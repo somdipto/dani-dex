@@ -1,0 +1,476 @@
+import { execFile } from "node:child_process";
+import { constants } from "node:fs";
+import { access } from "node:fs/promises";
+import { homedir } from "node:os";
+import { extname, posix, resolve, win32 } from "node:path";
+import { promisify } from "node:util";
+import type { AgentProviderId } from "@openbot/contracts/ipc";
+
+const execFileAsync = promisify(execFile);
+const MINIMUM_CODEX_VERSION = [0, 144, 1] as const;
+const MINIMUM_CLAUDE_VERSION = [2, 1, 232] as const;
+const MINIMUM_GROK_VERSION = [1, 0, 5] as const;
+
+export interface CodexCliInfo {
+  executable: string;
+  version: string;
+  source: "system" | "managed";
+}
+
+export interface ClaudeCliInfo {
+  executable: string;
+  version: string;
+  source?: "system" | "managed";
+}
+
+export interface GrokCliInfo {
+  executable: string;
+  version: string;
+  source?: "system" | "managed";
+}
+
+export interface OpencodeCliInfo {
+  executable: string;
+  version: string;
+  source?: "system" | "managed";
+}
+
+export type AgentCliInfo = CodexCliInfo | ClaudeCliInfo | GrokCliInfo | OpencodeCliInfo;
+
+export class CodexCliError extends Error {
+  constructor(
+    message: string,
+    readonly code: "missing" | "invalid" | "outdated",
+  ) {
+    super(message);
+    this.name = "CodexCliError";
+  }
+}
+
+/**
+ * The managed CLI Dani-Dex downloaded for each provider, keyed by provider id. `null` means Dani-Dex
+ * has no managed copy and only the user's own installation is used. A missing key means the same as
+ * an unset option: the resolver looks for the copy shipped inside the application itself.
+ */
+export type BundledProviderExecutables = Partial<Record<AgentProviderId, string | null>>;
+
+export async function resolveCodexCli(
+  input: { systemCandidates?: string[]; bundledExecutable?: string | null } = {},
+): Promise<CodexCliInfo> {
+  const bundledExecutable = input.bundledExecutable === undefined ? bundledCodexExecutable() : input.bundledExecutable;
+  const candidates = await cliCandidates("codex", input.systemCandidates, bundledExecutable);
+  const failures: CodexCliError[] = [];
+
+  for (const candidate of candidates) {
+    if (!(await isExecutable(candidate.executable))) continue;
+
+    try {
+      const stdout = await readCliVersion(candidate.executable);
+      const version = parseCodexVersion(stdout);
+      if (!isMinimumVersion(version, MINIMUM_CODEX_VERSION)) {
+        throw new CodexCliError(`Codex CLI ${version} is too old. Dani-Dex requires 0.144.1 or newer.`, "outdated");
+      }
+
+      return { executable: candidate.executable, version, source: candidate.source };
+    } catch (error) {
+      failures.push(
+        error instanceof CodexCliError
+          ? error
+          : new CodexCliError("Codex CLI was found but could not be started.", "invalid"),
+      );
+    }
+  }
+
+  const outdated = failures.find((failure) => failure.code === "outdated");
+  if (outdated) throw outdated;
+  if (failures.length > 0) {
+    throw new CodexCliError(
+      "Codex CLI was found but could not be started. Run `codex --version` in a new terminal.",
+      "invalid",
+    );
+  }
+
+  throw new CodexCliError("ChatGPT is not downloaded. Download it in Dani-Dex to continue.", "missing");
+}
+
+export function bundledCodexExecutable(
+  platform = process.platform,
+  architecture = process.arch,
+  resourcesPath: string | null | undefined = process.resourcesPath,
+): string | null {
+  return bundledProviderExecutable("codex", platform, architecture, resourcesPath);
+}
+
+export async function resolveClaudeCli(
+  input: { systemCandidates?: string[]; bundledExecutable?: string | null } = {},
+): Promise<ClaudeCliInfo> {
+  const bundledExecutable = input.bundledExecutable === undefined ? bundledClaudeExecutable() : input.bundledExecutable;
+  const candidates = await cliCandidates("claude", input.systemCandidates, bundledExecutable);
+  const failures: CodexCliError[] = [];
+
+  for (const candidate of candidates) {
+    if (!(await isExecutable(candidate.executable))) continue;
+
+    try {
+      const stdout = await readCliVersion(candidate.executable);
+      const version = parseClaudeVersion(stdout);
+      if (!isMinimumVersion(version, MINIMUM_CLAUDE_VERSION)) {
+        throw new CodexCliError(`Claude Code ${version} is too old. Dani-Dex requires 2.1.232 or newer.`, "outdated");
+      }
+      return { executable: candidate.executable, version, source: candidate.source };
+    } catch (error) {
+      failures.push(
+        error instanceof CodexCliError
+          ? error
+          : new CodexCliError("Claude CLI was found but could not be started.", "invalid"),
+      );
+    }
+  }
+
+  const outdated = failures.find((failure) => failure.code === "outdated");
+  if (outdated) throw outdated;
+  if (failures.length > 0) {
+    throw new CodexCliError(
+      "Claude CLI was found but could not be started. Run `claude --version` in a new terminal.",
+      "invalid",
+    );
+  }
+
+  throw new CodexCliError("Claude is not downloaded. Download it in Dani-Dex to continue.", "missing");
+}
+
+export function bundledClaudeExecutable(
+  platform = process.platform,
+  architecture = process.arch,
+  resourcesPath: string | null | undefined = process.resourcesPath,
+): string | null {
+  return bundledProviderExecutable("claude", platform, architecture, resourcesPath);
+}
+
+export async function resolveGrokCli(
+  input: { systemCandidates?: string[]; bundledExecutable?: string | null } = {},
+): Promise<GrokCliInfo> {
+  const bundledExecutable = input.bundledExecutable === undefined ? bundledGrokExecutable() : input.bundledExecutable;
+  const candidates = await cliCandidates("grok", input.systemCandidates, bundledExecutable);
+  const failures: CodexCliError[] = [];
+
+  for (const candidate of candidates) {
+    if (!(await isExecutable(candidate.executable))) continue;
+
+    try {
+      const stdout = await readCliVersion(candidate.executable);
+      const version = parseGrokVersion(stdout);
+      if (!isMinimumVersion(version, MINIMUM_GROK_VERSION)) {
+        throw new CodexCliError(`Grok CLI ${version} is too old. Dani-Dex requires 1.0.5 or newer.`, "outdated");
+      }
+      return { executable: candidate.executable, version, source: candidate.source };
+    } catch (error) {
+      failures.push(
+        error instanceof CodexCliError
+          ? error
+          : new CodexCliError("Grok CLI was found but could not be started.", "invalid"),
+      );
+    }
+  }
+
+  const outdated = failures.find((failure) => failure.code === "outdated");
+  if (outdated) throw outdated;
+  if (failures.length > 0) {
+    throw new CodexCliError(
+      "Grok CLI was found but could not be started. Run `grok --version` in a new terminal.",
+      "invalid",
+    );
+  }
+
+  throw new CodexCliError("Grok is not downloaded. Download it in Dani-Dex to continue.", "missing");
+}
+
+/**
+ * There is deliberately no minimum version here. Dani-Dex downloads and pins OpenCode now, but a
+ * user who already has the CLI keeps it, and a floor would newly lock out an install that works.
+ */
+export async function resolveOpencodeCli(
+  input: { systemCandidates?: string[]; bundledExecutable?: string | null } = {},
+): Promise<OpencodeCliInfo> {
+  const bundledExecutable =
+    input.bundledExecutable === undefined ? bundledOpencodeExecutable() : input.bundledExecutable;
+  const candidates = await cliCandidates("opencode", input.systemCandidates, bundledExecutable);
+  let found = false;
+  for (const candidate of candidates) {
+    if (!(await isExecutable(candidate.executable))) continue;
+    found = true;
+    try {
+      const version = parseOpencodeVersion(await readCliVersion(candidate.executable));
+      // `source` has to be the candidate's own: hardcoding "system" made `updateProviderCli` refuse
+      // to activate the managed copy, and made `trackSystemCliVersions` report the managed version
+      // as the user's, which suppressed every later update offer.
+      return { executable: candidate.executable, version, source: candidate.source };
+    } catch {
+      /* Try the remaining installed candidates. */
+    }
+  }
+  throw new CodexCliError(
+    found
+      ? "OpenCode could not start. Run `opencode --version` in a terminal."
+      : "OpenCode is not downloaded. Download it in Dani-Dex to continue.",
+    found ? "invalid" : "missing",
+  );
+}
+
+export function bundledOpencodeExecutable(
+  platform = process.platform,
+  architecture = process.arch,
+  resourcesPath: string | null | undefined = process.resourcesPath,
+): string | null {
+  return bundledProviderExecutable("opencode", platform, architecture, resourcesPath);
+}
+
+export function bundledGrokExecutable(
+  platform = process.platform,
+  architecture = process.arch,
+  resourcesPath: string | null | undefined = process.resourcesPath,
+): string | null {
+  return bundledProviderExecutable("grok", platform, architecture, resourcesPath);
+}
+
+function bundledProviderExecutable(
+  provider: AgentProviderId,
+  platform: NodeJS.Platform,
+  architecture: string,
+  resourcesPath: string | null | undefined,
+): string | null {
+  const targetPlatform =
+    platform === "darwin" && architecture === "arm64"
+      ? "mac"
+      : platform === "linux" && architecture === "x64"
+        ? "linux"
+        : platform === "win32" && architecture === "x64"
+          ? "win"
+          : null;
+  if (!targetPlatform) return null;
+
+  const executable = platform === "win32" ? `${provider}.exe` : provider;
+  if (!resourcesPath) {
+    return resolve("build", provider, targetPlatform, architecture, "bin", executable);
+  }
+
+  const targetPath = platform === "win32" ? win32 : posix;
+  return targetPath.join(resourcesPath, provider, targetPlatform, architecture, "bin", executable);
+}
+
+export function parseCodexVersion(output: string): string {
+  const match = output.match(/(?:codex-cli\s+)?(\d+)\.(\d+)\.(\d+)/i);
+  if (!match) throw new CodexCliError("Unable to read the Codex CLI version.", "invalid");
+  return `${Number(match[1])}.${Number(match[2])}.${Number(match[3])}`;
+}
+
+export function parseClaudeVersion(output: string): string {
+  const match = output.match(/(\d+)\.(\d+)\.(\d+)(?:\s+\(Claude Code\))?/i);
+  if (!match) throw new CodexCliError("Unable to read the Claude CLI version.", "invalid");
+  return `${Number(match[1])}.${Number(match[2])}.${Number(match[3])}`;
+}
+
+export function parseGrokVersion(output: string): string {
+  const match = output.match(/(?:grok(?:-cli)?\s+)?v?(\d+)\.(\d+)\.(\d+)/i);
+  if (!match) throw new CodexCliError("Unable to read the Grok CLI version.", "invalid");
+  return `${Number(match[1])}.${Number(match[2])}.${Number(match[3])}`;
+}
+
+/** OpenCode prints a bare `1.18.30`, and `verifyInstalledRuntime` compares that exactly. */
+export function parseOpencodeVersion(output: string): string {
+  const match = output.trim().match(/^(?:opencode\s+)?v?(\d+)\.(\d+)\.(\d+)(?:[-+][\w.-]+)?$/i);
+  if (!match) throw new CodexCliError("Unable to read the OpenCode CLI version.", "invalid");
+  return `${Number(match[1])}.${Number(match[2])}.${Number(match[3])}`;
+}
+
+/**
+ * Bun prints a bare `1.4.2` and nothing else. It is not a provider CLI, so no discovery step reads
+ * this; only `verifyInstalledRuntime` does, to confirm the binary in the store is the pinned one.
+ */
+export function parseBunVersion(output: string): string {
+  const match = output.trim().match(/^v?(\d+)\.(\d+)\.(\d+)(?:[-+][\w.-]+)?$/);
+  if (!match) throw new CodexCliError("Unable to read the Bun runtime version.", "invalid");
+  return `${Number(match[1])}.${Number(match[2])}.${Number(match[3])}`;
+}
+
+function isMinimumVersion(version: string, minimum: readonly number[]): boolean {
+  const parts = version.split(".").map(Number);
+  for (let index = 0; index < minimum.length; index += 1) {
+    if (parts[index] > minimum[index]) return true;
+    if (parts[index] < minimum[index]) return false;
+  }
+  return true;
+}
+
+/** An explicit path remains under the user's control, including during managed updates. */
+export function configuredCliPath(provider: AgentProviderId): string | null {
+  return process.env[`OPENBOT_${provider.toUpperCase()}_PATH`]?.trim() || null;
+}
+
+async function cliCandidates(
+  provider: AgentProviderId,
+  systemCandidates: string[] | undefined,
+  bundledExecutable: string | null,
+): Promise<Array<{ executable: string; source: "system" | "managed" }>> {
+  const override = systemCandidates === undefined ? configuredCliPath(provider) : null;
+  const system = (systemCandidates ?? (await collectCandidates(provider, override ?? undefined))).map((executable) => ({
+    executable,
+    source: "system" as const,
+  }));
+  const managed = bundledExecutable ? [{ executable: bundledExecutable, source: "managed" as const }] : [];
+  return (override ? [...system, ...managed] : [...managed, ...system]).filter(
+    (candidate, index, all) => all.findIndex((other) => other.executable === candidate.executable) === index,
+  );
+}
+
+async function collectCandidates(command: AgentProviderId, configuredPath: string | undefined): Promise<string[]> {
+  const candidates: string[] = [];
+  const override = configuredPath?.trim();
+  if (override) return [override];
+
+  if (process.platform === "win32") {
+    try {
+      const { stdout } = await execFileAsync("where.exe", [command], {
+        timeout: 5_000,
+        maxBuffer: 64 * 1024,
+      });
+      candidates.push(
+        ...stdout
+          .split(/\r?\n/u)
+          .map((path) => path.trim())
+          .filter(Boolean),
+      );
+    } catch {
+      // Known Windows install locations are checked next.
+    }
+    candidates.push(...windowsFallbackPaths(command));
+  } else {
+    const loginShell = loginShellCommand();
+    try {
+      const { stdout } = await execFileAsync(loginShell.command, [...loginShell.args, `command -v ${command}`], {
+        timeout: 5_000,
+        maxBuffer: 64 * 1024,
+      });
+      if (stdout.trim()) candidates.push(stdout.trim());
+    } catch {
+      // Packaged apps often start with a restricted PATH; known locations are checked next.
+    }
+    candidates.push(...posixFallbackPaths(command));
+  }
+
+  return [...new Set(candidates)];
+}
+
+export function windowsFallbackPaths(
+  command: AgentProviderId,
+  userHome = homedir(),
+  environment: NodeJS.ProcessEnv = process.env,
+): string[] {
+  const paths: string[] = [];
+  const appData = environment.APPDATA?.trim();
+  const localAppData = environment.LOCALAPPDATA?.trim();
+
+  if (command === "codex" && localAppData) {
+    paths.push(win32.join(localAppData, "Programs", "OpenAI", "Codex", "bin", "codex.exe"));
+  }
+  if (command === "claude" && localAppData) {
+    paths.push(win32.join(localAppData, "Microsoft", "WinGet", "Links", "claude.exe"));
+  }
+  if (command === "grok") {
+    paths.push(win32.join(userHome, ".grok", "bin", "grok.exe"));
+    if (localAppData) paths.push(win32.join(localAppData, "Microsoft", "WinGet", "Links", "grok.exe"));
+  }
+  if (appData) paths.push(win32.join(appData, "npm", `${command}.cmd`));
+  paths.push(
+    win32.join(userHome, ".local", "bin", `${command}.exe`),
+    win32.join(userHome, ".bun", "bin", `${command}.exe`),
+    win32.join(userHome, ".bun", "bin", `${command}.cmd`),
+  );
+  if (localAppData) {
+    paths.push(win32.join(localAppData, "pnpm", `${command}.exe`), win32.join(localAppData, "pnpm", `${command}.cmd`));
+  }
+
+  return paths;
+}
+
+/**
+ * The shell that answers `command -v`. It has to be a login shell, because that is what reads the
+ * profile a version manager appends its `PATH` to, and a packaged app inherits none of it.
+ *
+ * macOS keeps `/bin/zsh`: it is the default login shell and is always present. Linux cannot assume
+ * zsh is installed at all, so it prefers the user's own `$SHELL` and falls back to `/bin/sh`. The
+ * `-i` flag goes with it, because `sh` is not required to accept an interactive non-tty invocation
+ * and dash exits rather than running the command.
+ */
+export function loginShellCommand(
+  platform: NodeJS.Platform = process.platform,
+  environment: NodeJS.ProcessEnv = process.env,
+): { command: string; args: string[] } {
+  if (platform !== "linux") return { command: "/bin/zsh", args: ["-lic"] };
+  const preferred = environment.SHELL?.trim();
+  if (!preferred) return { command: "/bin/sh", args: ["-lc"] };
+  return { command: preferred, args: preferred.endsWith("/sh") ? ["-lc"] : ["-lic"] };
+}
+
+export function posixFallbackPaths(command: AgentProviderId, userHome = homedir()): string[] {
+  const paths = [posix.join(userHome, ".local", "bin", command)];
+  if (command === "claude") paths.push(posix.join(userHome, ".claude", "local", "claude"));
+  if (command === "opencode") paths.push(posix.join(userHome, ".opencode", "bin", "opencode"));
+  if (command === "grok") paths.push(posix.join(userHome, ".grok", "bin", "grok"));
+  paths.push(`/opt/homebrew/bin/${command}`, `/usr/local/bin/${command}`, `/usr/bin/${command}`);
+  return paths;
+}
+
+/**
+ * How to start a resolved CLI. A `.cmd` or `.bat` wrapper is a script that only the Windows command
+ * processor runs, so it is called through `cmd.exe` with the same verbatim quoting as
+ * `readCliVersion`. Every other executable starts with no shell. That keeps a path that holds a
+ * space runnable: a managed CLI lives under `userData`, which holds a space for a user such as
+ * `C:\Users\Jane Doe` and for the `Dani-Dex Dev` profile, and `cmd.exe` would split it there.
+ */
+export function cliSpawnTarget(
+  executable: string,
+  argv: readonly string[],
+  platform: NodeJS.Platform = process.platform,
+): { command: string; args: string[]; windowsVerbatimArguments: boolean } {
+  if (platform !== "win32" || ![".bat", ".cmd"].includes(extname(executable).toLowerCase())) {
+    return { command: executable, args: [...argv], windowsVerbatimArguments: false };
+  }
+
+  const commandLine = [`"${executable.replaceAll("%", "%%")}"`, ...argv].join(" ");
+  return {
+    command: process.env.ComSpec?.trim() || "cmd.exe",
+    args: ["/d", "/s", "/c", `"${commandLine}"`],
+    windowsVerbatimArguments: true,
+  };
+}
+
+async function readCliVersion(candidate: string): Promise<string> {
+  if (process.platform === "win32" && [".bat", ".cmd"].includes(extname(candidate).toLowerCase())) {
+    const commandProcessor = process.env.ComSpec?.trim() || "cmd.exe";
+    const escapedCandidate = candidate.replaceAll("%", "%%");
+    const { stdout } = await execFileAsync(commandProcessor, ["/d", "/s", "/c", `""${escapedCandidate}" --version"`], {
+      timeout: 5_000,
+      maxBuffer: 64 * 1024,
+      windowsHide: true,
+      windowsVerbatimArguments: true,
+    });
+    return stdout;
+  }
+
+  const { stdout } = await execFileAsync(candidate, ["--version"], {
+    timeout: 5_000,
+    maxBuffer: 64 * 1024,
+    windowsHide: process.platform === "win32",
+  });
+  return stdout;
+}
+
+async function isExecutable(path: string): Promise<boolean> {
+  try {
+    await access(path, process.platform === "win32" ? constants.F_OK : constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}

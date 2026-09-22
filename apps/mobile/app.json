@@ -1,0 +1,98 @@
+{
+  "expo": {
+    "name": "Dani-Dex",
+    "slug": "dani-dex",
+    "platforms": ["ios", "android"],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/app-icon.png",
+    "scheme": "dani-dex",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "dev.danlab.danidex.mobile",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "Allow Dani-Dex to connect to your desktop during local development.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        },
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "icon": "./assets/icons/app-icon.icon"
+    },
+    "android": {
+      "package": "dev.danlab.danidex.mobile",
+      "icon": "./assets/icons/app-icon.png",
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["android.permission.CAMERA"]
+    },
+    "plugins": [
+      "./plugins/with-rocketsim",
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#E6C5FA",
+          "image": "./assets/icons/app-icon.png",
+          "imageWidth": 112,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#181818"
+          }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Dani-Dex to use your camera to scan QR codes.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Dani-Dex to access the photos you choose to share.",
+          "cameraPermission": "Allow Dani-Dex to use your camera to add photos.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Allow Dani-Dex to react to how you rotate your device."
+        }
+      ],
+      "expo-notifications",
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      "expo-sharing",
+      "expo-font",
+      "expo-image"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "eeec730f-c8f4-42c0-a750-64df8af14940"
+      }
+    },
+    "owner": "openbot",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/eeec730f-c8f4-42c0-a750-64df8af14940"
+    }
+  }
+}

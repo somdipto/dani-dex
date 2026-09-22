@@ -1,0 +1,692 @@
+name: Release desktop
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  # Exercises the Host signing keychain on its own, so a credential or keychain problem is found
+  # without pushing a tag. This path builds nothing and publishes nothing.
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release tag
+    # Gating the one job every build and the publish depend on keeps a manual run off the release
+    # path entirely, rather than relying on each of them to opt out.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      release_version: ${{ steps.release.outputs.version }}
+      release_tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Require release commit on main
+        shell: bash
+        run: |
+          git fetch origin main --no-tags
+          release_commit="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
+          if ! git merge-base --is-ancestor "$release_commit" origin/main; then
+            echo "Release tag $GITHUB_REF_NAME does not point to a commit on origin/main." >&2
+            exit 1
+          fi
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+        with:
+          install: none
+
+      - name: Validate release version
+        id: release
+        shell: bash
+        run: |
+          package_version="$(bun -p 'require("./package.json").version')"
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [[ "$package_version" != "$tag_version" ]]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $package_version." >&2
+            exit 1
+          fi
+          grep -F "## [$package_version]" CHANGELOG.md
+          echo "version=$package_version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$package_version" >> "$GITHUB_OUTPUT"
+
+      - name: Require deployed Universal Links support
+        shell: bash
+        run: |
+          verification_dir="$(mktemp -d)"
+          trap 'rm -rf "$verification_dir"' EXIT
+          join_status="$(curl --silent --show-error --retry 5 --retry-all-errors \
+            --max-redirs 0 --dump-header "$verification_dir/join.headers" \
+            --output "$verification_dir/join.html" --write-out '%{http_code}' \
+            https://openbot.run/join)"
+          test "$join_status" = "200"
+          tr -d '\r' < "$verification_dir/join.headers" | grep -Eiq '^cache-control:.*no-store'
+          association_status="$(curl --silent --show-error --retry 5 --retry-all-errors \
+            --max-redirs 0 --dump-header "$verification_dir/association.headers" \
+            --output "$verification_dir/association.json" --write-out '%{http_code}' \
+            https://openbot.run/.well-known/apple-app-site-association)"
+          test "$association_status" = "200"
+          tr -d '\r' < "$verification_dir/association.headers" | grep -Eiq '^content-type: application/json'
+          jq -e '.applinks.details == [{"appID":"ZTRDTUL87R.app.openbot.desktop","paths":["/join"]}]' \
+            "$verification_dir/association.json" >/dev/null
+
+  host-signing:
+    name: Check Host signing keychain
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-14
+    timeout-minutes: 20
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+        with:
+          install: ignore-scripts
+
+      - name: Build the Host signing keychain and sign a throwaway package
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.CSC_INSTALLER_KEY_PASSWORD }}
+          CSC_INSTALLER_LINK: ${{ secrets.CSC_INSTALLER_LINK }}
+        run: |
+          set -euo pipefail
+          source scripts/host-signing-keychain.sh
+          echo "Application identity: $HOST_APPLICATION_IDENTITY"
+          echo "Installer identity: $HOST_INSTALLER_IDENTITY"
+          # Signs a throwaway package with the installer identity and holds the real
+          # `verifyHostInstaller` wording against it. Apple writes that status text and a runner can
+          # word it differently from a developer's own Mac, so the release path must not be the first
+          # place the comparison runs: it gets there with the package already built and notarized.
+          probe="$host_signing_dir/pkg-probe"
+          mkdir -p "$probe/root/usr/local/bin"
+          cp /usr/bin/true "$probe/root/usr/local/bin/openbot-signing-probe"
+          /usr/bin/pkgbuild --root "$probe/root" --identifier app.openbot.host.signing-probe \
+            --version 0.0.0 --install-location / --ownership recommended \
+            --sign "$HOST_INSTALLER_IDENTITY" --keychain "$HOST_SIGNING_KEYCHAIN" "$probe/probe.pkg"
+          HOST_PROBE_PKG="$probe/probe.pkg" bun -e '
+            import { execFileSync } from "node:child_process";
+            import { verifyHostSignature } from "./scripts/verify-host-installer";
+            const pkg = process.env.HOST_PROBE_PKG;
+            if (!pkg) throw new Error("Missing HOST_PROBE_PKG.");
+            const status = execFileSync("/usr/sbin/pkgutil", ["--check-signature", pkg]).toString();
+            process.stdout.write(status);
+            verifyHostSignature(status);
+            process.stdout.write("This runner reports a wording verifyHostSignature accepts.\n");
+          '
+          # `verifyHostBom` allows only the fixed host paths. A macOS that stamps every new file with
+          # `com.apple.provenance` makes `pkgbuild` record an AppleDouble entry beside each one, which
+          # that allowlist rejects, so print the payload listing rather than infer it from one OS.
+          /usr/sbin/pkgutil --expand-full "$probe/probe.pkg" "$probe/expanded"
+          /usr/bin/lsbom -p fmug "$probe/expanded/Bom"
+          if /usr/bin/lsbom -p f "$probe/expanded/Bom" | grep -q '/\._'; then
+            echo "This runner records AppleDouble metadata entries, which verifyHostBom rejects." >&2
+            exit 1
+          fi
+          echo "This runner records no AppleDouble metadata entries."
+
+  macos:
+    name: Build signed macOS ARM64 release
+    needs: validate
+    runs-on: macos-14
+    timeout-minutes: 90
+    environment: release
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      RELEASE_VERSION: ${{ needs.validate.outputs.release_version }}
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+        with:
+          install: none
+
+      - name: Require signing and notarization credentials
+        shell: bash
+        env:
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_INSTALLER_LINK: ${{ secrets.CSC_INSTALLER_LINK }}
+          CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.CSC_INSTALLER_KEY_PASSWORD }}
+          MAC_PROVISIONING_PROFILE: ${{ secrets.MAC_PROVISIONING_PROFILE }}
+        run: |
+          missing=()
+          for name in CSC_LINK CSC_KEY_PASSWORD CSC_INSTALLER_LINK CSC_INSTALLER_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID MAC_PROVISIONING_PROFILE; do
+            if [[ -z "${!name}" ]]; then missing+=("$name"); fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            echo "Missing release secrets: ${missing[*]}" >&2
+            echo "See docs/RELEASING.md before publishing a tag." >&2
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run repository check
+        run: |
+          bun run check:desktop
+          bun run test:desktop -- --maxWorkers=2
+          bun run test:sites
+          bun run check:api
+
+      - name: Install and verify native runtimes
+        run: |
+          bun run install:codex-runtime
+          bun run install:claude-runtime
+          bun run install:grok-runtime
+          bun run install:remote-desktop-runtime
+          bun run verify:remote-desktop-runtime
+          bun run prepare:cua-driver
+
+      - name: Install Developer ID provisioning profile
+        shell: bash
+        env:
+          MAC_PROVISIONING_PROFILE: ${{ secrets.MAC_PROVISIONING_PROFILE }}
+        run: |
+          profile_path="$RUNNER_TEMP/Dani-Dex.provisionprofile"
+          printf '%s' "$MAC_PROVISIONING_PROFILE" | /usr/bin/base64 -D > "$profile_path"
+          security cms -D -i "$profile_path" >/dev/null
+          echo "OPENBOT_PROVISIONING_PROFILE=$profile_path" >> "$GITHUB_ENV"
+
+      - name: Build, sign, and notarize ARM64 update artifacts
+        env:
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+        run: |
+          bun run voice:prepare-runtime
+          bun run build
+          bun x electron-builder --mac --arm64 --publish never \
+            --config.mac.provisioningProfile="$OPENBOT_PROVISIONING_PROFILE"
+
+      - name: Verify packaged application metadata and launch
+        run: bun run verify:package
+
+      - name: Verify application signature and notarization
+        shell: bash
+        run: |
+          app_path="dist/mac-arm64/Dani-Dex.app"
+          test -d "$app_path"
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          runtime_path="$app_path/Contents/Resources/remote-desktop-runtime/darwin/arm64"
+          codesign --verify --deep --strict --verbose=2 "$runtime_path/Sunshine.app"
+          codesign --verify --strict --verbose=2 "$runtime_path/web-server"
+          codesign --verify --strict --verbose=2 "$runtime_path/streamer"
+          verify_provider_signature() {
+            local executable="$1"
+            local team_id="$2"
+            codesign --verify --strict --verbose=2 "$executable"
+            codesign -d --verbose=4 "$executable" 2>&1 | grep -Fx "TeamIdentifier=$team_id"
+          }
+          verify_provider_signature build/codex/mac/arm64/bin/codex 2DC432GLL2
+          verify_provider_signature build/claude/mac/arm64/bin/claude Q6L2SF6YDW
+          verify_provider_signature build/grok/mac/arm64/bin/grok 5Y6N3AJ54S
+          test -f "$app_path/Contents/embedded.provisionprofile"
+          codesign -d --entitlements :- "$app_path" > "$RUNNER_TEMP/openbot-entitlements.plist"
+          test -s "$RUNNER_TEMP/openbot-entitlements.plist"
+          plutil -lint "$RUNNER_TEMP/openbot-entitlements.plist"
+          /usr/libexec/PlistBuddy -c 'Print :com.apple.developer.associated-domains:0' \
+            "$RUNNER_TEMP/openbot-entitlements.plist" | grep -Fx 'applinks:openbot.run'
+          /usr/libexec/PlistBuddy -c 'Print :com.apple.developer.team-identifier' \
+            "$RUNNER_TEMP/openbot-entitlements.plist" | grep -Fx 'ZTRDTUL87R'
+          /usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.audio-input' \
+            "$RUNNER_TEMP/openbot-entitlements.plist" | grep -Fx 'true'
+          plutil -extract NSUserActivityTypes.0 raw "$app_path/Contents/Info.plist" \
+            | grep -Fx 'NSUserActivityTypeBrowsingWeb'
+          plutil -extract ElectronTeamID raw "$app_path/Contents/Info.plist" | grep -Fx 'ZTRDTUL87R'
+          spctl --assess --type execute --verbose=2 "$app_path"
+          xcrun stapler validate "$app_path"
+
+      - name: Verify updater metadata
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+          dmgs=(dist/*.dmg)
+          zips=(dist/*.zip)
+          metadata=(dist/latest-mac.yml)
+          if (( ${#dmgs[@]} != 1 || ${#zips[@]} != 1 || ${#metadata[@]} != 1 )); then
+            echo "Expected one DMG, one ZIP, and latest-mac.yml." >&2
+            find dist -maxdepth 1 -type f -print
+            exit 1
+          fi
+          grep -F "version: $RELEASE_VERSION" dist/latest-mac.yml
+          grep -F '.zip' dist/latest-mac.yml
+          bun run verify:update-artifacts macos
+          current_size=$(stat -f%z "${zips[0]}")
+          if (( current_size >= 800000000 )); then
+            echo "The macOS ZIP is ${current_size} bytes. The limit is 800000000 bytes." >&2
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/openbot-0.1.21"
+          gh release download v0.1.21 --repo "$GITHUB_REPOSITORY" --pattern '*.zip' \
+            --dir "$RUNNER_TEMP/openbot-0.1.21"
+          old_zips=("$RUNNER_TEMP/openbot-0.1.21"/*.zip)
+          if (( ${#old_zips[@]} != 1 )); then
+            echo "Expected one macOS ZIP in v0.1.21." >&2
+            exit 1
+          fi
+          old_size=$(stat -f%z "${old_zips[0]}")
+          if (( current_size >= old_size )); then
+            echo "The macOS ZIP is not smaller than v0.1.21 (${current_size} >= ${old_size})." >&2
+            exit 1
+          fi
+
+      - name: Test native tenant setup
+        run: |
+          xcrun swiftc -parse-as-library -D TENANT_SETUP_TESTS scripts/macos-tenant-setup.swift scripts/macos-tenant-setup-tests.swift -o "$RUNNER_TEMP/openbot-tenant-setup-tests"
+          "$RUNNER_TEMP/openbot-tenant-setup-tests"
+
+      - name: Build, sign, notarize, and verify Host installer
+        shell: bash
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_INSTALLER_LINK: ${{ secrets.CSC_INSTALLER_LINK }}
+          CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.CSC_INSTALLER_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          source scripts/host-signing-keychain.sh
+          bun scripts/build-host-installer.ts
+          host_pkg="dist/Dani-Dex-Host-$RELEASE_VERSION-arm64.pkg"
+          xcrun notarytool store-credentials openbot-host-release --keychain "$HOST_SIGNING_KEYCHAIN" \
+            --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          xcrun notarytool submit "$host_pkg" --keychain "$HOST_SIGNING_KEYCHAIN" \
+            --keychain-profile openbot-host-release --wait --timeout 20m --output-format json > "$host_signing_dir/notarization.json"
+          jq -e '.status == "Accepted"' "$host_signing_dir/notarization.json" >/dev/null
+          xcrun stapler staple "$host_pkg"
+          bun scripts/verify-host-installer.ts "$host_pkg" "$RELEASE_VERSION"
+          # Host infrastructure is never an Electron auto-update target.
+          if grep -F '.pkg' dist/latest-mac.yml; then exit 1; fi
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd dist
+          shopt -s nullglob
+          artifacts=("Dani-Dex-$RELEASE_VERSION-arm64.dmg" "Dani-Dex-$RELEASE_VERSION-arm64.zip" "Dani-Dex-Host-$RELEASE_VERSION-arm64.pkg")
+          shasum -a 256 "${artifacts[@]}" > SHA256SUMS-macos.txt
+
+      - name: Generate macOS release SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: dist/mac-arm64/Dani-Dex.app
+          format: spdx-json
+          output-file: dist/Dani-Dex-${{ env.RELEASE_VERSION }}-macos.spdx.json
+          artifact-name: Dani-Dex-${{ env.RELEASE_VERSION }}-macOS-SBOM
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Generate Host package SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: dist/host-sbom
+          format: spdx-json
+          output-file: dist/Dani-Dex-Host-${{ env.RELEASE_VERSION }}-macos.spdx.json
+          artifact-name: Dani-Dex-Host-${{ env.RELEASE_VERSION }}-macOS-SBOM
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Attest macOS release provenance
+        id: macos-provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS-macos.txt
+
+      - name: Include macOS provenance bundle
+        env:
+          BUNDLE_PATH: ${{ steps.macos-provenance.outputs.bundle-path }}
+        run: cp "$BUNDLE_PATH" "dist/Dani-Dex-$RELEASE_VERSION-macos.sigstore.json"
+
+      - name: Upload macOS release assets
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-macos
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/Dani-Dex-Host-*-arm64.pkg
+            dist/latest-mac.yml
+            dist/*.blockmap
+            dist/*.spdx.json
+            dist/*-macos.sigstore.json
+            dist/SHA256SUMS-macos.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  windows:
+    name: Build unsigned Windows x64 release
+    needs: validate
+    runs-on: windows-2025
+    timeout-minutes: 35
+    environment: release
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+    env:
+      RELEASE_VERSION: ${{ needs.validate.outputs.release_version }}
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Run Windows checks
+        run: bun run lint && bun run typecheck && bunx vitest run src/backend/cli.test.ts
+
+      - name: Install and verify remote desktop runtime
+        run: bun scripts/install-remote-desktop-runtime.ts win32 x64 && bun run verify:remote-desktop-runtime --windows
+
+      - name: Install and verify provider control artifacts
+        run: |
+          bun scripts/install-codex-runtime.ts win32 x64
+          bun scripts/install-claude-runtime.ts win32 x64
+          bun scripts/install-grok-runtime.ts win32 x64
+
+      - name: Build unsigned NSIS installer
+        run: bun run dist:win
+
+      - name: Verify packaged application metadata and launch
+        run: bun run verify:package:win --require-update-metadata
+
+      - name: Verify installer and updater metadata
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $installers = @(Get-ChildItem -Path dist -File -Filter *.exe)
+          if ($installers.Count -ne 1 -or -not (Test-Path dist/latest.yml)) {
+            Write-Error "Expected one EXE installer and latest.yml."
+          }
+          $applicationSignature = Get-AuthenticodeSignature -LiteralPath dist/win-unpacked/Dani-Dex.exe
+          if ($applicationSignature.Status -ne "NotSigned") {
+            Write-Error "The unsigned application contract changed: $($applicationSignature.Status)."
+          }
+          $sourceBuiltRuntimeExecutables = @(
+            "dist/win-unpacked/resources/remote-desktop-runtime/win32/x64/sunshine.exe",
+            "dist/win-unpacked/resources/remote-desktop-runtime/win32/x64/web-server.exe",
+            "dist/win-unpacked/resources/remote-desktop-runtime/win32/x64/streamer.exe"
+          )
+          $vendorRuntimeExecutables = @(
+            "build/codex/win/x64/bin/codex.exe",
+            "build/codex/win/x64/bin/codex-code-mode-host.exe",
+            "build/claude/win/x64/bin/claude.exe",
+            "build/grok/win/x64/bin/grok.exe"
+          )
+          foreach ($runtimeExecutable in $sourceBuiltRuntimeExecutables) {
+            $runtimeSignature = Get-AuthenticodeSignature -LiteralPath $runtimeExecutable
+            if ($runtimeSignature.Status -ne "NotSigned") {
+              Write-Error "The source-built runtime signature contract changed for ${runtimeExecutable}: $($runtimeSignature.Status)."
+            }
+          }
+          foreach ($runtimeExecutable in $vendorRuntimeExecutables) {
+            $runtimeSignature = Get-AuthenticodeSignature -LiteralPath $runtimeExecutable
+            if ($runtimeSignature.Status -ne "Valid") {
+              Write-Error "The vendor runtime signature is not valid for ${runtimeExecutable}: $($runtimeSignature.Status)."
+            }
+          }
+          $providerVendorPatterns = @{
+            "build/codex/win/x64/bin/codex.exe" = "OpenAI"
+            "build/codex/win/x64/bin/codex-code-mode-host.exe" = "OpenAI"
+            "build/claude/win/x64/bin/claude.exe" = "Anthropic"
+            "build/grok/win/x64/bin/grok.exe" = "X\.AI|xAI"
+          }
+          foreach ($runtimeExecutable in $providerVendorPatterns.Keys) {
+            $runtimeSignature = Get-AuthenticodeSignature -LiteralPath $runtimeExecutable
+            if ($runtimeSignature.SignerCertificate.Subject -notmatch $providerVendorPatterns[$runtimeExecutable]) {
+              Write-Error "The provider runtime has an unexpected signer: ${runtimeExecutable}."
+            }
+          }
+          $signature = Get-AuthenticodeSignature -LiteralPath $installers[0].FullName
+          if ($signature.Status -ne "NotSigned") {
+            Write-Error "The unsigned installer contract changed: $($signature.Status)."
+          }
+          Select-String -Path dist/latest.yml -SimpleMatch "version: $env:RELEASE_VERSION"
+          Select-String -Path dist/latest.yml -SimpleMatch ".exe"
+          bun run verify:update-artifacts windows
+
+      - name: Generate checksums
+        shell: pwsh
+        run: |
+          $installer = @(Get-ChildItem -Path dist -File -Filter *.exe)
+          $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $installer[0].FullName).Hash.ToLowerInvariant()
+          "$hash  $($installer[0].Name)" | Set-Content -Encoding ascii dist/SHA256SUMS-windows.txt
+
+      - name: Generate Windows release SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: dist/win-unpacked
+          format: spdx-json
+          output-file: dist/Dani-Dex-${{ env.RELEASE_VERSION }}-windows.spdx.json
+          artifact-name: Dani-Dex-${{ env.RELEASE_VERSION }}-Windows-SBOM
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Attest Windows release provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS-windows.txt
+
+      - name: Upload Windows release assets
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-windows
+          path: |
+            dist/*.exe
+            dist/*.exe.blockmap
+            dist/latest.yml
+            dist/*.spdx.json
+            dist/SHA256SUMS-windows.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  linux:
+    name: Build unsigned Linux x64 release
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    environment: release
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+    env:
+      RELEASE_VERSION: ${{ needs.validate.outputs.release_version }}
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Install a virtual display for the launch check
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes xvfb
+
+      - name: Run Linux checks
+        run: bun run lint && bun run typecheck && bunx vitest run src/backend/cli.test.ts
+
+      - name: Install and verify provider control artifacts
+        run: |
+          bun scripts/install-codex-runtime.ts linux x64
+          bun scripts/install-claude-runtime.ts linux x64
+          bun scripts/install-grok-runtime.ts linux x64
+
+      - name: Build AppImage
+        run: bun run dist:linux
+
+      # Ubuntu 24.04 restricts unprivileged user namespaces through AppArmor, which is the same
+      # restriction the shipped profile answers for an installed AppImage. The verifier starts the
+      # unpacked build from the workspace, so that path needs its own profile, and the SUID helper
+      # needs the ownership a package manager would give it. The sandbox stays on either way:
+      # `--no-sandbox` would make the launch check prove nothing about a real install.
+      - name: Permit the Electron sandbox for the verification build
+        run: |
+          set -euo pipefail
+          sudo chown root:root dist/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 dist/linux-unpacked/chrome-sandbox
+          sudo tee /etc/apparmor.d/openbot-verify >/dev/null <<PROFILE
+          abi <abi/4.0>,
+          include <tunables/global>
+
+          profile openbot-verify "$GITHUB_WORKSPACE/dist/linux-unpacked/openbot" flags=(unconfined) {
+            userns,
+          }
+          PROFILE
+          sudo apparmor_parser -r /etc/apparmor.d/openbot-verify
+
+      - name: Verify packaged application metadata and launch
+        run: xvfb-run -a bun run verify:package:linux --require-update-metadata
+
+      - name: Verify AppImage and updater metadata
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          appImages=(dist/*.AppImage)
+          if [ "${#appImages[@]}" -ne 1 ] || [ ! -f dist/latest-linux.yml ]; then
+            echo "Expected one AppImage and latest-linux.yml." >&2
+            exit 1
+          fi
+          # The AppImage has to stay executable, or the download is unusable without a chmod.
+          if [ ! -x "${appImages[0]}" ]; then
+            echo "The AppImage is not executable." >&2
+            exit 1
+          fi
+          grep -Fq "version: $RELEASE_VERSION" dist/latest-linux.yml
+          grep -Fq ".AppImage" dist/latest-linux.yml
+          bun run verify:update-artifacts linux
+
+      - name: Generate checksums
+        run: |
+          set -euo pipefail
+          cd dist
+          shasum -a 256 ./*.AppImage | sed 's| \./| |' > SHA256SUMS-linux.txt
+          cat SHA256SUMS-linux.txt
+
+      - name: Generate Linux release SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: dist/linux-unpacked
+          format: spdx-json
+          output-file: dist/Dani-Dex-${{ env.RELEASE_VERSION }}-linux.spdx.json
+          artifact-name: Dani-Dex-${{ env.RELEASE_VERSION }}-Linux-SBOM
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Attest Linux release provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS-linux.txt
+
+      - name: Upload Linux release assets
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-linux
+          # An AppImage embeds its block map, so there is no sidecar file to upload beside it.
+          path: |
+            dist/*.AppImage
+            dist/latest-linux.yml
+            dist/*.spdx.json
+            dist/SHA256SUMS-linux.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub Release
+    needs: [validate, macos, windows, linux]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ needs.validate.outputs.release_tag }}
+    steps:
+      - name: Download macOS release assets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-macos
+          path: release-assets/macos
+
+      - name: Download Windows release assets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-windows
+          path: release-assets/windows
+
+      - name: Download Linux release assets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-linux
+          path: release-assets/linux
+
+      - name: Generate combined checksums
+        shell: bash
+        run: |
+          cat release-assets/macos/SHA256SUMS-macos.txt \
+            release-assets/windows/SHA256SUMS-windows.txt \
+            release-assets/linux/SHA256SUMS-linux.txt \
+            > release-assets/SHA256SUMS.txt
+
+      - name: Publish GitHub Release
+        shell: bash
+        run: |
+          shopt -s nullglob
+          artifacts=(release-assets/macos/* release-assets/windows/* release-assets/linux/* release-assets/SHA256SUMS.txt)
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "${artifacts[@]}" --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$RELEASE_TAG" --draft=false --latest --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$RELEASE_TAG" \
+              "${artifacts[@]}" \
+              --generate-notes \
+              --latest \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Dani-Dex $RELEASE_TAG"
+          fi

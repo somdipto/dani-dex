@@ -1,0 +1,3310 @@
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/inter/wght-italic.css";
+@import "tailwindcss";
+@import "@openbot/brand/tokens.css";
+
+:root {
+  color-scheme: dark;
+  --stagger-dur: 500ms;
+  --stagger-distance: 12px;
+  --stagger-stagger: 40ms;
+  --stagger-blur: 3px;
+  --stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --pulse-dur: 1000ms;
+  --pulse-count: 1;
+  --pulse-min: 0.5;
+  --reveal-dur: 240ms;
+  --reveal-blur: 2px;
+  --reveal-ease: ease-in-out;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  background: var(--openbot-bg-canvas);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--openbot-bg-canvas);
+  color: var(--openbot-text-primary);
+  font-family: var(--openbot-font-sans);
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Lines start translated down + blurred + invisible; .is-shown
+   on the parent flips them to their resting state. The second
+   line's transition-delay holds it back by --stagger-stagger
+   so the eye lands on the headline first. */
+.t-stagger-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(var(--stagger-distance));
+  filter: blur(var(--stagger-blur));
+  transition:
+    opacity var(--stagger-dur) var(--stagger-ease),
+    transform var(--stagger-dur) var(--stagger-ease),
+    filter var(--stagger-dur) var(--stagger-ease);
+  will-change: transform, opacity, filter;
+}
+.t-stagger-line--2 {
+  transition-delay: var(--stagger-stagger);
+}
+
+.t-stagger-line--3 {
+  transition-delay: calc(var(--stagger-stagger) * 2);
+}
+
+.t-stagger-line--4 {
+  transition-delay: calc(var(--stagger-stagger) * 3);
+}
+
+.landing-actions.t-stagger-line--4 {
+  transition-duration: 400ms;
+  transition-delay: var(--stagger-stagger);
+}
+
+.t-stagger.is-shown .t-stagger-line {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+/* Exit decouples from the stagger: same fade for every line,
+   no Y return, no blur — so the disappearance reads as a
+   single quiet fade instead of a reverse reveal. */
+.t-stagger.is-hiding .t-stagger-line {
+  opacity: 0;
+  transform: translateY(0);
+  filter: blur(0);
+  transition:
+    opacity 200ms ease,
+    transform 0s linear,
+    filter 0s linear;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-stagger .t-stagger-line,
+  .t-stagger.is-hiding .t-stagger-line {
+    transition: none;
+  }
+}
+
+/* The wrap stacks two layers on the same coordinates. The
+   skeleton owns the cold pulse + the fade-out side of the
+   reveal; the content owns the fade-in side. They share the
+   same duration / ease so the swap reads as one motion. */
+.t-skel {
+  position: relative;
+}
+.t-skel-skeleton,
+.t-skel-content {
+  position: absolute;
+  inset: 0;
+}
+
+.t-skel-skeleton {
+  z-index: 1;
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    filter var(--reveal-dur) var(--reveal-ease);
+}
+.t-skel-content {
+  z-index: 2;
+  opacity: 0;
+  filter: blur(var(--reveal-blur));
+  transition:
+    opacity var(--reveal-dur) var(--reveal-ease),
+    filter var(--reveal-dur) var(--reveal-ease);
+}
+.t-skel.is-revealed .t-skel-skeleton {
+  opacity: 0;
+  filter: blur(var(--reveal-blur));
+}
+.t-skel.is-revealed .t-skel-content {
+  opacity: 1;
+  filter: blur(0);
+}
+/* Snap-back when replaying: kill transitions so the reverse
+   (revealed → skeleton) is instant. Drop .is-resetting
+   after a forced reflow and the next reveal animates again. */
+.t-skel.is-resetting .t-skel-skeleton,
+.t-skel.is-resetting .t-skel-content {
+  transition: none;
+}
+
+/* Pulse: place the animation on the bar/avatar children, not
+   on the skeleton itself, so the skeleton's opacity / filter
+   stay free for the cross-fade transition above. */
+.t-skel-skeleton.is-pulsing > * {
+  animation: t-skel-pulse var(--pulse-dur) ease-in-out var(--pulse-count);
+}
+@keyframes t-skel-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--pulse-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-skel-skeleton,
+  .t-skel-content {
+    transition: none;
+  }
+  .t-skel-skeleton.is-pulsing > * {
+    animation: none;
+  }
+}
+
+.landing-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.landing-page {
+  min-height: 100vh;
+  overflow: clip;
+}
+
+.landing-header {
+  width: min(100%, 1280px);
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 auto;
+  padding: 18px clamp(20px, 4vw, 48px);
+}
+
+.landing-brand {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: var(--openbot-radius-md);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.landing-brand:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+}
+
+.landing-brand-logo {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+}
+
+.landing-navigation,
+.landing-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* A quiet text link among the buttons. It keeps their height and pill radius so
+   the row stays on one baseline and the focus ring matches theirs. */
+.landing-header-link {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: var(--openbot-radius-pill);
+  color: var(--openbot-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: color 160ms ease;
+}
+
+.landing-header-link:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+}
+
+.landing-button {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--openbot-radius-pill);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background-color var(--openbot-duration-normal) ease,
+    border-color var(--openbot-duration-normal) ease,
+    color var(--openbot-duration-normal) ease,
+    transform var(--openbot-duration-fast) var(--openbot-ease-out);
+}
+
+.landing-button::before {
+  content: "";
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  background: currentColor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.landing-button[data-icon="download"]::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3Zm-6 16h14v2H5v-2Z'/%3E%3C/svg%3E");
+}
+
+.landing-button[data-icon="contact"]::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 3v-3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z'/%3E%3C/svg%3E");
+}
+
+.landing-button[data-icon="github"]::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.71.5.1.68-.22.68-.49 0-.24-.01-1.05-.01-1.91-2.78.62-3.37-1.21-3.37-1.21-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.38 9.38 0 0 1 12 6.95a9.4 9.4 0 0 1 2.5.35c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.35 4.8-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.59.69.49A10.25 10.25 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z'/%3E%3C/svg%3E");
+}
+
+.landing-button[data-icon="open"]::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 3h7v7h-2V6.41l-8.29 8.3-1.42-1.42L17.59 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z'/%3E%3C/svg%3E");
+}
+
+/* The only trailing icon so far. `order` moves the shared ::before after the
+   label instead of adding a second pseudo-element for one button. */
+.landing-button[data-icon="arrow-right"]::before {
+  order: 1;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.17 5 11.76 6.41 16.34 11H4v2h12.34l-4.58 4.59L13.17 19l7-7-7-7Z'/%3E%3C/svg%3E");
+}
+
+.join-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 96px 24px 48px;
+  background:
+    radial-gradient(circle at 50% 42%, var(--openbot-accent-strong), var(--openbot-transparent) 38%),
+    var(--openbot-bg-canvas);
+}
+
+.join-page-brand {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+}
+
+.join-card {
+  width: min(100%, 520px);
+  display: grid;
+  justify-items: center;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: 24px;
+  background: var(--openbot-bg-sidebar);
+  padding: clamp(32px, 7vw, 56px);
+  text-align: center;
+  box-shadow: 0 24px 80px var(--openbot-glass-shadow);
+}
+
+.join-card-signal {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.join-card-signal span {
+  height: 1px;
+  background: var(--openbot-border-strong);
+}
+
+.join-card-signal i {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-logo-production);
+  box-shadow: 0 0 0 6px var(--openbot-accent-strong);
+}
+
+.join-card-logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 22px;
+}
+
+.join-card-eyebrow {
+  margin: 0 0 10px;
+  color: var(--openbot-logo-production);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.join-card h1 {
+  margin: 0;
+  font-size: clamp(30px, 6vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.join-card-copy {
+  max-width: 420px;
+  margin: 18px 0 0;
+  color: var(--openbot-text-secondary);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.join-card-actions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.join-card-disabled {
+  opacity: 0.5;
+}
+
+.join-card-error {
+  margin: 26px 0 0;
+  color: var(--openbot-text-primary);
+}
+
+.join-card-note {
+  margin: 24px 0 0;
+  color: var(--openbot-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 520px) {
+  .join-page {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .join-page-brand {
+    left: 18px;
+  }
+
+  .join-card-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.landing-button-sm {
+  height: 38px;
+  gap: 7px;
+  padding: 0 17px;
+  font-size: 13px;
+}
+
+.landing-button-md {
+  height: 42px;
+  gap: 8px;
+  padding: 0 20px;
+  font-size: 14px;
+}
+
+.landing-button-lg {
+  height: 48px;
+  gap: 9px;
+  padding: 0 24px;
+  font-size: 15px;
+}
+
+.landing-button-primary {
+  background: var(--openbot-surface-light);
+  color: var(--openbot-text-on-light);
+}
+
+.landing-button-secondary {
+  border-color: var(--openbot-border-strong);
+  background: transparent;
+  color: var(--openbot-text-secondary);
+}
+
+.landing-button-glass {
+  border-color: var(--openbot-glass-border);
+  background: var(--openbot-glass-surface);
+  box-shadow:
+    inset 0 1px 0 var(--openbot-glass-highlight),
+    0 10px 30px -18px var(--openbot-glass-shadow);
+  color: var(--openbot-text-primary);
+}
+
+.landing-button:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+}
+
+.landing-button:active {
+  transform: scale(0.97);
+}
+
+.landing-hero {
+  width: min(100%, 1280px);
+  position: relative;
+  isolation: isolate;
+  margin: 0 auto;
+  padding: clamp(60px, 8vw, 112px) clamp(20px, 4vw, 48px) 72px;
+}
+
+.landing-hero-grid {
+  position: absolute;
+  z-index: 0;
+  inset: 0 auto 0 50%;
+  width: 100vw;
+  pointer-events: none;
+  background-image:
+    linear-gradient(90deg, var(--openbot-hero-grid-line) 1px, var(--openbot-transparent) 1px),
+    linear-gradient(var(--openbot-hero-grid-line) 1px, var(--openbot-transparent) 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(80% 62% at 50% 40%, var(--openbot-mask-solid) 40%, var(--openbot-transparent) 100%);
+  transform: translateX(-50%);
+}
+
+.landing-hero-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.landing-availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 28px;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-bg-sidebar);
+  color: var(--openbot-text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.landing-availability-new {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-surface-light);
+  color: var(--openbot-text-on-light);
+  font-family: var(--openbot-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.landing-availability-copy {
+  color: var(--openbot-text-muted);
+}
+
+.landing-availability-platform {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--openbot-text-primary);
+}
+
+.landing-availability-platform svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+
+.landing-availability-separator {
+  color: var(--openbot-text-dim);
+}
+
+.landing-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0;
+  color: var(--openbot-text-primary);
+  font-size: var(--openbot-text-hero);
+  font-weight: 500;
+  letter-spacing: -0.065em;
+  line-height: 0.96;
+}
+
+.landing-hero-logo {
+  width: 0.82em;
+  height: 0.82em;
+  flex: 0 0 auto;
+  margin-inline: 0.22em 0.14em;
+  transform: translateY(0.04em);
+}
+
+.landing-description {
+  max-width: 720px;
+  margin: 30px 0 0;
+  color: var(--openbot-text-secondary);
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.landing-provider {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28em;
+  color: var(--openbot-text-primary);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: -0.04em;
+}
+
+.landing-provider-logo {
+  width: 0.84em;
+  height: 0.84em;
+  flex: 0 0 auto;
+  overflow: visible;
+  fill: var(--openbot-provider-current);
+}
+
+.landing-actions {
+  margin-top: 32px;
+}
+
+.landing-download-selector {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.landing-download-split {
+  height: 48px;
+  display: inline-flex;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-surface-light);
+  color: var(--openbot-text-on-light);
+}
+
+.landing-download-primary {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 18px 0 22px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: opacity var(--openbot-duration-normal) ease;
+}
+
+.landing-download-primary svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.landing-download-primary[data-state="coming-soon"] {
+  color: var(--openbot-download-card-muted);
+}
+
+.landing-download-trigger {
+  width: 45px;
+  min-width: 45px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--openbot-download-card-border);
+  background: transparent;
+  color: currentColor;
+  font: inherit;
+  transition: opacity var(--openbot-duration-normal) ease;
+}
+
+.landing-download-trigger svg {
+  width: 13px;
+  height: 13px;
+  transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+}
+
+.landing-download-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.landing-download-primary:focus-visible,
+.landing-download-trigger:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--openbot-logo-production);
+  outline-offset: -3px;
+}
+
+.landing-download-menu {
+  width: min(288px, calc(100vw - 32px));
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-lg);
+  background: var(--openbot-bg-sidebar);
+  box-shadow: 0 18px 48px -24px var(--openbot-mask-solid);
+  color: var(--openbot-text-primary);
+  transform: translateX(-50%);
+  animation: landing-download-menu-enter var(--openbot-duration-normal) var(--openbot-ease-out) both;
+}
+
+.landing-download-menu-item {
+  min-height: 42px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 17px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0 11px;
+  border: 0;
+  border-radius: var(--openbot-radius-md);
+  background: transparent;
+  color: var(--openbot-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  transition:
+    background-color var(--openbot-duration-fast) ease,
+    color var(--openbot-duration-fast) ease;
+}
+
+.landing-download-menu-item svg {
+  width: 15px;
+  height: 15px;
+  justify-self: center;
+}
+
+.landing-download-menu-item span {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing-download-menu-item small {
+  color: var(--openbot-text-muted);
+  font-family: var(--openbot-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.landing-download-menu-item[data-selected="true"] {
+  background: var(--openbot-bg-surface);
+  color: var(--openbot-text-primary);
+}
+
+.landing-download-menu-item:focus-visible {
+  outline: 2px solid var(--openbot-logo-production);
+  outline-offset: -2px;
+}
+
+.landing-preview {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  max-height: 760px;
+  margin-top: clamp(68px, 9vw, 112px);
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-lg);
+  background: var(--openbot-bg-sidebar);
+  box-shadow:
+    0 28px 90px -42px var(--openbot-mask-solid),
+    inset 0 1px var(--openbot-glass-highlight);
+}
+
+.landing-preview::before {
+  position: absolute;
+  z-index: -1;
+  inset: -42px -24px -30px;
+  background: radial-gradient(ellipse at 50% 48%, var(--openbot-accent-strong), var(--openbot-transparent) 68%);
+  content: "";
+  filter: blur(22px);
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.landing-preview-window-controls {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.landing-preview-window-controls i {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 0.5px solid rgba(0, 0, 0, 0.18);
+  border-radius: var(--openbot-radius-pill);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.14);
+}
+
+.landing-preview-window-controls i:nth-child(1) {
+  background: #ff5f57;
+}
+
+.landing-preview-window-controls i:nth-child(2) {
+  background: #febc2e;
+}
+
+.landing-preview-window-controls i:nth-child(3) {
+  background: #28c840;
+}
+
+.landing-preview-stage {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: calc(var(--openbot-radius-lg) - 1px);
+  background: var(--openbot-bg-canvas);
+}
+
+.landing-preview-placeholder {
+  overflow: hidden;
+  border-radius: calc(var(--openbot-radius-lg) - 1px);
+  background: var(--openbot-bg-canvas);
+}
+
+.landing-app-preview iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  background: var(--openbot-bg-canvas);
+}
+
+.landing-download {
+  scroll-margin-top: 24px;
+  color: var(--openbot-text-primary);
+}
+
+.landing-download-inner {
+  width: min(100%, 1280px);
+  margin: 0 auto;
+  padding: clamp(96px, 10vw, 144px) clamp(20px, 4vw, 48px) clamp(36px, 5vw, 64px);
+}
+
+.landing-download-heading {
+  max-width: 720px;
+}
+
+.landing-download-heading h2 {
+  margin: 0;
+  font-size: clamp(38px, 5vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 1;
+}
+
+.landing-download-heading p {
+  max-width: 620px;
+  margin: 22px 0 0;
+  color: var(--openbot-text-secondary);
+  font-size: clamp(16px, 1.8vw, 19px);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.landing-download-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: clamp(48px, 6vw, 72px);
+}
+
+.landing-download-card {
+  min-width: 0;
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(26px, 2.6vw, 34px);
+  border: 1px solid var(--openbot-download-card-border);
+  border-radius: 20px;
+  color: var(--openbot-text-on-light);
+}
+
+.landing-download-card[data-download-platform="macos"] {
+  background: var(--openbot-logo-production);
+}
+
+.landing-download-card[data-download-platform="windows"] {
+  background: var(--openbot-logo-preview);
+}
+
+.landing-download-card[data-download-platform="linux"] {
+  background: var(--openbot-logo-dev);
+}
+
+.landing-download-card[data-state="available"] {
+  transition:
+    transform var(--openbot-duration-normal) var(--openbot-ease-out),
+    box-shadow var(--openbot-duration-normal) ease;
+}
+
+.landing-download-card:focus-visible {
+  outline: 3px solid var(--openbot-download-card-focus);
+  outline-offset: 3px;
+}
+
+.landing-download-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.landing-download-platform-logo {
+  width: clamp(76px, 7vw, 96px);
+  height: clamp(76px, 7vw, 96px);
+  flex: 0 0 auto;
+}
+
+.landing-download-status {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid var(--openbot-download-card-border);
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-download-card-chip);
+  font-family: var(--openbot-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.landing-download-card-copy {
+  margin-top: auto;
+}
+
+.landing-download-card-copy h3 {
+  margin: 0;
+  font-size: clamp(29px, 3vw, 38px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.landing-download-card-copy p {
+  margin: 14px 0 0;
+  color: var(--openbot-download-card-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.landing-download-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 28px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.landing-download-arrow {
+  width: 15px;
+  height: 15px;
+  transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+}
+
+.landing-download-heading[data-revealed="false"],
+.landing-download-card[data-revealed="false"] {
+  opacity: 0;
+}
+
+.landing-download-heading[data-revealed="true"],
+.landing-download-card[data-revealed="true"] {
+  animation: landing-download-reveal 760ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.landing-download-card:nth-child(2)[data-revealed="true"] {
+  animation-delay: 90ms;
+}
+
+.landing-download-card:nth-child(3)[data-revealed="true"] {
+  animation-delay: 180ms;
+}
+
+.landing-pricing {
+  color: var(--openbot-text-primary);
+}
+
+.landing-pricing-inner {
+  width: min(100%, 1280px);
+  margin: 0 auto;
+  padding: clamp(96px, 10vw, 144px) clamp(20px, 4vw, 48px) clamp(24px, 4vw, 48px);
+  text-align: center;
+}
+
+.landing-pricing-eyebrow {
+  margin: 0;
+  color: var(--openbot-text-secondary);
+  font-size: clamp(16px, 1.8vw, 19px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+/* The figure is three stacked copies of the same two glyphs: a blurred glow behind,
+   the clipped metal gradient in the middle, and a hairline rim on top. The rim is
+   what separates a dark body from a dark canvas; without it the glyphs dissolve. */
+.landing-pricing-amount {
+  position: relative;
+  isolation: isolate;
+  margin: clamp(8px, 1.5vw, 20px) 0 clamp(28px, 4vw, 48px);
+  font-size: clamp(8rem, 30vw, 22rem);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 0.9;
+  color: transparent;
+  background-image:
+    linear-gradient(
+      180deg,
+      var(--openbot-price-sheen-cool-clear) 36%,
+      var(--openbot-price-sheen-cool-soft) 44%,
+      var(--openbot-price-sheen-cool) 47.5%,
+      var(--openbot-price-sheen-light) 50%,
+      var(--openbot-price-sheen-warm) 52.5%,
+      var(--openbot-price-sheen-warm-soft) 56%,
+      var(--openbot-price-sheen-warm-clear) 64%
+    ),
+    linear-gradient(
+      180deg,
+      var(--openbot-price-metal-high) 0%,
+      var(--openbot-price-metal-core) 16%,
+      var(--openbot-price-metal-core) 84%,
+      var(--openbot-price-metal-low) 100%
+    );
+  background-repeat: no-repeat;
+  /* The band layer is twice the glyph height, so the 13% of it the sheen occupies
+     lands as a band a quarter of the figure tall - and sliding that layer is what
+     the sheen animation moves, without touching the body underneath. */
+  background-size:
+    100% 200%,
+    100% 100%;
+  background-position:
+    0 50%,
+    0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* The rim is a bevel, not an outline. -webkit-text-stroke traces each glyph
+     contour on its own, so on the "$" it drew the stem's rectangle straight
+     across the S and the stem read as a pasted-on bar. drop-shadow works from
+     the rendered silhouette, where stem and S are already one shape. Held in a
+     variable because the entrance animates filter, and a keyframe that set
+     blur() alone would drop the bevel for the length of the entrance. */
+  --price-bevel: drop-shadow(0 -1px 0 var(--openbot-price-rim)) drop-shadow(0 1px 0 var(--openbot-price-rim-under));
+  filter: var(--price-bevel);
+}
+
+.landing-pricing-amount::before {
+  content: attr(data-amount);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: var(--openbot-price-glow);
+  filter: blur(clamp(24px, 4vw, 56px));
+}
+
+.landing-pricing-note {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--openbot-text-secondary);
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+.landing-pricing [data-revealed="false"] {
+  opacity: 0;
+}
+
+.landing-pricing-eyebrow[data-revealed="true"],
+.landing-pricing-note[data-revealed="true"] {
+  animation: landing-download-reveal 760ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.landing-pricing-note[data-revealed="true"] {
+  animation-delay: 320ms;
+}
+
+/* The figure does not use the shared card reveal: the light arriving is the
+   entrance. The band starts below the glyphs and rises into its resting
+   position, ending exactly where the sheen loop begins so the two join without
+   a jump. */
+.landing-pricing-amount[data-revealed="true"] {
+  animation:
+    landing-price-enter 1200ms cubic-bezier(0.22, 1, 0.36, 1) 60ms backwards,
+    landing-price-sheen 14s ease-in-out 1260ms infinite alternate;
+}
+
+.landing-footer {
+  background: var(--openbot-bg-canvas);
+  color: var(--openbot-text-primary);
+}
+
+.landing-footer-inner {
+  width: min(100%, 1280px);
+  margin: 0 auto;
+  padding: clamp(53px, 5.6vw, 78px) clamp(20px, 4vw, 48px) 32px;
+}
+
+.landing-footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+  gap: clamp(56px, 8vw, 112px);
+}
+
+.landing-footer-brand {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.landing-footer-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: var(--openbot-radius-md);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.landing-footer-lockup:focus-visible,
+.landing-footer-cta:focus-visible,
+.landing-footer-social:focus-visible,
+.landing-footer-column a:focus-visible,
+.landing-footer-meta a:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+}
+
+.landing-footer-logo {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+}
+
+.landing-footer-description {
+  max-width: 560px;
+  margin: 32px 0 0;
+  color: var(--openbot-text-primary);
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+.landing-footer-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 28px;
+  border-radius: var(--openbot-radius-md);
+  color: var(--openbot-text-primary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.landing-footer-cta svg,
+.landing-footer-meta a svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+}
+
+.landing-footer-socials {
+  display: flex;
+  gap: 7px;
+  margin-top: 32px;
+}
+
+.landing-footer-social {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-bg-sidebar);
+  color: var(--openbot-text-muted);
+  transition:
+    background-color var(--openbot-duration-normal) ease,
+    color var(--openbot-duration-normal) ease;
+}
+
+.landing-footer-social svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.landing-footer-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(40px, 6vw, 88px);
+  padding-top: 7px;
+}
+
+.landing-footer-column h2 {
+  margin: 0;
+  color: var(--openbot-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.landing-footer-column ul {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-footer-column a {
+  border-radius: 4px;
+  color: var(--openbot-text-secondary);
+  font-size: 14px;
+  transition: color var(--openbot-duration-normal) ease;
+}
+
+.landing-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: clamp(53px, 6.3vw, 84px);
+  padding-top: 24px;
+  border-top: 1px solid var(--openbot-border);
+  color: var(--openbot-text-muted);
+  font-size: 12px;
+}
+
+.landing-footer-bottom p {
+  margin: 0;
+}
+
+.landing-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.landing-footer-meta a,
+.landing-footer-made {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.landing-footer-meta a {
+  border-radius: 4px;
+  transition: color var(--openbot-duration-normal) ease;
+}
+
+.landing-footer-availability {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-logo-preview);
+}
+
+.landing-footer-made {
+  font-family: var(--openbot-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.landing-footer-made svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--openbot-logo-production);
+  color: var(--openbot-logo-production);
+  animation: landing-footer-heart 1.8s ease-in-out infinite;
+}
+
+.landing-footer [data-revealed="false"] {
+  opacity: 0;
+}
+
+.landing-footer [data-revealed="true"] {
+  animation: landing-footer-reveal 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.landing-footer-columns[data-revealed="true"] {
+  animation-delay: 120ms;
+}
+
+.landing-footer-bottom[data-revealed="true"] {
+  animation-delay: 220ms;
+}
+
+.landing-glow {
+  width: 100%;
+  height: 55vh;
+  min-height: 360px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.landing-glow-rise {
+  width: 100%;
+  height: 100%;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform var(--landing-glow-rise-ms, 1100ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-glow-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes landing-footer-reveal {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translate3d(0, 6px, 0);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0.001px);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes landing-download-reveal {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translate3d(0, 10px, 0);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0.001px);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes landing-price-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translate3d(0, 16px, 0);
+    filter: blur(16px) var(--price-bevel);
+    background-position:
+      0 0%,
+      0 0;
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+    filter: blur(0.001px) var(--price-bevel);
+    background-position:
+      0 42%,
+      0 0;
+  }
+}
+
+/* Only the sheen layer moves; the metal body is the second background and stays put. */
+@keyframes landing-price-sheen {
+  from {
+    background-position:
+      0 42%,
+      0 0;
+  }
+
+  to {
+    background-position:
+      0 58%,
+      0 0;
+  }
+}
+
+@keyframes landing-footer-heart {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.84);
+  }
+}
+
+[data-enter] {
+  animation: landing-enter var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+}
+
+[data-enter="header"] {
+  animation-name: landing-header-enter;
+}
+
+[data-enter="preview"] {
+  animation-delay: 110ms;
+}
+
+@keyframes landing-header-enter {
+  from {
+    transform: translateY(10px);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-download-menu-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .landing-button {
+    cursor: pointer;
+  }
+
+  .landing-header-link:hover {
+    color: var(--openbot-text-primary);
+  }
+
+  .landing-button-primary:hover {
+    background: var(--openbot-text-primary);
+  }
+
+  .landing-download-primary[data-state="available"]:hover,
+  .landing-download-trigger:hover {
+    opacity: 0.78;
+  }
+
+  .landing-download-trigger,
+  .landing-download-menu-item {
+    cursor: pointer;
+  }
+
+  .landing-download-menu-item:hover {
+    background: var(--openbot-bg-surface);
+    color: var(--openbot-text-primary);
+  }
+
+  .landing-button-secondary:hover {
+    border-color: var(--openbot-text-dim);
+    background: var(--openbot-bg-control-hover);
+    color: var(--openbot-text-primary);
+  }
+
+  .landing-button-glass:hover {
+    border-color: var(--openbot-glass-highlight);
+    background: var(--openbot-glass-surface-hover);
+    box-shadow:
+      inset 0 1px 0 var(--openbot-glass-border),
+      0 14px 36px -18px var(--openbot-glass-shadow);
+  }
+
+  .landing-footer-cta:hover span {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .landing-download-card[data-state="available"]:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 44px -28px var(--openbot-text-on-light);
+  }
+
+  .landing-download-card[data-state="available"]:hover .landing-download-arrow {
+    transform: translate(2px, -2px);
+  }
+
+  .landing-footer-social:hover {
+    background: var(--openbot-bg-surface);
+    color: var(--openbot-text-primary);
+  }
+
+  .landing-footer-column a:hover,
+  .landing-footer-meta a:hover {
+    color: var(--openbot-text-primary);
+  }
+}
+
+@media (max-width: 959px) {
+  .landing-preview {
+    aspect-ratio: auto;
+    height: 620px;
+    max-height: none;
+  }
+
+  .landing-download-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-download-card[data-download-platform="linux"] {
+    min-height: 260px;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 840px) {
+  .landing-footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-footer-columns {
+    max-width: 520px;
+  }
+
+  .landing-footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-header {
+    min-height: 68px;
+    flex-wrap: wrap;
+    gap: 12px;
+    row-gap: 10px;
+    padding: 15px 16px;
+  }
+
+  .landing-brand {
+    flex-shrink: 0;
+    gap: 8px;
+    font-size: 15px;
+  }
+
+  .landing-brand-logo {
+    width: 25px;
+    height: 25px;
+  }
+
+  .landing-navigation {
+    flex-wrap: wrap;
+    gap: 7px;
+    row-gap: 7px;
+  }
+
+  .landing-navigation .landing-button-sm {
+    height: 36px;
+    padding-inline: 13px;
+    font-size: 12px;
+  }
+
+  .landing-header-link {
+    height: 36px;
+    padding-inline: 9px;
+    font-size: 12px;
+  }
+
+  .landing-hero {
+    padding: 60px 16px 48px;
+  }
+
+  .landing-hero-grid {
+    background-size: 36px 36px;
+    mask-image: radial-gradient(100% 66% at 50% 36%, var(--openbot-mask-solid) 34%, var(--openbot-transparent) 100%);
+  }
+
+  .landing-description {
+    margin-top: 24px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .landing-actions {
+    width: 100%;
+    flex-direction: column;
+    margin-top: 28px;
+  }
+
+  .landing-actions .landing-button {
+    width: min(100%, 320px);
+  }
+
+  .landing-download-selector,
+  .landing-download-split {
+    width: min(100%, 320px);
+  }
+
+  .landing-download-primary {
+    flex: 1;
+  }
+
+  .landing-download-menu {
+    width: 100%;
+  }
+
+  .landing-download-selector[data-open="true"] + .landing-button {
+    visibility: hidden;
+  }
+
+  .landing-availability {
+    margin-bottom: 24px;
+    gap: 6px;
+    padding: 3px 9px 3px 3px;
+    font-size: 10px;
+  }
+
+  .landing-availability-new {
+    min-height: 23px;
+    padding-inline: 7px;
+    font-size: 8px;
+  }
+
+  .landing-availability-platform {
+    gap: 3px;
+  }
+
+  .landing-availability-platform svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .landing-preview {
+    height: 590px;
+    margin-top: 64px;
+  }
+
+  .landing-preview-window-controls {
+    display: none;
+  }
+
+  .landing-pricing-inner {
+    padding: 88px 16px 24px;
+  }
+
+  .landing-download-inner {
+    padding: 88px 16px 32px;
+  }
+
+  .landing-download-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 42px;
+  }
+
+  .landing-download-card,
+  .landing-download-card[data-download-platform="linux"] {
+    min-height: 360px;
+    grid-column: auto;
+    padding: 26px;
+  }
+
+  .landing-footer-inner {
+    padding: 72px 16px 28px;
+  }
+
+  .landing-footer-grid {
+    gap: 64px;
+  }
+
+  .landing-footer-description {
+    font-size: 25px;
+  }
+
+  .landing-footer-columns {
+    gap: 32px;
+  }
+
+  .landing-footer-bottom {
+    margin-top: 72px;
+  }
+
+  .landing-footer-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .landing-glow {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 420px) {
+  .landing-header-contact {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+  }
+
+  .landing-footer [data-revealed] {
+    opacity: 1;
+    animation: none;
+  }
+
+  .landing-download [data-revealed] {
+    opacity: 1;
+    animation: none;
+  }
+
+  .landing-pricing [data-revealed] {
+    opacity: 1;
+    animation: none;
+  }
+
+  .landing-footer-made svg {
+    animation: none;
+  }
+
+  .landing-glow-rise {
+    transform: scaleY(1);
+    transition: none;
+  }
+}
+
+/* Articles -----------------------------------------------------------------
+   The index and article pages of every collection: /news, /guides, and whatever
+   is added next. They reuse .landing-header and .landing-footer, so only the
+   content between them is described here. */
+
+.post-main {
+  padding: clamp(17px, 2.8vw, 34px) 0 clamp(50px, 6.3vw, 84px);
+}
+
+.post-container {
+  width: min(100%, 1280px);
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 48px);
+}
+
+.post-meta {
+  display: block;
+  color: var(--openbot-text-dim);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Laid out rather than written as one string, so the space on each side of the
+   separator is equal whatever the date and the name are, and so a long name wraps
+   under the date instead of taking the dot with it. */
+.post-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 7px;
+}
+
+.post-featured {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 64px);
+  margin-top: clamp(28px, 3.5vw, 50px);
+}
+
+.post-featured-copy {
+  min-width: 0;
+}
+
+.post-featured-title {
+  margin: 12px 0 0;
+  font-size: clamp(30px, 3.4vw, 50px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.post-featured-description {
+  max-width: 46ch;
+  margin: 16px 0 0;
+  color: var(--openbot-text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* The heading's link, stretched over the whole featured block. It is what makes
+   the artwork clickable: one link in the document, one name to announce, and the
+   whole area reacts to a pointer the way the grid cards below it do. */
+.post-featured-title a::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+}
+
+.post-featured-action {
+  /* Above the stretched link, so the button keeps its own hover and focus ring. */
+  position: relative;
+  z-index: 2;
+  margin-top: 26px;
+}
+
+/* The artwork frame. The gradient host fills it and the title sits on top;
+   `place-items` is what centres that title without a second positioned layer. */
+.post-featured-art,
+.post-card-art,
+.post-article-art,
+.plugin-card-art,
+.plugin-prompts-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--openbot-border-strong);
+  /* The artwork is decoration, and it is the largest thing on a card. It takes no
+     pointer, so a click on it reaches the link that covers the block: on the
+     featured article that link is a stretched pseudo-element, and it cannot paint
+     over this frame because the entry animation leaves a transform on the copy
+     column, which traps the z-index inside a stacking context of its own. */
+  pointer-events: none;
+}
+
+.post-featured-art {
+  aspect-ratio: 19 / 10;
+  border-radius: 16px;
+}
+
+.post-card-art {
+  aspect-ratio: 2 / 1;
+  border-radius: 12px;
+}
+
+.post-article-art {
+  aspect-ratio: 21 / 9;
+  margin-top: clamp(28px, 3.5vw, 44px);
+  border-radius: 14px;
+}
+
+/* Squarer than an article card: what sits in the middle is a mark rather than a
+   line of words, and a wide frame leaves it stranded in empty colour. */
+.plugin-card-art {
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+}
+
+/* Layer order inside the frame, bottom to top: the CSS approximation and the
+   generated PNG are two backgrounds of this element, and the shader canvas is
+   prepended by the library at z-index -1, which paints over a background but
+   under anything else in the frame. */
+.post-gradient {
+  position: absolute;
+  inset: 0;
+  /* Clipped three ways, for the one picture. The canvas is prepended at z-index -1,
+     and Firefox on a GPU gives it a compositing layer of its own: a layer is not cut
+     by an ancestor's rounded corner, so the picture stayed square inside a round card.
+     `isolation` keeps the negative layer in this host rather than in a stacking context
+     further up, `overflow` cuts it here, and the corner on the canvas itself is what
+     rounds the layer when the other two are composited around it. */
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: inherit;
+  background-position: center;
+  background-size: cover;
+}
+
+/* The library's own canvas rules sit in a cascade layer, so these plain ones win
+   without a fight. The canvas is transparent until the component has seen it draw
+   a frame, and it arrives as a fade: the picture underneath it is the same first
+   frame, so a reader sees the artwork start to move rather than change. */
+.post-gradient > canvas {
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--openbot-duration-slow) var(--openbot-ease-out);
+}
+
+.post-gradient[data-shader="live"] > canvas {
+  opacity: 1;
+}
+
+.post-featured-art-title,
+.post-card-art-title {
+  position: relative;
+  /* The gradient host below listens for pointerenter to start its shader, and it
+     is a sibling of this title, not an ancestor. Without this, crossing onto the
+     title counts as leaving the artwork and the shader is thrown away exactly
+     where the pointer usually rests. The title is decorative and aria-hidden, so
+     it has nothing to answer a pointer with. */
+  pointer-events: none;
+  padding: clamp(18px, 2.6vw, 40px);
+  color: var(--openbot-text-primary);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.post-featured-art-title {
+  font-size: clamp(24px, 3.2vw, 44px);
+}
+
+.post-card-art-title {
+  font-size: clamp(15px, 1.4vw, 19px);
+}
+
+.post-grid-section {
+  margin-top: clamp(56px, 7vw, 96px);
+}
+
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(18px, 2vw, 26px);
+}
+
+.post-card {
+  min-width: 0;
+  display: block;
+}
+
+.post-card:focus-visible {
+  border-radius: 24px;
+  outline: 3px solid var(--openbot-border-focus);
+  outline-offset: 4px;
+}
+
+.post-card .post-meta {
+  margin-top: 14px;
+}
+
+/* A card is a quarter of the row, so the two parts are given their own line when
+   the name no longer fits beside the date. */
+.post-card-byline {
+  row-gap: 1px;
+}
+
+.post-card-title {
+  margin: 6px 0 0;
+  color: var(--openbot-text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  transition: color var(--openbot-duration-normal) ease;
+}
+
+/* The reveal is per card, ordered by --post-card-index, so the row arrives as a
+   sweep rather than all at once. */
+.post-grid-section[data-revealed="false"] .post-card,
+.post-more[data-revealed="false"] .post-card {
+  opacity: 0;
+}
+
+.post-grid-section[data-revealed="true"] .post-card,
+.post-more[data-revealed="true"] .post-card {
+  animation: landing-download-reveal 720ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--post-card-index, 0) * 80ms);
+}
+
+/* The block at the top of a collection page is in the server's HTML and is already on
+   screen when the page loads, so it takes the header's `data-enter` route rather
+   than an observer: nothing has to arrive before it can play. The longhands below
+   the `[data-enter]` shorthand swap in the same reveal the cards use, so one page
+   has one motion. The artwork follows the copy by a step, which is the order the
+   block is read in, and the body follows the artwork by another step, so an
+   article opens as one movement down the page instead of a title and a picture
+   arriving over text that is already sitting there.
+
+   `backwards`, not the shorthand's `both`, and it is what the cards already use.
+   The reveal ends on `blur(0.001px)`, and a filter that is held makes the element
+   a containing block for anything absolutely positioned inside it. Held on the
+   copy column, that shrinks the featured article's stretched link to the width of
+   the copy, and the artwork beside it stops being clickable. The last frame is
+   the resting state anyway, so there is nothing for the fill to hold. */
+[data-enter="post-copy"],
+[data-enter="post-art"],
+[data-enter="post-prose"] {
+  animation-name: landing-download-reveal;
+  animation-duration: 720ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: backwards;
+}
+
+[data-enter="post-copy"] {
+  animation-delay: 60ms;
+}
+
+[data-enter="post-art"] {
+  animation-delay: 160ms;
+}
+
+[data-enter="post-prose"] {
+  animation-delay: 260ms;
+}
+
+.post-article-body {
+  max-width: 820px;
+}
+
+.post-article-header {
+  margin-top: clamp(20px, 3vw, 36px);
+}
+
+.post-article-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--openbot-text-muted);
+  font-size: 13px;
+  transition: color var(--openbot-duration-normal) ease;
+}
+
+.post-article-back::before {
+  content: "\2190";
+}
+
+.post-article-title {
+  margin: 18px 0 0;
+  font-size: clamp(32px, 4.2vw, 54px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.post-article-standfirst {
+  margin: 18px 0 0;
+  color: var(--openbot-text-secondary);
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.55;
+}
+
+.post-article-byline {
+  margin: 18px 0 0;
+}
+
+.post-prose {
+  margin-top: clamp(32px, 4vw, 48px);
+  color: var(--openbot-text-secondary);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.post-prose p {
+  margin: 0 0 20px;
+}
+
+.post-prose h2 {
+  margin: 40px 0 14px;
+  color: var(--openbot-text-primary);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.post-prose h3 {
+  margin: 32px 0 12px;
+  color: var(--openbot-text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.post-prose ul,
+.post-prose ol {
+  margin: 0 0 20px;
+  padding-left: 22px;
+}
+
+/* Tailwind preflight removes every list marker. Prose is the one place that needs
+   them back: without a number, a list of steps reads as unrelated paragraphs. */
+.post-prose ul {
+  list-style: disc;
+}
+
+.post-prose ol {
+  list-style: decimal;
+}
+
+.post-prose li {
+  margin: 0 0 8px;
+}
+
+.post-prose strong {
+  color: var(--openbot-text-primary);
+  font-weight: 600;
+}
+
+.post-prose a {
+  color: var(--openbot-accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.post-prose code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--openbot-bg-surface);
+  font-family: var(--openbot-font-mono);
+  font-size: 0.9em;
+}
+
+.post-prose pre {
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-lg);
+  background: var(--openbot-bg-surface);
+  color: var(--openbot-text-primary);
+  font-family: var(--openbot-font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* A run of code inside a block is already in the block's own face and on the
+   block's own background. Left with the inline treatment, every line of a command
+   carried a second box around it. */
+.post-prose pre code {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font-size: inherit;
+}
+
+.post-prose kbd {
+  padding: 2px 7px;
+  border: 1px solid var(--openbot-border-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--openbot-radius-sm);
+  background: var(--openbot-bg-surface);
+  color: var(--openbot-text-primary);
+  font-family: var(--openbot-font-mono);
+  font-size: 0.85em;
+}
+
+.post-prose hr {
+  margin: 40px 0;
+  border: 0;
+  border-top: 1px solid var(--openbot-border-strong);
+}
+
+.post-prose table {
+  width: 100%;
+  margin: 0 0 24px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.post-prose th,
+.post-prose td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--openbot-border-strong);
+  text-align: left;
+  vertical-align: top;
+}
+
+.post-prose th {
+  color: var(--openbot-text-primary);
+  font-weight: 600;
+}
+
+.post-prose blockquote {
+  margin: 24px 0;
+  padding-left: 18px;
+  border-left: 2px solid var(--openbot-border-strong);
+  color: var(--openbot-text-muted);
+}
+
+.post-prose > :last-child {
+  margin-bottom: 0;
+}
+
+/* Media in an article. The components in `ArticleMedia.tsx` write this markup, but
+   the two rules below are also the floor for anything an author writes by hand: a
+   picture wider than the column has to stay inside it, or a phone scrolls sideways
+   for the length of the article. */
+.post-prose img,
+.post-prose video {
+  max-width: 100%;
+  height: auto;
+}
+
+.post-figure {
+  /* The figure's own margin, not a paragraph's. Both edges are set, because a
+     figure can open an article and a paragraph's bottom margin cannot be relied on
+     to be there above it. */
+  margin: 32px 0;
+}
+
+.post-figure picture {
+  display: block;
+}
+
+.post-media-frame {
+  position: relative;
+}
+
+.post-media {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-card);
+  /* The frame is filled before the file arrives, so what the reader sees in that
+     moment is the shape the picture will take rather than a hole in the page. The
+     space itself comes from the width and height the component writes. */
+  background: var(--openbot-bg-surface);
+}
+
+/* A picture with room around it, standing on the article's own gradient. A
+   screenshot of a pale interface runs into the page where it stops, and a picture
+   of the product sitting on the page reads as part of the page rather than as a
+   picture of something. The gradient is the same one the reader met on the card
+   they arrived from, because both are drawn from the article title.
+
+   The gradient host inside is absolutely positioned to the padding box, so it
+   fills the room around the picture and leaves the border alone. */
+.post-mount {
+  position: relative;
+  /* The shader canvas is prepended by the library at z-index -1. Without a
+     stacking context of its own here, that negative layer leaves the mount and
+     paints behind the page instead of behind the picture. */
+  isolation: isolate;
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-card);
+  /* Proportional, so the room around the picture stays the same fraction of the
+     column on a phone as on a wide screen, with a floor and a ceiling that keep
+     it from vanishing or from eating the picture. Authors pick `tight` or
+     `roomy` on the component; this is the fallback if neither is set. */
+  padding: clamp(14px, 4.5%, 52px);
+}
+
+.post-mount[data-pad="tight"] {
+  padding: clamp(12px, 3.5%, 36px);
+}
+
+.post-mount[data-pad="roomy"] {
+  padding: clamp(22px, 7%, 72px);
+}
+
+/* Inside a mount the picture is a smaller thing on a coloured field, so it takes
+   a tighter radius and a lift instead of the plain border it wears on the page.
+   `z-index` is what keeps it above the gradient host: that host is positioned,
+   so without a layer of its own the picture paints underneath and the mount
+   reads as a gradient with no screenshot on it. */
+.post-mount .post-media,
+.post-mount .post-media-frame {
+  position: relative;
+  z-index: 1;
+}
+
+.post-mount .post-media {
+  border-color: var(--openbot-border);
+  border-radius: 9px;
+  box-shadow: var(--openbot-shadow-overlay);
+}
+
+.post-figure-caption {
+  margin-top: 12px;
+  color: var(--openbot-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* The control that stops a moving picture. It sits on the picture rather than
+   under it, because the thing it stops is what the reader is looking at, and it is
+   opaque so that it stays readable over any frame. */
+.post-media-toggle {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px 7px 11px;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-bg-overlay);
+  color: var(--openbot-text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--openbot-duration-normal) ease;
+}
+
+.post-media-toggle:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+}
+
+.post-media-toggle-icon {
+  width: 9px;
+  height: 11px;
+  background: currentcolor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.post-media-toggle[data-state="playing"] .post-media-toggle-icon {
+  background: linear-gradient(to right, currentcolor 0 3px, transparent 3px 6px, currentcolor 6px);
+  clip-path: none;
+}
+
+.post-more {
+  margin-top: clamp(64px, 8vw, 104px);
+}
+
+.post-more-title {
+  margin: 0 0 clamp(22px, 2.6vw, 32px);
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+/* The heading joins the sweep of the cards under it. Left out, it was the one
+   fixed thing in a moving section. It carries no card index, so it arrives with
+   the first of them, which is the pair a reader takes as one thing anyway. It is
+   written here rather than beside the cards because its own rule is above, and a
+   reveal declared before it would be the higher specificity of the two. */
+.post-more[data-revealed="false"] .post-more-title {
+  opacity: 0;
+}
+
+.post-more[data-revealed="true"] .post-more-title {
+  animation: landing-download-reveal 720ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* The closing block of a collection page. Centred, because it is an end rather than
+   another row of the page, and separated by a rule so it reads as an offer and not
+   as the last article. The type scale is the download section's, so the two places
+   that ask the reader to take the app speak at the same size. */
+.post-cta {
+  margin-top: clamp(64px, 8vw, 104px);
+  padding-top: clamp(48px, 6vw, 80px);
+  border-top: 1px solid var(--openbot-border);
+  text-align: center;
+}
+
+.post-cta-title {
+  margin: 0;
+  font-size: clamp(34px, 4.6vw, 56px);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.post-cta-description {
+  max-width: 580px;
+  margin: 20px auto 0;
+  color: var(--openbot-text-secondary);
+  font-size: clamp(16px, 1.8vw, 19px);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* Wraps rather than shrinks: two full-width buttons stacked read better on a
+   narrow screen than two that have been squeezed to fit one row. */
+.post-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: clamp(28px, 3.5vw, 40px);
+}
+
+/* The block arrives in the order it is read, rather than as one slab. Two things
+   made it snap: the shared curve is a quintic ease-out, which is right for a 120ms
+   hover but over 760ms puts the block at 97% of the way there by the halfway mark
+   and then spends the rest on motion too small to see; and every part of the block
+   moved at the same instant, so there was nothing to follow. A gentler curve
+   spreads the same distance across the whole duration, and it holds back at the
+   start rather than opening at speed, so the block reads as arriving instead of
+   appearing. The stagger gives the eye an order to take it in: the offer, the
+   reason for it, then the two ways to act on it. */
+.post-cta[data-revealed="false"] .post-cta-title,
+.post-cta[data-revealed="false"] .post-cta-description,
+.post-cta[data-revealed="false"] .post-cta-actions {
+  opacity: 0;
+}
+
+.post-cta[data-revealed="true"] .post-cta-title,
+.post-cta[data-revealed="true"] .post-cta-description,
+.post-cta[data-revealed="true"] .post-cta-actions {
+  animation: landing-download-reveal 880ms cubic-bezier(0.4, 0.18, 0.28, 1) backwards;
+}
+
+.post-cta[data-revealed="true"] .post-cta-description {
+  animation-delay: 170ms;
+}
+
+.post-cta[data-revealed="true"] .post-cta-actions {
+  animation-delay: 340ms;
+}
+
+@media (max-width: 1080px) {
+  .post-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .post-featured {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Artwork first on a narrow screen, which is how the grid cards read too. */
+  .post-featured-art {
+    order: -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .post-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .post-featured,
+  .post-card {
+    cursor: pointer;
+  }
+
+  /* Nothing about the card's shape moves under the pointer: not the frame, not
+     the artwork inside it. A grid of cards that each swell as the pointer crosses
+     is restless to read. The artwork answers by starting its animation, and the
+     title grows a little. */
+  .post-featured-art-title,
+  .post-card-art-title {
+    /* An explicit scale rather than `none`, and a layer that is there before the
+       transition starts. Otherwise the browser rasterises the text once for the
+       moving layer and again for the resting element, and that second pass lands
+       on different pixels: the title looks like it jumps as the growth ends. */
+    transform: scale(1);
+    transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+    will-change: transform;
+  }
+
+  .post-card:hover .post-card-art-title {
+    transform: scale(1.06);
+  }
+
+  /* Keyed to the block, not to the artwork: the stretched link covers the artwork,
+     so the frame under it never reports a hover. The hero title is already large,
+     so it takes the smaller step of the two. */
+  .post-featured:hover .post-featured-art-title {
+    transform: scale(1.04);
+  }
+
+  .post-card:hover .post-card-title,
+  .post-article-back:hover {
+    color: var(--openbot-text-primary);
+  }
+
+  .post-media-toggle:hover {
+    background: var(--openbot-bg-surface-raised);
+  }
+
+  .post-featured-title a:hover {
+    color: var(--openbot-text-secondary);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-grid-section[data-revealed] .post-card,
+  .post-more[data-revealed] .post-card,
+  .post-more[data-revealed] .post-more-title {
+    opacity: 1;
+    animation: none;
+  }
+
+  /* The global escape shortens every animation to nothing, but it selects with
+     `*`, and an attribute selector outranks that. So the blocks below were still
+     running their full reveal for a reader who asked for no motion. Naming them
+     is what makes these pages arrive at rest. The shared `[data-enter]` header
+     has the same gap and is left alone here, because it is not ours to change. */
+  [data-enter="post-copy"],
+  [data-enter="post-art"],
+  [data-enter="post-prose"],
+  .post-cta[data-revealed] .post-cta-title,
+  .post-cta[data-revealed] .post-cta-description,
+  .post-cta[data-revealed] .post-cta-actions {
+    opacity: 1;
+    animation: none;
+  }
+
+  .post-card-art,
+  .post-card-art-title,
+  .post-featured-art-title,
+  .post-media-toggle {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   /plugins and /plugins/<slug>.
+
+   The index reads as a sibling of /news and /guides, and it is built from the
+   same parts: the article frame, the gradient that runs in it under a pointer,
+   and the per-card reveal. A listing is recognised before it is read, so the
+   mark is the largest thing on a card and the words under it are only the two a
+   reader needs to choose. Nothing about a card's shape moves.
+
+   The listing page is built from the same parts, and from the article page's
+   column as well: it opens on the picture the card a reader pressed was already
+   carrying, under the back link, the title and the standfirst that /news and
+   /guides set. Only the rules below are its own, and they are the ones that turn
+   the boxed lists it used to draw into text. A later change to an article page's
+   type scale moves this page with it, which is the point of borrowing the
+   classes rather than copying them. */
+
+.plugin-intro {
+  margin-top: clamp(28px, 3.5vw, 50px);
+}
+
+.plugin-intro-title {
+  margin: 0;
+  color: var(--openbot-text-primary);
+  font-size: clamp(30px, 3.4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.plugin-grid-section {
+  margin-top: clamp(32px, 4vw, 48px);
+}
+
+.plugin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2vw, 26px);
+}
+
+.plugin-card {
+  display: block;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.plugin-card:focus-visible {
+  border-radius: 24px;
+  outline: 3px solid var(--openbot-border-focus);
+  outline-offset: 4px;
+}
+
+/* One colour on a gradient that is a different colour on every card. The shadow
+   is what keeps it readable where the picture behind it is pale: the mark has no
+   plate under it, so the frame stays a picture rather than a tile. */
+.plugin-logo {
+  position: relative;
+  /* The gradient host listens for pointerenter, and it is this mark's sibling
+     rather than its ancestor. Without this, crossing onto the mark counts as
+     leaving the artwork and throws the shader away where the pointer rests. */
+  pointer-events: none;
+  color: var(--openbot-text-primary);
+  filter: drop-shadow(0 1px 6px rgb(0 0 0 / 35%));
+}
+
+/* Sized against the frame rather than the viewport: the card is widest where the
+   grid has folded to one column, which is exactly where a mark set in viewport
+   units would be at its smallest. */
+.plugin-card-logo {
+  width: auto;
+  max-width: 58%;
+  height: 20%;
+}
+
+/* An upright mark takes more of the frame's height than a wide one, so that the
+   two kinds read as the same size on a row of cards: a wide mark spends its size
+   on width, and an upright one has only height to spend it on. */
+.plugin-card-logo.plugin-logo-upright {
+  height: 34%;
+}
+
+/* The listing's own icon on a card, sized against the frame like the drawn mark
+   beside it. It is square art already, so it takes the logo corner and no plate:
+   what is behind it is the gradient, which is the card's picture. */
+.plugin-card-icon {
+  position: relative;
+  height: 40%;
+  border-radius: var(--openbot-radius-logo);
+  box-shadow: 0 2px 12px rgb(0 0 0 / 35%);
+  pointer-events: none;
+}
+
+/* The letter a plugin falls back to when its mark is not drawn yet. Type cannot
+   be sized against the frame the way a mark is, so it takes a clamp; the letter
+   is a stand-in for a path that is on its way, not a listing's resting state. */
+.plugin-logo-letter {
+  display: grid;
+  place-items: center;
+  font-size: clamp(34px, 3.8vw, 48px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* Both text lines under a card share one shape: what a reader asks on the left,
+   what answers it on the right, and the gap between the two ends doing the work a
+   separator would. `baseline` rather than `center`, because the two ends of a line
+   are set at different sizes and centring them would leave neither on the line. */
+.plugin-card-meta,
+.plugin-card-headline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.plugin-card-meta {
+  margin-top: 14px;
+  color: var(--openbot-text-dim);
+  font-size: 12px;
+}
+
+.plugin-card-version {
+  flex: none;
+  letter-spacing: var(--openbot-tracking-wide);
+}
+
+/* One end of each line gives way first, and it is whichever end a reader can lose:
+   the publisher's own name on the meta line, the sentence about the plugin on the
+   one below. Truncating is what keeps a card the height of the two beside it. */
+.plugin-card-publisher,
+.plugin-card-tagline {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plugin-card-tagline {
+  text-align: right;
+}
+
+/* The switches over the grid and the tags under a card carry the same words, but
+   they are not the same object: one is pressed and one is read. So the switch
+   takes the size and the shape of every other button on the site, and the card
+   tag stays a label. The words are what ties them together. */
+.plugin-filters {
+  /* A fieldset draws a border and reserves room for a legend the page hides. */
+  margin-inline: 0;
+  border: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: clamp(20px, 2.4vw, 30px);
+}
+
+.plugin-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.plugin-tag {
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-bg-surface);
+  padding: 5px 11px;
+  color: var(--openbot-text-dim);
+  font-size: 12px;
+  letter-spacing: var(--openbot-tracking-wide);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* The metrics of `.landing-button-sm`, written out rather than borrowed: the
+   shared class paints an icon box on every button that wears it, and a filter has
+   no icon to put in it. Everything a reader can compare - the height, the padding,
+   the pill, the weight, the rest and pressed colours - is the button family's. */
+.plugin-tag-button {
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-pill);
+  background: transparent;
+  padding: 0 17px;
+  color: var(--openbot-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: var(--openbot-tracking-wide);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  /* Colour, and a press. A filter row is read before it is used, so the motion
+     that belongs on it is the motion every other button here already has. */
+  transition:
+    border-color var(--openbot-duration-normal) ease,
+    background-color var(--openbot-duration-normal) ease,
+    color var(--openbot-duration-normal) ease,
+    transform var(--openbot-duration-fast) var(--openbot-ease-out);
+}
+
+/* Pressed is the only state that fills a switch in, and it fills it the way a
+   primary button is filled. A switch a reader can turn off has to look different
+   from one that was never on, and the grid behind it has already changed, so the
+   fill confirms what happened rather than announcing it. */
+.plugin-tag-button[aria-pressed="true"] {
+  border-color: var(--openbot-surface-light);
+  background: var(--openbot-surface-light);
+  color: var(--openbot-text-on-light);
+}
+
+.plugin-tag-button:active {
+  transform: scale(0.97);
+}
+
+.plugin-tag-button:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+}
+
+.plugin-empty {
+  margin: 0;
+  color: var(--openbot-text-dim);
+  font-size: 14px;
+}
+
+.plugin-card-headline {
+  margin-top: 5px;
+}
+
+.plugin-card-title {
+  flex: none;
+  color: var(--openbot-text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  transition: color var(--openbot-duration-normal) ease;
+}
+
+.plugin-card-tagline {
+  color: var(--openbot-text-dim);
+  font-size: 13px;
+}
+
+/* Per card, ordered by --plugin-card-index, so the grid arrives as a sweep. */
+.plugin-grid-section[data-revealed="false"] .plugin-card {
+  opacity: 0;
+}
+
+.plugin-grid-section[data-revealed="true"] .plugin-card {
+  animation: landing-download-reveal 720ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--plugin-card-index, 0) * 80ms);
+}
+
+/* Larger against its frame than a card's mark is against its own: this frame is
+   the width of the column and a mark sized for a card would sit lost in it. Both
+   are measured against the frame rather than the viewport, so neither shrinks on
+   the narrow screen where the picture is at its widest. */
+.plugin-hero-logo {
+  width: auto;
+  max-width: 44%;
+  height: 26%;
+}
+
+/* The title and the button share a line, so the space between the two ends of it is
+   what separates them. Below the width that holds both, the button wraps under the
+   title rather than crushing it. The row carries the title's own top margin, so that
+   margin is not inside the item the row centres the button against. */
+.plugin-hero-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  margin-top: 18px;
+}
+
+/* Smaller than an article's title. This one is read against a tile rather than across a
+   column, and at the article's size the two lines beside the mark stand taller than it. */
+.plugin-hero-row .post-article-title {
+  min-width: 0;
+  margin-top: 0;
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.1;
+}
+
+/* The mark, the name and the line under it are one thing, so they travel together when the
+   button wraps below them. */
+.plugin-hero-heading {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.6vw, 20px);
+  min-width: 0;
+}
+
+/* What the mark stands beside: the name and the one line that says what the listing does. */
+.plugin-hero-text {
+  min-width: 0;
+}
+
+/* Closer than an article's standfirst sits under its title: here the two lines are one
+   block against the mark, and the article's gap would leave the mark between them. */
+.plugin-hero-standfirst {
+  margin-top: 4px;
+  font-size: clamp(14px, 1.3vw, 16px);
+  line-height: 1.4;
+}
+
+/* The listing's mark as an icon rather than as artwork: the frame further down is
+   21/9 and reads as a picture, and a reader deciding whether to install something
+   looks for a square. Same gradient as that frame, at the size of an app icon. */
+.plugin-hero-mark {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: clamp(56px, 6vw, 76px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--openbot-glass-border);
+  border-radius: var(--openbot-radius-logo);
+  background: var(--openbot-glass-surface);
+  /* Decoration, like every other frame on this page: it takes no pointer. */
+  pointer-events: none;
+}
+
+/* The listing's own icon, filling the tile: an icon a developer publishes is already
+   drawn as a square, so it is given the whole square rather than inset in it. The plate
+   and its hairline go with the same reasoning as the row's. */
+.plugin-hero-mark-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.plugin-hero-mark:has(.plugin-hero-mark-icon) {
+  border-color: transparent;
+  background: none;
+}
+
+/* Sized against the tile rather than the viewport, the way a card's mark is. */
+.plugin-hero-mark-logo {
+  width: auto;
+  max-width: 64%;
+  height: 32%;
+}
+
+/* Against the right edge of the column, opposite the tags: the block above is
+   read from the left, and the one thing on it a reader acts on is the one thing
+   that is not. It wraps back under the tags before the column gets too narrow
+   to hold both. */
+.plugin-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* The download offer, as the small modal it is: the visitor has just asked for the app and
+   nothing happened, so this is the only thing on the page worth reading. Same panel the
+   download menu is built from - sidebar surface, strong hairline, overlay shadow - because
+   it is the same kind of surface, lifted off the page rather than drawn into it. */
+.plugin-dialog {
+  width: min(380px, calc(100vw - 32px));
+  margin: auto;
+  padding: 22px;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-lg);
+  background: var(--openbot-bg-sidebar);
+  box-shadow: var(--openbot-shadow-overlay);
+  color: var(--openbot-text-primary);
+  animation: plugin-dialog-enter var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+}
+
+@keyframes plugin-dialog-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The page stays visible behind it, because the visitor is deciding whether to leave it. */
+.plugin-dialog::backdrop {
+  background: var(--openbot-dialog-overlay);
+  backdrop-filter: blur(6px);
+}
+
+.plugin-dialog-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.plugin-dialog-copy {
+  margin: 8px 0 0;
+  color: var(--openbot-text-dim);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* The way out on the left and the way on to the right, which is the order the rest of the
+   site puts a pair of actions in. */
+.plugin-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.plugin-dialog-dismiss {
+  margin: 0;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--openbot-radius-pill);
+  background: none;
+  color: var(--openbot-text-dim);
+  font: inherit;
+  font-size: 13px;
+  transition: color var(--openbot-duration-fast) ease;
+}
+
+/* The ring the site's buttons take, rather than the browser's own box. */
+.plugin-dialog-dismiss:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+}
+
+.plugin-body {
+  margin-top: clamp(32px, 4vw, 48px);
+}
+
+.plugin-description {
+  margin: 0;
+  color: var(--openbot-text-readable);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.plugin-section {
+  margin-top: clamp(32px, 4vw, 48px);
+}
+
+/* The heading the app's plugin detail sets, rather than the uppercase eyebrow this
+   page used: the section's name at reading size, with its count in a box beside it. */
+.plugin-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  color: var(--openbot-text-primary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* A count is one or two digits. A box that is square at one digit holds every count
+   at one width, so a section with 2 rows and one with 12 draw the same shape. */
+.plugin-section-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding-inline: 6px;
+  border-radius: var(--openbot-radius-sm);
+  background: var(--openbot-glass-surface);
+  color: var(--openbot-text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The app draws its prompts on the plugin's own artwork, so this card is that screen:
+   the gradient fills it and the requests sit on plates over it. It is one of the
+   artwork frames above rather than a card that copies them - the same rule, the same
+   corner as the picture further up this column, and the same clipping of the shader,
+   which is the whole reason it is declared there and not here. */
+.plugin-prompts-card {
+  border-radius: 14px;
+  padding: clamp(16px, 2.4vw, 24px);
+}
+
+.plugin-prompts {
+  /* Over the canvas, which the shader library prepends at z-index -1: that paints
+     above a background but below anything in the card that is positioned. */
+  position: relative;
+  /* Given back what the frame rule turns off for artwork. These are sentences a
+     reader copies, so the list takes the pointer even though the frame does not. */
+  pointer-events: auto;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+/* One frame around the whole list, like the app's item group: the rows share a
+   border and a surface, and a single hairline separates each pair. No gap - a gap
+   would leave that hairline floating between two rows rather than between them. */
+.plugin-rows {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--openbot-border-strong);
+  border-radius: var(--openbot-radius-card);
+  background: var(--openbot-bg-surface);
+}
+
+/* One request as the app draws it: the plugin's chip, then the line a reader would
+   type. The plate is opaque because the colour behind it is a different colour on
+   every listing, and no transparent surface is legible on all of them. */
+.plugin-prompt {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  border-radius: var(--openbot-radius-card);
+  background: var(--openbot-bg-canvas);
+  padding: 12px;
+  color: var(--openbot-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* The chip the app puts in front of a prompt: this is the plugin the request would
+   be sent to, said once per line rather than in a heading above the list. */
+.plugin-prompt-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--openbot-radius-pill);
+  background: var(--openbot-glass-surface);
+  padding: 3px 10px 3px 6px;
+  color: var(--openbot-text-primary);
+  font-size: 13px;
+}
+
+/* Set by height alone, so a wide wordmark stays a wordmark instead of being letterboxed
+   into a square. The shadow the marks carry over artwork is dropped here: the plate under
+   this one is opaque, so it has nothing to lift off. */
+.plugin-prompt-mark {
+  width: auto;
+  max-width: 56px;
+  height: 14px;
+  font-size: 12px;
+  filter: none;
+}
+
+.plugin-prompt-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.plugin-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 14px;
+  color: var(--openbot-text-secondary);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.plugin-rows > .plugin-row + .plugin-row {
+  border-top: 1px solid var(--openbot-border-strong);
+}
+
+/* What kind of thing the row is, in a tile the height of its two lines of type. The
+   app draws the thing's own icon here; this page draws a glyph, because that icon
+   lives on a developer's own servers and the site fetches nothing from one. */
+/* The square is this plate, not the picture on it. A listing's icon is usually a mark on
+   a transparent ground - Canva's is a circle - so an icon left to draw its own shape reads
+   as whatever shape its developer chose. A lighter plate under it, inset far enough to be
+   seen at every edge, is what makes every row open on the same square. */
+.plugin-row-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border: 1px solid var(--openbot-glass-border);
+  border-radius: var(--openbot-radius-md);
+  background: var(--openbot-glass-surface);
+  padding: 5px;
+  color: var(--openbot-accent-text);
+}
+
+.plugin-row-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* A listing's own icon is a picture of any proportion - one of them is a favicon - and it
+   is drawn here as the rounded square an icon is everywhere else in the product. `cover`
+   is what makes the square: a wide picture is trimmed to it rather than left floating in
+   a frame at the height its proportion allows. */
+.plugin-icon {
+  display: block;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+/* The icon is the tile. An icon a developer publishes is drawn as a square already - both
+   in the catalog are - so it takes the whole plate rather than sitting inset in one, and a
+   picture that is not square is trimmed to it. */
+.plugin-row-icon .plugin-icon {
+  width: 100%;
+  height: 100%;
+}
+
+/* The plate is for the glyph. A row that draws a real icon drops the inset and the hairline
+   with it, which would otherwise read as a frame around a picture that has its own edge. */
+.plugin-row-icon:has(.plugin-icon) {
+  border-color: transparent;
+  background: none;
+  padding: 0;
+}
+
+/* On the chip the icon sits on a line of type, so it takes the height of one. */
+.plugin-prompt-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.plugin-row-text {
+  min-width: 0;
+}
+
+.plugin-row-title {
+  margin: 0;
+  color: var(--openbot-text-primary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.plugin-row-copy {
+  margin: 2px 0 0;
+  color: var(--openbot-text-dim);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.plugin-facts {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+.plugin-fact {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 16px;
+  padding: 11px 0;
+  border-top: 1px solid var(--openbot-glass-surface);
+  font-size: 14px;
+}
+
+.plugin-fact dt {
+  color: var(--openbot-text-dim);
+}
+
+.plugin-fact dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--openbot-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.plugin-fact-link {
+  color: var(--openbot-text-secondary);
+  text-decoration: none;
+  transition: color var(--openbot-duration-normal) ease;
+}
+
+@media (max-width: 900px) {
+  .plugin-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .plugin-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .plugin-fact {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plugin-card,
+  .plugin-dialog-dismiss {
+    cursor: pointer;
+  }
+
+  /* An explicit scale rather than `none`, for the reason the article titles give:
+     the resting element and the moving layer otherwise rasterise on different
+     pixels, and the mark looks like it jumps as the growth ends. */
+  .plugin-card-logo,
+  .plugin-card-icon {
+    transform: scale(1);
+    transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+    will-change: transform;
+  }
+
+  .plugin-tag-button:hover:not([aria-pressed="true"]) {
+    border-color: var(--openbot-text-dim);
+    background: var(--openbot-bg-control-hover);
+    color: var(--openbot-text-primary);
+  }
+
+  .plugin-tag-button[aria-pressed="true"]:hover {
+    background: var(--openbot-text-primary);
+  }
+
+  .plugin-card:hover .plugin-card-logo,
+  .plugin-card:hover .plugin-card-icon {
+    transform: scale(1.06);
+  }
+
+  .plugin-card:hover .plugin-card-title,
+  .plugin-dialog-dismiss:hover,
+  .plugin-fact-link:hover {
+    color: var(--openbot-text-primary);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plugin-grid-section[data-revealed] .plugin-card {
+    opacity: 1;
+    animation: none;
+  }
+
+  .plugin-card,
+  .plugin-card-title,
+  .plugin-card-art,
+  .plugin-fact-link {
+    transition: none;
+  }
+
+  .plugin-card-logo,
+  .plugin-card-icon,
+  .plugin-tag-button {
+    transition: none;
+    transform: none;
+  }
+
+  .plugin-dialog {
+    animation: none;
+  }
+}

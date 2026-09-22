@@ -1,0 +1,204 @@
+import type { AgentStore } from "../agent-store";
+import { mergeProviderHistory, snapshotFromThread } from "../conversation-snapshots";
+import type { MailboxStore } from "../mailbox-store";
+import { decodeThreadResponse } from "../protocol";
+import type { ConversationRuntime } from "./conversation-runtime";
+import { conversationContentSignature } from "./delivery-content";
+import { markIncompleteImageGeneration } from "./image-generation";
+import type { MailboxSync } from "./mailbox-sync";
+import type { ProviderRuntime } from "./provider-runtime";
+import type { ThreadLifecycle } from "./thread-lifecycle";
+
+export interface BootRecoveryHooks {
+  executionThreads?(): Array<{ id: string; threadId: string }>;
+  deliveryThreadId?(deliveryId: string): string | null;
+  emitError(code: string, error: unknown, agentId?: string): void;
+}
+
+export interface BootRecoveryOptions {
+  store: AgentStore;
+  mailbox: MailboxStore;
+  providers: ProviderRuntime;
+  conversation: ConversationRuntime;
+  mailboxSync: MailboxSync;
+  threads: ThreadLifecycle;
+  hooks: BootRecoveryHooks;
+}
+
+/**
+ * Restart recovery: settles what the previous process left mid-flight.
+ *
+ * - `recoverPersistedTurns` runs at startup before providers start: clears
+ *   stale active turns, expires unanswered prompts, marks streaming messages
+ *   interrupted.
+ * - `reconcileUnresolvedDeliveries` runs once providers are ready: asks the
+ *   provider what really happened to each unsettled delivery instead of
+ *   assuming, and conservatively keeps `interrupted` on any doubt — never
+ *   repeats uncertain side effects.
+ * - `backfillProviderHistory` merges provider-side turns that happened while
+ *   Dani-Dex was down into the persisted conversation.
+ *
+ * Reads the store/mailbox/provider and writes the database plus in-memory
+ * snapshots; delivery to the renderer goes through `mailboxSync` and
+ * `emitError`. Never imports the facade.
+ */
+export class BootRecovery {
+  readonly #store: AgentStore;
+  readonly #mailbox: MailboxStore;
+  readonly #providers: ProviderRuntime;
+  readonly #conversation: ConversationRuntime;
+  readonly #mailboxSync: MailboxSync;
+  readonly #threads: ThreadLifecycle;
+  readonly #hooks: BootRecoveryHooks;
+
+  constructor(options: BootRecoveryOptions) {
+    this.#store = options.store;
+    this.#mailbox = options.mailbox;
+    this.#providers = options.providers;
+    this.#conversation = options.conversation;
+    this.#mailboxSync = options.mailboxSync;
+    this.#threads = options.threads;
+    this.#hooks = options.hooks;
+  }
+
+  private threads() {
+    const agents = this.#store.list();
+    return [
+      ...agents,
+      ...(this.#hooks.executionThreads?.() ?? []).flatMap((context) => {
+        const agent = agents.find((item) => item.id === context.id);
+        if (!agent) return [];
+        this.#conversation.registerExecutionThread(agent.id, context.threadId);
+        return [{ ...agent, threadId: context.threadId }];
+      }),
+    ];
+  }
+
+  async reconcileUnresolvedDeliveries(): Promise<void> {
+    for (const context of this.#mailbox.unresolvedDeliveries()) {
+      const { delivery } = context;
+      let terminal: "completed" | "failed" | "interrupted" = "interrupted";
+      let reason = "Dani-Dex restarted before this delivery reached a confirmed terminal state.";
+      try {
+        const agent = this.#store.list().find((candidate) => candidate.id === delivery.recipientAgentId);
+        const client = agent ? this.#providers.clientForAgent(agent) : null;
+        const threadId = this.#hooks.deliveryThreadId?.(delivery.id) ?? agent?.threadId;
+        const session = agent && threadId ? this.#store.database.activeProviderSession(threadId, agent.provider) : null;
+        if (agent && session && client) {
+          const response = await client.request(
+            "thread/read",
+            { ...(await this.#threads.threadParams(agent, client, session.externalSessionId)), includeTurns: true },
+            decodeThreadResponse,
+          );
+          const turn = response.thread.turns?.find(
+            (candidate) =>
+              candidate.id === delivery.turnId ||
+              candidate.items?.some((item) => item.type === "userMessage" && item.clientId === delivery.id),
+          );
+          if (turn && !delivery.turnId) {
+            await this.#mailbox.markRunning(delivery.id, turn.id);
+          }
+          if (turn?.status === "completed") {
+            terminal = "completed";
+            reason = "Recovered completed delivery after restart.";
+          } else if (turn?.status === "failed") {
+            terminal = "failed";
+            reason = "The recovered Codex turn failed.";
+          }
+        }
+      } catch {
+        // Conservatively keep the interrupted result; never repeat uncertain side effects.
+      }
+      await this.#mailbox.markTerminal(delivery.id, terminal, terminal === "completed" ? null : reason);
+      const agent = this.#store.list().find((candidate) => candidate.id === delivery.recipientAgentId);
+      const threadId = this.#hooks.deliveryThreadId?.(delivery.id) ?? agent?.threadId;
+      if (agent && threadId) {
+        const snapshot = this.#store.database.readConversation(agent.id, threadId);
+        snapshot.activeTurnId = null;
+        for (const message of snapshot.messages) {
+          if (message.turnId === delivery.turnId && message.status === "streaming") {
+            message.status = terminal;
+            markIncompleteImageGeneration(message, terminal);
+          }
+        }
+        this.#store.database.persistConversation(snapshot, "turn.reconciled-after-restart", {
+          turnId: delivery.turnId,
+          status: terminal,
+        });
+      }
+      this.#mailboxSync.emitQueue(delivery.recipientAgentId);
+    }
+  }
+
+  recoverPersistedTurns(): void {
+    for (const agent of this.threads()) {
+      if (!agent.threadId) continue;
+      const snapshot = this.#store.database.readConversation(agent.id, agent.threadId);
+      const turnId = snapshot.activeTurnId;
+      let changed = false;
+      if (turnId) {
+        snapshot.activeTurnId = null;
+        changed = true;
+      }
+      for (const message of snapshot.messages) {
+        if (message.questionPrompt?.resolution === null) {
+          message.questionPrompt.resolution = { status: "expired" };
+          changed = true;
+        }
+        if (turnId && message.turnId === turnId && message.status === "streaming") {
+          message.status = "interrupted";
+          markIncompleteImageGeneration(message, "interrupted");
+          changed = true;
+        }
+      }
+      if (!changed) continue;
+      const persisted = this.#store.database.persistConversation(snapshot, "turn.interrupted-by-restart", { turnId });
+      this.#conversation.setSnapshot(agent.id, persisted);
+    }
+  }
+
+  async backfillProviderHistory(): Promise<void> {
+    for (const agent of this.threads()) {
+      if (!agent.threadId) continue;
+      // Inactive sessions still own history after an upgrade or provider switch.
+      const active = this.#store.database.activeProviderSession(agent.threadId, agent.provider);
+      for (const session of this.#store.database.listProviderSessions(agent.threadId)) {
+        const client = this.#providers.clientFor(session.provider);
+        if (!client) continue;
+        try {
+          // The full parameters for the session the agent still runs on, and the id alone for the
+          // retired ones: a client that loads a session to read it must not reopen a session that
+          // was deliberately replaced.
+          const params =
+            session.externalSessionId === active?.externalSessionId
+              ? await this.#threads.threadParams(agent, client, session.externalSessionId)
+              : { threadId: session.externalSessionId };
+          const response = await client.request("thread/read", { ...params, includeTurns: true }, decodeThreadResponse);
+          const imported = snapshotFromThread(agent.id, response.thread, (deliveryId) =>
+            this.#mailbox.getDelivery(deliveryId),
+          );
+          imported.threadId = agent.threadId;
+          const current = this.#store.database.readConversation(agent.id, agent.threadId);
+          const merged = mergeProviderHistory(current, imported, session.provider);
+          this.#mailboxSync.syncMailboxMessages(merged);
+          if (conversationContentSignature(merged) === conversationContentSignature(current)) {
+            const live = this.#conversation.ensureSnapshot(agent.id, agent.threadId);
+            if (!live?.activeTurnId) this.#conversation.setSnapshot(agent.id, current);
+            continue;
+          }
+          const persisted = this.#store.database.persistConversation(merged, "provider-history.backfilled", {
+            provider: session.provider,
+            externalSessionId: session.externalSessionId,
+          });
+          const live = this.#conversation.ensureSnapshot(agent.id, agent.threadId);
+          if (!live?.activeTurnId) {
+            this.#conversation.setSnapshot(agent.id, persisted);
+            if (this.#conversation.isExecutionThread(agent.threadId)) this.#conversation.publishConversation(persisted);
+          }
+        } catch (error) {
+          this.#hooks.emitError("provider_history_backfill_pending", error, agent.id);
+        }
+      }
+    }
+  }
+}

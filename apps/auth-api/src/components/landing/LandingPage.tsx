@@ -1,0 +1,133 @@
+import { AppLogo, PlatformLogo, ProviderLogo } from "@openbot/brand";
+import { Link } from "@tanstack/solid-router";
+import { onSettled } from "solid-js";
+import { landingAnalytics } from "../../lib/analytics";
+import { EXTERNAL_LINK_REL, OPENBOT_LINKS } from "../../lib/landing-links";
+import { Button } from "../ui/button";
+import { DownloadSection } from "./DownloadSection";
+import { HeroDownloadSelector } from "./HeroDownloadSelector";
+import { LandingAppPreview } from "./LandingAppPreview";
+import { LandingFooter } from "./LandingFooter";
+import { LandingGlow } from "./LandingGlow";
+import { PricingSection } from "./PricingSection";
+
+export function LandingPage() {
+  let hero: HTMLDivElement | undefined;
+
+  onSettled(() => {
+    const cleanup = landingAnalytics.start(document, window.location.hostname);
+    if (hero) {
+      hero.classList.remove("is-hiding");
+      hero.classList.remove("is-shown");
+      void hero.offsetHeight;
+      hero.classList.add("is-shown");
+    }
+    return cleanup;
+  });
+
+  return (
+    <div class="landing-page">
+      <header class="landing-header" data-enter="header">
+        <a class="landing-brand" href="/" aria-label="Dani-Dex home">
+          <AppLogo variant="production" class="landing-brand-logo" />
+          <span>Dani-Dex</span>
+        </a>
+
+        <nav class="landing-navigation" aria-label="Primary navigation">
+          <Link class="landing-header-link" to="/news">
+            News
+          </Link>
+          <Link class="landing-header-link" to="/guides">
+            Guides
+          </Link>
+          <Link class="landing-header-link" to="/plugins">
+            Plugins
+          </Link>
+          <Button
+            href={OPENBOT_LINKS.contact}
+            target="_blank"
+            rel={EXTERNAL_LINK_REL}
+            variant="secondary"
+            size="sm"
+            icon="contact"
+            class="landing-header-contact"
+          >
+            Contact
+          </Button>
+          <Button href={OPENBOT_LINKS.download} variant="primary" size="sm" icon="download">
+            Download
+          </Button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="landing-hero" aria-labelledby="landing-title">
+          <div class="landing-hero-grid" data-slot="hero-grid" aria-hidden="true" />
+          <div ref={hero} class="landing-hero-copy t-stagger">
+            <p class="landing-availability t-stagger-line t-stagger-line--1">
+              <span class="landing-availability-new">NEW</span>
+              <span class="landing-availability-copy">Available on</span>
+              <span class="landing-availability-platform">
+                <PlatformLogo platform="macos" />
+                macOS
+              </span>
+              <span class="landing-availability-separator" aria-hidden="true">
+                ·
+              </span>
+              <span class="landing-availability-platform">
+                <PlatformLogo platform="windows" />
+                Windows
+              </span>
+            </p>
+
+            <h1 id="landing-title" class="landing-title t-stagger-line t-stagger-line--2">
+              <span>Meet</span>
+              <AppLogo variant="production" animation="blink" interactive class="landing-hero-logo" />
+              <span>Dani-Dex</span>
+            </h1>
+
+            <p class="landing-description t-stagger-line t-stagger-line--3">
+              Persistent AI teammates for real work. Run{" "}
+              <span class="landing-provider">
+                <ProviderLogo provider="codex" class="landing-provider-logo" />
+                Codex
+              </span>
+              ,{" "}
+              <span class="landing-provider">
+                <ProviderLogo provider="claude" class="landing-provider-logo" />
+                Claude
+              </span>{" "}
+              and{" "}
+              <span class="landing-provider">
+                <ProviderLogo provider="grok" class="landing-provider-logo" />
+                Grok
+              </span>{" "}
+              side by side, each with its own workspace, queue, and context.
+            </p>
+
+            <div class="landing-actions t-stagger-line t-stagger-line--4">
+              <HeroDownloadSelector />
+              <Button
+                href={OPENBOT_LINKS.contact}
+                target="_blank"
+                rel={EXTERNAL_LINK_REL}
+                variant="secondary"
+                size="lg"
+                icon="contact"
+                class="landing-button-glass"
+              >
+                Contact
+              </Button>
+            </div>
+          </div>
+
+          <LandingAppPreview />
+        </section>
+        <PricingSection />
+        <DownloadSection />
+      </main>
+      <LandingFooter />
+      <LandingGlow />
+    </div>
+  );
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": [
+    "electron.vite.config.ts",
+    "vitest.config.ts",
+    "scripts/**/*.ts",
+    "src/backend/**/*.ts",
+    "src/main/**/*.ts",
+    "src/preload/**/*.ts",
+    "packages/contracts/src/**/*.ts",
+    "packages/logging/src/**/*.ts"
+  ]
+}

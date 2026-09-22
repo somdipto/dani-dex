@@ -1,0 +1,180 @@
+import type {
+  AccountUsage,
+  AgentEvent,
+  AgentModelOption,
+  AgentProviderId,
+  AgentStatus,
+  AttachmentSummary,
+  AvatarImageInput,
+  BrowserControlState,
+  BrowserTab,
+  CustomProviderSummary,
+  DraftAttachment,
+  FilePreview,
+  ProviderRuntimeStatus,
+  QueueSnapshot,
+  ServerSummary,
+  TeamPresenceSnapshot,
+  UpdateAgentInput,
+} from "@openbot/contracts/ipc";
+import type { AgentMessage, AgentProfile } from "../../data";
+
+/**
+ * What a conversation is, as data. These live apart from `ConversationView.tsx`
+ * because fifteen of this feature's modules - the scope, the controller, the
+ * draft logic and every store - name one of these types and none of them render
+ * anything. Reading them from the entry component made `conversation-scope.ts`
+ * and `ConversationView.tsx` import each other: a cycle `noImportCycles` lets
+ * through only because one direction is `import type`.
+ */
+
+export interface ConversationTarget {
+  agentId: string;
+  serverId: string;
+}
+
+export interface ConversationProps {
+  agentStatus: AgentStatus;
+  /**
+   * The plan windows for the active agent's provider and model, when the account dock has them.
+   * The composer reads them for one thing only: a window at 100% means the next send is refused by
+   * the provider, so the notice has to say so before the user writes the message.
+   */
+  accountUsage?: AccountUsage | null;
+  providerRuntimeStatuses?: Partial<Record<AgentProviderId, ProviderRuntimeStatus>>;
+  /**
+   * The endpoints the user named, so both model pickers can tell a custom model from an OpenCode
+   * one. It travels as a prop rather than through `useCustomProviders()`, because
+   * `AgentSettingsPanel.test.tsx` mounts that component bare and a context `use()` throws without
+   * its provider - the same path `providerRuntimeStatuses` above already takes.
+   */
+  customProviders?: readonly CustomProviderSummary[];
+  onDownloadProvider?: (provider: AgentProviderId) => void | Promise<void>;
+  onCancelProviderDownload?: (provider: AgentProviderId) => void | Promise<void>;
+  onConnectProvider?: (provider: AgentProviderId) => void | Promise<void>;
+  /**
+   * Take the user to the provider's sign-in. Separate from `onConnectProvider`, which is the
+   * managed-download path and is withheld when downloads are unavailable: a signed-out provider
+   * needs a way in whether or not Dani-Dex manages its CLI.
+   */
+  onSignInProvider?: (provider: AgentProviderId) => void | Promise<void>;
+  agent: AgentProfile | undefined;
+  agents: AgentProfile[];
+  availableRoutineIds?: readonly string[];
+  modelOptions: AgentModelOption[];
+  messages: AgentMessage[];
+  messageReferences?: Record<string, AgentMessage>;
+  unreadCount: number;
+  firstUnreadMessageId: string | null;
+  loaded: boolean;
+  hasOlder?: boolean;
+  discontinuous?: boolean;
+  loadingOlder?: boolean;
+  olderError?: string | null;
+  activeTurnId: string | null | undefined;
+  activityDetail?: string;
+  skillsMarketplaceOpen?: boolean;
+  /**
+   * True while a surface that can add or remove one of the host's MCP servers is open: the server
+   * settings dialog and the marketplace, where a plugin installs its app. The composer reads the
+   * list again when the last of them closes, so a server added there can be tagged without a
+   * restart.
+   */
+  mcpSettingsOpen?: boolean;
+  globalOverlayOpen: boolean;
+  settingsRequest: { agentId: string; nonce: number } | null;
+  messageFocusRequest: { agentId: string; messageId: string; nonce: number } | null;
+  queue: QueueSnapshot | undefined;
+  browserTabs: BrowserTab[];
+  activeBrowserTabId: string | null;
+  browserVisibilitySuspended: boolean;
+  /**
+   * The workspace content is covered by a panel above it, the Usage report today.
+   * The conversation stays mounted, so its document-level keyboard listeners are
+   * still registered; `inert` on the covered markup does not reach them.
+   */
+  workspaceCovered?: boolean;
+  browserControlState: BrowserControlState;
+  server: ServerSummary | undefined;
+  presence: TeamPresenceSnapshot;
+  currentUserEmail: string;
+  browserEnabled?: boolean;
+  remoteDesktopEnabled?: boolean;
+  remoteDesktopSessionActive: boolean;
+  remoteDesktopVisible: boolean;
+  prompt: Extract<AgentEvent, { type: "prompt" }> | undefined;
+  approval: Extract<AgentEvent, { type: "approval" }>["approval"] | undefined;
+  browserTakeover: Extract<AgentEvent, { type: "browser-takeover-requested" }>["request"] | undefined;
+  onSelectAgent: (agentId: string) => void;
+  onUpdateAgent: (agentId: string, updates: Omit<UpdateAgentInput, "agentId">) => Promise<void>;
+  onSetAgentAvatar: (agentId: string, image: AvatarImageInput | null) => Promise<void>;
+  onSendMessage: (
+    body: string,
+    attachmentDraftIds: string[],
+    replyToMessageId: string | null,
+    target?: ConversationTarget,
+  ) => Promise<boolean>;
+  onMarkRead: () => Promise<void>;
+  onLoadOlder?: () => void;
+  onLoadLatest?: () => Promise<void>;
+  onSearchMessages?: (query: string) => Promise<{ messageIds: string[]; total: number }>;
+  onOpenSearchMessage?: (messageId: string) => Promise<void>;
+  onTypingChange: (agentId: string, typing: boolean) => void;
+  onAnswerPrompt: (answers: Record<string, string[]>) => Promise<boolean>;
+  onPromptResolutionPresented?: (agentId: string, turnId: string, requestId: string | number) => void;
+  onRespondToApproval: (decision: "accept" | "decline") => Promise<boolean>;
+  /**
+   * Grants the agent a standing approval and accepts the request in hand. Absent where the grant
+   * cannot be given: the approval widens the agent's access, or the agent belongs to a remote
+   * server, whose own computer holds that choice.
+   */
+  onAlwaysAllowApproval?: () => Promise<boolean>;
+  /**
+   * Whether this agent acts without asking, by Turbo mode or by its own grant. Shown in the header,
+   * because standing consent the user cannot see is consent they cannot take back.
+   */
+  agentAutoApproves?: boolean;
+  /** Turbo mode covers every agent, so the per-agent switch is read-only while it is on. */
+  agentAutoApproveLocked?: boolean;
+  /** Absent for a remote agent: its own computer holds that choice. */
+  onSetAgentAutoApprove?: (autoApprove: boolean) => Promise<void>;
+  onRespondToBrowserTakeover: (decision: "complete" | "cancel") => Promise<boolean>;
+  onCancelQueuedMessage: (deliveryId: string) => void;
+  onSteerQueuedMessage: (deliveryId: string) => void;
+  onUpdateQueuedMessage: (
+    deliveryId: string,
+    text: string,
+    keepAttachmentIds: string[],
+    attachmentDraftIds: string[],
+    target?: ConversationTarget,
+  ) => Promise<boolean>;
+  onReorderQueue: (deliveryIds: string[]) => void;
+  onActivateBrowserTab: (tabId: string) => void;
+  onCloseBrowserTab: (tabId: string) => void | Promise<void>;
+  onOpenRemoteDesktop: (serverId: string, trigger: HTMLElement) => Promise<void>;
+  onStop: () => void;
+}
+
+export interface ComposerDraft {
+  text: string;
+  attachments: DraftAttachment[];
+  replyToMessageId: string | null;
+}
+
+/**
+ * What the file preview panel is showing. A shared or workspace file is named by its path, which
+ * the main process reads; an attachment is named by its record, because its bytes arrive over
+ * `previewUrl` and "open externally" goes through the attachment handler instead of a path.
+ */
+export type SidebarFilePreviewSource =
+  | { kind: "shared"; path: string }
+  | { kind: "workspace"; path: string }
+  | { kind: "attachment"; attachment: AttachmentSummary };
+
+export interface SidebarFilePreview {
+  ownerAgentId: string;
+  source: SidebarFilePreviewSource;
+  preview: FilePreview;
+}
+
+export type RightPanelMode = "none" | "browser" | "browser-expanded" | "browser-pip" | "settings" | "file-preview";

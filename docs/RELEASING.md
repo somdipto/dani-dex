@@ -1,0 +1,402 @@
+# Releasing Dani-Dex
+
+For iOS builds uploaded to TestFlight through GitHub Actions, see
+[the mobile release guide](../apps/mobile/README.md#github-actions-testflight-release).
+The mobile workflow is separate from the desktop tag release described below.
+
+Dani-Dex updates are published through GitHub Releases and installed with `electron-updater`.
+macOS requires every auto-updatable build to be signed with a Developer ID Application certificate.
+The release workflow also notarizes and staples the macOS application before publishing it. Windows
+x64 and Linux x64 releases are currently unsigned, so Windows can show an Unknown publisher or
+SmartScreen warning and the Linux AppImage carries no signature.
+All three platforms must pass before one release is published. A release also requires the pinned
+Sunshine and Moonlight Web runtime artifacts. GitHub Actions downloads those artifacts, checks SHA-256, and
+verifies their native executables as part of the final Dani-Dex package. Release packages are not built
+on a developer machine.
+
+Codex, Claude, and Grok runtimes are optional downloads. They are not part of the application package.
+Release CI downloads the pinned macOS, Windows, and Linux provider artifacts as control artifacts. It
+checks their SHA-256 values, versions, licenses, and vendor signatures without copying them into
+Dani-Dex. Linux has no code-signature contract to check, so its provider artifacts are verified by
+SHA-256 and version only.
+
+## One-time GitHub setup
+
+Create the `release` environment in `nightly-labs/openbot`, then add these environment secrets:
+
+- `CSC_LINK` — a base64-encoded Developer ID Application `.p12` file.
+- `MAC_PROVISIONING_PROFILE` — the base64-encoded Developer ID provisioning profile for
+  `app.openbot.desktop`, with the `applinks:openbot.run` entitlement.
+- `CSC_KEY_PASSWORD` — the application `.p12` export password.
+- `CSC_INSTALLER_LINK` — a base64-encoded **Developer ID Installer** `.p12` file for team `ZTRDTUL87R`.
+- `CSC_INSTALLER_KEY_PASSWORD` — the installer `.p12` export password.
+- `APPLE_ID` — the Apple Account used for notarization.
+- `APPLE_APP_SPECIFIC_PASSWORD` — a dedicated app-specific password for `notarytool`.
+- `APPLE_TEAM_ID` — the Apple Developer team ID.
+
+Do not use an Apple Development certificate. Direct distribution and native macOS updates require a
+Developer ID Application certificate. Never commit signing credentials to the repository.
+
+Windows signing credentials are not currently configured. The workflow explicitly verifies that the
+Dani-Dex executable and NSIS installer remain unsigned, while retaining package, runtime, updater,
+checksum, SBOM, and provenance checks.
+
+## Build the remote desktop runtime
+
+`native-runtime.lock.json` pins the upstream source for Sunshine `v2026.516.143833` and Moonlight Web
+`v2.10.0` by full commit and source archive SHA-256. Each entry also records the reviewable Dani-Dex
+patch applied to that source. Build on the target platform:
+
+```bash
+bun run build:remote-desktop-runtime
+bun run verify:remote-desktop-runtime
+```
+
+The command writes binaries, the static Moonlight viewer, GPL-3.0 licenses, corresponding-source
+metadata, and SHA-256 checksums under `build/remote-desktop-runtime/<platform>/<arch>`. Publish the
+exact corresponding source for both GPL components with every binary release. A release must stop if
+a binary, license, source manifest, checksum, platform signature, or notarization result is missing.
+
+Use this source build only to make or reproduce a runtime version. The
+`.github/workflows/remote-desktop-runtime.yml` workflow builds macOS ARM64 and Windows x64 when the
+recipe or a pinned input changes. It publishes an immutable GitHub prerelease named
+`remote-desktop-runtime-<input-digest>`. The prerelease contains both deterministic archives, SPDX
+SBOMs, build provenance, and `remote-desktop-runtime-manifest.json`. It is not an Dani-Dex application
+update and it must never contain `latest.yml`.
+
+PR pushes do not cancel an active runtime build. The next run reuses a successful native build
+from the same PR and platform when its native inputs and build tools are unchanged. It still runs
+verification and the macOS smoke test against the current checkout. A cache miss rebuilds the
+runtime. Pushes to `main` and manual dispatches do not use the PR build cache.
+
+After publication, the workflow opens a draft PR that adds the release tag and SHA-256 values to
+`native-runtime.lock.json`. That job runs only from `main`, because it pins against the lock it checks
+out: the input digest is derived from the recipe on disk, and a manifest built from a different recipe
+is refused.
+
+So a branch that changes the recipe pins by hand, and must, or merging it leaves `main` with an
+unpinned lock -- which is not a degraded state but a broken one, because
+`prepare-remote-desktop-runtime.ts` throws and takes every `package`, `dist:mac` and `dist:win` run
+with it. From the branch:
+
+```bash
+gh workflow run remote-desktop-runtime.yml --ref <branch>
+# once Publish and Verify published are green:
+gh release download remote-desktop-runtime-<input-digest> --pattern remote-desktop-runtime-manifest.json
+bun scripts/pin-remote-desktop-runtime.ts remote-desktop-runtime-manifest.json
+```
+
+To repeat verification after a download or CI setup failure, without replacing the published
+artifacts, run `gh workflow run remote-desktop-runtime.yml --ref <branch> -f verify_only=true`.
+This mode requires an existing release for the current input digest and runs installation, runtime
+verification, the macOS smoke test, and application packaging. It does not build or publish.
+
+Commit the rewritten `native-runtime.lock.json` to the branch and merge it with the recipe, so `main`
+never sees the two apart. The pin does not change the input digest -- it covers `recipeVersion`, both
+source entries and `targets`, not the artifacts -- so it cannot invalidate the release it just pinned.
+
+Normal CI and application release jobs then use:
+
+```bash
+bun run install:remote-desktop-runtime
+bun run verify:remote-desktop-runtime
+```
+
+The installer accepts only the exact prerelease and assets in the lock file. It rejects a changed
+manifest, a changed archive, an unsafe archive path, and a mismatched source manifest. Do not replace
+assets in an existing runtime prerelease. Increase `recipeVersion` when the build process changes.
+
+### Sunshine security backports (runtime recipe 12)
+
+The Sunshine upstream base remains `v2026.516.143833` to keep the tested macOS input backend.
+The Dani-Dex patch includes these upstream security changes and regression tests:
+
+- `1583e7c4a7e99538c7700315a1d2a2101c6d2812`: validate input packets before queueing and
+  dispatch (GHSA-26q2-58j6-qmvv and GHSA-6w33-pjh7-p77c).
+- `82bccdf69894ee03ac422cc787f1ac9654da359d`: reject short ENet control packets
+  (GHSA-c428-87f8-rrv5).
+- `ccf97e38796be6cfcbff0ef248a684d39e181eba`: bind pairing approval to an explicit,
+  expiring request ID (GHSA-36ff-frg7-492f).
+- `4d768847fcd88cc94ac745c4611715c67d7d67e1`: require the exact enabled client
+  certificate and canonicalize stored certificate identities (GHSA-6jvv-jqr7-m6m3).
+
+Backport adaptations retain the older platform APIs and test fixtures. Native CI builds and runs
+only the relevant packet, pairing, REST authorization, and certificate regression tests. The local
+Moonlight client uses a random pairing name and approves only its matching loopback request ID.
+Moonlight now builds from the same upstream commit with the existing Dani-Dex patch and a fix
+that sends the configured pairing name instead of the upstream hard-coded name.
+The published runtime uses a new recipe/input digest; no existing release assets are replaced.
+The Linux GUI capability advisory GHSA-fp6g-27w5-489j does not apply: Dani-Dex does not ship Sunshine
+on Linux.
+
+## Pin the OpenCode CLI
+
+`native-runtime.lock.json` also pins the OpenCode CLI that Dani-Dex downloads for the OpenCode
+provider, by npm platform package, asset SHA-256, extracted binary SHA-256, byte counts, and the
+MIT license file it fetches from `github.com/anomalyco/opencode`. Codex, Claude, and Grok are pinned
+in the same file by hand; OpenCode has a script, because the version, both platform packages, and
+the license have to agree:
+
+```bash
+bun run pin:opencode-runtime          # the newest published release
+bun run pin:opencode-runtime 1.18.30  # one exact version
+```
+
+The script downloads both platform tarballs, checks that `package/package.json` names the package
+and version the lock claims, hashes the extracted binary and the license, and on macOS runs the
+extracted binary with `--version` and refuses a value that is not the pinned one. That last check is
+what protects `verifyInstalledRuntime`, which compares the installed version for exact equality. The
+script prints the block for review instead of rewriting the lock, so paste it over the `opencode`
+entry and re-run it with that exact version: the command reports `already pins OpenCode <version>`
+when the committed block matches byte for byte.
+
+Run it on a version bump only. A bump also needs the Windows checks in
+[the OpenCode notes](ARCHITECTURE.md#opencode-and-acp): the `win32-x64` values come from the
+published tarball read on macOS, so a staged `opencode.exe --version` must be confirmed on Windows
+before release.
+
+## Pin the Computer Use driver
+
+`native-runtime.lock.json` pins `cua-driver`, the third-party binary that gives every provider
+Computer Use, by release tag, asset SHA-256, and one SHA-256 for each file Dani-Dex ships. Unlike the
+provider CLIs, the driver is packaged rather than downloaded on demand, so the release carries it and
+the user installs nothing.
+
+```bash
+bun run pin:cua-driver 0.28.2
+```
+
+The script downloads all three `-binary` release assets, hashes each shipped file, and refuses a
+release that renamed an asset or dropped a file. It prints the block for review instead of rewriting
+the lock, so paste it over the `cuaDriver` entry. Use the versioned `cua-driver-rs-v*` tags; the
+`nightly-cua-driver-rs-v*` tags are rebuilt daily and are not a pin.
+
+`bun run prepare:cua-driver` then writes `build/cua-driver/<platform>/<arch>` from the pin, verifying
+every digest before and after it installs, and `electron-builder.yml` copies that directory to
+`resources/cua-driver/<platform>/<arch>`. Every `package`, `package:*`, `dist:*` and `dist:release`
+run does this first. Each installer carries only its own target's driver, and the package verifiers
+check both that the driver is present and that no other platform's is. The macOS release job calls
+`electron-builder` directly rather than through `dist:mac`, so it installs the driver in its own
+`Install and verify native runtimes` step; the Windows and Linux jobs get it from `dist:win` and
+`dist:linux`.
+
+On macOS the driver arrives signed by Cua AI with the hardened runtime, a secure timestamp, and the
+Automation entitlement. `mac.signIgnore` keeps that signature: re-signing it under Dani-Dex's
+inherited entitlements would drop the entitlement and break the driver's Automation route.
+Notarization accepts a nested binary signed by another Developer ID team, and
+`verify-macos-package.ts` fails if the Cua AI authority or the hardened runtime flag is ever lost.
+
+## Pin the Bun tool runtime
+
+`native-runtime.lock.json` also pins Bun, which is not a provider CLI: it is the runtime a STDIO MCP
+server is started with on a computer that has no Node, and the staged layout puts a second name
+`bunx` beside it so that `npx -y <package>` has something to answer it. The pin has its own script
+for the same reason OpenCode does - the version, three platform packages, and the MIT license have
+to agree:
+
+```bash
+bun run pin:bun-runtime         # the newest published release
+bun run pin:bun-runtime 1.4.2   # one exact version
+```
+
+It works like the OpenCode script: it downloads all three platform tarballs, checks
+`package/package.json` against the registry metadata, hashes the extracted binary and
+`LICENSE.md`, runs `--version` on the target that matches the host, and prints the block for review
+instead of rewriting the lock. Paste it over the `bun` entry and re-run it with that exact version
+to get `already pins Bun <version>`.
+
+The x64 entries are the `baseline` builds. Bun's plain x64 build needs AVX2 and answers a spawn on
+an older machine with an illegal instruction and no message, which would reach the user as an MCP
+server that never starts.
+
+Move this pin at release preparation, with the release-upgrade-safety audit, and not on a schedule:
+a pinned runtime is Dani-Dex's supply chain, and a Bun security release only reaches users through an
+Dani-Dex release. One reviewed commit per release.
+
+## Publish a version
+
+Start from a clean, up-to-date `main` branch. For the first release, `package.json` and
+`CHANGELOG.md` are already prepared as `0.1.0`; after CI passes, create its annotated tag directly:
+
+```bash
+git tag -a v0.1.0 -m "Dani-Dex v0.1.0"
+git push origin v0.1.0
+```
+
+For later releases, add the release notes under `Unreleased`, then choose the appropriate semantic
+version bump:
+
+```bash
+bun run release:patch
+# or: bun run release:minor
+# or: bun run release:major
+```
+
+The command updates `package.json` and moves the unreleased changelog entries under the new dated
+version heading. Review and publish that preparation before creating the tag:
+
+```bash
+git add package.json CHANGELOG.md
+git commit -m "release: prepare vX.Y.Z"
+git push origin main
+bun run release:preflight
+git tag -a vX.Y.Z -m "Dani-Dex vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+Pushing the version tag runs `.github/workflows/release.yml`.
+The tag workflow starts only after `https://openbot.run/join` and the Apple association file return
+direct `200` responses with the required security headers, MIME type, app ID, and `/join` scope.
+
+The workflow:
+
+1. verifies the tag matches `package.json`;
+2. installs and verifies the pinned remote desktop runtime without CMake or Cargo;
+3. runs the complete offline repository check;
+4. builds signed and notarized ARM64 DMG and ZIP artifacts plus a separately signed/notarized Host PKG on the same GitHub macOS runner;
+5. builds an unsigned Windows x64 NSIS installer on a GitHub Windows runner;
+6. builds an unsigned Linux x64 AppImage on a GitHub Ubuntu 24.04 runner, with the launch check under
+   `xvfb-run`;
+7. verifies all three unpacked applications, update metadata, included runtimes, provider control
+   artifacts, licenses, checksums, platform signing contracts, launch behavior, and update artifact
+   size limits;
+8. generates SPDX SBOMs and GitHub build-provenance attestations for all three platforms;
+9. publishes one non-draft GitHub Release only after all three platform jobs pass.
+
+Users can verify a downloaded artifact with
+`gh attestation verify <file> --repo nightly-labs/openbot`.
+
+Installed Dani-Dex builds check for updates shortly after launch and every four minutes. New versions
+download automatically while **Automatically download updates** is on, which is the default and is
+persisted per user in `openbot-update-preference-v1.json`; with the setting off, a download starts
+only on a user action. The account popover shows the current state and lets the user download an
+available version, then restart into it. The restart action appears as
+soon as the download completes, and no platform installs without that
+explicit action, because `autoInstallOnAppQuit` stays off so shutdown preparation always runs. Every
+stage the user waits on is bounded by a timeout and recorded in `logs/update/update.log`, so a failed
+check, download, or restart reports an actionable error and can be retried in place.
+
+The Whisper executable is part of the macOS and Windows applications. Linux ships no Whisper binary
+and no remote desktop runtime, so voice prompts and remote desktop report themselves as unavailable
+there. The `ggml-medium-q5_0.bin` model is not part of an application or update artifact. Dani-Dex downloads the pinned model on first voice use, checks its size
+and SHA-256, and keeps the verified file in the user data directory for later offline use.
+
+The release workflow stops if the macOS update ZIP, the Windows NSIS installer, or the Linux AppImage
+is larger than 700 MiB, or if the DMG is larger than 750 MiB. It also stops if update metadata has a wrong size or SHA-512, if
+the Whisper model is present, or if the application contains a second native Claude runtime.
+
+If a release is bad, publish a newer patch version. Do not replace an already published version with
+different binaries.
+
+Before working this checklist, audit the changes since the last released tag with the
+`.agents/skills/release-upgrade-safety/` skill: it covers the upgrade and data-loss hazards an
+installed user cannot undo — the in-place database migration, the `userData` files nothing backs up,
+the frozen Team API adapters, and the D1 migrations that race their own deploy.
+
+## Preflight checklist
+
+Before creating the first tag or any later release:
+
+0. run the Team API compatibility matrix for every protocol that remains in the adapter registry. The matrix must cover an older client with the new host, the new client with an older host, matching versions, no shared protocol, capability omission, unknown optional events, and malformed known events. Do not reduce this matrix because a protocol is old or because many application versions separate the peers. Confirm that each supported protocol still has unchanged client and host fixtures;
+
+1. run `bun run release:preflight` and resolve every reported release-secret or repository gate;
+2. confirm the `release` environment contains all eight macOS secrets above; Windows and Linux remain
+   unsigned;
+3. confirm the production `/join` page and Apple association file pass the deployment checks in CI;
+4. run `bun install --frozen-lockfile` and `bun run check` from a clean clone;
+5. run `bun run package:verify` on macOS; Windows and Linux packaging and launch verification run on
+   the release runners;
+6. confirm that the lock file contains all six provider artifacts, their download and install sizes,
+   and that their install checks pass;
+7. smoke-test sign-in/setup, chat streaming, queues, attachments, agent messaging, browser control,
+   context compaction, and the update popover;
+8. on macOS ARM64, Windows x64, and Linux x64, update from the last public version and confirm check,
+   download, preparation, explicit restart, new version, local agents, conversations, and queues. A
+   Linux build only auto-updates when it runs from the AppImage, which the runtime reports through
+   `APPIMAGE`;
+9. test first voice use, download progress, retry after a stopped download, transcription, and cached
+   offline use;
+10. build a signed and notarized canary and test an update from the official `0.1.21` application on
+   macOS 26 with a separate `userData` directory;
+11. confirm the canary update does not crash in `CFURLConnectionSynchronous`, preserves data, starts
+    the new version, and can run three provider downloads with restricted memory;
+12. on Windows 10 and 11 x64, confirm that normal exit, restart, and sign-out do not start NSIS, while
+    `Restart and install` does start it;
+13. on Ubuntu 24.04 x64 with the AppArmor profile from `build/linux/openbot.apparmor` installed,
+    confirm the AppImage starts with the sandbox on, that `xdg-open 'openbot://join?...'` focuses the
+    running application, that a provider downloads in-app, that the server rail is drawn, and that the
+    microphone control is absent;
+14. confirm `CHANGELOG.md` describes the version and the working tree is clean;
+15. create and push the version commit and tag only after CI passes on `main`.
+
+The macOS ZIP must be smaller than 800,000,000 bytes and smaller than the official `0.1.21` ZIP.
+Do not publish when either size gate fails, the `0.1.21` canary update crashes, or Windows starts NSIS
+during shutdown or sign-out.
+
+The unsigned local macOS package is a development artifact. It does not prove Gatekeeper,
+notarization, or auto-update readiness. Those are proven only by the signed release workflow's
+`codesign`, `spctl`, and `stapler` checks.
+
+After publishing `v0.1.0`, keep one installed copy and use the first signed patch (`v0.1.1`) as the
+end-to-end updater acceptance test: check, download, restart, and confirm the version changed without
+losing local agents or queues. This cannot be proven with an unsigned development build because macOS
+updaters require both versions to share a valid Developer ID signature.
+
+## Managed-host release package
+
+The normal DMG remains the desktop application. The optional Host PKG installs managed-host
+infrastructure only. Both use the validated `v<VERSION>` tag and the exact same source commit.
+The macOS job fails if Host compilation, signing, payload verification, notarization, stapling,
+or checksum generation fails; it never publishes a release with the Host package silently omitted.
+
+Expected macOS assets:
+
+```text
+Dani-Dex-<VERSION>-arm64.dmg
+Dani-Dex-<VERSION>-arm64.zip
+Dani-Dex-Host-<VERSION>-arm64.pkg
+latest-mac.yml
+SHA256SUMS-macos.txt
+Dani-Dex-<VERSION>-macos.spdx.json
+Dani-Dex-Host-<VERSION>-macos.spdx.json
+Dani-Dex-<VERSION>-macos.sigstore.json
+```
+
+The macOS checksum file covers the DMG, ZIP, and Host PKG. The existing provenance step consumes
+that file, so all three artifacts are attested against the same tag, commit, and release run.
+The existing publish job downloads `release-macos` and publishes the PKG with the other assets.
+`latest-mac.yml` still describes only Electron application updates; a `.pkg` reference is rejected.
+
+After verifying Dani-Dex.app, the macOS job:
+
+1. runs native account tests without creating users;
+2. imports the application and installer certificates into a temporary, isolated keychain;
+3. compiles standalone ARM64 `host-manager` and `openbot-host` executables with Bun, and the native
+   account helper with Swift; no target-machine runtime or compiler is required;
+4. signs all executables with **Developer ID Application**, hardened runtime and timestamp, and
+   checks their fixed identifiers and team `ZTRDTUL87R`;
+5. creates the fixed root:wheel package payload and signs the PKG with **Developer ID Installer**;
+6. expands it and rejects extra files, symlinks, unsafe modes/owners, version mismatches, changed
+   installer scripts, unexpected destinations, or non-system dynamic runtime dependencies;
+7. submits the PKG through `notarytool`, waits for `Accepted`, staples it, then requires successful
+   `pkgutil --check-signature`, `spctl --assess --type install`, and `stapler validate`;
+8. generates checksums and the Host payload SBOM, attests provenance, and uploads the PKG.
+
+The Bun executables need only `com.apple.security.cs.allow-jit` for JavaScriptCore's ARM64 JIT.
+The native account helper has no special entitlements. Library validation, executable-page
+protection, and the hardened runtime remain enabled. CI launches the signed standalone binaries
+with a system-only PATH and exercises a hot JavaScript loop before publication. Do not copy broad
+example Bun entitlements that disable these protections. If the pinned Bun version cannot pass
+these checks, stop the release and investigate; do not weaken the flags to obtain a signature.
+
+The release keychain and imported `.p12` files are deleted at step exit. The installer identity is
+mandatory and distinct from the application identity; add both new secrets before tagging. Never
+publish an unsigned Host package. The test fixture package is temporary, unsigned, never installed,
+and never uploaded as a release asset.
+
+CI does not install the root daemon or create tenant accounts on the runner. Package expansion,
+BOM ownership/mode verification, plist/signature checks, standalone smoke checks, and mocked CLI
+checks run there. Actual signed PKG installation/upgrade, new-account login, private-home isolation,
+and two-user Aqua relaunch remain the [target-host acceptance gate](multi-tenant-hosting.md#target-host-acceptance-required-before-paying-client-use).
+No tenant-data backup is made. Infrastructure updates require administrator installation of a
+newer signed Host PKG; the daemon never replaces itself.

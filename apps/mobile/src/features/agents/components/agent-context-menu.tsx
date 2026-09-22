@@ -1,0 +1,116 @@
+import { userErrorMessage as errorMessage } from "@openbot/user-errors";
+import * as Clipboard from "expo-clipboard";
+import { Link, router } from "expo-router";
+import { useRef } from "react";
+import { Alert } from "react-native";
+import { useAgentPinTransition } from "@/features/agents/components/agent-pin-transition";
+import { useChatSectionMenu } from "@/features/agents/components/use-chat-section-menu";
+import { type MobileAgent, useMobileWorkspace } from "@/features/workspace/context/mobile-workspace-context";
+import { canToggleAgentPin } from "@/features/workspace/model/agent-pins";
+import { haptics } from "@/shared/lib/haptics";
+
+export function useAgentContextMenu(agent: MobileAgent) {
+  const {
+    deleteAgent,
+    duplicateAgent,
+    hideAgent,
+    markAgentRead,
+    markAgentUnread,
+    pinnedAgentIds,
+    pinnedChannelIds,
+    unreadAgentIds,
+  } = useMobileWorkspace();
+  const { toggleAgentPinAnimated } = useAgentPinTransition();
+  const sectionMenu = useChatSectionMenu(agent.serverId, agent.id);
+  const isPinned = pinnedAgentIds.includes(agent.id);
+  const isUnread = unreadAgentIds.includes(agent.id);
+  const actionPending = useRef(false);
+
+  async function runAgentAction(action: "delete" | "duplicate"): Promise<void> {
+    if (actionPending.current) return;
+    actionPending.current = true;
+    try {
+      if (action === "delete") await deleteAgent(agent.id);
+      else await duplicateAgent(agent.id);
+      void haptics.notification();
+    } catch (error) {
+      Alert.alert(
+        action === "delete" ? "Could not delete agent" : "Could not duplicate agent",
+        errorMessage(error, "The server could not complete this action. Please try again."),
+      );
+    } finally {
+      actionPending.current = false;
+    }
+  }
+
+  const handlePin = () => toggleAgentPinAnimated(agent.id);
+
+  const handleCopyId = () => {
+    void Clipboard.setStringAsync(agent.id).then(() => {
+      void haptics.notification();
+    });
+  };
+
+  const handleDelete = () => {
+    Alert.alert(`Delete ${agent.name}?`, "This removes the agent from this server.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => {
+          void runAgentAction("delete");
+        },
+      },
+    ]);
+  };
+
+  const handleRead = () => {
+    if (isUnread) markAgentRead(agent.id);
+    else markAgentUnread(agent.id);
+    void haptics.selection();
+  };
+  const handleHide = () => {
+    hideAgent(agent.id);
+    void haptics.impact();
+  };
+  const handleInfo = () =>
+    router.push({ pathname: "/agent-info/[agentId]", params: { agentId: agent.id, serverId: agent.serverId } });
+  return (
+    <Link.Menu>
+      <Link.MenuAction icon={isUnread ? "envelope.open" : "envelope.badge"} onPress={handleRead}>
+        {isUnread ? "Mark read" : "Mark unread"}
+      </Link.MenuAction>
+      <Link.MenuAction
+        icon={isPinned ? "pin.slash" : "pin"}
+        isOn={isPinned}
+        onPress={handlePin}
+        disabled={!canToggleAgentPin([...pinnedAgentIds, ...pinnedChannelIds], agent.id)}
+      >
+        {isPinned ? "Unpin" : "Pin"}
+      </Link.MenuAction>
+      <Link.MenuAction icon="eye.slash" onPress={handleHide}>
+        Hide
+      </Link.MenuAction>
+      {sectionMenu.menu}
+      <Link.MenuAction icon="info.circle" onPress={handleInfo}>
+        Info
+      </Link.MenuAction>
+      <Link.Menu icon="ellipsis" title="More">
+        <Link.MenuAction icon="doc.on.doc" onPress={handleCopyId}>
+          Copy ID
+        </Link.MenuAction>
+        <Link.MenuAction
+          icon="plus.square.on.square"
+          onPress={() => {
+            void runAgentAction("duplicate");
+          }}
+        >
+          Duplicate
+        </Link.MenuAction>
+        <Link.MenuAction destructive icon="trash" onPress={handleDelete}>
+          Delete
+        </Link.MenuAction>
+      </Link.Menu>
+    </Link.Menu>
+  );
+}

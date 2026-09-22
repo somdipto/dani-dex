@@ -1,0 +1,2243 @@
+import { isManagedRuntimeProvider, type ManagedProviderId } from "@openbot/contracts/agent-providers";
+import type {
+  AccountSession,
+  AccountUsage,
+  AgentEvent,
+  AgentMemory,
+  AgentModelOption,
+  AgentProviderId,
+  AgentStatus,
+  AgentSubmission,
+  AgentSummary,
+  AnalyticsPreference,
+  AppInfo,
+  AppLanguagePreference,
+  ApprovalAutomationPreference,
+  AppSetupState,
+  AttachmentImportEvent,
+  BrowserControlState,
+  BrowserLiveViewEvent,
+  BrowserOpenInput,
+  BrowserPictureInPictureEvent,
+  BrowserPreview,
+  BrowserTab,
+  CentralAuthState,
+  CentralAuthUser,
+  ComputerUseState,
+  ConfigureHostInput,
+  ConversationMessage,
+  ConversationSnapshot,
+  CreateTeamInviteInput,
+  CustomProviderSummary,
+  DirectConversationSnapshot,
+  DirectMessage,
+  DirectMessageRealtimeEvent,
+  DirectThreadSummary,
+  DirectTypingRealtimeEvent,
+  DynamicIslandPreference,
+  DynamicIslandPresentation,
+  FilePreview,
+  HostedSiteSummary,
+  HostStatus,
+  InstalledSkill,
+  InviteSummary,
+  JoinServerInput,
+  MacPermissionId,
+  MarketplaceSkillDetail,
+  OpenAttachmentInput,
+  OpenBotDesktopApi,
+  OpenSharedFileInput,
+  OpenWorkspaceFileInput,
+  ProviderRuntimeSnapshot,
+  ProviderRuntimeStatus,
+  QueueDelivery,
+  QueueSnapshot,
+  RemoteDesktopSession,
+  ReorderQueueInput,
+  RespondToPromptInput,
+  Routine,
+  RoutineRun,
+  RoutineSchedule,
+  SendDirectMessageInput,
+  SendMessageInput,
+  ServerSummary,
+  SetAgentAvatarInput,
+  SetMessageReactionInput,
+  SetTeamTypingInput,
+  SharedTable,
+  SidebarLayoutSnapshot,
+  SkillSubmission,
+  SteerQueuedMessageInput,
+  TeamInviteSummary,
+  TeamMemberSummary,
+  TeamPresenceSnapshot,
+  TeamSessionSummary,
+  UpdateAgentInput,
+  UpdateQueuedMessageInput,
+  UpdateStatus,
+  UpdateTeamMemberInput,
+} from "@openbot/contracts/ipc";
+import {
+  composedCustomModelId,
+  createMcpServerId,
+  DEFAULT_APPROVAL_AUTOMATION_PREFERENCE,
+  DEFAULT_DYNAMIC_ISLAND_PREFERENCE,
+  normalizeMcpConfig,
+  SIDEBAR_PEOPLE_SECTION_ID,
+  SIDEBAR_UNASSIGNED_SECTION_ID,
+} from "@openbot/contracts/ipc";
+import browserTakeoverPreviewUrl from "../../stories/assets/browser-takeover-preview.svg";
+import { filePreviewForPath } from "../../stories/file-previews";
+import {
+  STORY_AGENT_STATUS,
+  STORY_AGENT_SUBMISSIONS,
+  STORY_AGENT_SUMMARIES,
+  STORY_APP_INFO,
+  STORY_BROWSER_CONTROL,
+  STORY_BROWSER_TABS,
+  STORY_DIRECT_SNAPSHOTS,
+  STORY_DIRECT_THREADS,
+  STORY_HOST_STATUS,
+  STORY_HOSTED_SITES,
+  STORY_INSTALLED_SKILLS,
+  STORY_INVITES,
+  STORY_MARKETPLACE_AGENT_DETAILS,
+  STORY_MARKETPLACE_AGENTS,
+  STORY_MARKETPLACE_SKILL_DETAILS,
+  STORY_MARKETPLACE_SKILLS,
+  STORY_MCP_SERVERS,
+  STORY_MODELS,
+  STORY_PRESENCE,
+  STORY_REMOTE_DESKTOP_SESSION,
+  STORY_SERVERS,
+  STORY_SESSIONS,
+  STORY_SHARED_TABLES,
+  STORY_SKILL_PACKAGE_PREVIEW,
+  STORY_SKILL_SUBMISSIONS,
+  STORY_SNAPSHOTS,
+  STORY_TEAM_MEMBERS,
+  STORY_UPDATE_STATUS,
+  STORY_USAGE,
+} from "./fixtures";
+import { mockAgentAnalytics, mockHostAnalytics } from "./mock-agent-analytics";
+import { createMockChannels } from "./mock-channels";
+import { applySidebarLayoutAction } from "./mock-sidebar-layout";
+
+type Listener<T> = (value: T) => void;
+
+export interface MockOpenBotOptions {
+  providerRuntimeSnapshot?: ProviderRuntimeSnapshot;
+  providerRuntimeFailure?: boolean;
+  appInfo?: AppInfo;
+  analyticsPreference?: AnalyticsPreference;
+  languagePreference?: AppLanguagePreference;
+  authState?: CentralAuthState;
+  setupState?: AppSetupState;
+  agentStatus?: AgentStatus;
+  usage?: AccountUsage;
+  agents?: AgentSummary[];
+  models?: AgentModelOption[];
+  snapshots?: Record<string, ConversationSnapshot>;
+  browserTabs?: BrowserTab[];
+  browserControlState?: BrowserControlState;
+  browserPreview?: BrowserPreview | null;
+  browserPreviews?: Record<string, BrowserPreview | null>;
+  servers?: ServerSummary[];
+  presence?: TeamPresenceSnapshot;
+  directThreads?: DirectThreadSummary[];
+  directSnapshots?: Record<string, DirectConversationSnapshot>;
+  hostStatus?: HostStatus;
+  teamMembers?: TeamMemberSummary[];
+  invites?: TeamInviteSummary[];
+  sessions?: TeamSessionSummary[];
+  remoteDesktopSessions?: RemoteDesktopSession[];
+  updateStatus?: UpdateStatus;
+  memories?: Record<string, AgentMemory[]>;
+  tables?: SharedTable[];
+  routines?: Record<string, Routine[]>;
+  localSkills?: MarketplaceSkillDetail[];
+  installedSkills?: Record<string, InstalledSkill[]>;
+  customProviders?: CustomProviderSummary[];
+}
+
+/** Custom models compose as `<provider>/<model>`; preview builds `listModels()` from these. */
+function mockCustomProviderModels(provider: CustomProviderSummary): AgentModelOption[] {
+  return provider.models.map((model) => ({
+    provider: "opencode",
+    id: composedCustomModelId(provider.id, model.id),
+    name: `${provider.name}/${model.name}`,
+    description: `Served by ${provider.baseUrl}.`,
+    defaultReasoningEffort: "medium",
+    supportedReasoningEfforts: ["low", "medium", "high"],
+  }));
+}
+
+export interface MockOpenBotControls {
+  api: OpenBotDesktopApi;
+  emitAgentEvent: (event: AgentEvent) => void;
+  onLatestConversationOpened: (listener: (agentId: string) => void) => () => void;
+  onLatestDirectConversationOpened: (listener: (memberId: string) => void) => () => void;
+  readConversationSnapshot: (agentId: string) => ConversationSnapshot;
+  updateConversationSnapshot: (
+    agentId: string,
+    update: (snapshot: ConversationSnapshot) => void,
+  ) => ConversationSnapshot;
+  readDirectConversationSnapshot: (memberId: string) => DirectConversationSnapshot;
+  updateDirectConversationSnapshot: (
+    memberId: string,
+    update: (snapshot: DirectConversationSnapshot) => void,
+  ) => DirectConversationSnapshot;
+  emitConversationDelta: (
+    event: Omit<Extract<AgentEvent, { type: "conversation-delta" }>, "type" | "revision">,
+  ) => void;
+  setQueueSnapshot: (agentId: string, deliveries: QueueDelivery[]) => QueueSnapshot;
+  emitAuthState: (state: CentralAuthState) => void;
+  emitPresence: (snapshot: TeamPresenceSnapshot) => void;
+  emitDirectMessage: (event: DirectMessageRealtimeEvent) => void;
+  emitDirectTyping: (event: DirectTypingRealtimeEvent) => void;
+  emitInvite: (inviteUrl: string) => void;
+  emitHostStatus: (status: HostStatus) => void;
+  emitRemoteDesktopSessions: (sessions: RemoteDesktopSession[]) => void;
+  dispose: () => void;
+}
+
+/** Preview file fixtures; a path with no fixture keeps the unsupported shape. */
+function mockFilePreview(path: string, fallbackName: string): FilePreview {
+  return (
+    filePreviewForPath(path) ?? {
+      name: path.split("/").at(-1) ?? fallbackName,
+      size: 0,
+      mimeType: "application/octet-stream",
+      previewKind: "none",
+      bytes: null,
+    }
+  );
+}
+
+/** What each story server answers with when it is tested, so a story reads the same way twice. */
+const MOCK_MCP_TOOL_COUNTS: Record<string, number> = { "Local SQLite": 12, Linear: 1, Figma: 6 };
+
+function clone<T>(value: T): T {
+  return structuredClone(value);
+}
+
+export function createMockOpenBot(options: MockOpenBotOptions = {}): MockOpenBotControls {
+  const appInfo = clone(options.appInfo ?? STORY_APP_INFO);
+  const defaultAuthState: CentralAuthState = {
+    status: "signed_in",
+    user: {
+      id: "user-1",
+      email: "person@example.com",
+      name: "Norbert",
+      avatarUrl: null,
+    },
+  };
+  let authState = clone<CentralAuthState>(options.authState ?? defaultAuthState);
+  let setupState = clone<AppSetupState>(
+    options.setupState ?? { completed: true, preferredProvider: "codex", preferredModel: null },
+  );
+  const grantedComputerUsePermissions = new Set<MacPermissionId>();
+  const computerUseState = (): ComputerUseState => {
+    const permissions = (["screen-recording", "accessibility"] as const).map((id) => ({
+      id,
+      granted: grantedComputerUsePermissions.has(id),
+    }));
+    return {
+      status: permissions.every(({ granted }) => granted) ? "ready" : "permissions-required",
+      permissions,
+      message: null,
+    };
+  };
+  let analyticsPreference = clone<AnalyticsPreference>(options.analyticsPreference ?? { enabled: true });
+  let approvalAutomation = clone<ApprovalAutomationPreference>(DEFAULT_APPROVAL_AUTOMATION_PREFERENCE);
+  let languagePreference = clone<AppLanguagePreference>(options.languagePreference ?? { language: "system" });
+  const languageListeners = new Set<(preference: AppLanguagePreference) => void>();
+  let dynamicIslandPreference: DynamicIslandPreference = { ...DEFAULT_DYNAMIC_ISLAND_PREFERENCE };
+  let dynamicIslandPresentation: DynamicIslandPresentation = { serverId: "local", mode: "idle" };
+  const agentStatus = clone(options.agentStatus ?? STORY_AGENT_STATUS);
+  let agents = clone(options.agents ?? STORY_AGENT_SUMMARIES);
+  let mcpServers = clone(STORY_MCP_SERVERS);
+  let sidebarLayout: SidebarLayoutSnapshot = {
+    revision: 0,
+    sections: [],
+    order: [SIDEBAR_PEOPLE_SECTION_ID, SIDEBAR_UNASSIGNED_SECTION_ID],
+    agentAssignments: {},
+    agentOrder: [],
+  };
+  const models = clone(options.models ?? STORY_MODELS);
+  const snapshots = clone(options.snapshots ?? STORY_SNAPSHOTS);
+  let browserTabs = clone(options.browserTabs ?? STORY_BROWSER_TABS);
+  let activeBrowserTabId = browserTabs.at(-1)?.id ?? null;
+  const browserControlState = clone(options.browserControlState ?? STORY_BROWSER_CONTROL);
+  const browserPreview =
+    options.browserPreview === undefined
+      ? { dataUrl: browserTakeoverPreviewUrl, width: 960, height: 600 }
+      : options.browserPreview;
+  let servers = clone(options.servers ?? STORY_SERVERS);
+  let presence = clone(options.presence ?? STORY_PRESENCE);
+  let directThreads = clone(options.directThreads ?? STORY_DIRECT_THREADS);
+  const directSnapshots = clone(options.directSnapshots ?? STORY_DIRECT_SNAPSHOTS);
+  let hostStatus = clone(options.hostStatus ?? STORY_HOST_STATUS);
+  let teamMembers = clone(options.teamMembers ?? STORY_TEAM_MEMBERS);
+  let invites = clone(options.invites ?? STORY_INVITES);
+  let sessions = clone(options.sessions ?? STORY_SESSIONS);
+  let accountSessions: AccountSession[] = [
+    {
+      sessionId: "22222222-2222-4222-8222-222222222222",
+      name: "This desktop",
+      kind: "desktop",
+      current: true,
+      connectedAt: Date.now() - 86_400_000,
+      lastActiveAt: Date.now(),
+    },
+    {
+      sessionId: "33333333-3333-4333-8333-333333333333",
+      name: "Desktop",
+      kind: "desktop",
+      current: false,
+      connectedAt: Date.now() - 172_800_000,
+      lastActiveAt: Date.now() - 3_600_000,
+    },
+    {
+      sessionId: "11111111-1111-4111-8111-111111111111",
+      name: "Norbert’s iPhone",
+      kind: "mobile",
+      current: false,
+      connectedAt: Date.now() - 86_400_000,
+      lastActiveAt: Date.now() - 60_000,
+    },
+  ];
+  let remoteDesktopSessions = clone(options.remoteDesktopSessions ?? [STORY_REMOTE_DESKTOP_SESSION]);
+  let updateStatus = clone(options.updateStatus ?? STORY_UPDATE_STATUS);
+  const usage = clone(options.usage ?? STORY_USAGE);
+  let agentCounter = agents.length;
+  const marketplaceSkills = clone(STORY_MARKETPLACE_SKILLS);
+  const localSkills = clone(
+    options.localSkills ?? [
+      {
+        ...STORY_MARKETPLACE_SKILL_DETAILS["skill-release-notes"],
+        id: "local-skill-11111111-1111-4111-8111-111111111111",
+        name: "Weekly summary",
+        slug: "weekly-summary",
+        creatorName: "Local",
+        version: 1,
+        versionId: "1",
+      },
+    ],
+  );
+  const localRevisions = new Map(localSkills.map((skill) => [`${skill.id}:${skill.version}`, skill]));
+  let skillSubmissions = clone(STORY_SKILL_SUBMISSIONS);
+  const installedSkills = new Map(Object.entries(clone(options.installedSkills ?? STORY_INSTALLED_SKILLS)));
+  let hostedSites = clone(STORY_HOSTED_SITES);
+  // The same two endpoints the model-picker stories invent, so preview shows one list everywhere.
+  let customProviders = clone(
+    options.customProviders ?? [
+      {
+        id: "studio-local",
+        name: "Studio Local",
+        baseUrl: "http://127.0.0.1:11434/v1",
+        hasApiKey: false,
+        models: [
+          { id: "qwen3-coder:30b", name: "Qwen3 Coder 30B" },
+          { id: "gpt-oss:120b", name: "GPT-OSS 120B" },
+        ],
+      },
+      {
+        id: "house-router",
+        name: "House Router",
+        baseUrl: "https://models.example.com/v1",
+        hasApiKey: true,
+        models: [{ id: "glm-5-air", name: "GLM-5 Air" }],
+      },
+    ],
+  );
+  let marketplaceAgentSubmissions = clone(STORY_AGENT_SUBMISSIONS);
+  let messageCounter = 10;
+  let directMessageCounter = 10;
+
+  /** Which providers have a key saved. The preview holds the flag only, like the real boundary. */
+  const providerApiKeys = new Set<AgentProviderId>();
+
+  const runtimeSnapshot: ProviderRuntimeSnapshot = clone(
+    options.providerRuntimeSnapshot ?? {
+      revision: 0,
+      providers: {
+        codex: { phase: "not-downloaded", progress: null, message: null, version: null, availableVersion: null },
+        claude: { phase: "not-downloaded", progress: null, message: null, version: null, availableVersion: null },
+        grok: { phase: "not-downloaded", progress: null, message: null, version: null, availableVersion: null },
+        opencode: { phase: "not-downloaded", progress: null, message: null, version: null, availableVersion: null },
+      },
+      // No `availableVersion`: a tool runtime is downloaded once and replaced by a release, so the
+      // preview never offers an update for one.
+      toolRuntimes: { bun: { phase: "not-downloaded", progress: null, message: null, version: null } },
+    },
+  );
+  let failRuntimeDownload = options.providerRuntimeFailure ?? false;
+  const runtimeListeners = new Set<Listener<ProviderRuntimeSnapshot>>();
+  const runtimeTransfers = new Map<AgentProviderId, symbol>();
+  const setRuntimeStatus = (provider: ManagedProviderId, status: ProviderRuntimeStatus) => {
+    runtimeSnapshot.providers[provider] = status;
+    runtimeSnapshot.revision += 1;
+    for (const listener of runtimeListeners) listener(clone(runtimeSnapshot));
+  };
+  const agentListeners = new Set<Listener<AgentEvent>>();
+  const browserDisplayListeners = new Set<Listener<{ tabs: BrowserTab[]; activeTabId: string | null }>>();
+  const browserLiveViewListeners = new Set<Listener<BrowserLiveViewEvent>>();
+  const browserPictureInPictureListeners = new Set<Listener<BrowserPictureInPictureEvent>>();
+  const authListeners = new Set<Listener<CentralAuthState>>();
+  const presenceListeners = new Set<Listener<TeamPresenceSnapshot>>();
+  const directMessageListeners = new Set<Listener<DirectMessageRealtimeEvent>>();
+  const directTypingListeners = new Set<Listener<DirectTypingRealtimeEvent>>();
+  const inviteListeners = new Set<Listener<string>>();
+  const hostListeners = new Set<Listener<HostStatus>>();
+  const remoteDesktopListeners = new Set<Listener<RemoteDesktopSession[]>>();
+  const updateListeners = new Set<Listener<UpdateStatus>>();
+  const attachmentListeners = new Set<Listener<AttachmentImportEvent>>();
+  const latestConversationListeners = new Set<Listener<string>>();
+  const latestDirectConversationListeners = new Set<Listener<string>>();
+  const timers = new Set<ReturnType<typeof setTimeout>>();
+
+  const emit = <T>(listeners: Set<Listener<T>>, value: T) => {
+    for (const listener of listeners) listener(clone(value));
+  };
+  const schedule = (callback: () => void, delay = 24) => {
+    const timer = setTimeout(() => {
+      timers.delete(timer);
+      callback();
+    }, delay);
+    timers.add(timer);
+  };
+  const emptyQueue = (agentId: string): QueueSnapshot => ({ agentId, deliveries: [] });
+  const queueEdits = new Map<string, { agentId: string; delivery: QueueDelivery }>();
+  const queues = new Map<string, QueueSnapshot>(agents.map((agent) => [agent.id, emptyQueue(agent.id)]));
+  const memories = new Map<string, AgentMemory[]>(Object.entries(clone(options.memories ?? {})));
+  let tables: SharedTable[] = clone(options.tables ?? STORY_SHARED_TABLES);
+  const routines = new Map<string, Routine[]>(Object.entries(clone(options.routines ?? {})));
+  const routineRuns = new Map<string, RoutineRun[]>();
+
+  function emitAgentEvent(event: AgentEvent): void {
+    emit(agentListeners, event);
+  }
+
+  function emitAuthState(state: CentralAuthState): void {
+    authState = clone(state);
+    emit(authListeners, state);
+  }
+
+  function emitPresence(snapshot: TeamPresenceSnapshot): void {
+    presence = clone(snapshot);
+    emit(presenceListeners, snapshot);
+  }
+
+  function emitDirectMessage(event: DirectMessageRealtimeEvent): void {
+    emit(directMessageListeners, event);
+  }
+
+  function emitDirectTyping(event: DirectTypingRealtimeEvent): void {
+    emit(directTypingListeners, event);
+  }
+
+  function getDirectSnapshot(memberId: string): DirectConversationSnapshot {
+    return (
+      directSnapshots[memberId] ?? {
+        threadId: `direct-${memberId}`,
+        otherMemberId: memberId,
+        messages: [],
+        revision: 0,
+      }
+    );
+  }
+
+  function readDirectConversationSnapshot(memberId: string): DirectConversationSnapshot {
+    return clone(getDirectSnapshot(memberId));
+  }
+
+  function updateDirectConversationSnapshot(
+    memberId: string,
+    update: (snapshot: DirectConversationSnapshot) => void,
+  ): DirectConversationSnapshot {
+    const snapshot = getDirectSnapshot(memberId);
+    update(snapshot);
+    snapshot.revision += 1;
+    directSnapshots[memberId] = snapshot;
+    return readDirectConversationSnapshot(memberId);
+  }
+
+  function emitInvite(inviteUrl: string): void {
+    emit(inviteListeners, inviteUrl);
+  }
+
+  function emitHostStatus(status: HostStatus): void {
+    hostStatus = clone(status);
+    emit(hostListeners, status);
+  }
+
+  function emitRemoteDesktopSessions(sessionsValue: RemoteDesktopSession[]): void {
+    remoteDesktopSessions = clone(sessionsValue);
+    emit(remoteDesktopListeners, sessionsValue);
+  }
+
+  function getSnapshot(agentId: string): ConversationSnapshot {
+    return (
+      snapshots[agentId] ?? {
+        agentId,
+        threadId: `thread-${agentId}`,
+        activeTurnId: null,
+        revision: 0,
+        messages: [],
+      }
+    );
+  }
+
+  function updateSnapshot(agentId: string, update: (snapshot: ConversationSnapshot) => void): void {
+    const snapshot = getSnapshot(agentId);
+    update(snapshot);
+    snapshot.revision += 1;
+    snapshots[agentId] = snapshot;
+    emitAgentEvent({ type: "conversation", snapshot });
+  }
+
+  function readConversationSnapshot(agentId: string): ConversationSnapshot {
+    return clone(getSnapshot(agentId));
+  }
+
+  function updateConversationSnapshot(
+    agentId: string,
+    update: (snapshot: ConversationSnapshot) => void,
+  ): ConversationSnapshot {
+    updateSnapshot(agentId, update);
+    return readConversationSnapshot(agentId);
+  }
+
+  function emitConversationDelta(
+    event: Omit<Extract<AgentEvent, { type: "conversation-delta" }>, "type" | "revision">,
+  ): void {
+    const snapshot = getSnapshot(event.agentId);
+    snapshot.revision += 1;
+    snapshots[event.agentId] = snapshot;
+    emitAgentEvent({ ...event, type: "conversation-delta", revision: snapshot.revision });
+  }
+
+  function setQueueSnapshot(agentId: string, deliveries: QueueDelivery[]): QueueSnapshot {
+    const snapshot = { agentId, deliveries: clone(deliveries) };
+    queues.set(agentId, snapshot);
+    emitAgentEvent({ type: "queue-changed", snapshot });
+    return clone(snapshot);
+  }
+
+  function createAgentSummary(input: Partial<AgentSummary> = {}): AgentSummary {
+    agentCounter += 1;
+    const id = input.id ?? `mock-agent-${agentCounter}`;
+    return {
+      id,
+      provider: input.provider ?? "codex",
+      name: input.name ?? "New agent",
+      title: input.title ?? "Generalist agent",
+      description: input.description ?? "A new agent ready to help with focused work.",
+      notifications: input.notifications ?? true,
+      model: input.model ?? "gpt-5.6-luna",
+      reasoningEffort: input.reasoningEffort ?? "medium",
+      threadId: input.threadId ?? `thread-${id}`,
+      workspacePath: input.workspacePath ?? `/mock/Dani-Dex/Agents/${id}`,
+      preview: input.preview ?? "No messages yet",
+      updatedAt: input.updatedAt ?? null,
+      avatarSeed: input.avatarSeed ?? id,
+      avatarHue: input.avatarHue ?? null,
+      avatarUrl: input.avatarUrl ?? null,
+      ...(input.marketplaceSource ? { marketplaceSource: input.marketplaceSource } : {}),
+    };
+  }
+
+  function matchesQuery(text: string, query: string | undefined): boolean {
+    return !query || text.toLowerCase().includes(query.toLowerCase());
+  }
+
+  function readInstalledSkills(agentId: string): InstalledSkill[] {
+    return installedSkills.get(agentId) ?? [];
+  }
+
+  function createRoutineRecord(input: {
+    agentId: string;
+    name: string;
+    instruction: string;
+    active: boolean;
+    timezone: string;
+    schedule: RoutineSchedule;
+  }): Routine {
+    const now = new Date().toISOString();
+    const routineId = crypto.randomUUID();
+    return {
+      id: routineId,
+      agentId: input.agentId,
+      name: input.name.trim(),
+      instruction: input.instruction.trim(),
+      active: input.active,
+      timezone: input.timezone,
+      trigger: {
+        id: crypto.randomUUID(),
+        routineId,
+        schedule: input.schedule,
+        nextRunAt: new Date(Date.now() + 3_600_000).toISOString(),
+        createdAt: now,
+        updatedAt: now,
+      },
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+
+  const api: OpenBotDesktopApi = {
+    getAppInfo: async () => clone(appInfo),
+    getSetupState: async () => clone(setupState),
+    saveSetup: async ({ preferredProvider, preferredModel }) => {
+      setupState = { completed: true, preferredProvider, preferredModel };
+      return clone(setupState);
+    },
+    getAnalyticsPreference: async () => clone(analyticsPreference),
+    setAnalyticsPreference: async ({ enabled }) => {
+      analyticsPreference = { enabled };
+      return clone(analyticsPreference);
+    },
+    getApprovalAutomation: async () => clone(approvalAutomation),
+    setApprovalAutomation: async ({ turbo, agentId, autoApprove }) => {
+      approvalAutomation = {
+        ...approvalAutomation,
+        turbo: turbo ?? approvalAutomation.turbo,
+        autoApproveOverrides:
+          agentId !== undefined && autoApprove !== undefined
+            ? { ...approvalAutomation.autoApproveOverrides, [agentId]: autoApprove }
+            : approvalAutomation.autoApproveOverrides,
+      };
+      return clone(approvalAutomation);
+    },
+    getAppLanguagePreference: async () => clone(languagePreference),
+    setAppLanguagePreference: async ({ language }) => {
+      languagePreference = { language };
+      // The real setting is owned by the main process, which tells every window. A preview that only
+      // answered the call would show a Settings row that changes while the rest of the app does not.
+      for (const listener of languageListeners) listener(clone(languagePreference));
+      return clone(languagePreference);
+    },
+    onAppLanguagePreference: (listener) => {
+      languageListeners.add(listener);
+      return () => languageListeners.delete(listener);
+    },
+    onOpenSettings: () => () => undefined,
+    dynamicIsland: {
+      getPreference: async () => clone(dynamicIslandPreference),
+      setPreference: async (preference) => {
+        dynamicIslandPreference = { ...preference };
+        return clone(dynamicIslandPreference);
+      },
+      publishPresentation: async (presentation) => {
+        dynamicIslandPresentation = clone(presentation);
+      },
+      getPresentation: async () => clone(dynamicIslandPresentation),
+      onPreference: () => () => undefined,
+      onPresentation: () => () => undefined,
+      onGeometry: () => () => undefined,
+      performAction: async () => undefined,
+      performHaptic: async () => undefined,
+      onAction: () => () => undefined,
+      setInteractive: async () => undefined,
+    },
+    getComputerUseState: async () => computerUseState(),
+    // The preview grants the permission the pane was opened for, because the panel's whole job is
+    // to show the answer changing. A mock that always reported the same state would make every
+    // story of this panel look identical.
+    openComputerUsePermissionPane: async (permission) => {
+      grantedComputerUsePermissions.add(permission);
+      return computerUseState();
+    },
+    // The help window belongs to the desktop app. The preview has no second window to close, and
+    // the panel never waits on the answer.
+    closeComputerUsePermissionHelp: async () => undefined,
+    // No bundle to drag in a browser, so the window draws its steps and nothing else.
+    getComputerUsePermissionApp: async () => null,
+    startComputerUsePermissionAppDrag: async () => undefined,
+    revealComputerUsePermissionApp: async () => undefined,
+    // The rim is drawn over another application's window, which the preview has none of, so this
+    // subscribes to a stream that never carries anything.
+    onComputerUseHighlightPlacement: () => () => undefined,
+    openExternal: async () => undefined,
+    connectProvider: async () => clone(agentStatus),
+    updateProviderCli: async () => clone(agentStatus),
+    refreshAgentProviders: async () => clone(agentStatus),
+    // A code that never completes: the preview has no provider to finish the sign-in, so this shows
+    // the waiting screen and leaves it there.
+    startProviderCodeLogin: async () => ({
+      kind: "code",
+      userCode: "KTQ4-B62MX",
+      verificationUrl: "https://auth.openai.com/codex/device",
+      expiresAt: Date.now() + 10 * 60_000,
+    }),
+    cancelProviderCodeLogin: async () => clone(agentStatus),
+    setProviderApiKey: async ({ provider, key }) => {
+      if (!key.trim()) throw new Error("A provider key is required.");
+      providerApiKeys.add(provider);
+      return clone(agentStatus);
+    },
+    clearProviderApiKey: async (provider) => {
+      providerApiKeys.delete(provider);
+      return clone(agentStatus);
+    },
+    getProviderApiKeyState: async (provider) => ({
+      provider,
+      status: providerApiKeys.has(provider) ? "saved" : "missing",
+    }),
+    providerRuntimes: {
+      getStatus: async () => clone(runtimeSnapshot),
+      download: async (provider) => {
+        if (!isManagedRuntimeProvider(provider)) throw new Error("Dani-Dex does not manage this provider's CLI.");
+        const installed = runtimeSnapshot.providers[provider];
+        if (runtimeTransfers.has(provider) || (installed.phase === "ready" && !installed.availableVersion))
+          return clone(runtimeSnapshot);
+        const transfer = Symbol(provider);
+        runtimeTransfers.set(provider, transfer);
+        setRuntimeStatus(provider, { ...installed, phase: "downloading", progress: 0, message: null });
+        const advance = (progress: number) => {
+          if (runtimeTransfers.get(provider) !== transfer) return;
+          if (failRuntimeDownload && progress >= 50) {
+            failRuntimeDownload = false;
+            runtimeTransfers.delete(provider);
+            setRuntimeStatus(provider, {
+              ...installed,
+              phase: "download-error",
+              progress: null,
+              message: "The update was interrupted.",
+            });
+            return;
+          }
+          if (progress < 100) {
+            setRuntimeStatus(provider, { ...installed, phase: "downloading", progress, message: null });
+            schedule(() => advance(progress + 25), 300);
+            return;
+          }
+          setRuntimeStatus(provider, { ...installed, phase: "finishing", progress: null, message: null });
+          schedule(() => {
+            if (runtimeTransfers.get(provider) !== transfer) return;
+            runtimeTransfers.delete(provider);
+            setRuntimeStatus(provider, {
+              phase: "ready",
+              progress: 100,
+              message: null,
+              version: installed.availableVersion ?? installed.version ?? "preview",
+              availableVersion: null,
+            });
+          }, 300);
+        };
+        schedule(() => advance(25), 300);
+        return clone(runtimeSnapshot);
+      },
+      cancel: async (provider) => {
+        if (!isManagedRuntimeProvider(provider)) throw new Error("Dani-Dex does not manage this provider's CLI.");
+        const current = runtimeSnapshot.providers[provider];
+        if (current.phase !== "downloading") return clone(runtimeSnapshot);
+        runtimeTransfers.delete(provider);
+        setRuntimeStatus(provider, { ...current, phase: "not-downloaded", progress: null, message: null });
+        return clone(runtimeSnapshot);
+      },
+      onEvent: (listener) => {
+        runtimeListeners.add(listener);
+        return () => runtimeListeners.delete(listener);
+      },
+    },
+    openUrl: async () => undefined,
+    voice: {
+      getModelStatus: async () => ({ phase: "ready", progress: 100, message: null }),
+      prepareModel: async () => ({ phase: "ready", progress: 100, message: null }),
+      transcribe: async () => ({ text: "Mock voice transcript" }),
+      onModelStatus: () => () => undefined,
+    },
+    auth: {
+      getState: async () => clone(authState),
+      retry: async () => clone(authState),
+      requestEmailCode: async (email) => {
+        authState = {
+          status: "code_sent",
+          challengeId: "mock-challenge",
+          email,
+          expiresAt: Date.now() + 600_000,
+          resendAvailableAt: Date.now() + 60_000,
+          developmentCode: "2345-6789",
+        };
+        return clone(authState);
+      },
+      verifyEmailCode: async (_challengeId, _code) => {
+        const email = authState.status === "code_sent" ? authState.email : "person@example.com";
+        const user: CentralAuthUser = {
+          id: "user-1",
+          email,
+          name: "Norbert",
+          avatarUrl: null,
+        };
+        authState = { status: "signed_in", user };
+        return clone(authState);
+      },
+      updateName: async (name) => {
+        if (authState.status !== "signed_in") return clone(authState);
+        authState = { ...authState, user: { ...authState.user, name } };
+        emitAuthState(authState);
+        return clone(authState);
+      },
+      updateAvatar: async (image) => {
+        if (authState.status !== "signed_in") return clone(authState);
+        const avatarUrl = image
+          ? `data:${image.mimeType};base64,${btoa(Array.from(image.bytes, (byte) => String.fromCharCode(byte)).join(""))}`
+          : null;
+        authState = { ...authState, user: { ...authState.user, avatarUrl } };
+        emitAuthState(authState);
+        return clone(authState);
+      },
+      createMobileConnect: async () => ({
+        qrData:
+          "openbot://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=preview-mobile-ticket_1234567890abcdef",
+        expiresAt: Date.now() + 120_000,
+      }),
+      listMobileConnectedDevices: async () =>
+        accountSessions
+          .filter((session) => session.kind === "mobile")
+          .map((session) => ({
+            sessionId: session.sessionId,
+            name: session.name,
+            platform: "ios",
+            connectedAt: session.connectedAt,
+            lastActiveAt: session.lastActiveAt,
+          })),
+      revokeMobileConnectedDevice: async (sessionId) => {
+        accountSessions = accountSessions.filter(
+          (session) => session.kind !== "mobile" || session.sessionId !== sessionId,
+        );
+      },
+      listAccountSessions: async () => clone(accountSessions),
+      revokeAccountSession: async (sessionId) => {
+        accountSessions = accountSessions.filter((session) => session.sessionId !== sessionId);
+      },
+      logout: async () => {
+        authState = { status: "signed_out" };
+        emitAuthState(authState);
+        return clone(authState);
+      },
+      onEvent: (listener) => {
+        authListeners.add(listener);
+        return () => authListeners.delete(listener);
+      },
+    },
+    skills: {
+      localList: async () => clone(localSkills),
+      localGet: async ({ skillId, revision }) => {
+        const skill = revision
+          ? localRevisions.get(`${skillId}:${revision}`)
+          : localSkills.find((item) => item.id === skillId);
+        if (!skill) throw new Error("Local skill not found.");
+        return clone(skill);
+      },
+      localCreate: async ({ agentId, sourcePath }) => {
+        const name = sourcePath.split("/").at(-1) || "New skill";
+        const skill = {
+          ...STORY_MARKETPLACE_SKILL_DETAILS["skill-release-notes"],
+          id: `local-skill-${crypto.randomUUID()}`,
+          name,
+          slug: name,
+          creatorName: "Local",
+          version: 1,
+          versionId: "1",
+        };
+        localSkills.push(skill);
+        localRevisions.set(`${skill.id}:1`, skill);
+        await api.skills.localInstall({ agentId, skillId: skill.id, revision: 1 });
+        return clone(skill);
+      },
+      localRevise: async ({ skillId, expectedRevision }) => {
+        const index = localSkills.findIndex((item) => item.id === skillId);
+        const current = localSkills[index];
+        if (!current || current.version !== expectedRevision)
+          throw new Error("The skill changed. Read its latest revision before revising it.");
+        const skill = { ...current, version: expectedRevision + 1, versionId: String(expectedRevision + 1) };
+        localSkills[index] = skill;
+        localRevisions.set(`${skill.id}:${skill.version}`, skill);
+        return clone(skill);
+      },
+      localInstall: async ({ agentId, skillId, revision }) => {
+        const skill = await api.skills.localGet({ skillId, revision });
+        const previous = readInstalledSkills(agentId).find((item) => item.skillId === skillId);
+        if (previous?.state === "modified")
+          throw new Error("This skill has local changes. Confirm replacement to continue.");
+        const installed: InstalledSkill = {
+          skillId,
+          name: skill.name,
+          slug: skill.slug,
+          installedVersion: revision,
+          availableVersion: revision,
+          state: "installed",
+          origin: "local",
+          enabled: previous?.enabled !== false,
+          description: skill.description,
+        };
+        installedSkills.set(agentId, [
+          ...readInstalledSkills(agentId).filter((item) => item.skillId !== skillId),
+          installed,
+        ]);
+        return clone(installed);
+      },
+      list: async (query) => {
+        const matches = marketplaceSkills.filter(
+          (skill) =>
+            matchesQuery(`${skill.name} ${skill.description} ${skill.creatorName}`, query?.query) &&
+            (!query?.category || skill.category === query.category) &&
+            (query?.featured !== true || skill.featured),
+        );
+        const start = Number(query?.cursor ?? 0);
+        const end = start + (query?.limit ?? 50);
+        return clone({
+          skills: matches.slice(start, end),
+          nextCursor: end < matches.length ? String(end) : null,
+        });
+      },
+      get: async (skillId) => {
+        if (skillId.startsWith("local-skill-")) return api.skills.localGet({ skillId });
+        const detail = STORY_MARKETPLACE_SKILL_DETAILS[skillId];
+        if (!detail) throw new Error("Skill not found");
+        return clone(detail);
+      },
+      listMine: async () => clone(skillSubmissions),
+      choosePackage: async () => clone(STORY_SKILL_PACKAGE_PREVIEW),
+      submit: async (input) => {
+        const preview = STORY_SKILL_PACKAGE_PREVIEW;
+        const submission: SkillSubmission = {
+          id: `submission-${preview.slug}-${skillSubmissions.length + 1}`,
+          showCreatorAvatar: input.showCreatorAvatar ?? false,
+          skillId: input.skillId ?? `skill-${preview.slug}`,
+          slug: preview.slug,
+          name: preview.name,
+          description: preview.description,
+          category: input.category,
+          version: 1,
+          status: "pending",
+          rejectionNote: null,
+          iconUrl: null,
+          createdAt: new Date().toISOString(),
+        };
+        skillSubmissions = [submission, ...skillSubmissions];
+        return clone(submission);
+      },
+      listInstalled: async (agentId) =>
+        clone(
+          readInstalledSkills(agentId).map((skill) => {
+            const latest = localSkills.find((item) => item.id === skill.skillId);
+            return latest
+              ? {
+                  ...skill,
+                  availableVersion: latest.version,
+                  state:
+                    skill.state === "installed" && latest.version > skill.installedVersion
+                      ? "update-available"
+                      : skill.state,
+                }
+              : skill;
+          }),
+        ),
+      install: async ({ agentId, skillId }) => {
+        if (skillId.startsWith("local-skill-")) {
+          const skill = await api.skills.localGet({ skillId });
+          return api.skills.localInstall({ agentId, skillId, revision: skill.version });
+        }
+        const skill = marketplaceSkills.find((candidate) => candidate.id === skillId);
+        if (!skill) throw new Error("Skill not found");
+        const previous = readInstalledSkills(agentId).find((item) => item.skillId === skillId);
+        const installed: InstalledSkill = {
+          skillId: skill.id,
+          slug: skill.slug,
+          name: skill.name,
+          installedVersion: skill.version,
+          availableVersion: skill.version,
+          state: "installed",
+          enabled: previous?.enabled !== false,
+          origin: previous?.origin ?? "marketplace",
+          description: skill.description,
+        };
+        installedSkills.set(agentId, [
+          ...readInstalledSkills(agentId).filter((item) => item.skillId !== skillId),
+          installed,
+        ]);
+        return clone(installed);
+      },
+      uninstall: async ({ agentId, skillId }) => {
+        const skill = readInstalledSkills(agentId).find((item) => item.skillId === skillId);
+        if (skill?.origin === "managed") throw new Error("This skill is managed by Dani-Dex.");
+        installedSkills.set(
+          agentId,
+          readInstalledSkills(agentId).filter((item) => item.skillId !== skillId),
+        );
+      },
+      setEnabled: async ({ agentId, skillId, enabled }) => {
+        const current = readInstalledSkills(agentId);
+        const skill = current.find((item) => item.skillId === skillId);
+        if (!skill) throw new Error("Skill not found.");
+        if (skill.origin === "managed") throw new Error("This skill is managed by Dani-Dex.");
+        const next: InstalledSkill = { ...skill, enabled };
+        installedSkills.set(
+          agentId,
+          current.map((item) => (item.skillId === skillId ? next : item)),
+        );
+        return clone(next);
+      },
+    },
+    hostedSites: {
+      list: async () => clone(hostedSites),
+      chooseDirectory: async () => "/mock/Dani-Dex/Sites/launch-notes",
+      publish: async (input) => {
+        const hostname = `${input.title.toLowerCase().replaceAll(/[^a-z0-9]+/gu, "-")}.openbot.site`;
+        const site: HostedSiteSummary = {
+          id: `site-${hostedSites.length + 1}`,
+          hostname,
+          url: `https://${hostname}`,
+          title: input.title,
+          description: input.description,
+          framework: "vanilla",
+          status: "active",
+          fileCount: 12,
+          size: 786_432,
+          expiresAt: null,
+          updatedAt: new Date().toISOString(),
+        };
+        hostedSites = [site, ...hostedSites];
+        return clone(site);
+      },
+      replace: async (input) => {
+        const existing = hostedSites.find((site) => site.id === input.siteId);
+        if (!existing) throw new Error("Site not found");
+        const replaced: HostedSiteSummary = {
+          ...existing,
+          title: input.title,
+          description: input.description,
+          updatedAt: new Date().toISOString(),
+        };
+        hostedSites = hostedSites.map((site) => (site.id === input.siteId ? replaced : site));
+        return clone(replaced);
+      },
+      delete: async ({ siteId }) => {
+        hostedSites = hostedSites.filter((site) => site.id !== siteId);
+      },
+    },
+    customProviders: {
+      list: async () => clone(customProviders),
+      /**
+       * Keeps only `hasApiKey`, like the real store: the key is dropped on arrival, so no preview
+       * state and no story snapshot can hold one.
+       *
+       * The ready `status` event is what makes the new models appear, exactly as in the app, so
+       * preview exercises the refresh path rather than a shortcut.
+       */
+      save: async (input) => {
+        if (customProviders.some((provider) => provider.id === input.id)) {
+          throw new Error("An endpoint with this provider ID is already saved. Remove it first, or use another ID.");
+        }
+        customProviders = [
+          ...customProviders,
+          {
+            id: input.id,
+            name: input.name,
+            baseUrl: input.baseUrl,
+            hasApiKey: input.apiKey !== null,
+            models: input.models.map((model) => ({ id: model.id, name: model.name })),
+          },
+        ];
+        emitAgentEvent({ type: "status", status: clone(agentStatus) });
+        return { providers: clone(customProviders), restart: "restarted" };
+      },
+      delete: async ({ id }) => {
+        customProviders = customProviders.filter((provider) => provider.id !== id);
+        emitAgentEvent({ type: "status", status: clone(agentStatus) });
+        return { providers: clone(customProviders), restart: "restarted" };
+      },
+    },
+    marketplaceAgents: {
+      list: async (query) => {
+        const matches = STORY_MARKETPLACE_AGENTS.filter(
+          (agent) =>
+            matchesQuery(`${agent.name} ${agent.title} ${agent.description} ${agent.creatorName}`, query?.query) &&
+            (!query?.category || (agent.category ?? "other") === query.category) &&
+            (query?.featured !== true || agent.featured),
+        );
+        const start = Number(query?.cursor ?? 0);
+        const end = start + (query?.limit ?? 50);
+        return clone({
+          agents: matches.slice(start, end),
+          nextCursor: end < matches.length ? String(end) : null,
+        });
+      },
+      get: async (listingId) => {
+        const detail = STORY_MARKETPLACE_AGENT_DETAILS[listingId];
+        if (!detail) throw new Error("Agent not found");
+        return clone(detail);
+      },
+      listMine: async () => clone(marketplaceAgentSubmissions),
+      preview: async (agentId) => {
+        const agent = agents.find((candidate) => candidate.id === agentId);
+        if (!agent) throw new Error("Agent not found");
+        return clone({
+          agentId: agent.id,
+          name: agent.name,
+          title: agent.title,
+          description: agent.description,
+          avatarSeed: agent.avatarSeed,
+          avatarHue: agent.avatarHue,
+          avatarUrl: agent.avatarUrl,
+          skills: readInstalledSkills(agent.id).map((skill) => ({
+            skillId: skill.skillId,
+            versionId: `${skill.skillId}-v${skill.installedVersion}`,
+            slug: skill.slug,
+            name: skill.name,
+            version: skill.installedVersion,
+          })),
+          routines: (routines.get(agent.id) ?? []).map((routine) => ({
+            name: routine.name,
+            instruction: routine.instruction,
+            active: routine.active,
+            schedule: routine.trigger.schedule,
+          })),
+        });
+      },
+      submit: async (input) => {
+        const agent = agents.find((candidate) => candidate.id === input.agentId);
+        if (!agent) throw new Error("Agent not found");
+        const submission: AgentSubmission = {
+          id: `agent-submission-${agent.id}-${marketplaceAgentSubmissions.length + 1}`,
+          showCreatorAvatar: input.showCreatorAvatar ?? false,
+          category: input.category ?? "other",
+          listingId: input.listingId ?? `listing-${agent.id}`,
+          name: agent.name,
+          title: agent.title,
+          description: agent.description,
+          version: 1,
+          status: "pending",
+          rejectionNote: null,
+          avatarSeed: agent.avatarSeed,
+          avatarHue: agent.avatarHue,
+          avatarUrl: agent.avatarUrl,
+          skillCount: readInstalledSkills(agent.id).length,
+          routineCount: (routines.get(agent.id) ?? []).length,
+          activeRoutineCount: (routines.get(agent.id) ?? []).filter((routine) => routine.active).length,
+          createdAt: new Date().toISOString(),
+        };
+        marketplaceAgentSubmissions = [submission, ...marketplaceAgentSubmissions];
+        return clone(submission);
+      },
+      install: async ({ listingId, agentId, timezone }) => {
+        const detail = STORY_MARKETPLACE_AGENT_DETAILS[listingId];
+        if (!detail) throw new Error("Agent not found");
+        // Installing over an existing agent updates it in place, the way the real service does:
+        // a second install of the same listing has to change the agent, not add a second copy.
+        const existing = agentId ? agents.find((candidate) => candidate.id === agentId) : undefined;
+        if (agentId && !existing) throw new Error("The installed agent no longer exists.");
+        if (existing && existing.marketplaceSource?.listingId !== detail.id) {
+          throw new Error("This local agent was installed from a different marketplace agent.");
+        }
+        const previousRoutineIds = existing?.marketplaceSource?.routineIds ?? [];
+        const previousSkillIds = existing?.marketplaceSource?.skillIds ?? [];
+        const target =
+          existing ??
+          createAgentSummary({
+            name: detail.name,
+            title: detail.title,
+            description: detail.description,
+            avatarSeed: detail.avatarSeed,
+            avatarHue: detail.avatarHue,
+          });
+        const created = detail.routines.map((routine) =>
+          createRoutineRecord({
+            agentId: target.id,
+            name: routine.name,
+            instruction: routine.instruction,
+            active: routine.active,
+            timezone,
+            schedule: routine.schedule,
+          }),
+        );
+        const agent: AgentSummary = {
+          ...target,
+          name: detail.name,
+          title: detail.title,
+          description: detail.description,
+          avatarSeed: detail.avatarSeed,
+          avatarHue: detail.avatarHue,
+          marketplaceSource: {
+            listingId: detail.id,
+            versionId: detail.versionId,
+            version: detail.version,
+            skillIds: detail.skills.map((skill) => skill.skillId),
+            routineIds: created.map((routine) => routine.id),
+          },
+        };
+        agents = existing
+          ? agents.map((candidate) => (candidate.id === agent.id ? agent : candidate))
+          : [...agents, agent];
+        if (!existing) queues.set(agent.id, emptyQueue(agent.id));
+        // Reinstalling drops only the skills this listing installed and has since dropped. A
+        // skill the user installed themselves is not the marketplace's to remove.
+        const listingSkillIds = new Set(detail.skills.map((skill) => skill.skillId));
+        const kept = readInstalledSkills(agent.id).filter(
+          (skill) => !listingSkillIds.has(skill.skillId) && !previousSkillIds.includes(skill.skillId),
+        );
+        installedSkills.set(agent.id, [
+          ...detail.skills.map((skill) => ({
+            skillId: skill.skillId,
+            slug: skill.slug,
+            name: skill.name,
+            installedVersion: skill.version,
+            availableVersion: skill.version,
+            state: "installed" as const,
+          })),
+          ...kept,
+        ]);
+        routines.set(agent.id, [
+          ...created,
+          ...(routines.get(agent.id) ?? []).filter((routine) => !previousRoutineIds.includes(routine.id)),
+        ]);
+        emitAgentEvent({ type: "agents-changed", agents });
+        emitAgentEvent({ type: "routines-changed", agentId: agent.id });
+        return clone({ agent });
+      },
+    },
+    agent: {
+      getStatus: async () => clone(agentStatus),
+      getHostAnalytics: async (input) => mockHostAnalytics(input, agents),
+      getAnalytics: async (input) => {
+        const agent = agents.find((entry) => entry.id === input.agentId);
+        if (!agent) throw new Error("Agent not found.");
+        return mockAgentAnalytics(input, agent);
+      },
+      getUsage: async (agentId) => {
+        if (!agentId) return clone(usage);
+        const agent = agents.find((candidate) => candidate.id === agentId);
+        return clone({
+          limits: agent ? usage.limits.filter((limit) => limit.id === agent.provider) : [],
+        });
+      },
+      // A saved endpoint's models are composed here, not stored, so a removal drops them the way a
+      // respawned OpenCode would: it lists what its config names and nothing else.
+      listModels: async () => clone([...models, ...customProviders.flatMap(mockCustomProviderModels)]),
+      listAgents: async () => clone(agents),
+      listInstalledSkills: async (agentId) => clone(readInstalledSkills(agentId)),
+      ...createMockChannels(emitAgentEvent, (agentId) => agents.find((entry) => entry.id === agentId)?.name ?? agentId),
+      listMcpServers: async () => clone(mcpServers),
+      saveMcpServer: async ({ config }) => {
+        const normalized = normalizeMcpConfig(config);
+        const existing = mcpServers.findIndex((server) => server.id === normalized.id);
+        if (existing < 0) mcpServers = [...mcpServers, { ...normalized, id: normalized.id || createMcpServerId() }];
+        else mcpServers = mcpServers.map((server, index) => (index === existing ? normalized : server));
+        return clone(mcpServers);
+      },
+      removeMcpServer: async ({ mcpServerId }) => {
+        mcpServers = mcpServers.filter((server) => server.id !== mcpServerId);
+        return clone(mcpServers);
+      },
+      setMcpServerEnabled: async ({ mcpServerId, enabled }) => {
+        mcpServers = mcpServers.map((server) => (server.id === mcpServerId ? { ...server, enabled } : server));
+        return clone(mcpServers);
+      },
+      /**
+       * A test takes a moment, so the panel shows its connecting state before the answer lands. A
+       * command that is not on this machine fails, the way the real probe reports a missing one.
+       */
+      testMcpServer: async ({ config }) => {
+        await new Promise((resolve) => schedule(() => resolve(null), 400));
+        const command = config.command.split(" ")[0] ?? "";
+        if (config.transport === "stdio" && command.startsWith("bunx"))
+          return { toolCount: 0, error: `Command not found: ${command}` };
+        return { toolCount: MOCK_MCP_TOOL_COUNTS[config.name] ?? 4, error: null };
+      },
+      getSidebarLayout: async () => clone(sidebarLayout),
+      mutateSidebarLayout: async (action) => {
+        sidebarLayout = applySidebarLayoutAction(sidebarLayout, action);
+        emitAgentEvent({ type: "sidebar-layout-changed", layout: sidebarLayout });
+        return clone(sidebarLayout);
+      },
+      generateProfile: async (input) => ({
+        name: input.draft?.name ?? "Research partner",
+        title: input.draft?.title ?? "Research assistant",
+        description: input.prompt.slice(0, 2000),
+        avatarSeed: input.draft?.avatarSeed ?? "profile:research",
+        avatarHue: input.draft?.avatarHue ?? 215,
+        sectionId: input.draft?.sectionId ?? null,
+      }),
+      saveProfile: async (input) => {
+        const agent = input.agentId
+          ? await api.agent.updateAgent({ agentId: input.agentId, ...input.draft })
+          : await api.agent.createAgent({ ...input.draft, initialMessage: input.initialMessage ?? "Hello" });
+        const updated = await api.agent.updateAgent({ agentId: agent.id, ...input.draft });
+        await api.agent.setAvatar({ agentId: agent.id, image: null });
+        const layout = await api.agent.mutateSidebarLayout({
+          type: "assign",
+          agentId: agent.id,
+          sectionId: input.draft.sectionId,
+        });
+        return { agent: { ...updated, avatarUrl: null }, layout };
+      },
+      createAgent: async (input) => {
+        const agent = createAgentSummary({
+          name: input.name,
+          title: "",
+          description: input.description,
+          avatarSeed: input.avatarSeed,
+          avatarHue: input.avatarHue,
+          ...(input.provider === undefined ? {} : { provider: input.provider }),
+          ...(input.model === undefined ? {} : { model: input.model }),
+          ...(input.reasoningEffort === undefined ? {} : { reasoningEffort: input.reasoningEffort }),
+        });
+        agents = [...agents, agent];
+        queues.set(agent.id, emptyQueue(agent.id));
+        emitAgentEvent({ type: "agents-changed", agents });
+        try {
+          await api.agent.sendMessage({ agentId: agent.id, text: input.initialMessage, attachmentDraftIds: [] });
+          return clone(agent);
+        } catch (error) {
+          agents = agents.filter((candidate) => candidate.id !== agent.id);
+          queues.delete(agent.id);
+          delete snapshots[agent.id];
+          emitAgentEvent({ type: "agents-changed", agents });
+          throw error;
+        }
+      },
+      duplicateAgent: async (agentId) => {
+        const source = agents.find((agent) => agent.id === agentId);
+        if (!source) throw new Error("Agent not found");
+        const agent = {
+          ...createAgentSummary({
+            ...source,
+            id: undefined,
+            name: `${source.name} copy`,
+            preview: "",
+            updatedAt: null,
+            workspacePath: undefined,
+          }),
+          threadId: null,
+        };
+        agents = [...agents, agent];
+        queues.set(agent.id, emptyQueue(agent.id));
+        snapshots[agent.id] = {
+          agentId: agent.id,
+          threadId: null,
+          messages: [],
+          activeTurnId: null,
+          revision: 0,
+        };
+        memories.set(
+          agent.id,
+          (memories.get(agentId) ?? []).map((memory) => ({
+            ...memory,
+            id: crypto.randomUUID(),
+            agentId: agent.id,
+            sourceTurnId: null,
+          })),
+        );
+        routines.set(
+          agent.id,
+          (routines.get(agentId) ?? []).map((routine) => {
+            const routineId = crypto.randomUUID();
+            return {
+              ...routine,
+              id: routineId,
+              agentId: agent.id,
+              trigger: {
+                ...routine.trigger,
+                id: crypto.randomUUID(),
+                routineId,
+                nextRunAt: new Date().toISOString(),
+              },
+            };
+          }),
+        );
+        const sourceSectionId = sidebarLayout.agentAssignments[agentId] ?? null;
+        const orderWithoutAgent = sidebarLayout.agentOrder.filter((agentId) => agentId !== agent.id);
+        const sourceIndex = orderWithoutAgent.indexOf(agentId);
+        const beforeAgentId = sourceIndex < 0 ? null : (orderWithoutAgent[sourceIndex + 1] ?? null);
+        sidebarLayout = applySidebarLayoutAction(sidebarLayout, {
+          type: "move-agent",
+          agentId: agent.id,
+          sectionId: sourceSectionId,
+          beforeAgentId,
+        });
+        emitAgentEvent({ type: "agents-changed", agents });
+        emitAgentEvent({ type: "sidebar-layout-changed", layout: sidebarLayout });
+        return clone({ agent, layout: sidebarLayout });
+      },
+      updateAgent: async (input: UpdateAgentInput) => {
+        const current = agents.find((agent) => agent.id === input.agentId);
+        if (!current) throw new Error("Agent not found");
+        const { agentId: _agentId, ...updates } = input;
+        const updated = { ...current, ...updates };
+        agents = agents.map((agent) => (agent.id === updated.id ? updated : agent));
+        emitAgentEvent({ type: "agents-changed", agents });
+        return clone(updated);
+      },
+      setAvatar: async (input: SetAgentAvatarInput) => {
+        const current = agents.find((agent) => agent.id === input.agentId);
+        if (!current) throw new Error("Agent not found");
+        const updated = {
+          ...current,
+          avatarUrl: input.image ? `mock-avatar://${input.agentId}` : null,
+        };
+        agents = agents.map((agent) => (agent.id === updated.id ? updated : agent));
+        emitAgentEvent({ type: "agents-changed", agents });
+        return clone(updated);
+      },
+      deleteAgent: async (agentId) => {
+        agents = agents.filter((agent) => agent.id !== agentId);
+        queues.delete(agentId);
+        memories.delete(agentId);
+        routines.delete(agentId);
+        emitAgentEvent({ type: "agents-changed", agents });
+      },
+      listMemories: async (agentId) => clone(memories.get(agentId) ?? []),
+      createMemory: async (input) => {
+        const now = new Date().toISOString();
+        const memory: AgentMemory = {
+          id: crypto.randomUUID(),
+          agentId: input.agentId,
+          text: input.text.trim(),
+          origin: "manual",
+          sourceTurnId: null,
+          createdAt: now,
+          updatedAt: now,
+        };
+        memories.set(input.agentId, [...(memories.get(input.agentId) ?? []), memory]);
+        emitAgentEvent({ type: "memories-changed", agentId: input.agentId });
+        return clone(memory);
+      },
+      updateMemory: async (input) => {
+        const current = memories.get(input.agentId)?.find((memory) => memory.id === input.memoryId);
+        if (!current) throw new Error("Memory not found");
+        const updated = { ...current, text: input.text.trim(), updatedAt: new Date().toISOString() };
+        memories.set(
+          input.agentId,
+          (memories.get(input.agentId) ?? []).map((memory) => (memory.id === input.memoryId ? updated : memory)),
+        );
+        emitAgentEvent({ type: "memories-changed", agentId: input.agentId });
+        return clone(updated);
+      },
+      deleteMemory: async (input) => {
+        memories.set(
+          input.agentId,
+          (memories.get(input.agentId) ?? []).filter((memory) => memory.id !== input.memoryId),
+        );
+        emitAgentEvent({ type: "memories-changed", agentId: input.agentId });
+      },
+      clearMemories: async (agentId) => {
+        memories.delete(agentId);
+        emitAgentEvent({ type: "memories-changed", agentId });
+      },
+      listTables: async () => clone(tables),
+      deleteTable: async (input) => {
+        tables = tables.filter((table) => table.name !== input.name);
+      },
+      listRoutines: async (agentId) => clone(routines.get(agentId) ?? []),
+      createRoutine: async (input) => {
+        const routine = createRoutineRecord(input);
+        routines.set(input.agentId, [routine, ...(routines.get(input.agentId) ?? [])]);
+        emitAgentEvent({ type: "routines-changed", agentId: input.agentId });
+        return clone(routine);
+      },
+      updateRoutine: async (input) => {
+        const current = routines.get(input.agentId)?.find((routine) => routine.id === input.routineId);
+        if (!current) throw new Error("Routine not found");
+        const updated: Routine = {
+          ...current,
+          ...(input.name === undefined ? {} : { name: input.name.trim() }),
+          ...(input.instruction === undefined ? {} : { instruction: input.instruction.trim() }),
+          ...(input.active === undefined ? {} : { active: input.active }),
+          ...(input.schedule === undefined
+            ? {}
+            : {
+                trigger: {
+                  id: crypto.randomUUID(),
+                  routineId: current.id,
+                  schedule: input.schedule,
+                  nextRunAt: new Date(Date.now() + 3_600_000).toISOString(),
+                  createdAt: current.createdAt,
+                  updatedAt: new Date().toISOString(),
+                },
+              }),
+          updatedAt: new Date().toISOString(),
+        };
+        routines.set(
+          input.agentId,
+          (routines.get(input.agentId) ?? []).map((routine) => (routine.id === current.id ? updated : routine)),
+        );
+        emitAgentEvent({ type: "routines-changed", agentId: input.agentId });
+        return clone(updated);
+      },
+      deleteRoutine: async (input) => {
+        routines.set(
+          input.agentId,
+          (routines.get(input.agentId) ?? []).filter((routine) => routine.id !== input.routineId),
+        );
+        emitAgentEvent({ type: "routines-changed", agentId: input.agentId });
+      },
+      testRoutine: async (input) => {
+        const routine = routines.get(input.agentId)?.find((candidate) => candidate.id === input.routineId);
+        if (!routine) throw new Error("Routine not found");
+        const now = new Date().toISOString();
+        const run: RoutineRun = {
+          id: crypto.randomUUID(),
+          routineId: routine.id,
+          agentId: input.agentId,
+          triggerId: null,
+          kind: "manual",
+          scheduledFor: now,
+          routineName: routine.name,
+          instruction: routine.instruction,
+          deliveryId: crypto.randomUUID(),
+          status: "queued",
+          error: null,
+          createdAt: now,
+          updatedAt: now,
+        };
+        routineRuns.set(routine.id, [run, ...(routineRuns.get(routine.id) ?? [])]);
+        emitAgentEvent({ type: "routines-changed", agentId: input.agentId });
+        return clone(run);
+      },
+      listRoutineRuns: async (input) => clone((routineRuns.get(input.routineId) ?? []).slice(0, input.limit)),
+      readConversation: async (agentId) => ({
+        ...clone(getSnapshot(agentId)),
+        readState: { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
+      }),
+      readConversationPage: async (input) => {
+        if (!input.anchor || input.anchor.type === "latest") {
+          emit(latestConversationListeners, input.agentId);
+        }
+        const snapshot = clone(getSnapshot(input.agentId));
+        const messages = snapshot.messages.slice(-Math.min(input.limit ?? 50, 100));
+        return {
+          ...snapshot,
+          messages,
+          references: {},
+          pageInfo: { hasOlder: snapshot.messages.length > messages.length, olderCursor: null },
+          readState: { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
+        };
+      },
+      searchConversationMessages: async (input) => {
+        const query = input.query.trim().toLocaleLowerCase();
+        const results = agents.flatMap((agent) =>
+          getSnapshot(agent.id)
+            .messages.filter((message) => message.text.toLocaleLowerCase().includes(query))
+            .map((message) => ({ agentId: agent.id, message: clone(message) })),
+        );
+        return { results: results.slice(0, input.limit ?? 100), total: results.length, nextCursor: null };
+      },
+      listConversationReads: async () => ({}),
+      markConversationRead: async (input) => ({
+        unreadCount: 0,
+        firstUnreadMessageId: null,
+        throughMessageId: input.throughMessageId,
+      }),
+      chooseAttachments: async (_input) => [],
+      onAttachmentImport: (listener) => {
+        attachmentListeners.add(listener);
+        return () => attachmentListeners.delete(listener);
+      },
+      discardDraftAttachment: async () => undefined,
+      downloadAttachments: async () => {
+        throw new Error("ZIP downloads are available in the desktop app.");
+      },
+      openAttachment: async (_input: OpenAttachmentInput) => undefined,
+      openSharedFile: async (_input: OpenSharedFileInput) => undefined,
+      openWorkspaceFile: async (_input: OpenWorkspaceFileInput) => undefined,
+      previewSharedFile: async (input: OpenSharedFileInput) => mockFilePreview(input.path, "shared-file"),
+      previewWorkspaceFile: async (input: OpenWorkspaceFileInput) => mockFilePreview(input.path, "workspace-file"),
+      sendMessage: async (input: SendMessageInput) => {
+        const messageId = `mock-message-${messageCounter++}`;
+        const deliveryId = `mock-delivery-${messageCounter++}`;
+        const turnId = `mock-turn-${messageCounter++}`;
+        const createdAt = new Date().toISOString();
+        const userMessage: ConversationMessage = {
+          id: messageId,
+          turnId,
+          author: "user",
+          source: "user",
+          text: input.text,
+          createdAt,
+          status: "completed",
+          replyToMessageId: input.replyToMessageId ?? null,
+        };
+        const delivery: QueueDelivery = {
+          id: deliveryId,
+          messageId,
+          recipientAgentId: input.agentId,
+          sender: { kind: "user" },
+          text: input.text,
+          attachments: [],
+          replyToMessageId: input.replyToMessageId ?? null,
+          status: "running",
+          position: null,
+          turnId,
+          error: null,
+          createdAt,
+        };
+        updateSnapshot(input.agentId, (snapshot) => {
+          snapshot.activeTurnId = turnId;
+          snapshot.messages = [...snapshot.messages, userMessage];
+        });
+        queues.set(input.agentId, { agentId: input.agentId, deliveries: [delivery] });
+        emitAgentEvent({
+          type: "queue-changed",
+          snapshot: queues.get(input.agentId) ?? emptyQueue(input.agentId),
+        });
+        emitAgentEvent({
+          type: "turn-started",
+          agentId: input.agentId,
+          threadId: getSnapshot(input.agentId).threadId ?? `thread-${input.agentId}`,
+          turnId,
+        });
+        emitAgentEvent({
+          type: "turn-progress",
+          agentId: input.agentId,
+          threadId: getSnapshot(input.agentId).threadId ?? `thread-${input.agentId}`,
+          turnId,
+          detail: "Reviewing your request…",
+        });
+
+        schedule(() => {
+          const assistantMessage: ConversationMessage = {
+            id: `mock-reply-${messageCounter++}`,
+            turnId,
+            author: "assistant",
+            source: "assistant",
+            text: `Mock reply from ${agents.find((agent) => agent.id === input.agentId)?.name ?? "agent"}: I received “${input.text}” and added it to the working context.`,
+            createdAt: new Date().toISOString(),
+            status: "completed",
+          };
+          updateSnapshot(input.agentId, (snapshot) => {
+            snapshot.activeTurnId = null;
+            snapshot.messages = [...snapshot.messages, assistantMessage];
+          });
+          queues.set(input.agentId, {
+            agentId: input.agentId,
+            deliveries: [{ ...delivery, status: "completed" }],
+          });
+          emitAgentEvent({
+            type: "queue-changed",
+            snapshot: queues.get(input.agentId) ?? emptyQueue(input.agentId),
+          });
+          emitAgentEvent({
+            type: "turn-completed",
+            agentId: input.agentId,
+            threadId: getSnapshot(input.agentId).threadId ?? `thread-${input.agentId}`,
+            turnId,
+            status: "completed",
+          });
+        }, 80);
+
+        return {
+          messageId,
+          deliveries: [{ id: deliveryId, recipientAgentId: input.agentId, status: "running", position: null }],
+        };
+      },
+      setMessageReaction: async (input: SetMessageReactionInput) => {
+        updateSnapshot(input.agentId, (snapshot) => {
+          const message = snapshot.messages.find((candidate) => candidate.id === input.messageId);
+          if (message) {
+            message.reaction = input.emoji;
+            message.reactions = [
+              ...(message.reactions ?? []).filter((reaction) => reaction.actor.kind !== "user"),
+              ...(input.emoji ? [{ emoji: input.emoji, actor: { kind: "user" as const } }] : []),
+            ];
+          }
+        });
+      },
+      listQueue: async (agentId) => clone(queues.get(agentId) ?? emptyQueue(agentId)),
+      acknowledgeFailedTurn: async () => undefined,
+      cancelQueuedMessage: async (input) => {
+        const queue = queues.get(input.agentId) ?? emptyQueue(input.agentId);
+        queue.deliveries = queue.deliveries.map((delivery) =>
+          delivery.id === input.deliveryId ? { ...delivery, status: "cancelled" } : delivery,
+        );
+        queues.set(input.agentId, queue);
+        emitAgentEvent({ type: "queue-changed", snapshot: queue });
+      },
+      steerQueuedMessage: async (input: SteerQueuedMessageInput) => {
+        const queue = queues.get(input.agentId) ?? emptyQueue(input.agentId);
+        queue.deliveries = queue.deliveries.map((delivery) =>
+          delivery.id === input.deliveryId
+            ? { ...delivery, status: "running", turnId: input.expectedTurnId, position: null }
+            : delivery,
+        );
+        queues.set(input.agentId, queue);
+        emitAgentEvent({ type: "queue-changed", snapshot: queue });
+      },
+      editQueuedMessage: async (input) => {
+        const queue = queues.get(input.agentId) ?? emptyQueue(input.agentId);
+        if (input.action === "begin") {
+          const existing = queueEdits.get(input.editId);
+          const delivery =
+            existing?.delivery ??
+            queue.deliveries.find((item) => item.id === input.deliveryId && item.status === "queued");
+          if (!delivery || (existing && existing.agentId !== input.agentId))
+            throw new Error("This queued message is no longer available.");
+          queueEdits.set(input.editId, { agentId: input.agentId, delivery });
+          // The host keeps a held delivery listed and marks it, so every device keeps the row.
+          queue.deliveries = queue.deliveries.map((item) =>
+            item.id === delivery.id ? { ...item, editing: true } : item,
+          );
+          queues.set(input.agentId, queue);
+          emitAgentEvent({ type: "queue-changed", snapshot: structuredClone(queue) });
+          return structuredClone(queue);
+        }
+        const held = queueEdits.get(input.editId);
+        if (!held || held.agentId !== input.agentId || held.delivery.id !== input.deliveryId)
+          throw new Error("This edit is no longer available.");
+        if (input.action === "retain-attachments") return structuredClone(queue);
+        queueEdits.delete(input.editId);
+        const delivery =
+          input.action === "save"
+            ? {
+                ...held.delivery,
+                text: input.text,
+                attachments: held.delivery.attachments.filter((item) => input.keepAttachmentIds.includes(item.id)),
+              }
+            : held.delivery;
+        queue.deliveries = queue.deliveries.some((item) => item.id === delivery.id)
+          ? queue.deliveries.map((item) => (item.id === delivery.id ? { ...delivery, editing: false } : item))
+          : [...queue.deliveries, { ...delivery, editing: false }];
+        queues.set(input.agentId, queue);
+        emitAgentEvent({ type: "queue-changed", snapshot: structuredClone(queue) });
+        return structuredClone(queue);
+      },
+      updateQueuedMessage: async (input: UpdateQueuedMessageInput) => {
+        const queue = queues.get(input.agentId) ?? emptyQueue(input.agentId);
+        queue.deliveries = queue.deliveries.map((delivery) =>
+          delivery.id === input.deliveryId ? { ...delivery, text: input.text } : delivery,
+        );
+        queues.set(input.agentId, queue);
+        emitAgentEvent({ type: "queue-changed", snapshot: queue });
+      },
+      reorderQueue: async (input: ReorderQueueInput) => {
+        const queue = queues.get(input.agentId) ?? emptyQueue(input.agentId);
+        const byId = new Map(queue.deliveries.map((delivery) => [delivery.id, delivery]));
+        queue.deliveries = input.deliveryIds.flatMap((deliveryId, index) => {
+          const delivery = byId.get(deliveryId);
+          return delivery ? [{ ...delivery, position: index + 1 }] : [];
+        });
+        queues.set(input.agentId, queue);
+        emitAgentEvent({ type: "queue-changed", snapshot: queue });
+      },
+      interrupt: async (input) => {
+        emitAgentEvent({
+          type: "turn-completed",
+          agentId: input.agentId,
+          threadId: getSnapshot(input.agentId).threadId ?? `thread-${input.agentId}`,
+          turnId: input.turnId,
+          status: "interrupted",
+        });
+      },
+      respondToPrompt: async (_input: RespondToPromptInput) => undefined,
+      respondToApproval: async () => undefined,
+      respondToBrowserSecret: async (input) => {
+        for (const listener of agentListeners)
+          listener({ type: "browser-takeover-resolved", requestId: input.requestId, agentId: input.agentId });
+      },
+      respondToBrowserTakeover: async () => undefined,
+      onEvent: (listener) => {
+        agentListeners.add(listener);
+        return () => agentListeners.delete(listener);
+      },
+      onScopedEvent: (listener) => {
+        const scopedListener = (event: AgentEvent) => listener({ serverId: "local", event });
+        agentListeners.add(scopedListener);
+        return () => agentListeners.delete(scopedListener);
+      },
+    },
+    browser: {
+      open: async (input: BrowserOpenInput) => {
+        const tab: BrowserTab = {
+          id: `browser-tab-${browserTabs.length + 1}`,
+          title: input.url,
+          url: input.url,
+          loading: false,
+          ownerThreadId: input.ownerThreadId ?? null,
+          ownerAgentId: input.ownerAgentId ?? null,
+          // `toPublicTab` in `browser-host.ts` fills all three on every tab it reports, so a mock that
+          // left them undefined would be the only surface where a freshly opened tab has no environment.
+          // These are `defaultBrowserEnvironment()` -- a fill viewport, which the real host then reports
+          // at the view's measured size.
+          environment: {
+            viewport: { mode: "fill", width: 1200, height: 800, deviceScaleFactor: 1, preset: null },
+            colorScheme: "system",
+            reducedMotion: false,
+          },
+          recording: false,
+          diagnosticErrorCount: 0,
+        };
+        browserTabs = [...browserTabs, tab];
+        activeBrowserTabId = tab.id;
+        emit(browserDisplayListeners, { tabs: browserTabs, activeTabId: tab.id });
+        emitAgentEvent({ type: "browser-changed", tabs: browserTabs, activeTabId: tab.id });
+        return clone(tab);
+      },
+      activate: async (tabId) => {
+        activeBrowserTabId = tabId;
+        emit(browserDisplayListeners, { tabs: browserTabs, activeTabId: activeBrowserTabId });
+      },
+      navigate: async (input) => {
+        if (!("url" in input)) return;
+        browserTabs = browserTabs.map((tab) =>
+          tab.id === input.tabId ? { ...tab, url: input.url, title: input.url } : tab,
+        );
+        emit(browserDisplayListeners, { tabs: browserTabs, activeTabId: activeBrowserTabId });
+        emitAgentEvent({ type: "browser-changed", tabs: browserTabs, activeTabId: activeBrowserTabId });
+      },
+      reload: async () => undefined,
+      close: async (tabId) => {
+        const closedTab = browserTabs.find((tab) => tab.id === tabId);
+        const closedIds = new Set([tabId]);
+        for (const tab of browserTabs) {
+          if (tab.openerTabId && closedIds.has(tab.openerTabId)) closedIds.add(tab.id);
+        }
+        browserTabs = browserTabs.filter((tab) => !closedIds.has(tab.id));
+        if (activeBrowserTabId && closedIds.has(activeBrowserTabId)) {
+          activeBrowserTabId =
+            browserTabs.find((tab) => tab.id === closedTab?.openerTabId)?.id ?? browserTabs[0]?.id ?? null;
+        }
+        emit(browserDisplayListeners, { tabs: browserTabs, activeTabId: activeBrowserTabId });
+        emitAgentEvent({
+          type: "browser-changed",
+          tabs: browserTabs,
+          activeTabId: activeBrowserTabId,
+        });
+      },
+      listTabs: async () => clone(browserTabs),
+      getDisplayState: async () => ({ tabs: clone(browserTabs), activeTabId: activeBrowserTabId }),
+      getControlState: async () => clone(browserControlState),
+      capturePreview: async (tabId) => {
+        const preview =
+          options.browserPreviews?.[tabId] === undefined ? browserPreview : options.browserPreviews[tabId];
+        if (!preview) throw new Error("Browser preview is unavailable.");
+        return clone(preview);
+      },
+      setVisible: async () => undefined,
+      // The preview has no host, so it answers the one thing that is true: there is nothing live to
+      // show. The panel draws its own message for that rather than an empty rectangle.
+      startLiveView: async (tabId) => {
+        emit(browserLiveViewListeners, { type: "stopped", tabId, reason: "The preview has no host to watch." });
+      },
+      stopLiveView: async () => undefined,
+      sendLiveViewInput: async () => undefined,
+      onLiveViewEvent: (listener) => {
+        browserLiveViewListeners.add(listener);
+        return () => browserLiveViewListeners.delete(listener);
+      },
+      onDisplayState: (listener) => {
+        browserDisplayListeners.add(listener);
+        return () => browserDisplayListeners.delete(listener);
+      },
+      openPictureInPicture: async (bounds) => bounds ?? { x: 16, y: 16, width: 420, height: 300 },
+      closePictureInPicture: async () => undefined,
+      dockPictureInPicture: async () => {
+        emit(browserPictureInPictureListeners, { type: "dock" });
+      },
+      hidePictureInPicture: async () => {
+        emit(browserPictureInPictureListeners, { type: "hide" });
+      },
+      onPictureInPictureEvent: (listener) => {
+        browserPictureInPictureListeners.add(listener);
+        return () => browserPictureInPictureListeners.delete(listener);
+      },
+    },
+    update: {
+      getStatus: async () => clone(updateStatus),
+      check: async () => {
+        updateStatus = { ...updateStatus, phase: "up-to-date", availableVersion: null };
+        emit(updateListeners, updateStatus);
+        return clone(updateStatus);
+      },
+      download: async () => {
+        updateStatus = { ...updateStatus, phase: "downloading", progress: 0 };
+        emit(updateListeners, updateStatus);
+        const downloadSteps = [
+          { delay: 350, expectedPhase: "downloading", phase: "downloading", progress: 28 },
+          { delay: 700, expectedPhase: "downloading", phase: "downloading", progress: 64 },
+          { delay: 1_050, expectedPhase: "downloading", phase: "ready", progress: 100 },
+        ] as const;
+        for (const step of downloadSteps) {
+          schedule(() => {
+            if (updateStatus.phase !== step.expectedPhase) return;
+            updateStatus = { ...updateStatus, phase: step.phase, progress: step.progress };
+            emit(updateListeners, updateStatus);
+          }, step.delay);
+        }
+        return clone(updateStatus);
+      },
+      install: async () => {
+        updateStatus = { ...updateStatus, phase: "installing" };
+        emit(updateListeners, updateStatus);
+      },
+      getPreference: async () => ({ autoDownload: true }),
+      setPreference: async (input) => ({ ...input }),
+      onEvent: (listener) => {
+        updateListeners.add(listener);
+        return () => updateListeners.delete(listener);
+      },
+    },
+    maintenance: {
+      exportData: async () => ({ saved: true }),
+      exportDiagnostics: async () => ({ saved: true }),
+    },
+    servers: {
+      setMuted: async ({ serverId, muted }) => {
+        if (!servers.some((server) => server.id === serverId)) throw new Error("Remote server not found.");
+        servers = servers.map((server) => (server.id === serverId ? { ...server, notificationsMuted: muted } : server));
+        return clone(servers);
+      },
+      list: async () => clone(servers),
+      select: async (serverId) => {
+        servers = servers.map((server) => ({ ...server, active: server.id === serverId }));
+        emitAgentEvent({ type: "agents-changed", agents });
+        return clone(servers);
+      },
+      reorder: async ({ serverIds }) => {
+        const serversById = new Map(servers.map((server) => [server.id, server]));
+        servers = [
+          ...servers.filter((server) => server.kind === "local"),
+          ...serverIds.flatMap((serverId) => {
+            const server = serversById.get(serverId);
+            return server?.kind === "remote" ? [server] : [];
+          }),
+        ];
+        return clone(servers);
+      },
+      join: async (input: JoinServerInput) => {
+        const server: ServerSummary = {
+          id: `server-${servers.length + 1}`,
+          name: "Joined workspace",
+          logoUrl: null,
+          notificationsMuted: false,
+          kind: "remote",
+          state: "online",
+          apiUrl: input.inviteUrl,
+          remoteDesktopAvailable: false,
+          role: "member",
+          active: false,
+        };
+        servers = [...servers, server];
+        return clone(server);
+      },
+      previewInvite: async () => ({
+        serverId: "00000000-0000-4000-8000-000000000000",
+        serverName: "Joined workspace",
+        apiHostname: "story-host.openbot.run",
+        role: "member",
+        expiresAt: "2026-09-19T10:00:00.000Z",
+        emailBound: false,
+        permanent: false,
+      }),
+      takePendingInvite: async () => null,
+      login: async (input) => {
+        const server = servers.find((candidate) => candidate.id === input.serverId);
+        if (!server) throw new Error("Server not found");
+        return clone(server);
+      },
+      retryConnection: async (serverId) => {
+        const server = servers.find((candidate) => candidate.id === serverId);
+        if (!server) throw new Error("Server not found");
+        return clone(server);
+      },
+      remove: async (serverId) => {
+        servers = servers.filter((server) => server.id !== serverId);
+      },
+      getPresence: async () => clone(presence),
+      getPresenceFor: async () => clone(presence),
+      refreshIdentity: async (serverId) => {
+        const server = servers.find((candidate) => candidate.id === serverId);
+        if (!server) throw new Error("Server not found");
+        return clone(server);
+      },
+      listMembers: async () => clone(teamMembers),
+      updateMember: async (_serverId, input: UpdateTeamMemberInput) => {
+        const member = teamMembers.find((candidate) => candidate.id === input.memberId);
+        if (!member) throw new Error("Member not found");
+        const updated = { ...member, ...input };
+        teamMembers = teamMembers.map((candidate) => (candidate.id === updated.id ? updated : candidate));
+        return clone(updated);
+      },
+      removeMember: async (_serverId, memberId) => {
+        teamMembers = teamMembers.filter((member) => member.id !== memberId);
+      },
+      listInvites: async () => clone(invites),
+      revokeInvite: async (_serverId, inviteId) => {
+        invites = invites.filter((invite) => invite.id !== inviteId);
+      },
+      createInvite: async (_serverId, input: CreateTeamInviteInput): Promise<InviteSummary> => ({
+        id: `invite-${invites.length + 1}`,
+        inviteUrl: "https://team.example.com/invite/story-invite",
+        expiresAt: "2026-09-19T10:00:00.000Z",
+        role: input.role,
+        usedAt: null,
+        email: input.email ?? null,
+        permanent: input.permanent ?? false,
+        useCount: 0,
+      }),
+      setTyping: async (_input: SetTeamTypingInput) => undefined,
+      onPresence: (listener, serverId) => {
+        const receive = (snapshot: TeamPresenceSnapshot) => {
+          if (
+            !serverId ||
+            snapshot.serverId === serverId ||
+            (serverId === "local" && snapshot.serverId === hostStatus.serverId)
+          )
+            listener(snapshot);
+        };
+        presenceListeners.add(receive);
+        return () => presenceListeners.delete(receive);
+      },
+      listDirectThreads: async () => clone(directThreads),
+      readDirectConversation: async (memberId) =>
+        clone(
+          directSnapshots[memberId] ?? {
+            threadId: `direct-${memberId}`,
+            otherMemberId: memberId,
+            messages: [],
+            revision: 0,
+          },
+        ),
+      readDirectConversationPage: async (input) => {
+        if (!input.anchor || input.anchor.type === "latest") {
+          emit(latestDirectConversationListeners, input.memberId);
+        }
+        const snapshot = clone(
+          directSnapshots[input.memberId] ?? {
+            threadId: `direct-${input.memberId}`,
+            otherMemberId: input.memberId,
+            messages: [],
+            revision: 0,
+          },
+        );
+        const messages = snapshot.messages.slice(-Math.min(input.limit ?? 50, 100));
+        return {
+          ...snapshot,
+          messages,
+          pageInfo: { hasOlder: snapshot.messages.length > messages.length, olderCursor: null },
+        };
+      },
+      sendDirectMessage: async (input: SendDirectMessageInput) => {
+        const message: DirectMessage = {
+          id: input.clientMessageId,
+          threadId: `direct-${input.memberId}`,
+          senderMemberId: "member-self",
+          recipientMemberId: input.memberId,
+          text: input.text,
+          createdAt: new Date().toISOString(),
+          sequence: directMessageCounter++,
+        };
+        const snapshot = directSnapshots[input.memberId] ?? {
+          threadId: message.threadId,
+          otherMemberId: input.memberId,
+          messages: [],
+          revision: 0,
+        };
+        snapshot.messages = [...snapshot.messages, message];
+        snapshot.revision += 1;
+        directSnapshots[input.memberId] = snapshot;
+        return clone(message);
+      },
+      markDirectRead: async (input) => {
+        directThreads = directThreads.map((thread) =>
+          thread.otherMemberId === input.memberId ? { ...thread, unreadCount: 0 } : thread,
+        );
+        const snapshot = directSnapshots[input.memberId];
+        const readState = {
+          unreadCount: 0,
+          firstUnreadMessageId: null,
+          throughSequence: input.throughSequence,
+        };
+        if (snapshot) snapshot.readState = readState;
+        return readState;
+      },
+      setDirectTyping: async () => undefined,
+      onDirectMessage: (listener) => {
+        directMessageListeners.add(listener);
+        return () => directMessageListeners.delete(listener);
+      },
+      onDirectTyping: (listener) => {
+        directTypingListeners.add(listener);
+        return () => directTypingListeners.delete(listener);
+      },
+      onEvent: (listener) => {
+        void listener;
+        return () => undefined;
+      },
+      onInvite: (listener) => {
+        inviteListeners.add(listener);
+        return () => inviteListeners.delete(listener);
+      },
+    },
+    plugins: {
+      // The preview is never opened by a link, so there is nothing pending and nothing to push.
+      takePendingListing: async () => null,
+      onOpenListing: (listener) => {
+        void listener;
+        return () => undefined;
+      },
+    },
+    host: {
+      getStatus: async () => clone(hostStatus),
+      configure: async (input: ConfigureHostInput) => {
+        hostStatus = {
+          ...hostStatus,
+          configured: true,
+          phase: "idle",
+          serverName: input.serverName,
+        };
+        emitHostStatus(hostStatus);
+        return clone(hostStatus);
+      },
+      updateIdentity: async (input) => {
+        hostStatus = {
+          ...hostStatus,
+          ...(input.serverName === undefined ? {} : { serverName: input.serverName }),
+        };
+        emitHostStatus(hostStatus);
+        return clone(hostStatus);
+      },
+      getPresence: async () => clone(presence),
+      start: async () => {
+        hostStatus = { ...hostStatus, phase: "online", apiOnline: true, remoteDesktopReady: true };
+        emitHostStatus(hostStatus);
+        return clone(hostStatus);
+      },
+      stop: async () => {
+        hostStatus = { ...hostStatus, phase: "idle", apiOnline: false, remoteDesktopReady: false };
+        emitHostStatus(hostStatus);
+        return clone(hostStatus);
+      },
+      // The preview has no runtime to ask, so the check is what a granted permission looks like.
+      recheckScreenRecording: async () => {
+        hostStatus = { ...hostStatus, remoteDesktopScreenRecordingDenied: false };
+        emitHostStatus(hostStatus);
+        return clone(hostStatus);
+      },
+      listMembers: async () => clone(teamMembers),
+      updateMember: async (input: UpdateTeamMemberInput) => {
+        const member = teamMembers.find((candidate) => candidate.id === input.memberId);
+        if (!member) throw new Error("Member not found");
+        const updated = { ...member, ...input };
+        teamMembers = teamMembers.map((candidate) => (candidate.id === updated.id ? updated : candidate));
+        return clone(updated);
+      },
+      removeMember: async (memberId) => {
+        teamMembers = teamMembers.filter((member) => member.id !== memberId);
+      },
+      listSessions: async () => clone(sessions),
+      revokeSession: async (sessionId) => {
+        sessions = sessions.filter((session) => session.id !== sessionId);
+      },
+      listInvites: async () => clone(invites),
+      revokeInvite: async (inviteId) => {
+        invites = invites.filter((invite) => invite.id !== inviteId);
+      },
+      createInvite: async (input: CreateTeamInviteInput): Promise<InviteSummary> => ({
+        id: `invite-${invites.length + 1}`,
+        role: input.role,
+        expiresAt: "2026-09-19T10:00:00.000Z",
+        usedAt: null,
+        inviteUrl: "https://openbot.run/join?invite=mock-invite",
+        email: input.email ?? null,
+        permanent: input.permanent ?? false,
+        useCount: 0,
+      }),
+      onEvent: (listener) => {
+        hostListeners.add(listener);
+        return () => hostListeners.delete(listener);
+      },
+    },
+    remoteDesktop: {
+      checkSetup: async () => ({
+        platform: "darwin",
+        hostName: "Mac mini",
+        username: "openbot",
+        checkedAt: new Date().toISOString(),
+        screenRecording: hostStatus.remoteDesktopScreenRecordingDenied ? "blocked" : "allowed",
+        accessibility: "blocked",
+        service: "allowed",
+        displays: "allowed",
+        guiSession: "allowed",
+        restartRequired: false,
+        activeSessions: remoteDesktopSessions.length,
+        message: null,
+      }),
+      openSetup: async () => undefined,
+      test: async (input) => ({ active: input.action !== "stop", mouse: false, keyboard: false, code: "1234" }),
+      list: async () => clone(remoteDesktopSessions),
+      connect: async (input) => {
+        const session: RemoteDesktopSession = {
+          ...clone(STORY_REMOTE_DESKTOP_SESSION),
+          id: `remote-desktop-${remoteDesktopSessions.length + 1}`,
+          serverId: input.serverId,
+          createdAt: new Date().toISOString(),
+        };
+        remoteDesktopSessions = [...remoteDesktopSessions, session];
+        emitRemoteDesktopSessions(remoteDesktopSessions);
+        return { status: "connected", session: clone(session) };
+      },
+      selectDisplay: async (input) => {
+        remoteDesktopSessions = remoteDesktopSessions.map((session) =>
+          session.serverId === input.serverId ? { ...session, selectedDisplayId: input.displayId } : session,
+        );
+        emitRemoteDesktopSessions(remoteDesktopSessions);
+      },
+      disconnect: async (sessionId) => {
+        remoteDesktopSessions = remoteDesktopSessions.filter((session) => session.id !== sessionId);
+        emitRemoteDesktopSessions(remoteDesktopSessions);
+      },
+      onEvent: (listener) => {
+        remoteDesktopListeners.add(listener);
+        return () => remoteDesktopListeners.delete(listener);
+      },
+    },
+  };
+
+  return {
+    api,
+    emitAgentEvent,
+    onLatestConversationOpened: (listener) => {
+      latestConversationListeners.add(listener);
+      return () => latestConversationListeners.delete(listener);
+    },
+    onLatestDirectConversationOpened: (listener) => {
+      latestDirectConversationListeners.add(listener);
+      return () => latestDirectConversationListeners.delete(listener);
+    },
+    readConversationSnapshot,
+    updateConversationSnapshot,
+    readDirectConversationSnapshot,
+    updateDirectConversationSnapshot,
+    emitConversationDelta,
+    setQueueSnapshot,
+    emitAuthState,
+    emitPresence,
+    emitDirectMessage,
+    emitDirectTyping,
+    emitInvite,
+    emitHostStatus,
+    emitRemoteDesktopSessions,
+    dispose: () => {
+      for (const timer of timers) clearTimeout(timer);
+      timers.clear();
+      runtimeListeners.clear();
+      runtimeTransfers.clear();
+      agentListeners.clear();
+      authListeners.clear();
+      presenceListeners.clear();
+      directMessageListeners.clear();
+      directTypingListeners.clear();
+      inviteListeners.clear();
+      hostListeners.clear();
+      remoteDesktopListeners.clear();
+      updateListeners.clear();
+      attachmentListeners.clear();
+      latestConversationListeners.clear();
+      latestDirectConversationListeners.clear();
+      void appInfo;
+    },
+  };
+}

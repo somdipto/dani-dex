@@ -1,0 +1,1153 @@
+import type {
+  AccountSession,
+  AgentProviderId,
+  AgentStatus,
+  AvatarImageInput,
+  CentralAuthUser,
+  CustomProviderRestart,
+  HostedSitesDesktopApi,
+  MobileConnectedDevice,
+  SaveCustomProviderInput,
+  UpdateStatus,
+} from "@openbot/contracts/ipc";
+import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
+import { createSignal } from "solid-js";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { type DesktopAnalyticsScope, desktopAnalytics } from "../../analytics";
+import type { ProviderCodeLoginState } from "../../components/ProviderCodeLoginDialog";
+import { toast } from "../../components/ui";
+import { DEFAULT_GENERAL_SETTINGS } from "./app-settings";
+import { SettingsModal } from "./SettingsModal";
+import { isOpenSettingsShortcut } from "./settings-shortcut";
+
+const account: CentralAuthUser = {
+  id: "user-1",
+  email: "norbert@example.com",
+  name: "Norbert",
+  avatarUrl: null,
+};
+
+/**
+ * A custom endpoint runs inside OpenCode, so the AI providers section offers one only while that CLI
+ * can answer. Its own sign-in does not matter: the endpoint brings its own key.
+ */
+const openCodeReadyStatus: AgentStatus = {
+  phase: "ready",
+  cliVersion: "1.3.13",
+  auth: { kind: "chatgpt", email: "norbert@example.com" },
+  providers: [{ id: "opencode", state: "available", version: "1.3.13", message: null, cliSource: "system" }],
+  capabilities: { chat: "ready", browser: "ready", computerUse: "unavailable" },
+  message: null,
+  fullAccess: true,
+};
+
+/** ChatGPT installed and signed out: the state both sign-in buttons are offered from. */
+const codexSignedOutStatus: AgentStatus = {
+  phase: "ready",
+  cliVersion: "0.55.0",
+  auth: { kind: "signed-out" },
+  providers: [{ id: "codex", state: "sign-in-required", version: "0.55.0", message: null, cliSource: "system" }],
+  capabilities: { chat: "unavailable", browser: "unavailable", computerUse: "unavailable" },
+  message: null,
+  fullAccess: true,
+};
+
+const idleUpdateStatus: UpdateStatus = {
+  phase: "idle",
+  currentVersion: "0.2.1",
+  availableVersion: null,
+  progress: null,
+  checkedAt: null,
+  message: null,
+  errorCode: null,
+};
+
+describe("SettingsModal", () => {
+  it("disconnects another desktop from the account session list and preserves the current device", async () => {
+    const current: AccountSession = {
+      sessionId: "current",
+      name: "Current desktop",
+      kind: "desktop",
+      current: true,
+      connectedAt: 1,
+      lastActiveAt: 2,
+    };
+    const other: AccountSession = { ...current, sessionId: "other", name: "Other desktop", current: false };
+    let sessions = [current, other];
+    const revoke = vi.fn(async (sessionId: string) => {
+      sessions = sessions.filter((session) => session.sessionId !== sessionId);
+    });
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => {}}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => {}}
+        appInfo={null}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={async () => {}}
+        account={account}
+        onUpdateAccountName={async () => {}}
+        onUpdateAccountAvatar={async () => {}}
+        onListAccountSessions={async () => sessions}
+        onRevokeAccountSession={revoke}
+      />
+    ));
+    await fireEvent.click(await screen.findByRole("tab", { name: "Profile" }));
+    await fireEvent.click(await screen.findByRole("button", { name: /^Disconnect Other desktop session/ }));
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: /^Disconnect Other desktop session/ })).not.toBeInTheDocument(),
+    );
+    expect(revoke).toHaveBeenCalledWith("other");
+    expect(screen.queryByRole("button", { name: /^Disconnect Current desktop session/ })).not.toBeInTheDocument();
+    expect(sessions).toEqual([current]);
+  });
+  afterEach(() => {
+    toast.dismiss();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps every settings preference controlled across a button close, Escape, and reopen", async () => {
+    const [open, setOpen] = createSignal(true);
+    const [value, setValue] = createSignal({ ...DEFAULT_GENERAL_SETTINGS });
+    let openTrigger: HTMLButtonElement | undefined;
+
+    render(() => (
+      <>
+        <button ref={(element) => (openTrigger = element)} type="button" onClick={() => setOpen(true)}>
+          Open settings
+        </button>
+        <SettingsModal
+          open={open()}
+          onOpenChange={setOpen}
+          value={value()}
+          onValueChange={setValue}
+          appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+          updateStatus={idleUpdateStatus}
+          onUpdateAction={vi.fn(async () => undefined)}
+          account={account}
+          onUpdateAccountName={vi.fn(async () => undefined)}
+          onUpdateAccountAvatar={vi.fn(async () => undefined)}
+          restoreFocusTarget={openTrigger}
+        />
+      </>
+    ));
+
+    const launchSwitch = screen.getByRole("switch", { name: "Launch Dani-Dex at login" });
+    await fireEvent.click(launchSwitch);
+    expect(value().launchAtLogin).toBe(false);
+
+    await fireEvent.click(screen.getByRole("switch", { name: "Show status in the MacBook notch" }));
+    expect(value().macBookNotch).toBe(false);
+    for (const dependent of ["Haptic feedback", "Show idle island", "Show on additional displays"]) {
+      expect(await screen.findByRole("switch", { name: dependent })).toBeChecked();
+      expect(screen.getByRole("switch", { name: dependent })).toBeDisabled();
+    }
+
+    const select = screen.getByRole("button", { name: /^Open external links in/ });
+    await fireEvent.pointerDown(select, { pointerType: "mouse", button: 0 });
+    await fireEvent.click(screen.getByRole("option", { name: "Dani-Dex" }));
+    expect(value().externalLinkTarget).toBe("Dani-Dex");
+    await fireEvent.click(screen.getByRole("switch", { name: "Share product analytics" }));
+    expect(value().productAnalytics).toBe(false);
+
+    await fireEvent.click(screen.getByRole("button", { name: "Close settings" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "General" })).not.toBeInTheDocument());
+    await fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
+
+    expect(await screen.findByRole("switch", { name: "Launch Dani-Dex at login" })).not.toBeChecked();
+    expect(screen.getByRole("button", { name: /^Open external links in/ })).toHaveTextContent("Dani-Dex");
+    expect(screen.getByRole("switch", { name: "Share product analytics" })).not.toBeChecked();
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Updates" }));
+    const autoDownload = await screen.findByRole("switch", { name: "Automatically download updates" });
+    expect(autoDownload).toBeChecked();
+    await fireEvent.click(autoDownload);
+    expect(value().autoDownloadUpdates).toBe(false);
+
+    await fireEvent.keyDown(screen.getByRole("dialog", { name: "Updates" }), { key: "Escape" });
+    // The dialog is named after the active tab, so the wait has to target the Updates title.
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Updates" })).not.toBeInTheDocument());
+    await fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
+    await fireEvent.click(await screen.findByRole("tab", { name: "Updates" }));
+
+    expect(await screen.findByRole("switch", { name: "Automatically download updates" })).not.toBeChecked();
+  });
+
+  it("offers an update for a CLI the user installed, which has no managed download", async () => {
+    const onUpdateProvider = vi.fn(async () => undefined);
+    const agentStatus: AgentStatus = {
+      phase: "ready",
+      cliVersion: "0.146.0",
+      auth: { kind: "chatgpt", email: "norbert@example.com" },
+      providers: [
+        { id: "codex", state: "available", version: "0.146.0", message: null, cliSource: "system" },
+        { id: "claude", state: "available", version: "2.1.246", message: null, cliSource: "managed" },
+        { id: "grok", state: "not-installed", version: null, message: null },
+      ],
+      capabilities: { chat: "ready", browser: "ready", computerUse: "unavailable" },
+      message: null,
+      fullAccess: true,
+    };
+
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        agentStatus={agentStatus}
+        providerRuntimeStatuses={{
+          codex: { phase: "not-downloaded", progress: null, message: null, version: null, availableVersion: "0.153.4" },
+          claude: { phase: "ready", progress: null, message: null, version: "2.1.246", availableVersion: "2.1.263" },
+        }}
+        providerAvailableVersions={{ codex: "0.153.4", claude: "2.1.263" }}
+        onUpdateProvider={onUpdateProvider}
+      />
+    ));
+
+    await fireEvent.click(await screen.findByRole("button", { name: "Update ChatGPT to 0.153.4" }));
+    await waitFor(() => expect(onUpdateProvider).toHaveBeenCalledWith("codex"));
+  });
+
+  it("runs the updater and reflects its live status", async () => {
+    const [status, setStatus] = createSignal<UpdateStatus>(idleUpdateStatus);
+    const onUpdateAction = vi.fn(async () => {
+      setStatus({ ...idleUpdateStatus, phase: "up-to-date", checkedAt: "2026-08-26T12:00:00.000Z" });
+    });
+
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={status()}
+        onUpdateAction={onUpdateAction}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Updates" }));
+    await fireEvent.click(screen.getByRole("button", { name: "Check for updates" }));
+    await waitFor(() => expect(onUpdateAction).toHaveBeenCalledOnce());
+    expect(await screen.findByText("Dani-Dex is up to date on the Stable track.")).toBeInTheDocument();
+  });
+
+  it("reports host management instead of tenant update controls on a managed host", async () => {
+    const onUpdateAction = vi.fn(async () => undefined);
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.16.0", platform: "darwin", variant: "dev" }}
+        updateStatus={{ ...idleUpdateStatus, phase: "up-to-date", currentVersion: "0.16.0", managedByHost: true }}
+        onUpdateAction={onUpdateAction}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Updates" }));
+    expect(await screen.findByText("Managed by Host")).toBeInTheDocument();
+    expect(screen.getByText(/managed automatically by Dani-Dex Host Manager/)).toBeInTheDocument();
+    expect(screen.getByText(/Up to date/)).toBeInTheDocument();
+    // The host owns both the shared application and the download schedule, so neither the manual
+    // action nor the per-user download preference can change anything.
+    expect(screen.queryByRole("switch", { name: "Automatically download updates" })).not.toBeInTheDocument();
+    for (const name of ["Check for updates", "Download update", "Restart to update", "Managed by host"]) {
+      expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
+    }
+    expect(onUpdateAction).not.toHaveBeenCalled();
+  });
+
+  it("shows the live host update status while the host installs a new version", async () => {
+    const [status, setStatus] = createSignal<UpdateStatus>({
+      ...idleUpdateStatus,
+      phase: "downloading",
+      currentVersion: "0.16.0",
+      availableVersion: "0.17.0",
+      progress: 42,
+      managedByHost: true,
+    });
+
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.16.0", platform: "darwin", variant: "dev" }}
+        updateStatus={status()}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Updates" }));
+    expect(await screen.findByText(/Downloading Dani-Dex v0.17.0 · 42%/)).toBeInTheDocument();
+
+    setStatus((current) => ({ ...current, phase: "ready", progress: null }));
+    expect(await screen.findByText(/Waiting for the other users of this Mac to be idle/)).toBeInTheDocument();
+
+    setStatus((current) => ({ ...current, phase: "installing" }));
+    expect(await screen.findByText("Installing Dani-Dex v0.17.0…")).toBeInTheDocument();
+    expect(screen.getByText("Managed by Host")).toBeInTheDocument();
+  });
+
+  it("disables busy update actions and shows action failures", async () => {
+    const onUpdateAction = vi.fn(async () => {
+      throw new Error("Update service is offline.");
+    });
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={onUpdateAction}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Updates" }));
+    await fireEvent.click(screen.getByRole("button", { name: "Check for updates" }));
+    expect(await screen.findByText("Update service is offline.")).toBeInTheDocument();
+  });
+
+  it("resets a display-name draft and saves its trimmed value", async () => {
+    const [currentAccount, setCurrentAccount] = createSignal({ ...account });
+    const onUpdateAccountName = vi.fn(async (name: string) => {
+      setCurrentAccount((current) => ({ ...current, name }));
+    });
+
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={currentAccount()}
+        onUpdateAccountName={onUpdateAccountName}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Profile" }));
+    const input = screen.getByRole("textbox", { name: "Display name" });
+    await fireEvent.input(input, { target: { value: "Unsaved name" } });
+    await fireEvent.click(screen.getByRole("tab", { name: "Updates" }));
+    await fireEvent.click(screen.getByRole("button", { name: "Reset" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Profile" }));
+    expect(input).toHaveValue("Norbert");
+    expect(onUpdateAccountName).not.toHaveBeenCalled();
+
+    await fireEvent.input(input, { target: { value: "  No\u0308ra\u00a0\u00a0Bot  " } });
+    await fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(onUpdateAccountName).toHaveBeenCalledWith("Nöra Bot"));
+    expect(input).toHaveValue("Nöra Bot");
+  });
+
+  it("does not mark a normalized legacy display name as changed", async () => {
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={{ ...account, name: "Jose\u0301" }}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Profile" }));
+
+    expect(screen.getByRole("textbox", { name: "Display name" })).toHaveValue("Jose\u0301");
+    expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+  });
+
+  it("keeps an invalid or rejected display name in the field", async () => {
+    const onUpdateAccountName = vi
+      .fn(async () => undefined)
+      .mockRejectedValueOnce(new Error("Profile service is offline."));
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={onUpdateAccountName}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Profile" }));
+    const input = screen.getByRole("textbox", { name: "Display name" });
+    await fireEvent.input(input, { target: { value: " " } });
+    await fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(onUpdateAccountName).not.toHaveBeenCalled();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Enter a display name.");
+
+    await fireEvent.input(input, { target: { value: "No" } });
+    await fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onUpdateAccountName).not.toHaveBeenCalled();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Use at least 3 characters.");
+
+    await fireEvent.input(input, { target: { value: "Nor\u200bbert" } });
+    await fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onUpdateAccountName).not.toHaveBeenCalled();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Remove line breaks and hidden or control characters.");
+
+    await fireEvent.input(input, { target: { value: "Nora" } });
+    await fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Profile service is offline.");
+    expect(input).toHaveValue("Nora");
+  });
+
+  it("updates and removes the signed-in account avatar from Profile settings", async () => {
+    const [currentAccount, setCurrentAccount] = createSignal({ ...account });
+    const onUpdateAccountAvatar = vi.fn(async (image: AvatarImageInput | null) => {
+      setCurrentAccount((current) => ({
+        ...current,
+        avatarUrl: image ? "data:image/webp;base64,cHJvZmlsZQ==" : null,
+      }));
+    });
+
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={currentAccount()}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={onUpdateAccountAvatar}
+        processAvatarFile={async () => ({
+          mimeType: "image/webp",
+          bytes: new Uint8Array([1, 2, 3]),
+        })}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Profile" }));
+    const input = screen.getByLabelText("Upload profile photo");
+    const file = new File(["profile"], "profile.png", { type: "image/png" });
+    await fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() =>
+      expect(onUpdateAccountAvatar).toHaveBeenCalledWith(expect.objectContaining({ mimeType: "image/webp" })),
+    );
+    await fireEvent.click(await screen.findByRole("button", { name: "Remove profile photo" }));
+    await waitFor(() => expect(onUpdateAccountAvatar).toHaveBeenLastCalledWith(null));
+  });
+
+  it("lists an agent-published site with only Open and Delete actions", async () => {
+    const site = {
+      id: "site-1",
+      hostname: "interactive-budget-planner-students-23456789ab.openbot.site",
+      url: "https://interactive-budget-planner-students-23456789ab.openbot.site",
+      title: "Student budget planner",
+      description: "Plan a student budget.",
+      framework: "vanilla" as const,
+      status: "active" as const,
+      fileCount: 3,
+      size: 1_024,
+      expiresAt: "2026-09-30T12:00:00.000Z",
+      updatedAt: "2026-08-31T12:00:00.000Z",
+    };
+    const hostedSitesApi: HostedSitesDesktopApi = {
+      list: vi.fn(async () => [site]),
+      chooseDirectory: vi.fn(async () => "/tmp/student-budget-site"),
+      publish: vi.fn(async () => site),
+      replace: vi.fn(async () => site),
+      delete: vi.fn(async () => undefined),
+    };
+    const openUrl = vi.fn(async () => undefined);
+    vi.stubGlobal("openbot", { openUrl });
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        hostedSitesApi={hostedSitesApi}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Hosted sites" }));
+    expect(await screen.findByText(site.hostname)).toBeInTheDocument();
+    await fireEvent.click(screen.getByRole("button", { name: site.hostname }));
+    await fireEvent.click(screen.getByRole("button", { name: `Open ${site.hostname}` }));
+
+    expect(openUrl).toHaveBeenNthCalledWith(1, site.url);
+    expect(openUrl).toHaveBeenNthCalledWith(2, site.url);
+    expect(screen.queryByRole("button", { name: "Publish" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Replace" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Refresh" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: `Copy ${site.hostname} URL` })).not.toBeInTheDocument();
+    expect(hostedSitesApi.chooseDirectory).not.toHaveBeenCalled();
+    expect(hostedSitesApi.publish).not.toHaveBeenCalled();
+    expect(hostedSitesApi.replace).not.toHaveBeenCalled();
+  });
+
+  it("confirms a hosted-site deletion and reloads the list", async () => {
+    const site = {
+      id: "site-to-delete",
+      hostname: "temporary-project-site-23456789ab.openbot.site",
+      url: "https://temporary-project-site-23456789ab.openbot.site",
+      title: "Temporary project site",
+      description: "Verify deletion and list refresh.",
+      framework: "vanilla" as const,
+      status: "active" as const,
+      fileCount: 1,
+      size: 256,
+      expiresAt: "2026-09-30T12:00:00.000Z",
+      updatedAt: "2026-08-31T12:00:00.000Z",
+    };
+    const analyticsTrack = vi.fn<DesktopAnalyticsScope["track"]>();
+    const analyticsScope = { track: analyticsTrack } satisfies DesktopAnalyticsScope;
+    vi.spyOn(desktopAnalytics, "scope").mockReturnValue(analyticsScope);
+    const hostedSitesApi: HostedSitesDesktopApi = {
+      list: vi.fn().mockResolvedValueOnce([site]).mockResolvedValue([]),
+      chooseDirectory: vi.fn(async () => "/tmp/queued-site"),
+      publish: vi.fn(async () => site),
+      replace: vi.fn(async () => site),
+      delete: vi.fn(async () => undefined),
+    };
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        hostedSitesApi={hostedSitesApi}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Hosted sites" }));
+    expect(await screen.findByText(site.hostname)).toBeInTheDocument();
+    await fireEvent.click(screen.getByRole("button", { name: `Delete ${site.hostname}` }));
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      `Delete ${site.hostname}? This address will immediately return 410 Gone.`,
+    );
+    await waitFor(() => expect(hostedSitesApi.delete).toHaveBeenCalledWith({ siteId: site.id }));
+    await waitFor(() => expect(hostedSitesApi.list).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByText(site.hostname)).not.toBeInTheDocument());
+    expect(analyticsTrack).toHaveBeenCalledWith("hosted_site_action", {
+      action: "delete",
+      entry_point: "settings",
+      result: "succeeded",
+    });
+  });
+
+  it("shows a blocked hosted site and disables Open", async () => {
+    const site = {
+      id: "blocked-site",
+      hostname: "blocked-project-site-23456789ab.openbot.site",
+      url: "https://blocked-project-site-23456789ab.openbot.site",
+      title: "Blocked project site",
+      description: "A blocked hosted site.",
+      framework: "vanilla" as const,
+      status: "blocked" as const,
+      fileCount: 1,
+      size: 256,
+      expiresAt: "2026-09-30T12:00:00.000Z",
+      updatedAt: "2026-08-31T12:00:00.000Z",
+    };
+    const hostedSitesApi: HostedSitesDesktopApi = {
+      list: vi.fn(async () => [site]),
+      chooseDirectory: vi.fn(async () => null),
+      publish: vi.fn(async () => site),
+      replace: vi.fn(async () => site),
+      delete: vi.fn(async () => undefined),
+    };
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        hostedSitesApi={hostedSitesApi}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Hosted sites" }));
+    expect(await screen.findByText("Blocked")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: `Open ${site.hostname}` })).toBeDisabled();
+  });
+
+  it("confirms a new mobile connection before collapsing the QR code", async () => {
+    vi.useFakeTimers({ now: 1_000_000 });
+    const devices: MobileConnectedDevice[] = [];
+    const onListMobileConnectedDevices = vi.fn(async () => [...devices]);
+    const view = render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        onCreateMobileConnect={async () => ({
+          qrData: "openbot://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=mobile-ticket_success_1234567890",
+          expiresAt: Date.now() + 120_000,
+        })}
+        onListMobileConnectedDevices={onListMobileConnectedDevices}
+        onRevokeMobileConnectedDevice={vi.fn(async () => undefined)}
+      />
+    ));
+
+    try {
+      await fireEvent.click(screen.getByRole("tab", { name: "Mobile Connect" }));
+      await vi.advanceTimersByTimeAsync(0);
+      await fireEvent.click(screen.getByRole("button", { name: "Generate QR code" }));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(screen.getByRole("img", { name: "Mobile Connect sign-in QR code" })).toBeInTheDocument();
+      const requestsBeforePolling = onListMobileConnectedDevices.mock.calls.length;
+
+      devices.push({
+        sessionId: "22222222-2222-4222-8222-222222222222",
+        name: "Norbert’s iPhone",
+        platform: "ios",
+        connectedAt: Date.now(),
+        lastActiveAt: Date.now(),
+      });
+      await vi.advanceTimersByTimeAsync(4_999);
+      expect(onListMobileConnectedDevices).toHaveBeenCalledTimes(requestsBeforePolling);
+      expect(screen.queryByText("Phone connected")).not.toBeInTheDocument();
+
+      await vi.advanceTimersByTimeAsync(1);
+      expect(onListMobileConnectedDevices).toHaveBeenCalledTimes(requestsBeforePolling + 1);
+
+      expect(screen.getByText("Phone connected")).toBeInTheDocument();
+      expect(screen.getByText("Norbert’s iPhone is ready to use Dani-Dex.")).toBeInTheDocument();
+      expect(screen.getByRole("table")).toBeInTheDocument();
+
+      await vi.advanceTimersByTimeAsync(1_200);
+      expect(screen.queryByRole("img", { name: "Mobile Connect sign-in QR code" })).not.toBeInTheDocument();
+    } finally {
+      view.unmount();
+      vi.useRealTimers();
+    }
+  });
+
+  it("captures the existing device baseline before issuing a Mobile Connect ticket", async () => {
+    vi.useFakeTimers({ now: 1_000_000 });
+    const existingDevice: MobileConnectedDevice = {
+      sessionId: "11111111-1111-4111-8111-111111111111",
+      name: "Existing iPhone",
+      platform: "ios",
+      connectedAt: Date.now() - 60_000,
+      lastActiveAt: Date.now(),
+    };
+    let resolveInitialDevices: ((devices: MobileConnectedDevice[]) => void) | undefined;
+    const initialDevices = new Promise<MobileConnectedDevice[]>((resolve) => {
+      resolveInitialDevices = resolve;
+    });
+    const onListMobileConnectedDevices = vi
+      .fn<() => Promise<MobileConnectedDevice[]>>()
+      .mockImplementationOnce(() => initialDevices)
+      .mockImplementationOnce(() => initialDevices)
+      .mockResolvedValue([existingDevice]);
+    const onCreateMobileConnect = vi.fn(async () => ({
+      qrData: "openbot://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=mobile-ticket_baseline_1234567890",
+      expiresAt: Date.now() + 120_000,
+    }));
+    const view = render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        onCreateMobileConnect={onCreateMobileConnect}
+        onListMobileConnectedDevices={onListMobileConnectedDevices}
+      />
+    ));
+
+    try {
+      await fireEvent.click(screen.getByRole("tab", { name: "Mobile Connect" }));
+      await fireEvent.click(screen.getByRole("button", { name: "Generate QR code" }));
+      expect(onCreateMobileConnect).not.toHaveBeenCalled();
+
+      resolveInitialDevices?.([existingDevice]);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(onCreateMobileConnect).toHaveBeenCalledOnce();
+      expect(screen.getByRole("img", { name: "Mobile Connect sign-in QR code" })).toBeInTheDocument();
+
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(screen.queryByText("Phone connected")).not.toBeInTheDocument();
+      expect(screen.getByRole("img", { name: "Mobile Connect sign-in QR code" })).toBeInTheDocument();
+    } finally {
+      view.unmount();
+      vi.useRealTimers();
+    }
+  });
+
+  it("refreshes connected mobile devices once per minute while no QR code is active", async () => {
+    vi.useFakeTimers({ now: 1_000_000 });
+    const onListMobileConnectedDevices = vi.fn(async () => []);
+    const view = render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        onListMobileConnectedDevices={onListMobileConnectedDevices}
+      />
+    ));
+
+    try {
+      await fireEvent.click(screen.getByRole("tab", { name: "Mobile Connect" }));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(onListMobileConnectedDevices).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(59_999);
+      expect(onListMobileConnectedDevices).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(1);
+      expect(onListMobileConnectedDevices).toHaveBeenCalledTimes(2);
+    } finally {
+      view.unmount();
+      vi.useRealTimers();
+    }
+  });
+
+  it("lists connected mobile devices and revokes one device session", async () => {
+    const onListMobileConnectedDevices = vi.fn(async () => [
+      {
+        sessionId: "11111111-1111-4111-8111-111111111111",
+        name: "Norbert’s iPhone",
+        platform: "ios" as const,
+        connectedAt: Date.now() - 60_000,
+        lastActiveAt: Date.now(),
+      },
+    ]);
+    const onRevokeMobileConnectedDevice = vi.fn(async () => undefined);
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        onListMobileConnectedDevices={onListMobileConnectedDevices}
+        onRevokeMobileConnectedDevice={onRevokeMobileConnectedDevice}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("tab", { name: "Mobile Connect" }));
+    expect(await screen.findByRole("table")).toBeInTheDocument();
+    await fireEvent.click(screen.getByRole("button", { name: "Disconnect Norbert’s iPhone" }));
+
+    await waitFor(() =>
+      expect(onRevokeMobileConnectedDevice).toHaveBeenCalledWith("11111111-1111-4111-8111-111111111111"),
+    );
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.getByText("No connected devices")).toBeInTheDocument();
+  });
+
+  // The endpoint the user typed carries an API key, so a failed save must not throw the form away:
+  // the previous version closed the dialog before the call and dropped the promise, which made a
+  // refused endpoint look like a saved one.
+  it("keeps the custom endpoint form open when the save fails, and closes it when the next one works", async () => {
+    const onAddCustomProvider = vi
+      .fn<(value: SaveCustomProviderInput) => Promise<CustomProviderRestart>>()
+      .mockRejectedValueOnce(new Error("Studio Local refused the API key."))
+      .mockResolvedValue("restarted");
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        agentStatus={openCodeReadyStatus}
+        customProviders={[]}
+        onAddCustomProvider={onAddCustomProvider}
+      />
+    ));
+
+    await fireEvent.click(screen.getByRole("button", { name: "Add custom provider" }));
+    // A required field appends an aria-hidden asterisk to its label, so its name is not an exact match.
+    await fireEvent.input(await screen.findByLabelText(/^Provider ID/u), { target: { value: "studio-local" } });
+    await fireEvent.input(screen.getByLabelText(/^Display name/u), { target: { value: "Studio Local" } });
+    await fireEvent.input(screen.getByLabelText(/^Base URL/u), { target: { value: "http://127.0.0.1:11434/v1" } });
+    await fireEvent.input(screen.getByLabelText("Model 1 ID"), { target: { value: "glm-5-air" } });
+    await fireEvent.input(screen.getByLabelText("Model 1 display name"), { target: { value: "GLM 5 Air" } });
+    await fireEvent.input(screen.getByLabelText("API key"), { target: { value: "sk-test-key" } });
+    await fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(await screen.findByText("Studio Local refused the API key.")).toBeInTheDocument();
+    // Still open, still holding the endpoint: the user retries rather than types it again.
+    expect(screen.getByLabelText(/^Provider ID/u)).toHaveValue("studio-local");
+    await waitFor(() => expect(onAddCustomProvider).toHaveBeenCalledTimes(1));
+    expect(onAddCustomProvider).toHaveBeenCalledWith({
+      id: "studio-local",
+      name: "Studio Local",
+      baseUrl: "http://127.0.0.1:11434/v1",
+      apiKey: "sk-test-key",
+      models: [{ id: "glm-5-air", name: "GLM 5 Air" }],
+      headers: [],
+    });
+
+    await fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+    await waitFor(() => expect(screen.queryByLabelText(/^Provider ID/u)).not.toBeInTheDocument());
+    expect(screen.getByRole("status")).toHaveTextContent("Saved. Dani-Dex is loading the models.");
+  });
+
+  // A removal discards the key and drops the models, and neither is undoable, so the callback must
+  // run only after the user answers the question.
+  it("removes a custom endpoint only after the confirmation is accepted", async () => {
+    const onDeleteCustomProvider = vi.fn<(id: string) => Promise<CustomProviderRestart>>(async () => "restarted");
+    vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValue(true);
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        agentStatus={openCodeReadyStatus}
+        customProviders={[
+          {
+            id: "studio-local",
+            name: "Studio Local",
+            baseUrl: "http://127.0.0.1:11434/v1",
+            hasApiKey: true,
+            models: [],
+          },
+        ]}
+        onAddCustomProvider={vi.fn(async () => "restarted" as const)}
+        onDeleteCustomProvider={onDeleteCustomProvider}
+      />
+    ));
+
+    // The endpoints are listed in a dialog now, which the count on the Custom provider row opens.
+    await fireEvent.click(screen.getByRole("button", { name: "Manage 1 endpoint" }));
+    await fireEvent.click(await screen.findByRole("button", { name: "Delete Studio Local" }));
+    expect(window.confirm).toHaveBeenCalledWith(
+      "Remove Studio Local? Its API key is discarded, its models disappear from the picker, and any agent using one falls back to a default model.",
+    );
+    expect(onDeleteCustomProvider).not.toHaveBeenCalled();
+
+    await fireEvent.click(screen.getByRole("button", { name: "Delete Studio Local" }));
+    await waitFor(() => expect(onDeleteCustomProvider).toHaveBeenCalledWith("studio-local"));
+    // The outcome is read inside the dialog, which stays open: the section behind it is hidden.
+    expect(await screen.findByRole("status")).toHaveTextContent("Removed. Dani-Dex is loading the models.");
+  });
+
+  // The custom row is one of the AI providers, so it takes the check mark like its neighbours and
+  // the provider that serves it gives it up. Nothing stores the choice yet; this is the row's state.
+  it("gives the custom provider row the check mark, and takes it from the provider rows", async () => {
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        agentStatus={openCodeReadyStatus}
+        customProviders={[
+          {
+            id: "studio-local",
+            name: "Studio Local",
+            baseUrl: "http://127.0.0.1:11434/v1",
+            hasApiKey: true,
+            models: [],
+          },
+        ]}
+        onAddCustomProvider={vi.fn(async () => "restarted" as const)}
+      />
+    ));
+
+    const custom = await screen.findByRole("radio", { name: /Custom provider/ });
+    const openCode = screen.getByRole("radio", { name: /OpenCode/ });
+    await fireEvent.click(openCode);
+    expect(openCode).toBeChecked();
+
+    await fireEvent.click(custom);
+    expect(custom).toBeChecked();
+    expect(openCode).not.toBeChecked();
+
+    await fireEvent.click(openCode);
+    expect(custom).not.toBeChecked();
+  });
+
+  // The runtime badge reports the CLI, so the row carries a tier badge only while it adds
+  // anything: "Free" with no key, gone once the key is saved and the runtime "Connected" speaks
+  // for the row. The status is re-read after the key dialog closes, so a save lands on the row
+  // without reopening Settings.
+  it("badges the OpenCode row with the account tier, and refreshes it after the key dialog closes", async () => {
+    const providerKeys = {
+      // Modal open, key dialog open: no key yet. Key dialog close: the save landed.
+      getProviderApiKeyState: vi
+        .fn()
+        .mockResolvedValueOnce({ provider: "opencode" as const, status: "missing" as const })
+        .mockResolvedValueOnce({ provider: "opencode" as const, status: "missing" as const })
+        .mockResolvedValue({ provider: "opencode" as const, status: "saved" as const }),
+      setProviderApiKey: vi.fn(async () => undefined),
+      clearProviderApiKey: vi.fn(async () => undefined),
+      openExternal: vi.fn(async () => undefined),
+    };
+    const onConnectProvider = vi.fn(async () => undefined);
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        agentStatus={openCodeReadyStatus}
+        providerKeys={providerKeys}
+        onConnectProvider={onConnectProvider}
+      />
+    ));
+
+    await screen.findByText("Free");
+    expect(providerKeys.getProviderApiKeyState).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Sign in to OpenCode" }));
+    const input = await screen.findByLabelText("OpenCode Go key");
+    await waitFor(() => expect(input).toBeEnabled());
+    // The dialog reconnects without touching credentials. The row behind keeps its own
+    // "Connect OpenCode" button, so the name matches exactly.
+    fireEvent.click(screen.getByRole("button", { name: /^Reconnect$/ }));
+    await waitFor(() => expect(onConnectProvider).toHaveBeenCalledWith("opencode"));
+    fireEvent.input(input, { target: { value: "go-key-value" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save key" }));
+
+    await waitFor(() =>
+      expect(providerKeys.setProviderApiKey).toHaveBeenCalledWith({ provider: "opencode", key: "go-key-value" }),
+    );
+    // Modal open, key dialog open, key dialog close: the last read is the refresh the badge needs.
+    await waitFor(() => expect(providerKeys.getProviderApiKeyState).toHaveBeenCalledTimes(3));
+    // getAllByText only waits for the first match, so the count itself is what waits here: the
+    // Free badge is gone, leaving the single runtime Connected.
+    await waitFor(() => expect(screen.getAllByText("Connected")).toHaveLength(1));
+    expect(screen.queryByText("Free")).toBeNull();
+  });
+
+  it("warns before Turbo mode is turned on, and turns it off without asking", async () => {
+    const [value, setValue] = createSignal({ ...DEFAULT_GENERAL_SETTINGS });
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={value()}
+        onValueChange={setValue}
+        appInfo={null}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={async () => {}}
+        account={account}
+        onUpdateAccountName={async () => {}}
+        onUpdateAccountAvatar={async () => {}}
+      />
+    ));
+
+    const toggle = await screen.findByRole("switch", { name: "Turbo mode" });
+    await fireEvent.click(toggle);
+    // Nothing is on yet: the switch is a request to turn it on, and the dialog is where it is given.
+    expect(value().turboMode).toBe(false);
+    await fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+    expect(value().turboMode).toBe(false);
+
+    await fireEvent.click(toggle);
+    await fireEvent.click(await screen.findByRole("button", { name: "Turn on" }));
+    await waitFor(() => expect(value().turboMode).toBe(true));
+
+    await fireEvent.click(await screen.findByRole("switch", { name: "Turbo mode" }));
+    await waitFor(() => expect(value().turboMode).toBe(false));
+  });
+
+  it("keeps Turbo available without per-agent approval controls", async () => {
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={null}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={async () => {}}
+        account={account}
+        onUpdateAccountName={async () => {}}
+        onUpdateAccountAvatar={async () => {}}
+      />
+    ));
+
+    expect(await screen.findByRole("switch", { name: "Turbo mode" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Revoke all" })).not.toBeInTheDocument();
+  });
+
+  // The second way in, for the computer whose browser cannot finish the first one. What Settings
+  // owns is the entry point and the dialog; the phase itself comes from main.
+  it("opens the code sign-in from the ChatGPT row and shows the code to type", async () => {
+    const [state, setState] = createSignal<ProviderCodeLoginState>({ phase: "starting" });
+    const [provider, setProvider] = createSignal<AgentProviderId | null>(null);
+    const codeLogin = {
+      provider,
+      state,
+      start: vi.fn((id: AgentProviderId) => {
+        setProvider(id);
+        setState({
+          phase: "waiting",
+          userCode: "KTQ4-B62MX",
+          verificationUrl: "https://auth.openai.com/codex/device",
+          expiresAt: Date.now() + 600_000,
+        });
+      }),
+      cancel: vi.fn(() => setProvider(null)),
+      openVerificationUrl: vi.fn(),
+    };
+    render(() => (
+      <SettingsModal
+        open
+        onOpenChange={() => undefined}
+        value={DEFAULT_GENERAL_SETTINGS}
+        onValueChange={() => undefined}
+        appInfo={{ name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" }}
+        updateStatus={idleUpdateStatus}
+        onUpdateAction={vi.fn(async () => undefined)}
+        account={account}
+        onUpdateAccountName={vi.fn(async () => undefined)}
+        onUpdateAccountAvatar={vi.fn(async () => undefined)}
+        agentStatus={codexSignedOutStatus}
+        codeLogin={codeLogin}
+      />
+    ));
+
+    // The menu is a Kobalte trigger: it wants the pointer press as well as the click.
+    const moreActions = await screen.findByRole("button", { name: "More ways to log in to ChatGPT" });
+    fireEvent.pointerDown(moreActions, { button: 0 });
+    fireEvent.click(moreActions);
+    fireEvent.pointerUp(await screen.findByRole("menuitem", { name: "Log in with code" }), { button: 0 });
+
+    await waitFor(() => expect(codeLogin.start).toHaveBeenCalledWith("codex"));
+    expect(await screen.findByLabelText("Login code K T Q 4 - B 6 2 M X")).toHaveTextContent("KTQ4-B62MX");
+
+    fireEvent.click(screen.getByRole("button", { name: "Close log in to ChatGPT" }));
+
+    await waitFor(() => expect(codeLogin.cancel).toHaveBeenCalledTimes(1));
+  });
+});
+
+describe("isOpenSettingsShortcut", () => {
+  it("accepts Command+, and Control+,", () => {
+    expect(isOpenSettingsShortcut({ key: ",", metaKey: true, ctrlKey: false, altKey: false, shiftKey: false })).toBe(
+      true,
+    );
+    expect(isOpenSettingsShortcut({ key: ",", metaKey: false, ctrlKey: true, altKey: false, shiftKey: false })).toBe(
+      true,
+    );
+  });
+
+  it("does not claim a plain comma or a modified shortcut", () => {
+    expect(isOpenSettingsShortcut({ key: ",", metaKey: false, ctrlKey: false, altKey: false, shiftKey: false })).toBe(
+      false,
+    );
+    expect(isOpenSettingsShortcut({ key: ",", metaKey: true, ctrlKey: false, altKey: true, shiftKey: false })).toBe(
+      false,
+    );
+    expect(isOpenSettingsShortcut({ key: ",", metaKey: true, ctrlKey: false, altKey: false, shiftKey: true })).toBe(
+      false,
+    );
+    expect(isOpenSettingsShortcut({ key: ".", metaKey: true, ctrlKey: false, altKey: false, shiftKey: false })).toBe(
+      false,
+    );
+  });
+});

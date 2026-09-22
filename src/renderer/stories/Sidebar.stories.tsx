@@ -1,0 +1,979 @@
+import type { ChannelSummary, SidebarLayoutAction, SidebarLayoutSnapshot } from "@openbot/contracts/ipc";
+import { createSignal, untrack } from "solid-js";
+import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
+import type { Meta, StoryObj } from "storybook-solidjs-vite";
+import type { AvatarMood } from "../src/bloub-avatar";
+import { Sidebar } from "../src/features/sidebar/Sidebar";
+import { normalizeSidebarPinnedItems, type SidebarPinnedItem } from "../src/features/sidebar/sidebar-pins";
+import { defaultSidebarLayout } from "../src/features/sidebar/sidebar-sections";
+import type { SidebarAgentState } from "../src/features/sidebar/sidebar-types";
+import { STORY_AGENTS, STORY_DIRECT_THREADS, STORY_PRESENCE } from "./fixtures";
+
+const agentStates: Record<string, SidebarAgentState> = {
+  chief: { kind: "working" },
+  research: { kind: "unread", count: 3 },
+  sales: { kind: "responded" },
+};
+
+const agentMoods: Record<string, AvatarMood> = {
+  chief: "working",
+  research: "waiting",
+  sales: "responded",
+};
+
+const sidebarAgents = STORY_AGENTS.map((agent) => {
+  if (agent.id === "chief") return { ...agent, title: "CEO" };
+  if (agent.id === "research") return { ...agent, title: "Analyst" };
+  if (agent.id === "sales") return { ...agent, name: "Sales", title: "Growth" };
+  return agent;
+});
+
+const pinnedOne: SidebarPinnedItem[] = [{ kind: "agent", id: "chief" }];
+const pinnedTwo: SidebarPinnedItem[] = [...pinnedOne, { kind: "agent", id: "research" }];
+const pinnedThree: SidebarPinnedItem[] = [...pinnedTwo, { kind: "agent", id: "sales" }];
+const pinnedFour: SidebarPinnedItem[] = [...pinnedThree, { kind: "agent", id: "stress-agent-1" }];
+const pinnedFive: SidebarPinnedItem[] = [...pinnedFour, { kind: "agent", id: "stress-agent-2" }];
+const pinnedSix: SidebarPinnedItem[] = [...pinnedFive, { kind: "agent", id: "stress-agent-3" }];
+const longLabelAgents = sidebarAgents.map((agent) =>
+  agent.id === "chief"
+    ? {
+        ...agent,
+        name: "Strategic Operations Coordinator",
+        title: "Executive Planning and Delivery Partner",
+      }
+    : agent,
+);
+const demoSectionId = "11111111-1111-4111-8111-111111111111";
+const emptySectionId = "22222222-2222-4222-8222-222222222222";
+const sectionedLayout: SidebarLayoutSnapshot = {
+  revision: 1,
+  sections: [
+    { id: demoSectionId, name: "Core team" },
+    { id: emptySectionId, name: "Empty section" },
+  ],
+  order: ["people", demoSectionId, "unassigned", emptySectionId],
+  agentAssignments: { chief: demoSectionId, research: demoSectionId },
+  agentOrder: ["chief", "research", "sales"],
+};
+const longSectionLayout: SidebarLayoutSnapshot = {
+  revision: 1,
+  sections: [
+    {
+      id: demoSectionId,
+      name: "International Research and Strategic Operations Group",
+    },
+  ],
+  order: [demoSectionId, "people", "unassigned"],
+  agentAssignments: { chief: demoSectionId },
+  agentOrder: ["chief", "research", "sales"],
+};
+const stressSectionIds = Array.from({ length: 6 }, (_, index) => `44444444-4444-4444-8444-44444444444${index}`);
+const stressAgents = [
+  ...sidebarAgents,
+  ...Array.from({ length: 27 }, (_, index) => {
+    const source = sidebarAgents[index % sidebarAgents.length] ?? sidebarAgents[0];
+    return {
+      ...source,
+      id: `stress-agent-${index + 1}`,
+      name: `Agent ${index + 1}`,
+      threadId: `stress-thread-${index + 1}`,
+      avatarSeed: `stress-agent-${index + 1}`,
+      preview: `Active task ${index + 1}`,
+    };
+  }),
+];
+const stressLayout: SidebarLayoutSnapshot = {
+  revision: 1,
+  sections: stressSectionIds.map((id, index) => ({ id, name: `Team ${index + 1}` })),
+  order: ["people", ...stressSectionIds, "unassigned"],
+  agentAssignments: Object.fromEntries(
+    stressAgents.slice(0, -3).map((agent, index) => [agent.id, stressSectionIds[index % stressSectionIds.length]]),
+  ),
+  agentOrder: stressAgents.map((agent) => agent.id),
+};
+
+/* One channel for each shape the member cluster has to draw: a single face, a pair, the triangle,
+ * the full quad, and the count that takes the last cell when the members outnumber it. */
+const channelSizes = [
+  { name: "Solo", size: 1 },
+  { name: "Pair", size: 2 },
+  { name: "Trio", size: 3 },
+  { name: "Quad", size: 4 },
+  { name: "All hands", size: 6 },
+];
+const storyChannels: ChannelSummary[] = channelSizes.map(({ name, size }, index) => ({
+  id: `channel-${size}`,
+  name,
+  title: "",
+  instructions: "",
+  members: stressAgents.slice(index, index + size).map((agent) => ({ agentId: agent.id })),
+  leadAgentId: null,
+  archived: false,
+  revision: 1,
+  createdAt: "2026-01-01T09:00:00.000Z",
+  unreadCount: size === 2 ? 4 : 0,
+  activeTasks: size === 6 ? 1 : 0,
+  lastMessage:
+    size === 1 ? null : { at: "2026-01-01T10:00:00.000Z", text: `${size} members here`, authorName: "Agent 1" },
+}));
+
+const args: Parameters<typeof Sidebar>[0] = {
+  serverName: "Local",
+  onOpenServerSettings: fn(),
+  agents: sidebarAgents,
+  activeAgentId: "chief",
+  people: STORY_PRESENCE.members,
+  directThreads: STORY_DIRECT_THREADS,
+  activeDirectMemberId: null,
+  agentStates,
+  agentMoods,
+  layout: defaultSidebarLayout(),
+  collapsedSectionIds: [],
+  onMutateLayout: fn(async () => undefined),
+  onToggleSection: fn(),
+  pinnedItems: pinnedThree,
+  peopleOrder: [],
+  onPin: fn(),
+  onUnpin: fn(),
+  onReorderPinned: fn(),
+  onReorderPeople: fn(),
+  onSelectAgent: fn(),
+  onSelectPerson: fn(),
+  onCreateAgent: fn(),
+  onEditAgent: fn(),
+  onDeleteAgent: async () => undefined,
+  compact: false,
+  onExpand: fn(),
+  onOpenMarketplace: fn(),
+};
+
+function InteractiveSidebar(props: Parameters<typeof Sidebar>[0]) {
+  const [pinnedItems, setPinnedItems] = createSignal(untrack(() => props.pinnedItems));
+  const [peopleOrder, setPeopleOrder] = createSignal(untrack(() => props.peopleOrder));
+  const [layout, setLayout] = createSignal(untrack(() => props.layout));
+  const [collapsedSectionIds, setCollapsedSectionIds] = createSignal(untrack(() => props.collapsedSectionIds));
+  return (
+    <Sidebar
+      {...props}
+      layout={layout()}
+      collapsedSectionIds={collapsedSectionIds()}
+      pinnedItems={pinnedItems()}
+      peopleOrder={peopleOrder()}
+      onPin={(item) => {
+        setPinnedItems((current) =>
+          current.some((candidate) => candidate.kind === item.kind && candidate.id === item.id)
+            ? current
+            : normalizeSidebarPinnedItems([...current, item]),
+        );
+        props.onPin(item);
+      }}
+      onUnpin={(item) => {
+        setPinnedItems((current) =>
+          current.filter((candidate) => candidate.kind !== item.kind || candidate.id !== item.id),
+        );
+        props.onUnpin(item);
+      }}
+      onReorderPinned={(items) => {
+        setPinnedItems(items);
+        props.onReorderPinned(items);
+      }}
+      onReorderPeople={(memberIds) => {
+        setPeopleOrder(memberIds);
+        props.onReorderPeople(memberIds);
+      }}
+      onMutateLayout={async (action) => {
+        setLayout((current) => applyStoryLayoutAction(current, action));
+        await props.onMutateLayout(action);
+      }}
+      onToggleSection={(sectionId) => {
+        setCollapsedSectionIds((current) =>
+          current.includes(sectionId)
+            ? current.filter((candidate) => candidate !== sectionId)
+            : [...current, sectionId],
+        );
+        props.onToggleSection(sectionId);
+      }}
+    />
+  );
+}
+
+function applyStoryLayoutAction(layout: SidebarLayoutSnapshot, action: SidebarLayoutAction): SidebarLayoutSnapshot {
+  const revision = layout.revision + 1;
+  if (action.type === "create") {
+    const id = crypto.randomUUID();
+    return {
+      ...layout,
+      revision,
+      sections: [...layout.sections, { id, name: action.name.trim() }],
+      order: [...layout.order, id],
+      agentAssignments: action.agentId
+        ? { ...layout.agentAssignments, [action.agentId]: id }
+        : { ...layout.agentAssignments },
+      agentOrder: [...layout.agentOrder],
+    };
+  }
+  if (action.type === "rename") {
+    return {
+      ...layout,
+      revision,
+      sections: layout.sections.map((section) =>
+        section.id === action.sectionId ? { ...section, name: action.name.trim() } : section,
+      ),
+    };
+  }
+  if (action.type === "delete") {
+    return {
+      ...layout,
+      revision,
+      sections: layout.sections.filter((section) => section.id !== action.sectionId),
+      order: layout.order.filter((sectionId) => sectionId !== action.sectionId),
+      agentAssignments: Object.fromEntries(
+        Object.entries(layout.agentAssignments).filter(([, sectionId]) => sectionId !== action.sectionId),
+      ),
+      agentOrder: [...layout.agentOrder],
+    };
+  }
+  if (action.type === "move") {
+    const order = [...layout.order];
+    const index = order.indexOf(action.sectionId);
+    const target = index + (action.direction === "up" ? -1 : 1) * (action.steps ?? 1);
+    if (index >= 0 && target >= 0 && target < order.length) {
+      const [movedSectionId] = order.splice(index, 1);
+      if (movedSectionId) order.splice(target, 0, movedSectionId);
+    }
+    return { ...layout, revision, order };
+  }
+  if (action.type === "move-agent") {
+    const agentOrder = layout.agentOrder.filter((agentId) => agentId !== action.agentId);
+    const insertionIndex = action.beforeAgentId === null ? agentOrder.length : agentOrder.indexOf(action.beforeAgentId);
+    agentOrder.splice(insertionIndex < 0 ? agentOrder.length : insertionIndex, 0, action.agentId);
+    const agentAssignments = { ...layout.agentAssignments };
+    if (action.sectionId === null) delete agentAssignments[action.agentId];
+    else agentAssignments[action.agentId] = action.sectionId;
+    return { ...layout, revision, agentAssignments, agentOrder };
+  }
+  const agentAssignments = { ...layout.agentAssignments };
+  if (action.sectionId === null) delete agentAssignments[action.agentId];
+  else agentAssignments[action.agentId] = action.sectionId;
+  return { ...layout, revision, agentAssignments };
+}
+
+const meta = {
+  title: "Navigation/Sidebar",
+  component: Sidebar,
+  render: (storyArgs) => <InteractiveSidebar {...storyArgs} />,
+  args,
+  parameters: { layout: "fullscreen" },
+} satisfies Meta<typeof Sidebar>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+async function expectPinnedLayout(canvasElement: HTMLElement, expectedCount: number): Promise<void> {
+  const list = canvasElement.querySelector<HTMLElement>(".sidebar-pinned-list");
+  if (!list) throw new Error("Pinned list is missing.");
+  const tiles = Array.from(list.querySelectorAll<HTMLElement>(".sidebar-pinned-row"));
+  const avatars = tiles.map((tile) => tile.querySelector<HTMLElement>(".sidebar-pinned-avatar"));
+  if (avatars.some((avatar) => !avatar)) throw new Error("A pinned avatar is missing.");
+
+  await expect(tiles).toHaveLength(expectedCount);
+  for (const tile of tiles) await expect(tile.getBoundingClientRect().height).toBe(94);
+  for (const avatar of avatars) await expect(avatar?.getBoundingClientRect().width).toBe(48);
+
+  const rects = tiles.map((tile) => tile.getBoundingClientRect());
+  const listRect = list.getBoundingClientRect();
+  const rowTops = [...new Set(rects.map((rect) => Math.round(rect.top)))].sort((left, right) => left - right);
+  await expect(rowTops).toHaveLength(Math.ceil(expectedCount / 3));
+  await expect(list.scrollWidth).toBe(list.clientWidth);
+  await expect(list.scrollHeight).toBe(list.clientHeight);
+  for (const rect of rects) {
+    await expect(rect.left).toBeGreaterThanOrEqual(listRect.left);
+    await expect(rect.right).toBeLessThanOrEqual(listRect.right);
+    await expect(rect.bottom).toBeLessThanOrEqual(listRect.bottom);
+  }
+  for (const rowTop of rowTops) {
+    const row = rects.filter((rect) => Math.abs(rect.top - rowTop) < 1);
+    const first = row[0];
+    const last = row.at(-1);
+    if (!first || !last) throw new Error("Pinned row is missing.");
+    await expect(row.length).toBeLessThanOrEqual(3);
+    const contentCenter = (first.left + last.right) / 2;
+    await expect(Math.abs(contentCenter - (listRect.left + listRect.right) / 2)).toBeLessThanOrEqual(1);
+  }
+}
+
+async function expectHiddenPinnedDragSource(canvasElement: HTMLElement): Promise<void> {
+  const source = canvasElement.querySelector<HTMLElement>(".sidebar-pinned-item");
+  if (!source) throw new Error("Pinned drag source is missing.");
+  const dataTransfer = new DataTransfer();
+
+  fireEvent.dragStart(source, { dataTransfer, clientX: 36, clientY: 36 });
+  try {
+    await expect(getComputedStyle(source).opacity).toBe("0");
+    await expect(canvasElement.ownerDocument.querySelector(".sidebar-pinned-drag-preview")).toBeInTheDocument();
+  } finally {
+    fireEvent.dragEnd(source, { dataTransfer });
+  }
+  await expect(canvasElement.ownerDocument.querySelector(".sidebar-pinned-drag-preview")).not.toBeInTheDocument();
+}
+
+export const Populated: Story = {
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas, canvasElement }) => {
+    await expectPinnedLayout(canvasElement, 3);
+    const pinnedRegion = canvas.getByRole("region", { name: "Pinned chats" });
+    const peopleHeading = canvas.getByRole("button", { name: /People/ });
+    const chief = canvas.getByRole("button", { name: "Chief, pinned agent" });
+    const research = canvas.getByRole("button", { name: "Research, pinned agent" });
+
+    await expect(chief.getBoundingClientRect().left).toBeLessThan(research.getBoundingClientRect().left);
+    await expect(pinnedRegion.getBoundingClientRect().top).toBeLessThan(peopleHeading.getBoundingClientRect().top);
+    await expect(canvas.queryByText("Pinned")).not.toBeInTheDocument();
+    await expect(canvas.getAllByText("Chief")).toHaveLength(1);
+    await expect(canvas.getAllByText("Alice Chen")).toHaveLength(1);
+  },
+};
+
+export const PinnedOne: Story = {
+  args: { pinnedItems: pinnedOne },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => expectPinnedLayout(canvasElement, 1),
+};
+
+export const PinnedTwo: Story = {
+  args: { pinnedItems: pinnedTwo },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => expectPinnedLayout(canvasElement, 2),
+};
+
+export const PinnedThree: Story = {
+  args: { pinnedItems: pinnedThree },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => {
+    await expectPinnedLayout(canvasElement, 3);
+    await expectHiddenPinnedDragSource(canvasElement);
+  },
+};
+
+export const PinnedFour: Story = {
+  args: { agents: stressAgents, pinnedItems: pinnedFour },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => expectPinnedLayout(canvasElement, 4),
+};
+
+export const PinnedFive: Story = {
+  args: { agents: stressAgents, pinnedItems: pinnedFive },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => expectPinnedLayout(canvasElement, 5),
+};
+
+export const PinnedSix: Story = {
+  args: { agents: stressAgents, pinnedItems: pinnedSix },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => expectPinnedLayout(canvasElement, 6),
+};
+
+export const PinnedMany: Story = {
+  args: {
+    agents: stressAgents,
+    pinnedItems: stressAgents.slice(0, 12).map((agent) => ({ kind: "agent", id: agent.id })),
+  },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => expectPinnedLayout(canvasElement, 12),
+};
+
+export const PinnedLongLabels: Story = {
+  args: { agents: longLabelAgents, pinnedItems: pinnedOne },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => {
+    await expectPinnedLayout(canvasElement, 1);
+    const tile = canvasElement.querySelector<HTMLElement>(".sidebar-pinned-row");
+    const name = tile?.querySelector<HTMLElement>(".sidebar-pinned-name");
+    const title = tile?.querySelector<HTMLElement>(".sidebar-pinned-title > span");
+    if (!tile || !name || !title) throw new Error("Pinned labels are missing.");
+    await expect(name.scrollWidth).toBeGreaterThan(name.clientWidth);
+    await expect(title.scrollWidth).toBeGreaterThan(title.clientWidth);
+    await expect(getComputedStyle(name).textOverflow).toBe("ellipsis");
+    await expect(getComputedStyle(title).textOverflow).toBe("ellipsis");
+    await expect(name.getBoundingClientRect().right).toBeLessThanOrEqual(tile.getBoundingClientRect().right);
+    await expect(title.getBoundingClientRect().right).toBeLessThanOrEqual(tile.getBoundingClientRect().right);
+  },
+};
+
+export const AgentTiles: Story = {
+  args: {
+    people: [],
+    directThreads: [],
+    agentStates: {},
+    agentMoods: {},
+    pinnedItems: [],
+  },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas }) => {
+    const tile = canvas.getByRole("button", { name: /Chief, CEO/ });
+    const avatar = tile.querySelector<HTMLElement>(".agent-row-avatar");
+    const title = tile.querySelector<HTMLElement>(".agent-row-title strong");
+    const badge = tile.querySelector<HTMLElement>(".agent-role-badge");
+    const preview = tile.querySelector<HTMLElement>(".agent-row-preview");
+    const time = tile.querySelector<HTMLElement>(".agent-row-time");
+    if (!avatar || !title || !badge || !preview || !time) throw new Error("Agent tile anatomy is incomplete.");
+    await expect(tile.getBoundingClientRect().height).toBe(54);
+    await expect(avatar.getBoundingClientRect().width).toBe(36);
+    await expect(getComputedStyle(title).fontSize).toBe("14px");
+    const titleRect = title.getBoundingClientRect();
+    const badgeRect = badge.getBoundingClientRect();
+    await expect(Math.abs(titleRect.top + titleRect.height / 2 - (badgeRect.top + badgeRect.height / 2))).toBeLessThan(
+      1,
+    );
+    await expect(getComputedStyle(preview).fontSize).toBe("13px");
+    await expect(getComputedStyle(time).fontSize).toBe("12px");
+  },
+};
+
+export const AgentLongLabels: Story = {
+  args: {
+    agents: longLabelAgents,
+    people: [],
+    directThreads: [],
+    agentStates: {},
+    agentMoods: {},
+    pinnedItems: [],
+  },
+  decorators: [
+    (Story) => (
+      <div
+        style={{
+          width: "240px",
+          "min-width": "240px",
+          "max-width": "400px",
+          height: "100vh",
+          overflow: "hidden",
+          resize: "horizontal",
+        }}
+      >
+        {Story()}
+      </div>
+    ),
+  ],
+};
+
+export const TimestampLabels: Story = {
+  ...AgentLongLabels,
+  args: {
+    ...AgentLongLabels.args,
+    agents: longLabelAgents.map((agent, index) => {
+      const updatedAt = new Date();
+      updatedAt.setDate(updatedAt.getDate() - [0, 1, 30][index % 3]);
+      updatedAt.setHours(13, 42, 0, 0);
+      return {
+        ...agent,
+        updatedAt: updatedAt.toISOString(),
+        time: new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" }).format(updatedAt),
+      };
+    }),
+  },
+};
+
+export const AgentContextMenu: Story = {
+  args: {
+    people: [],
+    directThreads: [],
+    agentStates: {},
+    agentMoods: {},
+    layout: sectionedLayout,
+    pinnedItems: [],
+  },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas, canvasElement }) => {
+    const tile = canvas.getByRole("button", { name: /Chief, CEO/ });
+    const tileRect = tile.getBoundingClientRect();
+    fireEvent.contextMenu(tile, {
+      clientX: tileRect.left + tileRect.width / 2,
+      clientY: tileRect.top + tileRect.height / 2,
+    });
+
+    const menu = await within(canvasElement.ownerDocument.body).findByRole("menu", { name: "Agent actions" });
+    const items = within(menu).getAllByRole("menuitem");
+    const menuStyle = getComputedStyle(menu);
+    const itemStyle = getComputedStyle(items[0]);
+
+    await expect(menu).toHaveClass("ui-action-menu");
+    await expect(menu.getBoundingClientRect().width).toBe(160);
+    await expect(menuStyle.padding).toBe("4px");
+    await expect(menuStyle.outlineStyle).toBe("none");
+    await expect(items[0].getBoundingClientRect().height).toBe(32);
+    await expect(itemStyle.padding).toBe("6px 8px");
+    await expect(itemStyle.gap).toBe("8px");
+    await expect(itemStyle.borderRadius).toBe("6px");
+    await expect(itemStyle.fontSize).toBe("14px");
+    await expect(itemStyle.lineHeight).toBe("20px");
+    await expect(items[0].querySelector("svg")?.getBoundingClientRect().width).toBe(16);
+
+    const moveTo = within(menu).getByRole("menuitem", { name: "Move to" });
+    moveTo.focus();
+    fireEvent.keyDown(moveTo, { key: "Enter" });
+    const assignmentMenu = await within(canvasElement.ownerDocument.body).findByRole("menu", { name: "Move to" });
+    const coreTeam = within(assignmentMenu).getByRole("menuitem", { name: "Core team" });
+    const emptySection = within(assignmentMenu).getByRole("menuitem", { name: "Empty section" });
+    const unassigned = within(assignmentMenu).getByRole("menuitem", { name: "Unassigned" });
+    const assignmentDivider = within(assignmentMenu).getByRole("separator");
+    const newSection = within(assignmentMenu).getByRole("menuitem", { name: "New section" });
+
+    await expect(moveTo).toHaveAttribute("aria-expanded", "true");
+    await expect(getComputedStyle(moveTo).backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+    await expect(getComputedStyle(items[0]).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    await expect(coreTeam.querySelector(".lucide-check")).toBeInTheDocument();
+    await expect(unassigned.querySelector(".lucide-folder")).toBeInTheDocument();
+    await expect(emptySection).toBeInTheDocument();
+    await expect(assignmentDivider.nextElementSibling).toBe(newSection);
+    await expect(assignmentMenu.getBoundingClientRect().left).toBeGreaterThanOrEqual(
+      menu.getBoundingClientRect().right - 4,
+    );
+  },
+};
+
+export const Sections: Story = {
+  args: { layout: sectionedLayout, pinnedItems: pinnedOne },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas, canvasElement }) => {
+    await expect(canvas.getByRole("button", { name: /People/ })).toBeInTheDocument();
+    await expect(canvas.getByRole("button", { name: "Core team" })).toHaveAttribute("draggable", "true");
+    await expect(canvas.getByRole("button", { name: "Unassigned" })).toBeInTheDocument();
+    const researchButton = canvas.getByRole("button", { name: /Research/ });
+    const researchItem = researchButton.closest<HTMLElement>(".sidebar-agent-item");
+    if (!researchItem) throw new Error("Research drag source is missing.");
+    await expect(researchItem).toHaveAttribute("draggable", "true");
+    await expect(researchButton).not.toHaveAttribute("draggable");
+    const bounds = researchItem.getBoundingClientRect();
+    const DataTransferConstructor = canvasElement.ownerDocument.defaultView?.DataTransfer;
+    if (!DataTransferConstructor) throw new Error("DataTransfer is unavailable.");
+    const dataTransfer = new DataTransferConstructor();
+    fireEvent.dragStart(researchItem, {
+      clientX: bounds.left + 24,
+      clientY: bounds.top + 24,
+      dataTransfer,
+    });
+    const preview = canvasElement.ownerDocument.body.querySelector<HTMLElement>(".sidebar-agent-drag-preview");
+    if (!preview) throw new Error("Agent drag preview is missing.");
+    await expect(getComputedStyle(preview).transitionProperty).toBe("none");
+    await expect(getComputedStyle(preview).transitionDuration).toBe("0s");
+    fireEvent.dragEnd(researchItem, { dataTransfer });
+    await expect(canvas.getByRole("button", { name: "Empty section" })).toBeInTheDocument();
+  },
+};
+
+export const DragStress: Story = {
+  args: { agents: stressAgents, layout: stressLayout, pinnedItems: pinnedSix },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelectorAll("[data-pinned-key]")).toHaveLength(6);
+    await expect(canvasElement.querySelectorAll("[data-section-id]").length).toBeGreaterThanOrEqual(7);
+    await expect(canvasElement.querySelectorAll("[data-chat-id]").length).toBeGreaterThanOrEqual(24);
+    const source = canvasElement.querySelector<HTMLElement>("[data-chat-id]");
+    const list = within(canvasElement).getByRole("navigation", { name: "Chat list" });
+    const DataTransferConstructor = canvasElement.ownerDocument.defaultView?.DataTransfer;
+    if (!source || !list || !DataTransferConstructor) throw new Error("Agent drag stress fixture is unavailable.");
+    const section = source.closest<HTMLElement>("[data-section-id]");
+    const target = section?.querySelector<HTMLElement>(`[data-chat-id]:not([data-chat-id="${source.dataset.chatId}"])`);
+    if (!target) throw new Error("Agent drag stress target is unavailable.");
+    const bounds = source.getBoundingClientRect();
+    const targetBounds = target.getBoundingClientRect();
+    const dataTransfer = new DataTransferConstructor();
+
+    fireEvent.dragStart(source, {
+      clientX: bounds.left + 24,
+      clientY: bounds.top + 24,
+      dataTransfer,
+    });
+    fireEvent.dragOver(target, {
+      clientX: targetBounds.left + 24,
+      clientY: targetBounds.top + 24,
+      dataTransfer,
+    });
+
+    await expect(list).toHaveAttribute("data-sidebar-dragging", "chat");
+    for (const row of canvasElement.querySelectorAll<HTMLElement>("[data-chat-id]")) {
+      await expect(getComputedStyle(row).transitionDuration).toBe("0s");
+    }
+
+    fireEvent.dragEnd(source, { dataTransfer });
+  },
+};
+
+export const SectionsCollapsed: Story = {
+  args: { layout: sectionedLayout, collapsedSectionIds: [demoSectionId], pinnedItems: [] },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas, canvasElement }) => {
+    await expect(canvas.getByRole("button", { name: "Core team" })).toHaveAttribute("aria-expanded", "false");
+    const body = canvasElement.querySelector(`#sidebar-section-body-${demoSectionId}`)?.parentElement;
+    await expect(body).toHaveAttribute("data-collapsed");
+    await expect(body).toHaveAttribute("inert");
+  },
+};
+
+export const SectionLongLabels: Story = {
+  args: { layout: longSectionLayout, people: [], directThreads: [], pinnedItems: [] },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => {
+    const label = canvasElement.querySelector<HTMLElement>(".sidebar-section-name");
+    const toggle = canvasElement.querySelector<HTMLElement>(".sidebar-section-toggle");
+    if (!label || !toggle) throw new Error("Long section heading is missing.");
+    await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
+    await expect(getComputedStyle(label).textOverflow).toBe("ellipsis");
+    await expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(toggle.getBoundingClientRect().right);
+  },
+};
+
+export const SectionRename: Story = {
+  args: { layout: sectionedLayout, pinnedItems: [] },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas, canvasElement }) => {
+    const heading = canvas.getByRole("button", { name: "Core team" });
+    fireEvent.contextMenu(heading);
+    const menu = await within(canvasElement.ownerDocument.body).findByRole("menu", { name: "Section actions" });
+    fireEvent.pointerUp(within(menu).getByRole("menuitem", { name: "Rename" }), { button: 0 });
+    await expect(await canvas.findByRole("textbox", { name: "Rename section" })).toHaveValue("Core team");
+  },
+};
+
+export const Compact: Story = {
+  args: { compact: true },
+};
+
+export const LongServerName: Story = {
+  args: { serverName: "Synthetify production workspace with a long name" },
+  decorators: [(Story) => <div style={{ width: "240px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas }) => {
+    const name = canvas.getByText("Synthetify production workspace with a long name");
+    const actions = canvas.getByRole("button", { name: "Open Marketplace" }).parentElement;
+    if (!actions) throw new Error("Sidebar header actions are missing.");
+    await expect(getComputedStyle(name).textOverflow).toBe("ellipsis");
+    await expect(name.scrollWidth).toBeGreaterThan(name.clientWidth);
+    await expect(name.getBoundingClientRect().right).toBeLessThanOrEqual(actions.getBoundingClientRect().left);
+  },
+};
+
+export const EmptyPinDropTarget: Story = {
+  args: {
+    people: [],
+    directThreads: [],
+    pinnedItems: [],
+  },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas, canvasElement }) => {
+    const chief = canvas.getByRole("button", { name: /Chief/ });
+    const source = chief.closest<HTMLElement>("[data-chat-id]");
+    const DataTransferConstructor = canvasElement.ownerDocument.defaultView?.DataTransfer;
+    if (!source || !DataTransferConstructor) throw new Error("Agent drag source is unavailable.");
+    const bounds = source.getBoundingClientRect();
+    const dataTransfer = new DataTransferConstructor();
+    fireEvent.dragStart(source, {
+      clientX: bounds.left + 24,
+      clientY: bounds.top + 24,
+      dataTransfer,
+    });
+    await expect(canvas.queryByText("Drag here to pin")).not.toBeInTheDocument();
+    fireEvent.dragOver(source, {
+      clientX: bounds.left + 26,
+      clientY: bounds.top + 26,
+      dataTransfer,
+    });
+    const emptyTarget = canvas.getByText("Drag here to pin");
+    const pinnedGroup = emptyTarget.closest<HTMLElement>(".sidebar-pinned-group");
+    if (!pinnedGroup) throw new Error("Empty pinned group is unavailable.");
+    await expect(emptyTarget.getBoundingClientRect().height).toBe(104);
+    await expect(getComputedStyle(pinnedGroup).transitionProperty).not.toContain("grid-template-rows");
+  },
+};
+
+/** Three pinned tiles, three people and one small section of three agents: every region gets the
+ *  three rows a shift needs, and no section grows tall enough to win the nearest-centre hit test
+ *  away from the one being hovered. The pinned agents are excluded from the section list, which is
+ *  why the section holds stress agents rather than the three real ones. */
+const dragOffsetAgents = stressAgents.slice(0, 6);
+const dragOffsetLayout: SidebarLayoutSnapshot = {
+  revision: 1,
+  sections: [
+    { id: demoSectionId, name: "Core team" },
+    { id: emptySectionId, name: "Empty section" },
+  ],
+  order: ["people", demoSectionId, emptySectionId, "unassigned"],
+  agentAssignments: {
+    "stress-agent-1": demoSectionId,
+    "stress-agent-2": demoSectionId,
+    "stress-agent-3": demoSectionId,
+  },
+  agentOrder: dragOffsetAgents.map((agent) => agent.id),
+};
+
+/**
+ * The one pair every region writes, and the shift is the only thing a user sees. Reading both for
+ * every region is also the check that a row never inherits its section's offset: the axis a region
+ * does not use has to stay at the reset `0px`, or the sum picks up a shift that is not its own.
+ */
+const DRAG_OFFSET_VARIABLES = ["--sidebar-drag-x", "--sidebar-drag-y"] as const;
+
+function totalDragOffset(element: HTMLElement): number {
+  const styles = getComputedStyle(element);
+  return DRAG_OFFSET_VARIABLES.reduce(
+    (total, name) => total + Math.abs(Number.parseFloat(styles.getPropertyValue(name)) || 0),
+    0,
+  );
+}
+
+/** Aims at the middle of `element`, clamped into `list` so a section taller than the scroll port
+ *  still gets a point the drop resolver accepts — its first guard rejects anything outside the list. */
+function dragAimPoint(element: HTMLElement, list: HTMLElement): { clientX: number; clientY: number } {
+  const bounds = element.getBoundingClientRect();
+  const listBounds = list.getBoundingClientRect();
+  return {
+    clientX: bounds.left + bounds.width / 2,
+    clientY: Math.min(Math.max(bounds.top + bounds.height / 2, listBounds.top + 1), listBounds.bottom - 1),
+  };
+}
+
+/**
+ * Drags `source` onto `target` and asserts `shifted` moves out of the way, then that ending the drag
+ * puts it back. The custom property is read rather than the transform because all four rules
+ * transition their transform, so the computed matrix is mid-animation and racy.
+ *
+ * This is the only check on the drag offset transports: root `AGENTS.md` rejects `toHaveStyle`,
+ * `toHaveClass` and `getComputedStyle` inside `*.test.tsx`, so the unit suite cannot see an offset at
+ * all and deleting a shift makes no test fail. Keep this story in step with the transports.
+ */
+async function expectDragShift(
+  canvasElement: HTMLElement,
+  source: HTMLElement,
+  target: HTMLElement,
+  shifted: HTMLElement,
+): Promise<void> {
+  const DataTransferConstructor = canvasElement.ownerDocument.defaultView?.DataTransfer;
+  if (!DataTransferConstructor) throw new Error("DataTransfer is unavailable.");
+  const list = canvasElement.querySelector<HTMLElement>('[aria-label="Chat list"]');
+  if (!list) throw new Error("Sidebar list is missing.");
+  const dataTransfer = new DataTransferConstructor();
+
+  await expect(totalDragOffset(shifted)).toBe(0);
+  fireEvent.dragStart(source, { ...dragAimPoint(source, list), dataTransfer });
+  try {
+    fireEvent.dragOver(target, { ...dragAimPoint(target, list), dataTransfer });
+    await waitFor(() => expect(totalDragOffset(shifted)).toBeGreaterThan(0));
+  } finally {
+    fireEvent.dragEnd(source, { dataTransfer });
+  }
+  await waitFor(() => expect(totalDragOffset(shifted)).toBe(0));
+}
+
+function dragRows(root: HTMLElement, selector: string, what: string): HTMLElement[] {
+  const rows = Array.from(root.querySelectorAll<HTMLElement>(selector));
+  if (rows.length < 2) throw new Error(`Need two ${what} rows to show a shift, found ${rows.length}.`);
+  return rows;
+}
+
+export const DragOffsets: Story = {
+  args: { agents: dragOffsetAgents, layout: dragOffsetLayout, pinnedItems: pinnedThree },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvasElement }) => {
+    // The first row is always dragged onto the second, so the row that has to move is the one being
+    // hovered. Aiming further down the list makes the neighbouring section win the drop resolver's
+    // nearest-centre hit test, and the agent never gets a target at all.
+    const pinned = dragRows(canvasElement, "[data-pinned-key]", "pinned");
+    await expectDragShift(canvasElement, pinned[0], pinned[1], pinned[1]);
+
+    const people = dragRows(canvasElement, "[data-person-id]", "person");
+    await expectDragShift(canvasElement, people[0], people[1], people[1]);
+
+    // An agent only shifts for a source in its own section, so both rows come from one section.
+    const sections = dragRows(canvasElement, "[data-section-id]", "section");
+    const populated = sections.find((section) => section.querySelectorAll("[data-chat-id]").length >= 2);
+    if (!populated) throw new Error("No section holds two agents.");
+    const agents = dragRows(populated, "[data-chat-id]", "chat");
+    await expectDragShift(canvasElement, agents[0], agents[1], agents[1]);
+
+    const handle = sections[0].querySelector<HTMLElement>(".sidebar-section-drag-handle");
+    if (!handle) throw new Error("Section drag handle is missing.");
+    await expectDragShift(canvasElement, handle, sections[1], sections[1]);
+  },
+};
+
+export const Empty: Story = {
+  args: {
+    agents: [],
+    people: [],
+    directThreads: [],
+    agentStates: {},
+    agentMoods: {},
+    pinnedItems: [],
+  },
+};
+
+export const FirstAgent: Story = {
+  args: {
+    ...Empty.args,
+    emptyAction: {
+      label: "Create your first agent",
+      avatarSeed: "first-bot",
+      onSelect: fn(),
+    },
+  },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas }) => {
+    const button = canvas.getByRole("button", { name: "Create your first agent" });
+    const avatar = button.querySelector<HTMLElement>(".agent-row-avatar");
+    const label = canvas.getByText("Create your first agent");
+    if (!avatar) throw new Error("First agent avatar is missing.");
+    const buttonBounds = button.getBoundingClientRect();
+    const avatarBounds = avatar.getBoundingClientRect();
+    const labelBounds = label.getBoundingClientRect();
+    await expect(
+      Math.abs(avatarBounds.top + avatarBounds.height / 2 - buttonBounds.top - buttonBounds.height / 2),
+    ).toBeLessThan(1);
+    await expect(
+      Math.abs(avatarBounds.top + avatarBounds.height / 2 - labelBounds.top - labelBounds.height / 2),
+    ).toBeLessThan(1);
+    await expect(labelBounds.left - avatarBounds.right).toBe(8);
+    await expect(avatarBounds.top).toBeGreaterThanOrEqual(buttonBounds.top);
+    await expect(avatarBounds.bottom).toBeLessThanOrEqual(buttonBounds.bottom);
+  },
+};
+
+export const EmptySections: Story = {
+  args: {
+    ...FirstAgent.args,
+    layout: {
+      ...defaultSidebarLayout(),
+      sections: [
+        { id: demoSectionId, name: "Product" },
+        { id: emptySectionId, name: "Research" },
+      ],
+      order: ["people", "unassigned", demoSectionId, emptySectionId],
+    },
+  },
+  decorators: FirstAgent.decorators,
+};
+
+export const FirstAgentNarrow: Story = {
+  ...FirstAgent,
+  decorators: [(Story) => <div style={{ width: "220px", height: "100vh" }}>{Story()}</div>],
+};
+
+export const FirstAgentCompact: Story = {
+  args: { ...FirstAgent.args, compact: true },
+  decorators: [(Story) => <div style={{ width: "80px", height: "100vh" }}>{Story()}</div>],
+};
+
+export const Channels: Story = {
+  args: {
+    agents: stressAgents,
+    channels: storyChannels,
+    activeChannelId: "channel-3",
+    onSelectChannel: fn(),
+    onEditChannel: fn(),
+    onDeleteChannel: fn(async () => undefined),
+    pinnedItems: [
+      { kind: "channel", id: "channel-4" },
+      { kind: "agent", id: "chief" },
+    ],
+  },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+};
+
+export const ChannelsCompact: Story = {
+  args: { ...Channels.args, compact: true },
+};
+
+export const ChannelContextMenu: Story = {
+  args: { ...Channels.args, pinnedItems: [] },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas, canvasElement }) => {
+    const channel = canvas.getByRole("button", { name: "Trio. 3 members here" });
+    const bounds = channel.getBoundingClientRect();
+    fireEvent.contextMenu(channel, {
+      clientX: bounds.left + bounds.width / 2,
+      clientY: bounds.top + bounds.height / 2,
+    });
+    const menu = await within(canvasElement.ownerDocument.body).findByRole("menu", { name: "Channel actions" });
+    await expect(within(menu).getByRole("menuitem", { name: "Pin" })).toBeInTheDocument();
+    await expect(within(menu).getByRole("menuitem", { name: "Move to" })).toBeInTheDocument();
+    await expect(within(menu).getByRole("menuitem", { name: "Edit channel" })).toBeInTheDocument();
+    await expect(within(menu).getByRole("menuitem", { name: "Delete channel" })).toBeInTheDocument();
+    await expect(within(menu).queryByRole("menuitem", { name: /Duplicate/ })).not.toBeInTheDocument();
+  },
+};
+
+export const ChannelDeleteConfirmation: Story = {
+  args: { ...Channels.args, pinnedItems: [] },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    const channel = canvas.getByRole("button", { name: "Trio. 3 members here" });
+    fireEvent.contextMenu(channel);
+    const menu = await within(canvasElement.ownerDocument.body).findByRole("menu", { name: "Channel actions" });
+    await userEvent.click(within(menu).getByRole("menuitem", { name: "Delete channel" }));
+    await within(canvasElement.ownerDocument.body).findByRole("alertdialog", { name: "Delete Trio?" });
+  },
+};
+
+export const DeleteConfirmationKeyboard: Story = {
+  args: {
+    layout: sectionedLayout,
+    pinnedItems: [],
+    onDeleteAgent: fn(async () => undefined),
+    onMutateLayout: fn(async () => undefined),
+  },
+  decorators: [(Story) => <div style={{ width: "280px", height: "100vh" }}>{Story()}</div>],
+  play: async ({ args: storyArgs, canvas, canvasElement, userEvent }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    for (const kind of ["agent", "section"] as const) {
+      const trigger = canvas.getByRole("button", { name: kind === "agent" ? /Chief, CEO/ : "Core team" });
+      const deletion = kind === "agent" ? storyArgs.onDeleteAgent : storyArgs.onMutateLayout;
+      const openConfirmation = async () => {
+        fireEvent.contextMenu(trigger);
+        const menu = await body.findByRole("menu", {
+          name: kind === "agent" ? "Agent actions" : "Section actions",
+        });
+        within(menu)
+          .getByRole("menuitem", { name: kind === "agent" ? "Delete agent" : "Delete" })
+          .focus();
+        await userEvent.keyboard("{Enter}");
+        const dialog = await body.findByRole("alertdialog");
+        await waitFor(() => expect(within(dialog).getByRole("button", { name: "Delete" })).toHaveFocus());
+        return dialog;
+      };
+
+      const dialog = await openConfirmation();
+      await expect(deletion).not.toHaveBeenCalled();
+      const confirm = within(dialog).getByRole("button", { name: "Delete" });
+      const cancel = within(dialog).getByRole("button", { name: "Cancel" });
+      await userEvent.tab();
+      await expect(cancel).toHaveFocus();
+      await userEvent.tab({ shift: true });
+      await expect(confirm).toHaveFocus();
+      await userEvent.tab({ shift: true });
+      await expect(cancel).toHaveFocus();
+      await userEvent.keyboard("{Enter}");
+      await waitFor(() => expect(body.queryByRole("alertdialog")).not.toBeInTheDocument());
+      await expect(deletion).not.toHaveBeenCalled();
+
+      await openConfirmation();
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(body.queryByRole("alertdialog")).not.toBeInTheDocument());
+      await expect(deletion).not.toHaveBeenCalled();
+
+      await openConfirmation();
+      await userEvent.keyboard("{Enter}");
+      await waitFor(() => expect(deletion).toHaveBeenCalledOnce());
+      await expect(deletion).toHaveBeenCalledWith(
+        kind === "agent" ? "chief" : { type: "delete", sectionId: demoSectionId },
+      );
+      await waitFor(() => expect(body.queryByRole("alertdialog")).not.toBeInTheDocument());
+    }
+  },
+};
+
+export const DeletedChats: Story = {
+  args: {
+    ...Channels.args,
+    showingArchivedChannels: true,
+    deletedChannels: storyChannels.map((channel) => ({ ...channel, id: `deleted-${channel.id}`, archived: true })),
+  },
+};

@@ -1,0 +1,165 @@
+import { MenuView } from "@expo/ui/community/menu";
+import type { Href } from "expo-router";
+import { Typography } from "heroui-native";
+import { Monitor, Plus, Server, Settings } from "lucide-react-native";
+import { Pressable, ScrollView, View, type ViewStyle } from "react-native";
+import { useCSSVariable } from "uniwind";
+
+import type { MobileSession } from "@/features/auth/api/mobile-auth";
+import { mobileUserName } from "@/features/auth/api/mobile-user-name";
+import type { MobileServer } from "@/features/workspace/context/mobile-workspace-context";
+import { serverStatusLabel } from "@/features/workspace/model/server-status";
+import { ProfileAvatar } from "@/shared/components/profile-avatar";
+import { SheetScrollEdgeEffect } from "@/shared/components/sheet-scroll-edge-effect";
+import { ServerDrawerIconButton } from "./server-drawer-icon-button";
+import { ServerStatusLabel } from "./server-status-label";
+
+interface ServerDrawerContentProps {
+  activeServerId: string;
+  headerHeight: number;
+  listTopInset: number;
+  muted: ViewStyle["backgroundColor"];
+  servers: MobileServer[];
+  session: MobileSession;
+  sideInset: number;
+  topInset: number;
+  onNavigate: (href: Href) => void;
+  onSelectServer: (serverId: string) => void;
+}
+
+export function ServerDrawerContent({
+  activeServerId,
+  headerHeight,
+  listTopInset,
+  muted,
+  servers,
+  session,
+  sideInset,
+  topInset,
+  onNavigate,
+  onSelectServer,
+}: ServerDrawerContentProps) {
+  const displayName = mobileUserName(session.user);
+  const avatarUrl = session.user.avatarUrl ? new URL(session.user.avatarUrl, session.apiUrl).toString() : null;
+  const mutedColor = String(muted);
+  const serverForeground = String(useCSSVariable("--openbot-text-on-light"));
+
+  return (
+    <>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="gap-1 pr-3"
+        contentContainerStyle={{ paddingTop: listTopInset }}
+        contentInsetAdjustmentBehavior="never"
+        showsVerticalScrollIndicator={false}
+      >
+        {servers.map((serverItem) => {
+          const selected = serverItem.id === activeServerId;
+          const ServerIcon = serverItem.kind === "local" ? Monitor : Server;
+          const serverLabel = serverItem.kind === "local" ? "Local" : "Remote";
+
+          const row = (
+            <Pressable
+              key={serverItem.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              accessibilityLabel={`${serverItem.name}, ${serverLabel}, ${serverStatusLabel(serverItem)}`}
+              accessibilityActions={[{ name: "options", label: "Server options" }]}
+              onAccessibilityAction={(event) => {
+                if (event.nativeEvent.actionName === "options")
+                  onNavigate({ pathname: "/server-settings", params: { serverId: serverItem.id } });
+              }}
+              className="min-h-16 flex-row items-center gap-3 rounded-2xl px-3 py-2"
+              onPress={() => onSelectServer(serverItem.id)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.58 : 1 })}
+            >
+              {selected ? (
+                <View
+                  style={{
+                    backgroundColor: serverItem.accent,
+                    borderRadius: 999,
+                    bottom: 16,
+                    left: 0,
+                    position: "absolute",
+                    top: 16,
+                    width: 3,
+                  }}
+                />
+              ) : null}
+              <View
+                className="size-11 items-center justify-center rounded-[15px]"
+                style={{ backgroundColor: serverItem.accent, borderCurve: "continuous" }}
+              >
+                <ServerIcon color={serverForeground} size={21} strokeWidth={1.8} />
+              </View>
+              <View className="min-w-0 flex-1 gap-0.5">
+                <Typography.Paragraph weight={selected ? "bold" : "semibold"} numberOfLines={1}>
+                  {serverItem.name}
+                </Typography.Paragraph>
+                <ServerStatusLabel server={serverItem} prefix={`${serverLabel} · `} />
+              </View>
+            </Pressable>
+          );
+          return (
+            <MenuView
+              key={serverItem.id}
+              shouldOpenOnLongPress
+              actions={[{ id: "options", title: "Options", image: "gearshape" }]}
+              onPressAction={(event) => {
+                if (event.nativeEvent.event === "options")
+                  onNavigate({ pathname: "/server-settings", params: { serverId: serverItem.id } });
+              }}
+            >
+              {row}
+            </MenuView>
+          );
+        })}
+      </ScrollView>
+
+      <SheetScrollEdgeEffect
+        style={{ height: headerHeight + 20, left: -sideInset, position: "absolute", right: -34, top: 0, zIndex: 10 }}
+      />
+
+      <View
+        className="absolute right-0 z-20 h-14 flex-row items-center justify-between pr-3"
+        pointerEvents="box-none"
+        style={{ left: -sideInset, paddingLeft: sideInset + 12, top: Math.max(topInset, 16) }}
+      >
+        <Typography.Heading type="h1" weight="bold">
+          Servers
+        </Typography.Heading>
+        <ServerDrawerIconButton
+          accessibilityLabel="Join a server"
+          color={mutedColor}
+          fallbackVariant="filled"
+          systemName="plus"
+          onPress={() => onNavigate("/add-server")}
+        >
+          <Plus color={mutedColor} size={18} strokeWidth={2} />
+        </ServerDrawerIconButton>
+      </View>
+
+      <View className="mr-3 flex-row items-center gap-2 pt-2">
+        <View className="min-h-14 min-w-0 flex-1 flex-row items-center gap-2.5 rounded-2xl px-2 py-2">
+          <ProfileAvatar neutral name={displayName} imageUrl={avatarUrl} size={36} />
+          <View className="min-w-0 flex-1">
+            <Typography.Paragraph type="body-sm" weight="semibold" numberOfLines={1}>
+              {displayName}
+            </Typography.Paragraph>
+            <Typography.Paragraph type="body-xs" className="text-text-secondary" numberOfLines={1} selectable>
+              {session.user.email}
+            </Typography.Paragraph>
+          </View>
+        </View>
+        <ServerDrawerIconButton
+          accessibilityLabel="Settings"
+          color={mutedColor}
+          systemName="gearshape"
+          onPress={() => onNavigate("/settings")}
+        >
+          <Settings color={mutedColor} size={18} strokeWidth={1.8} />
+        </ServerDrawerIconButton>
+      </View>
+    </>
+  );
+}

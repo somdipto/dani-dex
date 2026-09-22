@@ -1,0 +1,522 @@
+import { isManagedRuntimeProvider, type ManagedProviderId } from "@openbot/contracts/agent-providers";
+import type { AgentProviderId, AgentStatus, AppSetupState, ProviderRuntimeStatus } from "@openbot/contracts/ipc";
+import { createSignal, onCleanup } from "solid-js";
+import { expect, fn, waitFor, within } from "storybook/test";
+import type { Meta, StoryObj } from "storybook-solidjs-vite";
+import { Toaster, toast } from "../src/components/ui";
+import { OnboardingFlow } from "../src/features/onboarding/OnboardingFlow";
+import { createFakeCodeLogin } from "./code-login-fixture";
+import { STORY_AGENT_STATUS } from "./fixtures";
+import { createMockOpenBot } from "./mock-openbot";
+
+const setupState: AppSetupState = { completed: false, preferredProvider: null, preferredModel: null };
+
+/** OpenCode installed with no account of its own: enough to run an endpoint that brings its own key. */
+const openCodeInstalledAgentStatus: AgentStatus = {
+  ...STORY_AGENT_STATUS,
+  providers: [
+    ...(STORY_AGENT_STATUS.providers ?? []),
+    { id: "opencode", state: "sign-in-required", version: "1.18.27", message: null },
+  ],
+};
+
+const noProvidersConnectedAgentStatus: AgentStatus = {
+  ...STORY_AGENT_STATUS,
+  phase: "blocked",
+  cliVersion: null,
+  auth: { kind: "unknown" },
+  providers: [
+    { id: "opencode", state: "not-installed", version: null, message: "Install OpenCode on this computer." },
+    {
+      id: "codex",
+      state: "sign-in-required",
+      version: "0.149.1",
+      message: "Connect ChatGPT to continue.",
+    },
+    {
+      id: "claude",
+      state: "sign-in-required",
+      version: "2.1.246",
+      message: "Connect Claude to continue.",
+    },
+    {
+      id: "grok",
+      state: "sign-in-required",
+      version: "1.0.5",
+      message: "Connect Grok to continue.",
+    },
+  ],
+  capabilities: { ...STORY_AGENT_STATUS.capabilities, chat: "unavailable" },
+  message: "Connect ChatGPT or Claude to create a local agent.",
+};
+
+const checkingProvidersAgentStatus: AgentStatus = {
+  ...noProvidersConnectedAgentStatus,
+  phase: "starting",
+  providers: noProvidersConnectedAgentStatus.providers?.map((provider) => ({
+    ...provider,
+    state: "checking",
+    message: null,
+  })),
+  message: "Checking local AI providers…",
+};
+
+const bothConnectingAgentStatus: AgentStatus = {
+  ...noProvidersConnectedAgentStatus,
+  providers: noProvidersConnectedAgentStatus.providers?.map((provider) => ({
+    ...provider,
+    connectionState: "connecting" as const,
+    message: null,
+  })),
+};
+
+const lazyProviderAgentStatus: AgentStatus = {
+  ...noProvidersConnectedAgentStatus,
+  providers: noProvidersConnectedAgentStatus.providers?.map((provider) => ({
+    ...provider,
+    state: "not-installed",
+    connectionState: undefined,
+    message: null,
+  })),
+};
+
+const initialRuntimeStatuses = (): Record<ManagedProviderId, ProviderRuntimeStatus> => ({
+  codex: { phase: "not-downloaded", progress: null, message: null, version: null },
+  claude: { phase: "not-downloaded", progress: null, message: null, version: null },
+  grok: { phase: "not-downloaded", progress: null, message: null, version: null },
+  opencode: { phase: "not-downloaded", progress: null, message: null, version: null },
+});
+
+function MockedOnboardingFlow(props: { args: Parameters<typeof OnboardingFlow>[0]; permissions?: boolean }) {
+  const previousApi = window.openbot;
+  const mock = createMockOpenBot();
+  if (props.permissions) {
+    mock.api.getComputerUseState = async () => ({
+      status: "permissions-required",
+      permissions: [
+        { id: "screen-recording", granted: false },
+        { id: "accessibility", granted: false },
+      ],
+      message: null,
+    });
+  }
+  window.openbot = mock.api;
+  onCleanup(() => {
+    mock.dispose();
+    toast.dismiss();
+    window.openbot = previousApi;
+  });
+  return (
+    <>
+      <OnboardingFlow {...props.args} />
+      <Toaster />
+    </>
+  );
+}
+
+function RefreshResettingFlow(props: { args: Parameters<typeof OnboardingFlow>[0] }) {
+  const [agentStatus, setAgentStatus] = createSignal(bothConnectingAgentStatus);
+  const [refreshingProviders, setRefreshingProviders] = createSignal(false);
+  return (
+    <MockedOnboardingFlow
+      args={{
+        ...props.args,
+        agentStatus: agentStatus(),
+        refreshingProviders: refreshingProviders(),
+        onRefreshProviders: async () => {
+          setRefreshingProviders(true);
+          await props.args.onRefreshProviders?.();
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          setAgentStatus(noProvidersConnectedAgentStatus);
+          setRefreshingProviders(false);
+        },
+      }}
+    />
+  );
+}
+
+function LazyProviderDownloadsFlow(props: { args: Parameters<typeof OnboardingFlow>[0]; failGrokOnce?: boolean }) {
+  const [agentStatus, setAgentStatus] = createSignal(lazyProviderAgentStatus);
+  const [runtimeStatuses, setRuntimeStatuses] = createSignal(initialRuntimeStatuses());
+  const [grokFailed, setGrokFailed] = createSignal(false);
+  const providerTimers = new Map<AgentProviderId, Set<number>>();
+
+  function rememberTimer(provider: AgentProviderId, timer: number): number {
+    const timers = providerTimers.get(provider) ?? new Set<number>();
+    timers.add(timer);
+    providerTimers.set(provider, timers);
+    return timer;
+  }
+
+  function clearProviderTimers(provider: AgentProviderId): void {
+    for (const timer of providerTimers.get(provider) ?? []) {
+      window.clearInterval(timer);
+      window.clearTimeout(timer);
+    }
+    providerTimers.delete(provider);
+  }
+
+  function updateRuntime(provider: AgentProviderId, status: Partial<ProviderRuntimeStatus>): void {
+    if (!isManagedRuntimeProvider(provider)) return;
+    setRuntimeStatuses((current) => ({ ...current, [provider]: { ...current[provider], ...status } }));
+  }
+
+  function updateProvider(
+    provider: AgentProviderId,
+    update: Partial<NonNullable<AgentStatus["providers"]>[number]>,
+  ): void {
+    setAgentStatus((current) => ({
+      ...current,
+      providers: current.providers?.map((candidate) =>
+        candidate.id === provider ? { ...candidate, ...update } : candidate,
+      ),
+    }));
+  }
+
+  function finishDownload(provider: AgentProviderId): void {
+    updateRuntime(provider, { phase: "finishing", progress: 100 });
+    rememberTimer(
+      provider,
+      window.setTimeout(() => {
+        providerTimers.delete(provider);
+        updateRuntime(provider, { phase: "ready", progress: 100 });
+        updateProvider(provider, { state: "sign-in-required", message: `Connect ${provider} to continue.` });
+      }, 700),
+    );
+  }
+
+  function downloadProvider(provider: AgentProviderId): void {
+    clearProviderTimers(provider);
+    updateProvider(provider, { state: "not-installed", connectionState: undefined, message: null });
+    updateRuntime(provider, { phase: "downloading", progress: 0 });
+    let progress = 0;
+    const interval = window.setInterval(() => {
+      progress = Math.min(100, progress + 4);
+      if (props.failGrokOnce && provider === "grok" && !grokFailed() && progress >= 56) {
+        window.clearInterval(interval);
+        providerTimers.delete(provider);
+        setGrokFailed(true);
+        updateRuntime(provider, {
+          phase: "download-error",
+          progress: 55,
+          message: "The download was interrupted. Try again.",
+        });
+        return;
+      }
+      updateRuntime(provider, { phase: "downloading", progress });
+      if (progress < 100) return;
+      window.clearInterval(interval);
+      providerTimers.delete(provider);
+      finishDownload(provider);
+    }, 160);
+    rememberTimer(provider, interval);
+  }
+
+  function cancelProviderDownload(provider: AgentProviderId): void {
+    clearProviderTimers(provider);
+    updateRuntime(provider, { phase: "not-downloaded", progress: null });
+  }
+
+  function connectProvider(provider: AgentProviderId): void {
+    clearProviderTimers(provider);
+    updateProvider(provider, { connectionState: "connecting", message: null });
+    rememberTimer(
+      provider,
+      window.setTimeout(() => {
+        providerTimers.delete(provider);
+        updateProvider(provider, { state: "available", connectionState: undefined, message: null });
+      }, 1_200),
+    );
+  }
+
+  onCleanup(() => {
+    for (const provider of providerTimers.keys()) clearProviderTimers(provider);
+  });
+
+  return (
+    <MockedOnboardingFlow
+      args={{
+        ...props.args,
+        agentStatus: agentStatus(),
+        providerRuntimeStatuses: runtimeStatuses(),
+        onDownloadProvider: downloadProvider,
+        onCancelProviderDownload: cancelProviderDownload,
+        onConnectProvider: connectProvider,
+        onInstallProvider: fn(),
+        onRefreshProviders: undefined,
+      }}
+    />
+  );
+}
+
+const args: Parameters<typeof OnboardingFlow>[0] = {
+  state: setupState,
+  agentStatus: STORY_AGENT_STATUS,
+  platform: "darwin",
+  onSave: async (_provider: AgentProviderId) => undefined,
+  // Every onboarding story offers it: naming your own endpoint is part of choosing a provider,
+  // not a variant of the step.
+  onAddCustomProvider: fn(async () => "restarted" as const),
+  customProviders: [
+    {
+      id: "studio-local",
+      name: "Studio Local",
+      baseUrl: "http://127.0.0.1:11434/v1",
+      hasApiKey: false,
+      models: [{ id: "qwen3-coder:30b", name: "Qwen3 Coder 30B" }],
+    },
+  ],
+};
+
+const meta = {
+  title: "Setup/OnboardingFlow",
+  component: OnboardingFlow,
+  args,
+  parameters: {
+    layout: "fullscreen",
+    viewport: {
+      options: {
+        onboardingNarrow: {
+          name: "Onboarding — 420 × 760",
+          styles: { width: "420px", height: "760px" },
+        },
+      },
+    },
+  },
+  render: (storyArgs) => <MockedOnboardingFlow args={storyArgs} />,
+} satisfies Meta<typeof OnboardingFlow>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Initial: Story = {};
+
+/** The row that adds a self-described endpoint. OpenCode is installed, so the row offers Add. */
+export const AddCustomProvider: Story = {
+  args: { agentStatus: openCodeInstalledAgentStatus },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(await canvas.findByRole("button", { name: "Add custom provider" }));
+    const body = within(document.body);
+    await expect(body.findByRole("heading", { name: "Custom provider" })).resolves.toBeTruthy();
+  },
+};
+
+/** The endpoint is refused, so the form stays with the values, including the key the user typed. */
+export const CustomProviderSaveFails: Story = {
+  args: {
+    agentStatus: openCodeInstalledAgentStatus,
+    onAddCustomProvider: fn(async () => {
+      throw new Error("House Router refused the API key.");
+    }),
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(await canvas.findByRole("button", { name: "Add custom provider" }));
+    const body = within(document.body);
+    // A required field appends an aria-hidden asterisk to its label, so its name is not an exact match.
+    await userEvent.type(await body.findByLabelText(/^Provider ID/), "house-router");
+    await userEvent.type(body.getByLabelText(/^Display name/), "House Router");
+    await userEvent.type(body.getByLabelText(/^Base URL/), "https://models.example.com/v1");
+    await userEvent.type(body.getByLabelText("Model 1 ID"), "glm-5-air");
+    await userEvent.type(body.getByLabelText("Model 1 display name"), "GLM 5 Air");
+    await userEvent.click(body.getByRole("button", { name: "Submit" }));
+
+    await expect(body.findByText("House Router refused the API key.")).resolves.toBeTruthy();
+    await expect(body.getByLabelText(/^Provider ID/)).toHaveValue("house-router");
+  },
+};
+
+export const NarrowProviderVersions: Story = {
+  globals: { viewport: "onboardingNarrow" },
+  args: {
+    providerRuntimeStatuses: {
+      codex: { phase: "ready", progress: null, message: null, version: "0.149.1" },
+      claude: { phase: "ready", progress: null, message: null, version: "2.1.246" },
+      grok: { phase: "ready", progress: null, message: null, version: "1.0.5" },
+    },
+  },
+};
+
+export const OptionalPermissions: Story = {
+  render: (storyArgs) => <MockedOnboardingFlow args={storyArgs} permissions />,
+};
+
+export const NoProvidersConnected: Story = {
+  args: {
+    agentStatus: noProvidersConnectedAgentStatus,
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+  },
+  play: async ({ args: storyArgs, canvas, userEvent }) => {
+    const providers = canvas.getByRole("radiogroup", { name: "Default provider" });
+    await expect(within(providers).getByRole("radio", { name: /ChatGPT/ })).not.toBeChecked();
+    await expect(within(providers).getByRole("radio", { name: /Claude/ })).toBeEnabled();
+    await expect(within(providers).getByRole("radio", { name: /Grok/ })).toBeEnabled();
+
+    await userEvent.click(canvas.getByRole("button", { name: "Connect ChatGPT" }));
+    await userEvent.click(canvas.getByRole("button", { name: "Connect Claude" }));
+    await userEvent.click(canvas.getByRole("button", { name: "Connect Grok" }));
+    await userEvent.click(canvas.getByRole("button", { name: "Refresh providers" }));
+
+    await expect(storyArgs.onConnectProvider).toHaveBeenCalledWith("codex");
+    await expect(storyArgs.onConnectProvider).toHaveBeenCalledWith("claude");
+    await expect(storyArgs.onConnectProvider).toHaveBeenCalledWith("grok");
+    await expect(storyArgs.onRefreshProviders).toHaveBeenCalledOnce();
+    await expect(canvas.getByRole("button", { name: "Next" })).toBeDisabled();
+  },
+};
+
+/**
+ * The second way in, on the step where it matters most: first run on a computer whose browser
+ * cannot finish the hand-off. The ChatGPT row keeps it in its actions menu, beside the Connect the
+ * step leads with, and the code opens over the step rather than replacing it.
+ */
+export const SignInWithCode: Story = {
+  args: {
+    agentStatus: noProvidersConnectedAgentStatus,
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+    codeLogin: createFakeCodeLogin({ finishAfterMs: 0 }),
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole("button", { name: "More ways to log in to ChatGPT" }));
+    const body = within(document.body);
+    await userEvent.click(await body.findByRole("menuitem", { name: "Log in with code" }));
+    await expect(await body.findByLabelText("Login code K T Q 4 - B 6 2 M X")).toHaveTextContent("KTQ4-B62MX");
+  },
+};
+
+export const RefreshingProviders: Story = {
+  args: {
+    agentStatus: checkingProvidersAgentStatus,
+    refreshingProviders: true,
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+  },
+  play: async ({ canvas }) => {
+    const providers = canvas.getByRole("radiogroup", { name: "Default provider" });
+    await expect(canvas.getByRole("button", { name: "Checking providers" })).toBeDisabled();
+    await expect(canvas.queryByRole("button", { name: /^Install / })).not.toBeInTheDocument();
+    await expect(canvas.getByRole("button", { name: "Connect ChatGPT" })).toBeDisabled();
+    await expect(canvas.getByRole("button", { name: "Connect Claude" })).toBeDisabled();
+    await expect(canvas.getByRole("button", { name: "Connect Grok" })).toBeDisabled();
+    await expect(within(providers).getByRole("radio", { name: /ChatGPT/ })).toBeEnabled();
+    await expect(within(providers).getByRole("radio", { name: /Claude/ })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Next" })).toBeDisabled();
+  },
+};
+
+export const ConnectedWithRefreshWarning: Story = {
+  args: {
+    agentStatus: {
+      ...STORY_AGENT_STATUS,
+      providers: STORY_AGENT_STATUS.providers?.map((provider) =>
+        provider.id === "codex"
+          ? {
+              ...provider,
+              checkError: "Could not verify ChatGPT. Keeping the existing connection.",
+            }
+          : provider,
+      ),
+    },
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+  },
+};
+
+export const ConnectingChatGPT: Story = {
+  args: {
+    agentStatus: {
+      ...noProvidersConnectedAgentStatus,
+      providers: noProvidersConnectedAgentStatus.providers?.map((provider) =>
+        provider.id === "codex" ? { ...provider, connectionState: "connecting", message: null } : provider,
+      ),
+    },
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole("button", { name: "Restart ChatGPT" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Connect Claude" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Refresh providers" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Next" })).toBeDisabled();
+  },
+};
+
+export const ConnectingClaude: Story = {
+  args: {
+    agentStatus: {
+      ...noProvidersConnectedAgentStatus,
+      providers: noProvidersConnectedAgentStatus.providers?.map((provider) =>
+        provider.id === "claude" ? { ...provider, connectionState: "connecting", message: null } : provider,
+      ),
+    },
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole("button", { name: "Restart Claude" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Connect ChatGPT" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Refresh providers" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Next" })).toBeDisabled();
+  },
+};
+
+export const ConnectingBoth: Story = {
+  args: {
+    agentStatus: bothConnectingAgentStatus,
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole("button", { name: "Restart ChatGPT" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Restart Claude" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Refresh providers" })).toBeEnabled();
+  },
+};
+
+export const RefreshResettingConnections: Story = {
+  args: {
+    agentStatus: bothConnectingAgentStatus,
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+  },
+  render: (storyArgs) => <RefreshResettingFlow args={storyArgs} />,
+  play: async ({ args: storyArgs, canvas, userEvent }) => {
+    await expect(canvas.getByRole("button", { name: "Restart ChatGPT" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Restart Claude" })).toBeEnabled();
+    await userEvent.click(canvas.getByRole("button", { name: "Refresh providers" }));
+    await waitFor(() => expect(canvas.getByRole("button", { name: "Connect ChatGPT" })).toBeEnabled());
+    await expect(canvas.getByRole("button", { name: "Connect Claude" })).toBeEnabled();
+    await expect(storyArgs.onRefreshProviders).toHaveBeenCalledOnce();
+    await expect(canvas.queryByRole("alert")).not.toBeInTheDocument();
+  },
+};
+
+export const ConnectedWithReconnect: Story = {
+  args: {
+    agentStatus: STORY_AGENT_STATUS,
+    onConnectProvider: fn(),
+    onRefreshProviders: fn(),
+  },
+  play: async ({ canvas }) => {
+    const providers = canvas.getByRole("radiogroup", { name: "Default provider" });
+    await expect(within(providers).getByRole("radio", { name: /ChatGPT/ })).toBeChecked();
+    await expect(canvas.getByRole("button", { name: "Reconnect ChatGPT" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Reconnect Claude" })).toBeEnabled();
+    await expect(canvas.getByRole("button", { name: "Next" })).toBeEnabled();
+  },
+};
+
+export const LazyProviderDownloads: Story = {
+  args: {
+    agentStatus: lazyProviderAgentStatus,
+  },
+  render: (storyArgs) => <LazyProviderDownloadsFlow args={storyArgs} />,
+};
+
+export const LazyProviderDownloadsWithFailure: Story = {
+  args: {
+    agentStatus: lazyProviderAgentStatus,
+  },
+  render: (storyArgs) => <LazyProviderDownloadsFlow args={storyArgs} failGrokOnce />,
+};
