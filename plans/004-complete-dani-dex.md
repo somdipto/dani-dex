@@ -8,6 +8,25 @@ Draft for owner review. Do not publish or push until Somdipto provides the targe
 
 Dani-Dex is a separate product from Dani Bot / `dani-desktop`. It is a local-first multi-agent desktop workspace in which a user can choose an agent harness and model, speak naturally to a chief-of-staff agent, let that agent delegate work to other agents while the conversation continues, and hear the final response spoken back. It must preserve the visible transcript, delegated work, approvals, cancellation, and evidence in the normal conversation thread.
 
+## Owner scope update - 2026-09-23
+
+The following requirements supersede narrower assumptions elsewhere in this draft:
+
+- Remove every `OpenBot` / `openbot` mention from README, documentation, source, tests, package names, paths, runtime identifiers, environment variables, protocols, URLs, workflows, resources, and codebase-facing files. `LICENSE` and `NOTICE` remain unchanged. Where old identifiers must be read for upgrade compatibility, isolate them in a generated migration compatibility manifest so the ordinary codebase and documentation carry only Dani-Dex names; add tests that prove the old state migrates without loss.
+- Every push to `main` triggers CI and cross-platform build validation for Windows x64, Linux x64, macOS x64 (Intel), macOS arm64 (Apple Silicon), and the universal macOS distribution.
+- The release DMG must run natively on both Intel and Apple Silicon. Build per-architecture app bundles, merge architecture-compatible native contents correctly, and verify the final universal artifact with `lipo`, codesign, notarization, package launch, and update metadata. Do not call two separate DMGs “universal.”
+- Shipped desktop builds must check GitHub Releases for updates and offer download/restart in the app. A `main` push builds test artifacts; a release promotion creates versioned signed assets and updater metadata. Do not point production clients at every unreviewed main build.
+- Preinstall and verify three managed runtimes: OpenCode as the free model proxy, Hermes as the default general-purpose harness, and the exact owner-approved OMP harness for complex work. The OMP implementation remains blocked only on the missing upstream repository URL.
+- Present selection in two layers. Layer 1 is the harness: Hermes or OMP. Layer 2 is the model/provider route inside that harness: OpenCode free proxy, Claude Code, Claude subscription OAuth, or OpenAI subscription OAuth. Capability checks must prevent unsupported harness/provider/model combinations.
+- OpenAI authentication must discover the supported Realtime/live model automatically and enable the full-duplex mode only after a real Realtime session can be minted. Local Codex credentials must not be assumed equivalent without source-grounded provider support.
+
+### Three-machine acceptance fleet
+
+- Somdipto's Intel Mac: universal DMG install, launch, auth, managed runtimes, update, and duplex call.
+- Friend's Apple Silicon Mac: the same universal DMG and the same acceptance flow, running arm64 natively.
+- Friend's Windows machine: Windows installer, managed runtimes, update, and duplex call.
+- CI Linux runner or a real Linux x64 tester: AppImage install/update path and duplex smoke where audio hardware is available.
+
 ## Non-goals for this issue
 
 - Do not merge or share state, branding, repository history, runtime directories, app identifiers, release channels, or update feeds with Dani Bot.
@@ -192,7 +211,7 @@ A documented baseline identifies passing gates, inherited warnings, environmenta
 - [x] Build, typecheck, run focused link/identity tests, launch, and inspect pixels.
 - [x] Replace source history with one local root commit authored by Somdipto Nandy.
 - [x] Remove all remotes.
-- [ ] Add an automated product-copy scan that permits legal notices and intentional migration vocabulary only.
+- [ ] Add an automated zero-residual-name scan across every tracked text file except `LICENSE` and `NOTICE`; fail CI on any case-insensitive old-name hit. Migration compatibility data must be generated/encoded without reintroducing the old product name into ordinary tracked text.
 - [ ] Add data-path migration tests before changing any existing user-data directory or database name.
 - [ ] Replace old product artwork with approved Dani-Dex artwork. Do not merely recolor without owner review.
 
@@ -227,14 +246,14 @@ Every advertised auth route succeeds live or is hidden/disabled with a truthful 
 ### Tasks
 - [ ] Add `HarnessId`, descriptors, capabilities, health, auth, model discovery, session and event contracts.
 - [ ] Migrate existing provider-driven sessions behind a compatibility harness adapter.
-- [ ] Implement Hermes runtime install/verification and adapter.
+- [ ] Implement Hermes runtime install/verification and adapter; bundle or first-run provision it automatically with pinned version, checksum, license, and offline/error states.
 - [ ] Create, resume, cancel, and recover Hermes sessions.
 - [ ] Map Hermes tool/delegation/approval/final events to the canonical event stream.
-- [ ] Make harness choice explicit in agent creation and settings.
-- [ ] Put model choice inside the selected harness UI.
+- [ ] Make Layer 1 harness choice explicit in agent creation/settings: Hermes (default/general) or OMP (complex).
+- [ ] Put Layer 2 provider/model choice inside the selected harness UI: OpenCode free proxy, Claude Code, Claude subscription OAuth, or OpenAI subscription OAuth, filtered by actual compatibility.
 - [ ] Reject incompatible stored harness/model pairs with a repair path.
 - [ ] Add health checks that distinguish missing runtime, bad auth, no models, startup failure, and protocol failure.
-- [ ] After the exact OMP/mypi repository is supplied, perform license/security/API research and implement one coding-harness adapter.
+- [ ] After the exact OMP repository is supplied, perform license/security/API research, pin and preinstall it, and implement its coding/complex-work harness adapter.
 - [ ] Keep Laya absent from execution. Capture trace points needed for later shadow evaluation.
 
 ### Exit gate
@@ -337,7 +356,24 @@ Record end-of-speech to final transcript, final transcript to harness dispatch, 
 ### Exit gate
 Ten consecutive successful chief-of-staff calls on each supported desktop target available to the team, with no hidden manual repair.
 
-## Phase 7 - Packaging, release, and evidence
+## Phase 7 - Packaging, CI/CD, release, updates, and evidence
+
+### Main-push CI matrix
+
+- [ ] Trigger on every push and pull request to `main`.
+- [ ] Run static checks, full bounded test shards, browser smoke, auth/harness/voice regressions, Storybook, and package preflight.
+- [ ] Build unsigned test artifacts for Windows x64, Linux x64, macOS x64, macOS arm64, and a universal macOS package where GitHub runner/toolchain support permits it.
+- [ ] Upload artifacts with commit SHA, architecture, checksums, SBOM, and test manifest. Main-push artifacts are not production update releases.
+- [ ] Gate branch success on all required jobs. Use concurrency cancellation only for superseded validation, never for release publishing.
+
+### Release promotion and updater
+
+- [ ] Promote a reviewed `main` commit through an explicit version/tag or approved release workflow.
+- [ ] Build/sign/notarize macOS x64 and arm64 inputs, assemble and verify a true universal application/DMG, and launch-test on both architectures.
+- [ ] Build Windows x64 and Linux x64 installers, with signing when owner credentials are available and truthful warnings otherwise.
+- [ ] Publish GitHub Release assets plus `latest*.yml` / platform updater metadata expected by the pinned updater.
+- [ ] Point `electron-updater` at `somdipto/dani-dex` and verify check, download, cancel, ready, restart-install, rollback/error, and skipped-version behavior.
+- [ ] Prove an installed N build offers and completes an update to N+1 on Intel Mac, Apple Silicon Mac, Windows, and AppImage Linux.
 
 ### Tasks
 - [ ] Package voice runtimes and required notices for macOS Intel, macOS Apple Silicon, Windows x64, and Linux x64 as supported.
