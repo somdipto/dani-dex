@@ -58,7 +58,7 @@ export function AgentEventBridge() {
   const channels = useChannels();
   const platform = usePlatform();
   const { activeServerId } = useServers();
-  const { applyAccountUsage } = useAuth();
+  const { applyAccountUsage, centralAuth } = useAuth();
   const { applyAgentStatus, refreshAgentProviders } = useProviders();
   const { agentList, setModelOptions, explicitlyOpenedAgentChatId, applyStoredAgents } = useAgents();
   const { setConversationErrors } = useConversationController();
@@ -137,6 +137,7 @@ export function AgentEventBridge() {
         return;
       case "conversation-invalidated":
         {
+          if (centralAuth().status !== "signed_in") return;
           const request = ++readRefresh;
           const serverId = activeServerId();
           void window.openbot.agent

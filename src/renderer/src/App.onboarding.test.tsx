@@ -354,6 +354,10 @@ describe("Dani-Dex connected desktop shell", () => {
 
     expect(await screen.findByRole("heading", { name: "Sign in to Dani-Dex" })).toBeInTheDocument();
     expect(screen.queryByRole("radiogroup", { name: "Default provider" })).not.toBeInTheDocument();
+    expect(window.openbot.agent.listConversationReads).not.toHaveBeenCalled();
+
+    emitAgentEvent?.({ type: "conversation-invalidated", agentId: "chief", revision: 1 });
+    expect(window.openbot.agent.listConversationReads).not.toHaveBeenCalled();
 
     await fireEvent.input(screen.getByRole("textbox", { name: "Email" }), {
       target: { value: "person@example.com" },

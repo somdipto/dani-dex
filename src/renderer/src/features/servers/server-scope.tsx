@@ -115,12 +115,14 @@ const ServerScope = createSimpleContext({
             if (isCurrent()) setSidebarLayout(value);
           })
           .catch(() => undefined),
-        window.openbot.agent
-          .listConversationReads()
-          .then((value) => {
-            if (isCurrent()) applyConversationReads(value);
-          })
-          .catch(() => undefined),
+        centralAuth().status === "signed_in"
+          ? window.openbot.agent
+              .listConversationReads()
+              .then((value) => {
+                if (isCurrent()) applyConversationReads(value);
+              })
+              .catch(() => undefined)
+          : Promise.resolve(),
       ]).finally(() => {
         if (isCurrent()) setLoaded(true);
       });
