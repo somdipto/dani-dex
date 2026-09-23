@@ -64,7 +64,7 @@ describe("messageFileReferences", () => {
         path: "~/Dani-Dex/Shared/raport.csv",
         name: "raport.csv",
         start: 5,
-        end: 32,
+        end: 33,
       },
     ]);
   });
