@@ -76,3 +76,21 @@ async function temporaryRoot(): Promise<string> {
   await mkdir(root, { recursive: true });
   return root;
 }
+
+describe("setup harness", () => {
+  it("stores Layer 1 apart from the provider and model, and drops an unknown harness", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-setup-harness-"));
+    roots.push(root);
+    const path = join(root, "setup.json");
+    await writeSetupState(path, { preferredProvider: "claude", preferredModel: null, harness: "hermes" });
+    await expect(readSetupState(path)).resolves.toEqual({
+      completed: true,
+      preferredProvider: "claude",
+      preferredModel: null,
+      harness: "hermes",
+    });
+    const stored = JSON.parse(await readFile(path, "utf8"));
+    await writeFile(path, JSON.stringify({ ...stored, harness: "unknown" }));
+    await expect(readSetupState(path)).resolves.not.toHaveProperty("harness");
+  });
+});

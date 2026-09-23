@@ -1,3 +1,4 @@
+import type { AgentHarnessId } from "./agent-harnesses";
 import type { ManagedProviderId, ManagedToolRuntimeId } from "./agent-providers";
 import type { AgentModelId } from "./ipc-agent-identity";
 import type { AgentProviderId } from "./ipc-agent-status";
@@ -119,11 +120,17 @@ export interface AppSetupState {
    * endpoint becomes the default: the provider is the CLI that runs it, and only the model names it.
    */
   preferredModel: AgentModelId | null;
+  /**
+   * Layer 1, stored apart from the provider and model. Absent means each provider's own CLI runs
+   * the turn; `hermes` runs every provider inside the Hermes harness.
+   */
+  harness?: AgentHarnessId | null;
 }
 
 export interface SaveSetupInput {
   preferredProvider: AgentProviderId;
   preferredModel: AgentModelId | null;
+  harness?: AgentHarnessId | null;
 }
 
 export interface AnalyticsPreference {

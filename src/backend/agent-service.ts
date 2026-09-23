@@ -145,7 +145,7 @@ import {
 import { mcpSecretValues, redactMcpValues } from "./mcp-redaction";
 import { McpServerStore } from "./mcp-server-store";
 import { type AppServerRequest, type DynamicToolCallParams, decodeRecordResponse, isRecord } from "./protocol";
-import { NO_PROVIDER_CREDENTIALS, type ProviderClientContext } from "./provider-drivers";
+import { type BuiltInProviderDriver, NO_PROVIDER_CREDENTIALS, type ProviderClientContext } from "./provider-drivers";
 import { recordAgentRestartActivity } from "./restart-activity";
 import { RoutineTimer } from "./routine-timer";
 import type { SidebarLayoutStore } from "./sidebar-layout-store";
@@ -199,6 +199,8 @@ export interface AgentServiceOptions {
   /** The model chosen beside `preferredProvider`, or `null` for that provider's own default. */
   preferredModel?: AgentModelId | null;
   clientFactory?: AgentClientFactory | null;
+  /** Layer 1: the harness driver for each provider. Omitted means each provider's own CLI. */
+  providerDriver?: (provider: AgentProvider) => BuiltInProviderDriver;
   bundledExecutables?: BundledProviderExecutables;
   prepareAgentWorkspace?: (agent: AgentSummary) => Promise<void>;
   hostedSites?: AgentHostedSites | null;
@@ -339,6 +341,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       preferredProvider = "codex",
       preferredModel = null,
       clientFactory = null,
+      providerDriver,
       bundledExecutables = DEFAULT_BUNDLED_EXECUTABLES,
       prepareAgentWorkspace = async () => undefined,
       hostedSites = null,
@@ -481,6 +484,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       preferredModel,
       clientFactory,
       bundledExecutables,
+      ...(providerDriver ? { driverFor: providerDriver } : {}),
       // The exclusion travels with the credentials, so the client that holds a session on a removed
       // endpoint can refuse the prompt itself, after the waits every caller above it makes.
       credentials: {

@@ -43,6 +43,7 @@ import {
 } from "./../protocol";
 import {
   BUILT_IN_PROVIDER_DRIVERS,
+  type BuiltInProviderDriver,
   type ProviderCliCommand,
   type ProviderClientContext,
   requireProviderDriver,
@@ -383,6 +384,8 @@ export class ProviderRuntime implements ProviderPort {
   readonly #clientFactory: AgentClientFactory | null;
   readonly #bundledExecutables: BundledProviderExecutables;
   readonly #credentials: ProviderClientContext;
+  /** Layer 1: the harness that runs each provider. Defaults to each provider's own CLI. */
+  readonly #driverFor: (provider: AgentProvider) => BuiltInProviderDriver;
   readonly #clients = new Map<AgentProvider, AgentClient>();
   readonly #usageLimitRefreshes = new WeakMap<AgentClient, Promise<void>>();
   /**
@@ -446,6 +449,7 @@ export class ProviderRuntime implements ProviderPort {
     clientFactory: AgentClientFactory | null;
     bundledExecutables: BundledProviderExecutables;
     credentials: ProviderClientContext;
+    driverFor?: (provider: AgentProvider) => BuiltInProviderDriver;
     mcpHandoff?: McpHandoffLog;
     redactMcp: (text: string) => string;
   }) {
@@ -459,6 +463,7 @@ export class ProviderRuntime implements ProviderPort {
     this.#clientFactory = options.clientFactory;
     this.#bundledExecutables = { ...options.bundledExecutables };
     this.#credentials = options.credentials;
+    this.#driverFor = options.driverFor ?? requireProviderDriver;
     this.#mcpHandoff = options.mcpHandoff ?? new McpHandoffLog();
     this.#redactMcp = options.redactMcp;
   }
@@ -484,7 +489,7 @@ export class ProviderRuntime implements ProviderPort {
   /** Resolve a provider's binary and keep who owns it, whether or not the provider is signed in. */
   async #resolveProviderCli(provider: AgentProvider): Promise<AgentCliInfo> {
     try {
-      const cli = await requireProviderDriver(provider).resolveCli({
+      const cli = await this.#driverFor(provider).resolveCli({
         bundledExecutable: this.#bundledExecutables[provider],
       });
       this.#cliSources.set(provider, cli.source);
@@ -530,7 +535,7 @@ export class ProviderRuntime implements ProviderPort {
     if (!cli || !this.#clients.has(provider))
       throw new Error("Connect the selected provider before generating a profile.");
     if (this.#clientFactory) return this.#clientFactory(provider, cli);
-    const driver = requireProviderDriver(provider);
+    const driver = this.#driverFor(provider);
     if (driver.createProfileClient) return driver.createProfileClient(cli, this.#requestTimeoutMs, this.#credentials);
     return driver.createClient(cli, this.#requestTimeoutMs, this.#credentials);
   }
@@ -607,7 +612,7 @@ export class ProviderRuntime implements ProviderPort {
     if (!this.#clients.has(provider) || !account) return;
     this.#setStatus({
       cliVersion: this.#cli.get(provider)?.version ?? null,
-      auth: requireProviderDriver(provider).authState(account),
+      auth: this.#driverFor(provider).authState(account),
     });
   }
 
@@ -670,7 +675,7 @@ export class ProviderRuntime implements ProviderPort {
     if (this.#providerRefresh || (!start && ["starting", "restarting"].includes(this.#status.phase))) {
       return Promise.resolve(this.status());
     }
-    const signIn = requireProviderDriver(provider).signIn;
+    const signIn = this.#driverFor(provider).signIn;
     return this.#runProviderConnectionCommand(provider, async () => {
       switch (signIn.kind) {
         case "browser":
@@ -980,7 +985,7 @@ export class ProviderRuntime implements ProviderPort {
         try {
           const account = await client.request("account/read", { refreshToken: true }, decodeAccountReadResult, 5_000);
           if (account.account) {
-            requireProviderDriver(provider).validateAccount(account.account);
+            this.#driverFor(provider).validateAccount(account.account);
             this.#accounts.set(provider, account.account);
             this.#setStatus({
               providers: updateProviderStatus(this.#status.providers, provider, {
@@ -1050,7 +1055,7 @@ export class ProviderRuntime implements ProviderPort {
     provider: AgentProvider,
     cli: AgentCliInfo,
   ): Promise<{ client: AgentClient; account: NonNullable<AccountReadResult["account"]> }> {
-    const driver = requireProviderDriver(provider);
+    const driver = this.#driverFor(provider);
     const client = this.#clientFactory
       ? this.#clientFactory(provider, cli)
       : driver.createClient(cli, this.#requestTimeoutMs, this.#credentials);
@@ -1124,7 +1129,7 @@ export class ProviderRuntime implements ProviderPort {
           this.#setStatus({
             phase: "ready",
             cliVersion: this.#cli.get(primaryProvider)?.version ?? null,
-            auth: requireProviderDriver(primaryProvider).authState(primaryAccount ?? null),
+            auth: this.#driverFor(primaryProvider).authState(primaryAccount ?? null),
             providers: updateProviderStatus(this.#status.providers, provider, {
               state: "available",
               version: cli.version,
@@ -1540,7 +1545,7 @@ export class ProviderRuntime implements ProviderPort {
     const results = await Promise.all(
       requestedProviders.map(async (provider): Promise<string | null> => {
         if (this.#clients.has(provider)) return null;
-        const driver = requireProviderDriver(provider);
+        const driver = this.#driverFor(provider);
         let client: AgentClient | null = null;
         let cli: AgentCliInfo | null = null;
         try {
@@ -1631,7 +1636,7 @@ export class ProviderRuntime implements ProviderPort {
     this.#setStatus({
       phase: "ready",
       cliVersion: this.#cli.get(primaryProvider)?.version ?? null,
-      auth: requireProviderDriver(primaryProvider).authState(primaryAccount ?? null),
+      auth: this.#driverFor(primaryProvider).authState(primaryAccount ?? null),
       providers: finalProviderStatuses,
       capabilities: { ...this.#status.capabilities, chat: "ready", browser: "ready" },
       message: null,

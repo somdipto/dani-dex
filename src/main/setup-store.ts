@@ -1,4 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
+import { type AgentHarnessId, isAgentHarness } from "@openbot/contracts/agent-harnesses";
 import {
   type AgentModelId,
   type AgentProviderId,
@@ -18,6 +19,8 @@ interface StoredSetup {
    * field means the provider's own default model, which is what those users already have.
    */
   preferredModel?: AgentModelId;
+  /** Layer 1. Added without a version bump for the same reason as `preferredModel`. */
+  harness?: AgentHarnessId;
   completedAt: string;
 }
 
@@ -41,6 +44,7 @@ export async function readSetupState(path: string): Promise<AppSetupState> {
       // A malformed model is dropped rather than failing the whole read: the provider is still a
       // usable answer, and the model falls back to that provider's default.
       preferredModel: isAgentModel(parsed.preferredModel) ? parsed.preferredModel : null,
+      ...(isAgentHarness(parsed.harness) ? { harness: parsed.harness } : {}),
     };
   } catch (error) {
     if (isMissing(error) || error instanceof SyntaxError) return { ...EMPTY_SETUP };
@@ -53,6 +57,7 @@ export async function writeSetupState(path: string, input: SaveSetupInput): Prom
     version: 2,
     preferredProvider: input.preferredProvider,
     ...(input.preferredModel === null ? {} : { preferredModel: input.preferredModel }),
+    ...(input.harness ? { harness: input.harness } : {}),
     completedAt: new Date().toISOString(),
   };
   await writeFile(path, `${JSON.stringify(stored)}\n`, { encoding: "utf8", mode: 0o600 });

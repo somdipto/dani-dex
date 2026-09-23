@@ -1,3 +1,4 @@
+import { agentHarnessDescriptor, isAgentHarness } from "@openbot/contracts/agent-harnesses";
 import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
 import type {
   AgentProviderId,
@@ -46,7 +47,10 @@ export function parseSetup(input: unknown): SaveSetupInput {
   // place: setup is written from one screen that always knows which of the two it means.
   const model = input.preferredModel;
   if (model !== null && !isAgentModel(model)) throw new Error("Unknown model.");
-  return { preferredProvider: provider, preferredModel: model };
+  const harness = input.harness;
+  if (harness !== undefined && harness !== null && !isAgentHarness(harness)) throw new Error("Unknown harness.");
+  if (harness === "omp" && !agentHarnessDescriptor("omp").available) throw new Error("OMP is not available yet.");
+  return { preferredProvider: provider, preferredModel: model, ...(harness ? { harness } : {}) };
 }
 
 export function parseProviderId(input: unknown): AgentProviderId {

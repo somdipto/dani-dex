@@ -47,6 +47,7 @@ import { app, type BrowserWindow, nativeImage, safeStorage, screen, shell } from
 import { AgentService } from "../backend/agent-service";
 import { AgentStore } from "../backend/agent-store";
 import { BrowserHost } from "../backend/browser-host";
+import { harnessDriverResolver } from "../backend/hermes-acp-driver";
 import { MailboxStore } from "../backend/mailbox-store";
 import { McpOAuth } from "../backend/mcp-oauth-provider";
 import { SidebarLayoutStore } from "../backend/sidebar-layout-store";
@@ -674,6 +675,14 @@ export async function createApplicationServices({
     requestTimeoutMs: 30_000,
     preferredProvider: setupState.preferredProvider ?? "codex",
     bundledExecutables: providerRuntimes.bundledExecutables(),
+    // Layer 1. Hermes keeps its own state under Dani-Dex's data directory, never ~/.hermes.
+    ...(setupState.harness
+      ? {
+          providerDriver: harnessDriverResolver(setupState.harness, {
+            hermesHome: join(app.getPath("userData"), "hermes"),
+          }),
+        }
+      : {}),
     prepareAgentWorkspace: async (agent) => {
       await managedSkills.syncAgent(agent);
       await skillCreator.syncAgent(agent);
