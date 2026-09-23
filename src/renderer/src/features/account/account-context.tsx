@@ -1,4 +1,10 @@
-import type { AccountUsage, AvatarImageInput, CentralAuthState } from "@dani-dex/contracts/ipc";
+import type {
+  AccountUsage,
+  AvatarImageInput,
+  CentralAuthProvider,
+  CentralAuthSignInOptions,
+  CentralAuthState,
+} from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal, createStore, flush, onCleanup, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { createSimpleContext } from "../../simple-context";
@@ -22,6 +28,11 @@ function authFailureCode(value: string | undefined): string {
     case "email_sign_in_start_failed":
     case "invalid_email":
     case "invalid_sign_in_code":
+    case "online_service_unavailable":
+    case "provider_disabled":
+    case "provider_sign_in_expired":
+    case "provider_sign_in_failed":
+    case "provider_sign_in_timed_out":
     case "rate_limited":
     case "sign_in_code_expired":
     case "too_many_code_attempts":
@@ -57,6 +68,12 @@ const Auth = createSimpleContext({
   init: () => {
     const [centralAuth, setCentralAuth] = createSignal<CentralAuthState>({ status: "loading" });
     const [authSuccessVisible, setAuthSuccessVisible] = createSignal(false);
+    // Online features stay offered until the account service says otherwise, so an older main
+    // process that cannot answer never hides anything.
+    const [signInOptions, setSignInOptions] = createSignal<CentralAuthSignInOptions>({
+      providers: [],
+      onlineServices: true,
+    });
     const [accountUsageState, setAccountUsageState] = createStore<{
       targetKey: string | null;
       data: AccountUsage | null;
@@ -92,6 +109,15 @@ const Auth = createSimpleContext({
         }, AUTH_SUCCESS_HOLD_MS);
       }
       setCentralAuth(state);
+      if (state.status === "signed_out" || state.status === "error") refreshSignInOptions();
+    }
+
+    /** Re-read on each return to the sign-in screen, so a provider switched on since shows up. */
+    function refreshSignInOptions(): void {
+      void window.danidex.auth
+        .getSignInOptions()
+        .then(setSignInOptions)
+        .catch(() => undefined);
     }
 
     onSettled(() => {
@@ -102,6 +128,7 @@ const Auth = createSimpleContext({
       // `applyCentralAuthState`: there is no earlier state to have completed a
       // code challenge against, so a restart into a signed-in account must not
       // play the success hold.
+      refreshSignInOptions();
       void window.danidex.auth
         .getState()
         .then(setCentralAuth)
@@ -133,6 +160,20 @@ const Auth = createSimpleContext({
         });
         throw error;
       }
+    }
+
+    async function signInWithProvider(provider: CentralAuthProvider): Promise<void> {
+      const analytics = desktopAnalytics.anonymousScope();
+      const state = await window.danidex.auth.signInWithProvider(provider);
+      analytics.track("account_sign_in_started", {
+        result: state.status === "signing_in" ? "browser_opened" : "failed",
+        ...(state.status === "error" ? { failure_code: authFailureCode(state.issue.code) } : {}),
+      });
+      applyCentralAuthState(state);
+    }
+
+    async function cancelProviderSignIn(): Promise<void> {
+      applyCentralAuthState(await window.danidex.auth.cancelProviderSignIn());
     }
 
     async function retryCentralAccount(): Promise<void> {
@@ -256,6 +297,9 @@ const Auth = createSimpleContext({
       applyAccountUsage,
       refreshAccountUsage,
       requestEmailCode,
+      signInOptions,
+      signInWithProvider,
+      cancelProviderSignIn,
       retryCentralAccount,
       verifyEmailCode,
       logoutCentralAccount,

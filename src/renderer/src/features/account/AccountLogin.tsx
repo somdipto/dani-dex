@@ -1,8 +1,8 @@
 import { AppLogo } from "@dani-dex/brand";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
-import type { AppVariant, CentralAuthIssue, CentralAuthState } from "@dani-dex/contracts/ipc";
+import type { AppVariant, CentralAuthIssue, CentralAuthProvider, CentralAuthState } from "@dani-dex/contracts/ipc";
 import { normalizeEmailAddress, normalizeOneTimeCode } from "@dani-dex/contracts/validation";
-import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 import { ArrowLeft, Button, Input, RefreshCw } from "../../components/ui";
 import { OtpInput, type OtpInputStatus } from "../../components/ui/otp-input";
 
@@ -13,9 +13,15 @@ interface AccountLoginProps {
   onRequestEmailCode: (email: string) => Promise<void>;
   onVerifyEmailCode: (challengeId: string, code: string) => Promise<void>;
   onReset: () => Promise<void>;
+  /** Browser sign-ins that are switched on. None means the screen offers email only. */
+  providers?: readonly CentralAuthProvider[];
+  onSignInWithProvider?: (provider: CentralAuthProvider) => Promise<void>;
+  onCancelProviderSignIn?: () => Promise<void>;
 }
 
-type PendingAction = "retry" | "send" | "check" | "verify" | "resend" | "reset";
+type PendingAction = "retry" | "send" | "check" | "verify" | "resend" | "reset" | "provider" | "cancel";
+
+const PROVIDER_LABELS: Record<CentralAuthProvider, string> = { github: "GitHub", google: "Google" };
 type LoginStep = "email" | "code";
 type LoginTransition = "none" | "forward" | "back";
 
@@ -81,6 +87,10 @@ export function AccountLogin(props: AccountLoginProps) {
   const loginStep = (): LoginStep => (codeSent() || verified() ? "code" : "email");
   const challenge = () => (props.state.status === "code_sent" ? props.state : undefined);
   const connecting = () => props.state.status === "loading";
+  const browserProvider = () =>
+    props.state.status === "signing_in" && props.state.provider ? props.state.provider : undefined;
+  /** Digits for a Supabase code; the account API's 8-character code otherwise. */
+  const codeLength = () => challenge()?.codeLength;
   const currentIssue = (): CentralAuthIssue | undefined => {
     if (props.state.status === "error") return props.state.issue;
     return props.state.status === "code_sent" ? props.state.issue : undefined;
@@ -110,7 +120,9 @@ export function AccountLogin(props: AccountLoginProps) {
     return retryIn > 0 ? `Try again in ${formatTimer(retryIn)}` : "Send sign-in code";
   };
   const emailBusy = () =>
-    pendingAction() === "send" || pendingAction() === "check" || props.state.status === "signing_in";
+    pendingAction() === "send" ||
+    pendingAction() === "check" ||
+    (props.state.status === "signing_in" && !browserProvider());
   const codeBusy = () => pendingAction() === "verify";
   const resendBusy = () => pendingAction() === "resend";
   const formIssue = createMemo(() => {
@@ -270,9 +282,11 @@ export function AccountLogin(props: AccountLoginProps) {
 
   async function submitCode(value = code()): Promise<void> {
     if (props.state.status !== "code_sent" || pendingAction() || codeBusy() || codeNeedsReplacement()) return;
-    const normalizedCode = normalizeOneTimeCode(value);
+    const digits = codeLength();
+    const numericCode = value.replace(/\D/gu, "");
+    const normalizedCode = digits ? (numericCode.length === digits ? numericCode : null) : normalizeOneTimeCode(value);
     if (!normalizedCode) {
-      setCodeError("Enter the full 8-character code.");
+      setCodeError(digits ? `Enter the full ${digits}-digit code.` : "Enter the full 8-character code.");
       return;
     }
     setCodeError(null);
@@ -280,7 +294,7 @@ export function AccountLogin(props: AccountLoginProps) {
     setLocalError(null);
     setPendingAction("verify");
     try {
-      await props.onVerifyEmailCode(props.state.challengeId, formatCode(normalizedCode));
+      await props.onVerifyEmailCode(props.state.challengeId, digits ? normalizedCode : formatCode(normalizedCode));
     } catch {
       setLocalError("Something went wrong while verifying the code. Try again.");
     } finally {
@@ -297,6 +311,32 @@ export function AccountLogin(props: AccountLoginProps) {
       await props.onRequestEmailCode(props.state.email);
     } catch {
       setLocalError("Something went wrong while sending a new code. Try again.");
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function startProviderSignIn(provider: CentralAuthProvider): Promise<void> {
+    if (pendingAction() || !props.onSignInWithProvider) return;
+    setIssueVisible(false);
+    setLocalError(null);
+    setPendingAction("provider");
+    try {
+      await props.onSignInWithProvider(provider);
+    } catch {
+      setLocalError(`Dani-Dex couldn’t start ${PROVIDER_LABELS[provider]} sign-in. Try again.`);
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function cancelProviderSignIn(): Promise<void> {
+    if (pendingAction() || !props.onCancelProviderSignIn) return;
+    setPendingAction("cancel");
+    try {
+      await props.onCancelProviderSignIn();
+    } catch {
+      setLocalError("Dani-Dex couldn’t cancel sign in. Try again.");
     } finally {
       setPendingAction(null);
     }
@@ -349,13 +389,15 @@ export function AccountLogin(props: AccountLoginProps) {
           <h1 id="account-login-title" class="account-login-title">
             {connecting()
               ? "Connecting to Dani-Dex"
-              : unavailable()
-                ? "Service unavailable"
-                : verified()
-                  ? "You’re signed in"
-                  : codeSent()
-                    ? "Check your inbox"
-                    : "Sign in to Dani-Dex"}
+              : browserProvider()
+                ? "Continue in your browser"
+                : unavailable()
+                  ? "Service unavailable"
+                  : verified()
+                    ? "You’re signed in"
+                    : codeSent()
+                      ? "Check your inbox"
+                      : "Sign in to Dani-Dex"}
           </h1>
           <p id="account-login-description" class="account-login-description">
             <Show
@@ -363,9 +405,11 @@ export function AccountLogin(props: AccountLoginProps) {
               fallback={
                 connecting()
                   ? "Starting the account service. This usually takes a moment."
-                  : unavailable()
-                    ? (currentIssue()?.message ?? "Dani-Dex can’t reach the account service right now.")
-                    : "We’ll email you a one-time code."
+                  : browserProvider()
+                    ? `Finish signing in with ${PROVIDER_LABELS[browserProvider() ?? "github"]} in your browser. Dani-Dex opens again when you’re done.`
+                    : unavailable()
+                      ? (currentIssue()?.message ?? "Dani-Dex can’t reach the account service right now.")
+                      : "We’ll email you a one-time code."
               }
             >
               {verified() ? (
@@ -407,7 +451,30 @@ export function AccountLogin(props: AccountLoginProps) {
             </Button>
           </Show>
 
-          <Show when={!connecting() && !unavailable()}>
+          <Show when={browserProvider()}>
+            <div class="account-login-loader" role="status" aria-live="polite">
+              <span class="account-login-spinner" aria-hidden="true" />
+              <span>Waiting for {PROVIDER_LABELS[browserProvider() ?? "github"]}…</span>
+            </div>
+            <Show when={localError()}>
+              {(message) => (
+                <p class="account-login-error" role="alert">
+                  {message()}
+                </p>
+              )}
+            </Show>
+            <Button
+              variant="ghost"
+              type="button"
+              class="account-login-primary"
+              disabled={pendingAction() !== null}
+              onClick={() => void cancelProviderSignIn()}
+            >
+              Cancel
+            </Button>
+          </Show>
+
+          <Show when={!connecting() && !unavailable() && !browserProvider()}>
             <Show
               when={challenge() || verified()}
               fallback={
@@ -483,6 +550,26 @@ export function AccountLogin(props: AccountLoginProps) {
                       {pendingAction() === "check" ? "Checking delivery…" : "Sending code…"}
                     </Show>
                   </Button>
+
+                  <Show when={(props.providers ?? []).length > 0 && props.onSignInWithProvider}>
+                    <div class="account-login-divider" aria-hidden="true">
+                      <span>or</span>
+                    </div>
+                    <For each={props.providers ?? []}>
+                      {(provider) => (
+                        <Button
+                          variant="outline"
+                          type="button"
+                          class="account-login-provider"
+                          data-provider={provider}
+                          disabled={pendingAction() !== null || emailBusy()}
+                          onClick={() => void startProviderSignIn(provider)}
+                        >
+                          Continue with {PROVIDER_LABELS[provider]}
+                        </Button>
+                      )}
+                    </For>
+                  </Show>
                 </form>
               }
             >
@@ -493,8 +580,14 @@ export function AccountLogin(props: AccountLoginProps) {
               >
                 <OtpInput
                   value={code()}
+                  length={codeLength()}
+                  numeric={codeLength() !== undefined}
                   status={otpStatus()}
-                  hint="Enter all 8 characters to continue."
+                  hint={
+                    codeLength()
+                      ? `Enter the ${codeLength()}-digit code, or open the link in the same email.`
+                      : "Enter all 8 characters to continue."
+                  }
                   errorMessage={displayedCodeError()}
                   successMessage="Verified. Opening Dani-Dex…"
                   disabled={codeNeedsReplacement() || resendBusy()}

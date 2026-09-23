@@ -5,6 +5,8 @@ import { dirname } from "node:path";
 import type {
   AvatarImageInput,
   CentralAuthIssue,
+  CentralAuthProvider,
+  CentralAuthSignInOptions,
   CentralAuthState,
   CentralAuthUser,
   MobileConnectedDevice,
@@ -26,6 +28,18 @@ import {
 } from "@dani-dex/contracts/signal-protocol/ticket";
 import { createLocalJWKSet, jwtVerify } from "jose";
 import { z } from "zod";
+import { AuthApiError } from "./account-api-error";
+import {
+  createPkcePair,
+  decodeStoredSupabaseSession,
+  SUPABASE_EMAIL_CODE_LENGTH,
+  SUPABASE_EMAIL_CODE_LIFETIME_MS,
+  SUPABASE_EMAIL_RESEND_INTERVAL_MS,
+  SupabaseAuthClient,
+  type SupabaseAuthConfig,
+  type SupabaseSession,
+  type SupabaseSignIn,
+} from "./supabase-auth";
 
 interface CentralAuthEvents {
   changed: [state: CentralAuthState];
@@ -45,6 +59,28 @@ interface CentralAuthManagerOptions {
   startupRequestTimeoutMs?: number;
   startupRetryDelaysMs?: readonly number[];
   emailCodeRequestTimeoutMs?: number;
+}
+
+/**
+ * Signing in through Supabase instead of the account API.
+ *
+ * With this set, sign-in, the profile and sign-out go to Supabase Auth, and every feature that
+ * needs the account API's own servers answers `online_service_unavailable` instead of calling a
+ * server this build does not run.
+ */
+interface SupabaseAccountOptions {
+  config: SupabaseAuthConfig;
+  /** Opens a URL in the user's browser; a provider sign-in happens there. */
+  openExternal: (url: string) => Promise<void>;
+  fetch?: AuthFetcher;
+  providerSignInTimeoutMs?: number;
+}
+
+interface PendingBrowserSignIn {
+  verifier: string;
+  provider: CentralAuthProvider | null;
+  expiresAt: number;
+  timer: ReturnType<typeof setTimeout> | null;
 }
 
 interface EmailCodeRequest {
@@ -77,6 +113,12 @@ const UNCERTAIN_EMAIL_CODE_REQUEST_FAILURES = new Set([
   "email_delivery_timeout",
   "email_delivery_unknown",
 ]);
+const PROVIDER_SIGN_IN_TIMEOUT_MS = 10 * 60_000;
+/** An emailed link can be opened for as long as its code lasts. */
+const EMAIL_LINK_SIGN_IN_TIMEOUT_MS = SUPABASE_EMAIL_CODE_LIFETIME_MS;
+const ACCESS_TOKEN_REFRESH_MARGIN_MS = 60_000;
+export const ONLINE_SERVICE_UNAVAILABLE_MESSAGE =
+  "This needs Dani-Dex's online service, which isn't available for this account yet.";
 const AUTH_API_UNAVAILABLE_MESSAGE =
   "Dani-Dex could not reach the account service. Check that the API is running, then try again.";
 const remoteTicketJwksSchema = z.object({
@@ -161,9 +203,20 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   #emailCodeRequest: EmailCodeRequest | null = null;
   #profileRefreshPromise: Promise<CentralAuthState> | null = null;
   #profileRefreshGeneration = 0;
+  readonly #supabase: SupabaseAuthClient | null;
+  readonly #openExternal: ((url: string) => Promise<void>) | null;
+  readonly #providerSignInTimeoutMs: number;
+  #supabaseSession: SupabaseSession | null = null;
+  #supabaseRefresh: Promise<SupabaseSession> | null = null;
+  #browserSignIn: PendingBrowserSignIn | null = null;
 
-  constructor(options: CentralAuthManagerOptions) {
+  constructor(options: CentralAuthManagerOptions & { supabase?: SupabaseAccountOptions }) {
     super();
+    const { supabase, ...legacyOptions } = options;
+    options = legacyOptions;
+    this.#supabase = supabase ? new SupabaseAuthClient(supabase.config, supabase.fetch ?? options.fetch) : null;
+    this.#openExternal = supabase?.openExternal ?? null;
+    this.#providerSignInTimeoutMs = supabase?.providerSignInTimeoutMs ?? PROVIDER_SIGN_IN_TIMEOUT_MS;
     this.#options = {
       ...options,
       mobileConnectApiUrl: options.mobileConnectApiUrl ?? options.apiUrl,
@@ -174,6 +227,11 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
       startupRetryDelaysMs: options.startupRetryDelaysMs ?? STARTUP_RETRY_DELAYS_MS,
       emailCodeRequestTimeoutMs: options.emailCodeRequestTimeoutMs ?? EMAIL_CODE_REQUEST_TIMEOUT_MS,
     };
+  }
+
+  /** Whether this account has the account API's servers behind it: remote hosts, mobile, teams. */
+  get onlineServicesAvailable(): boolean {
+    return this.#supabase === null;
   }
 
   getState(): CentralAuthState {
@@ -187,12 +245,17 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   refreshProfile(): Promise<CentralAuthState> {
     if (this.#profileRefreshPromise) return this.#profileRefreshPromise;
     const state = this.#state;
-    const token = this.#sessionToken;
+    const supabase = this.#supabase;
+    const token = supabase ? (this.#supabaseSession?.refreshToken ?? null) : this.#sessionToken;
     const generation = this.#profileRefreshGeneration;
     if (state.status !== "signed_in" || !token) return Promise.resolve(this.getState());
-    const pending = this.#authorizedRequest("/v1/me", { method: "GET" }, decodeCentralAuthUser)
+    const currentToken = () => (supabase ? (this.#supabaseSession?.refreshToken ?? null) : this.#sessionToken);
+    const loadUser = supabase
+      ? this.#supabaseAccessToken().then((accessToken) => supabase.getUser(accessToken))
+      : this.#authorizedRequest("/v1/me", { method: "GET" }, decodeCentralAuthUser);
+    const pending = loadUser
       .then((user) => {
-        if (this.#state !== state || this.#sessionToken !== token || generation !== this.#profileRefreshGeneration) {
+        if (this.#state !== state || currentToken() !== token || generation !== this.#profileRefreshGeneration) {
           return this.getState();
         }
         if (user.id !== state.user.id) throw new Error("The account service returned an invalid user.");
@@ -206,8 +269,15 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
         }
         return this.#setState({ status: "signed_in", user: resolved });
       })
-      // Background refresh must not replace a usable profile with a loading/error screen.
-      .catch(() => this.getState())
+      // Background refresh must not replace a usable profile with a loading/error screen - except
+      // when Supabase says the session itself is gone, which only signing in again can fix.
+      .catch(async (error) => {
+        if (supabase && isEndedSession(error) && currentToken() === token) {
+          await this.#clearStoredSession();
+          return this.#setState({ status: "signed_out" });
+        }
+        return this.getState();
+      })
       .finally(() => {
         this.#profileRefreshPromise = null;
       });
@@ -236,6 +306,7 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   }
 
   async downloadAuthorized(path: string, timeoutMs = 30_000): Promise<Uint8Array> {
+    this.#requireAccountApi();
     if (!this.#sessionToken) throw new AuthApiError(401, "unauthorized", "Sign in is required.");
     const response = await this.#options.fetch(new URL(path, this.#options.apiUrl), {
       headers: { Authorization: `Bearer ${this.#sessionToken}` },
@@ -438,6 +509,7 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   }
 
   async #fetchRemoteTicketJwks(): Promise<z.infer<typeof remoteTicketJwksSchema>> {
+    this.#requireAccountApi();
     const response = await this.#options.fetch(new URL("/.well-known/jwks.json", this.#options.apiUrl), {
       signal: AbortSignal.timeout(10_000),
     });
@@ -558,6 +630,7 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   }
 
   async downloadRemoteHostLogo(hostId: string, version: string): Promise<{ bytes: Uint8Array; mimeType: string }> {
+    this.#requireAccountApi();
     if (!this.#sessionToken) throw new AuthApiError(401, "unauthorized", "Sign in is required.");
     const url = new URL(`/v2/remote/hosts/${encodeURIComponent(hostId)}/logo`, this.#options.apiUrl);
     url.searchParams.set("v", version);
@@ -624,6 +697,7 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
 
   async #initialize(): Promise<CentralAuthState> {
     this.#setState({ status: "loading" });
+    if (this.#supabase) return this.#initializeSupabase(this.#supabase);
     if (this.#options.canPersist()) {
       try {
         const encrypted = Buffer.from(await readFile(this.#options.storagePath, "utf8"), "base64");
@@ -654,6 +728,7 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
 
   requestEmailCode(email: string): Promise<CentralAuthState> {
     const normalizedEmail = email.trim().toLowerCase();
+    if (this.#supabase) return this.#requestSupabaseEmailCode(this.#supabase, normalizedEmail);
     const existingRequest = this.#emailCodeRequest;
     if (existingRequest?.email === normalizedEmail && existingRequest.promise) return existingRequest.promise;
 
@@ -718,6 +793,7 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   }
 
   async verifyEmailCode(challengeId: string, code: string): Promise<CentralAuthState> {
+    if (this.#supabase) return this.#verifySupabaseEmailCode(this.#supabase, challengeId, code);
     const challenge = this.#state.status === "code_sent" ? this.#state : null;
     if (challenge) this.#setState({ ...challenge, issue: undefined });
     try {
@@ -758,6 +834,15 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
 
   async logout(): Promise<CentralAuthState> {
     this.#emailCodeRequest = null;
+    this.#endBrowserSignIn();
+    const supabaseSession = this.#supabaseSession;
+    if (this.#supabase && supabaseSession) {
+      try {
+        await this.#supabase.signOut(supabaseSession.accessToken);
+      } catch {
+        // As below: signing out of this device never waits on the server agreeing.
+      }
+    }
     if (this.#sessionToken) {
       try {
         await this.#authorizedRequest("/v1/auth/logout", { method: "POST" }, decodeVoid);
@@ -770,6 +855,8 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   }
 
   async updateAvatar(image: AvatarImageInput | null): Promise<CentralAuthState> {
+    // The photo is stored by the account API; a Supabase account keeps the one its provider gave.
+    this.#requireAccountApi();
     const sessionToken = this.#sessionToken;
     if (!sessionToken) throw new AuthApiError(401, "unauthorized", "Sign in is required.");
     const user = image
@@ -798,6 +885,17 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   }
 
   async updateName(name: string): Promise<CentralAuthState> {
+    if (this.#supabase) {
+      const supabase = this.#supabase;
+      const accountId = this.#state.status === "signed_in" ? this.#state.user.id : null;
+      if (!accountId || !this.#supabaseSession) throw new AuthApiError(401, "unauthorized", "Sign in is required.");
+      const user = await supabase.updateName(await this.#supabaseAccessToken(), name);
+      // A refresh may have rotated the tokens meanwhile; what matters is that it is the same account.
+      if (this.#state.status !== "signed_in" || this.#state.user.id !== accountId || !this.#supabaseSession) {
+        return this.getState();
+      }
+      return this.#setState({ status: "signed_in", user: { ...this.#state.user, name: user.name } });
+    }
     const sessionToken = this.#sessionToken;
     if (!sessionToken) throw new AuthApiError(401, "unauthorized", "Sign in is required.");
     const user = await this.#authorizedRequest(
@@ -816,7 +914,266 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
     });
   }
 
+  /**
+   * The browser sign-ins to offer, straight from the project's settings: a provider switched on
+   * there shows up here on the next look, with no new build.
+   */
+  async getSignInOptions(): Promise<CentralAuthSignInOptions> {
+    if (!this.#supabase) return { providers: [], onlineServices: true };
+    try {
+      return { providers: await this.#supabase.enabledProviders(5_000), onlineServices: false };
+    } catch {
+      return { providers: [], onlineServices: false };
+    }
+  }
+
+  /**
+   * Starts a browser sign-in with GitHub or Google and waits for `dani-dex://auth/callback`.
+   *
+   * The PKCE verifier stays in this process; the browser only ever sees its hash. A callback that
+   * arrives with no sign-in waiting is ignored, which is what makes a forged or replayed link inert.
+   */
+  async signInWithProvider(provider: CentralAuthProvider): Promise<CentralAuthState> {
+    const supabase = this.#supabase;
+    const openExternal = this.#openExternal;
+    if (!supabase || !openExternal) {
+      throw new AuthApiError(400, "provider_disabled", "That sign-in option is not available in this build.");
+    }
+    if (this.#state.status === "signed_in") return this.getState();
+    const enabled = await supabase.enabledProviders(5_000).catch(() => null);
+    if (enabled && !enabled.includes(provider)) {
+      return this.#setState({
+        status: "error",
+        issue: { code: "provider_disabled", message: `${providerLabel(provider)} sign-in is not switched on yet.` },
+      });
+    }
+    const pkce = createPkcePair();
+    this.#startBrowserSignIn(pkce.verifier, provider, this.#providerSignInTimeoutMs);
+    const state = this.#setState({ status: "signing_in", provider });
+    try {
+      await openExternal(supabase.authorizeUrl(provider, pkce));
+    } catch (error) {
+      this.#endBrowserSignIn();
+      return this.#setState({
+        status: "error",
+        issue: centralAuthIssue(error, "provider_sign_in_failed", "Dani-Dex could not open your browser."),
+      });
+    }
+    return state;
+  }
+
+  cancelProviderSignIn(): Promise<CentralAuthState> {
+    const waiting = this.#browserSignIn?.provider !== null && this.#state.status === "signing_in";
+    if (!waiting) return Promise.resolve(this.getState());
+    this.#endBrowserSignIn();
+    return Promise.resolve(this.#setState({ status: "signed_out" }));
+  }
+
+  /**
+   * The return leg of a browser sign-in or an emailed link: `dani-dex://auth/callback?code=…`.
+   *
+   * Returns whether a sign-in was waiting for it, so the caller raises a window only for a link
+   * this run started.
+   */
+  async receiveAuthCallback(result: { code: string } | { error: string }): Promise<boolean> {
+    const supabase = this.#supabase;
+    const pending = this.#browserSignIn;
+    if (!supabase || !pending || pending.expiresAt < Date.now()) return false;
+    if (this.#state.status === "signed_in") return false;
+    this.#endBrowserSignIn();
+    if ("error" in result) {
+      this.#setState({ status: "error", issue: { code: "provider_sign_in_failed", message: result.error } });
+      return true;
+    }
+    const previous = this.#state;
+    if (pending.provider) this.#setState({ status: "signing_in", provider: pending.provider });
+    try {
+      await this.#completeSupabaseSignIn(await supabase.exchangeCode(result.code, pending.verifier));
+    } catch (error) {
+      const issue = centralAuthIssue(error, "provider_sign_in_failed", "Sign in did not complete. Try again.");
+      if (previous.status === "code_sent") this.#setState({ ...previous, issue });
+      else this.#setState({ status: "error", issue });
+    }
+    return true;
+  }
+
+  async #initializeSupabase(supabase: SupabaseAuthClient): Promise<CentralAuthState> {
+    if (this.#options.canPersist()) {
+      try {
+        const encrypted = Buffer.from(await readFile(this.#options.storagePath, "utf8"), "base64");
+        this.#restoreStoredSession(this.#options.decrypt(encrypted));
+      } catch (error) {
+        if (!isMissing(error)) await this.#clearStoredSession();
+      }
+    } else {
+      await rm(this.#options.storagePath, { force: true });
+    }
+    // A session saved by the account API belongs to a service this build no longer signs in to.
+    if (this.#sessionToken) await this.#clearStoredSession();
+    const session = this.#supabaseSession;
+    if (!session) {
+      await this.#withStartupRetries((timeoutMs) => supabase.enabledProviders(timeoutMs));
+      return this.#setState({ status: "signed_out" });
+    }
+    try {
+      const user = await this.#withStartupRetries(async (timeoutMs) => {
+        const current = this.#supabaseSession ?? session;
+        if (current.expiresAt - ACCESS_TOKEN_REFRESH_MARGIN_MS > Date.now()) {
+          return supabase.getUser(current.accessToken, timeoutMs);
+        }
+        const refreshed = await supabase.refresh(current.refreshToken, timeoutMs);
+        this.#supabaseSession = refreshed.session;
+        await this.#writeStoredSession();
+        return refreshed.user;
+      });
+      return this.#setState({ status: "signed_in", user });
+    } catch (error) {
+      if (isEndedSession(error)) {
+        await this.#clearStoredSession();
+        return this.#setState({ status: "signed_out" });
+      }
+      throw error;
+    }
+  }
+
+  async #requestSupabaseEmailCode(supabase: SupabaseAuthClient, email: string): Promise<CentralAuthState> {
+    const existingChallenge = this.#state.status === "code_sent" ? this.#state : null;
+    if (existingChallenge) this.#setState({ ...existingChallenge, issue: undefined });
+    else this.#setState({ status: "signing_in" });
+    const pkce = createPkcePair();
+    try {
+      await supabase.sendEmailCode(email, pkce);
+    } catch (error) {
+      const issue = emailCodeRequestIssue(error);
+      if (existingChallenge && !UNCERTAIN_EMAIL_CODE_REQUEST_FAILURES.has(issue.code)) {
+        return this.#setState({ ...existingChallenge, issue });
+      }
+      return this.#setState({ status: "error", issue });
+    }
+    // The link in the same email signs in too, for as long as the code is good.
+    this.#startBrowserSignIn(pkce.verifier, null, EMAIL_LINK_SIGN_IN_TIMEOUT_MS);
+    const now = Date.now();
+    return this.#setState({
+      status: "code_sent",
+      challengeId: existingChallenge?.email === email ? existingChallenge.challengeId : randomUUID(),
+      email,
+      expiresAt: now + SUPABASE_EMAIL_CODE_LIFETIME_MS,
+      resendAvailableAt: now + SUPABASE_EMAIL_RESEND_INTERVAL_MS,
+      codeLength: SUPABASE_EMAIL_CODE_LENGTH,
+    });
+  }
+
+  async #verifySupabaseEmailCode(
+    supabase: SupabaseAuthClient,
+    challengeId: string,
+    code: string,
+  ): Promise<CentralAuthState> {
+    const challenge = this.#state.status === "code_sent" ? this.#state : null;
+    if (!challenge || challenge.challengeId !== challengeId) {
+      return this.#setState({
+        status: "error",
+        issue: { code: "sign_in_code_expired", message: "That sign-in has ended. Send a new code." },
+      });
+    }
+    this.#setState({ ...challenge, issue: undefined });
+    try {
+      const signIn = await supabase.verifyEmailCode(challenge.email, code.replace(/[\s-]/gu, ""));
+      this.#endBrowserSignIn();
+      return await this.#completeSupabaseSignIn(signIn);
+    } catch (error) {
+      return this.#setState({
+        ...challenge,
+        issue: centralAuthIssue(error, "email_sign_in_failed", "The sign-in code could not be verified."),
+      });
+    }
+  }
+
+  async #completeSupabaseSignIn(signIn: SupabaseSignIn): Promise<CentralAuthState> {
+    this.#supabaseSession = signIn.session;
+    await this.#writeStoredSession();
+    return this.#setState({ status: "signed_in", user: signIn.user });
+  }
+
+  /** A current access token, refreshed first when it is about to lapse. Concurrent callers share one refresh. */
+  async #supabaseAccessToken(): Promise<string> {
+    const supabase = this.#supabase;
+    const session = this.#supabaseSession;
+    if (!supabase || !session) throw new AuthApiError(401, "unauthorized", "Sign in is required.");
+    if (session.expiresAt - ACCESS_TOKEN_REFRESH_MARGIN_MS > Date.now()) return session.accessToken;
+    if (!this.#supabaseRefresh) {
+      this.#supabaseRefresh = supabase
+        .refresh(session.refreshToken)
+        .then(async (refreshed) => {
+          if (this.#supabaseSession === session) {
+            this.#supabaseSession = refreshed.session;
+            await this.#writeStoredSession();
+          }
+          return refreshed.session;
+        })
+        .finally(() => {
+          this.#supabaseRefresh = null;
+        });
+    }
+    return (await this.#supabaseRefresh).accessToken;
+  }
+
+  #startBrowserSignIn(verifier: string, provider: CentralAuthProvider | null, timeoutMs: number): void {
+    this.#endBrowserSignIn();
+    const pending: PendingBrowserSignIn = { verifier, provider, expiresAt: Date.now() + timeoutMs, timer: null };
+    if (provider) {
+      pending.timer = setTimeout(() => {
+        if (this.#browserSignIn !== pending) return;
+        this.#browserSignIn = null;
+        if (this.#state.status === "signing_in") {
+          this.#setState({
+            status: "error",
+            issue: {
+              code: "provider_sign_in_timed_out",
+              message: `${providerLabel(provider)} sign-in took too long. Try again.`,
+            },
+          });
+        }
+      }, timeoutMs);
+      pending.timer.unref?.();
+    }
+    this.#browserSignIn = pending;
+  }
+
+  #endBrowserSignIn(): void {
+    if (this.#browserSignIn?.timer) clearTimeout(this.#browserSignIn.timer);
+    this.#browserSignIn = null;
+  }
+
+  /** The gate on every feature that needs the account API's own servers. */
+  #requireAccountApi(): void {
+    if (this.#supabase) {
+      throw new AuthApiError(503, "online_service_unavailable", ONLINE_SERVICE_UNAVAILABLE_MESSAGE);
+    }
+  }
+
+  async #withStartupRetries<T>(attempt: (timeoutMs: number) => Promise<T>): Promise<T> {
+    const deadline = Date.now() + this.#options.startupRetryWindowMs;
+    let retryIndex = 0;
+    while (true) {
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) throw new Error(AUTH_API_UNAVAILABLE_MESSAGE);
+      try {
+        return await attempt(Math.max(1, Math.min(this.#options.startupRequestTimeoutMs, remainingMs)));
+      } catch (error) {
+        if (!isTransientStartupError(error)) throw error;
+        const delayMs = Math.min(
+          this.#options.startupRetryDelaysMs[Math.min(retryIndex, this.#options.startupRetryDelaysMs.length - 1)],
+          Math.max(0, deadline - Date.now()),
+        );
+        if (delayMs <= 0) throw error;
+        await delay(delayMs);
+        retryIndex += 1;
+      }
+    }
+  }
+
   async #request<T>(path: string, init: RequestInit, decoder: (value: unknown) => T, timeoutMs = 10_000): Promise<T> {
+    this.#requireAccountApi();
     const response = await this.#options.fetch(new URL(path, this.#options.apiUrl), {
       ...init,
       signal: AbortSignal.timeout(timeoutMs),
@@ -859,12 +1216,13 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
     }
   }
 
-  #authorizedRequest<T>(
+  async #authorizedRequest<T>(
     path: string,
     init: RequestInit,
     decoder: (value: unknown) => T,
     timeoutMs?: number,
   ): Promise<T> {
+    this.#requireAccountApi();
     if (!this.#sessionToken) throw new AuthApiError(401, "unauthorized", "Sign in is required.");
     return this.#request(
       path,
@@ -895,18 +1253,20 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
   }
 
   async #writeStoredSessionNow(): Promise<void> {
-    if (!this.#sessionToken) return;
+    if (!this.#sessionToken && !this.#supabaseSession) return;
     if (!this.#options.canPersist()) {
       await rm(this.#options.storagePath, { force: true });
       return;
     }
     const temporaryPath = `${this.#options.storagePath}.${randomUUID()}.tmp`;
     try {
-      const value = JSON.stringify({
-        version: 2,
-        sessionToken: this.#sessionToken,
-        teamHostTokens: Object.fromEntries(this.#teamHostTokens),
-      });
+      const value = this.#supabaseSession
+        ? JSON.stringify({ version: 3, supabase: this.#supabaseSession })
+        : JSON.stringify({
+            version: 2,
+            sessionToken: this.#sessionToken,
+            teamHostTokens: Object.fromEntries(this.#teamHostTokens),
+          });
       const encrypted = this.#options.encrypt(value).toString("base64");
       await mkdir(dirname(this.#options.storagePath), { recursive: true });
       await writeFile(temporaryPath, encrypted, { mode: 0o600 });
@@ -921,6 +1281,7 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
 
   async #clearStoredSession(): Promise<void> {
     this.#sessionToken = null;
+    this.#supabaseSession = null;
     this.#sessionAccountId = null;
     this.#teamHostTokens.clear();
     // Through the same chain as the writes, so a write already in flight cannot put the
@@ -939,6 +1300,12 @@ export class CentralAuthManager extends EventEmitter<CentralAuthEvents> {
       return;
     }
     const stored = JSON.parse(value);
+    if (isDynamicRecord(stored) && stored.version === 3) {
+      const session = decodeStoredSupabaseSession(stored.supabase);
+      if (!session) throw new Error("Invalid protected account session.");
+      this.#supabaseSession = session;
+      return;
+    }
     if (!isDynamicRecord(stored) || stored.version !== 2 || !isString(stored.sessionToken)) {
       throw new Error("Invalid protected account session.");
     }
@@ -992,38 +1359,6 @@ export function readMobileConnectApiUrl(value: string | undefined, fallback: str
   return new URL(apiUrl).origin;
 }
 
-class AuthApiError extends Error {
-  constructor(
-    readonly status: number,
-    readonly code: string,
-    message: string,
-    readonly retryAfterSeconds?: number,
-  ) {
-    super(message);
-  }
-
-  static async fromResponse(response: Response): Promise<AuthApiError> {
-    const retryAfterSeconds = parseRetryAfterSeconds(response.headers.get("Retry-After"));
-    try {
-      const value = await response.json();
-      if (!isDynamicRecord(value) || !isDynamicRecord(value.error)) {
-        throw new Error("Invalid error response.");
-      }
-      if (isString(value.error.code) && isString(value.error.message)) {
-        return new AuthApiError(response.status, value.error.code, value.error.message, retryAfterSeconds);
-      }
-    } catch {
-      // Use a generic error when the server did not return the API error shape.
-    }
-    return new AuthApiError(
-      response.status,
-      "auth_api_error",
-      "The account service returned an error.",
-      retryAfterSeconds,
-    );
-  }
-}
-
 function centralAuthIssue(error: unknown, fallbackCode: string, fallbackMessage: string): CentralAuthIssue {
   if (error instanceof AuthApiError) {
     return {
@@ -1061,19 +1396,6 @@ function emailCodeRequestIssue(error: unknown): CentralAuthIssue {
 function isDefinitiveEmailCodeRequestFailure(error: unknown): boolean {
   if (!(error instanceof AuthApiError)) return false;
   return DEFINITIVE_EMAIL_CODE_REQUEST_FAILURES.has(error.code);
-}
-
-function parseRetryAfterSeconds(value: string | null): number | undefined {
-  if (value === null) return undefined;
-  const trimmed = value.trim();
-  if (/^\d+$/u.test(trimmed)) {
-    const seconds = Number.parseInt(trimmed, 10);
-    return seconds > 0 ? seconds : undefined;
-  }
-  const retryAt = Date.parse(trimmed);
-  if (!Number.isFinite(retryAt)) return undefined;
-  const seconds = Math.ceil((retryAt - Date.now()) / 1_000);
-  return seconds > 0 ? seconds : undefined;
 }
 
 function decodeVoid(value: unknown): undefined {
@@ -1297,6 +1619,15 @@ function decodeSessionResponse(value: unknown): SessionResponse {
     sessionToken: requiredString(record, "sessionToken"),
     user: decodeCentralAuthUser(record.user),
   };
+}
+
+/** Supabase refused the session itself, as opposed to being unreachable. */
+function isEndedSession(error: unknown): boolean {
+  return error instanceof AuthApiError && (error.code === "unauthorized" || error.status === 401);
+}
+
+function providerLabel(provider: CentralAuthProvider) {
+  return provider === "github" ? "GitHub" : "Google";
 }
 
 function isMissing(error: unknown): error is NodeJS.ErrnoException {

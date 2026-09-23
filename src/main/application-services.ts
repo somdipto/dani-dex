@@ -118,6 +118,7 @@ import {
 } from "./session-configuration";
 import { readSetupState } from "./setup-store";
 import { SkillMarketplaceService } from "./skill-marketplace-service";
+import { readSupabaseAuthConfig } from "./supabase-auth";
 import { TeamStore } from "./team-store";
 import { TeamWebRtcBridge } from "./team-webrtc-bridge";
 import { TeamWebRtcClientTransport } from "./team-webrtc-client-transport";
@@ -312,7 +313,21 @@ export async function createApplicationServices({
     process.env.DANI_DEX_AUTH_API_URL,
     app.isPackaged ? "https://api.openbot.run" : "http://127.0.0.1:3100",
   );
+  // Accounts live in Dani-Dex's Supabase project. Naming an account API explicitly (the local
+  // development server, say) is the one way back to the account-API sign-in and its online features;
+  // DANI_DEX_ACCOUNT_BACKEND=supabase keeps Supabase even then.
+  const supabaseAuth =
+    process.env.DANI_DEX_AUTH_API_URL && process.env.DANI_DEX_ACCOUNT_BACKEND !== "supabase"
+      ? undefined
+      : {
+          config: readSupabaseAuthConfig({
+            url: process.env.DANI_DEX_SUPABASE_URL,
+            publishableKey: process.env.DANI_DEX_SUPABASE_PUBLISHABLE_KEY,
+          }),
+          openExternal: (url: string) => shell.openExternal(url),
+        };
   const centralAuth = new CentralAuthManager({
+    supabase: supabaseAuth,
     apiUrl: centralAuthApiUrl,
     mobileConnectApiUrl: readMobileConnectApiUrl(process.env.DANI_DEX_MOBILE_AUTH_API_URL, centralAuthApiUrl),
     storagePath: join(app.getPath("userData"), CENTRAL_AUTH_FILE),

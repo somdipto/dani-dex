@@ -20,11 +20,13 @@
 
 import { type InviteLinkOptions, parseInviteUrl } from "@dani-dex/contracts/invite-links";
 import { parsePluginUrl } from "@dani-dex/contracts/plugin-links";
+import { parseAuthCallbackParameters } from "./supabase-auth";
 
 export type DeepLink =
   | { kind: "invite"; url: string }
   | { kind: "plugin"; slug: string }
-  | { kind: "mcp-auth"; state: string; code: string };
+  | { kind: "mcp-auth"; state: string; code: string }
+  | { kind: "account-auth"; result: { code: string } | { error: string } };
 
 /**
  * Where an MCP grant comes back when this machine could not bind a loopback port.
@@ -52,7 +54,24 @@ export function parseDeepLink(value: string, options: InviteLinkOptions = {}): D
     // Not a plugin listing. A plugin link carries no query, so it can never be the link below.
   }
 
-  return parseMcpAuthUrl(value);
+  return parseAccountAuthUrl(value) ?? parseMcpAuthUrl(value);
+}
+
+/**
+ * The return leg of an account sign-in: `dani-dex://auth/callback?code=…`, from GitHub, Google or
+ * the link in a sign-in email. Like `mcp-auth` it carries a grant, so it never reaches a renderer;
+ * the sign-in waiting in the main process is the only thing that can use it.
+ */
+function parseAccountAuthUrl(value: string): DeepLink | null {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "dani-dex:" || url.hostname !== "auth" || url.pathname !== "/callback") return null;
+  const result = parseAuthCallbackParameters(url);
+  return result ? { kind: "account-auth", result } : null;
 }
 
 /**
@@ -71,7 +90,7 @@ function parseMcpAuthUrl(value: string): DeepLink | null {
   } catch {
     return null;
   }
-  if ((url.protocol !== "dani-dex:" && url.protocol !== "dani-dex:") || url.hostname !== MCP_OAUTH_HOST) return null;
+  if (url.protocol !== "dani-dex:" || url.hostname !== MCP_OAUTH_HOST) return null;
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   if (!code || !state) return null;

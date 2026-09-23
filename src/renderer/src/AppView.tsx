@@ -63,6 +63,9 @@ export function AppAccessGate() {
               onRetry={auth.retryCentralAccount}
               onRequestEmailCode={auth.requestEmailCode}
               onVerifyEmailCode={auth.verifyEmailCode}
+              providers={auth.signInOptions().providers}
+              onSignInWithProvider={auth.signInWithProvider}
+              onCancelProviderSignIn={auth.cancelProviderSignIn}
               onReset={auth.logoutCentralAccount}
             />
           </Loading>

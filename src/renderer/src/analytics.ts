@@ -30,7 +30,7 @@ export interface AgentAnalyticsProperties {
 export interface DesktopAnalyticsEvents {
   desktop_app_opened: { setup_completed: boolean; signed_in: boolean };
   app_updated: { from_version: string; to_version: string };
-  account_sign_in_started: { result: "code_sent" | "failed"; failure_code?: string };
+  account_sign_in_started: { result: "code_sent" | "browser_opened" | "failed"; failure_code?: string };
   account_sign_in_completed: { result: AnalyticsResult; failure_code?: string };
   account_sign_out: { result: AnalyticsResult; failure_code?: string };
   onboarding_completed: { preferred_provider: AgentProviderId };
@@ -403,7 +403,10 @@ function sanitizeDesktopProperty(
   if (key === "failure_code") return isString(value) && SAFE_FAILURE_CODES.has(value) ? value : "unknown";
   if (key === "action") return safeEnum(value, EVENT_ACTIONS[name]);
   if (key === "result") {
-    return safeEnum(value, name === "account_sign_in_started" ? ["code_sent", "failed"] : ["succeeded", "failed"]);
+    return safeEnum(
+      value,
+      name === "account_sign_in_started" ? ["code_sent", "browser_opened", "failed"] : ["succeeded", "failed"],
+    );
   }
   if (key === "provider" || key === "preferred_provider") return safeEnum(value, AGENT_PROVIDERS);
   if (key === "reasoning_effort") return safeEnum(value, AGENT_REASONING_EFFORTS);

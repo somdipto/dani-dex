@@ -350,10 +350,11 @@ function AppSettings(props: AccountProps) {
         account={props.account()}
         onUpdateAccountName={auth.updateAccountName}
         onUpdateAccountAvatar={auth.updateAccountAvatar}
+        onlineServices={auth.signInOptions().onlineServices}
         onCreateMobileConnect={auth.createMobileConnect}
         onListMobileConnectedDevices={auth.listMobileConnectedDevices}
         onRevokeMobileConnectedDevice={auth.revokeMobileConnectedDevice}
-        onListAccountSessions={auth.listAccountSessions}
+        onListAccountSessions={auth.signInOptions().onlineServices ? auth.listAccountSessions : undefined}
         onRevokeAccountSession={auth.revokeAccountSession}
         agentStatus={agentStatus()}
         providerRuntimeStatuses={localProviderDownloads() ? providerRuntimeStatuses() : undefined}

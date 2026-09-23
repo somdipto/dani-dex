@@ -525,6 +525,9 @@ export function installDanidexStub(): void {
           status: "signed_in",
           user: { id: "user-1", email: "person@example.com", name: null, avatarUrl: null },
         }),
+        getSignInOptions: vi.fn().mockResolvedValue({ providers: [], onlineServices: true }),
+        signInWithProvider: vi.fn().mockResolvedValue({ status: "signing_in", provider: "github" }),
+        cancelProviderSignIn: vi.fn().mockResolvedValue({ status: "signed_out" }),
         updateName: vi.fn().mockResolvedValue({
           status: "signed_in",
           user: { id: "user-1", email: "person@example.com", name: "Norbert", avatarUrl: null },

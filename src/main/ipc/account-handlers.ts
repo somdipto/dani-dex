@@ -1,6 +1,7 @@
 // The cloud account: email sign-in, profile, and the mobile devices connected to it.
 
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { CENTRAL_AUTH_PROVIDERS, type CentralAuthProvider } from "@dani-dex/contracts/ipc";
 import type { CentralAuthManager } from "../central-auth-manager";
 import type { HostService } from "../host-service";
 import { createHostedMobileConnect } from "../mobile-connect-host";
@@ -25,6 +26,11 @@ export function accountIpcHandlers({ centralAuth, host }: AccountIpcDependencies
       verifyEmailCode: payloadHandler(parseEmailCodeVerification, (verification) =>
         centralAuth.verifyEmailCode(verification.challengeId, verification.code),
       ),
+      getSignInOptions: handler(() => centralAuth.getSignInOptions()),
+      signInWithProvider: payloadHandler(parseCentralAuthProvider, (provider) =>
+        centralAuth.signInWithProvider(provider),
+      ),
+      cancelProviderSignIn: handler(() => centralAuth.cancelProviderSignIn()),
       updateName: payloadHandler(parseProfileName, (name) => centralAuth.updateName(name)),
       updateAvatar: payloadHandler(parseAvatarImage, (parsed) => centralAuth.updateAvatar(parsed)),
       createMobileConnect: handler(() => createHostedMobileConnect({ centralAuth, host })),
@@ -39,4 +45,10 @@ export function accountIpcHandlers({ centralAuth, host }: AccountIpcDependencies
       logout: handler(() => centralAuth.logout()),
     },
   };
+}
+
+function parseCentralAuthProvider(input: unknown): CentralAuthProvider {
+  const provider = CENTRAL_AUTH_PROVIDERS.find((candidate) => candidate === input);
+  if (!provider) throw new Error("provider must be github or google.");
+  return provider;
 }

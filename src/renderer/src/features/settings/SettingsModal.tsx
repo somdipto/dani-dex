@@ -60,6 +60,11 @@ export interface SettingsModalProps {
   account: CentralAuthUser;
   onUpdateAccountName: (name: string) => Promise<void>;
   onUpdateAccountAvatar: (image: AvatarImageInput | null) => Promise<void>;
+  /**
+   * False while the account has no Dani-Dex online service behind it. Mobile connect and hosted
+   * sites are then left out of the sidebar, and the photo comes from the sign-in provider.
+   */
+  onlineServices?: boolean;
   onCreateMobileConnect?: () => Promise<MobileConnectTicket>;
   onListMobileConnectedDevices?: () => Promise<MobileConnectedDevice[]>;
   onRevokeMobileConnectedDevice?: (sessionId: string) => Promise<void>;
@@ -319,19 +324,24 @@ export function SettingsModal(props: SettingsModalProps) {
         }
         sidebar={
           <Tabs.List class="settings-modal-nav" aria-label={i18n.t("settings.sections.label")}>
-            {navItems.map((item) => {
-              const NavIcon = item.icon;
-              return (
-                <Tabs.Trigger
-                  class="settings-modal-nav-item"
-                  value={item.value}
-                  aria-current={activeTab() === item.value ? "page" : undefined}
-                >
-                  <NavIcon aria-hidden="true" />
-                  <span>{i18n.t(item.titleKey)}</span>
-                </Tabs.Trigger>
-              );
-            })}
+            {navItems
+              .filter(
+                (item) =>
+                  props.onlineServices !== false || (item.value !== "mobile-connect" && item.value !== "hosted-sites"),
+              )
+              .map((item) => {
+                const NavIcon = item.icon;
+                return (
+                  <Tabs.Trigger
+                    class="settings-modal-nav-item"
+                    value={item.value}
+                    aria-current={activeTab() === item.value ? "page" : undefined}
+                  >
+                    <NavIcon aria-hidden="true" />
+                    <span>{i18n.t(item.titleKey)}</span>
+                  </Tabs.Trigger>
+                );
+              })}
           </Tabs.List>
         }
       >
@@ -367,6 +377,7 @@ export function SettingsModal(props: SettingsModalProps) {
             store={profile}
             account={props.account}
             canListSessions={Boolean(props.onListAccountSessions)}
+            canEditAvatar={props.onlineServices !== false}
             canRevokeSession={Boolean(props.onRevokeAccountSession)}
           />
         </Tabs.Content>

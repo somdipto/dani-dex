@@ -18,6 +18,8 @@ import {
 import type { SettingsProfileStore } from "./stores/profile-store";
 
 interface SettingsProfileTabProps {
+  /** False when the photo comes from the sign-in provider and cannot be changed here. */
+  canEditAvatar?: boolean;
   store: SettingsProfileStore;
   account: CentralAuthUser;
   canListSessions: boolean;
@@ -79,7 +81,10 @@ export function SettingsProfileTab(props: SettingsProfileTabProps) {
             <ItemContent>
               <ItemTitle>Profile photo</ItemTitle>
               <ItemDescription class={props.store.state.avatar.error ? "settings-modal-error" : undefined}>
-                {props.store.state.avatar.error ?? "Shown with your profile in Dani-Dex."}
+                {props.store.state.avatar.error ??
+                  (props.canEditAvatar === false
+                    ? "From your sign-in account."
+                    : "Shown with your profile in Dani-Dex.")}
               </ItemDescription>
             </ItemContent>
             <ItemActions class="settings-identity-image-control">
@@ -90,12 +95,12 @@ export function SettingsProfileTab(props: SettingsProfileTabProps) {
                   size="icon-lg"
                   class="settings-identity-image-trigger settings-modal-profile-photo-trigger"
                   aria-label={props.account.avatarUrl ? "Edit profile photo" : "Add profile photo"}
-                  disabled={props.store.state.avatar.busy}
+                  disabled={props.store.state.avatar.busy || props.canEditAvatar === false}
                   onClick={props.store.openAvatarPicker}
                 >
                   <UserAvatar user={props.account} class="settings-modal-avatar" decorative />
                 </Button>
-                <Show when={props.account.avatarUrl && !props.store.state.avatar.busy}>
+                <Show when={props.account.avatarUrl && !props.store.state.avatar.busy && props.canEditAvatar !== false}>
                   <ImageRemoveButton label="Remove profile photo" onClick={() => void props.store.updateAvatar(null)} />
                 </Show>
               </div>

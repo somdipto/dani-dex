@@ -770,6 +770,17 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
         };
         return clone(authState);
       },
+      getSignInOptions: async () => ({ providers: ["github", "google"], onlineServices: true }),
+      signInWithProvider: async (provider) => {
+        authState = { status: "signing_in", provider };
+        emitAuthState(authState);
+        return clone(authState);
+      },
+      cancelProviderSignIn: async () => {
+        authState = { status: "signed_out" };
+        emitAuthState(authState);
+        return clone(authState);
+      },
       verifyEmailCode: async (_challengeId, _code) => {
         const email = authState.status === "code_sent" ? authState.email : "person@example.com";
         const user: CentralAuthUser = {

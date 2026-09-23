@@ -186,3 +186,18 @@ export const ServiceUnavailable: Story = {
 function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
+
+export const WithBrowserSignIn: Story = {
+  args: { providers: ["github", "google"], onSignInWithProvider: fn(async () => undefined) },
+};
+
+export const WaitingForBrowser: Story = {
+  args: {
+    state: { status: "signing_in", provider: "github" },
+    onCancelProviderSignIn: fn(async () => undefined),
+  },
+};
+
+export const SupabaseCodeSent: Story = {
+  args: { state: codeSentState({ codeLength: 6 }) },
+};

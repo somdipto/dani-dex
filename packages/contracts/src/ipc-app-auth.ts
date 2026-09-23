@@ -167,16 +167,36 @@ export interface CentralAuthIssue {
   retryAfterSeconds?: number;
 }
 
+/** A browser sign-in the account service can offer, once its provider is switched on. */
+export type CentralAuthProvider = "github" | "google";
+
+export const CENTRAL_AUTH_PROVIDERS: readonly CentralAuthProvider[] = ["github", "google"];
+
+/**
+ * What the sign-in screen may offer right now, read from the account service rather than assumed.
+ *
+ * `providers` lists only the browser sign-ins that are switched on, so a button appears the moment
+ * one is enabled and never before. `onlineServices` says whether the features that need Dani-Dex's
+ * own servers (mobile connect, remote hosts, shared teams, the marketplace) can work with this
+ * account; while it is false those features are shown as unavailable instead of failing.
+ */
+export interface CentralAuthSignInOptions {
+  providers: CentralAuthProvider[];
+  onlineServices: boolean;
+}
+
 export type CentralAuthState =
   | { status: "loading" }
   | { status: "signed_out" }
-  | { status: "signing_in" }
+  | { status: "signing_in"; provider?: CentralAuthProvider }
   | {
       status: "code_sent";
       challengeId: string;
       email: string;
       expiresAt: number;
       resendAvailableAt: number;
+      /** Set when the emailed code is this many digits, rather than the 8-character account-service code. */
+      codeLength?: number;
       developmentCode?: string;
       issue?: CentralAuthIssue;
     }
@@ -188,6 +208,9 @@ export interface CentralAuthDesktopApi {
   retry: () => Promise<CentralAuthState>;
   requestEmailCode: (email: string) => Promise<CentralAuthState>;
   verifyEmailCode: (challengeId: string, code: string) => Promise<CentralAuthState>;
+  getSignInOptions: () => Promise<CentralAuthSignInOptions>;
+  signInWithProvider: (provider: CentralAuthProvider) => Promise<CentralAuthState>;
+  cancelProviderSignIn: () => Promise<CentralAuthState>;
   updateName: (name: string) => Promise<CentralAuthState>;
   updateAvatar: (image: AvatarImageInput | null) => Promise<CentralAuthState>;
   createMobileConnect: () => Promise<MobileConnectTicket>;

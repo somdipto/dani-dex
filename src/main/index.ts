@@ -159,7 +159,7 @@ let systemSessionEndFlushStarted = false;
  * and the sign-in waiting for that grant lives in this process. It is also never held: a grant is
  * answered by the sign-in that started it, and there is no such sign-in before the app is running.
  */
-type RendererDeepLink = Exclude<DeepLink, { kind: "mcp-auth" }>;
+type RendererDeepLink = Exclude<DeepLink, { kind: "mcp-auth" } | { kind: "account-auth" }>;
 
 // One link at a time, of whichever kind: a second replaces the first, because what a user opened
 // last is what they meant. `deepLinkReceiverReady` says a window has asked for it, which is what
@@ -462,6 +462,9 @@ function forwardCentralAuth(state: CentralAuthState): void {
         }
         services?.analytics.flushPending();
       }
+      // A Supabase account has no remote-host service behind it yet, so there is nothing to sync
+      // and no host to publish; asking would only log a failure on every sign-in.
+      if (services && !services.centralAuth.onlineServicesAvailable) return;
       try {
         await services?.remoteServers.syncRemoteHosts();
       } catch (error) {
@@ -486,6 +489,10 @@ function forwardCentralAuth(state: CentralAuthState): void {
 function acceptDeepLink(link: DeepLink): void {
   if (link.kind === "mcp-auth") {
     receiveMcpAuthorizationCode(link.state, link.code);
+    return;
+  }
+  if (link.kind === "account-auth") {
+    receiveAccountAuthCallback(link.result);
     return;
   }
   pendingDeepLink = link;
@@ -513,7 +520,7 @@ function takePendingDeepLink(kind: RendererDeepLink["kind"]): string | null {
 
 /** A link of a kind a renderer can be sent, or null for one it cannot - which includes no link. */
 function takeRendererDeepLink(link: DeepLink | null): RendererDeepLink | null {
-  return link && link.kind !== "mcp-auth" ? link : null;
+  return link && link.kind !== "mcp-auth" && link.kind !== "account-auth" ? link : null;
 }
 
 /**
@@ -526,6 +533,27 @@ function receiveMcpAuthorizationCode(state: string, code: string): void {
   if (!services?.mcpOAuth.receiveAuthorizationCode(state, code)) return;
   const window = windowHolder.current;
   if (window && !window.isDestroyed()) showMainWindow(window);
+}
+
+/**
+ * Hands an account sign-in the grant GitHub, Google or a sign-in email sent back.
+ *
+ * Like the MCP grant it goes no further than the sign-in that is waiting in this process, and a
+ * link nobody is waiting for raises no window.
+ */
+function receiveAccountAuthCallback(result: { code: string } | { error: string }): void {
+  const centralAuth = services?.centralAuth;
+  if (!centralAuth) return;
+  void centralAuth
+    .receiveAuthCallback(result)
+    .then((waiting) => {
+      if (!waiting) return;
+      const window = windowHolder.current;
+      if (window && !window.isDestroyed()) showMainWindow(window);
+    })
+    .catch((error) => {
+      logger.error("Unable to finish signing in:", toLogValue(error));
+    });
 }
 
 app.on("open-url", (event, url) => {

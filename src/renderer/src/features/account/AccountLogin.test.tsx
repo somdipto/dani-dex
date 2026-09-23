@@ -69,6 +69,49 @@ describe("AccountLogin", () => {
     finishVerification?.();
   });
 
+  it("verifies a six-digit Supabase code as digits", async () => {
+    const onVerifyEmailCode = vi.fn().mockResolvedValue(undefined);
+    renderLogin(codeSentState({ codeLength: 6 }), { onVerifyEmailCode });
+    const code = screen.getByRole("textbox", { name: "One-time code" });
+
+    await fireEvent.input(code, { target: { value: "012345" } });
+
+    expect(onVerifyEmailCode).toHaveBeenCalledWith("challenge-1", "012345");
+  });
+
+  it("offers only the browser sign-ins that are switched on, and waits for the browser", async () => {
+    const onSignInWithProvider = vi.fn().mockResolvedValue(undefined);
+    const onCancelProviderSignIn = vi.fn().mockResolvedValue(undefined);
+    const [state, setState] = createSignal<CentralAuthState>({ status: "signed_out" });
+    render(() => (
+      <AccountLogin
+        variant="production"
+        state={state()}
+        onRetry={vi.fn()}
+        onRequestEmailCode={vi.fn()}
+        onVerifyEmailCode={vi.fn()}
+        onReset={vi.fn()}
+        providers={["github"]}
+        onSignInWithProvider={onSignInWithProvider}
+        onCancelProviderSignIn={onCancelProviderSignIn}
+      />
+    ));
+    expect(screen.queryByRole("button", { name: "Continue with Google" })).not.toBeInTheDocument();
+    await fireEvent.click(screen.getByRole("button", { name: "Continue with GitHub" }));
+    expect(onSignInWithProvider).toHaveBeenCalledWith("github");
+
+    setState({ status: "signing_in", provider: "github" });
+    expect(await screen.findByRole("heading", { name: "Continue in your browser" })).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "Email" })).not.toBeInTheDocument();
+    await fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(onCancelProviderSignIn).toHaveBeenCalledOnce());
+  });
+
+  it("shows no browser sign-in when none is switched on", () => {
+    renderLogin({ status: "signed_out" }, { providers: [], onSignInWithProvider: vi.fn() });
+    expect(screen.queryByText("or")).not.toBeInTheDocument();
+  });
+
   it("filters ambiguous characters without submitting an incomplete code", async () => {
     const onVerifyEmailCode = vi.fn().mockResolvedValue(undefined);
     renderLogin(codeSentState(), { onVerifyEmailCode });
