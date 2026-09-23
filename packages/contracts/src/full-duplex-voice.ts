@@ -36,15 +36,28 @@ export class FullDuplexVoiceSession {
     return { type: "phase", phase: "listening", turnId };
   }
 
-  async *commit(audio: Uint8Array): AsyncGenerator<DuplexVoiceEvent> {
+  /** Local transport: the coordinator runs speech-to-text on the recorded audio itself. */
+  commit(audio: Uint8Array): AsyncGenerator<DuplexVoiceEvent> {
+    return this.#run((signal) => this.ports.transcribe(audio, signal), true);
+  }
+
+  /** Realtime transport: the transcript already arrived from the call, so STT is skipped. */
+  commitText(text: string): AsyncGenerator<DuplexVoiceEvent> {
+    return this.#run(async () => text, false);
+  }
+
+  async *#run(
+    transcribe: (signal: AbortSignal) => Promise<string>,
+    announceTranscribing: boolean,
+  ): AsyncGenerator<DuplexVoiceEvent> {
     if (this.#phase !== "listening") throw new Error("Voice input is not listening.");
     const turnId = this.#turnId;
     const active = new AbortController();
     this.#active = active;
     try {
       this.#phase = "transcribing";
-      yield { type: "phase", phase: "transcribing", turnId };
-      const transcript = (await this.ports.transcribe(audio, active.signal)).trim();
+      if (announceTranscribing) yield { type: "phase", phase: "transcribing", turnId };
+      const transcript = (await transcribe(active.signal)).trim();
       this.#assertCurrent(turnId, active);
       if (!transcript) throw new Error("No speech was detected.");
       yield { type: "transcript", text: transcript, turnId };

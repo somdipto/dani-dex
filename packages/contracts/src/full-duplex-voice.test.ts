@@ -75,4 +75,19 @@ describe("full-duplex voice session", () => {
     expect(session.phase).toBe("error");
     expect(session.listen()).toMatchObject({ phase: "listening", turnId: 2 });
   });
+
+  it("takes a transcript from a transport that already transcribed, without running STT", async () => {
+    const transcribe = vi.fn(async () => "unused");
+    const session = new FullDuplexVoiceSession({
+      transcribe,
+      dispatch: async (text) => `echo ${text}`,
+      synthesize: async () => new Uint8Array(),
+    });
+    session.listen();
+    const events = await collect(session.commitText("  what is on my calendar  "));
+    expect(transcribe).not.toHaveBeenCalled();
+    expect(events).toContainEqual({ type: "transcript", text: "what is on my calendar", turnId: 1 });
+    expect(events).toContainEqual({ type: "answer", text: "echo what is on my calendar", turnId: 1 });
+    expect(events.at(-1)).toEqual({ type: "phase", phase: "idle", turnId: 1 });
+  });
 });
