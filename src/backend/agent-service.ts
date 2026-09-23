@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
 import { realpath, stat } from "node:fs/promises";
 import { basename } from "node:path";
+import type { HarnessAvailability } from "@dani-dex/contracts/agent-harness-routing";
+import type { AgentHarnessId } from "@dani-dex/contracts/agent-harnesses";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AccountUsage,
@@ -86,7 +88,7 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { isString } from "@dani-dex/contracts/runtime-values";
 import { QueueEditRejectedError, type QueueEditRequest } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
-import { createDaniDexLogger, redactText } from "@dani-dex/logging";
+import { createDaniDexLogger, redactText, toLogValue } from "@dani-dex/logging";
 import { AgentMemories } from "./agent/agent-memories";
 import type { ApprovalAutomationPolicy } from "./agent/approval-automation";
 import { AttachmentGateway } from "./agent/attachment-gateway";
@@ -107,6 +109,7 @@ import { DeltaBuffer } from "./agent/delta-buffer";
 import { DEVELOPMENT_DEFAULT_PROVIDER, developmentStartingModel } from "./agent/development-defaults";
 import { DrainScheduler, REMOVED_ENDPOINT_MESSAGE } from "./agent/drain-scheduler";
 import { DuplicationGate } from "./agent/duplication-gate";
+import { AgentHarnessRouter } from "./agent/harness-router";
 import { type AgentHostedSites, HostedSiteCoordinator } from "./agent/hosted-site-coordinator";
 import { isHostedSiteMutationTool } from "./agent/hosted-site-events";
 import { ImageGenRuntime } from "./agent/image-gen-runtime";
@@ -201,6 +204,11 @@ export interface AgentServiceOptions {
   clientFactory?: AgentClientFactory | null;
   /** Layer 1: the harness driver for each provider. Omitted means each provider's own CLI. */
   providerDriver?: (provider: AgentProvider) => BuiltInProviderDriver;
+  /**
+   * Set under the `automatic` harness setting: which harness this service runs and which ones the
+   * install has, so each new conversation can be routed and its route recorded.
+   */
+  harnessRouting?: { running: AgentHarnessId | null; availability: HarnessAvailability };
   bundledExecutables?: BundledProviderExecutables;
   prepareAgentWorkspace?: (agent: AgentSummary) => Promise<void>;
   hostedSites?: AgentHostedSites | null;
@@ -316,6 +324,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
   readonly #images: ImageGenRuntime;
   readonly #threads: ThreadLifecycle;
   readonly #drain: DrainScheduler;
+  readonly #harnessRouter: AgentHarnessRouter | null;
   readonly #attachments: AttachmentGateway;
   readonly #browserUploads: BrowserUploads;
   readonly #mailboxSync: MailboxSync;
@@ -342,6 +351,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       preferredModel = null,
       clientFactory = null,
       providerDriver,
+      harnessRouting,
       bundledExecutables = DEFAULT_BUNDLED_EXECUTABLES,
       prepareAgentWorkspace = async () => undefined,
       hostedSites = null,
@@ -707,6 +717,9 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
         excludedChannels: () => new Set(),
       },
     });
+    this.#harnessRouter = harnessRouting
+      ? new AgentHarnessRouter({ routes: store.database.harnessRoutes, ...harnessRouting })
+      : null;
     this.#drain = new DrainScheduler({
       channels: this.channels,
       store,
@@ -719,6 +732,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       compaction: this.#compaction,
       routines: this.#routines,
       threads: this.#threads,
+      ...(this.#harnessRouter ? { harnessRouter: this.#harnessRouter } : {}),
       hooks: {
         emitError: (code, error, agentId) => this.#emitError(code, error, agentId),
         redactMcp: (text) => this.#redactMcp(text),
@@ -1254,6 +1268,19 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     return model ? { provider: preferredProvider, model } : null;
   }
 
+  /**
+   * Gives a new bot its harness from what it was created as, under the automatic setting. Logged
+   * and skipped on failure: the first turn routes the bot again, and creation must not fail over it.
+   */
+  #routeNewAgent(agent: AgentSummary): void {
+    if (!this.#harnessRouter) return;
+    try {
+      this.#harnessRouter.routeAgent(agent);
+    } catch (error) {
+      logger.warn(`Could not route new agent ${agent.id}: ${toLogValue(error)}`);
+    }
+  }
+
   async createAgent(
     input: CreateAgentInput,
     configure?: (agent: AgentSummary) => Promise<AgentSummary>,
@@ -1263,6 +1290,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     if (!initialMessage) throw new Error("Initial message is required.");
     if (input.initialMessage.length > INPUT_LIMITS.messageText) throw new Error("Initial message is too long.");
     let agent = await this.#store.createAgent(input, profileOperationId);
+    this.#routeNewAgent(agent);
     try {
       await this.#prepareAgentWorkspace(agent);
       // A named pair lands before the initial message is queued: a provider change afterwards is
@@ -1322,6 +1350,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     input: Omit<CreateAgentInput, "initialMessage"> & { title?: string },
   ): Promise<AgentSummary> {
     let agent = await this.#store.createAgent(input);
+    this.#routeNewAgent(agent);
     try {
       await this.#prepareAgentWorkspace(agent);
       if (input.title) agent = await this.#store.updateAgent({ agentId: agent.id, title: input.title });

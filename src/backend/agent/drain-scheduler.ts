@@ -1,4 +1,6 @@
-import { AGENT_PROVIDERS } from "@dani-dex/contracts/ipc";
+import { describeHarnessRoute } from "@dani-dex/contracts/agent-harness-routing";
+import { AGENT_PROVIDERS, type AgentSummary } from "@dani-dex/contracts/ipc";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import type { AgentProvider } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import type { ChannelService } from "../channel-service";
@@ -8,12 +10,15 @@ import type { ContextCompaction } from "./context-compaction";
 import type { ConversationRuntime } from "./conversation-runtime";
 import { agentNamesById, displayMessageReferences } from "./delivery-content";
 import type { DuplicationGate } from "./duplication-gate";
+import type { AgentHarnessRouter } from "./harness-router";
 import type { MailboxSync } from "./mailbox-sync";
 import type { ProfileSave } from "./profile-save";
 import type { ProviderRuntime } from "./provider-runtime";
 import type { RoutineScheduler } from "./routine-scheduler";
 import { isMissingProviderSessionError, isRequestTimeout, providerForAgent } from "./thread-items";
 import type { ThreadLifecycle } from "./thread-lifecycle";
+
+const logger = createDaniDexLogger("harness-router");
 
 /** Shown to the user when a message names a model of an endpoint that was taken out. */
 export const REMOVED_ENDPOINT_MESSAGE = "The endpoint this agent used was removed. Choose another model for it.";
@@ -48,6 +53,8 @@ export interface DrainSchedulerOptions {
   threads: ThreadLifecycle;
   hooks: DrainHooks;
   channels?: ChannelService;
+  /** Present under the `automatic` harness setting: gives each bot its harness route. */
+  harnessRouter?: AgentHarnessRouter;
 }
 
 /**
@@ -73,6 +80,7 @@ export class DrainScheduler {
   readonly #threads: ThreadLifecycle;
   readonly #hooks: DrainHooks;
   readonly #channels: ChannelService | undefined;
+  readonly #harnessRouter: AgentHarnessRouter | undefined;
   readonly #drainingAgents = new Set<string>();
   /**
    * The model each agent's running turn was started with, by turn id. The agent record can be moved
@@ -93,6 +101,7 @@ export class DrainScheduler {
 
   constructor(options: DrainSchedulerOptions) {
     this.#store = options.store;
+    this.#harnessRouter = options.harnessRouter;
     this.#mailbox = options.mailbox;
     this.#mailboxSync = options.mailboxSync;
     this.#conversation = options.conversation;
@@ -232,6 +241,7 @@ export class DrainScheduler {
         return;
       }
       let threadId = await this.#threads.ensureThread(agent, client, execution?.threadId);
+      this.#routeAgent(agent, threadId);
       const snapshot = this.#conversation.ensureSnapshot(agent.id, threadId);
       // A turn started on this thread while the provider and the thread were prepared. The user
       // cannot see that race, so the delivery goes back to the head of the queue rather than
@@ -452,6 +462,20 @@ export class DrainScheduler {
    * The providers a delivery to this agent can reach. One for an agent that exists; an agent
    * startDelivery has still to create can land on any of them, so all of them are claimed.
    */
+  /**
+   * Makes sure the bot has its harness route and logs where this conversation runs. A failure here
+   * is logged and never stops the turn: the conversation still runs on the service's harness.
+   */
+  #routeAgent(agent: AgentSummary, threadId: string): void {
+    if (!this.#harnessRouter) return;
+    try {
+      const route = this.#harnessRouter.routeAgent(agent);
+      logger.info(`Conversation ${threadId} of ${agent.id} runs as: ${describeHarnessRoute(route)}.`);
+    } catch (error) {
+      logger.warn(`Could not route ${agent.id}: ${toLogValue(error)}`);
+    }
+  }
+
   #deliveryProviders(agentId: string): AgentProvider[] {
     const agent = this.#store.list().find((candidate) => candidate.id === agentId);
     return agent ? [providerForAgent(agent)] : [...AGENT_PROVIDERS];

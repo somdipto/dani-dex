@@ -15,6 +15,7 @@ import { AgentUsage } from "./database/agent-usage";
 import { ConversationQueries } from "./database/conversation-queries";
 import { ConversationWriter } from "./database/conversation-writer";
 import { DatabaseCore, type OrchestrationEventInput } from "./database/database-core";
+import { HarnessRoutes } from "./database/harness-routes";
 import {
   type ActiveHostedSiteConversationEvent,
   HostedSiteEventLog,
@@ -53,6 +54,7 @@ export class DaniDexDatabase {
   readonly #mailbox: MailboxProjection;
   readonly #sessions: ProviderSessions;
   readonly #summaries: ThreadSummaries;
+  readonly harnessRoutes: HarnessRoutes;
 
   constructor(readonly userDataPath: string) {
     this.#core = new DatabaseCore({ userDataPath });
@@ -65,6 +67,7 @@ export class DaniDexDatabase {
     this.#mailbox = new MailboxProjection({ core: this.#core });
     this.#sessions = new ProviderSessions({ core: this.#core });
     this.#summaries = new ThreadSummaries({ core: this.#core });
+    this.harnessRoutes = new HarnessRoutes({ core: this.#core });
   }
 
   get path(): string {

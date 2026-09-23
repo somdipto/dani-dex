@@ -14,6 +14,7 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it } from "vitest";
+import { AgentHarnessRouter } from "./agent/harness-router";
 import { DaniDexDatabase } from "./dani-dex-database";
 
 const roots: string[] = [];
@@ -129,6 +130,7 @@ describe("DaniDexDatabase", () => {
       { version: 19 },
       { version: 20 },
       { version: 21 },
+      { version: 22 },
     ]);
     database.close();
   });
@@ -1109,6 +1111,7 @@ describe("DaniDexDatabase", () => {
       { version: 19 },
       { version: 20 },
       { version: 21 },
+      { version: 22 },
     ]);
     expect(migrated.connection.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
     migrated.close();
@@ -1176,7 +1179,7 @@ describe("DaniDexDatabase", () => {
       ALTER TABLE projection_provider_sessions_v18 RENAME TO projection_provider_sessions;
       CREATE INDEX provider_sessions_thread
         ON projection_provider_sessions(thread_id, provider, state);
-      DELETE FROM schema_migrations WHERE version IN (19, 20, 21);
+      DELETE FROM schema_migrations WHERE version IN (19, 20, 21, 22);
       PRAGMA foreign_keys = ON;
     `);
     legacy.close();
@@ -1204,7 +1207,7 @@ describe("DaniDexDatabase", () => {
         .get(),
     ).toMatchObject({ sql: expect.stringContaining("'opencode'") });
     expect(migrated.connection.prepare("SELECT MAX(version) AS version FROM schema_migrations").get()).toEqual({
-      version: 21,
+      version: 22,
     });
     migrated.close();
   });
@@ -1222,7 +1225,7 @@ describe("DaniDexDatabase", () => {
     const legacy = new DatabaseSync(database.path);
     legacy.exec(`
       DROP TABLE projection_mcp_servers;
-      DELETE FROM schema_migrations WHERE version IN (20, 21);
+      DELETE FROM schema_migrations WHERE version IN (20, 21, 22);
     `);
     legacy.close();
 
@@ -1247,7 +1250,7 @@ describe("DaniDexDatabase", () => {
       { name: "Filesystem" },
     ]);
     expect(reopened.connection.prepare("SELECT MAX(version) AS version FROM schema_migrations").get()).toEqual({
-      version: 21,
+      version: 22,
     });
     reopened.close();
   });
@@ -1271,7 +1274,7 @@ describe("DaniDexDatabase", () => {
          '2026-09-14T10:00:00.000Z', '2026-09-14T10:00:00.000Z'),
         ('mcp-2', 'computer_use_saved', 'stdio', 1, 'other', '[]', '[]', '[]', '', '', '[]', 1,
          '2026-09-14T10:00:00.000Z', '2026-09-14T10:00:00.000Z');
-      DELETE FROM schema_migrations WHERE version = 21;
+      DELETE FROM schema_migrations WHERE version IN (21, 22);
     `);
     legacy.close();
 
@@ -1350,6 +1353,7 @@ describe("DaniDexDatabase", () => {
       { version: 19 },
       { version: 20 },
       { version: 21 },
+      { version: 22 },
     ]);
     migrated.close();
   });
@@ -1429,6 +1433,7 @@ describe("DaniDexDatabase", () => {
       { version: 19 },
       { version: 20 },
       { version: 21 },
+      { version: 22 },
     ]);
     retried.close();
   });
@@ -2260,6 +2265,43 @@ async function createDatabase(): Promise<DaniDexDatabase> {
   await database.initialize();
   return database;
 }
+
+describe("AgentHarnessRouter", () => {
+  it("routes a bot once from what it was created as and keeps that route", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-harness-route-"));
+    roots.push(root);
+    const database = new DaniDexDatabase(root);
+    await database.initialize();
+    const agent = { ...testAgent(), name: "CTO", title: "", description: "" };
+    database.replaceAgents("agents-import", [agent], "agents.imported");
+    const router = new AgentHarnessRouter({
+      routes: database.harnessRoutes,
+      running: "hermes",
+      availability: { hermes: true, omp: false },
+    });
+
+    const route = router.routeAgent(agent);
+    expect(route).toMatchObject({ agentId: agent.id, kind: "technical", harness: "hermes", wanted: "omp" });
+    expect(route.signals).toEqual(["role: cto"]);
+
+    // A rename does not move the bot: its conversations live on the harness it started on.
+    expect(router.routeAgent({ ...agent, name: "Trip planner" })).toMatchObject({
+      kind: "technical",
+      harness: "hermes",
+    });
+
+    // A service without OMP running never hands out OMP, even when OMP is installed.
+    const other = { ...testAgent(), id: `${agent.id}-2`, name: "Chef", title: "", description: "" };
+    database.replaceAgents("agents-import-2", [agent, other], "agents.imported");
+    const withOmpInstalled = new AgentHarnessRouter({
+      routes: database.harnessRoutes,
+      running: "hermes",
+      availability: { hermes: true, omp: true },
+    });
+    expect(withOmpInstalled.routeAgent(other)).toMatchObject({ kind: "general", harness: "hermes", wanted: null });
+    database.close();
+  });
+});
 
 function testAgent(): AgentSummary {
   return {

@@ -1,4 +1,4 @@
-import type { AgentHarnessId, AgentModelId, AgentProviderId, AppSetupState } from "@dani-dex/contracts/ipc";
+import type { AgentHarnessSetting, AgentModelId, AgentProviderId, AppSetupState } from "@dani-dex/contracts/ipc";
 import { createSignal, flush, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { createSimpleContext } from "../../simple-context";
@@ -60,7 +60,7 @@ const Setup = createSimpleContext({
      * review of the permissions does not move the agents off a chosen local endpoint. A caller that
      * gives `null` clears the model on purpose.
      */
-    function keptHarness(): { harness?: AgentHarnessId } {
+    function keptHarness(): { harness?: AgentHarnessSetting } {
       const harness = setupState()?.harness;
       return harness ? { harness } : {};
     }
@@ -92,7 +92,7 @@ const Setup = createSimpleContext({
      * `relaunch`. Only a completed setup has a provider to keep, which is why a setup still in
      * progress refuses rather than guessing one.
      */
-    async function saveHarness(harness: AgentHarnessId | null) {
+    async function saveHarness(harness: AgentHarnessSetting | null) {
       const previous = setupState();
       if (!previous?.completed || !previous.preferredProvider)
         throw new Error("Finish setup before choosing a harness.");

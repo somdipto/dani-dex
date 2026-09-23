@@ -68,6 +68,7 @@ export const ja = {
   "settings.harness.rowTitle": "ハーネス",
   "settings.harness.rowDescription": "Hermes は一般的な作業と委任を担当します。プロバイダ自身の CLI は従来の動作です。",
   "settings.harness.provider": "プロバイダ自身の CLI",
+  "settings.harness.automatic": "自動（Hermes、技術系エージェントはOMP）",
   "settings.harness.hermes": "Hermes",
   "settings.harness.omp": "OMP(まだ利用できません)",
   "settings.harness.restartNote": "新しいハーネスに切り替えるには Dani-Dex を再起動してください。",

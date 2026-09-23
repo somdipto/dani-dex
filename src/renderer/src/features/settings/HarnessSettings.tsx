@@ -1,4 +1,4 @@
-import { AGENT_HARNESS_DESCRIPTORS, type AgentHarnessId } from "@dani-dex/contracts/ipc";
+import { AGENT_HARNESS_DESCRIPTORS, type AgentHarnessSetting } from "@dani-dex/contracts/ipc";
 import type { AppTextKey } from "@dani-dex/i18n";
 import { createSignal, Show } from "solid-js";
 import {
@@ -20,35 +20,40 @@ import {
 import { useI18n } from "../../i18n-context";
 
 /** `provider` is the stored absence of a harness: each provider's own CLI runs the turn. */
-export type HarnessChoice = AgentHarnessId | "provider";
+export type HarnessChoice = AgentHarnessSetting | "provider";
 
 export interface HarnessSettingsApi {
   /** What is saved for the next launch. `null` is the provider's own CLI. */
-  saved: () => AgentHarnessId | null;
+  saved: () => AgentHarnessSetting | null;
   /** What the running agents use. It only changes on relaunch. */
-  active: () => AgentHarnessId | null;
-  onChange: (harness: AgentHarnessId | null) => Promise<void>;
+  active: () => AgentHarnessSetting | null;
+  onChange: (harness: AgentHarnessSetting | null) => Promise<void>;
   onRelaunch: () => Promise<void>;
 }
 
-const CHOICES: readonly HarnessChoice[] = ["provider", ...AGENT_HARNESS_DESCRIPTORS.map((harness) => harness.id)];
+const CHOICES: readonly HarnessChoice[] = [
+  "automatic",
+  "provider",
+  ...AGENT_HARNESS_DESCRIPTORS.map((harness) => harness.id),
+];
 
 const CHOICE_KEYS = {
+  automatic: "settings.harness.automatic",
   provider: "settings.harness.provider",
   hermes: "settings.harness.hermes",
   omp: "settings.harness.omp",
 } as const satisfies Record<HarnessChoice, AppTextKey>;
 
-function toChoice(harness: AgentHarnessId | null): HarnessChoice {
+function toChoice(harness: AgentHarnessSetting | null): HarnessChoice {
   return harness ?? "provider";
 }
 
-function fromChoice(choice: HarnessChoice): AgentHarnessId | null {
+function fromChoice(choice: HarnessChoice): AgentHarnessSetting | null {
   return choice === "provider" ? null : choice;
 }
 
 function choiceAvailable(choice: HarnessChoice): boolean {
-  if (choice === "provider") return true;
+  if (choice === "provider" || choice === "automatic") return true;
   return AGENT_HARNESS_DESCRIPTORS.find((harness) => harness.id === choice)?.available === true;
 }
 

@@ -1,5 +1,5 @@
-import type { AgentHarnessId } from "@dani-dex/contracts/agent-harnesses";
 import { isManagedRuntimeProvider } from "@dani-dex/contracts/agent-providers";
+import { AGENT_HARNESS_DESCRIPTORS, type AgentHarnessSetting, fixedHarness } from "@dani-dex/contracts/ipc";
 import { AgentDatabaseSupervisor } from "../backend/agent-data/agent-database-supervisor";
 import { AgentTables } from "../backend/agent-data/agent-tables";
 import { spawnAgentDatabaseHost } from "./agent-database-host-process";
@@ -232,7 +232,7 @@ export interface ApplicationServices {
   hostUpdateCoordinator: HostUpdateCoordinator;
   setupFile: string;
   /** The harness the agent service was built with. Read once at launch; a change needs a relaunch. */
-  activeHarness: AgentHarnessId | null;
+  activeHarness: AgentHarnessSetting | null;
   analyticsPreferenceFile: string;
   updatePreferenceFile: string;
   approvalAutomation: ApprovalAutomation;
@@ -673,6 +673,23 @@ export async function createApplicationServices({
   teardown.push(TEARDOWN_ORDER.computerUsePermissionHelp, "the Computer Use permission help", () => {
     computerUsePermissionHelp.close();
   });
+  // Layer 1. A harness counts as available when Dani-Dex can start it: Hermes is bundled or found on
+  // the PATH at spawn, and OMP stays off until its runtime ships verified. Neither the router nor a
+  // fixed setting ever picks an unavailable one.
+  const harnessAvailability = {
+    hermes: true,
+    omp: AGENT_HARNESS_DESCRIPTORS.find((harness) => harness.id === "omp")?.available === true,
+  };
+  // The service runs one harness's clients. Under `automatic` that is Hermes, where general work
+  // goes, and each conversation's route is recorded for when a second harness can take it.
+  const runningHarness =
+    setupState.harness === "automatic"
+      ? harnessAvailability.hermes
+        ? "hermes"
+        : null
+      : setupState.harness
+        ? fixedHarness(setupState.harness, harnessAvailability)
+        : null;
   const service: AgentService = new AgentService({
     store,
     mailbox,
@@ -681,12 +698,15 @@ export async function createApplicationServices({
     preferredProvider: setupState.preferredProvider ?? "codex",
     bundledExecutables: providerRuntimes.bundledExecutables(),
     // Layer 1. Hermes keeps its own state under Dani-Dex's data directory, never ~/.hermes.
-    ...(setupState.harness
+    ...(runningHarness
       ? {
-          providerDriver: harnessDriverResolver(setupState.harness, {
+          providerDriver: harnessDriverResolver(runningHarness, {
             hermesHome: join(app.getPath("userData"), "hermes"),
           }),
         }
+      : {}),
+    ...(setupState.harness === "automatic"
+      ? { harnessRouting: { running: runningHarness, availability: harnessAvailability } }
       : {}),
     prepareAgentWorkspace: async (agent) => {
       await managedSkills.syncAgent(agent);

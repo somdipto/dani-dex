@@ -1,3 +1,4 @@
+export * from "./agent-harness-routing";
 export * from "./agent-harnesses";
 export * from "./agent-providers";
 export * from "./app-language";

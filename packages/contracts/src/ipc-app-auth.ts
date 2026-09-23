@@ -1,4 +1,4 @@
-import type { AgentHarnessId } from "./agent-harnesses";
+import type { AgentHarnessSetting } from "./agent-harness-routing";
 import type { ManagedProviderId, ManagedToolRuntimeId } from "./agent-providers";
 import type { AgentModelId } from "./ipc-agent-identity";
 import type { AgentProviderId } from "./ipc-agent-status";
@@ -128,21 +128,22 @@ export interface AppSetupState {
   preferredModel: AgentModelId | null;
   /**
    * Layer 1, stored apart from the provider and model. Absent means each provider's own CLI runs
-   * the turn; `hermes` runs every provider inside the Hermes harness.
+   * the turn; `hermes` runs every provider inside the Hermes harness; `automatic` routes each new
+   * conversation to the harness its work belongs on.
    */
-  harness?: AgentHarnessId | null;
+  harness?: AgentHarnessSetting | null;
   /**
    * The harness the running agent service was built with. It is chosen once at launch, so after a
    * save this can differ from `harness` until Dani-Dex restarts. Absent in states that did not come
    * from the main process, which read as "nothing pending".
    */
-  activeHarness?: AgentHarnessId | null;
+  activeHarness?: AgentHarnessSetting | null;
 }
 
 export interface SaveSetupInput {
   preferredProvider: AgentProviderId;
   preferredModel: AgentModelId | null;
-  harness?: AgentHarnessId | null;
+  harness?: AgentHarnessSetting | null;
 }
 
 export interface AnalyticsPreference {

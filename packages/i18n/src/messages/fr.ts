@@ -79,6 +79,7 @@ export const fr = {
   "settings.harness.rowDescription":
     "Hermes gère le travail général et la délégation. Le CLI du fournisseur est le fonctionnement d’avant.",
   "settings.harness.provider": "CLI du fournisseur",
+  "settings.harness.automatic": "Automatique (Hermes, OMP pour les agents techniques)",
   "settings.harness.hermes": "Hermes",
   "settings.harness.omp": "OMP (pas encore disponible)",
   "settings.harness.restartNote": "Redémarrez Dani-Dex pour passer au nouveau moteur.",

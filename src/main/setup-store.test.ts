@@ -100,8 +100,8 @@ describe("default harness", () => {
   const fresh = { completed: false, preferredProvider: null, preferredModel: null };
   const done = { completed: true, preferredProvider: "codex" as const, preferredModel: null };
 
-  it("gives a first setup Hermes when the bundled Hermes is there", () => {
-    expect(withDefaultHarness(fresh, input, true)).toEqual({ ...input, harness: "hermes" });
+  it("gives a first setup automatic routing when the bundled Hermes is there", () => {
+    expect(withDefaultHarness(fresh, input, true)).toEqual({ ...input, harness: "automatic" });
     expect(withDefaultHarness(fresh, input, false)).toEqual(input);
   });
 

@@ -3,7 +3,13 @@
 
 import { access } from "node:fs/promises";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
-import type { AgentHarnessId, AppInfo, AppSetupState, AppVariant, ExternalDestination } from "@dani-dex/contracts/ipc";
+import type {
+  AgentHarnessSetting,
+  AppInfo,
+  AppSetupState,
+  AppVariant,
+  ExternalDestination,
+} from "@dani-dex/contracts/ipc";
 import { app, type BrowserWindow, shell } from "electron";
 import type { AgentService } from "../../backend/agent-service";
 import type { BrowserHost } from "../../backend/browser-host";
@@ -61,7 +67,7 @@ export interface AppIpcDependencies {
   getMainWindow: () => BrowserWindow | null;
   setAnalyticsTrackingEnabled: (enabled: boolean) => void;
   /** The harness the agent service was built with at launch. A saved change applies on relaunch. */
-  activeHarness: AgentHarnessId | null;
+  activeHarness: AgentHarnessSetting | null;
   relaunch: () => void;
 }
 

@@ -74,6 +74,7 @@ export const en = {
   "settings.harness.rowDescription":
     "Hermes runs general work and delegation. The provider's own CLI is how agents ran before.",
   "settings.harness.provider": "Provider's own CLI",
+  "settings.harness.automatic": "Automatic (Hermes, OMP for technical bots)",
   "settings.harness.hermes": "Hermes",
   "settings.harness.omp": "OMP (not available yet)",
   "settings.harness.restartNote": "Restart Dani-Dex to switch to the new harness.",

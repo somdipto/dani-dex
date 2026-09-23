@@ -4,6 +4,7 @@ import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-d
 import { isGeneratedAgentId } from "@dani-dex/contracts/validation";
 import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { CHANNEL_SCHEMA_SQL, CHANNEL_SETTINGS_SCHEMA_SQL } from "./channel-schema";
+import { HARNESS_ROUTES_SCHEMA_SQL } from "./database/harness-routes";
 import { MCP_SERVERS_SCHEMA_SQL } from "./mcp-schema";
 
 const BASELINE_SCHEMA_VERSION = 8;
@@ -373,7 +374,8 @@ const LATEST_SCHEMA_SQL =
   ANALYTICS_DATE_INDEX_SQL +
   CHANNEL_SCHEMA_SQL +
   CHANNEL_SETTINGS_SCHEMA_SQL +
-  MCP_SERVERS_SCHEMA_SQL;
+  MCP_SERVERS_SCHEMA_SQL +
+  HARNESS_ROUTES_SCHEMA_SQL;
 
 // Silence here would ship new installs a table the migrations never produce, so an edit to the baseline
 // that moves this declaration out from under the substitution has to be loud.
@@ -465,6 +467,11 @@ const MIGRATIONS: readonly DaniDexMigration[] = [
     // Renames rows only, so no foreign-key pause, no vacuum, and nothing to mirror in the latest
     // schema: a new database has no rows to rename.
     up: freeComputerUseServerName,
+  },
+  {
+    version: 22,
+    // Only creates a table, so no foreign-key pause and no vacuum.
+    up: (db) => db.exec(HARNESS_ROUTES_SCHEMA_SQL),
   },
 ];
 

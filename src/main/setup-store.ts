@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { type AgentHarnessId, isAgentHarness } from "@dani-dex/contracts/agent-harnesses";
+import { type AgentHarnessSetting, isAgentHarnessSetting } from "@dani-dex/contracts/agent-harness-routing";
 import {
   type AgentModelId,
   type AgentProviderId,
@@ -20,7 +20,7 @@ interface StoredSetup {
    */
   preferredModel?: AgentModelId;
   /** Layer 1. Added without a version bump for the same reason as `preferredModel`. */
-  harness?: AgentHarnessId;
+  harness?: AgentHarnessSetting;
   completedAt: string;
 }
 
@@ -44,7 +44,7 @@ export async function readSetupState(path: string): Promise<AppSetupState> {
       // A malformed model is dropped rather than failing the whole read: the provider is still a
       // usable answer, and the model falls back to that provider's default.
       preferredModel: isAgentModel(parsed.preferredModel) ? parsed.preferredModel : null,
-      ...(isAgentHarness(parsed.harness) ? { harness: parsed.harness } : {}),
+      ...(isAgentHarnessSetting(parsed.harness) ? { harness: parsed.harness } : {}),
     };
   } catch (error) {
     if (isMissing(error) || error instanceof SyntaxError) return { ...EMPTY_SETUP };
@@ -65,8 +65,9 @@ export async function writeSetupState(path: string, input: SaveSetupInput): Prom
 }
 
 /**
- * Hermes is the default harness for a new setup. Only the first completion picks it, and only when
- * the bundled Hermes is there to run: a setup finished before Hermes shipped keeps its provider's
+ * Automatic routing is the default for a new setup: general work on Hermes, technical work on OMP
+ * once OMP is installed. Only the first completion picks it, and only when the bundled Hermes is
+ * there to run: a setup finished before Hermes shipped keeps its provider's
  * own CLI, and so does any later save, where a missing harness is the user's own choice.
  */
 export function withDefaultHarness(
@@ -75,7 +76,7 @@ export function withDefaultHarness(
   hermesAvailable: boolean,
 ): SaveSetupInput {
   if (previous.completed || input.harness || !hermesAvailable) return input;
-  return { ...input, harness: "hermes" };
+  return { ...input, harness: "automatic" };
 }
 
 function isMissing(error: unknown): error is NodeJS.ErrnoException {
