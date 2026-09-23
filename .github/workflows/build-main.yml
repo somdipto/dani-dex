@@ -1,0 +1,192 @@
+name: Build main
+
+# Every push to main packages the desktop app the way a release would, without signing or
+# publishing, so a change that breaks packaging is found on the commit that made it rather than on
+# the next tag. The installers are CI artifacts only: nothing here reaches the updater feed, which
+# reads GitHub Releases and is fed by `release.yml` alone.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-main-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+jobs:
+  windows:
+    name: Windows x64 installer (unsigned)
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      - name: Install and verify runtimes
+        run: |
+          bun scripts/install-remote-desktop-runtime.ts win32 x64
+          bun run verify:remote-desktop-runtime --windows
+          bun scripts/install-codex-runtime.ts win32 x64
+          bun scripts/install-claude-runtime.ts win32 x64
+          bun scripts/install-grok-runtime.ts win32 x64
+          bun scripts/install-hermes-runtime.ts win32 x64
+
+      - name: Build unsigned NSIS installer
+        run: bun run dist:win
+
+      - name: Verify packaged application and launch
+        run: bun run verify:package:win
+
+      # The harness the app runs by default for general work, started from inside the package through
+      # the same `.cmd` launcher the app spawns.
+      - name: Verify packaged Hermes
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $output = & cmd.exe /d /s /c '"dist\win-unpacked\resources\hermes\win\x64\bin\hermes.cmd" --version'
+          if ($LASTEXITCODE -ne 0) { Write-Error "The packaged Hermes did not start." }
+          $version = (Get-Content native-runtime.lock.json -Raw | ConvertFrom-Json).hermes.version
+          if (-not ($output -match [regex]::Escape("v$version"))) { Write-Error "Unexpected packaged Hermes version: $output" }
+          $output
+
+      - name: Upload installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dani-dex-main-windows-${{ github.sha }}
+          path: dist/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  linux:
+    name: Linux x64 AppImage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Install a virtual display for the launch check
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes xvfb
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      - name: Install and verify runtimes
+        run: |
+          bun scripts/install-codex-runtime.ts linux x64
+          bun scripts/install-claude-runtime.ts linux x64
+          bun scripts/install-grok-runtime.ts linux x64
+          bun scripts/install-hermes-runtime.ts linux x64
+
+      - name: Build AppImage
+        run: bun run dist:linux
+
+      # Same reason as the release job: Ubuntu 24.04 confines unprivileged user namespaces, and the
+      # launch check keeps the Electron sandbox on.
+      - name: Permit the Electron sandbox for the verification build
+        run: |
+          set -euo pipefail
+          sudo chown root:root dist/linux-unpacked/chrome-sandbox
+          sudo chmod 4755 dist/linux-unpacked/chrome-sandbox
+          sudo tee /etc/apparmor.d/dani-dex-verify >/dev/null <<PROFILE
+          abi <abi/4.0>,
+          include <tunables/global>
+
+          profile dani-dex-verify "$GITHUB_WORKSPACE/dist/linux-unpacked/dani-dex" flags=(unconfined) {
+            userns,
+          }
+          PROFILE
+          sudo apparmor_parser -r /etc/apparmor.d/dani-dex-verify
+
+      - name: Verify packaged application and launch
+        run: xvfb-run -a bun run verify:package:linux
+
+      - name: Verify packaged Hermes
+        run: |
+          set -euo pipefail
+          version=$(jq -r .hermes.version native-runtime.lock.json)
+          output=$(dist/linux-unpacked/resources/hermes/linux/x64/bin/hermes --version)
+          echo "$output"
+          grep -Fq "v$version" <<<"$output"
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dani-dex-main-linux-${{ github.sha }}
+          path: dist/*.AppImage
+          if-no-files-found: error
+          retention-days: 14
+
+  macos:
+    # Unsigned and not notarized: macOS will ask the tester to allow it in Privacy & Security. The
+    # signed build waits on the owner's Apple Developer team.
+    name: macOS arm64 DMG (unsigned)
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      - name: Install and verify runtimes
+        run: |
+          bun run install:codex-runtime
+          bun run install:claude-runtime
+          bun run install:grok-runtime
+          bun run install:hermes-runtime
+          bun run install:remote-desktop-runtime
+          bun run verify:remote-desktop-runtime
+          bun run prepare:cua-driver
+
+      # The release job's build, with signing and notarization switched off. `dist:mac` would rebuild
+      # the remote desktop runtime from source instead of installing the pinned one.
+      - name: Build unsigned DMG
+        run: |
+          bun run voice:prepare-runtime
+          bun run build
+          bun x electron-builder --mac --arm64 --publish never --config.mac.identity=null --config.mac.notarize=false
+
+      - name: Verify packaged Hermes
+        run: |
+          set -euo pipefail
+          version=$(jq -r .hermes.version native-runtime.lock.json)
+          output=$(dist/mac-arm64/Dani-Dex.app/Contents/Resources/hermes/mac/arm64/bin/hermes --version)
+          echo "$output"
+          grep -Fq "v$version" <<<"$output"
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dani-dex-main-macos-${{ github.sha }}
+          path: dist/*.dmg
+          if-no-files-found: error
+          retention-days: 14
