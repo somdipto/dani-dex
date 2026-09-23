@@ -1,3 +1,4 @@
+export * from "./agent-harnesses";
 export * from "./agent-providers";
 export * from "./app-language";
 export * from "./ipc-agent-analytics";

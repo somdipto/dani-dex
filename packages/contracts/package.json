@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./agent-harnesses": "./src/agent-harnesses.ts",
     "./agent-providers": "./src/agent-providers.ts",
     "./attachment-files": "./src/attachment-files.ts",
     "./attachment-references": "./src/attachment-references.ts",
