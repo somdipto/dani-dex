@@ -58,7 +58,7 @@ function UsageStory(props: {
         width: props.narrow ? "390px" : "100%",
         height: "900px",
         overflow: "hidden",
-        background: "var(--openbot-bg-canvas)",
+        background: "var(--dani-dex-bg-canvas)",
       }}
     >
       <AgentUsagePanel hostName="Local host" serverId="local" agentId={props.agentId} onBack={fn()} />

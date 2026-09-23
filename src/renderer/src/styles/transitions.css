@@ -44,7 +44,7 @@
    only owns the interpolation. Use a constant border-width
    across states so the tween never shifts inner content. */
 .t-input {
-  transition: border-color var(--openbot-duration-normal) ease-out;
+  transition: border-color var(--dani-dex-duration-normal) ease-out;
   will-change: transform;
 }
 .t-input.is-error {

@@ -67,12 +67,12 @@ export function usageProviders(models: AnalyticsModel[]) {
 // re-sorts when the metric changes, and a legend dot that repainted with it would say a
 // different area belongs to the row.
 const seriesColors: Readonly<Record<string, string>> = {
-  codex: "var(--openbot-chart-series-codex)",
-  claude: "var(--openbot-chart-series-claude)",
-  grok: "var(--openbot-chart-series-grok)",
+  codex: "var(--dani-dex-chart-series-codex)",
+  claude: "var(--dani-dex-chart-series-claude)",
+  grok: "var(--dani-dex-chart-series-grok)",
 };
 export function usageSeriesColor(provider: string): string {
-  return seriesColors[provider] ?? "var(--openbot-chart-series-other)";
+  return seriesColors[provider] ?? "var(--dani-dex-chart-series-other)";
 }
 
 // The one series a report without a provider split still draws. It cannot collide with a

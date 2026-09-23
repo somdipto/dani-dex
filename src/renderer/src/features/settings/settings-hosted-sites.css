@@ -1,6 +1,6 @@
 .hosted-sites-overview {
   display: grid;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
 }
 
 .hosted-sites-list .hosted-sites-row {
@@ -15,10 +15,10 @@
 .hosted-sites-link.ui-button {
   width: min(100%, 320px);
   justify-content: flex-start;
-  color: var(--openbot-accent-text);
-  font-size: var(--openbot-text-md);
-  font-weight: var(--openbot-weight-regular);
-  line-height: var(--openbot-leading-md);
+  color: var(--dani-dex-accent-text);
+  font-size: var(--dani-dex-text-md);
+  font-weight: var(--dani-dex-weight-regular);
+  line-height: var(--dani-dex-leading-md);
   text-align: left;
 }
 

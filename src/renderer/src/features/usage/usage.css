@@ -27,23 +27,23 @@
   min-height: 0;
   height: 100%;
   flex-direction: column;
-  color: var(--openbot-text-primary);
-  background: var(--openbot-bg-canvas);
+  color: var(--dani-dex-text-primary);
+  background: var(--dani-dex-bg-canvas);
 }
 .agent-usage-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--openbot-space-3);
-  padding: var(--openbot-space-4) var(--openbot-space-6);
-  border-bottom: 1px solid var(--openbot-border);
+  gap: var(--dani-dex-space-3);
+  padding: var(--dani-dex-space-4) var(--dani-dex-space-6);
+  border-bottom: 1px solid var(--dani-dex-border);
 }
 .agent-usage-identity,
 .agent-usage-controls {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
   min-width: 0;
 }
 .agent-usage-identity {
@@ -52,16 +52,16 @@
 /* What lines up with the header's inset is the arrow, not the 32px hit area around it, so
    the button hangs its padding back into the header rather than pushing the glyph right. */
 .agent-usage-identity .ui-icon-button {
-  margin-left: calc(-1 * var(--openbot-space-2));
+  margin-left: calc(-1 * var(--dani-dex-space-2));
 }
 .agent-usage-identity h2 {
   display: flex;
-  gap: var(--openbot-space-3);
-  font-size: var(--openbot-text-lg);
-  color: var(--openbot-text-muted);
+  gap: var(--dani-dex-space-3);
+  font-size: var(--dani-dex-text-lg);
+  color: var(--dani-dex-text-muted);
 }
 .agent-usage-identity h2 span:last-child {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   overflow-wrap: anywhere;
 }
 
@@ -71,68 +71,68 @@
   margin-left: auto;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 .agent-usage-body {
   width: 100%;
   max-width: 1200px;
   margin-inline: auto;
-  padding: var(--openbot-space-6);
+  padding: var(--dani-dex-space-6);
   overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-8);
+  gap: var(--dani-dex-space-8);
 }
 .agent-usage h3 {
-  font-size: var(--openbot-text-xl);
+  font-size: var(--dani-dex-text-xl);
   font-weight: 550;
 }
 .agent-usage-secondary,
 .agent-usage-footer {
-  font-size: var(--openbot-text-sm);
-  color: var(--openbot-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  color: var(--dani-dex-text-muted);
 }
 .agent-usage-overview {
   display: grid;
-  gap: var(--openbot-space-8);
+  gap: var(--dani-dex-space-8);
 }
 .agent-usage-summary {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-8);
+  gap: var(--dani-dex-space-8);
 }
 .agent-usage-hero {
-  font-size: var(--openbot-text-usage-total);
+  font-size: var(--dani-dex-text-usage-total);
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
-  margin-bottom: var(--openbot-space-3);
+  margin-bottom: var(--dani-dex-space-3);
 }
 .agent-usage-providers {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
 }
 .agent-usage-provider-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--openbot-space-4);
-  font-size: var(--openbot-text-lg);
+  gap: var(--dani-dex-space-4);
+  font-size: var(--dani-dex-text-lg);
 }
 .agent-usage-provider-heading > span {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 /* The legend mark for the row's series. Its colour is an inline style, because it is the
    provider that decides it rather than the stylesheet. */
 .agent-usage-series-dot {
-  width: var(--openbot-space-2);
-  height: var(--openbot-space-2);
-  border-radius: var(--openbot-radius-pill);
+  width: var(--dani-dex-space-2);
+  height: var(--dani-dex-space-2);
+  border-radius: var(--dani-dex-radius-pill);
   flex-shrink: 0;
 }
 .agent-usage-provider-heading strong {
@@ -140,14 +140,14 @@
   font-variant-numeric: tabular-nums;
 }
 .agent-usage-provider p {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  margin-top: var(--openbot-space-2);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  margin-top: var(--dani-dex-space-2);
 }
 .agent-usage-provider-icon {
-  fill: var(--openbot-provider-current);
-  width: var(--openbot-space-4);
-  height: var(--openbot-space-4);
+  fill: var(--dani-dex-provider-current);
+  width: var(--dani-dex-space-4);
+  height: var(--dani-dex-space-4);
   flex-shrink: 0;
 }
 .agent-usage-trend {
@@ -157,8 +157,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--openbot-space-4);
-  margin-bottom: var(--openbot-space-4);
+  gap: var(--dani-dex-space-4);
+  margin-bottom: var(--dani-dex-space-4);
 }
 
 /* One line, never two. A wrapped second row put two entries under five and read as a
@@ -167,19 +167,19 @@
 .agent-usage-totals {
   display: flex;
   flex-wrap: nowrap;
-  gap: calc(var(--openbot-space-6) * 2);
-  margin-top: var(--openbot-space-4);
+  gap: calc(var(--dani-dex-space-6) * 2);
+  margin-top: var(--dani-dex-space-4);
   overflow: hidden;
 }
 .agent-usage-totals dt {
-  font-size: var(--openbot-text-sm);
-  color: var(--openbot-text-muted);
-  margin-bottom: var(--openbot-space-1);
+  font-size: var(--dani-dex-text-sm);
+  color: var(--dani-dex-text-muted);
+  margin-bottom: var(--dani-dex-space-1);
   white-space: nowrap;
 }
 .agent-usage-totals dd {
   margin: 0;
-  font-size: var(--openbot-text-xl);
+  font-size: var(--dani-dex-text-xl);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -189,14 +189,14 @@
 .agent-usage-table table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--openbot-text-lg);
+  font-size: var(--dani-dex-text-lg);
   font-variant-numeric: tabular-nums;
 }
 .agent-usage-table th,
 .agent-usage-table td {
   text-align: right;
-  padding: var(--openbot-space-2) var(--openbot-space-3);
-  border-bottom: 1px solid var(--openbot-border-strong);
+  padding: var(--dani-dex-space-2) var(--dani-dex-space-3);
+  border-bottom: 1px solid var(--dani-dex-border-strong);
   white-space: nowrap;
   font-weight: 400;
 }
@@ -209,62 +209,62 @@
   padding-right: 0;
 }
 .agent-usage-table thead th {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 .agent-usage-table td {
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
 }
 .agent-usage-model-name {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
   overflow-wrap: anywhere;
   min-width: 10rem;
 }
 .agent-usage-footer {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-3);
-  padding-bottom: var(--openbot-space-6);
+  gap: var(--dani-dex-space-3);
+  padding-bottom: var(--dani-dex-space-6);
 }
 .agent-usage-footer summary {
   cursor: pointer;
   width: fit-content;
 }
 .agent-usage-footer details p {
-  margin-top: var(--openbot-space-3);
+  margin-top: var(--dani-dex-space-3);
   max-width: 72ch;
   line-height: 1.6;
 }
 .agent-usage-notice {
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-md);
-  padding: var(--openbot-space-4);
-  background: var(--openbot-bg-surface);
-  border-radius: var(--openbot-radius-md);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-md);
+  padding: var(--dani-dex-space-4);
+  background: var(--dani-dex-bg-surface);
+  border-radius: var(--dani-dex-radius-md);
 }
 .agent-usage-notice .ui-button {
-  margin-top: var(--openbot-space-3);
+  margin-top: var(--dani-dex-space-3);
 }
 .agent-usage-loading {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-md);
 }
 .agent-usage-placeholder {
   height: 280px;
-  margin-top: var(--openbot-space-6);
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-bg-surface);
+  margin-top: var(--dani-dex-space-6);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-bg-surface);
 }
 @container (min-width: 850px) {
   .agent-usage-overview {
     grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.5fr);
-    gap: calc(var(--openbot-space-6) * 2);
+    gap: calc(var(--dani-dex-space-6) * 2);
   }
   .agent-usage-body {
-    padding: var(--openbot-space-8) calc(var(--openbot-space-6) * 2);
-    gap: calc(var(--openbot-space-6) * 2);
+    padding: var(--dani-dex-space-8) calc(var(--dani-dex-space-6) * 2);
+    gap: calc(var(--dani-dex-space-6) * 2);
   }
 }
 /* The drop order is the reading order reversed: message counts go before token
@@ -296,13 +296,13 @@
 }
 @container (max-width: 480px) {
   .agent-usage-hero {
-    font-size: var(--openbot-text-display);
+    font-size: var(--dani-dex-text-display);
   }
   .agent-usage-body {
-    padding: var(--openbot-space-4);
+    padding: var(--dani-dex-space-4);
   }
   .agent-usage-header {
-    padding: var(--openbot-space-3);
+    padding: var(--dani-dex-space-3);
   }
   .agent-usage-controls {
     margin-left: 0;
@@ -322,36 +322,36 @@
 }
 .agent-usage-controls .ui-select-trigger {
   width: max-content;
-  border-color: var(--openbot-border);
-  background: var(--openbot-bg-control);
+  border-color: var(--dani-dex-border);
+  background: var(--dani-dex-bg-control);
   box-shadow: none;
-  font-size: var(--openbot-text-md);
-  font-weight: var(--openbot-weight-medium);
+  font-size: var(--dani-dex-text-md);
+  font-weight: var(--dani-dex-weight-medium);
 }
 
 .ui-chart {
   width: 100%;
   height: 300px;
   min-width: 0;
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
 }
 .ui-chart-tooltip {
-  background: var(--openbot-bg-surface);
-  color: var(--openbot-text-primary);
-  padding: var(--openbot-space-3);
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-md);
-  font-size: var(--openbot-text-sm);
+  background: var(--dani-dex-bg-surface);
+  color: var(--dani-dex-text-primary);
+  padding: var(--dani-dex-space-3);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-md);
+  font-size: var(--dani-dex-text-sm);
   font-variant-numeric: tabular-nums;
 }
 /* One row per series: mark, name, value. The value column takes the remaining width so
    the numbers line up under each other however long the names are. */
 .ui-chart-tooltip-row {
   display: grid;
-  grid-template-columns: var(--openbot-space-4) auto 1fr;
+  grid-template-columns: var(--dani-dex-space-4) auto 1fr;
   align-items: center;
-  gap: var(--openbot-space-2);
-  margin-top: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
+  margin-top: var(--dani-dex-space-2);
 }
 .ui-chart-tooltip-value {
   text-align: right;
@@ -361,7 +361,7 @@
   align-items: center;
 }
 .ui-chart-tooltip-total {
-  border-top: 1px solid var(--openbot-border-strong);
-  padding-top: var(--openbot-space-2);
-  color: var(--openbot-text-muted);
+  border-top: 1px solid var(--dani-dex-border-strong);
+  padding-top: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-muted);
 }

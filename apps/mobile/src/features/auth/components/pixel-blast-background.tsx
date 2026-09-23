@@ -20,7 +20,7 @@ export function PixelBlastBackground({ active }: { active: boolean }) {
   const clickIndex = useSharedValue(0);
   const brush = useSharedValue([0, 0, 0, 0]);
   const direction = useSharedValue([0, 0]);
-  const brandColor = String(useCSSVariable("--openbot-logo-production") ?? "#cdadec");
+  const brandColor = String(useCSSVariable("--dani-dex-logo-production") ?? "#cdadec");
   const color = Array.from(Skia.Color(brandColor)).slice(0, 3);
   const running = active && foreground && !reduceMotion;
 

@@ -1,51 +1,51 @@
 .ui-action-menu,
 .ui-popover-menu-surface {
   border: 0;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
   outline: 0;
-  background: var(--openbot-bg-control);
+  background: var(--dani-dex-bg-control);
   box-shadow:
-    0 0 0 1px var(--openbot-border),
-    0 4px 6px -1px var(--openbot-shadow-popover-ambient),
-    0 2px 4px -2px var(--openbot-shadow-popover-ambient);
-  color: var(--openbot-text-primary);
+    0 0 0 1px var(--dani-dex-border),
+    0 4px 6px -1px var(--dani-dex-shadow-popover-ambient),
+    0 2px 4px -2px var(--dani-dex-shadow-popover-ambient);
+  color: var(--dani-dex-text-primary);
 }
 
 .ui-action-menu {
   position: relative;
-  z-index: var(--openbot-layer-popover);
+  z-index: var(--dani-dex-layer-popover);
   width: max-content;
   min-width: 160px;
-  max-width: min(240px, calc(100vw - var(--openbot-space-4)));
+  max-width: min(240px, calc(100vw - var(--dani-dex-space-4)));
   overflow: hidden;
-  padding: var(--openbot-space-1);
+  padding: var(--dani-dex-space-1);
   transform-origin: var(--kb-menu-content-transform-origin, var(--kb-popover-content-transform-origin));
-  animation: ui-action-menu-in var(--openbot-duration-fast) var(--openbot-ease-out) both;
+  animation: ui-action-menu-in var(--dani-dex-duration-fast) var(--dani-dex-ease-out) both;
 }
 
 .ui-action-menu:not([data-menu-layout="grid"])
   :is([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]) {
   display: flex;
   width: 100%;
-  height: var(--openbot-control-md);
-  min-height: var(--openbot-control-md);
+  height: var(--dani-dex-control-md);
+  min-height: var(--dani-dex-control-md);
   align-items: center;
   justify-content: flex-start;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   border: 0;
-  border-radius: var(--openbot-radius-sm);
+  border-radius: var(--dani-dex-radius-sm);
   outline: 0;
   background: transparent;
-  padding: var(--openbot-space-1-5) var(--openbot-space-2);
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-lg);
-  font-weight: var(--openbot-weight-regular);
-  line-height: var(--openbot-leading-lg);
+  padding: var(--dani-dex-space-1-5) var(--dani-dex-space-2);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-lg);
+  font-weight: var(--dani-dex-weight-regular);
+  line-height: var(--dani-dex-leading-lg);
   text-align: left;
   white-space: nowrap;
   transition:
-    background-color var(--openbot-duration-hover) var(--openbot-ease-out),
-    color var(--openbot-duration-hover) var(--openbot-ease-out);
+    background-color var(--dani-dex-duration-hover) var(--dani-dex-ease-out),
+    color var(--dani-dex-duration-hover) var(--dani-dex-ease-out);
 }
 
 .ui-action-menu:not([data-menu-layout="grid"])
@@ -55,13 +55,13 @@
     [data-highlighted],
     [aria-expanded="true"]
   ) {
-  background: var(--openbot-bg-control-hover);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-bg-control-hover);
+  color: var(--dani-dex-text-primary);
 }
 
 .ui-action-menu:not([data-menu-layout="grid"])
   :is([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"])[data-disabled] {
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
   cursor: default;
   opacity: 0.45;
 }
@@ -69,8 +69,8 @@
 .ui-action-menu:not([data-menu-layout="grid"])
   :is([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"])
   > svg {
-  width: var(--openbot-icon-md);
-  height: var(--openbot-icon-md);
+  width: var(--dani-dex-icon-md);
+  height: var(--dani-dex-icon-md);
   flex: 0 0 auto;
   /* fill and stroke belong here beside the colour and the weight: this rule owns how a
    * menu icon paints. Lucide sets both as attributes, so every menu built out of the
@@ -78,7 +78,7 @@
    * the SVG defaults instead, painting itself as an opaque filled shape with no outline. */
   fill: none;
   stroke: currentColor;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -90,15 +90,15 @@
 .ui-action-menu:not([data-menu-layout="grid"])
   :is([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"])
   > svg:not(.ui-glyph-20, .ui-glyph-16) {
-  stroke-width: var(--openbot-icon-stroke);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .ui-action-menu > hr,
 .ui-action-menu [role="separator"] {
   height: 1px;
-  margin: var(--openbot-space-1) 0;
+  margin: var(--dani-dex-space-1) 0;
   border: 0;
-  background: var(--openbot-shadow-ring);
+  background: var(--dani-dex-shadow-ring);
 }
 
 .ui-action-menu:not([data-menu-layout="grid"])
@@ -106,7 +106,7 @@
 .ui-action-menu:not([data-menu-layout="grid"])
   :is([role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]).ui-action-menu-danger
   > svg {
-  color: var(--openbot-danger);
+  color: var(--dani-dex-danger);
 }
 
 .ui-action-menu:not([data-menu-layout="grid"])
@@ -115,13 +115,13 @@
     :focus-visible,
     [data-highlighted]
   ) {
-  background: var(--openbot-danger-soft);
-  color: var(--openbot-danger);
+  background: var(--dani-dex-danger-soft);
+  color: var(--dani-dex-danger);
 }
 
 @keyframes ui-action-menu-in {
   from {
-    transform: translateY(var(--openbot-space-0-5));
+    transform: translateY(var(--dani-dex-space-0-5));
   }
 }
 

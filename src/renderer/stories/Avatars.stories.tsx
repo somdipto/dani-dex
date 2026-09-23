@@ -116,7 +116,7 @@ export const SizesAndMoods: AgentStory = {
     return (
       <div
         class="grid gap-6 p-8"
-        style={{ background: "var(--openbot-bg-canvas)", color: "var(--openbot-text-primary)" }}
+        style={{ background: "var(--dani-dex-bg-canvas)", color: "var(--dani-dex-text-primary)" }}
       >
         {AVATAR_MOODS.map((mood) => {
           const presentation = avatarMoodPresentation(mood);
@@ -138,7 +138,7 @@ export const SizesAndMoods: AgentStory = {
                         class="bloub-avatar-svg"
                       />
                     </span>
-                    <small style={{ color: "var(--openbot-text-muted)" }}>{size}</small>
+                    <small style={{ color: "var(--dani-dex-text-muted)" }}>{size}</small>
                   </div>
                 ))}
               </div>
@@ -157,7 +157,7 @@ export const Moods: AgentStory = {
       {AVATAR_MOODS.map((mood) => (
         <div class="grid justify-items-center gap-3">
           <AgentAvatar seed="story-avatar" hue={215} mood={mood} motion="always" class="size-12" />
-          <small style={{ color: "var(--openbot-text-muted)" }}>{mood}</small>
+          <small style={{ color: "var(--dani-dex-text-muted)" }}>{mood}</small>
         </div>
       ))}
     </div>

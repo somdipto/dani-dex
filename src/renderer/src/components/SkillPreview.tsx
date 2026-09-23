@@ -96,7 +96,7 @@ export function SkillPreview(props: {
               name={props.skill.name}
               class="skill-preview-chip"
               style={{
-                "--skill-logo-color": iconTint()?.url === iconUrl() ? iconTint()?.color : "var(--openbot-accent-text)",
+                "--skill-logo-color": iconTint()?.url === iconUrl() ? iconTint()?.color : "var(--dani-dex-accent-text)",
               }}
               icon={
                 <Show when={iconUrl()} fallback={<Puzzle />} keyed>

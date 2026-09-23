@@ -66,7 +66,7 @@ export function SettingsRow({
   leading?: ReactNode;
   disclosure?: boolean;
 }>) {
-  const muted = String(useCSSVariable("--openbot-text-grouped-secondary"));
+  const muted = String(useCSSVariable("--dani-dex-text-grouped-secondary"));
   const content = (
     <>
       {leading}

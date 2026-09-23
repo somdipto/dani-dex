@@ -27,8 +27,8 @@ function SelectionActionsDemo(props: {
         width: props.width ?? "560px",
         "max-width": "calc(100vw - 48px)",
         padding: "96px 36px 120px",
-        background: "var(--openbot-bg-canvas)",
-        color: "var(--openbot-text-primary)",
+        background: "var(--dani-dex-bg-canvas)",
+        color: "var(--dani-dex-text-primary)",
       }}
     >
       <p style={{ margin: "0", "font-size": "14px", "line-height": "21px" }}>

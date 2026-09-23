@@ -11,7 +11,7 @@ import { rendererDuration } from "../conversation/activity-timing";
 // it is built from; keep this in step with `--panel-close-dur` in
 // account-update-island.css.
 function islandCloseDuration(): number {
-  return rendererDuration("--openbot-duration-slow", 200) + rendererDuration("--openbot-duration-normal", 160);
+  return rendererDuration("--dani-dex-duration-slow", 200) + rendererDuration("--dani-dex-duration-normal", 160);
 }
 
 interface AccountUpdateIslandProps {

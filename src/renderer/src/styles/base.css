@@ -13,8 +13,8 @@ body,
 }
 
 body {
-  background: var(--openbot-bg-canvas);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-bg-canvas);
+  color: var(--dani-dex-text-primary);
   -webkit-font-smoothing: antialiased;
 }
 

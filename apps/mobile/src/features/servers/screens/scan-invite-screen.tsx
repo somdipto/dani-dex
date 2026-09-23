@@ -11,7 +11,7 @@ import { AddServerScreen } from "./add-server-screen";
 export function ScanInviteScreen() {
   const [invite, setInvite] = useState<string | null>(null);
   const foreground = useThemeColor("foreground");
-  const sheetBackground = String(useCSSVariable("--openbot-bg-sheet"));
+  const sheetBackground = String(useCSSVariable("--dani-dex-bg-sheet"));
   return (
     <>
       <Stack.Screen

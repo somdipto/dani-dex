@@ -1,13 +1,13 @@
 .skill-preview {
   display: grid;
-  gap: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
   min-width: 0;
 }
 .skill-preview-heading {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  column-gap: var(--openbot-space-3);
-  row-gap: var(--openbot-space-3);
+  column-gap: var(--dani-dex-space-3);
+  row-gap: var(--dani-dex-space-3);
   align-items: center;
 }
 .skill-preview-heading .agent-skill-icon {
@@ -35,43 +35,43 @@
 .marketplace-install-control {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-1);
-  padding: var(--openbot-space-1);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-control);
-  box-shadow: inset 0 0 0 1px var(--openbot-border-grouped);
+  gap: var(--dani-dex-space-1);
+  padding: var(--dani-dex-space-1);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-control);
+  box-shadow: inset 0 0 0 1px var(--dani-dex-border-grouped);
 }
 .marketplace-install-control .ui-select-trigger {
   max-width: 180px;
-  height: var(--openbot-control-md);
+  height: var(--dani-dex-control-md);
   border: 0;
-  border-radius: var(--openbot-radius-pill);
+  border-radius: var(--dani-dex-radius-pill);
   background: transparent;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
 }
 .marketplace-install-control > .ui-button {
-  height: var(--openbot-control-md);
-  padding-inline: var(--openbot-space-4);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-text-primary);
-  color: var(--openbot-bg-sidebar);
+  height: var(--dani-dex-control-md);
+  padding-inline: var(--dani-dex-space-4);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-text-primary);
+  color: var(--dani-dex-bg-sidebar);
 }
 .skill-preview-heading h2 {
-  font-size: var(--openbot-text-2xl);
-  font-weight: var(--openbot-weight-medium);
+  font-size: var(--dani-dex-text-2xl);
+  font-weight: var(--dani-dex-weight-medium);
   overflow-wrap: anywhere;
 }
 .skill-preview-heading p,
 .skill-preview-description {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-lg);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-lg);
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
 .skill-preview-heading .skill-preview-creator {
-  margin-top: var(--openbot-space-1);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-md);
+  margin-top: var(--dani-dex-space-1);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-md);
 }
 .skill-preview-card {
   position: relative;
@@ -80,8 +80,8 @@
   min-height: 160px;
   overflow: hidden;
   isolation: isolate;
-  border-radius: var(--openbot-radius-xl);
-  padding: var(--openbot-space-6);
+  border-radius: var(--dani-dex-radius-xl);
+  padding: var(--dani-dex-space-6);
 }
 .skill-preview-gradient,
 .skill-preview-gradient canvas {
@@ -94,7 +94,7 @@
      overflow clip to such a layer, so each level clips itself with clip-path, which does hold. */
   overflow: hidden;
   border-radius: inherit;
-  clip-path: inset(0 round var(--openbot-radius-xl));
+  clip-path: inset(0 round var(--dani-dex-radius-xl));
 }
 /* The artwork stays behind the content by paint order alone. A z-index of its own puts it on a
    stacking context that Firefox paints without the rounded clip, and the card's corners come back
@@ -105,14 +105,14 @@
 .skill-preview-request {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
   width: min(100%, 520px);
   min-width: 0;
-  border-radius: var(--openbot-radius-card);
-  background: var(--openbot-bg-canvas);
-  padding: var(--openbot-space-3);
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-lg);
+  border-radius: var(--dani-dex-radius-card);
+  background: var(--dani-dex-bg-canvas);
+  padding: var(--dani-dex-space-3);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-lg);
   line-height: 1.5;
 }
 .skill-preview-request p {
@@ -128,8 +128,8 @@
 }
 .skill-preview-unavailable {
   margin: 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-md);
 }
 .skill-preview-description > :first-child {
   margin-top: 0;
@@ -139,8 +139,8 @@
 }
 
 .skill-preview-request .ui-icon-button {
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-border);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-border);
 }
 .agent-skills-modal:has(.agent-skill-detail) {
   width: min(760px, calc(100vw - 32px));
@@ -268,7 +268,7 @@
   transform: translateY(0);
   filter: blur(0);
   transition:
-    opacity var(--openbot-duration-slow) ease,
+    opacity var(--dani-dex-duration-slow) ease,
     transform 0s linear,
     filter 0s linear;
   transition-delay: 0s;
@@ -302,8 +302,8 @@
    declarations are invalid at computed-value time, so the chip loses its fill to `transparent`
    rather than falling back to the accent fill the base rule gives it. */
 .skill-preview-request .skill-preview-chip {
-  color: color-mix(in srgb, var(--skill-logo-color, var(--openbot-accent-text)), var(--openbot-text-primary) 35%);
-  background: color-mix(in srgb, var(--skill-logo-color, var(--openbot-accent-text)) 18%, transparent);
+  color: color-mix(in srgb, var(--skill-logo-color, var(--dani-dex-accent-text)), var(--dani-dex-text-primary) 35%);
+  background: color-mix(in srgb, var(--skill-logo-color, var(--dani-dex-accent-text)) 18%, transparent);
 }
 
 .agent-skills-tabs {
@@ -316,9 +316,9 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   flex-shrink: 0;
-  margin: var(--openbot-space-3);
+  margin: var(--dani-dex-space-3);
 }
 
 .agent-skills-tab-content {
@@ -333,7 +333,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 .agent-skills-tab-slot {
   flex: 1;
@@ -349,7 +349,7 @@
 }
 
 .agent-local-library:not(.agent-skill-detail) {
-  gap: var(--openbot-space-0-5);
+  gap: var(--dani-dex-space-0-5);
   padding: 0;
 }
 .agent-local-skill-row:has(.agent-skill-update) {

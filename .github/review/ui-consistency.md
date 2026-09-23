@@ -11,10 +11,10 @@ repository actually does, not against React or shadcn habits.
 
 Report a finding when the diff:
 
-- Introduces a colour literal where a semantic `--openbot-*` token from `src/renderer/src/styles.css`
+- Introduces a colour literal where a semantic `--dani-dex-*` token from `src/renderer/src/styles.css`
   exists. *Exception:* fixed integration colours, generated assets, inline SVG payloads, and platform
   chrome are allowed to carry literals at their boundary.
-- Adds a token to one palette only. `--openbot-*` is declared separately in
+- Adds a token to one palette only. `--dani-dex-*` is declared separately in
   `src/renderer/src/styles.css`, `apps/auth-api/src/styles.css`, and `apps/mobile/global.css`. Flag
   this only when the change plainly needs the token on more than one surface.
 - Adds an inline SVG or a local icon component where a `lucide-solid` icon exists, without a comment

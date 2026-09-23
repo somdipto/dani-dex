@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-/** `--openbot-bg-canvas`, as the RGB channels of the scrim. */
+/** `--dani-dex-bg-canvas`, as the RGB channels of the scrim. */
 const SCRIM_COLOR = "26, 26, 26";
 const TITLE_MAX_LINES = 3;
 

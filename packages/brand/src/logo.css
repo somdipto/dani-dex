@@ -1,9 +1,9 @@
 .app-logo {
-  --app-logo-background: var(--openbot-logo-production);
+  --app-logo-background: var(--dani-dex-logo-production);
   position: relative;
   display: inline-block;
   overflow: hidden;
-  border-radius: var(--openbot-radius-logo);
+  border-radius: var(--dani-dex-radius-logo);
   isolation: isolate;
 }
 
@@ -12,15 +12,15 @@
 }
 
 .app-logo[data-interactive="true"]:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--openbot-text-primary);
+  box-shadow: inset 0 0 0 2px var(--dani-dex-text-primary);
 }
 
 .app-logo[data-variant="dev"] {
-  --app-logo-background: var(--openbot-logo-dev);
+  --app-logo-background: var(--dani-dex-logo-dev);
 }
 
 .app-logo[data-variant="preview"] {
-  --app-logo-background: var(--openbot-logo-preview);
+  --app-logo-background: var(--dani-dex-logo-preview);
 }
 
 .app-logo-background {
@@ -29,7 +29,7 @@
 
 .app-logo-eye {
   fill: none;
-  stroke: var(--openbot-logo-eye);
+  stroke: var(--dani-dex-logo-eye);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 9.5px;
@@ -41,7 +41,7 @@
   pointer-events: none;
   transform: translate(var(--app-logo-eye-x, 0%), var(--app-logo-eye-y, 0%));
   transform-origin: center;
-  transition: transform var(--openbot-duration-normal) cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform var(--dani-dex-duration-normal) cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .app-logo-eye-left {
@@ -161,15 +161,15 @@
   }
 
   22% {
-    fill: var(--openbot-logo-dev);
+    fill: var(--dani-dex-logo-dev);
   }
 
   48% {
-    fill: var(--openbot-logo-preview);
+    fill: var(--dani-dex-logo-preview);
   }
 
   74% {
-    fill: var(--openbot-logo-production);
+    fill: var(--dani-dex-logo-production);
   }
 }
 

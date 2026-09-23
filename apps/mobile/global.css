@@ -7,27 +7,27 @@
 @import "@openbot/brand/tokens-native.css";
 
 @theme inline {
-  --color-sheet: var(--openbot-bg-sheet);
-  --color-grouped: var(--openbot-bg-grouped);
-  --color-grouped-secondary: var(--openbot-text-grouped-secondary);
-  --color-grouped-border: var(--openbot-border-grouped);
-  --radius-grouped: var(--openbot-radius-grouped);
-  --color-canvas: var(--openbot-bg-canvas);
-  --color-sidebar: var(--openbot-bg-sidebar);
-  --color-control: var(--openbot-bg-control);
-  --color-control-active: var(--openbot-bg-control-active);
-  --color-raised: var(--openbot-bg-surface-raised);
-  --color-text-secondary: var(--openbot-text-secondary);
-  --color-text-dim: var(--openbot-text-dim);
-  --color-accent-text: var(--openbot-accent-text);
-  --color-success-text: var(--openbot-success-text);
-  --color-warning-text: var(--openbot-warning-text);
-  --color-danger-text: var(--openbot-danger-text);
-  --color-brand-logo: var(--openbot-logo-production);
-  --color-action: var(--openbot-action);
-  --color-action-foreground: var(--openbot-action-foreground);
-  --color-drawer-scrim: var(--openbot-drawer-scrim);
-  --color-scroll-edge-overlay: var(--openbot-scroll-edge-overlay);
+  --color-sheet: var(--dani-dex-bg-sheet);
+  --color-grouped: var(--dani-dex-bg-grouped);
+  --color-grouped-secondary: var(--dani-dex-text-grouped-secondary);
+  --color-grouped-border: var(--dani-dex-border-grouped);
+  --radius-grouped: var(--dani-dex-radius-grouped);
+  --color-canvas: var(--dani-dex-bg-canvas);
+  --color-sidebar: var(--dani-dex-bg-sidebar);
+  --color-control: var(--dani-dex-bg-control);
+  --color-control-active: var(--dani-dex-bg-control-active);
+  --color-raised: var(--dani-dex-bg-surface-raised);
+  --color-text-secondary: var(--dani-dex-text-secondary);
+  --color-text-dim: var(--dani-dex-text-dim);
+  --color-accent-text: var(--dani-dex-accent-text);
+  --color-success-text: var(--dani-dex-success-text);
+  --color-warning-text: var(--dani-dex-warning-text);
+  --color-danger-text: var(--dani-dex-danger-text);
+  --color-brand-logo: var(--dani-dex-logo-production);
+  --color-action: var(--dani-dex-action);
+  --color-action-foreground: var(--dani-dex-action-foreground);
+  --color-drawer-scrim: var(--dani-dex-drawer-scrim);
+  --color-scroll-edge-overlay: var(--dani-dex-scroll-edge-overlay);
 
   --text-display: 2rem;
   --text-display--line-height: 2.375rem;
@@ -42,8 +42,8 @@
   --text-caption: 0.75rem;
   --text-caption--line-height: 1rem;
 
-  --tracking-openbot-tight: var(--openbot-tracking-tight);
-  --tracking-openbot-wide: var(--openbot-tracking-wide);
+  --tracking-openbot-tight: var(--dani-dex-tracking-tight);
+  --tracking-openbot-wide: var(--dani-dex-tracking-wide);
 }
 
 @layer theme {
@@ -51,42 +51,42 @@
     color-scheme: light dark;
 
     /* HeroUI consumes these aliases; Dani-Dex tokens remain the source of truth. */
-    --background: var(--openbot-bg-canvas);
-    --foreground: var(--openbot-text-primary);
-    --surface: var(--openbot-bg-surface);
-    --surface-foreground: var(--openbot-text-primary);
-    --surface-secondary: var(--openbot-bg-control);
-    --surface-secondary-foreground: var(--openbot-text-primary);
-    --surface-tertiary: var(--openbot-bg-surface-raised);
-    --surface-tertiary-foreground: var(--openbot-text-primary);
-    --overlay: var(--openbot-bg-surface-raised);
-    --overlay-foreground: var(--openbot-text-primary);
-    --backdrop: var(--openbot-bg-overlay);
-    --muted: var(--openbot-text-muted);
-    --default: var(--openbot-bg-control);
-    --default-foreground: var(--openbot-text-primary);
-    --accent: var(--openbot-accent);
-    --accent-foreground: var(--openbot-text-on-accent);
-    --success: var(--openbot-success);
-    --success-foreground: var(--openbot-text-on-status);
-    --warning: var(--openbot-warning);
-    --warning-foreground: var(--openbot-text-on-status);
-    --danger: var(--openbot-danger);
-    --danger-foreground: var(--openbot-text-on-accent);
-    --border: var(--openbot-border);
-    --separator: var(--openbot-border-strong);
-    --focus: var(--openbot-accent);
-    --link: var(--openbot-accent-text);
-    --field-background: var(--openbot-bg-control);
-    --field-foreground: var(--openbot-text-primary);
-    --field-placeholder: var(--openbot-text-muted);
-    --field-border: var(--openbot-border-strong);
+    --background: var(--dani-dex-bg-canvas);
+    --foreground: var(--dani-dex-text-primary);
+    --surface: var(--dani-dex-bg-surface);
+    --surface-foreground: var(--dani-dex-text-primary);
+    --surface-secondary: var(--dani-dex-bg-control);
+    --surface-secondary-foreground: var(--dani-dex-text-primary);
+    --surface-tertiary: var(--dani-dex-bg-surface-raised);
+    --surface-tertiary-foreground: var(--dani-dex-text-primary);
+    --overlay: var(--dani-dex-bg-surface-raised);
+    --overlay-foreground: var(--dani-dex-text-primary);
+    --backdrop: var(--dani-dex-bg-overlay);
+    --muted: var(--dani-dex-text-muted);
+    --default: var(--dani-dex-bg-control);
+    --default-foreground: var(--dani-dex-text-primary);
+    --accent: var(--dani-dex-accent);
+    --accent-foreground: var(--dani-dex-text-on-accent);
+    --success: var(--dani-dex-success);
+    --success-foreground: var(--dani-dex-text-on-status);
+    --warning: var(--dani-dex-warning);
+    --warning-foreground: var(--dani-dex-text-on-status);
+    --danger: var(--dani-dex-danger);
+    --danger-foreground: var(--dani-dex-text-on-accent);
+    --border: var(--dani-dex-border);
+    --separator: var(--dani-dex-border-strong);
+    --focus: var(--dani-dex-accent);
+    --link: var(--dani-dex-accent-text);
+    --field-background: var(--dani-dex-bg-control);
+    --field-foreground: var(--dani-dex-text-primary);
+    --field-placeholder: var(--dani-dex-text-muted);
+    --field-border: var(--dani-dex-border-strong);
 
     /* A 4 pt base produces the 8 / 12 / 16 px radius family used on desktop. */
     --radius: 0.25rem;
     --field-radius: 0.75rem;
-    --surface-shadow: var(--openbot-shadow-card);
-    --overlay-shadow: var(--openbot-shadow-overlay);
+    --surface-shadow: var(--dani-dex-shadow-card);
+    --overlay-shadow: var(--dani-dex-shadow-overlay);
     --field-shadow: 0 0 0 0 transparent inset;
   }
 }

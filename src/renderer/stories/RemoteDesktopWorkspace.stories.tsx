@@ -48,7 +48,7 @@ const meta = {
   title: "Team/RemoteDesktopWorkspace",
   component: RemoteDesktopWorkspace,
   args,
-  decorators: [(Story) => <div style="height: 720px; background: var(--openbot-bg-canvas);">{Story()}</div>],
+  decorators: [(Story) => <div style="height: 720px; background: var(--dani-dex-bg-canvas);">{Story()}</div>],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof RemoteDesktopWorkspace>;
 

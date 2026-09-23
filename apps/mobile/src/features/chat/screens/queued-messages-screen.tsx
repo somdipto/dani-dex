@@ -23,7 +23,7 @@ function QueuePosition({ label }: { label: string }) {
 }
 
 function UploadRow({ pending }: { pending: QueuedUpload }) {
-  const muted = String(useCSSVariable("--openbot-text-grouped-secondary"));
+  const muted = String(useCSSVariable("--dani-dex-text-grouped-secondary"));
   const uploading = pending.total > 0 && pending.progress < pending.total;
   return (
     <SettingsRow

@@ -43,14 +43,14 @@ export function UsageChart(props: { result: HostAnalytics; metric: UsageMetric }
         tabIndex={0}
         aria-label={`Daily ${measure()} by provider`}
       >
-        <CartesianGrid vertical={false} stroke="var(--openbot-border-strong)" />
+        <CartesianGrid vertical={false} stroke="var(--dani-dex-border-strong)" />
         <XAxis
           dataKey="date"
           tickLine={false}
           axisLine={false}
           minTickGap={48}
           tickMargin={12}
-          stroke="var(--openbot-text-muted)"
+          stroke="var(--dani-dex-text-muted)"
           // Uppercased here rather than in CSS: a .recharts-* rule is a class no component
           // names, which the dead-class scan in check:ui reports.
           tickFormatter={(value) =>
@@ -64,11 +64,11 @@ export function UsageChart(props: { result: HostAnalytics; metric: UsageMetric }
           axisLine={false}
           width={80}
           tickCount={4}
-          stroke="var(--openbot-text-muted)"
+          stroke="var(--dani-dex-text-muted)"
           tickFormatter={(value) => (props.metric === "Cost" ? usageCost(Number(value)) : usageCompact(Number(value)))}
         />
         <ChartTooltip
-          cursor={{ stroke: "var(--openbot-text-muted)", strokeWidth: 1 }}
+          cursor={{ stroke: "var(--dani-dex-text-muted)", strokeWidth: 1 }}
           content={(contentProps: TooltipContentProps) => (
             <ChartTooltipContent
               {...contentProps}

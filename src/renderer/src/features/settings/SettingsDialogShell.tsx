@@ -34,7 +34,7 @@ function durationToMilliseconds(value: string, fallback: number): number {
 function closeDuration(): number {
   if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return 0;
   return durationToMilliseconds(
-    getComputedStyle(document.documentElement).getPropertyValue("--openbot-duration-fast"),
+    getComputedStyle(document.documentElement).getPropertyValue("--dani-dex-duration-fast"),
     120,
   );
 }

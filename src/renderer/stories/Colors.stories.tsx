@@ -4,32 +4,32 @@ import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { Badge, Heading, Text } from "../src/components/ui";
 
 const colors = [
-  ["Canvas", "--openbot-bg-canvas"],
-  ["Surface", "--openbot-bg-surface"],
-  ["Control", "--openbot-bg-control"],
-  ["Border", "--openbot-border-strong"],
-  ["Accent", "--openbot-accent"],
-  ["Success", "--openbot-success"],
-  ["Warning", "--openbot-warning"],
-  ["Danger", "--openbot-danger"],
+  ["Canvas", "--dani-dex-bg-canvas"],
+  ["Surface", "--dani-dex-bg-surface"],
+  ["Control", "--dani-dex-bg-control"],
+  ["Border", "--dani-dex-border-strong"],
+  ["Accent", "--dani-dex-accent"],
+  ["Success", "--dani-dex-success"],
+  ["Warning", "--dani-dex-warning"],
+  ["Danger", "--dani-dex-danger"],
 ] as const;
 
 // The two accent families, and what each step is for. The blue is the action
 // colour and reaches 155 call sites; the pink says "newly available" and has one,
 // the account dock's update pill.
 const accentBlue = [
-  ["Accent", "--openbot-accent", "Filled buttons, switches, the send control"],
-  ["Accent hover", "--openbot-accent-hover", "Hover on a filled control"],
-  ["Accent text", "--openbot-accent-text", "Links, and the blue word in a badge"],
-  ["Accent soft", "--openbot-accent-soft", "Badge and selected-row fills"],
-  ["Accent strong", "--openbot-accent-strong", "Selection rings, glows and gradient stops"],
-  ["Border focus", "--openbot-border-focus", "Focus ring on an interactive edge"],
-  ["Focus tint", "--openbot-focus-tint", "The ring's outer glow"],
+  ["Accent", "--dani-dex-accent", "Filled buttons, switches, the send control"],
+  ["Accent hover", "--dani-dex-accent-hover", "Hover on a filled control"],
+  ["Accent text", "--dani-dex-accent-text", "Links, and the blue word in a badge"],
+  ["Accent soft", "--dani-dex-accent-soft", "Badge and selected-row fills"],
+  ["Accent strong", "--dani-dex-accent-strong", "Selection rings, glows and gradient stops"],
+  ["Border focus", "--dani-dex-border-focus", "Focus ring on an interactive edge"],
+  ["Focus tint", "--dani-dex-focus-tint", "The ring's outer glow"],
 ] as const;
 
 const accentPink = [
-  ["Badge new", "--openbot-badge-new", "The word in a New pill"],
-  ["Badge new soft", "--openbot-badge-new-soft", "Its fill"],
+  ["Badge new", "--dani-dex-badge-new", "The word in a New pill"],
+  ["Badge new soft", "--dani-dex-badge-new-soft", "Its fill"],
 ] as const;
 
 const meta = {

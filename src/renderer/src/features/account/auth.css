@@ -12,12 +12,12 @@
 
 .account-login-screen {
   padding: 32px 24px;
-  background: var(--openbot-bg-canvas);
+  background: var(--dani-dex-bg-canvas);
 }
 
 .initial-setup-screen {
   padding: 52px 24px 32px;
-  background: radial-gradient(circle at 50% 18%, var(--openbot-hover), transparent 34%), var(--openbot-bg-canvas);
+  background: radial-gradient(circle at 50% 18%, var(--dani-dex-hover), transparent 34%), var(--dani-dex-bg-canvas);
 }
 
 .account-login-shell {
@@ -42,11 +42,11 @@
 }
 
 .account-login-wordmark {
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-display);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-display);
   font-weight: 620;
   letter-spacing: -0.015em;
-  line-height: var(--openbot-leading-display);
+  line-height: var(--dani-dex-leading-display);
 }
 
 .account-login {
@@ -59,8 +59,8 @@
 
 .account-login h1 {
   margin: 0;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-3xl);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-3xl);
   font-weight: 580;
   letter-spacing: -0.035em;
   line-height: 30px;
@@ -68,20 +68,20 @@
 
 .account-login-description {
   margin: 8px 0 0;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-lg);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-lg);
   line-height: 21px;
 }
 
 .account-login-description strong {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-weight: 560;
 }
 
 .account-login-error {
   margin: 0;
-  color: var(--openbot-danger);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-danger);
+  font-size: var(--dani-dex-text-sm);
   line-height: 17px;
   text-align: left;
 }
@@ -97,8 +97,8 @@
   justify-content: center;
   gap: 9px;
   margin-top: 28px;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-md);
 }
 
 .account-login-spinner,
@@ -106,9 +106,9 @@
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
-  border: 1.5px solid var(--openbot-border-strong);
+  border: 1.5px solid var(--dani-dex-border-strong);
   border-top-color: currentColor;
-  border-radius: var(--openbot-radius-pill);
+  border-radius: var(--dani-dex-radius-pill);
   animation: account-login-spin 900ms linear infinite;
 }
 
@@ -124,16 +124,16 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-surface-light);
-  color: var(--openbot-text-on-light);
-  font-size: var(--openbot-text-md);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-surface-light);
+  color: var(--dani-dex-text-on-light);
+  font-size: var(--dani-dex-text-md);
   font-weight: 650;
   transition:
-    background-color var(--openbot-duration-hover) ease,
-    border-color var(--openbot-duration-hover) ease,
-    transform var(--openbot-duration-fast) cubic-bezier(0.23, 1, 0.32, 1);
+    background-color var(--dani-dex-duration-hover) ease,
+    border-color var(--dani-dex-duration-hover) ease,
+    transform var(--dani-dex-duration-fast) cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .account-login > .account-login-primary {
@@ -161,39 +161,39 @@
 .account-login-form input:not(.otp-input-native) {
   width: 100%;
   height: 44px;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-md);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-md);
   outline: 0;
-  background: var(--openbot-bg-control);
+  background: var(--dani-dex-bg-control);
   padding: 0 12px;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-lg);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-lg);
   transition:
-    border-color var(--openbot-duration-hover) ease,
-    background-color var(--openbot-duration-hover) ease,
-    box-shadow var(--openbot-duration-hover) ease;
+    border-color var(--dani-dex-duration-hover) ease,
+    background-color var(--dani-dex-duration-hover) ease,
+    box-shadow var(--dani-dex-duration-hover) ease;
 }
 
 .account-login-form input:not(.otp-input-native):focus {
-  border-color: var(--openbot-border-focus);
-  background: var(--openbot-bg-surface);
-  box-shadow: 0 0 0 3px var(--openbot-accent-soft);
+  border-color: var(--dani-dex-border-focus);
+  background: var(--dani-dex-bg-surface);
+  box-shadow: 0 0 0 3px var(--dani-dex-accent-soft);
 }
 
 .account-login-form input:not(.otp-input-native)[aria-invalid="true"] {
-  border-color: var(--openbot-danger);
+  border-color: var(--dani-dex-danger);
 }
 
 .account-login-form input:not(.otp-input-native)::placeholder {
-  color: var(--openbot-text-placeholder);
+  color: var(--dani-dex-text-placeholder);
 }
 
 .account-login-field-error {
   height: 16px;
   overflow: hidden;
   margin: -2px 0 0;
-  color: var(--openbot-danger);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-danger);
+  font-size: var(--dani-dex-text-sm);
   line-height: 16px;
   text-align: left;
   text-overflow: ellipsis;
@@ -201,7 +201,7 @@
 }
 
 .account-login-form input:not(.otp-input-native).t-input.is-error {
-  border-color: var(--openbot-danger);
+  border-color: var(--dani-dex-danger);
 }
 
 .account-login-primary:disabled,
@@ -212,7 +212,7 @@
 
 .account-login-code-actions {
   width: 100%;
-  min-height: var(--openbot-control-sm);
+  min-height: var(--dani-dex-control-sm);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -233,21 +233,21 @@
 
 .account-login-development-code {
   margin: 0;
-  color: var(--openbot-warning);
+  color: var(--dani-dex-warning);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
   line-height: 16px;
   text-align: left;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .account-login-primary:hover:not(:disabled) {
-    background: var(--openbot-text-primary);
+    background: var(--dani-dex-text-primary);
   }
 
   .account-login-form input:not(.otp-input-native):hover:not(:focus) {
-    border-color: var(--openbot-border-strong);
-    background: var(--openbot-bg-surface);
+    border-color: var(--dani-dex-border-strong);
+    background: var(--dani-dex-bg-surface);
   }
 }
 
@@ -282,8 +282,8 @@
   align-items: center;
   gap: 7px;
   overflow: hidden;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -292,27 +292,27 @@
   width: 6px;
   height: 6px;
   flex: 0 0 auto;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-success);
-  box-shadow: 0 0 0 3px var(--openbot-success-soft);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-success);
+  box-shadow: 0 0 0 3px var(--dani-dex-success-soft);
 }
 
 .initial-setup-signout,
 .initial-setup-back {
   border: 0;
   background: transparent;
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
 }
 
 .initial-setup-signout {
   margin-left: 2px;
   padding: 5px 7px;
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
 }
 
 .initial-setup-signout:hover,
 .initial-setup-back:hover {
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
 }
 
 .initial-setup-back {
@@ -321,12 +321,12 @@
   display: grid;
   place-items: center;
   margin-right: 3px;
-  border-radius: var(--openbot-radius-pill);
+  border-radius: var(--dani-dex-radius-pill);
   padding: 0;
 }
 
 .initial-setup-back:hover {
-  background: var(--openbot-hover);
+  background: var(--dani-dex-hover);
 }
 
 .initial-setup-back svg {
@@ -335,13 +335,13 @@
   stroke: currentcolor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: var(--openbot-icon-stroke);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .initial-setup-eyebrow {
   margin: 0 0 9px;
   color: var(--text-muted);
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -350,7 +350,7 @@
 .initial-setup h1 {
   margin: 0;
   color: var(--text-primary);
-  font-size: var(--openbot-text-display);
+  font-size: var(--dani-dex-text-display);
   font-weight: 560;
   letter-spacing: -0.035em;
   line-height: 1.1;
@@ -360,7 +360,7 @@
   max-width: 540px;
   margin: 12px 0 0;
   color: var(--text-secondary);
-  font-size: var(--openbot-text-lg);
+  font-size: var(--dani-dex-text-lg);
   line-height: 1.55;
 }
 
@@ -379,27 +379,27 @@
   grid-template-columns: 48px minmax(0, 1fr) 20px;
   align-items: center;
   gap: 15px;
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-canvas);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-canvas);
   padding: 15px 17px;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   text-align: left;
   transition:
-    border-color var(--openbot-duration-hover) ease,
-    background-color var(--openbot-duration-hover) ease,
-    transform var(--openbot-duration-hover) ease;
+    border-color var(--dani-dex-duration-hover) ease,
+    background-color var(--dani-dex-duration-hover) ease,
+    transform var(--dani-dex-duration-hover) ease;
 }
 
 .setup-route-button:hover {
-  border-color: var(--openbot-text-dim);
-  background: var(--openbot-bg-sidebar);
+  border-color: var(--dani-dex-text-dim);
+  background: var(--dani-dex-bg-sidebar);
   transform: translateY(-1px);
 }
 
 .setup-route-button:active {
   transform: translateY(0);
-  transition-duration: var(--openbot-duration-hover), var(--openbot-duration-hover), var(--openbot-duration-fast);
+  transition-duration: var(--dani-dex-duration-hover), var(--dani-dex-duration-hover), var(--dani-dex-duration-fast);
 }
 
 .setup-route-icon {
@@ -408,10 +408,10 @@
   height: 46px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-hover);
-  color: var(--openbot-text-secondary);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-hover);
+  color: var(--dani-dex-text-secondary);
 }
 
 .setup-route-icon svg {
@@ -420,7 +420,7 @@
   stroke: currentcolor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: var(--openbot-icon-stroke);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .setup-route-icon i {
@@ -429,13 +429,13 @@
   bottom: -2px;
   width: 9px;
   height: 9px;
-  border: 2px solid var(--openbot-bg-canvas);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-accent);
+  border: 2px solid var(--dani-dex-bg-canvas);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-accent);
 }
 
 .setup-route-icon-local i {
-  background: var(--openbot-success);
+  background: var(--dani-dex-success);
 }
 
 .setup-route-copy {
@@ -444,23 +444,23 @@
 }
 
 .setup-route-copy strong {
-  font-size: var(--openbot-text-lg);
+  font-size: var(--dani-dex-text-lg);
   font-weight: 600;
 }
 
 .setup-route-copy small {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
   line-height: 17px;
 }
 
 .setup-route-arrow {
   width: 19px;
   fill: none;
-  stroke: var(--openbot-text-muted);
+  stroke: var(--dani-dex-text-muted);
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: transform var(--openbot-duration-hover) ease;
+  transition: transform var(--dani-dex-duration-hover) ease;
 }
 
 .setup-route-button:hover .setup-route-arrow {
@@ -480,21 +480,21 @@
 .setup-remote-form label {
   display: grid;
   gap: 7px;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
   font-weight: 560;
 }
 
 .setup-remote-form input,
 .setup-remote-form textarea {
   width: 100%;
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
   outline: 0;
-  background: var(--openbot-bg-canvas);
+  background: var(--dani-dex-bg-canvas);
   padding: 11px 12px;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-md);
   line-height: 18px;
   resize: none;
 }
@@ -505,19 +505,19 @@
 
 .setup-remote-form input:focus,
 .setup-remote-form textarea:focus {
-  border-color: var(--openbot-text-dim);
-  background: var(--openbot-bg-sidebar);
+  border-color: var(--dani-dex-text-dim);
+  background: var(--dani-dex-bg-sidebar);
 }
 
 .setup-remote-form input::placeholder,
 .setup-remote-form textarea::placeholder {
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
 }
 
 .setup-remote-note {
   margin: -2px 1px 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
   line-height: 16px;
 }
 
@@ -526,12 +526,12 @@
   border: 0;
   background: transparent;
   padding: 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 
 .setup-remote-change:hover:not(:disabled) {
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
 }
 
 .provider-picker {
@@ -553,7 +553,7 @@
   margin-bottom: 7px;
   padding: 0;
   color: var(--text-secondary);
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
   font-weight: 560;
 }
 
@@ -562,7 +562,7 @@
   min-height: 25px;
   align-items: center;
   justify-content: space-between;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   margin-bottom: 7px;
 }
 
@@ -572,21 +572,21 @@
 
 .ui-button.provider-picker-refresh {
   min-height: 25px;
-  gap: var(--openbot-space-1);
-  border-radius: var(--openbot-radius-md);
-  color: var(--openbot-text-muted);
-  padding-inline: var(--openbot-space-2);
+  gap: var(--dani-dex-space-1);
+  border-radius: var(--dani-dex-radius-md);
+  color: var(--dani-dex-text-muted);
+  padding-inline: var(--dani-dex-space-2);
 }
 
 .ui-button.provider-picker-refresh:hover:not(:disabled) {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
 }
 
 .provider-picker-list {
   overflow: hidden;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-bg-sidebar);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-bg-sidebar);
 }
 
 .provider-picker-option {
@@ -612,20 +612,20 @@
 /* The custom row follows the radio group rather than a radio, so the sibling rule cannot reach it. */
 .provider-picker-option + .provider-picker-option,
 .provider-picker-option-custom {
-  border-top: 1px solid var(--openbot-border);
+  border-top: 1px solid var(--dani-dex-border);
 }
 
 .provider-picker-option:hover:not(.provider-picker-option-unavailable),
 .provider-picker-option:focus-within {
-  background: var(--openbot-hover);
+  background: var(--dani-dex-hover);
 }
 
 .provider-picker-option-selected {
-  background: var(--openbot-hover);
+  background: var(--dani-dex-hover);
 }
 
 .provider-picker-option-unavailable {
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
 }
 
 .provider-picker-option-unavailable .provider-picker-option-selection {
@@ -637,14 +637,14 @@
 }
 
 .provider-picker-option-selectable-unavailable:hover {
-  background: var(--openbot-hover);
+  background: var(--dani-dex-hover);
 }
 
 .provider-picker-option input {
   width: 14px;
   height: 14px;
   margin: 0;
-  accent-color: var(--openbot-text-primary);
+  accent-color: var(--dani-dex-text-primary);
 }
 
 /* The actions share the grid cell the row reserves for them. In this variant the buttons carry
@@ -658,7 +658,7 @@
   min-width: 58px;
   min-height: 28px;
   margin-right: 8px;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
   padding-inline: 9px;
 }
 
@@ -666,7 +666,7 @@
   width: 18px;
   height: 18px;
   overflow: visible;
-  fill: var(--openbot-provider-current);
+  fill: var(--dani-dex-provider-current);
 }
 
 /* A custom endpoint has no brand mark, so a stroke icon takes the logo column. Until an endpoint
@@ -675,8 +675,8 @@
   width: 18px;
   height: 18px;
   grid-column: 2;
-  color: var(--openbot-text-secondary);
-  stroke-width: var(--openbot-icon-stroke);
+  color: var(--dani-dex-text-secondary);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .provider-picker-option-unavailable .provider-picker-logo,
@@ -685,7 +685,7 @@
 }
 
 .provider-picker-option-runtime {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
 }
 
 .provider-picker-option-runtime .provider-picker-logo {
@@ -705,28 +705,28 @@
 }
 
 .provider-picker-name {
-  font-size: var(--openbot-text-md);
+  font-size: var(--dani-dex-text-md);
   font-weight: 530;
   line-height: 18px;
 }
 
 .provider-picker-email {
   color: var(--text-muted);
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
   line-height: 15px;
 }
 
 .provider-picker-check-error {
   overflow: hidden;
-  color: var(--openbot-warning);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-warning);
+  font-size: var(--dani-dex-text-sm);
   line-height: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .provider-picker-option-selected .provider-picker-email {
-  color: var(--openbot-text-readable);
+  color: var(--dani-dex-text-readable);
 }
 
 /* The version and the status badge, in the one cell the row's last column reserves. They are read
@@ -745,7 +745,7 @@
 .provider-picker-version {
   overflow: hidden;
   color: var(--text-muted);
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
   font-variant-numeric: tabular-nums;
   line-height: 16px;
   text-overflow: ellipsis;
@@ -753,7 +753,7 @@
 }
 
 .provider-picker-option-selected .provider-picker-version {
-  color: var(--openbot-text-readable);
+  color: var(--dani-dex-text-readable);
 }
 
 .provider-picker-status {
@@ -761,7 +761,7 @@
   align-items: center;
   gap: 6px;
   color: var(--text-muted);
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
   line-height: 16px;
   white-space: nowrap;
 }
@@ -770,7 +770,7 @@
    sits in the same cell and answers the same kind of question, but it reports no state. */
 .provider-picker-custom-count {
   color: var(--text-muted);
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
   line-height: 16px;
   white-space: nowrap;
 }
@@ -780,75 +780,75 @@
 .ui-button.provider-picker-custom-count {
   min-height: 28px;
   margin-right: 8px;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
   padding-inline: 9px;
   color: var(--text-muted);
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
 }
 
 .provider-picker-status-available {
-  color: var(--openbot-success);
+  color: var(--dani-dex-success);
 }
 
 .provider-picker-status-sign-in-required,
 .provider-picker-status-outdated,
 .provider-picker-status-update-available {
-  color: var(--openbot-warning);
+  color: var(--dani-dex-warning);
 }
 
 .provider-picker-status-ready {
-  color: var(--openbot-success);
+  color: var(--dani-dex-success);
 }
 
 .provider-picker-status-download-error {
-  color: var(--openbot-danger);
+  color: var(--dani-dex-danger);
 }
 
 .provider-picker-status-finishing {
-  color: var(--openbot-warning);
+  color: var(--dani-dex-warning);
 }
 
 .provider-picker-status-not-installed,
 .provider-picker-status-checking,
 .provider-picker-status-error {
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
 }
 
 .provider-picker-status i {
   width: 5px;
   height: 5px;
   flex: 0 0 auto;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-text-dim);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-text-dim);
 }
 
 .provider-picker-status-available i {
-  background: var(--openbot-success);
+  background: var(--dani-dex-success);
 }
 
 .provider-picker-status-sign-in-required i,
 .provider-picker-status-outdated i,
 .provider-picker-status-update-available i {
-  background: var(--openbot-warning);
+  background: var(--dani-dex-warning);
 }
 
 .provider-picker-status-not-installed i,
 .provider-picker-status-checking i,
 .provider-picker-status-error i {
-  background: var(--openbot-text-dim);
+  background: var(--dani-dex-text-dim);
 }
 
 .provider-picker-hint {
   margin: 7px 0 0;
   color: var(--text-muted);
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
   line-height: 16px;
 }
 
 .initial-setup-error {
   margin: 12px 2px 0;
-  color: var(--openbot-danger);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-danger);
+  font-size: var(--dani-dex-text-md);
   line-height: 1.45;
 }
 
@@ -862,24 +862,24 @@
 .initial-setup-save,
 .initial-setup-secondary {
   min-height: 40px;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-md);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-md);
   padding: 12px 18px;
-  font-size: var(--openbot-text-md);
+  font-size: var(--dani-dex-text-md);
   font-weight: 620;
 }
 
 .initial-setup-save {
   min-width: 180px;
-  background: var(--openbot-text-primary);
-  color: var(--openbot-bg-sidebar);
+  background: var(--dani-dex-text-primary);
+  color: var(--dani-dex-bg-sidebar);
   transition:
-    transform var(--openbot-duration-normal) ease,
-    background var(--openbot-duration-hover) ease;
+    transform var(--dani-dex-duration-normal) ease,
+    background var(--dani-dex-duration-hover) ease;
 }
 
 .initial-setup-save:hover:not(:disabled) {
-  background: var(--openbot-text-primary);
+  background: var(--dani-dex-text-primary);
 }
 
 .initial-setup-save:disabled {
@@ -897,7 +897,7 @@
 }
 
 .initial-setup-secondary:hover {
-  background: var(--openbot-hover);
+  background: var(--dani-dex-hover);
 }
 
 @media (max-width: 620px) {
@@ -949,17 +949,17 @@
 @media (prefers-reduced-motion: no-preference) {
   .account-login,
   .initial-setup {
-    animation: setup-enter var(--openbot-duration-overlay) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: setup-enter var(--dani-dex-duration-overlay) cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .account-login[data-transition="forward"] .account-login-title,
   .account-login[data-transition="forward"] .account-login-description {
-    animation: account-login-copy-forward var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+    animation: account-login-copy-forward var(--dani-dex-duration-overlay) var(--dani-dex-ease-out) both;
   }
 
   .account-login[data-transition="back"] .account-login-title,
   .account-login[data-transition="back"] .account-login-description {
-    animation: account-login-copy-back var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+    animation: account-login-copy-back var(--dani-dex-duration-overlay) var(--dani-dex-ease-out) both;
   }
 
   .account-login[data-transition] .account-login-description {
@@ -967,11 +967,11 @@
   }
 
   .account-login[data-transition="forward"] .account-login-form[data-auth-panel="code"] {
-    animation: account-login-panel-forward var(--openbot-duration-overlay) 32ms var(--openbot-ease-out) both;
+    animation: account-login-panel-forward var(--dani-dex-duration-overlay) 32ms var(--dani-dex-ease-out) both;
   }
 
   .account-login[data-transition="back"] .account-login-form[data-auth-panel="email"] {
-    animation: account-login-panel-back var(--openbot-duration-overlay) 32ms var(--openbot-ease-out) both;
+    animation: account-login-panel-back var(--dani-dex-duration-overlay) 32ms var(--dani-dex-ease-out) both;
   }
 
   @keyframes setup-enter {
@@ -1034,16 +1034,16 @@ button {
 button:not(.ui-button):focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--openbot-border-focus);
+  outline: 2px solid var(--dani-dex-border-focus);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: var(--openbot-accent-strong);
+  background: var(--dani-dex-accent-strong);
 }
 
 ::-webkit-scrollbar {
-  width: var(--openbot-scrollbar-size);
+  width: var(--dani-dex-scrollbar-size);
 }
 
 ::-webkit-scrollbar-track {
@@ -1052,8 +1052,8 @@ textarea:focus-visible {
 
 ::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-border-strong);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-border-strong);
   background-clip: padding-box;
 }
 
@@ -1061,28 +1061,28 @@ textarea:focus-visible {
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    var(--openbot-text-primary) 18px,
-    var(--openbot-text-primary) 100%
+    var(--dani-dex-text-primary) 18px,
+    var(--dani-dex-text-primary) 100%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    var(--openbot-text-primary) 18px,
-    var(--openbot-text-primary) 100%
+    var(--dani-dex-text-primary) 18px,
+    var(--dani-dex-text-primary) 100%
   );
 }
 
 .scroll-fade-bottom:not(.scroll-fade-top) {
   -webkit-mask-image: linear-gradient(
     to bottom,
-    var(--openbot-text-primary) 0,
-    var(--openbot-text-primary) calc(100% - 18px),
+    var(--dani-dex-text-primary) 0,
+    var(--dani-dex-text-primary) calc(100% - 18px),
     transparent 100%
   );
   mask-image: linear-gradient(
     to bottom,
-    var(--openbot-text-primary) 0,
-    var(--openbot-text-primary) calc(100% - 18px),
+    var(--dani-dex-text-primary) 0,
+    var(--dani-dex-text-primary) calc(100% - 18px),
     transparent 100%
   );
 }
@@ -1091,15 +1091,15 @@ textarea:focus-visible {
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    var(--openbot-text-primary) 18px,
-    var(--openbot-text-primary) calc(100% - 18px),
+    var(--dani-dex-text-primary) 18px,
+    var(--dani-dex-text-primary) calc(100% - 18px),
     transparent 100%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    var(--openbot-text-primary) 18px,
-    var(--openbot-text-primary) calc(100% - 18px),
+    var(--dani-dex-text-primary) 18px,
+    var(--dani-dex-text-primary) calc(100% - 18px),
     transparent 100%
   );
 }
@@ -1122,7 +1122,7 @@ body,
 .app-frame,
 .conversation-panel,
 .direct-conversation {
-  background: var(--openbot-bg-canvas);
+  background: var(--dani-dex-bg-canvas);
 }
 
 .panel-edge,
@@ -1134,7 +1134,7 @@ body,
 .browser-panel,
 .remote-desktop-workspace,
 .provider-picker-list {
-  border-color: var(--openbot-border);
+  border-color: var(--dani-dex-border);
 }
 
 .search-field,
@@ -1147,9 +1147,9 @@ body,
 .setup-remote-form input,
 .setup-remote-form textarea,
 .account-login-form input {
-  border-color: var(--openbot-border);
-  background: var(--openbot-bg-surface);
-  color: var(--openbot-text-primary);
+  border-color: var(--dani-dex-border);
+  background: var(--dani-dex-bg-surface);
+  color: var(--dani-dex-text-primary);
 }
 
 .search-field:focus-within,
@@ -1162,8 +1162,8 @@ body,
 .setup-remote-form input:focus,
 .setup-remote-form textarea:focus,
 .account-login-form input:focus {
-  border-color: var(--openbot-border-focus);
-  background: var(--openbot-bg-surface-raised);
+  border-color: var(--dani-dex-border-focus);
+  background: var(--dani-dex-bg-surface-raised);
 }
 
 .search-field input::placeholder,
@@ -1175,88 +1175,88 @@ body,
 .setup-remote-form input::placeholder,
 .setup-remote-form textarea::placeholder,
 .account-login-form input::placeholder {
-  color: var(--openbot-text-placeholder);
+  color: var(--dani-dex-text-placeholder);
 }
 
 .provider-picker-option-selected,
 .provider-model-option-selected,
 .browser-tab-controlled .browser-tab {
-  border-color: var(--openbot-border-focus);
-  background: var(--openbot-accent-soft);
-  color: var(--openbot-text-primary);
+  border-color: var(--dani-dex-border-focus);
+  background: var(--dani-dex-accent-soft);
+  color: var(--dani-dex-text-primary);
 }
 
 .provider-picker-option,
 .provider-model-option {
-  border-color: var(--openbot-border);
-  background: var(--openbot-bg-control);
-  color: var(--openbot-text-secondary);
+  border-color: var(--dani-dex-border);
+  background: var(--dani-dex-bg-control);
+  color: var(--dani-dex-text-secondary);
 }
 
 .provider-picker-option:hover:not(.provider-picker-option-unavailable),
 .provider-picker-option:focus-within,
 .provider-model-option:hover,
 .provider-model-option:focus-visible {
-  background: var(--openbot-bg-control-hover);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-bg-control-hover);
+  color: var(--dani-dex-text-primary);
 }
 
 .voice-button,
 .voice-button-active,
 .initial-setup-save,
 .account-login-primary {
-  background: var(--openbot-surface-light);
-  color: var(--openbot-text-on-light);
+  background: var(--dani-dex-surface-light);
+  color: var(--dani-dex-text-on-light);
 }
 
 .voice-button:hover,
 .voice-button-active:hover,
 .initial-setup-save:hover:not(:disabled),
 .account-login-primary:hover:not(:disabled) {
-  background: var(--openbot-text-primary);
-  color: var(--openbot-text-on-light);
+  background: var(--dani-dex-text-primary);
+  color: var(--dani-dex-text-on-light);
 }
 
 .remote-desktop-overlay > button,
 .remote-desktop-overlay > button:hover {
-  border-color: var(--openbot-border-strong);
-  background: var(--openbot-bg-control-hover);
-  color: var(--openbot-text-primary);
+  border-color: var(--dani-dex-border-strong);
+  background: var(--dani-dex-bg-control-hover);
+  color: var(--dani-dex-text-primary);
 }
 
 .remote-desktop-overlay > button:hover {
-  background: var(--openbot-bg-control-active);
+  background: var(--dani-dex-bg-control-active);
 }
 
 .account-login-error,
 .initial-setup-error,
 .account-popover-error {
-  border-color: var(--openbot-danger-soft);
-  background: var(--openbot-danger-soft);
-  color: var(--openbot-danger);
+  border-color: var(--dani-dex-danger-soft);
+  background: var(--dani-dex-danger-soft);
+  color: var(--dani-dex-danger);
 }
 
 .setup-route-button,
 .setup-route-icon,
 .setup-remote-form input,
 .setup-remote-form textarea {
-  border-color: var(--openbot-border);
-  background: var(--openbot-bg-surface);
+  border-color: var(--dani-dex-border);
+  background: var(--dani-dex-bg-surface);
 }
 
 .setup-route-button:hover,
 .setup-route-button:focus-visible {
-  border-color: var(--openbot-border-focus);
-  background: var(--openbot-bg-surface-raised);
+  border-color: var(--dani-dex-border-focus);
+  background: var(--dani-dex-bg-surface-raised);
 }
 
 .setup-route-icon-local i,
 .provider-picker-status-available i {
-  color: var(--openbot-success);
+  color: var(--dani-dex-success);
 }
 
 .account-login-development-code,
 .provider-picker-status-sign-in-required i,
 .provider-picker-status-outdated i {
-  color: var(--openbot-warning);
+  color: var(--dani-dex-warning);
 }

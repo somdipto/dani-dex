@@ -1,40 +1,40 @@
 .account-update-island {
-  --panel-open-dur: calc(var(--openbot-duration-slow) + var(--openbot-duration-slow));
-  --panel-close-dur: calc(var(--openbot-duration-slow) + var(--openbot-duration-normal));
-  --panel-translate-y: calc(100% - var(--openbot-space-3));
-  --panel-blur: var(--openbot-space-0-5);
-  --panel-ease: var(--openbot-ease-out);
-  --text-swap-dur: var(--openbot-duration-normal);
-  --text-swap-translate-y: var(--openbot-space-1);
-  --text-swap-blur: var(--openbot-space-0-5);
-  --text-swap-ease: var(--openbot-ease-in-out);
-  --digit-dur: var(--openbot-duration-slow);
-  --digit-distance: var(--openbot-space-1);
-  --digit-stagger: calc(var(--openbot-duration-fast) - var(--openbot-duration-dialog));
-  --digit-blur: var(--openbot-space-0-5);
-  --digit-ease: var(--openbot-ease-out);
+  --panel-open-dur: calc(var(--dani-dex-duration-slow) + var(--dani-dex-duration-slow));
+  --panel-close-dur: calc(var(--dani-dex-duration-slow) + var(--dani-dex-duration-normal));
+  --panel-translate-y: calc(100% - var(--dani-dex-space-3));
+  --panel-blur: var(--dani-dex-space-0-5);
+  --panel-ease: var(--dani-dex-ease-out);
+  --text-swap-dur: var(--dani-dex-duration-normal);
+  --text-swap-translate-y: var(--dani-dex-space-1);
+  --text-swap-blur: var(--dani-dex-space-0-5);
+  --text-swap-ease: var(--dani-dex-ease-in-out);
+  --digit-dur: var(--dani-dex-duration-slow);
+  --digit-distance: var(--dani-dex-space-1);
+  --digit-stagger: calc(var(--dani-dex-duration-fast) - var(--dani-dex-duration-dialog));
+  --digit-blur: var(--dani-dex-space-0-5);
+  --digit-ease: var(--dani-dex-ease-out);
   --digit-dir-x: 0;
   --digit-dir-y: 1;
 
   position: absolute;
   z-index: 0;
-  right: var(--openbot-space-4);
-  bottom: var(--openbot-control-xl);
-  left: var(--openbot-space-4);
+  right: var(--dani-dex-space-4);
+  bottom: var(--dani-dex-control-xl);
+  left: var(--dani-dex-space-4);
   display: grid;
-  min-height: calc(var(--openbot-control-xl) + var(--openbot-radius-card));
+  min-height: calc(var(--dani-dex-control-xl) + var(--dani-dex-radius-card));
   align-items: center;
   border: 0;
-  border-radius: var(--openbot-radius-lg) var(--openbot-radius-lg) var(--openbot-radius-md) var(--openbot-radius-md);
-  background: var(--openbot-accent-strong);
-  box-shadow: 0 0 0 1px var(--openbot-accent-soft);
-  -webkit-backdrop-filter: blur(var(--openbot-space-3));
-  backdrop-filter: blur(var(--openbot-space-3));
-  padding: calc(var(--openbot-space-1) + 1px) var(--openbot-space-1-5)
-    calc(var(--openbot-space-4) + var(--openbot-space-1) - 1px);
+  border-radius: var(--dani-dex-radius-lg) var(--dani-dex-radius-lg) var(--dani-dex-radius-md) var(--dani-dex-radius-md);
+  background: var(--dani-dex-accent-strong);
+  box-shadow: 0 0 0 1px var(--dani-dex-accent-soft);
+  -webkit-backdrop-filter: blur(var(--dani-dex-space-3));
+  backdrop-filter: blur(var(--dani-dex-space-3));
+  padding: calc(var(--dani-dex-space-1) + 1px) var(--dani-dex-space-1-5)
+    calc(var(--dani-dex-space-4) + var(--dani-dex-space-1) - 1px);
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--openbot-space-2);
-  color: var(--openbot-accent-text);
+  gap: var(--dani-dex-space-2);
+  color: var(--dani-dex-accent-text);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -80,10 +80,10 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--openbot-accent-text);
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-semibold);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-accent-text);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-semibold);
+  line-height: var(--dani-dex-leading-sm);
   white-space: nowrap;
 }
 
@@ -128,32 +128,37 @@
 .account-update-island__action-shell {
   position: relative;
   display: grid;
-  width: calc(var(--openbot-control-xl) + var(--openbot-control-xl) + var(--openbot-space-6) + var(--openbot-space-1));
-  min-width: calc(var(--openbot-control-xl) + var(--openbot-control-xl) + var(--openbot-space-3));
+  width: calc(
+    var(--dani-dex-control-xl) +
+    var(--dani-dex-control-xl) +
+    var(--dani-dex-space-6) +
+    var(--dani-dex-space-1)
+  );
+  min-width: calc(var(--dani-dex-control-xl) + var(--dani-dex-control-xl) + var(--dani-dex-space-3));
   flex-shrink: 0;
 }
 
 .account-update-island__action.ui-button {
   width: 100%;
-  height: var(--openbot-control-sm);
-  min-height: var(--openbot-control-sm);
-  border-radius: var(--openbot-radius-sm);
-  background: var(--openbot-surface-light);
-  box-shadow: 0 1px 2px var(--openbot-shadow-popover-ambient);
-  padding: 0 var(--openbot-space-3) 0 var(--openbot-space-2);
-  color: var(--openbot-text-on-light);
+  height: var(--dani-dex-control-sm);
+  min-height: var(--dani-dex-control-sm);
+  border-radius: var(--dani-dex-radius-sm);
+  background: var(--dani-dex-surface-light);
+  box-shadow: 0 1px 2px var(--dani-dex-shadow-popover-ambient);
+  padding: 0 var(--dani-dex-space-3) 0 var(--dani-dex-space-2);
+  color: var(--dani-dex-text-on-light);
   transition:
-    box-shadow var(--openbot-duration-normal) var(--openbot-ease-out),
-    transform var(--openbot-duration-fast) var(--openbot-ease-out);
+    box-shadow var(--dani-dex-duration-normal) var(--dani-dex-ease-out),
+    transform var(--dani-dex-duration-fast) var(--dani-dex-ease-out);
 }
 
 .account-update-island__action.ui-button::after {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: calc(100% + var(--openbot-space-4));
-  min-width: var(--openbot-control-xl);
-  height: var(--openbot-control-xl);
+  width: calc(100% + var(--dani-dex-space-4));
+  min-width: var(--dani-dex-control-xl);
+  height: var(--dani-dex-control-xl);
   transform: translate(-50%, -50%);
   content: "";
 }
@@ -167,13 +172,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--openbot-space-1-5);
+  gap: var(--dani-dex-space-1-5);
 }
 
 .account-update-island__action-label {
-  min-width: calc(var(--openbot-control-xl) + var(--openbot-space-3));
-  color: var(--openbot-text-on-light);
-  font-weight: var(--openbot-weight-semibold);
+  min-width: calc(var(--dani-dex-control-xl) + var(--dani-dex-space-3));
+  color: var(--dani-dex-text-on-light);
+  font-weight: var(--dani-dex-weight-semibold);
   text-align: left;
 }
 
@@ -181,8 +186,8 @@
   display: inline-grid;
   align-items: baseline;
   grid-template-columns: 3ch max-content;
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-semibold);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-semibold);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -232,24 +237,24 @@
 }
 
 .account-update-island__action-shell[data-downloading="true"] .account-update-island__action-label {
-  min-width: var(--openbot-control-md);
+  min-width: var(--dani-dex-control-md);
   text-align: center;
 }
 
 .account-update-island__action-shell[data-downloading="true"] .account-update-island__action.ui-button {
-  padding-inline: var(--openbot-space-2);
+  padding-inline: var(--dani-dex-space-2);
 }
 
 .account-update-island__icon.t-icon-swap {
-  --icon-swap-dur: var(--openbot-duration-overlay);
-  --icon-swap-blur: var(--openbot-space-0-5);
+  --icon-swap-dur: var(--dani-dex-duration-overlay);
+  --icon-swap-blur: var(--dani-dex-space-0-5);
   --icon-swap-start-scale: 0.25;
-  --icon-swap-ease: var(--openbot-ease-in-out);
+  --icon-swap-ease: var(--dani-dex-ease-in-out);
 
   position: relative;
   display: inline-grid;
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
   flex: 0 0 auto;
   place-items: center;
 }
@@ -268,13 +273,13 @@
 }
 
 .account-update-island__icon.t-icon-swap svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
-  stroke-width: var(--openbot-icon-stroke);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .account-update-island__icon.t-icon-swap .ui-spinner {
-  border-color: var(--openbot-text-dim-on-light);
+  border-color: var(--dani-dex-text-dim-on-light);
   border-top-color: currentColor;
 }
 
@@ -298,11 +303,11 @@
 
 @media (hover: hover) and (pointer: fine) {
   .account-update-island__action.ui-button:hover:not(:disabled):not([data-disabled]) {
-    background: var(--openbot-surface-light);
+    background: var(--dani-dex-surface-light);
     box-shadow:
-      0 0 0 1px var(--openbot-text-dim-on-light),
-      0 1px 2px var(--openbot-shadow-popover-ambient);
-    color: var(--openbot-text-on-light);
+      0 0 0 1px var(--dani-dex-text-dim-on-light),
+      0 1px 2px var(--dani-dex-shadow-popover-ambient);
+    color: var(--dani-dex-text-on-light);
   }
 }
 

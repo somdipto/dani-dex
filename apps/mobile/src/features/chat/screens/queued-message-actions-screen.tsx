@@ -21,7 +21,7 @@ export function QueuedMessageActionsScreen() {
   const { chat, deliveryId } = useLocalSearchParams<{ chat: string; deliveryId: string }>();
   const { queue } = useQueuedChat(chat);
   const foreground = useThemeColor("foreground");
-  const danger = String(useCSSVariable("--openbot-danger-text"));
+  const danger = String(useCSSVariable("--dani-dex-danger-text"));
   const held = queue?.edit?.delivery ?? null;
   const delivery = held?.id === deliveryId ? held : queue?.queued.find((item) => item.id === deliveryId);
 

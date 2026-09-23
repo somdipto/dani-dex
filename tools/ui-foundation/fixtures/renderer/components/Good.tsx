@@ -3,5 +3,5 @@
 import { Button } from "./ui/Button";
 
 export function Good() {
-  return <Button style={{ color: "var(--openbot-text)", "border-radius": "var(--openbot-radius-md)" }} />;
+  return <Button style={{ color: "var(--dani-dex-text)", "border-radius": "var(--dani-dex-radius-md)" }} />;
 }

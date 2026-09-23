@@ -2,10 +2,10 @@
    reserves for a status glyph, and the fill is the brand colour the provider row already uses, so
    the notification and the row that offers the same update read as one thing. */
 .provider-update-toast-logo {
-  width: var(--openbot-icon-md);
-  height: var(--openbot-icon-md);
+  width: var(--dani-dex-icon-md);
+  height: var(--dani-dex-icon-md);
   overflow: visible;
-  fill: var(--openbot-provider-current);
+  fill: var(--dani-dex-provider-current);
 }
 
 /* One card, one size, for the whole update. The notification is held open from the offer through to
@@ -19,7 +19,7 @@
    The first row has a floor as well as a ceiling, because the running update hands its whole content
    column across both rows and a grid would otherwise shrink the first row to fit it. */
 .provider-update-toast[data-sonner-toast][data-styled="true"] {
-  grid-template-rows: minmax(var(--openbot-control-xl), auto) var(--openbot-control-md);
+  grid-template-rows: minmax(var(--dani-dex-control-xl), auto) var(--dani-dex-control-md);
 }
 
 /* A state with nothing to offer marks its label instead of losing it, and the button goes out of the
@@ -57,8 +57,8 @@
 .provider-update-toast-progress {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-3);
-  height: var(--openbot-control-md);
+  gap: var(--dani-dex-space-3);
+  height: var(--dani-dex-control-md);
   margin-top: auto;
 }
 
@@ -67,7 +67,7 @@
    button ended. */
 .ui-toaster.ui-toaster-closeable .provider-update-toast .provider-update-toast-progress,
 .ui-toaster .provider-update-toast:has([data-close-button]) .provider-update-toast-progress {
-  margin-right: calc(-1 * var(--openbot-space-6));
+  margin-right: calc(-1 * var(--dani-dex-space-6));
 }
 
 .provider-update-toast-bar {
@@ -78,20 +78,20 @@
 /* The bar carries the provider's colour, the same one the mark above it carries, so the running
    update is legible as this provider's at a glance rather than as generic progress. */
 .provider-update-toast-bar[data-provider] .ui-progress-fill {
-  background: var(--openbot-provider-current);
+  background: var(--dani-dex-provider-current);
 }
 
 /* A short movement leaves most of each 400 ms display interval still and readable.
    Move the whole value together; staggered digits make fast changes hard to read. */
 .provider-update-toast-percent {
-  --digit-dur: var(--openbot-duration-fast);
-  --digit-distance: var(--openbot-space-1);
+  --digit-dur: var(--dani-dex-duration-fast);
+  --digit-distance: var(--dani-dex-space-1);
   --digit-blur: 0px;
   --digit-ease: ease-out;
   display: inline-flex;
   justify-content: flex-end;
   width: 4ch;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-sm);
   font-variant-numeric: tabular-nums;
 }

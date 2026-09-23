@@ -1,6 +1,6 @@
 .computer-use-settings {
   display: grid;
-  gap: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
 }
 
 .computer-use-card:is(.ui-item-group) {
@@ -13,18 +13,18 @@
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-accent-soft);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-accent-soft);
 }
 
 .computer-use-permission-icon svg {
   width: 16px;
   height: 16px;
-  color: var(--openbot-accent-text);
+  color: var(--dani-dex-accent-text);
 }
 
 .computer-use-alert {
-  margin-top: var(--openbot-space-3);
+  margin-top: var(--dani-dex-space-3);
 }
 
 .computer-use-settings > .computer-use-alert:first-child,
@@ -39,7 +39,7 @@
 .computer-use-skeleton-icon {
   width: 30px;
   height: 30px;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
 }
 
 .computer-use-skeleton-title {
@@ -50,7 +50,7 @@
 .computer-use-skeleton-description {
   width: min(220px, 70%);
   height: 10px;
-  margin-top: var(--openbot-space-2);
+  margin-top: var(--dani-dex-space-2);
 }
 
 /*
@@ -60,7 +60,7 @@
  */
 .computer-use-compact {
   width: min(100%, 520px);
-  margin-top: var(--openbot-space-4);
+  margin-top: var(--dani-dex-space-4);
   text-align: left;
 }
 
@@ -68,23 +68,23 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--openbot-space-3);
-  margin: 0 var(--openbot-space-1) var(--openbot-space-2);
+  gap: var(--dani-dex-space-3);
+  margin: 0 var(--dani-dex-space-1) var(--dani-dex-space-2);
 }
 
 .computer-use-compact-header h2 {
   margin: 0;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-md);
-  font-weight: var(--openbot-weight-medium);
-  line-height: var(--openbot-leading-md);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-md);
+  font-weight: var(--dani-dex-weight-medium);
+  line-height: var(--dani-dex-leading-md);
 }
 
 .computer-use-compact-header p {
-  margin: var(--openbot-space-0-5) 0 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  margin: var(--dani-dex-space-0-5) 0 0;
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 /*
@@ -96,28 +96,28 @@
 }
 
 .computer-use-compact .computer-use-card {
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-bg-control);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-bg-control);
 }
 
 .computer-use-compact .computer-use-row {
   min-height: 58px;
-  padding: var(--openbot-space-2) var(--openbot-space-3);
+  padding: var(--dani-dex-space-2) var(--dani-dex-space-3);
 }
 
 .computer-use-compact .computer-use-row + .computer-use-row {
-  border-top: 1px solid var(--openbot-border);
+  border-top: 1px solid var(--dani-dex-border);
 }
 
 .computer-use-compact .ui-item-title {
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
 }
 
 .computer-use-compact .ui-item-description {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 
 @media (max-width: 640px) {
@@ -127,14 +127,14 @@
 
   .computer-use-row .ui-item-actions {
     width: auto;
-    padding-top: var(--openbot-space-1);
+    padding-top: var(--dani-dex-space-1);
   }
 }
 
 .computer-use-recheck {
   display: flex;
   justify-content: flex-end;
-  margin-top: var(--openbot-space-2);
+  margin-top: var(--dani-dex-space-2);
 }
 
 /* A label-and-icon button carries no size of its own for the mark beside the word, and a 24px icon
@@ -142,10 +142,10 @@
 .computer-use-recheck .ui-button > svg,
 .computer-use-compact-header .ui-button > svg,
 .computer-use-alert .ui-button > svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
   flex: 0 0 auto;
-  stroke-width: var(--openbot-icon-stroke);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 /*
@@ -166,9 +166,9 @@
    * are even the whole way round.
    */
   box-shadow:
-    inset 0 0 0 2px var(--openbot-accent),
-    inset 0 0 44px -4px var(--openbot-accent-strong),
-    inset 0 0 120px -8px var(--openbot-accent-soft);
+    inset 0 0 0 2px var(--dani-dex-accent),
+    inset 0 0 44px -4px var(--dani-dex-accent-strong),
+    inset 0 0 120px -8px var(--dani-dex-accent-soft);
   /* The surface itself is click-through; this keeps a stray pointer rule from undoing that. */
   pointer-events: none;
 }
@@ -215,19 +215,19 @@ body:has(.computer-use-highlight-surface),
   width: 22px;
   height: 24px;
   overflow: visible;
-  fill: var(--openbot-accent);
+  fill: var(--dani-dex-accent);
   /* The colour the accent carries text in, so the outline holds over any wallpaper. */
-  stroke: var(--openbot-text-on-accent);
+  stroke: var(--dani-dex-text-on-accent);
   stroke-width: 5;
   /* Under the fill, so the outline reads as an edge rather than as a second, thicker dart. */
   paint-order: stroke fill;
-  filter: drop-shadow(0 0 6px var(--openbot-accent-strong));
+  filter: drop-shadow(0 0 6px var(--dani-dex-accent-strong));
   /*
    * One step between two points the agent asked for. The cursor has to move - that is the whole of
    * what it says - and a jump of a thousand pixels tells the eye nothing about where it came from.
    * The shortest token, because a slower cursor would still be travelling when the click lands.
    */
-  transition: translate var(--openbot-duration-fast) linear;
+  transition: translate var(--dani-dex-duration-fast) linear;
   pointer-events: none;
 }
 
@@ -238,19 +238,19 @@ body:has(.computer-use-highlight-surface),
 }
 
 /*
- * The accent on the one row that still needs the user. `--openbot-accent` is the colour of an
+ * The accent on the one row that still needs the user. `--dani-dex-accent` is the colour of an
  * action here, and a panel of two rows says at a glance which one is left when only the ungranted
  * one carries it.
  */
 .computer-use-grant:is(.ui-button) {
   border-color: transparent;
-  background: var(--openbot-accent);
-  color: var(--openbot-text-on-accent);
+  background: var(--dani-dex-accent);
+  color: var(--dani-dex-text-on-accent);
 }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 601px) {
   .computer-use-grant:is(.ui-button):hover:not(:disabled):not([data-disabled]) {
-    background: var(--openbot-accent-hover);
+    background: var(--dani-dex-accent-hover);
   }
 }
 
@@ -263,17 +263,17 @@ body:has(.computer-use-highlight-surface),
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-4);
+  gap: var(--dani-dex-space-4);
   /* Clear of the traffic lights, which sit over this surface on macOS. */
-  padding: 44px var(--openbot-space-4) var(--openbot-space-4);
-  background: var(--openbot-bg-canvas);
+  padding: 44px var(--dani-dex-space-4) var(--dani-dex-space-4);
+  background: var(--dani-dex-bg-canvas);
   text-align: left;
 }
 
 .computer-use-help-header {
   display: flex;
   align-items: flex-start;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 
 .computer-use-help-icon {
@@ -282,65 +282,65 @@ body:has(.computer-use-highlight-surface),
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-accent-soft);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-accent-soft);
 }
 
 .computer-use-help-icon svg {
-  width: var(--openbot-icon-md);
-  height: var(--openbot-icon-md);
-  color: var(--openbot-accent-text);
-  stroke-width: var(--openbot-icon-stroke);
+  width: var(--dani-dex-icon-md);
+  height: var(--dani-dex-icon-md);
+  color: var(--dani-dex-accent-text);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .computer-use-help h1 {
   margin: 0;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-md);
-  font-weight: var(--openbot-weight-medium);
-  line-height: var(--openbot-leading-md);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-md);
+  font-weight: var(--dani-dex-weight-medium);
+  line-height: var(--dani-dex-leading-md);
 }
 
 .computer-use-help-header p {
-  margin: var(--openbot-space-0-5) 0 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  margin: var(--dani-dex-space-0-5) 0 0;
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 .computer-use-help-steps {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   margin: 0;
-  padding-left: var(--openbot-space-4);
+  padding-left: var(--dani-dex-space-4);
   /* The order of the two steps is the whole of the instruction, so the numbers have to be drawn. */
   list-style: decimal;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 .computer-use-help-status {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-1-5);
+  gap: var(--dani-dex-space-1-5);
   margin: 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 .computer-use-help-status svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
   flex: 0 0 auto;
-  color: var(--openbot-success);
-  stroke-width: var(--openbot-icon-stroke);
+  color: var(--dani-dex-success);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .computer-use-help-status.is-error {
-  color: var(--openbot-danger);
+  color: var(--dani-dex-danger);
 }
 
 /*
@@ -354,20 +354,20 @@ body:has(.computer-use-highlight-surface),
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
   align-self: center;
   box-sizing: border-box;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-control);
-  color: var(--openbot-text-primary);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-control);
+  color: var(--dani-dex-text-primary);
   cursor: grab;
   -webkit-app-region: no-drag;
 }
 
 .computer-use-drag-card:hover {
-  border-color: var(--openbot-accent-strong);
-  background: var(--openbot-bg-control-hover);
+  border-color: var(--dani-dex-accent-strong);
+  background: var(--dani-dex-bg-control-hover);
 }
 
 .computer-use-drag-card:active,
@@ -377,14 +377,14 @@ body:has(.computer-use-highlight-surface),
 
 .computer-use-drag-handle {
   position: absolute;
-  top: var(--openbot-space-2);
-  right: var(--openbot-space-2);
-  color: var(--openbot-text-dim);
+  top: var(--dani-dex-space-2);
+  right: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-dim);
 }
 
 .computer-use-drag-handle svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
 }
 
 .computer-use-drag-icon {
@@ -401,23 +401,23 @@ body:has(.computer-use-highlight-surface),
 }
 
 .computer-use-drag-icon svg {
-  width: var(--openbot-icon-md);
-  height: var(--openbot-icon-md);
-  color: var(--openbot-text-secondary);
+  width: var(--dani-dex-icon-md);
+  height: var(--dani-dex-icon-md);
+  color: var(--dani-dex-text-secondary);
 }
 
 .computer-use-drag-card strong {
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-medium);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-medium);
 }
 
 .computer-use-drag-card > span:last-child {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 
 .computer-use-help-footer {
   display: flex;
   justify-content: flex-end;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }

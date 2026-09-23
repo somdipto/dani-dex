@@ -256,9 +256,9 @@ export function ChatMessageList({
     AccessibilityInfo.announceForAccessibility(`Input required. ${questionForm.question.question}`);
   }, [questionForm?.messageId, questionForm?.question]);
   const [userForeground, themeForeground, themeMuted] = useCSSVariable([
-    "--openbot-text-on-light",
-    "--openbot-text-primary",
-    "--openbot-text-muted",
+    "--dani-dex-text-on-light",
+    "--dani-dex-text-primary",
+    "--dani-dex-text-muted",
   ]).map(String);
   const reducedMotion = useReducedMotion();
   const animateMessages = isFocused && online && appActive;

@@ -18,16 +18,16 @@
   --dynamic-island-shared-ease: cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   display: flex;
-  width: min(var(--dynamic-island-expanded-width), calc(100vw - var(--openbot-space-6)));
+  width: min(var(--dynamic-island-expanded-width), calc(100vw - var(--dani-dex-space-6)));
   height: fit-content;
   align-items: flex-start;
   justify-content: center;
   border: 0;
   background: transparent;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   filter: drop-shadow(0 0 0 transparent);
   pointer-events: none;
-  transition: filter var(--openbot-duration-normal) var(--openbot-ease-out);
+  transition: filter var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .dynamic-island-shell {
@@ -49,7 +49,7 @@
 
 .dynamic-island[data-layout-state="expanded"],
 .dynamic-island[data-hovered="true"] {
-  filter: drop-shadow(0 0 10px var(--openbot-shadow-dynamic-island));
+  filter: drop-shadow(0 0 10px var(--dani-dex-shadow-dynamic-island));
 }
 
 .dynamic-island-shell[data-resizing] {
@@ -59,7 +59,7 @@
 .dynamic-island-size-target {
   position: relative;
   left: 50%;
-  width: min(var(--dynamic-island-compact-width), calc(100vw - var(--openbot-space-6)));
+  width: min(var(--dynamic-island-compact-width), calc(100vw - var(--dani-dex-space-6)));
   min-height: var(--dynamic-island-notch-height);
   transform: translateX(-50%);
 }
@@ -67,13 +67,13 @@
 .dynamic-island[data-layout-state="compact"][data-hovered="true"] .dynamic-island-size-target {
   width: min(
     calc(var(--dynamic-island-compact-width) + var(--dynamic-island-hover-width-growth)),
-    calc(100vw - var(--openbot-space-6))
+    calc(100vw - var(--dani-dex-space-6))
   );
   min-height: calc(var(--dynamic-island-notch-height) + var(--dynamic-island-hover-height-growth));
 }
 
 .dynamic-island[data-layout-state="expanded"] .dynamic-island-size-target {
-  width: min(var(--dynamic-island-expanded-width), calc(100vw - var(--openbot-space-6)));
+  width: min(var(--dynamic-island-expanded-width), calc(100vw - var(--dani-dex-space-6)));
   padding-top: var(--dynamic-island-notch-height);
 }
 
@@ -89,9 +89,9 @@
   position: absolute;
   inset: 0 var(--dynamic-island-shoulder-size);
   border-radius: 0 0 var(--dynamic-island-bottom-radius) var(--dynamic-island-bottom-radius);
-  background: var(--openbot-bg-notch);
-  box-shadow: inset 0 -1px 0 var(--openbot-shadow-ring);
-  transition: box-shadow var(--openbot-duration-normal) var(--openbot-ease-out);
+  background: var(--dani-dex-bg-notch);
+  box-shadow: inset 0 -1px 0 var(--dani-dex-shadow-ring);
+  transition: box-shadow var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .dynamic-island-shoulder {
@@ -103,7 +103,7 @@
 }
 
 .dynamic-island-shoulder path {
-  fill: var(--openbot-bg-notch);
+  fill: var(--dani-dex-bg-notch);
 }
 
 .dynamic-island-shoulder-leading {
@@ -119,7 +119,7 @@
   z-index: 2;
   top: 0;
   left: 50%;
-  width: min(var(--dynamic-island-compact-width), calc(100vw - var(--openbot-space-6)));
+  width: min(var(--dynamic-island-compact-width), calc(100vw - var(--dani-dex-space-6)));
   height: var(--dynamic-island-notch-height);
   display: grid;
   grid-template-columns:
@@ -156,18 +156,18 @@
   height: 100%;
   display: flex;
   align-items: center;
-  color: var(--openbot-text-secondary);
-  transition: color var(--openbot-duration-normal) var(--openbot-ease-out);
+  color: var(--dani-dex-text-secondary);
+  transition: color var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .dynamic-island-ear-leading {
   justify-content: flex-end;
-  padding-right: var(--openbot-space-2);
+  padding-right: var(--dani-dex-space-2);
 }
 
 .dynamic-island-ear-trailing {
   justify-content: flex-start;
-  padding-left: var(--openbot-space-2);
+  padding-left: var(--dani-dex-space-2);
 }
 
 .dynamic-island:not(.dynamic-island-external):not(.dynamic-island-status) .dynamic-island-ear-leading {
@@ -183,9 +183,9 @@
   transform: translate3d(0, 0, 0) scale(1);
   transform-origin: center;
   transition:
-    color var(--openbot-duration-normal) var(--openbot-ease-out),
-    opacity var(--openbot-duration-island-content) cubic-bezier(0.22, 1.08, 0.36, 1),
-    transform var(--openbot-duration-island-content) cubic-bezier(0.22, 1.08, 0.36, 1);
+    color var(--dani-dex-duration-normal) var(--dani-dex-ease-out),
+    opacity var(--dani-dex-duration-island-content) cubic-bezier(0.22, 1.08, 0.36, 1),
+    transform var(--dani-dex-duration-island-content) cubic-bezier(0.22, 1.08, 0.36, 1);
 }
 
 .dynamic-island-hover-content {
@@ -202,12 +202,12 @@
 
 .dynamic-island-toggle:hover .dynamic-island-ear,
 .dynamic-island-toggle:focus-visible .dynamic-island-ear {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
 }
 
 .dynamic-island-trailing-content {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
   justify-content: center;
 }
 
@@ -217,8 +217,8 @@
   align-items: center;
   justify-content: center;
   transition:
-    opacity var(--openbot-duration-island-content) cubic-bezier(0.22, 1.08, 0.36, 1),
-    transform var(--openbot-duration-island-content) cubic-bezier(0.22, 1.08, 0.36, 1);
+    opacity var(--dani-dex-duration-island-content) cubic-bezier(0.22, 1.08, 0.36, 1),
+    transform var(--dani-dex-duration-island-content) cubic-bezier(0.22, 1.08, 0.36, 1);
 }
 
 .dynamic-island-trailing-compact {
@@ -245,7 +245,7 @@
   opacity: 0;
   filter: none;
   transform: scale(0.92);
-  transition-duration: var(--openbot-duration-island-content-exit);
+  transition-duration: var(--dani-dex-duration-island-content-exit);
   transition-timing-function: var(--dynamic-island-shared-ease);
 }
 
@@ -253,7 +253,7 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  padding: var(--openbot-space-2) var(--openbot-space-4) var(--openbot-space-4);
+  padding: var(--dani-dex-space-2) var(--dani-dex-space-4) var(--dani-dex-space-4);
 }
 
 .dynamic-island-panel[data-phase="leaving"] {
@@ -269,7 +269,7 @@
 }
 
 .dynamic-island-panel[data-phase="leaving"] {
-  width: min(var(--dynamic-island-expanded-width), calc(100vw - var(--openbot-space-6)));
+  width: min(var(--dynamic-island-expanded-width), calc(100vw - var(--dani-dex-space-6)));
 }
 
 .dynamic-island-content {
@@ -284,8 +284,8 @@
   opacity: 1;
   filter: none;
   transition:
-    color var(--openbot-duration-normal) var(--openbot-ease-out),
-    opacity var(--openbot-duration-island-content-exit) var(--dynamic-island-shared-ease);
+    color var(--dani-dex-duration-normal) var(--dani-dex-ease-out),
+    opacity var(--dani-dex-duration-island-content-exit) var(--dynamic-island-shared-ease);
 }
 
 .dynamic-island:not([data-shared-leading="true"])[data-layout-state="expanded"]
@@ -295,10 +295,10 @@
   filter: none;
   transform: scale(0.92);
   transition-duration:
-    var(--openbot-duration-normal), var(--openbot-duration-island-content-exit),
-    var(--openbot-duration-island-content-exit);
+    var(--dani-dex-duration-normal), var(--dani-dex-duration-island-content-exit),
+    var(--dani-dex-duration-island-content-exit);
   transition-timing-function:
-    var(--openbot-ease-out), var(--dynamic-island-shared-ease), var(--dynamic-island-shared-ease);
+    var(--dani-dex-ease-out), var(--dynamic-island-shared-ease), var(--dynamic-island-shared-ease);
 }
 
 .dynamic-island[data-layout-state="expanded"] .dynamic-island-ear-trailing .dynamic-island-ear-content {
@@ -309,7 +309,7 @@
 
 .dynamic-island-status .dynamic-island-trailing-compact {
   transform: scale(1);
-  transition: opacity var(--openbot-duration-island-content) var(--dynamic-island-shared-ease);
+  transition: opacity var(--dani-dex-duration-island-content) var(--dynamic-island-shared-ease);
 }
 
 .dynamic-island-status[data-layout-state="expanded"] .dynamic-island-trailing-compact {
@@ -336,7 +336,7 @@
 }
 
 .dynamic-island-idle .dynamic-island-ear-trailing {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   transition: none;
 }
 
@@ -351,7 +351,7 @@
      notch on every notched MacBook - rather than reaching into the window under it. The retention
      zone below is the generous one, and it only applies once the pointer is already on the
      island. */
-  width: min(var(--dynamic-island-compact-width), calc(100vw - var(--openbot-space-6)));
+  width: min(var(--dynamic-island-compact-width), calc(100vw - var(--dani-dex-space-6)));
   height: calc(
     var(--dynamic-island-notch-height) +
     var(--dynamic-island-hover-hit-top) +
@@ -372,7 +372,7 @@
       var(--dynamic-island-hover-width-growth) +
       var(--dynamic-island-hover-retention-inline-growth)
     ),
-    calc(100vw - var(--openbot-space-6))
+    calc(100vw - var(--dani-dex-space-6))
   );
   height: calc(
     var(--dynamic-island-notch-height) +
@@ -437,8 +437,8 @@
 
 .dynamic-island-external .dynamic-island-silhouette {
   border-radius: var(--dynamic-island-external-compact-radius);
-  background: var(--openbot-bg-notch);
-  box-shadow: inset 0 -1px 0 var(--openbot-shadow-ring);
+  background: var(--dani-dex-bg-notch);
+  box-shadow: inset 0 -1px 0 var(--dani-dex-shadow-ring);
 }
 
 .dynamic-island-external .dynamic-island-silhouette-body {

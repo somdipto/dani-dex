@@ -42,7 +42,7 @@ export function ServerDrawerContent({
   const displayName = mobileUserName(session.user);
   const avatarUrl = session.user.avatarUrl ? new URL(session.user.avatarUrl, session.apiUrl).toString() : null;
   const mutedColor = String(muted);
-  const serverForeground = String(useCSSVariable("--openbot-text-on-light"));
+  const serverForeground = String(useCSSVariable("--dani-dex-text-on-light"));
 
   return (
     <>

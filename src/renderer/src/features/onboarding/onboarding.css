@@ -1,13 +1,13 @@
 .onboarding-screen {
   position: absolute;
-  z-index: var(--openbot-layer-dialog);
+  z-index: var(--dani-dex-layer-dialog);
   inset: 0;
   min-height: 100vh;
   display: grid;
   place-items: center;
   overflow-y: auto;
-  background: var(--openbot-bg-canvas);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-bg-canvas);
+  color: var(--dani-dex-text-primary);
   -webkit-app-region: drag;
 }
 
@@ -23,34 +23,34 @@
 .onboarding-progress {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-1-5);
+  gap: var(--dani-dex-space-1-5);
   margin-bottom: 20px;
 }
 
 .onboarding-progress span {
   width: 6px;
   height: 6px;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-border-strong);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-border-strong);
   transition:
-    width var(--openbot-duration-normal) var(--openbot-ease-out),
-    background-color var(--openbot-duration-normal) ease;
+    width var(--dani-dex-duration-normal) var(--dani-dex-ease-out),
+    background-color var(--dani-dex-duration-normal) ease;
 }
 
 .onboarding-progress span.is-complete {
-  background: var(--openbot-text-muted);
+  background: var(--dani-dex-text-muted);
 }
 
 .onboarding-progress span.is-active {
   width: 22px;
-  background: var(--openbot-text-primary);
+  background: var(--dani-dex-text-primary);
 }
 
 .onboarding-step {
   width: 100%;
   display: flex;
   justify-content: center;
-  animation: onboarding-step-in var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+  animation: onboarding-step-in var(--dani-dex-duration-overlay) var(--dani-dex-ease-out) both;
 }
 
 .onboarding-step[data-direction="back"] {
@@ -82,9 +82,9 @@
 .onboarding-panel h1 {
   max-width: 620px;
   margin: 0;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-display);
-  font-weight: var(--openbot-weight-medium);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-display);
+  font-weight: var(--dani-dex-weight-medium);
   letter-spacing: -0.045em;
   line-height: 1.12;
 }
@@ -92,8 +92,8 @@
 .onboarding-description {
   max-width: 560px;
   margin: 10px 0 0;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-lg);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-lg);
   line-height: 1.45;
 }
 
@@ -142,7 +142,7 @@
 }
 
 .onboarding-provider .provider-picker-label {
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
 }
 
 .onboarding-provider .provider-picker-heading {
@@ -150,11 +150,11 @@
 }
 
 .onboarding-provider .provider-picker-list {
-  background: var(--openbot-bg-control);
+  background: var(--dani-dex-bg-control);
 }
 
 .onboarding-provider .provider-picker-hint {
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
 }
 
 .onboarding-computer-visual {
@@ -165,16 +165,16 @@
 
 .onboarding-computer-stop-mist,
 .onboarding-computer-highlight-start {
-  stop-color: var(--openbot-onboarding-desktop-mist);
+  stop-color: var(--dani-dex-onboarding-desktop-mist);
 }
 
 .onboarding-computer-stop-blue,
 .onboarding-computer-highlight-end {
-  stop-color: var(--openbot-onboarding-desktop-blue);
+  stop-color: var(--dani-dex-onboarding-desktop-blue);
 }
 
 .onboarding-computer-stop-indigo {
-  stop-color: var(--openbot-onboarding-desktop-indigo);
+  stop-color: var(--dani-dex-onboarding-desktop-indigo);
 }
 
 .onboarding-computer-highlight-start {
@@ -186,9 +186,9 @@
 }
 
 .onboarding-computer-desktop {
-  stroke: var(--openbot-border-on-light);
+  stroke: var(--dani-dex-border-on-light);
   stroke-width: 1;
-  filter: drop-shadow(0 16px 22px var(--openbot-shadow-popover-ambient));
+  filter: drop-shadow(0 16px 22px var(--dani-dex-shadow-popover-ambient));
 }
 
 .onboarding-computer-desktop-highlight {
@@ -196,51 +196,51 @@
 }
 
 .onboarding-computer-desktop-beam {
-  fill: var(--openbot-onboarding-desktop-mist);
+  fill: var(--dani-dex-onboarding-desktop-mist);
   opacity: 0.16;
   pointer-events: none;
 }
 
 .onboarding-computer-window-shadow {
-  fill: var(--openbot-shadow-dialog);
+  fill: var(--dani-dex-shadow-dialog);
   opacity: 0.46;
 }
 
 .onboarding-computer-window {
   transform-box: fill-box;
   transform-origin: center;
-  animation: onboarding-computer-window-drag 4.6s var(--openbot-ease-in-out) infinite;
+  animation: onboarding-computer-window-drag 4.6s var(--dani-dex-ease-in-out) infinite;
 }
 
 .onboarding-computer-window-body {
-  fill: var(--openbot-onboarding-window);
-  stroke: var(--openbot-border-on-light);
+  fill: var(--dani-dex-onboarding-window);
+  stroke: var(--dani-dex-border-on-light);
   stroke-width: 1;
 }
 
 .onboarding-computer-window-bar,
 .onboarding-computer-window-bar-fill {
-  fill: var(--openbot-text-muted-on-light);
+  fill: var(--dani-dex-text-muted-on-light);
   opacity: 0.24;
 }
 
 .onboarding-computer-window-bar {
-  stroke: var(--openbot-border-on-light);
+  stroke: var(--dani-dex-border-on-light);
   stroke-width: 1;
 }
 
 .onboarding-computer-window-pane {
-  fill: var(--openbot-text-dim-on-light);
+  fill: var(--dani-dex-text-dim-on-light);
   opacity: 0.18;
 }
 
 .onboarding-computer-window-card {
-  fill: var(--openbot-text-dim-on-light);
+  fill: var(--dani-dex-text-dim-on-light);
   opacity: 0.24;
 }
 
 .onboarding-computer-window-line {
-  fill: var(--openbot-text-dim-on-light);
+  fill: var(--dani-dex-text-dim-on-light);
   opacity: 0.54;
 }
 
@@ -249,30 +249,30 @@
 }
 
 .onboarding-computer-dot-danger {
-  fill: var(--openbot-danger);
+  fill: var(--dani-dex-danger);
 }
 
 .onboarding-computer-dot-warning {
-  fill: var(--openbot-warning);
+  fill: var(--dani-dex-warning);
 }
 
 .onboarding-computer-dot-success {
-  fill: var(--openbot-success);
+  fill: var(--dani-dex-success);
 }
 
 .onboarding-computer-cursor {
   transform-box: fill-box;
   transform-origin: 0 0;
-  animation: onboarding-computer-cursor-drag 4.6s var(--openbot-ease-in-out) infinite;
+  animation: onboarding-computer-cursor-drag 4.6s var(--dani-dex-ease-in-out) infinite;
 }
 
 .onboarding-computer-cursor path {
-  fill: var(--openbot-text-on-light);
-  stroke: var(--openbot-onboarding-window);
+  fill: var(--dani-dex-text-on-light);
+  stroke: var(--dani-dex-onboarding-window);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
-  filter: drop-shadow(0 2px 3px var(--openbot-shadow-popover-ambient));
+  filter: drop-shadow(0 2px 3px var(--dani-dex-shadow-popover-ambient));
   paint-order: stroke fill;
 }
 
@@ -286,7 +286,7 @@
   display: grid;
   place-items: center;
   pointer-events: none;
-  animation: onboarding-computer-avatar-drag 4.6s var(--openbot-ease-in-out) infinite;
+  animation: onboarding-computer-avatar-drag 4.6s var(--dani-dex-ease-in-out) infinite;
 }
 
 .onboarding-computer-avatar .agent-avatar {
@@ -297,7 +297,7 @@
 .onboarding-computer-avatar .agent-avatar > svg {
   width: 128%;
   height: 128%;
-  filter: drop-shadow(0 2px 4px var(--openbot-shadow-popover-ambient));
+  filter: drop-shadow(0 2px 4px var(--dani-dex-shadow-popover-ambient));
 }
 
 @keyframes onboarding-computer-window-drag {
@@ -403,11 +403,11 @@
 }
 
 .onboarding-job-card > span:last-child {
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-control);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-control);
   padding: 9px 15px;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-lg);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-lg);
   line-height: 1;
   white-space: nowrap;
 }
@@ -441,8 +441,8 @@
 .onboarding-error {
   width: min(100%, 480px);
   margin: 12px 0 0;
-  color: var(--openbot-danger);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-danger);
+  font-size: var(--dani-dex-text-sm);
   line-height: 1.45;
   text-align: center;
 }
@@ -450,7 +450,7 @@
 .onboarding-actions {
   width: min(100%, 288px);
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   margin-top: 22px;
 }
 
@@ -461,7 +461,7 @@
 .onboarding-actions .ui-button {
   width: 100%;
   min-height: 44px;
-  border-radius: var(--openbot-radius-pill);
+  border-radius: var(--dani-dex-radius-pill);
 }
 
 .onboarding-next {
@@ -470,8 +470,8 @@
 
 .onboarding-next-reason {
   margin: 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
   line-height: 1.45;
   text-align: center;
 }
@@ -482,11 +482,11 @@
   }
 
   .onboarding-panel h1 {
-    font-size: var(--openbot-text-3xl);
+    font-size: var(--dani-dex-text-3xl);
   }
 
   .onboarding-description {
-    font-size: var(--openbot-text-md);
+    font-size: var(--dani-dex-text-md);
   }
 
   .onboarding-computer-visual {
@@ -518,7 +518,7 @@
 
   .onboarding-job-card > span:last-child {
     padding-inline: 11px;
-    font-size: var(--openbot-text-md);
+    font-size: var(--dani-dex-text-md);
   }
 }
 

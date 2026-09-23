@@ -24,10 +24,10 @@
   display: flex;
   width: var(--settings-panel-width, 296px);
   flex-direction: column;
-  border-left: 1px solid var(--openbot-border);
-  background: var(--openbot-bg-canvas);
-  color: var(--openbot-text-primary);
-  animation: settings-panel-in var(--openbot-duration-slow) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  border-left: 1px solid var(--dani-dex-border);
+  background: var(--dani-dex-bg-canvas);
+  color: var(--dani-dex-text-primary);
+  animation: settings-panel-in var(--dani-dex-duration-slow) cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .settings-panel-header {
@@ -36,14 +36,14 @@
   flex: 0 0 auto;
   grid-template-columns: 32px 1fr 32px;
   align-items: center;
-  border-bottom: 1px solid var(--openbot-border);
+  border-bottom: 1px solid var(--dani-dex-border);
   padding: 0 10px;
 }
 
 .settings-panel-header h2 {
   margin: 0;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-md);
   font-weight: 600;
   line-height: 18px;
   text-align: center;
@@ -56,14 +56,14 @@
   height: 28px;
   place-items: center;
   border: 0;
-  border-radius: var(--openbot-radius-sm);
+  border-radius: var(--dani-dex-radius-sm);
   padding: 0;
   background: transparent;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   transition:
-    background-color var(--openbot-duration-hover) ease,
-    color var(--openbot-duration-hover) ease,
-    transform var(--openbot-duration-fast) ease;
+    background-color var(--dani-dex-duration-hover) ease,
+    color var(--dani-dex-duration-hover) ease,
+    transform var(--dani-dex-duration-fast) ease;
 }
 
 .settings-panel-nav-button::before {
@@ -83,8 +83,8 @@
 }
 
 .settings-panel-nav-button:hover {
-  background: var(--openbot-hover);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-hover);
+  color: var(--dani-dex-text-primary);
 }
 
 /* The chevron reads a hair right of centre in its box, so it is nudged back onto the axis. */
@@ -106,8 +106,8 @@
 .settings-field > span {
   display: block;
   margin: 0 0 6px 8px;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-md);
   line-height: 18px;
 }
 
@@ -116,18 +116,18 @@
 .settings-field select {
   display: block;
   width: 100%;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-md);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-md);
   outline: 0;
-  background: var(--openbot-shadow-popover-ambient);
+  background: var(--dani-dex-shadow-popover-ambient);
   padding: 10px 11px;
-  color: var(--openbot-text-primary);
-  caret-color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-lg);
+  color: var(--dani-dex-text-primary);
+  caret-color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-lg);
   line-height: 19px;
   transition:
-    border-color var(--openbot-duration-hover) ease,
-    background var(--openbot-duration-hover) ease;
+    border-color var(--dani-dex-duration-hover) ease,
+    background var(--dani-dex-duration-hover) ease;
 }
 
 .settings-field input,
@@ -139,8 +139,8 @@
   appearance: none;
   cursor: pointer;
   background-image:
-    linear-gradient(45deg, transparent 50%, var(--openbot-text-secondary) 50%),
-    linear-gradient(135deg, var(--openbot-text-secondary) 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, var(--dani-dex-text-secondary) 50%),
+    linear-gradient(135deg, var(--dani-dex-text-secondary) 50%, transparent 50%);
   background-position:
     calc(100% - 16px) 16px,
     calc(100% - 11px) 16px;
@@ -152,8 +152,8 @@
 }
 
 .settings-field select option {
-  background: var(--openbot-bg-control);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-bg-control);
+  color: var(--dani-dex-text-primary);
 }
 
 .settings-field textarea {
@@ -165,14 +165,14 @@
 
 .settings-field input::placeholder,
 .settings-field textarea::placeholder {
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
 }
 
 .settings-field input:focus,
 .settings-field textarea:focus,
 .settings-field select:focus {
-  border-color: var(--openbot-text-muted);
-  background: var(--openbot-shadow-popover-ambient);
+  border-color: var(--dani-dex-text-muted);
+  background: var(--dani-dex-shadow-popover-ambient);
 }
 
 .settings-field input:focus-visible,
@@ -185,8 +185,8 @@
   display: grid;
   width: 100%;
   margin: 7px 0 22px;
-  border-top: 1px solid var(--openbot-border);
-  border-bottom: 1px solid var(--openbot-border);
+  border-top: 1px solid var(--dani-dex-border);
+  border-bottom: 1px solid var(--dani-dex-border);
 }
 
 .settings-link {
@@ -195,47 +195,47 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
   border: 0;
   border-radius: 0;
   background: transparent;
-  padding: 0 var(--openbot-space-1);
+  padding: 0 var(--dani-dex-space-1);
   text-align: left;
   transition: none;
 }
 
 .settings-link + .settings-link {
-  border-top: 1px solid var(--openbot-border);
+  border-top: 1px solid var(--dani-dex-border);
 }
 
 .settings-link-label {
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-md);
-  font-weight: var(--openbot-weight-medium);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-md);
+  font-weight: var(--dani-dex-weight-medium);
 }
 
 .settings-link-value {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-2);
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  gap: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
   font-variant-numeric: tabular-nums;
 }
 
 .settings-link-value svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
-  stroke-width: var(--openbot-icon-stroke);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .settings-link-group .settings-link:hover {
-    background: var(--openbot-hover);
-    color: var(--openbot-text-primary);
+    background: var(--dani-dex-hover);
+    color: var(--dani-dex-text-primary);
   }
 
   .settings-link:hover .settings-link-value {
-    color: var(--openbot-text-secondary);
+    color: var(--dani-dex-text-secondary);
   }
 }

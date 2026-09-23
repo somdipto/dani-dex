@@ -5,7 +5,7 @@ import { isIOS } from "@/shared/lib/platform";
 export const unstable_settings = { initialRouteName: "index" };
 
 export default function AgentInfoLayout() {
-  const background = String(useCSSVariable("--openbot-bg-sheet"));
+  const background = String(useCSSVariable("--dani-dex-bg-sheet"));
   return (
     <Stack
       screenOptions={{

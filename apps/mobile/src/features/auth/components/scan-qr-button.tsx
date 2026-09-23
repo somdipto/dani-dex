@@ -5,10 +5,10 @@ import type { ScanQrButtonProps } from "@/features/auth/components/scan-qr-butto
 import { haptics } from "@/shared/lib/haptics";
 
 export function ScanQrButton({ onPress, width }: ScanQrButtonProps) {
-  const brandColor = String(useCSSVariable("--openbot-logo-production") ?? "#cdadec");
-  const labelColor = String(useCSSVariable("--openbot-logo-eye") ?? "#040007");
+  const brandColor = String(useCSSVariable("--dani-dex-logo-production") ?? "#cdadec");
+  const labelColor = String(useCSSVariable("--dani-dex-logo-eye") ?? "#040007");
 
-  const cornerRadius = Number.parseFloat(String(useCSSVariable("--openbot-radius-lg") ?? "12"));
+  const cornerRadius = Number.parseFloat(String(useCSSVariable("--dani-dex-radius-lg") ?? "12"));
 
   return (
     <Button

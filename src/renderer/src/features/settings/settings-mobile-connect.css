@@ -3,8 +3,8 @@
   grid-template-rows: 1fr;
   opacity: 1;
   transition:
-    grid-template-rows var(--openbot-duration-overlay) var(--openbot-ease-out),
-    opacity var(--openbot-duration-normal) ease-out;
+    grid-template-rows var(--dani-dex-duration-overlay) var(--dani-dex-ease-out),
+    opacity var(--dani-dex-duration-normal) ease-out;
 }
 
 @starting-style {
@@ -29,8 +29,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--openbot-space-6);
-  padding: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
+  padding: var(--dani-dex-space-6);
 }
 
 .settings-mobile-connect-qr-stage {
@@ -40,9 +40,9 @@
 
 .settings-mobile-connect-qr-stage .ui-qr-code {
   transition:
-    opacity var(--openbot-duration-normal) ease-out,
-    filter var(--openbot-duration-overlay) ease-out,
-    transform var(--openbot-duration-overlay) var(--openbot-ease-out);
+    opacity var(--dani-dex-duration-normal) ease-out,
+    filter var(--dani-dex-duration-overlay) ease-out,
+    transform var(--dani-dex-duration-overlay) var(--dani-dex-ease-out);
 }
 
 .settings-mobile-connect-qr-stage[data-success] .ui-qr-code {
@@ -56,56 +56,56 @@
   inset: 0;
   display: grid;
   place-items: center;
-  color: var(--openbot-success);
-  animation: settings-mobile-connect-success-enter var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+  color: var(--dani-dex-success);
+  animation: settings-mobile-connect-success-enter var(--dani-dex-duration-overlay) var(--dani-dex-ease-out) both;
 }
 
 .settings-mobile-connect-success-mark::before {
   position: absolute;
   width: 84px;
   height: 84px;
-  border: 1px solid var(--openbot-success);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-success-soft);
+  border: 1px solid var(--dani-dex-success);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-success-soft);
   content: "";
-  animation: settings-mobile-connect-success-ring 600ms var(--openbot-ease-out) both;
+  animation: settings-mobile-connect-success-ring 600ms var(--dani-dex-ease-out) both;
 }
 
 .settings-mobile-connect-success-mark > svg {
   position: relative;
   width: 58px;
   height: 58px;
-  padding: var(--openbot-space-2);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-surface-raised);
-  filter: drop-shadow(0 6px 16px var(--openbot-shadow-popover-ambient));
-  stroke-width: var(--openbot-icon-stroke);
-  animation: settings-mobile-connect-success-pop 420ms var(--openbot-ease-out) both;
+  padding: var(--dani-dex-space-2);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-surface-raised);
+  filter: drop-shadow(0 6px 16px var(--dani-dex-shadow-popover-ambient));
+  stroke-width: var(--dani-dex-icon-stroke);
+  animation: settings-mobile-connect-success-pop 420ms var(--dani-dex-ease-out) both;
 }
 
 .settings-mobile-connect-success-mark > svg path {
   stroke-dasharray: 24;
   stroke-dashoffset: 24;
-  animation: settings-mobile-connect-check-draw 360ms var(--openbot-duration-fast) var(--openbot-ease-out) forwards;
+  animation: settings-mobile-connect-check-draw 360ms var(--dani-dex-duration-fast) var(--dani-dex-ease-out) forwards;
 }
 
 .settings-mobile-connect-code-copy {
   max-width: 240px;
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 
 .settings-mobile-connect-code-title {
-  font-weight: var(--openbot-weight-semibold);
+  font-weight: var(--dani-dex-weight-semibold);
 }
 
 .settings-mobile-connect-expiry {
-  color: var(--openbot-accent-text);
+  color: var(--dani-dex-accent-text);
   font-variant-numeric: tabular-nums;
 }
 
 .settings-mobile-connect-success-title {
-  color: var(--openbot-success);
+  color: var(--dani-dex-success);
 }
 
 .settings-mobile-connect-expired {
@@ -113,32 +113,32 @@
   display: grid;
   place-items: center;
   align-content: center;
-  gap: var(--openbot-space-2);
-  color: var(--openbot-text-secondary);
+  gap: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-secondary);
   text-align: center;
 }
 
 .settings-mobile-connect-expired > svg {
-  width: calc(var(--openbot-icon-lg) + var(--openbot-space-3));
-  height: calc(var(--openbot-icon-lg) + var(--openbot-space-3));
-  margin-bottom: var(--openbot-space-2);
+  width: calc(var(--dani-dex-icon-lg) + var(--dani-dex-space-3));
+  height: calc(var(--dani-dex-icon-lg) + var(--dani-dex-space-3));
+  margin-bottom: var(--dani-dex-space-2);
 }
 
 .settings-mobile-devices {
   display: grid;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 
 .settings-mobile-devices-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 
 .settings-mobile-devices-heading h3 {
   margin: 0;
-  font-weight: var(--openbot-weight-medium);
+  font-weight: var(--dani-dex-weight-medium);
 }
 
 .settings-mobile-devices-states {
@@ -151,9 +151,9 @@
   opacity: 0;
   transform: translateY(-4px);
   transition:
-    grid-template-rows var(--openbot-duration-overlay) var(--openbot-ease-out),
-    opacity var(--openbot-duration-normal) ease-out,
-    transform var(--openbot-duration-overlay) var(--openbot-ease-out);
+    grid-template-rows var(--dani-dex-duration-overlay) var(--dani-dex-ease-out),
+    opacity var(--dani-dex-duration-normal) ease-out,
+    transform var(--dani-dex-duration-overlay) var(--dani-dex-ease-out);
 }
 
 .settings-mobile-devices-state[data-expanded] {
@@ -171,57 +171,57 @@
   min-height: 88px;
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-3);
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-surface);
-  padding: var(--openbot-space-4);
-  color: var(--openbot-text-muted);
+  gap: var(--dani-dex-space-3);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-surface);
+  padding: var(--dani-dex-space-4);
+  color: var(--dani-dex-text-muted);
 }
 
 .settings-mobile-devices-empty > svg {
-  width: var(--openbot-icon-lg);
-  height: var(--openbot-icon-lg);
+  width: var(--dani-dex-icon-lg);
+  height: var(--dani-dex-icon-lg);
   flex: 0 0 auto;
 }
 
 .settings-mobile-devices-empty > div {
   display: grid;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
 }
 
 .settings-mobile-devices-empty-title {
-  color: var(--openbot-text-secondary);
-  font-weight: var(--openbot-weight-medium);
+  color: var(--dani-dex-text-secondary);
+  font-weight: var(--dani-dex-weight-medium);
 }
 
 .settings-mobile-devices-table-frame {
   overflow-x: auto;
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-surface);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-surface);
 }
 
 .settings-mobile-devices-table {
   width: 100%;
   min-width: 600px;
   border-collapse: collapse;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 .settings-mobile-devices-table th,
 .settings-mobile-devices-table td {
-  padding: var(--openbot-space-3) var(--openbot-space-4);
-  border-bottom: 1px solid var(--openbot-border);
+  padding: var(--dani-dex-space-3) var(--dani-dex-space-4);
+  border-bottom: 1px solid var(--dani-dex-border);
   text-align: left;
   white-space: nowrap;
 }
 
 .settings-mobile-devices-table th {
-  color: var(--openbot-text-muted);
-  font-weight: var(--openbot-weight-medium);
+  color: var(--dani-dex-text-muted);
+  font-weight: var(--dani-dex-weight-medium);
 }
 
 .settings-mobile-devices-table tbody tr:last-child td {
@@ -231,15 +231,15 @@
 .settings-mobile-device-name {
   display: inline-flex;
   align-items: center;
-  gap: var(--openbot-space-2);
-  color: var(--openbot-text-primary);
-  font-weight: var(--openbot-weight-medium);
+  gap: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-primary);
+  font-weight: var(--dani-dex-weight-medium);
 }
 
 .settings-mobile-device-name svg {
-  width: var(--openbot-icon-md);
-  height: var(--openbot-icon-md);
-  color: var(--openbot-text-muted);
+  width: var(--dani-dex-icon-md);
+  height: var(--dani-dex-icon-md);
+  color: var(--dani-dex-text-muted);
 }
 
 .settings-mobile-devices-table td.settings-mobile-device-action {

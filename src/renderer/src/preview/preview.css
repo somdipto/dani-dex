@@ -5,13 +5,13 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--openbot-bg-canvas);
+  background: var(--dani-dex-bg-canvas);
 }
 
 .openbot-playground-loading {
   width: 100%;
   height: 100%;
-  background: var(--openbot-bg-canvas);
+  background: var(--dani-dex-bg-canvas);
 }
 
 .openbot-playground-root .account-dock-static .account-dock-trigger {
@@ -45,7 +45,7 @@
     grid-row: 1;
     flex-direction: row;
     border-right: 0;
-    border-bottom: 1px solid var(--openbot-border);
+    border-bottom: 1px solid var(--dani-dex-border);
   }
 
   .openbot-playground-root .agent-list,
@@ -55,15 +55,15 @@
     overflow-y: hidden;
     align-items: center;
     justify-content: center;
-    gap: var(--openbot-space-1-5);
-    padding: var(--openbot-space-2) var(--openbot-space-3);
+    gap: var(--dani-dex-space-1-5);
+    padding: var(--dani-dex-space-2) var(--dani-dex-space-3);
   }
 
   .openbot-playground-root .sidebar-chat-group[aria-labelledby="sidebar-agents-heading"],
   .openbot-playground-root .sidebar-chat-group[aria-label="Agents"] {
     display: flex;
     align-items: center;
-    gap: var(--openbot-space-1-5);
+    gap: var(--dani-dex-space-1-5);
     margin: 0;
   }
 

@@ -7,7 +7,7 @@ import { isIOS } from "@/shared/lib/platform";
 export const unstable_settings = { initialRouteName: "index" };
 
 export default function MessageActionsLayout() {
-  const background = String(useCSSVariable("--openbot-bg-sheet"));
+  const background = String(useCSSVariable("--dani-dex-bg-sheet"));
   const { select } = useMessageActions();
   useEffect(() => () => select(null), [select]);
   return (

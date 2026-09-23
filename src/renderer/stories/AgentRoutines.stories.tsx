@@ -64,7 +64,7 @@ function RoutinesStory(props: { routines?: Routine[]; runs?: RoutineRun[] }) {
     window.openbot = previousApi;
   });
   return (
-    <main style={{ width: "380px", height: "720px", overflow: "auto", background: "var(--openbot-bg-canvas)" }}>
+    <main style={{ width: "380px", height: "720px", overflow: "auto", background: "var(--dani-dex-bg-canvas)" }}>
       <AgentRoutinesSettings port={agentRoutinesPort("chief")} onCountChange={fn()} onBack={fn()} onClose={fn()} />
     </main>
   );

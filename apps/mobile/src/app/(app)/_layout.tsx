@@ -20,7 +20,7 @@ export const unstable_settings = {
 function AuthenticatedStack() {
   const segments = useSegments();
   const background = useThemeColor("background");
-  const sheetBackground = String(useCSSVariable("--openbot-bg-sheet") ?? background);
+  const sheetBackground = String(useCSSVariable("--dani-dex-bg-sheet") ?? background);
   const [navigationGate] = useState(createChatNavigationGate);
 
   return (

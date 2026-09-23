@@ -25,16 +25,16 @@
 html {
   min-width: 320px;
   scroll-behavior: smooth;
-  background: var(--openbot-bg-canvas);
+  background: var(--dani-dex-bg-canvas);
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: var(--openbot-bg-canvas);
-  color: var(--openbot-text-primary);
-  font-family: var(--openbot-font-sans);
+  background: var(--dani-dex-bg-canvas);
+  color: var(--dani-dex-text-primary);
+  font-family: var(--dani-dex-font-sans);
   font-synthesis: none;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
@@ -205,7 +205,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
   font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -213,7 +213,7 @@ a {
 
 .landing-brand:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+  box-shadow: 0 0 0 3px var(--dani-dex-accent-strong);
 }
 
 .landing-brand-logo {
@@ -237,8 +237,8 @@ a {
   align-items: center;
   height: 38px;
   padding: 0 12px;
-  border-radius: var(--openbot-radius-pill);
-  color: var(--openbot-text-secondary);
+  border-radius: var(--dani-dex-radius-pill);
+  color: var(--dani-dex-text-secondary);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.01em;
@@ -247,7 +247,7 @@ a {
 
 .landing-header-link:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+  box-shadow: 0 0 0 3px var(--dani-dex-accent-strong);
 }
 
 .landing-button {
@@ -256,16 +256,16 @@ a {
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  border-radius: var(--openbot-radius-pill);
+  border-radius: var(--dani-dex-radius-pill);
   font: inherit;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
   transition:
-    background-color var(--openbot-duration-normal) ease,
-    border-color var(--openbot-duration-normal) ease,
-    color var(--openbot-duration-normal) ease,
-    transform var(--openbot-duration-fast) var(--openbot-ease-out);
+    background-color var(--dani-dex-duration-normal) ease,
+    border-color var(--dani-dex-duration-normal) ease,
+    color var(--dani-dex-duration-normal) ease,
+    transform var(--dani-dex-duration-fast) var(--dani-dex-ease-out);
 }
 
 .landing-button::before {
@@ -309,8 +309,8 @@ a {
   overflow: hidden;
   padding: 96px 24px 48px;
   background:
-    radial-gradient(circle at 50% 42%, var(--openbot-accent-strong), var(--openbot-transparent) 38%),
-    var(--openbot-bg-canvas);
+    radial-gradient(circle at 50% 42%, var(--dani-dex-accent-strong), var(--dani-dex-transparent) 38%),
+    var(--dani-dex-bg-canvas);
 }
 
 .join-page-brand {
@@ -323,12 +323,12 @@ a {
   width: min(100%, 520px);
   display: grid;
   justify-items: center;
-  border: 1px solid var(--openbot-border-strong);
+  border: 1px solid var(--dani-dex-border-strong);
   border-radius: 24px;
-  background: var(--openbot-bg-sidebar);
+  background: var(--dani-dex-bg-sidebar);
   padding: clamp(32px, 7vw, 56px);
   text-align: center;
-  box-shadow: 0 24px 80px var(--openbot-glass-shadow);
+  box-shadow: 0 24px 80px var(--dani-dex-glass-shadow);
 }
 
 .join-card-signal {
@@ -342,15 +342,15 @@ a {
 
 .join-card-signal span {
   height: 1px;
-  background: var(--openbot-border-strong);
+  background: var(--dani-dex-border-strong);
 }
 
 .join-card-signal i {
   width: 7px;
   height: 7px;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-logo-production);
-  box-shadow: 0 0 0 6px var(--openbot-accent-strong);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-logo-production);
+  box-shadow: 0 0 0 6px var(--dani-dex-accent-strong);
 }
 
 .join-card-logo {
@@ -361,7 +361,7 @@ a {
 
 .join-card-eyebrow {
   margin: 0 0 10px;
-  color: var(--openbot-logo-production);
+  color: var(--dani-dex-logo-production);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -378,7 +378,7 @@ a {
 .join-card-copy {
   max-width: 420px;
   margin: 18px 0 0;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: 16px;
   line-height: 1.55;
 }
@@ -397,12 +397,12 @@ a {
 
 .join-card-error {
   margin: 26px 0 0;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
 }
 
 .join-card-note {
   margin: 24px 0 0;
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -444,28 +444,28 @@ a {
 }
 
 .landing-button-primary {
-  background: var(--openbot-surface-light);
-  color: var(--openbot-text-on-light);
+  background: var(--dani-dex-surface-light);
+  color: var(--dani-dex-text-on-light);
 }
 
 .landing-button-secondary {
-  border-color: var(--openbot-border-strong);
+  border-color: var(--dani-dex-border-strong);
   background: transparent;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
 }
 
 .landing-button-glass {
-  border-color: var(--openbot-glass-border);
-  background: var(--openbot-glass-surface);
+  border-color: var(--dani-dex-glass-border);
+  background: var(--dani-dex-glass-surface);
   box-shadow:
-    inset 0 1px 0 var(--openbot-glass-highlight),
-    0 10px 30px -18px var(--openbot-glass-shadow);
-  color: var(--openbot-text-primary);
+    inset 0 1px 0 var(--dani-dex-glass-highlight),
+    0 10px 30px -18px var(--dani-dex-glass-shadow);
+  color: var(--dani-dex-text-primary);
 }
 
 .landing-button:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+  box-shadow: 0 0 0 3px var(--dani-dex-accent-strong);
 }
 
 .landing-button:active {
@@ -487,10 +487,10 @@ a {
   width: 100vw;
   pointer-events: none;
   background-image:
-    linear-gradient(90deg, var(--openbot-hero-grid-line) 1px, var(--openbot-transparent) 1px),
-    linear-gradient(var(--openbot-hero-grid-line) 1px, var(--openbot-transparent) 1px);
+    linear-gradient(90deg, var(--dani-dex-hero-grid-line) 1px, var(--dani-dex-transparent) 1px),
+    linear-gradient(var(--dani-dex-hero-grid-line) 1px, var(--dani-dex-transparent) 1px);
   background-size: 48px 48px;
-  mask-image: radial-gradient(80% 62% at 50% 40%, var(--openbot-mask-solid) 40%, var(--openbot-transparent) 100%);
+  mask-image: radial-gradient(80% 62% at 50% 40%, var(--dani-dex-mask-solid) 40%, var(--dani-dex-transparent) 100%);
   transform: translateX(-50%);
 }
 
@@ -509,10 +509,10 @@ a {
   gap: 8px;
   margin: 0 0 28px;
   padding: 4px 12px 4px 4px;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-sidebar);
-  color: var(--openbot-text-secondary);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-sidebar);
+  color: var(--dani-dex-text-secondary);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -525,24 +525,24 @@ a {
   display: inline-flex;
   align-items: center;
   padding: 0 9px;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-surface-light);
-  color: var(--openbot-text-on-light);
-  font-family: var(--openbot-font-mono);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-surface-light);
+  color: var(--dani-dex-text-on-light);
+  font-family: var(--dani-dex-font-mono);
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.08em;
 }
 
 .landing-availability-copy {
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
 }
 
 .landing-availability-platform {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
 }
 
 .landing-availability-platform svg {
@@ -552,7 +552,7 @@ a {
 }
 
 .landing-availability-separator {
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
 }
 
 .landing-title {
@@ -562,8 +562,8 @@ a {
   flex-wrap: wrap;
   gap: 0;
   margin: 0;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-hero);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-hero);
   font-weight: 500;
   letter-spacing: -0.065em;
   line-height: 0.96;
@@ -580,7 +580,7 @@ a {
 .landing-description {
   max-width: 720px;
   margin: 30px 0 0;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: clamp(17px, 2vw, 20px);
   line-height: 1.55;
   text-wrap: pretty;
@@ -590,7 +590,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.28em;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
@@ -602,7 +602,7 @@ a {
   height: 0.84em;
   flex: 0 0 auto;
   overflow: visible;
-  fill: var(--openbot-provider-current);
+  fill: var(--dani-dex-provider-current);
 }
 
 .landing-actions {
@@ -621,9 +621,9 @@ a {
   display: inline-flex;
   align-items: stretch;
   overflow: hidden;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-surface-light);
-  color: var(--openbot-text-on-light);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-surface-light);
+  color: var(--dani-dex-text-on-light);
 }
 
 .landing-download-primary {
@@ -637,7 +637,7 @@ a {
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
-  transition: opacity var(--openbot-duration-normal) ease;
+  transition: opacity var(--dani-dex-duration-normal) ease;
 }
 
 .landing-download-primary svg {
@@ -647,7 +647,7 @@ a {
 }
 
 .landing-download-primary[data-state="coming-soon"] {
-  color: var(--openbot-download-card-muted);
+  color: var(--dani-dex-download-card-muted);
 }
 
 .landing-download-trigger {
@@ -658,17 +658,17 @@ a {
   margin: 0;
   padding: 0;
   border: 0;
-  border-left: 1px solid var(--openbot-download-card-border);
+  border-left: 1px solid var(--dani-dex-download-card-border);
   background: transparent;
   color: currentColor;
   font: inherit;
-  transition: opacity var(--openbot-duration-normal) ease;
+  transition: opacity var(--dani-dex-duration-normal) ease;
 }
 
 .landing-download-trigger svg {
   width: 13px;
   height: 13px;
-  transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+  transition: transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .landing-download-trigger[aria-expanded="true"] svg {
@@ -679,7 +679,7 @@ a {
 .landing-download-trigger:focus-visible {
   position: relative;
   z-index: 1;
-  outline: 2px solid var(--openbot-logo-production);
+  outline: 2px solid var(--dani-dex-logo-production);
   outline-offset: -3px;
 }
 
@@ -692,13 +692,13 @@ a {
   flex-direction: column;
   gap: 2px;
   padding: 6px;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-sidebar);
-  box-shadow: 0 18px 48px -24px var(--openbot-mask-solid);
-  color: var(--openbot-text-primary);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-sidebar);
+  box-shadow: 0 18px 48px -24px var(--dani-dex-mask-solid);
+  color: var(--dani-dex-text-primary);
   transform: translateX(-50%);
-  animation: landing-download-menu-enter var(--openbot-duration-normal) var(--openbot-ease-out) both;
+  animation: landing-download-menu-enter var(--dani-dex-duration-normal) var(--dani-dex-ease-out) both;
 }
 
 .landing-download-menu-item {
@@ -711,15 +711,15 @@ a {
   margin: 0;
   padding: 0 11px;
   border: 0;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
   background: transparent;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font: inherit;
   font-size: 13px;
   text-align: left;
   transition:
-    background-color var(--openbot-duration-fast) ease,
-    color var(--openbot-duration-fast) ease;
+    background-color var(--dani-dex-duration-fast) ease,
+    color var(--dani-dex-duration-fast) ease;
 }
 
 .landing-download-menu-item svg {
@@ -736,8 +736,8 @@ a {
 }
 
 .landing-download-menu-item small {
-  color: var(--openbot-text-muted);
-  font-family: var(--openbot-font-mono);
+  color: var(--dani-dex-text-muted);
+  font-family: var(--dani-dex-font-mono);
   font-size: 9px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -745,12 +745,12 @@ a {
 }
 
 .landing-download-menu-item[data-selected="true"] {
-  background: var(--openbot-bg-surface);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-bg-surface);
+  color: var(--dani-dex-text-primary);
 }
 
 .landing-download-menu-item:focus-visible {
-  outline: 2px solid var(--openbot-logo-production);
+  outline: 2px solid var(--dani-dex-logo-production);
   outline-offset: -2px;
 }
 
@@ -762,19 +762,19 @@ a {
   isolation: isolate;
   max-height: 760px;
   margin-top: clamp(68px, 9vw, 112px);
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-sidebar);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-sidebar);
   box-shadow:
-    0 28px 90px -42px var(--openbot-mask-solid),
-    inset 0 1px var(--openbot-glass-highlight);
+    0 28px 90px -42px var(--dani-dex-mask-solid),
+    inset 0 1px var(--dani-dex-glass-highlight);
 }
 
 .landing-preview::before {
   position: absolute;
   z-index: -1;
   inset: -42px -24px -30px;
-  background: radial-gradient(ellipse at 50% 48%, var(--openbot-accent-strong), var(--openbot-transparent) 68%);
+  background: radial-gradient(ellipse at 50% 48%, var(--dani-dex-accent-strong), var(--dani-dex-transparent) 68%);
   content: "";
   filter: blur(22px);
   opacity: 0.82;
@@ -797,7 +797,7 @@ a {
   width: 12px;
   height: 12px;
   border: 0.5px solid rgba(0, 0, 0, 0.18);
-  border-radius: var(--openbot-radius-pill);
+  border-radius: var(--dani-dex-radius-pill);
   box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.14);
 }
 
@@ -817,14 +817,14 @@ a {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: calc(var(--openbot-radius-lg) - 1px);
-  background: var(--openbot-bg-canvas);
+  border-radius: calc(var(--dani-dex-radius-lg) - 1px);
+  background: var(--dani-dex-bg-canvas);
 }
 
 .landing-preview-placeholder {
   overflow: hidden;
-  border-radius: calc(var(--openbot-radius-lg) - 1px);
-  background: var(--openbot-bg-canvas);
+  border-radius: calc(var(--dani-dex-radius-lg) - 1px);
+  background: var(--dani-dex-bg-canvas);
 }
 
 .landing-app-preview iframe {
@@ -832,12 +832,12 @@ a {
   height: 100%;
   display: block;
   border: 0;
-  background: var(--openbot-bg-canvas);
+  background: var(--dani-dex-bg-canvas);
 }
 
 .landing-download {
   scroll-margin-top: 24px;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
 }
 
 .landing-download-inner {
@@ -861,7 +861,7 @@ a {
 .landing-download-heading p {
   max-width: 620px;
   margin: 22px 0 0;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: clamp(16px, 1.8vw, 19px);
   line-height: 1.55;
   text-wrap: pretty;
@@ -880,31 +880,31 @@ a {
   display: flex;
   flex-direction: column;
   padding: clamp(26px, 2.6vw, 34px);
-  border: 1px solid var(--openbot-download-card-border);
+  border: 1px solid var(--dani-dex-download-card-border);
   border-radius: 20px;
-  color: var(--openbot-text-on-light);
+  color: var(--dani-dex-text-on-light);
 }
 
 .landing-download-card[data-download-platform="macos"] {
-  background: var(--openbot-logo-production);
+  background: var(--dani-dex-logo-production);
 }
 
 .landing-download-card[data-download-platform="windows"] {
-  background: var(--openbot-logo-preview);
+  background: var(--dani-dex-logo-preview);
 }
 
 .landing-download-card[data-download-platform="linux"] {
-  background: var(--openbot-logo-dev);
+  background: var(--dani-dex-logo-dev);
 }
 
 .landing-download-card[data-state="available"] {
   transition:
-    transform var(--openbot-duration-normal) var(--openbot-ease-out),
-    box-shadow var(--openbot-duration-normal) ease;
+    transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out),
+    box-shadow var(--dani-dex-duration-normal) ease;
 }
 
 .landing-download-card:focus-visible {
-  outline: 3px solid var(--openbot-download-card-focus);
+  outline: 3px solid var(--dani-dex-download-card-focus);
   outline-offset: 3px;
 }
 
@@ -926,10 +926,10 @@ a {
   display: inline-flex;
   align-items: center;
   padding: 0 11px;
-  border: 1px solid var(--openbot-download-card-border);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-download-card-chip);
-  font-family: var(--openbot-font-mono);
+  border: 1px solid var(--dani-dex-download-card-border);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-download-card-chip);
+  font-family: var(--dani-dex-font-mono);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -952,7 +952,7 @@ a {
 
 .landing-download-card-copy p {
   margin: 14px 0 0;
-  color: var(--openbot-download-card-muted);
+  color: var(--dani-dex-download-card-muted);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -969,7 +969,7 @@ a {
 .landing-download-arrow {
   width: 15px;
   height: 15px;
-  transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+  transition: transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .landing-download-heading[data-revealed="false"],
@@ -991,7 +991,7 @@ a {
 }
 
 .landing-pricing {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
 }
 
 .landing-pricing-inner {
@@ -1003,7 +1003,7 @@ a {
 
 .landing-pricing-eyebrow {
   margin: 0;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: clamp(16px, 1.8vw, 19px);
   font-weight: 500;
   letter-spacing: -0.01em;
@@ -1025,20 +1025,20 @@ a {
   background-image:
     linear-gradient(
       180deg,
-      var(--openbot-price-sheen-cool-clear) 36%,
-      var(--openbot-price-sheen-cool-soft) 44%,
-      var(--openbot-price-sheen-cool) 47.5%,
-      var(--openbot-price-sheen-light) 50%,
-      var(--openbot-price-sheen-warm) 52.5%,
-      var(--openbot-price-sheen-warm-soft) 56%,
-      var(--openbot-price-sheen-warm-clear) 64%
+      var(--dani-dex-price-sheen-cool-clear) 36%,
+      var(--dani-dex-price-sheen-cool-soft) 44%,
+      var(--dani-dex-price-sheen-cool) 47.5%,
+      var(--dani-dex-price-sheen-light) 50%,
+      var(--dani-dex-price-sheen-warm) 52.5%,
+      var(--dani-dex-price-sheen-warm-soft) 56%,
+      var(--dani-dex-price-sheen-warm-clear) 64%
     ),
     linear-gradient(
       180deg,
-      var(--openbot-price-metal-high) 0%,
-      var(--openbot-price-metal-core) 16%,
-      var(--openbot-price-metal-core) 84%,
-      var(--openbot-price-metal-low) 100%
+      var(--dani-dex-price-metal-high) 0%,
+      var(--dani-dex-price-metal-core) 16%,
+      var(--dani-dex-price-metal-core) 84%,
+      var(--dani-dex-price-metal-low) 100%
     );
   background-repeat: no-repeat;
   /* The band layer is twice the glyph height, so the 13% of it the sheen occupies
@@ -1058,7 +1058,7 @@ a {
      the rendered silhouette, where stem and S are already one shape. Held in a
      variable because the entrance animates filter, and a keyframe that set
      blur() alone would drop the bevel for the length of the entrance. */
-  --price-bevel: drop-shadow(0 -1px 0 var(--openbot-price-rim)) drop-shadow(0 1px 0 var(--openbot-price-rim-under));
+  --price-bevel: drop-shadow(0 -1px 0 var(--dani-dex-price-rim)) drop-shadow(0 1px 0 var(--dani-dex-price-rim-under));
   filter: var(--price-bevel);
 }
 
@@ -1067,14 +1067,14 @@ a {
   position: absolute;
   inset: 0;
   z-index: -1;
-  color: var(--openbot-price-glow);
+  color: var(--dani-dex-price-glow);
   filter: blur(clamp(24px, 4vw, 56px));
 }
 
 .landing-pricing-note {
   max-width: 560px;
   margin: 0 auto;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: clamp(17px, 2vw, 20px);
   line-height: 1.55;
   text-wrap: balance;
@@ -1104,8 +1104,8 @@ a {
 }
 
 .landing-footer {
-  background: var(--openbot-bg-canvas);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-bg-canvas);
+  color: var(--dani-dex-text-primary);
 }
 
 .landing-footer-inner {
@@ -1131,7 +1131,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
   font-size: 21px;
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -1143,7 +1143,7 @@ a {
 .landing-footer-column a:focus-visible,
 .landing-footer-meta a:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+  box-shadow: 0 0 0 3px var(--dani-dex-accent-strong);
 }
 
 .landing-footer-logo {
@@ -1155,7 +1155,7 @@ a {
 .landing-footer-description {
   max-width: 560px;
   margin: 32px 0 0;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-size: clamp(24px, 3vw, 34px);
   font-weight: 400;
   letter-spacing: -0.04em;
@@ -1168,8 +1168,8 @@ a {
   align-items: center;
   gap: 5px;
   margin-top: 28px;
-  border-radius: var(--openbot-radius-md);
-  color: var(--openbot-text-primary);
+  border-radius: var(--dani-dex-radius-md);
+  color: var(--dani-dex-text-primary);
   font-size: 14px;
   font-weight: 500;
 }
@@ -1178,7 +1178,7 @@ a {
 .landing-footer-meta a svg {
   width: 14px;
   height: 14px;
-  transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+  transition: transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .landing-footer-socials {
@@ -1192,13 +1192,13 @@ a {
   height: 38px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-sidebar);
-  color: var(--openbot-text-muted);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-sidebar);
+  color: var(--dani-dex-text-muted);
   transition:
-    background-color var(--openbot-duration-normal) ease,
-    color var(--openbot-duration-normal) ease;
+    background-color var(--dani-dex-duration-normal) ease,
+    color var(--dani-dex-duration-normal) ease;
 }
 
 .landing-footer-social svg {
@@ -1216,7 +1216,7 @@ a {
 
 .landing-footer-column h2 {
   margin: 0;
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -1234,9 +1234,9 @@ a {
 
 .landing-footer-column a {
   border-radius: 4px;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: 14px;
-  transition: color var(--openbot-duration-normal) ease;
+  transition: color var(--dani-dex-duration-normal) ease;
 }
 
 .landing-footer-bottom {
@@ -1246,8 +1246,8 @@ a {
   gap: 24px;
   margin-top: clamp(53px, 6.3vw, 84px);
   padding-top: 24px;
-  border-top: 1px solid var(--openbot-border);
-  color: var(--openbot-text-muted);
+  border-top: 1px solid var(--dani-dex-border);
+  color: var(--dani-dex-text-muted);
   font-size: 12px;
 }
 
@@ -1270,18 +1270,18 @@ a {
 
 .landing-footer-meta a {
   border-radius: 4px;
-  transition: color var(--openbot-duration-normal) ease;
+  transition: color var(--dani-dex-duration-normal) ease;
 }
 
 .landing-footer-availability {
   width: 7px;
   height: 7px;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-logo-preview);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-logo-preview);
 }
 
 .landing-footer-made {
-  font-family: var(--openbot-font-mono);
+  font-family: var(--dani-dex-font-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1290,8 +1290,8 @@ a {
 .landing-footer-made svg {
   width: 14px;
   height: 14px;
-  fill: var(--openbot-logo-production);
-  color: var(--openbot-logo-production);
+  fill: var(--dani-dex-logo-production);
+  color: var(--dani-dex-logo-production);
   animation: landing-footer-heart 1.8s ease-in-out infinite;
 }
 
@@ -1408,7 +1408,7 @@ a {
 }
 
 [data-enter] {
-  animation: landing-enter var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+  animation: landing-enter var(--dani-dex-duration-overlay) var(--dani-dex-ease-out) both;
 }
 
 [data-enter="header"] {
@@ -1459,11 +1459,11 @@ a {
   }
 
   .landing-header-link:hover {
-    color: var(--openbot-text-primary);
+    color: var(--dani-dex-text-primary);
   }
 
   .landing-button-primary:hover {
-    background: var(--openbot-text-primary);
+    background: var(--dani-dex-text-primary);
   }
 
   .landing-download-primary[data-state="available"]:hover,
@@ -1477,22 +1477,22 @@ a {
   }
 
   .landing-download-menu-item:hover {
-    background: var(--openbot-bg-surface);
-    color: var(--openbot-text-primary);
+    background: var(--dani-dex-bg-surface);
+    color: var(--dani-dex-text-primary);
   }
 
   .landing-button-secondary:hover {
-    border-color: var(--openbot-text-dim);
-    background: var(--openbot-bg-control-hover);
-    color: var(--openbot-text-primary);
+    border-color: var(--dani-dex-text-dim);
+    background: var(--dani-dex-bg-control-hover);
+    color: var(--dani-dex-text-primary);
   }
 
   .landing-button-glass:hover {
-    border-color: var(--openbot-glass-highlight);
-    background: var(--openbot-glass-surface-hover);
+    border-color: var(--dani-dex-glass-highlight);
+    background: var(--dani-dex-glass-surface-hover);
     box-shadow:
-      inset 0 1px 0 var(--openbot-glass-border),
-      0 14px 36px -18px var(--openbot-glass-shadow);
+      inset 0 1px 0 var(--dani-dex-glass-border),
+      0 14px 36px -18px var(--dani-dex-glass-shadow);
   }
 
   .landing-footer-cta:hover span {
@@ -1502,7 +1502,7 @@ a {
 
   .landing-download-card[data-state="available"]:hover {
     transform: translateY(-4px);
-    box-shadow: 0 18px 44px -28px var(--openbot-text-on-light);
+    box-shadow: 0 18px 44px -28px var(--dani-dex-text-on-light);
   }
 
   .landing-download-card[data-state="available"]:hover .landing-download-arrow {
@@ -1510,13 +1510,13 @@ a {
   }
 
   .landing-footer-social:hover {
-    background: var(--openbot-bg-surface);
-    color: var(--openbot-text-primary);
+    background: var(--dani-dex-bg-surface);
+    color: var(--dani-dex-text-primary);
   }
 
   .landing-footer-column a:hover,
   .landing-footer-meta a:hover {
-    color: var(--openbot-text-primary);
+    color: var(--dani-dex-text-primary);
   }
 }
 
@@ -1596,7 +1596,7 @@ a {
 
   .landing-hero-grid {
     background-size: 36px 36px;
-    mask-image: radial-gradient(100% 66% at 50% 36%, var(--openbot-mask-solid) 34%, var(--openbot-transparent) 100%);
+    mask-image: radial-gradient(100% 66% at 50% 36%, var(--dani-dex-mask-solid) 34%, var(--dani-dex-transparent) 100%);
   }
 
   .landing-description {
@@ -1773,7 +1773,7 @@ a {
 
 .post-meta {
   display: block;
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -1813,7 +1813,7 @@ a {
 .post-featured-description {
   max-width: 46ch;
   margin: 16px 0 0;
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
   font-size: 15px;
   line-height: 1.6;
 }
@@ -1846,7 +1846,7 @@ a {
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px solid var(--openbot-border-strong);
+  border: 1px solid var(--dani-dex-border-strong);
   /* The artwork is decoration, and it is the largest thing on a card. It takes no
      pointer, so a click on it reaches the link that covers the block: on the
      featured article that link is a stretched pseudo-element, and it cannot paint
@@ -1905,7 +1905,7 @@ a {
 .post-gradient > canvas {
   border-radius: inherit;
   opacity: 0;
-  transition: opacity var(--openbot-duration-slow) var(--openbot-ease-out);
+  transition: opacity var(--dani-dex-duration-slow) var(--dani-dex-ease-out);
 }
 
 .post-gradient[data-shader="live"] > canvas {
@@ -1922,7 +1922,7 @@ a {
      it has nothing to answer a pointer with. */
   pointer-events: none;
   padding: clamp(18px, 2.6vw, 40px);
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.12;
@@ -1955,7 +1955,7 @@ a {
 
 .post-card:focus-visible {
   border-radius: 24px;
-  outline: 3px solid var(--openbot-border-focus);
+  outline: 3px solid var(--dani-dex-border-focus);
   outline-offset: 4px;
 }
 
@@ -1971,12 +1971,12 @@ a {
 
 .post-card-title {
   margin: 6px 0 0;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.35;
-  transition: color var(--openbot-duration-normal) ease;
+  transition: color var(--dani-dex-duration-normal) ease;
 }
 
 /* The reveal is per card, ordered by --post-card-index, so the row arrives as a
@@ -2040,9 +2040,9 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
   font-size: 13px;
-  transition: color var(--openbot-duration-normal) ease;
+  transition: color var(--dani-dex-duration-normal) ease;
 }
 
 .post-article-back::before {
@@ -2060,7 +2060,7 @@ a {
 
 .post-article-standfirst {
   margin: 18px 0 0;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: clamp(16px, 1.6vw, 19px);
   line-height: 1.55;
 }
@@ -2071,7 +2071,7 @@ a {
 
 .post-prose {
   margin-top: clamp(32px, 4vw, 48px);
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: 17px;
   line-height: 1.7;
 }
@@ -2082,7 +2082,7 @@ a {
 
 .post-prose h2 {
   margin: 40px 0 14px;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-size: 26px;
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -2091,7 +2091,7 @@ a {
 
 .post-prose h3 {
   margin: 32px 0 12px;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -2119,12 +2119,12 @@ a {
 }
 
 .post-prose strong {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-weight: 600;
 }
 
 .post-prose a {
-  color: var(--openbot-accent-text);
+  color: var(--dani-dex-accent-text);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -2132,8 +2132,8 @@ a {
 .post-prose code {
   padding: 2px 6px;
   border-radius: 6px;
-  background: var(--openbot-bg-surface);
-  font-family: var(--openbot-font-mono);
+  background: var(--dani-dex-bg-surface);
+  font-family: var(--dani-dex-font-mono);
   font-size: 0.9em;
 }
 
@@ -2141,11 +2141,11 @@ a {
   margin: 0 0 24px;
   padding: 16px 18px;
   overflow-x: auto;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-surface);
-  color: var(--openbot-text-primary);
-  font-family: var(--openbot-font-mono);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-surface);
+  color: var(--dani-dex-text-primary);
+  font-family: var(--dani-dex-font-mono);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -2162,19 +2162,19 @@ a {
 
 .post-prose kbd {
   padding: 2px 7px;
-  border: 1px solid var(--openbot-border-strong);
+  border: 1px solid var(--dani-dex-border-strong);
   border-bottom-width: 2px;
-  border-radius: var(--openbot-radius-sm);
-  background: var(--openbot-bg-surface);
-  color: var(--openbot-text-primary);
-  font-family: var(--openbot-font-mono);
+  border-radius: var(--dani-dex-radius-sm);
+  background: var(--dani-dex-bg-surface);
+  color: var(--dani-dex-text-primary);
+  font-family: var(--dani-dex-font-mono);
   font-size: 0.85em;
 }
 
 .post-prose hr {
   margin: 40px 0;
   border: 0;
-  border-top: 1px solid var(--openbot-border-strong);
+  border-top: 1px solid var(--dani-dex-border-strong);
 }
 
 .post-prose table {
@@ -2187,21 +2187,21 @@ a {
 .post-prose th,
 .post-prose td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--openbot-border-strong);
+  border-bottom: 1px solid var(--dani-dex-border-strong);
   text-align: left;
   vertical-align: top;
 }
 
 .post-prose th {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-weight: 600;
 }
 
 .post-prose blockquote {
   margin: 24px 0;
   padding-left: 18px;
-  border-left: 2px solid var(--openbot-border-strong);
-  color: var(--openbot-text-muted);
+  border-left: 2px solid var(--dani-dex-border-strong);
+  color: var(--dani-dex-text-muted);
 }
 
 .post-prose > :last-child {
@@ -2237,12 +2237,12 @@ a {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-card);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-card);
   /* The frame is filled before the file arrives, so what the reader sees in that
      moment is the shape the picture will take rather than a hole in the page. The
      space itself comes from the width and height the component writes. */
-  background: var(--openbot-bg-surface);
+  background: var(--dani-dex-bg-surface);
 }
 
 /* A picture with room around it, standing on the article's own gradient. A
@@ -2261,8 +2261,8 @@ a {
   isolation: isolate;
   display: grid;
   overflow: hidden;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-card);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-card);
   /* Proportional, so the room around the picture stays the same fraction of the
      column on a phone as on a wide screen, with a floor and a ceiling that keep
      it from vanishing or from eating the picture. Authors pick `tight` or
@@ -2290,14 +2290,14 @@ a {
 }
 
 .post-mount .post-media {
-  border-color: var(--openbot-border);
+  border-color: var(--dani-dex-border);
   border-radius: 9px;
-  box-shadow: var(--openbot-shadow-overlay);
+  box-shadow: var(--dani-dex-shadow-overlay);
 }
 
 .post-figure-caption {
   margin-top: 12px;
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -2313,21 +2313,21 @@ a {
   align-items: center;
   gap: 7px;
   padding: 7px 13px 7px 11px;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-overlay);
-  color: var(--openbot-text-primary);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-overlay);
+  color: var(--dani-dex-text-primary);
   font-family: inherit;
   font-size: 12px;
   font-weight: 500;
   line-height: 1;
   cursor: pointer;
-  transition: background-color var(--openbot-duration-normal) ease;
+  transition: background-color var(--dani-dex-duration-normal) ease;
 }
 
 .post-media-toggle:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+  box-shadow: 0 0 0 3px var(--dani-dex-accent-strong);
 }
 
 .post-media-toggle-icon {
@@ -2373,7 +2373,7 @@ a {
 .post-cta {
   margin-top: clamp(64px, 8vw, 104px);
   padding-top: clamp(48px, 6vw, 80px);
-  border-top: 1px solid var(--openbot-border);
+  border-top: 1px solid var(--dani-dex-border);
   text-align: center;
 }
 
@@ -2389,7 +2389,7 @@ a {
 .post-cta-description {
   max-width: 580px;
   margin: 20px auto 0;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: clamp(16px, 1.8vw, 19px);
   line-height: 1.55;
   text-wrap: pretty;
@@ -2474,7 +2474,7 @@ a {
        moving layer and again for the resting element, and that second pass lands
        on different pixels: the title looks like it jumps as the growth ends. */
     transform: scale(1);
-    transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+    transition: transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
     will-change: transform;
   }
 
@@ -2491,15 +2491,15 @@ a {
 
   .post-card:hover .post-card-title,
   .post-article-back:hover {
-    color: var(--openbot-text-primary);
+    color: var(--dani-dex-text-primary);
   }
 
   .post-media-toggle:hover {
-    background: var(--openbot-bg-surface-raised);
+    background: var(--dani-dex-bg-surface-raised);
   }
 
   .post-featured-title a:hover {
-    color: var(--openbot-text-secondary);
+    color: var(--dani-dex-text-secondary);
   }
 }
 
@@ -2558,7 +2558,7 @@ a {
 
 .plugin-intro-title {
   margin: 0;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-size: clamp(30px, 3.4vw, 40px);
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -2583,7 +2583,7 @@ a {
 
 .plugin-card:focus-visible {
   border-radius: 24px;
-  outline: 3px solid var(--openbot-border-focus);
+  outline: 3px solid var(--dani-dex-border-focus);
   outline-offset: 4px;
 }
 
@@ -2596,7 +2596,7 @@ a {
      rather than its ancestor. Without this, crossing onto the mark counts as
      leaving the artwork and throws the shader away where the pointer rests. */
   pointer-events: none;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   filter: drop-shadow(0 1px 6px rgb(0 0 0 / 35%));
 }
 
@@ -2622,7 +2622,7 @@ a {
 .plugin-card-icon {
   position: relative;
   height: 40%;
-  border-radius: var(--openbot-radius-logo);
+  border-radius: var(--dani-dex-radius-logo);
   box-shadow: 0 2px 12px rgb(0 0 0 / 35%);
   pointer-events: none;
 }
@@ -2653,13 +2653,13 @@ a {
 
 .plugin-card-meta {
   margin-top: 14px;
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
   font-size: 12px;
 }
 
 .plugin-card-version {
   flex: none;
-  letter-spacing: var(--openbot-tracking-wide);
+  letter-spacing: var(--dani-dex-tracking-wide);
 }
 
 /* One end of each line gives way first, and it is whichever end a reader can lose:
@@ -2700,13 +2700,13 @@ a {
 }
 
 .plugin-tag {
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-surface);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-surface);
   padding: 5px 11px;
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
   font-size: 12px;
-  letter-spacing: var(--openbot-tracking-wide);
+  letter-spacing: var(--dani-dex-tracking-wide);
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -2719,25 +2719,25 @@ a {
   height: 38px;
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-pill);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-pill);
   background: transparent;
   padding: 0 17px;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font: inherit;
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: var(--openbot-tracking-wide);
+  letter-spacing: var(--dani-dex-tracking-wide);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   /* Colour, and a press. A filter row is read before it is used, so the motion
      that belongs on it is the motion every other button here already has. */
   transition:
-    border-color var(--openbot-duration-normal) ease,
-    background-color var(--openbot-duration-normal) ease,
-    color var(--openbot-duration-normal) ease,
-    transform var(--openbot-duration-fast) var(--openbot-ease-out);
+    border-color var(--dani-dex-duration-normal) ease,
+    background-color var(--dani-dex-duration-normal) ease,
+    color var(--dani-dex-duration-normal) ease,
+    transform var(--dani-dex-duration-fast) var(--dani-dex-ease-out);
 }
 
 /* Pressed is the only state that fills a switch in, and it fills it the way a
@@ -2745,9 +2745,9 @@ a {
    from one that was never on, and the grid behind it has already changed, so the
    fill confirms what happened rather than announcing it. */
 .plugin-tag-button[aria-pressed="true"] {
-  border-color: var(--openbot-surface-light);
-  background: var(--openbot-surface-light);
-  color: var(--openbot-text-on-light);
+  border-color: var(--dani-dex-surface-light);
+  background: var(--dani-dex-surface-light);
+  color: var(--dani-dex-text-on-light);
 }
 
 .plugin-tag-button:active {
@@ -2756,12 +2756,12 @@ a {
 
 .plugin-tag-button:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+  box-shadow: 0 0 0 3px var(--dani-dex-accent-strong);
 }
 
 .plugin-empty {
   margin: 0;
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
   font-size: 14px;
 }
 
@@ -2771,16 +2771,16 @@ a {
 
 .plugin-card-title {
   flex: none;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.35;
-  transition: color var(--openbot-duration-normal) ease;
+  transition: color var(--dani-dex-duration-normal) ease;
 }
 
 .plugin-card-tagline {
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
   font-size: 13px;
 }
 
@@ -2859,9 +2859,9 @@ a {
   width: clamp(56px, 6vw, 76px);
   aspect-ratio: 1;
   overflow: hidden;
-  border: 1px solid var(--openbot-glass-border);
-  border-radius: var(--openbot-radius-logo);
-  background: var(--openbot-glass-surface);
+  border: 1px solid var(--dani-dex-glass-border);
+  border-radius: var(--dani-dex-radius-logo);
+  background: var(--dani-dex-glass-surface);
   /* Decoration, like every other frame on this page: it takes no pointer. */
   pointer-events: none;
 }
@@ -2906,12 +2906,12 @@ a {
   width: min(380px, calc(100vw - 32px));
   margin: auto;
   padding: 22px;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-sidebar);
-  box-shadow: var(--openbot-shadow-overlay);
-  color: var(--openbot-text-primary);
-  animation: plugin-dialog-enter var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-sidebar);
+  box-shadow: var(--dani-dex-shadow-overlay);
+  color: var(--dani-dex-text-primary);
+  animation: plugin-dialog-enter var(--dani-dex-duration-overlay) var(--dani-dex-ease-out) both;
 }
 
 @keyframes plugin-dialog-enter {
@@ -2928,7 +2928,7 @@ a {
 
 /* The page stays visible behind it, because the visitor is deciding whether to leave it. */
 .plugin-dialog::backdrop {
-  background: var(--openbot-dialog-overlay);
+  background: var(--dani-dex-dialog-overlay);
   backdrop-filter: blur(6px);
 }
 
@@ -2940,7 +2940,7 @@ a {
 
 .plugin-dialog-copy {
   margin: 8px 0 0;
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
   font-size: 14px;
   line-height: 1.55;
 }
@@ -2960,18 +2960,18 @@ a {
   margin: 0;
   padding: 6px 10px;
   border: 0;
-  border-radius: var(--openbot-radius-pill);
+  border-radius: var(--dani-dex-radius-pill);
   background: none;
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
   font: inherit;
   font-size: 13px;
-  transition: color var(--openbot-duration-fast) ease;
+  transition: color var(--dani-dex-duration-fast) ease;
 }
 
 /* The ring the site's buttons take, rather than the browser's own box. */
 .plugin-dialog-dismiss:focus-visible {
   outline: 0;
-  box-shadow: 0 0 0 3px var(--openbot-accent-strong);
+  box-shadow: 0 0 0 3px var(--dani-dex-accent-strong);
 }
 
 .plugin-body {
@@ -2980,7 +2980,7 @@ a {
 
 .plugin-description {
   margin: 0;
-  color: var(--openbot-text-readable);
+  color: var(--dani-dex-text-readable);
   font-size: 17px;
   line-height: 1.7;
 }
@@ -2996,7 +2996,7 @@ a {
   align-items: center;
   gap: 8px;
   margin: 0 0 12px;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-size: 15px;
   font-weight: 500;
 }
@@ -3010,9 +3010,9 @@ a {
   min-width: 22px;
   height: 22px;
   padding-inline: 6px;
-  border-radius: var(--openbot-radius-sm);
-  background: var(--openbot-glass-surface);
-  color: var(--openbot-text-muted);
+  border-radius: var(--dani-dex-radius-sm);
+  background: var(--dani-dex-glass-surface);
+  color: var(--dani-dex-text-muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -3052,9 +3052,9 @@ a {
   list-style: none;
   display: grid;
   gap: 0;
-  border: 1px solid var(--openbot-border-strong);
-  border-radius: var(--openbot-radius-card);
-  background: var(--openbot-bg-surface);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-card);
+  background: var(--dani-dex-bg-surface);
 }
 
 /* One request as the app draws it: the plugin's chip, then the line a reader would
@@ -3066,10 +3066,10 @@ a {
   flex-wrap: wrap;
   gap: 8px;
   min-width: 0;
-  border-radius: var(--openbot-radius-card);
-  background: var(--openbot-bg-canvas);
+  border-radius: var(--dani-dex-radius-card);
+  background: var(--dani-dex-bg-canvas);
   padding: 12px;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: 15px;
   line-height: 1.5;
 }
@@ -3081,10 +3081,10 @@ a {
   flex: 0 0 auto;
   align-items: center;
   gap: 6px;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-glass-surface);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-glass-surface);
   padding: 3px 10px 3px 6px;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-size: 13px;
 }
 
@@ -3111,13 +3111,13 @@ a {
   gap: 12px;
   min-width: 0;
   padding: 12px 14px;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font-size: 14px;
   line-height: 1.55;
 }
 
 .plugin-rows > .plugin-row + .plugin-row {
-  border-top: 1px solid var(--openbot-border-strong);
+  border-top: 1px solid var(--dani-dex-border-strong);
 }
 
 /* What kind of thing the row is, in a tile the height of its two lines of type. The
@@ -3134,11 +3134,11 @@ a {
   width: 32px;
   height: 32px;
   overflow: hidden;
-  border: 1px solid var(--openbot-glass-border);
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-glass-surface);
+  border: 1px solid var(--dani-dex-glass-border);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-glass-surface);
   padding: 5px;
-  color: var(--openbot-accent-text);
+  color: var(--dani-dex-accent-text);
 }
 
 .plugin-row-icon svg {
@@ -3185,14 +3185,14 @@ a {
 
 .plugin-row-title {
   margin: 0;
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   font-size: 14px;
   font-weight: 500;
 }
 
 .plugin-row-copy {
   margin: 2px 0 0;
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -3208,25 +3208,25 @@ a {
   grid-template-columns: 160px minmax(0, 1fr);
   gap: 16px;
   padding: 11px 0;
-  border-top: 1px solid var(--openbot-glass-surface);
+  border-top: 1px solid var(--dani-dex-glass-surface);
   font-size: 14px;
 }
 
 .plugin-fact dt {
-  color: var(--openbot-text-dim);
+  color: var(--dani-dex-text-dim);
 }
 
 .plugin-fact dd {
   margin: 0;
   min-width: 0;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   overflow-wrap: anywhere;
 }
 
 .plugin-fact-link {
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   text-decoration: none;
-  transition: color var(--openbot-duration-normal) ease;
+  transition: color var(--dani-dex-duration-normal) ease;
 }
 
 @media (max-width: 900px) {
@@ -3258,18 +3258,18 @@ a {
   .plugin-card-logo,
   .plugin-card-icon {
     transform: scale(1);
-    transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+    transition: transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
     will-change: transform;
   }
 
   .plugin-tag-button:hover:not([aria-pressed="true"]) {
-    border-color: var(--openbot-text-dim);
-    background: var(--openbot-bg-control-hover);
-    color: var(--openbot-text-primary);
+    border-color: var(--dani-dex-text-dim);
+    background: var(--dani-dex-bg-control-hover);
+    color: var(--dani-dex-text-primary);
   }
 
   .plugin-tag-button[aria-pressed="true"]:hover {
-    background: var(--openbot-text-primary);
+    background: var(--dani-dex-text-primary);
   }
 
   .plugin-card:hover .plugin-card-logo,
@@ -3280,7 +3280,7 @@ a {
   .plugin-card:hover .plugin-card-title,
   .plugin-dialog-dismiss:hover,
   .plugin-fact-link:hover {
-    color: var(--openbot-text-primary);
+    color: var(--dani-dex-text-primary);
   }
 }
 

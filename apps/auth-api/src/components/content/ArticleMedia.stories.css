@@ -10,7 +10,7 @@
   min-height: 100vh;
   padding: clamp(28px, 8vw, 96px);
   overflow: hidden;
-  background: var(--openbot-bg-canvas);
+  background: var(--dani-dex-bg-canvas);
 }
 
 .story-product-shot-window {

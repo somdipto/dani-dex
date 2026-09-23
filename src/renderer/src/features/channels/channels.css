@@ -3,25 +3,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 .channel-avatar {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  min-width: var(--openbot-space-8);
-  height: var(--openbot-space-8);
-  color: var(--openbot-text-muted);
+  min-width: var(--dani-dex-space-8);
+  height: var(--dani-dex-space-8);
+  color: var(--dani-dex-text-muted);
 }
 .channel-avatar .agent-avatar {
-  width: var(--openbot-space-8);
-  height: var(--openbot-space-8);
+  width: var(--dani-dex-space-8);
+  height: var(--dani-dex-space-8);
   flex-shrink: 0;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-surface);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-surface);
 }
 .channel-avatar:not(.channel-avatar-cluster) .agent-avatar + .agent-avatar {
-  margin-left: calc(-1 * var(--openbot-space-4));
+  margin-left: calc(-1 * var(--dani-dex-space-4));
 }
 /*
  * The cluster holds the members in the square an agent avatar occupies, so a channel row keeps the
@@ -74,19 +74,19 @@
   height: var(--channel-avatar-face);
 }
 .channel-avatar-count {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
   /* The count is type, so it takes a step off the type scale rather than a share of the square:
      the smallest step that stays legible beside a face at both cluster sizes. */
-  font-size: var(--openbot-text-md);
+  font-size: var(--dani-dex-text-md);
   line-height: 1;
-  font-weight: var(--openbot-weight-semibold);
+  font-weight: var(--dani-dex-weight-semibold);
   font-variant-numeric: tabular-nums;
 }
 .channel-dialog-header h2 {
   margin: 0;
-  font-size: var(--openbot-text-xl);
-  line-height: var(--openbot-leading-xl);
-  font-weight: var(--openbot-weight-semibold);
+  font-size: var(--dani-dex-text-xl);
+  line-height: var(--dani-dex-leading-xl);
+  font-weight: var(--dani-dex-weight-semibold);
 }
 .channel-empty {
   min-height: 100%;
@@ -95,20 +95,20 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: var(--openbot-space-2);
-  color: var(--openbot-text-muted);
+  gap: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-muted);
 }
 .channel-empty h2 {
-  font-size: var(--openbot-text-2xl);
-  color: var(--openbot-text-primary);
-  margin: var(--openbot-space-2) 0 0;
+  font-size: var(--dani-dex-text-2xl);
+  color: var(--dani-dex-text-primary);
+  margin: var(--dani-dex-space-2) 0 0;
 }
 .channel-empty p {
   margin: 0;
 }
 /* The title is the one line that names what the channel is; the instructions read as body text. */
 .channel-empty .channel-empty-title {
-  color: var(--openbot-text-primary);
+  color: var(--dani-dex-text-primary);
 }
 
 /* The editor stacks the same fields the agent panel stacks, so it adds no spacing of its own: the
@@ -120,24 +120,24 @@
 .channel-create-form {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 .channel-members {
   display: flex;
   margin-top: var(--settings-panel-section-gap);
   flex-direction: column;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
   min-width: 0;
 }
 .channel-members-title,
 .channel-members-note {
   margin: 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 .channel-members-title {
-  font-weight: var(--openbot-weight-regular);
+  font-weight: var(--dani-dex-weight-regular);
 }
 /* Members read as a list, not as a card: the shared group gives up its frame and its dividers, so
    the hover highlight is the only box drawn and each member stays one plain line. */
@@ -151,18 +151,18 @@
 }
 .channel-member:is(.ui-item),
 .channel-member-add {
-  min-height: var(--openbot-control-lg);
-  gap: var(--openbot-space-2);
-  border-radius: var(--openbot-radius-md);
-  padding-block: var(--openbot-space-1);
-  padding-inline: var(--openbot-space-2);
+  min-height: var(--dani-dex-control-lg);
+  gap: var(--dani-dex-space-2);
+  border-radius: var(--dani-dex-radius-md);
+  padding-block: var(--dani-dex-space-1);
+  padding-inline: var(--dani-dex-space-2);
 }
 /* The trigger is a shared ghost button, whose own hover is written with two `:not()`s and so
    outweighs a plain class. It is matched here, or the last row of the list lights up differently
    from every row above it. */
 .channel-member:hover,
 .channel-member-add:hover:not(:disabled) {
-  background: var(--openbot-hover);
+  background: var(--dani-dex-hover);
 }
 /* The avatar sets the floor of a one-line row, the same size the create dialog uses. A menu row
    is the same row before it is a member, so it takes the same avatar: at its own 32px the bloub
@@ -174,11 +174,11 @@
 .channel-member-menu .agent-avatar {
   --agent-avatar-optical-offset: -3.25px;
 
-  width: var(--openbot-space-6);
-  height: var(--openbot-space-6);
+  width: var(--dani-dex-space-6);
+  height: var(--dani-dex-space-6);
 }
 .channel-member .ui-item-title {
-  font-weight: var(--openbot-weight-regular);
+  font-weight: var(--dani-dex-weight-regular);
 }
 /* Adding a member belongs in the list, under the last member, where the eye already is. The ghost
    button already gives it the transparent frame and the muted text; what it does not give is a row,
@@ -187,16 +187,16 @@
   width: 100%;
   justify-content: flex-start;
   height: auto;
-  line-height: var(--openbot-leading-md);
+  line-height: var(--dani-dex-leading-md);
   text-align: left;
   cursor: pointer;
 }
 .channel-member-add > svg {
-  width: var(--openbot-icon-md);
-  height: var(--openbot-icon-md);
+  width: var(--dani-dex-icon-md);
+  height: var(--dani-dex-icon-md);
   flex: 0 0 auto;
   /* The plus stands where an avatar stands, so both rows share one text edge. */
-  margin-inline: calc((var(--openbot-space-6) - var(--openbot-icon-md)) / 2);
+  margin-inline: calc((var(--dani-dex-space-6) - var(--dani-dex-icon-md)) / 2);
 }
 .channel-member-add:disabled {
   cursor: default;
@@ -208,7 +208,7 @@
    name, which `min-width: 160px` on the shared menu does not leave. */
 .channel-member-menu {
   min-width: 220px;
-  margin-inline-start: calc(var(--openbot-space-1) * -1);
+  margin-inline-start: calc(var(--dani-dex-space-1) * -1);
 }
 /* Kobalte highlights the first item the moment the menu opens, which painted a row nobody pointed
    at - and the trigger above it kept its own hover. Only the pointer and the keyboard paint here. */
@@ -221,7 +221,7 @@
   .channel-member-remove,
   .channel-lead-toggle[aria-pressed="false"] {
     opacity: 0;
-    transition: opacity var(--openbot-duration-hover) var(--openbot-ease-out);
+    transition: opacity var(--dani-dex-duration-hover) var(--dani-dex-ease-out);
   }
   .channel-member:hover :is(.channel-member-remove, .channel-lead-toggle),
   :is(.channel-member-remove, .channel-lead-toggle):focus-visible {
@@ -235,12 +235,12 @@
   min-width: 0;
 }
 .channel-picker legend {
-  margin-bottom: var(--openbot-space-2);
+  margin-bottom: var(--dani-dex-space-2);
 }
 /* The fade at the edges says there is more to read, so the scrollbar has nothing left to add. */
 .channel-picker-list {
-  margin-top: var(--openbot-space-2);
-  max-height: calc(var(--openbot-space-8) * 7);
+  margin-top: var(--dani-dex-space-2);
+  max-height: calc(var(--dani-dex-space-8) * 7);
   overflow: auto;
   scrollbar-width: none;
 }
@@ -248,52 +248,52 @@
   display: none;
 }
 .channel-picker-entry {
-  padding: var(--openbot-space-2) 0;
+  padding: var(--dani-dex-space-2) 0;
   cursor: pointer;
 }
 .channel-editor-footer {
-  padding-top: var(--openbot-space-3);
-  border-top: 1px solid var(--openbot-border);
+  padding-top: var(--dani-dex-space-3);
+  border-top: 1px solid var(--dani-dex-border);
 }
 .channel-search-icon {
-  width: var(--openbot-space-4);
-  height: var(--openbot-space-4);
-  color: var(--openbot-text-muted);
+  width: var(--dani-dex-space-4);
+  height: var(--dani-dex-space-4);
+  color: var(--dani-dex-text-muted);
   flex-shrink: 0;
 }
 .channel-picker-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--openbot-space-2);
-  padding: var(--openbot-space-6) var(--openbot-space-3);
+  gap: var(--dani-dex-space-2);
+  padding: var(--dani-dex-space-6) var(--dani-dex-space-3);
   text-align: center;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 .channel-picker-empty > svg {
-  width: var(--openbot-space-6);
-  height: var(--openbot-space-6);
-  margin-bottom: var(--openbot-space-1);
+  width: var(--dani-dex-space-6);
+  height: var(--dani-dex-space-6);
+  margin-bottom: var(--dani-dex-space-1);
 }
 .channel-picker-empty p {
   margin: 0;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-md);
 }
 
 .channel-dialog-backdrop {
   position: fixed;
   inset: 0;
-  z-index: var(--openbot-layer-dialog);
+  z-index: var(--dani-dex-layer-dialog);
   display: grid;
   place-items: center;
-  padding: var(--openbot-space-6);
+  padding: var(--dani-dex-space-6);
 }
 .channel-create-dialog {
   /* One inset for the header, the fields, every row and the footer. */
-  --channel-dialog-inset: var(--openbot-space-4);
+  --channel-dialog-inset: var(--dani-dex-space-4);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -301,18 +301,18 @@
   max-height: calc(100dvh - 48px);
   overflow: hidden;
   outline: 0;
-  background: var(--openbot-bg-surface);
+  background: var(--dani-dex-bg-surface);
 }
 .channel-create-dialog .channel-dialog-header {
   padding: var(--channel-dialog-inset);
 }
 .channel-create-dialog .channel-dialog-header .ui-button svg {
-  width: var(--openbot-space-4);
-  height: var(--openbot-space-4);
+  width: var(--dani-dex-space-4);
+  height: var(--dani-dex-space-4);
 }
 .channel-create-form {
   min-height: 0;
-  gap: var(--openbot-space-4);
+  gap: var(--dani-dex-space-4);
 }
 .channel-create-form > .ui-field,
 .channel-create-form > .ui-alert {
@@ -327,10 +327,10 @@
 }
 .channel-create-form .channel-picker legend {
   margin-inline: var(--channel-dialog-inset);
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-medium);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-medium);
+  line-height: var(--dani-dex-leading-sm);
 }
 /*
  * The shared `.search-field` row from `app-shell.css`, which the sidebar search also uses: it
@@ -338,11 +338,11 @@
  * for keyboard focus). Only the size is local, to match the name field above it.
  */
 .channel-create-form .channel-member-search {
-  height: var(--openbot-control-lg);
+  height: var(--dani-dex-control-lg);
   margin-inline: var(--channel-dialog-inset);
-  padding-inline: var(--openbot-space-3);
-  gap: var(--openbot-space-2);
-  border-radius: var(--openbot-radius-md);
+  padding-inline: var(--dani-dex-space-3);
+  gap: var(--dani-dex-space-2);
+  border-radius: var(--dani-dex-radius-md);
 }
 .channel-create-form .channel-member-search input::-webkit-search-cancel-button {
   display: none;
@@ -350,8 +350,8 @@
 .channel-create-form .channel-picker-list {
   min-height: 0;
   /* Taller than the settings picker: picking several agents is the whole job of this dialog. */
-  max-height: calc(var(--openbot-space-8) * 11);
-  margin-top: var(--openbot-space-2);
+  max-height: calc(var(--dani-dex-space-8) * 11);
+  margin-top: var(--dani-dex-space-2);
   padding: 0;
 }
 .channel-create-form .channel-picker-body {
@@ -362,9 +362,9 @@
    inside is the shared member row, so the label around it only paints the surface. */
 .channel-create-form .channel-picker-entry {
   display: block;
-  padding: var(--openbot-space-2) var(--channel-dialog-inset);
+  padding: var(--dani-dex-space-2) var(--channel-dialog-inset);
   border-radius: 0;
-  transition: background-color var(--openbot-duration-normal) var(--openbot-ease-out);
+  transition: background-color var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 /* Here the label is the row and paints the hover, so the shared member row must not paint a second,
    inset one inside it. In Channel settings the member row is the row, and keeps its own hover. */
@@ -379,10 +379,10 @@
   }
 }
 .channel-create-form .channel-picker-entry:hover {
-  background: var(--openbot-bg-control-hover);
+  background: var(--dani-dex-bg-control-hover);
 }
 .channel-create-form .channel-picker-entry:has(.ui-checkbox-input:checked) {
-  background: var(--openbot-accent-soft);
+  background: var(--dani-dex-accent-soft);
 }
 /*
  * One line per agent - name, then the description beside it - so a row costs the height of a
@@ -391,12 +391,12 @@
 .channel-create-form .channel-picker-entry .ui-item-content {
   display: flex;
   align-items: baseline;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   overflow: hidden;
 }
 .channel-create-form .channel-picker-entry .ui-item-title {
   flex: 0 0 auto;
-  font-weight: var(--openbot-weight-regular);
+  font-weight: var(--dani-dex-weight-regular);
 }
 .channel-create-form .channel-picker-entry .ui-item-description {
   min-width: 0;
@@ -429,7 +429,7 @@
   display: flex;
   min-width: 0;
   align-items: baseline;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 .channel-header-copy h1 {
   min-width: 0;
@@ -442,9 +442,9 @@
   min-width: 0;
   overflow: hidden;
   flex: 1 1 auto;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -453,7 +453,7 @@
    agent chat's size and optical offset, so the two indicators only differ in how many faces they
    hold. */
 .agent-activity-content.channel-activity-content {
-  padding-left: var(--openbot-space-0-5);
+  padding-left: var(--dani-dex-space-0-5);
 }
 
 .channel-activity-faces {
@@ -462,7 +462,7 @@
   align-items: center;
 }
 .channel-activity-faces .agent-activity-avatar + .agent-activity-avatar {
-  margin-left: calc(-1 * var(--openbot-space-2));
+  margin-left: calc(-1 * var(--dani-dex-space-2));
 }
 
 /* Reserve space outside the transcript. Only the panel's padded lower edge sits behind the composer.
@@ -472,55 +472,55 @@
   position: relative;
   max-height: 35dvh;
   overflow-y: auto;
-  margin: calc(-1 * var(--openbot-space-6)) var(--openbot-space-3) calc(-1 * var(--openbot-radius-lg));
-  border-radius: var(--openbot-radius-lg) var(--openbot-radius-lg) var(--openbot-radius-md) var(--openbot-radius-md);
-  background: var(--openbot-accent-strong);
-  box-shadow: 0 0 0 1px var(--openbot-accent-soft);
-  -webkit-backdrop-filter: blur(var(--openbot-space-3));
-  backdrop-filter: blur(var(--openbot-space-3));
-  padding-bottom: var(--openbot-radius-lg);
-  color: var(--openbot-accent-text);
+  margin: calc(-1 * var(--dani-dex-space-6)) var(--dani-dex-space-3) calc(-1 * var(--dani-dex-radius-lg));
+  border-radius: var(--dani-dex-radius-lg) var(--dani-dex-radius-lg) var(--dani-dex-radius-md) var(--dani-dex-radius-md);
+  background: var(--dani-dex-accent-strong);
+  box-shadow: 0 0 0 1px var(--dani-dex-accent-soft);
+  -webkit-backdrop-filter: blur(var(--dani-dex-space-3));
+  backdrop-filter: blur(var(--dani-dex-space-3));
+  padding-bottom: var(--dani-dex-radius-lg);
+  color: var(--dani-dex-accent-text);
 }
 
 .channel-paused-task {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   align-items: center;
   justify-content: space-between;
-  padding: var(--openbot-space-2) var(--openbot-space-3);
+  padding: var(--dani-dex-space-2) var(--dani-dex-space-3);
 }
 .channel-paused-task + .channel-paused-task {
-  border-top: 1px solid var(--openbot-accent-soft);
+  border-top: 1px solid var(--dani-dex-accent-soft);
 }
 .channel-paused-task-reason {
   min-width: 0;
   flex: 1 1 24ch;
   margin: 0;
   overflow-wrap: anywhere;
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
 }
 .channel-paused-task-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   align-items: center;
 }
 .channel-paused-task-actions .ui-button {
-  background: var(--openbot-surface-light);
-  color: var(--openbot-text-on-light);
+  background: var(--dani-dex-surface-light);
+  color: var(--dani-dex-text-on-light);
 }
 .channel-paused-task-actions .ui-button:hover {
-  background: var(--openbot-surface-light);
-  box-shadow: 0 0 0 1px var(--openbot-text-dim-on-light);
+  background: var(--dani-dex-surface-light);
+  box-shadow: 0 0 0 1px var(--dani-dex-text-dim-on-light);
 }
 
 .channel-preview-notice {
   flex-shrink: 0;
   margin: 0;
-  padding: var(--openbot-space-4);
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  padding: var(--dani-dex-space-4);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
   text-align: center;
 }

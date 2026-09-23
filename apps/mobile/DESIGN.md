@@ -67,7 +67,7 @@ a standalone sheet with a native title is:
 }
 ```
 
-Resolve `sheetBackground` from `--openbot-bg-sheet`, as in `src/app/(app)/_layout.tsx`.
+Resolve `sheetBackground` from `--dani-dex-bg-sheet`, as in `src/app/(app)/_layout.tsx`.
 Keep `headerShadowVisible: false` from the parent stack. A headerless sheet uses
 `headerShown: false`; do not add a fake navigation bar. Full-height detents are appropriate for
 search or similarly large content, not the default for a short form.

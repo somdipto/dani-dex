@@ -20,9 +20,9 @@ export function ChatCodeBlock({
   const { fontScale } = useWindowDimensions();
   const [foreground, muted, keyword] = useThemeColor(["foreground", "muted", "link"]);
   const [string, number, error] = useCSSVariable([
-    "--openbot-success-text",
-    "--openbot-warning-text",
-    "--openbot-danger-text",
+    "--dani-dex-success-text",
+    "--dani-dex-warning-text",
+    "--dani-dex-danger-text",
   ]).map(String);
   const [highlight, setHighlight] = useState<{ text: string; language?: string; tokens: CodeToken[] } | null>(null);
   const [copiedText, setCopiedText] = useState<string | null>(null);

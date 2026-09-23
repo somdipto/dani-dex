@@ -20,7 +20,7 @@
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
   min-width: 0;
 }
 
@@ -43,14 +43,14 @@
 
 .server-mcp-error {
   display: block;
-  margin-bottom: var(--openbot-space-2);
+  margin-bottom: var(--dani-dex-space-2);
 }
 
 /* The managed runtime under a STDIO server, while it is downloading or after it failed. It sits
    above the list because it describes every row there, not one of them. */
 .server-mcp-runtime-note {
   display: block;
-  margin-bottom: var(--openbot-space-2);
+  margin-bottom: var(--dani-dex-space-2);
 }
 
 /* A test result is one sentence under the Test section's own button, not a field. */
@@ -63,10 +63,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--openbot-space-3);
-  border: 1px dashed var(--openbot-border);
-  border-radius: var(--openbot-radius-card);
-  padding: var(--openbot-space-8) var(--openbot-space-6);
+  gap: var(--dani-dex-space-3);
+  border: 1px dashed var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-card);
+  padding: var(--dani-dex-space-8) var(--dani-dex-space-6);
   text-align: center;
 }
 
@@ -76,10 +76,10 @@
  * in the app do.
  */
 .server-mcp-panel .ui-button > svg {
-  width: var(--openbot-icon-md);
-  height: var(--openbot-icon-md);
+  width: var(--dani-dex-icon-md);
+  height: var(--dani-dex-icon-md);
   flex: 0 0 auto;
-  stroke-width: var(--openbot-icon-stroke);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .server-mcp-list {
@@ -87,7 +87,7 @@
 }
 
 .server-mcp-row-icon {
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
 }
 
 .server-mcp-row[data-disabled] .server-mcp-row-icon,
@@ -98,7 +98,7 @@
 .server-mcp-row-title {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   min-width: 0;
   flex-wrap: wrap;
 }
@@ -113,14 +113,14 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
   min-width: 0;
 }
 
 .server-mcp-transport-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
   min-width: 0;
 }
 
@@ -128,7 +128,7 @@
 .server-mcp-repeat {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   min-width: 0;
   border: 0;
   margin: 0;
@@ -143,7 +143,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 
 .server-mcp-repeat-row-pair {

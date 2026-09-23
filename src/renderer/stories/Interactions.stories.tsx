@@ -211,7 +211,7 @@ export const MenuPopoverTooltip: Story = {
     const deleteIcon = deleteItem.querySelector("svg");
     const menuSeparator = within(menu).getByRole("separator");
     const subtleDividerColor = getComputedStyle(document.documentElement)
-      .getPropertyValue("--openbot-shadow-ring")
+      .getPropertyValue("--dani-dex-shadow-ring")
       .trim();
     await expect(deleteItem).toHaveClass("ui-action-menu-danger");
     await expect(getComputedStyle(deleteItem).color).not.toBe(firstItemStyle.color);

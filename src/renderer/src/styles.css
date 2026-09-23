@@ -38,14 +38,14 @@
 
 :root {
   color-scheme: dark;
-  --background: var(--openbot-bg-canvas);
-  --surface: var(--openbot-bg-surface);
-  --border: var(--openbot-border);
-  --text-primary: var(--openbot-text-primary);
-  --text-secondary: var(--openbot-text-secondary);
-  --text-muted: var(--openbot-text-muted);
-  --accent: var(--openbot-accent);
-  --danger: var(--openbot-danger);
+  --background: var(--dani-dex-bg-canvas);
+  --surface: var(--dani-dex-bg-surface);
+  --border: var(--dani-dex-border);
+  --text-primary: var(--dani-dex-text-primary);
+  --text-secondary: var(--dani-dex-text-secondary);
+  --text-muted: var(--dani-dex-text-muted);
+  --accent: var(--dani-dex-accent);
+  --danger: var(--dani-dex-danger);
   --digit-dur: 500ms;
   --digit-distance: 8px;
   --digit-stagger: 70ms;
@@ -92,7 +92,7 @@
   --acc-expand: 250ms;
   --acc-collapse: 250ms;
   --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  font-family: var(--openbot-font-sans);
+  font-family: var(--dani-dex-font-sans);
   font-synthesis: none;
   text-rendering: geometricPrecision;
 }

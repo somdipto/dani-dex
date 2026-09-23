@@ -9,44 +9,44 @@
 // not a var(), and this module is read by the build-time generator where no
 // document exists to resolve one. The same test pins them to tokens.css.
 
-/** `--openbot-logo-production` */
+/** `--dani-dex-logo-production` */
 const LOGO_PRODUCTION = "#d6adf2";
-/** `--openbot-warning`, which `--openbot-logo-dev` aliases */
+/** `--dani-dex-warning`, which `--dani-dex-logo-dev` aliases */
 const LOGO_DEV = "#ff9412";
-/** `--openbot-success`, which `--openbot-logo-preview` aliases */
+/** `--dani-dex-success`, which `--dani-dex-logo-preview` aliases */
 const LOGO_PREVIEW = "#31cf76";
-/** `--openbot-accent` */
+/** `--dani-dex-accent` */
 const ACCENT = "#007cf7";
-/** `--openbot-unread-surface` */
+/** `--dani-dex-unread-surface` */
 const UNREAD = "#74b9ff";
-/** `--openbot-onboarding-desktop-indigo` */
+/** `--dani-dex-onboarding-desktop-indigo` */
 const INDIGO = "#6f7de8";
-/** `--openbot-chart-series-grok` */
+/** `--dani-dex-chart-series-grok` */
 const CYAN = "#6bc7d9";
-/** `--openbot-provider-claude` */
+/** `--dani-dex-provider-claude` */
 const TERRACOTTA = "#d97757";
-/** `--openbot-danger-text` */
+/** `--dani-dex-danger-text` */
 const CORAL = "#ff6069";
-/** `--openbot-badge-new` */
+/** `--dani-dex-badge-new` */
 const MAGENTA = "#ff1e5e";
-/** `--openbot-text-dim` */
+/** `--dani-dex-text-dim` */
 const DIM = "#6a6a6a";
-/** `--openbot-bg-canvas`, the page behind the card */
+/** `--dani-dex-bg-canvas`, the page behind the card */
 const CANVAS = "#1a1a1a";
 
 export const ARTICLE_GRADIENT_BRAND_HEXES = {
-  "--openbot-logo-production": LOGO_PRODUCTION,
-  "--openbot-warning": LOGO_DEV,
-  "--openbot-success": LOGO_PREVIEW,
-  "--openbot-accent": ACCENT,
-  "--openbot-unread-surface": UNREAD,
-  "--openbot-onboarding-desktop-indigo": INDIGO,
-  "--openbot-chart-series-grok": CYAN,
-  "--openbot-provider-claude": TERRACOTTA,
-  "--openbot-danger-text": CORAL,
-  "--openbot-badge-new": MAGENTA,
-  "--openbot-text-dim": DIM,
-  "--openbot-bg-canvas": CANVAS,
+  "--dani-dex-logo-production": LOGO_PRODUCTION,
+  "--dani-dex-warning": LOGO_DEV,
+  "--dani-dex-success": LOGO_PREVIEW,
+  "--dani-dex-accent": ACCENT,
+  "--dani-dex-unread-surface": UNREAD,
+  "--dani-dex-onboarding-desktop-indigo": INDIGO,
+  "--dani-dex-chart-series-grok": CYAN,
+  "--dani-dex-provider-claude": TERRACOTTA,
+  "--dani-dex-danger-text": CORAL,
+  "--dani-dex-badge-new": MAGENTA,
+  "--dani-dex-text-dim": DIM,
+  "--dani-dex-bg-canvas": CANVAS,
 } as const;
 
 // Four deep anchors that are not brand tokens. Nothing in the product is this

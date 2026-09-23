@@ -1,32 +1,32 @@
 .skills-marketplace-backdrop {
   position: fixed;
   inset: 0;
-  z-index: var(--openbot-layer-dialog-host);
+  z-index: var(--dani-dex-layer-dialog-host);
   display: grid;
   place-items: center;
-  padding: var(--openbot-space-4);
+  padding: var(--dani-dex-space-4);
 }
 
 .skills-marketplace {
   /* One inset for the whole dialog, on the agent Skills dialog's value: the chrome's title starts
      on it, and the columns below keep the same distance from the edge, so the two line up whatever
      the scrollbar gutter takes. */
-  --marketplace-inset: var(--openbot-space-6);
+  --marketplace-inset: var(--dani-dex-space-6);
   width: min(1040px, calc(100vw - 32px));
-  border: 1px solid var(--openbot-border-grouped);
-  border-radius: var(--openbot-radius-card);
+  border: 1px solid var(--dani-dex-border-grouped);
+  border-radius: var(--dani-dex-radius-card);
   height: min(704px, calc(100vh - 32px));
   /* Chrome, switch, listing: the body is the only row that scrolls, and it is the only one whose
      height is not its content's - so no row has to know another row's height in pixels. */
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
-  background: var(--openbot-bg-sidebar);
-  color: var(--openbot-text-primary);
+  background: var(--dani-dex-bg-sidebar);
+  color: var(--dani-dex-text-primary);
 }
 
 .marketplace-menu {
-  z-index: calc(var(--openbot-layer-dialog-host) + 1);
+  z-index: calc(var(--dani-dex-layer-dialog-host) + 1);
 }
 
 /* Dialog chrome, on the agent Skills dialog's own values: a 48px row, a rule under it, the title on
@@ -36,15 +36,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--openbot-space-3);
-  padding: var(--openbot-space-2) var(--openbot-space-2) var(--openbot-space-2) var(--marketplace-inset);
-  border-bottom: 1px solid var(--openbot-border);
+  gap: var(--dani-dex-space-3);
+  padding: var(--dani-dex-space-2) var(--dani-dex-space-2) var(--dani-dex-space-2) var(--marketplace-inset);
+  border-bottom: 1px solid var(--dani-dex-border);
 }
 .skills-marketplace-topbar-actions {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
 }
 /* Inside the scrolling body rather than a row of its own: the chrome is the only fixed row, and the
    switch scrolls away with the listing it filters. It also puts the switch in the same column as
@@ -52,10 +52,10 @@
 .skills-marketplace-toolbar {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
   width: calc(100% - 2 * var(--marketplace-inset));
   margin: 0 auto;
-  padding: var(--openbot-space-6) 0 var(--openbot-space-3);
+  padding: var(--dani-dex-space-6) 0 var(--dani-dex-space-3);
 }
 
 .skills-marketplace-body {
@@ -70,27 +70,27 @@
 .skills-marketplace-panel {
   width: calc(100% - 2 * var(--marketplace-inset));
   margin: 0 auto;
-  padding: var(--openbot-space-3) 0 var(--openbot-space-8);
+  padding: var(--dani-dex-space-3) 0 var(--dani-dex-space-8);
 }
 .agent-marketplace-panel {
-  padding-top: var(--openbot-space-3);
+  padding-top: var(--dani-dex-space-3);
 }
 .skills-marketplace-heading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--openbot-space-6);
-  margin-bottom: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
+  margin-bottom: var(--dani-dex-space-6);
 }
 .skills-marketplace-heading h1 {
   margin: 0;
-  font-size: var(--openbot-text-3xl);
-  line-height: var(--openbot-leading-3xl);
-  letter-spacing: var(--openbot-tracking-tight);
+  font-size: var(--dani-dex-text-3xl);
+  line-height: var(--dani-dex-leading-3xl);
+  letter-spacing: var(--dani-dex-tracking-tight);
 }
 .skills-marketplace-heading p {
-  margin: var(--openbot-space-1) 0 0;
-  color: var(--openbot-text-muted);
+  margin: var(--dani-dex-space-1) 0 0;
+  color: var(--dani-dex-text-muted);
 }
 .skills-agent-select-control {
   position: relative;
@@ -103,21 +103,21 @@
 .skills-agent-select-control > svg {
   position: absolute;
   top: 50%;
-  right: var(--openbot-space-3);
+  right: var(--dani-dex-space-3);
   width: 16px;
   height: 16px;
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
   pointer-events: none;
   transform: translateY(-50%);
 }
 .skills-publish-fields select {
   min-width: 160px;
-  height: var(--openbot-control-md);
-  padding: 0 30px 0 var(--openbot-space-3);
-  border: 1px solid var(--openbot-border-grouped);
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-bg-control);
-  color: var(--openbot-text-primary);
+  height: var(--dani-dex-control-md);
+  padding: 0 30px 0 var(--dani-dex-space-3);
+  border: 1px solid var(--dani-dex-border-grouped);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-bg-control);
+  color: var(--dani-dex-text-primary);
 }
 /*
  * The shared `.search-field` row from `app-shell.css`, which the sidebar and the channel dialog also
@@ -132,13 +132,13 @@
   min-width: 0;
   max-width: 320px;
   margin-left: auto;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
 }
 .skills-marketplace-search > svg {
   flex: none;
-  width: var(--openbot-space-4);
-  height: var(--openbot-space-4);
-  color: var(--openbot-text-muted);
+  width: var(--dani-dex-space-4);
+  height: var(--dani-dex-space-4);
+  color: var(--dani-dex-text-muted);
 }
 .skills-marketplace-search input::-webkit-search-cancel-button {
   display: none;
@@ -147,34 +147,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: var(--openbot-space-2);
+  padding-bottom: var(--dani-dex-space-2);
 }
 .skills-marketplace-section-title h2 {
   margin: 0;
-  font-size: var(--openbot-text-lg);
+  font-size: var(--dani-dex-text-lg);
 }
 .skills-marketplace-section-title span {
-  color: var(--openbot-text-dim);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-dim);
+  font-size: var(--dani-dex-text-sm);
 }
 .skills-marketplace-category-section + .skills-marketplace-category-section {
-  margin-top: var(--openbot-space-8);
+  margin-top: var(--dani-dex-space-8);
 }
 .skills-marketplace-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: var(--openbot-space-8);
+  column-gap: var(--dani-dex-space-8);
 }
 .skills-marketplace-card {
   position: relative;
   min-width: 0;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr);
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
   align-items: center;
   min-height: 68px;
-  padding: var(--openbot-space-2);
-  border-radius: var(--openbot-radius-md);
+  padding: var(--dani-dex-space-2);
+  border-radius: var(--dani-dex-radius-md);
   cursor: pointer;
 }
 .skills-marketplace-card-hitarea {
@@ -191,8 +191,8 @@
   transition: none;
 }
 .skills-marketplace-card-hitarea:focus-visible {
-  border-radius: var(--openbot-radius-sm);
-  outline: 2px solid var(--openbot-accent-strong);
+  border-radius: var(--dani-dex-radius-sm);
+  outline: 2px solid var(--dani-dex-accent-strong);
   outline-offset: -2px;
 }
 .skills-marketplace-icon,
@@ -203,10 +203,10 @@
   flex: 0 0 auto;
   place-items: center;
   overflow: hidden;
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-control);
-  color: var(--openbot-accent-text);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-control);
+  color: var(--dani-dex-accent-text);
 }
 .skills-marketplace-icon:has(img) {
   border: 0;
@@ -228,20 +228,20 @@
 .skills-marketplace-card-copy > div {
   display: flex;
   align-items: baseline;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   min-width: 0;
 }
 .skills-marketplace-card h3,
 .skills-submission-row h3 {
   margin: 0;
-  font-size: var(--openbot-text-md);
+  font-size: var(--dani-dex-text-md);
 }
 .skills-marketplace-card-copy span,
 .skills-marketplace-card-copy small,
 .skills-submission-row p,
 .skills-submission-row small {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 .skills-marketplace-card-copy span {
   overflow: hidden;
@@ -251,9 +251,9 @@
 .skills-marketplace-card-copy p {
   margin: 2px 0 0;
   overflow: hidden;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -262,8 +262,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--openbot-space-2);
-  color: var(--openbot-text-muted);
+  gap: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-muted);
 }
 
 .agent-submission-row .agent-avatar,
@@ -274,7 +274,7 @@
 .agent-marketplace-publish-picker {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 .agent-marketplace-publish-picker select {
   min-width: 160px;
@@ -283,7 +283,7 @@
 .agent-marketplace-dependency-list,
 .agent-marketplace-routine-list {
   display: grid;
-  gap: var(--openbot-space-4);
+  gap: var(--dani-dex-space-4);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -295,22 +295,22 @@
 }
 .agent-marketplace-dependency-list li > span,
 .agent-marketplace-routine-list li > span {
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-lg);
-  line-height: var(--openbot-leading-xl);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-lg);
+  line-height: var(--dani-dex-leading-xl);
 }
 .agent-marketplace-dependency-list small,
 .agent-marketplace-routine-list small,
 .agent-marketplace-routine-list li > p {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-md);
-  line-height: var(--openbot-leading-lg);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-md);
+  line-height: var(--dani-dex-leading-lg);
 }
 .agent-publish-card > p {
-  margin: var(--openbot-space-4) 0 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-lg);
+  margin: var(--dani-dex-space-4) 0 0;
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-lg);
 }
 .agent-submission-row {
   cursor: default;
@@ -321,22 +321,22 @@
   inset: 0;
   overflow: auto;
   overscroll-behavior: contain;
-  background: var(--openbot-bg-sidebar);
+  background: var(--dani-dex-bg-sidebar);
 }
 .skills-marketplace-detail {
   /* The skill page keeps the listing's own inset, so the two pages start on the same column. */
   width: calc(100% - 2 * var(--marketplace-inset));
   margin: 0 auto;
-  padding: var(--openbot-space-6) 0 var(--openbot-space-8);
+  padding: var(--dani-dex-space-6) 0 var(--dani-dex-space-8);
 }
 .skills-marketplace-detail-hero {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr) auto;
   align-items: start;
-  gap: var(--openbot-space-4);
-  margin-top: var(--openbot-space-6);
-  padding-bottom: var(--openbot-space-6);
-  border-bottom: 1px solid var(--openbot-border);
+  gap: var(--dani-dex-space-4);
+  margin-top: var(--dani-dex-space-6);
+  padding-bottom: var(--dani-dex-space-6);
+  border-bottom: 1px solid var(--dani-dex-border);
 }
 .skills-marketplace-detail-hero .skills-marketplace-icon,
 .skills-marketplace-detail-hero .skills-marketplace-default-icon {
@@ -344,78 +344,78 @@
   height: 64px;
 }
 .skills-marketplace-detail-category {
-  margin: 0 0 var(--openbot-space-1);
-  color: var(--openbot-accent-text);
-  font-size: var(--openbot-text-sm);
+  margin: 0 0 var(--dani-dex-space-1);
+  color: var(--dani-dex-accent-text);
+  font-size: var(--dani-dex-text-sm);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: var(--openbot-tracking-wide);
+  letter-spacing: var(--dani-dex-tracking-wide);
 }
 .skills-marketplace-detail-hero h1 {
   margin: 0;
-  font-size: var(--openbot-text-3xl);
-  line-height: var(--openbot-leading-3xl);
-  letter-spacing: var(--openbot-tracking-tight);
+  font-size: var(--dani-dex-text-3xl);
+  line-height: var(--dani-dex-leading-3xl);
+  letter-spacing: var(--dani-dex-tracking-tight);
 }
 .skills-marketplace-detail-hero h1 + p {
   max-width: 650px;
-  margin: var(--openbot-space-2) 0 0;
-  color: var(--openbot-text-secondary);
+  margin: var(--dani-dex-space-2) 0 0;
+  color: var(--dani-dex-text-secondary);
   /* Reading text on the Skills dialog's own body scale. Under it, 12px is for labels only. */
-  font-size: var(--openbot-text-lg);
-  line-height: var(--openbot-leading-xl);
+  font-size: var(--dani-dex-text-lg);
+  line-height: var(--dani-dex-leading-xl);
 }
 .skills-marketplace-detail-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--openbot-space-2) var(--openbot-space-4);
-  margin-top: var(--openbot-space-3);
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-md);
+  gap: var(--dani-dex-space-2) var(--dani-dex-space-4);
+  margin-top: var(--dani-dex-space-3);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-md);
 }
 .skills-marketplace-detail-content {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;
-  gap: var(--openbot-space-8);
-  padding-top: var(--openbot-space-6);
+  gap: var(--dani-dex-space-8);
+  padding-top: var(--dani-dex-space-6);
 }
 .skills-marketplace-detail-content h2 {
   margin: 0;
   /* A step above the body under it. */
-  font-size: var(--openbot-text-xl);
-  font-weight: var(--openbot-weight-medium);
+  font-size: var(--dani-dex-text-xl);
+  font-weight: var(--dani-dex-weight-medium);
 }
 .skills-marketplace-detail-instructions > div {
-  margin-top: var(--openbot-space-4);
-  color: var(--openbot-text-secondary);
-  font-family: var(--openbot-font-sans);
-  font-size: var(--openbot-text-lg);
-  line-height: var(--openbot-leading-xl);
+  margin-top: var(--dani-dex-space-4);
+  color: var(--dani-dex-text-secondary);
+  font-family: var(--dani-dex-font-sans);
+  font-size: var(--dani-dex-text-lg);
+  line-height: var(--dani-dex-leading-xl);
   white-space: pre-wrap;
 }
 .skills-marketplace-detail-package {
-  padding: var(--openbot-space-4);
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-surface);
+  padding: var(--dani-dex-space-4);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-surface);
 }
 .skills-marketplace-detail-package p {
-  margin: var(--openbot-space-1) 0 var(--openbot-space-3);
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-md);
+  margin: var(--dani-dex-space-1) 0 var(--dani-dex-space-3);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-md);
 }
 .skills-marketplace-detail-package ul {
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .skills-marketplace-detail-package li {
   overflow: hidden;
-  color: var(--openbot-text-secondary);
-  font-family: var(--openbot-font-mono);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-secondary);
+  font-family: var(--dani-dex-font-mono);
+  font-size: var(--dani-dex-text-md);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -426,12 +426,12 @@
 .skills-marketplace-detail-skeleton-icon {
   width: 64px;
   height: 64px;
-  border-radius: var(--openbot-radius-lg);
+  border-radius: var(--dani-dex-radius-lg);
 }
 .skills-marketplace-detail-skeleton-category {
   width: 76px;
   height: 14px;
-  margin-bottom: var(--openbot-space-1);
+  margin-bottom: var(--dani-dex-space-1);
 }
 .skills-marketplace-detail-skeleton-title {
   width: min(280px, 55%);
@@ -440,7 +440,7 @@
 .skills-marketplace-detail-skeleton-description {
   width: min(560px, 88%);
   height: 20px;
-  margin-top: var(--openbot-space-2);
+  margin-top: var(--dani-dex-space-2);
 }
 .skills-marketplace-detail-meta > div {
   width: 88px;
@@ -455,7 +455,7 @@
 .skills-marketplace-detail-skeleton-action {
   width: 96px;
   height: 32px;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
 }
 .skills-marketplace-detail-skeleton-heading {
   width: 156px;
@@ -463,8 +463,8 @@
 }
 .skills-marketplace-detail-skeleton-copy {
   display: grid;
-  gap: var(--openbot-space-3);
-  margin-top: var(--openbot-space-4);
+  gap: var(--dani-dex-space-3);
+  margin-top: var(--dani-dex-space-4);
 }
 .skills-marketplace-detail-skeleton-copy > div {
   width: 100%;
@@ -486,11 +486,11 @@
 .skills-marketplace-detail-skeleton-package-count {
   width: 92px;
   height: 14px;
-  margin: var(--openbot-space-1) 0 var(--openbot-space-3);
+  margin: var(--dani-dex-space-1) 0 var(--dani-dex-space-3);
 }
 .skills-marketplace-detail-skeleton-files {
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 .skills-marketplace-detail-skeleton-files > div {
   width: 100%;
@@ -507,7 +507,7 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .skills-marketplace-card:hover {
-    background: var(--openbot-bg-surface);
+    background: var(--dani-dex-bg-surface);
   }
   .skills-marketplace-card-hitarea:hover:not(:disabled):not([data-disabled]) {
     background: transparent;
@@ -516,22 +516,22 @@
     background: transparent;
   }
   .skills-submission-row:hover {
-    background: var(--openbot-bg-surface);
+    background: var(--dani-dex-bg-surface);
   }
 }
 .skills-submission-list {
   overflow: hidden;
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
 }
 .skills-submission-row {
   position: relative;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: var(--openbot-space-3);
-  padding: var(--openbot-space-4);
-  border-bottom: 1px solid var(--openbot-border);
+  gap: var(--dani-dex-space-3);
+  padding: var(--dani-dex-space-4);
+  border-bottom: 1px solid var(--dani-dex-border);
   cursor: pointer;
 }
 .skills-submission-row > button:first-child {
@@ -548,8 +548,8 @@
   transition: none;
 }
 .skills-submission-row > button:first-child:focus-visible {
-  border-radius: var(--openbot-radius-lg);
-  outline: 2px solid var(--openbot-accent-strong);
+  border-radius: var(--dani-dex-radius-lg);
+  outline: 2px solid var(--dani-dex-accent-strong);
   outline-offset: -2px;
 }
 .skills-submission-row > .ui-button:not(:first-child) {
@@ -567,43 +567,43 @@
 }
 .skills-submission-status {
   padding: 3px 8px;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-surface);
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-surface);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
   text-transform: capitalize;
 }
 .skills-submission-status[data-status="approved"] {
-  background: var(--openbot-success-soft);
-  color: var(--openbot-success);
+  background: var(--dani-dex-success-soft);
+  color: var(--dani-dex-success);
 }
 .skills-submission-status[data-status="rejected"] {
-  background: var(--openbot-danger-soft);
-  color: var(--openbot-danger);
+  background: var(--dani-dex-danger-soft);
+  color: var(--dani-dex-danger);
 }
 .skills-submission-status[data-status="pending"] {
-  background: var(--openbot-warning-soft);
-  color: var(--openbot-warning);
+  background: var(--dani-dex-warning-soft);
+  color: var(--dani-dex-warning);
 }
 .skills-submission-detail-hero {
   grid-template-columns: 64px minmax(0, 1fr);
 }
 .skills-submission-detail-review .skills-submission-status {
   display: inline-flex;
-  margin-top: var(--openbot-space-3);
+  margin-top: var(--dani-dex-space-3);
 }
 .skills-submission-detail-review .skills-submission-detail-note {
-  margin-top: var(--openbot-space-4);
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-md);
+  margin-top: var(--dani-dex-space-4);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-md);
 }
 .skills-submission-guide {
-  margin-bottom: var(--openbot-space-6);
-  padding: var(--openbot-space-4);
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-surface);
+  margin-bottom: var(--dani-dex-space-6);
+  padding: var(--dani-dex-space-4);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-surface);
 }
 .skills-submission-guide-heading h2,
 .skills-submission-guide h3,
@@ -611,128 +611,128 @@
   margin: 0;
 }
 .skills-submission-guide-heading h2 {
-  font-size: var(--openbot-text-lg);
+  font-size: var(--dani-dex-text-lg);
 }
 .skills-submission-guide-heading p,
 .skills-submission-example p,
 .skills-submission-limit {
-  margin-top: var(--openbot-space-1);
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  margin-top: var(--dani-dex-space-1);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 .skills-submission-guide-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--openbot-space-6);
-  margin-top: var(--openbot-space-4);
+  gap: var(--dani-dex-space-6);
+  margin-top: var(--dani-dex-space-4);
 }
 .skills-submission-guide h3 {
-  font-size: var(--openbot-text-sm);
+  font-size: var(--dani-dex-text-sm);
 }
 .skills-submission-guide ul {
   display: grid;
-  gap: var(--openbot-space-2);
-  margin: var(--openbot-space-3) 0 0;
+  gap: var(--dani-dex-space-2);
+  margin: var(--dani-dex-space-3) 0 0;
   padding: 0;
   list-style: none;
 }
 .skills-submission-guide li {
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr);
-  gap: var(--openbot-space-2);
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-md);
+  gap: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-md);
 }
 .skills-submission-guide li svg {
   width: 14px;
   height: 14px;
   margin-top: 3px;
-  color: var(--openbot-success);
+  color: var(--dani-dex-success);
 }
 .skills-submission-guide code {
-  color: var(--openbot-text-primary);
-  font-family: var(--openbot-font-mono);
+  color: var(--dani-dex-text-primary);
+  font-family: var(--dani-dex-font-mono);
 }
 .skills-submission-example {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 0.9fr);
-  gap: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
   align-items: center;
-  margin-top: var(--openbot-space-4);
-  padding-top: var(--openbot-space-4);
-  border-top: 1px solid var(--openbot-border);
+  margin-top: var(--dani-dex-space-4);
+  padding-top: var(--dani-dex-space-4);
+  border-top: 1px solid var(--dani-dex-border);
 }
 .skills-submission-example pre {
   margin: 0;
-  padding: var(--openbot-space-3);
+  padding: var(--dani-dex-space-3);
   overflow: auto;
-  border: 1px solid var(--openbot-border);
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-bg-control);
-  color: var(--openbot-text-secondary);
-  font-family: var(--openbot-font-mono);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-md);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-bg-control);
+  color: var(--dani-dex-text-secondary);
+  font-family: var(--dani-dex-font-mono);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-md);
   white-space: pre-wrap;
 }
 .skills-submission-guide .skills-submission-limit {
-  margin-top: var(--openbot-space-3);
+  margin-top: var(--dani-dex-space-3);
 }
 .skills-publish-card {
-  padding: var(--openbot-space-6);
-  border: 1px solid var(--openbot-border-grouped);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-control);
+  padding: var(--dani-dex-space-6);
+  border: 1px solid var(--dani-dex-border-grouped);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-control);
 }
 .skills-publish-summary {
   display: flex;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 .skills-publish-summary h2 {
   margin: 0;
-  font-size: var(--openbot-text-xl);
+  font-size: var(--dani-dex-text-xl);
 }
 .skills-publish-summary p {
-  margin: var(--openbot-space-1) 0;
-  color: var(--openbot-text-secondary);
+  margin: var(--dani-dex-space-1) 0;
+  color: var(--dani-dex-text-secondary);
 }
 .skills-publish-summary small {
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
 }
 .agent-publish-card .skills-publish-summary {
-  height: calc(var(--openbot-leading-xl) * 6);
+  height: calc(var(--dani-dex-leading-xl) * 6);
 }
 .agent-publish-card .skills-publish-summary > div {
   grid-template-rows: auto minmax(0, 1fr) auto;
   flex: 1;
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   min-width: 0;
 }
 .agent-publish-card .skills-publish-summary h2,
 .agent-publish-card .skills-publish-summary p {
   margin: 0;
-  line-height: var(--openbot-leading-xl);
+  line-height: var(--dani-dex-leading-xl);
 }
 .agent-publish-card .skills-publish-summary p {
   overflow: auto;
   scrollbar-gutter: stable;
 }
 .agent-publish-card .skills-publish-summary small {
-  line-height: var(--openbot-leading-md);
+  line-height: var(--dani-dex-leading-md);
 }
 .skills-publish-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--openbot-space-4);
-  margin-top: var(--openbot-space-6);
+  gap: var(--dani-dex-space-4);
+  margin-top: var(--dani-dex-space-6);
 }
 .skills-publish-fields label {
   display: grid;
-  gap: var(--openbot-space-2);
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  gap: var(--dani-dex-space-2);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 .skills-publish-fields select,
 .skills-publish-fields input {
@@ -743,52 +743,52 @@
 }
 .skills-publish-category select {
   appearance: none;
-  padding-right: var(--openbot-space-8);
+  padding-right: var(--dani-dex-space-8);
 }
 .skills-publish-category > svg {
   position: absolute;
-  right: var(--openbot-space-3);
-  bottom: var(--openbot-space-2);
+  right: var(--dani-dex-space-3);
+  bottom: var(--dani-dex-space-2);
   width: 16px;
   height: 16px;
-  color: var(--openbot-text-muted);
+  color: var(--dani-dex-text-muted);
   pointer-events: none;
 }
 .skills-publish-fields input[type="file"] {
-  padding: 0 var(--openbot-space-3) 0 0;
-  line-height: calc(var(--openbot-control-md) - 2px);
+  padding: 0 var(--dani-dex-space-3) 0 0;
+  line-height: calc(var(--dani-dex-control-md) - 2px);
 }
 .skills-publish-fields input[type="file"]::file-selector-button {
   height: 100%;
-  margin: 0 var(--openbot-space-3) 0 0;
-  padding: 0 var(--openbot-space-3);
+  margin: 0 var(--dani-dex-space-3) 0 0;
+  padding: 0 var(--dani-dex-space-3);
   border: 0;
-  border-right: 1px solid var(--openbot-border);
-  background: var(--openbot-bg-surface);
-  color: var(--openbot-text-primary);
+  border-right: 1px solid var(--dani-dex-border);
+  background: var(--dani-dex-bg-surface);
+  color: var(--dani-dex-text-primary);
   font: inherit;
   cursor: pointer;
 }
 .skills-publish-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--openbot-space-2);
-  margin-top: var(--openbot-space-6);
+  gap: var(--dani-dex-space-2);
+  margin-top: var(--dani-dex-space-6);
 }
 .skills-marketplace-error {
   position: sticky;
-  left: var(--openbot-space-4);
-  right: var(--openbot-space-4);
-  bottom: var(--openbot-space-4);
+  left: var(--dani-dex-space-4);
+  right: var(--dani-dex-space-4);
+  bottom: var(--dani-dex-space-4);
   width: fit-content;
   max-width: calc(100% - 32px);
   margin: 0 auto;
   padding: 10px 14px;
-  border: 1px solid var(--openbot-danger);
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-bg-control);
-  color: var(--openbot-danger);
-  box-shadow: 0 12px 32px var(--openbot-shadow-dialog);
+  border: 1px solid var(--dani-dex-danger);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-bg-control);
+  color: var(--dani-dex-danger);
+  box-shadow: 0 12px 32px var(--dani-dex-shadow-dialog);
 }
 
 @media (max-width: 800px) {
@@ -809,8 +809,8 @@
 @media (prefers-reduced-motion: no-preference) {
   .skills-marketplace {
     transition:
-      opacity var(--openbot-duration-normal) cubic-bezier(0.23, 1, 0.32, 1),
-      transform var(--openbot-duration-normal) cubic-bezier(0.23, 1, 0.32, 1);
+      opacity var(--dani-dex-duration-normal) cubic-bezier(0.23, 1, 0.32, 1),
+      transform var(--dani-dex-duration-normal) cubic-bezier(0.23, 1, 0.32, 1);
   }
   .skills-marketplace[data-closed] {
     opacity: 0;
@@ -824,10 +824,10 @@
   margin: 0;
   margin-right: auto;
   overflow: hidden;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-lg);
-  font-weight: var(--openbot-weight-semibold);
-  line-height: var(--openbot-leading-lg);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-lg);
+  font-weight: var(--dani-dex-weight-semibold);
+  line-height: var(--dani-dex-leading-lg);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -840,7 +840,7 @@
   display: flex;
   flex: 1;
   align-items: center;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
 }
 /*
  * The parent crumb is a ghost button, so `.ui-button` would otherwise win the type properties and
@@ -853,47 +853,47 @@
   height: auto;
   overflow: hidden;
   border: 1px solid transparent;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
   background: transparent;
-  color: var(--openbot-text-muted);
-  margin-block: calc(-1 * var(--openbot-space-1));
-  margin-inline-start: calc(-1 * var(--openbot-space-2));
-  padding: var(--openbot-space-1) var(--openbot-space-2);
-  font-size: var(--openbot-text-lg);
-  font-weight: var(--openbot-weight-semibold);
-  line-height: var(--openbot-leading-lg);
+  color: var(--dani-dex-text-muted);
+  margin-block: calc(-1 * var(--dani-dex-space-1));
+  margin-inline-start: calc(-1 * var(--dani-dex-space-2));
+  padding: var(--dani-dex-space-1) var(--dani-dex-space-2);
+  font-size: var(--dani-dex-text-lg);
+  font-weight: var(--dani-dex-weight-semibold);
+  line-height: var(--dani-dex-leading-lg);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 @media (hover: hover) and (pointer: fine) {
   .skills-marketplace .marketplace-crumb-parent:hover:not(:disabled) {
-    border-color: var(--openbot-border-strong);
-    background: var(--openbot-bg-control-hover);
-    color: var(--openbot-text-primary);
+    border-color: var(--dani-dex-border-strong);
+    background: var(--dani-dex-bg-control-hover);
+    color: var(--dani-dex-text-primary);
   }
 }
 .marketplace-crumb-separator {
   flex: 0 0 auto;
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
-  color: var(--openbot-text-muted);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
+  color: var(--dani-dex-text-muted);
 }
 .marketplace-management {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--openbot-space-1);
-  padding: var(--openbot-space-1) var(--openbot-space-3);
+  gap: var(--dani-dex-space-1);
+  padding: var(--dani-dex-space-1) var(--dani-dex-space-3);
   border: 0;
-  border-radius: var(--openbot-radius-pill);
+  border-radius: var(--dani-dex-radius-pill);
   background: transparent;
-  color: var(--openbot-text-secondary);
+  color: var(--dani-dex-text-secondary);
   font: inherit;
   cursor: pointer;
 }
 .marketplace-management svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
 }
 .skills-marketplace-card button svg {
   width: 15px;
@@ -905,11 +905,11 @@
  * it shrinks; the margin leaves room for a focus ring on the row at the edge.
  */
 .marketplace-catalog-viewport {
-  --resize-dur: var(--openbot-duration-overlay);
-  --resize-ease: var(--openbot-ease-out);
+  --resize-dur: var(--dani-dex-duration-overlay);
+  --resize-ease: var(--dani-dex-ease-out);
 
   overflow: clip;
-  overflow-clip-margin: var(--openbot-space-1);
+  overflow-clip-margin: var(--dani-dex-space-1);
   transition:
     height var(--resize-dur) var(--resize-ease),
     opacity var(--reveal-dur) var(--reveal-ease),
@@ -924,14 +924,14 @@
   }
 }
 .marketplace-catalog {
-  --reveal-dur: var(--openbot-duration-slow);
-  --reveal-ease: var(--openbot-ease-in-out);
+  --reveal-dur: var(--dani-dex-duration-slow);
+  --reveal-ease: var(--dani-dex-ease-in-out);
   --reveal-blur: 2px;
 }
 .marketplace-catalog h2 {
-  margin: 0 0 var(--openbot-space-3);
-  font-size: var(--openbot-text-xl);
-  font-weight: var(--openbot-weight-medium);
+  margin: 0 0 var(--dani-dex-space-3);
+  font-size: var(--dani-dex-text-xl);
+  font-weight: var(--dani-dex-weight-medium);
 }
 .marketplace-identity {
   position: relative;
@@ -950,14 +950,14 @@
   right: 0;
   display: grid;
   place-items: center;
-  width: var(--openbot-space-8);
-  height: var(--openbot-space-8);
+  width: var(--dani-dex-space-8);
+  height: var(--dani-dex-space-8);
   overflow: hidden;
-  border-radius: var(--openbot-radius-sm);
-  background: var(--openbot-bg-control-active);
-  color: var(--openbot-text-secondary);
-  border: 2px solid var(--openbot-bg-sidebar);
-  font-size: var(--openbot-text-sm);
+  border-radius: var(--dani-dex-radius-sm);
+  background: var(--dani-dex-bg-control-active);
+  color: var(--dani-dex-text-secondary);
+  border: 2px solid var(--dani-dex-bg-sidebar);
+  font-size: var(--dani-dex-text-sm);
 }
 .marketplace-creator-avatar img {
   width: 100%;
@@ -972,11 +972,11 @@
   white-space: nowrap;
   /* The row's own scale, as in the agent Skills dialog: the name is a step above the line under it,
      so the two do not read as one block of 12px. */
-  font-weight: var(--openbot-weight-medium);
-  line-height: var(--openbot-leading-md);
+  font-weight: var(--dani-dex-weight-medium);
+  line-height: var(--dani-dex-leading-md);
 }
 .skills-marketplace-card-copy > div {
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
 }
 .skills-marketplace-card > .agent-avatar {
   /* The face art overflows its box by design, so it needs the same -0.14 of the box that the
@@ -987,33 +987,33 @@
   height: 42px;
 }
 .skills-marketplace-section-title > .ui-button {
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-md);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-md);
 }
 .marketplace-catalog-skeleton {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--openbot-space-4);
+  gap: var(--dani-dex-space-4);
 }
 .marketplace-row-skeleton {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
   min-height: 52px;
 }
 .marketplace-placeholder-avatar {
   flex: none;
-  width: calc(var(--openbot-space-8) + var(--openbot-space-2));
-  height: calc(var(--openbot-space-8) + var(--openbot-space-2));
-  border-radius: var(--openbot-radius-pill);
+  width: calc(var(--dani-dex-space-8) + var(--dani-dex-space-2));
+  height: calc(var(--dani-dex-space-8) + var(--dani-dex-space-2));
+  border-radius: var(--dani-dex-radius-pill);
 }
 .marketplace-placeholder-copy {
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   width: 100%;
 }
 .marketplace-placeholder-copy > .ui-skeleton {
-  height: var(--openbot-text-sm);
+  height: var(--dani-dex-text-sm);
 }
 .marketplace-placeholder-copy > .ui-skeleton:first-child {
   width: 65%;
@@ -1021,7 +1021,7 @@
 @keyframes marketplace-content-enter {
   from {
     opacity: 0;
-    transform: translateY(var(--openbot-space-1));
+    transform: translateY(var(--dani-dex-space-1));
   }
   to {
     opacity: 1;
@@ -1041,7 +1041,7 @@
 @keyframes marketplace-section-swap {
   from {
     opacity: 0;
-    transform: translateY(var(--openbot-space-1));
+    transform: translateY(var(--dani-dex-space-1));
     filter: blur(2px);
   }
   to {
@@ -1062,17 +1062,17 @@
   .marketplace-catalog .skills-marketplace-card,
   .marketplace-detail-heading,
   .marketplace-detail-sections {
-    animation: marketplace-content-enter var(--openbot-duration-slow) var(--openbot-ease-out) both;
+    animation: marketplace-content-enter var(--dani-dex-duration-slow) var(--dani-dex-ease-out) both;
   }
   .marketplace-catalog .skills-marketplace-card:nth-child(2) {
-    animation-delay: calc(var(--openbot-duration-fast) / 6);
+    animation-delay: calc(var(--dani-dex-duration-fast) / 6);
   }
   .marketplace-catalog .skills-marketplace-card:nth-child(3) {
-    animation-delay: calc(var(--openbot-duration-fast) / 3);
+    animation-delay: calc(var(--dani-dex-duration-fast) / 3);
   }
   .marketplace-catalog .skills-marketplace-card:nth-child(n + 4),
   .marketplace-detail-sections {
-    animation-delay: calc(var(--openbot-duration-fast) / 2);
+    animation-delay: calc(var(--dani-dex-duration-fast) / 2);
   }
   /*
    * While a search runs, the rows change at typing speed. A rise with a per-row delay reads as a jump
@@ -1094,21 +1094,21 @@
   }
   .marketplace-catalog-skeleton,
   .skills-marketplace-detail-skeleton {
-    animation: marketplace-placeholder-enter var(--openbot-duration-normal) var(--openbot-ease-out)
-      var(--openbot-duration-dialog) both;
+    animation: marketplace-placeholder-enter var(--dani-dex-duration-normal) var(--dani-dex-ease-out)
+      var(--dani-dex-duration-dialog) both;
   }
   /*
    * Text states swap (transitions.dev 04). Picking another section replaces the panel's whole
    * content at once, so the new content rises through a cross-blur inside the box the panel keeps.
    */
   .marketplace-detail-section-body {
-    animation: marketplace-section-swap var(--openbot-duration-normal) var(--openbot-ease-out) both;
+    animation: marketplace-section-swap var(--dani-dex-duration-normal) var(--dani-dex-ease-out) both;
   }
 }
 .marketplace-detail-page {
   position: relative;
   width: 100%;
-  padding: var(--openbot-space-6) var(--openbot-space-6) var(--openbot-space-8);
+  padding: var(--dani-dex-space-6) var(--dani-dex-space-6) var(--dani-dex-space-8);
 }
 /* The page takes the focus the row gave up, but it is not a control: it shows no ring. */
 .marketplace-detail-page:focus-visible {
@@ -1120,15 +1120,15 @@
 }
 .marketplace-detail-heading {
   display: grid;
-  gap: var(--openbot-space-4);
-  padding-bottom: var(--openbot-space-6);
-  border-bottom: 1px solid var(--openbot-border-strong);
+  gap: var(--dani-dex-space-4);
+  padding-bottom: var(--dani-dex-space-6);
+  border-bottom: 1px solid var(--dani-dex-border-strong);
 }
 /* Icon, name with its creator line, and the action, all on one line. */
 .marketplace-detail-main {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-4);
+  gap: var(--dani-dex-space-4);
 }
 .marketplace-detail-copy {
   flex: 1;
@@ -1137,83 +1137,83 @@
 /* The skill page prints the creator under the preview, on its own rather than inside the heading
    block, so the line needs the sub-line treatment without that block around it. */
 .marketplace-detail-creator {
-  margin: var(--openbot-space-3) 0 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  margin: var(--dani-dex-space-3) 0 0;
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 .marketplace-detail-copy h1 {
   margin: 0;
-  font-size: var(--openbot-text-3xl);
-  font-weight: var(--openbot-weight-medium);
+  font-size: var(--dani-dex-text-3xl);
+  font-weight: var(--dani-dex-weight-medium);
 }
 .marketplace-detail-lead {
   margin: 0;
   /* The lead reads on the same body scale as the sections under it, as the skill preview in the
      agent Skills dialog does. Below it, 12px is for labels only. */
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-lg);
-  line-height: var(--openbot-leading-xl);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-lg);
+  line-height: var(--dani-dex-leading-xl);
   white-space: pre-wrap;
 }
 .marketplace-detail-copy .marketplace-detail-creator {
-  margin-top: var(--openbot-space-1);
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  margin-top: var(--dani-dex-space-1);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
 }
 .marketplace-detail-action {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 .marketplace-detail-action > .ui-button {
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-text-primary);
-  color: var(--openbot-bg-sidebar);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-text-primary);
+  color: var(--dani-dex-bg-sidebar);
 }
 .marketplace-detail-sections {
   display: grid;
   grid-template-columns: 192px minmax(0, 1fr);
-  gap: var(--openbot-space-6);
-  padding-top: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
+  padding-top: var(--dani-dex-space-6);
   align-items: stretch;
 }
 .marketplace-detail-sections nav {
   display: grid;
   /* The rows keep their own height, so a taller panel does not stretch the buttons or move them. */
   align-content: start;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
 }
 .marketplace-detail-sections nav button {
   display: flex;
   height: auto;
   flex-direction: column;
   align-items: start;
-  gap: var(--openbot-space-1);
-  padding: var(--openbot-space-3);
+  gap: var(--dani-dex-space-1);
+  padding: var(--dani-dex-space-3);
   white-space: normal;
   text-align: left;
 }
 .marketplace-detail-sections nav button[data-active] {
-  background: var(--openbot-bg-control-active);
+  background: var(--dani-dex-bg-control-active);
 }
 .marketplace-detail-sections nav small {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-regular);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-regular);
 }
 .marketplace-detail-section {
   /* The height comes from the measured content, so the padding sits on the content it measures. */
   overflow: hidden;
-  border-radius: var(--openbot-radius-xl);
-  background: var(--openbot-marketplace-detail-bg);
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-lg);
-  line-height: var(--openbot-leading-xl);
+  border-radius: var(--dani-dex-radius-xl);
+  background: var(--dani-dex-marketplace-detail-bg);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-lg);
+  line-height: var(--dani-dex-leading-xl);
   overflow-wrap: anywhere;
 }
 .marketplace-detail-section-body {
-  padding: var(--openbot-space-6);
+  padding: var(--dani-dex-space-6);
 }
 .marketplace-detail-section p {
   margin: 0;
@@ -1221,8 +1221,8 @@
 }
 /* The entry lists below carry their own layout; only a plain list in prose needs the indent. */
 .marketplace-detail-section ul:not(.agent-marketplace-dependency-list, .agent-marketplace-routine-list) {
-  margin: var(--openbot-space-3) 0 0;
-  padding-left: var(--openbot-space-4);
+  margin: var(--dani-dex-space-3) 0 0;
+  padding-left: var(--dani-dex-space-4);
 }
 @media (max-width: 600px) {
   .marketplace-detail-sections,
@@ -1243,13 +1243,13 @@
 
 .marketplace-publication-category {
   display: grid;
-  gap: var(--openbot-space-2);
-  margin-top: var(--openbot-space-6);
+  gap: var(--dani-dex-space-2);
+  margin-top: var(--dani-dex-space-6);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .agent-publish-card .skills-publish-summary {
-    animation: marketplace-placeholder-enter var(--openbot-duration-normal) var(--openbot-ease-out) both;
+    animation: marketplace-placeholder-enter var(--dani-dex-duration-normal) var(--dani-dex-ease-out) both;
   }
 }
 
@@ -1267,7 +1267,7 @@
  */
 .marketplace-plugin-detail {
   display: grid;
-  gap: var(--openbot-space-6);
+  gap: var(--dani-dex-space-6);
   align-content: start;
 }
 /* One line: the icon, the name over its tagline, and the actions at the end. The publisher is named
@@ -1276,7 +1276,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--openbot-space-2) var(--openbot-space-4);
+  gap: var(--dani-dex-space-2) var(--dani-dex-space-4);
 }
 .marketplace-plugin-heading-copy {
   flex: 1 1 auto;
@@ -1284,47 +1284,47 @@
 }
 .marketplace-plugin-heading-copy h1 {
   margin: 0;
-  font-size: var(--openbot-text-2xl);
-  font-weight: var(--openbot-weight-medium);
+  font-size: var(--dani-dex-text-2xl);
+  font-weight: var(--dani-dex-weight-medium);
 }
 .marketplace-plugin-heading-copy p {
-  margin: var(--openbot-space-1) 0 0;
+  margin: var(--dani-dex-space-1) 0 0;
 }
 .marketplace-plugin-heading-actions {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 /* Copy link stands beside the install group, so it takes the group's outside: the same height, which
    is one control plus the group's padding, and the same shell. Two pills of one size read as a pair;
    a shorter one reads as a smaller offer. */
 .marketplace-plugin-share {
-  height: calc(var(--openbot-control-md) + var(--openbot-space-1) * 2);
-  padding-inline: var(--openbot-space-4);
+  height: calc(var(--dani-dex-control-md) + var(--dani-dex-space-1) * 2);
+  padding-inline: var(--dani-dex-space-4);
   border: 0;
-  border-radius: var(--openbot-radius-pill);
-  background: var(--openbot-bg-control);
-  box-shadow: inset 0 0 0 1px var(--openbot-border-grouped);
+  border-radius: var(--dani-dex-radius-pill);
+  background: var(--dani-dex-bg-control);
+  box-shadow: inset 0 0 0 1px var(--dani-dex-border-grouped);
 }
 /* A label-and-icon button carries no size of its own for the mark beside the word, so these take the
    small one: a 24px icon dwarfs a one-word label. */
 .marketplace-plugin-heading-actions .ui-button > svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
   flex: 0 0 auto;
-  stroke-width: var(--openbot-icon-stroke);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 /* The showcase reuses the skill preview's card, gradient and request row: a plugin's examples and
    a skill's example are the same offer, so only the stack of three rows is new here. */
 .marketplace-plugin-prompts {
   place-items: stretch;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 .marketplace-plugin-prompts ul {
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   justify-self: center;
   width: min(100%, 520px);
   margin: 0;
@@ -1336,41 +1336,41 @@
 }
 
 .marketplace-plugin-detail > .marketplace-detail-lead {
-  font-size: var(--openbot-text-md);
-  line-height: var(--openbot-leading-lg);
+  font-size: var(--dani-dex-text-md);
+  line-height: var(--dani-dex-leading-lg);
 }
 
 .marketplace-plugin-section {
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 /* The count sits beside the title, and the group below is the only edge the section draws: a rule
    under the heading as well reads as two boundaries for one section. */
 .marketplace-plugin-section-title {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 /* A count is one or two digits, so the badge's pill shape and its side padding draw a lozenge around
    a single character. A square box the height of the badge holds every count at one width, and the
    figures line up between the sections. */
 .marketplace-plugin-section-count {
   min-width: 22px;
-  padding-inline: var(--openbot-space-1);
-  border-radius: var(--openbot-radius-sm);
+  padding-inline: var(--dani-dex-space-1);
+  border-radius: var(--dani-dex-radius-sm);
   font-variant-numeric: tabular-nums;
 }
 /* A row is not a card: the listing icon is drawn for a 42px card tile, and at that size it overshoots
    a compact row's two lines of text and pushes the row past the 52px the size is built on. One
    control unit holds the mark at the height of the title and description together. */
 .marketplace-plugin-section .ui-item .skills-marketplace-icon {
-  width: var(--openbot-control-md);
-  height: var(--openbot-control-md);
-  border-radius: var(--openbot-radius-md);
+  width: var(--dani-dex-control-md);
+  height: var(--dani-dex-control-md);
+  border-radius: var(--dani-dex-radius-md);
 }
 .marketplace-plugin-section .ui-item .skills-marketplace-icon svg {
-  width: var(--openbot-icon-md);
-  height: var(--openbot-icon-md);
+  width: var(--dani-dex-icon-md);
+  height: var(--dani-dex-icon-md);
 }
 
 .marketplace-plugin-row-description {
@@ -1383,28 +1383,28 @@
 /* The address and its mark read as one word: the link's own size, not the 24px an unsized icon
    draws at. */
 .marketplace-plugin-link {
-  gap: var(--openbot-space-1-5);
-  font-size: var(--openbot-text-sm);
+  gap: var(--dani-dex-space-1-5);
+  font-size: var(--dani-dex-text-sm);
 }
 .marketplace-plugin-link > svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
   flex: 0 0 auto;
-  stroke-width: var(--openbot-icon-stroke);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .marketplace-plugin-information {
   display: grid;
   grid-template-columns: 160px minmax(0, 1fr);
   align-items: center;
-  gap: var(--openbot-space-1) var(--openbot-space-4);
+  gap: var(--dani-dex-space-1) var(--dani-dex-space-4);
   margin: 0;
 }
 .marketplace-plugin-information dt,
 .marketplace-plugin-information dd {
   display: flex;
   align-items: center;
-  min-height: var(--openbot-control-md);
+  min-height: var(--dani-dex-control-md);
   margin: 0;
 }
 
@@ -1416,14 +1416,14 @@
   /* The address and its mark read as one word: the link's own size, not the 24px an unsized icon
    draws at. */
   .marketplace-plugin-link {
-    gap: var(--openbot-space-1-5);
-    font-size: var(--openbot-text-sm);
+    gap: var(--dani-dex-space-1-5);
+    font-size: var(--dani-dex-text-sm);
   }
   .marketplace-plugin-link > svg {
-    width: var(--openbot-icon-sm);
-    height: var(--openbot-icon-sm);
+    width: var(--dani-dex-icon-sm);
+    height: var(--dani-dex-icon-sm);
     flex: 0 0 auto;
-    stroke-width: var(--openbot-icon-stroke);
+    stroke-width: var(--dani-dex-icon-stroke);
   }
 
   .marketplace-plugin-information {
@@ -1437,7 +1437,7 @@
 
 /*
  * The uninstall confirmation. It opens over the marketplace modal, so it takes the nested step of
- * `--openbot-layer-dialog-host` the connect dialog takes, for the same reason: both portals are
+ * `--dani-dex-layer-dialog-host` the connect dialog takes, for the same reason: both portals are
  * children of `body`, and insertion order alone decides nothing reliable.
  *
  * Centred like the other destructive confirmations in the app - mark, question, one line - with the
@@ -1446,90 +1446,90 @@
 .plugin-uninstall-backdrop {
   position: fixed;
   inset: 0;
-  z-index: calc(var(--openbot-layer-dialog-host) + 2);
+  z-index: calc(var(--dani-dex-layer-dialog-host) + 2);
   display: grid;
   place-items: center;
-  padding: var(--openbot-space-6);
-  animation: plugin-uninstall-backdrop-in var(--openbot-duration-normal) var(--openbot-ease-out) both;
+  padding: var(--dani-dex-space-6);
+  animation: plugin-uninstall-backdrop-in var(--dani-dex-duration-normal) var(--dani-dex-ease-out) both;
 }
 .plugin-uninstall-dialog {
   width: min(420px, calc(100vw - 40px));
-  max-height: calc(100dvh - var(--openbot-space-6) * 2);
+  max-height: calc(100dvh - var(--dani-dex-space-6) * 2);
   overflow-y: auto;
   display: grid;
   justify-items: center;
   outline: 0;
-  border-radius: var(--openbot-radius-xl);
-  background: var(--openbot-bg-surface-raised);
-  padding: var(--openbot-space-6);
+  border-radius: var(--dani-dex-radius-xl);
+  background: var(--dani-dex-bg-surface-raised);
+  padding: var(--dani-dex-space-6);
   text-align: center;
-  animation: plugin-uninstall-in var(--openbot-duration-overlay) var(--openbot-ease-out) both;
+  animation: plugin-uninstall-in var(--dani-dex-duration-overlay) var(--dani-dex-ease-out) both;
 }
 .plugin-uninstall-icon {
   width: 44px;
   height: 44px;
   display: grid;
   place-items: center;
-  margin-bottom: var(--openbot-space-4);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-danger-soft);
-  color: var(--openbot-danger);
+  margin-bottom: var(--dani-dex-space-4);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-danger-soft);
+  color: var(--dani-dex-danger);
 }
 .plugin-uninstall-icon svg {
-  width: var(--openbot-icon-lg);
-  height: var(--openbot-icon-lg);
+  width: var(--dani-dex-icon-lg);
+  height: var(--dani-dex-icon-lg);
 }
 .plugin-uninstall-dialog h2 {
   margin: 0;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-2xl);
-  font-weight: var(--openbot-weight-semibold);
-  line-height: var(--openbot-leading-2xl);
-  letter-spacing: var(--openbot-tracking-tight);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-2xl);
+  font-weight: var(--dani-dex-weight-semibold);
+  line-height: var(--dani-dex-leading-2xl);
+  letter-spacing: var(--dani-dex-tracking-tight);
 }
 .plugin-uninstall-dialog > p {
   max-width: 340px;
-  margin: var(--openbot-space-2) 0 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-md);
-  line-height: var(--openbot-leading-md);
+  margin: var(--dani-dex-space-2) 0 0;
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-md);
+  line-height: var(--dani-dex-leading-md);
 }
 /* Each group is a caption over its names: what goes, and where it goes from. */
 .plugin-uninstall-group {
   width: 100%;
   display: grid;
-  gap: var(--openbot-space-2);
-  margin-top: var(--openbot-space-4);
+  gap: var(--dani-dex-space-2);
+  margin-top: var(--dani-dex-space-4);
   text-align: start;
 }
 .plugin-uninstall-list {
   display: grid;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
   margin: 0;
-  padding: var(--openbot-space-3);
-  border-radius: var(--openbot-radius-lg);
-  background: var(--openbot-bg-control);
+  padding: var(--dani-dex-space-3);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-control);
   list-style: none;
 }
 .plugin-uninstall-list li {
   display: flex;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   min-width: 0;
 }
 .plugin-uninstall-list li svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
   flex: 0 0 auto;
-  color: var(--openbot-text-muted);
-  stroke-width: var(--openbot-icon-stroke);
+  color: var(--dani-dex-text-muted);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 .plugin-uninstall-actions {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--openbot-space-2);
-  margin-top: var(--openbot-space-6);
+  gap: var(--dani-dex-space-2);
+  margin-top: var(--dani-dex-space-6);
 }
 
 @keyframes plugin-uninstall-backdrop-in {

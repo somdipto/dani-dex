@@ -98,7 +98,7 @@ export type {
 } from "@/features/workspace/model/workspace-types";
 
 // Five distinct hues for the server rail, taken from the palette's categorical set
-// (--openbot-file-blue/-orange/-teal/-pink and --openbot-success). Hardcoded because
+// (--dani-dex-file-blue/-orange/-teal/-pink and --dani-dex-success). Hardcoded because
 // @openbot/brand ships tokens as CSS only, and these are picked per index in JS.
 const SERVER_ACCENTS = ["#74b9ff", "#f0a06a", "#6bc7d9", "#d98ac9", "#31cf76"] as const;
 type RemoteAgent = Pick<

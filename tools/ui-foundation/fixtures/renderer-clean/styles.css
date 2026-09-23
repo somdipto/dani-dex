@@ -1,7 +1,7 @@
 /* A stylesheet in the widened scan's reach that spends none of the budget. */
 .panel {
-  color: var(--openbot-text);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text);
+  font-size: var(--dani-dex-text-sm);
   border-radius: 0;
   transition: none;
 }

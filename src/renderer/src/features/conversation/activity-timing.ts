@@ -7,13 +7,13 @@ export function rendererDuration(property: string, fallback: number): number {
 }
 
 export function agentActivityExitDuration(): number {
-  return rendererDuration("--openbot-duration-overlay", 240);
+  return rendererDuration("--dani-dex-duration-overlay", 240);
 }
 
 export function agentActivityShowDelay(): number {
-  return rendererDuration("--openbot-duration-fast", 120);
+  return rendererDuration("--dani-dex-duration-fast", 120);
 }
 
 export function agentActivityExitDelay(): number {
-  return rendererDuration("--openbot-agent-activity-exit-delay", 500);
+  return rendererDuration("--dani-dex-agent-activity-exit-delay", 500);
 }

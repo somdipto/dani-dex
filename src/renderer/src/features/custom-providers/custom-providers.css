@@ -5,10 +5,10 @@
 .custom-provider-backdrop {
   position: fixed;
   inset: 0;
-  z-index: var(--openbot-layer-dialog);
+  z-index: var(--dani-dex-layer-dialog);
   display: grid;
   place-items: center;
-  padding: var(--openbot-space-6);
+  padding: var(--dani-dex-space-6);
 }
 
 .custom-provider-dialog {
@@ -21,18 +21,18 @@
   /* The same radius the settings modal uses, so the two surfaces read as one family. It also nests
    * the close button: an 8px glyph target held 8px in from the corner asks for about 16px around it,
    * which 20px overshot. */
-  border-radius: var(--openbot-radius-card);
-  background: var(--openbot-bg-sidebar);
-  color: var(--openbot-text-primary);
+  border-radius: var(--dani-dex-radius-card);
+  background: var(--dani-dex-bg-sidebar);
+  color: var(--dani-dex-text-primary);
 }
 
 .custom-provider-header {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: var(--openbot-space-3);
-  border-bottom: 1px solid var(--openbot-border);
-  padding: var(--openbot-space-4);
+  gap: var(--dani-dex-space-3);
+  border-bottom: 1px solid var(--dani-dex-border);
+  padding: var(--dani-dex-space-4);
 }
 
 .custom-provider-mark {
@@ -41,9 +41,9 @@
   height: 28px;
   flex: 0 0 28px;
   place-items: center;
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-accent-soft);
-  color: var(--openbot-accent-text);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-accent-soft);
+  color: var(--dani-dex-accent-text);
 }
 
 .custom-provider-title {
@@ -59,9 +59,9 @@
 .custom-provider-close {
   flex: 0 0 auto;
   align-self: flex-start;
-  margin-block-start: calc(var(--openbot-space-2) * -1);
-  margin-inline-end: calc(var(--openbot-space-2) * -1);
-  color: var(--openbot-text-muted);
+  margin-block-start: calc(var(--dani-dex-space-2) * -1);
+  margin-inline-end: calc(var(--dani-dex-space-2) * -1);
+  color: var(--dani-dex-text-muted);
 }
 
 /* The form is the layout box; the fields inside it are what scrolls, so the footer stays put and
@@ -76,9 +76,9 @@
   display: flex;
   min-height: 0;
   flex-direction: column;
-  gap: var(--openbot-space-4);
+  gap: var(--dani-dex-space-4);
   overflow-y: auto;
-  padding: var(--openbot-space-4);
+  padding: var(--dani-dex-space-4);
 }
 
 /* The saved endpoints scroll on the same terms the form's fields do, so both dialogs keep their
@@ -87,33 +87,33 @@
   display: flex;
   min-height: 0;
   flex-direction: column;
-  gap: var(--openbot-space-4);
+  gap: var(--dani-dex-space-4);
   overflow-y: auto;
-  padding: var(--openbot-space-4);
+  padding: var(--dani-dex-space-4);
 }
 
 .custom-provider-list-empty {
-  padding: var(--openbot-space-4) 0;
+  padding: var(--dani-dex-space-4) 0;
   text-align: center;
 }
 
 .custom-provider-rows {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 
 .custom-provider-rows-heading {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 
 .custom-provider-row {
   display: flex;
   flex-direction: column;
-  gap: var(--openbot-space-1);
+  gap: var(--dani-dex-space-1);
 }
 
 /* Two equal columns and a trash button: the model ID and its display name carry the same weight,
@@ -121,7 +121,7 @@
 .custom-provider-row-inputs {
   display: grid;
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
 }
 
@@ -136,9 +136,9 @@
   flex-shrink: 0;
   flex-direction: column;
   align-items: center;
-  gap: var(--openbot-space-2);
-  border-top: 1px solid var(--openbot-border);
-  padding: var(--openbot-space-4);
+  gap: var(--dani-dex-space-2);
+  border-top: 1px solid var(--dani-dex-border);
+  padding: var(--dani-dex-space-4);
 }
 
 .custom-provider-actions .ui-button-variant-default {
@@ -148,7 +148,7 @@
 /* Same reason as the picker heading: only the direct children here are the label-and-icon buttons.
  * The nested remove buttons are icon-only and already sized by .ui-icon-button. */
 .custom-provider-rows > .ui-button svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
-  stroke-width: var(--openbot-icon-stroke);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
+  stroke-width: var(--dani-dex-icon-stroke);
 }

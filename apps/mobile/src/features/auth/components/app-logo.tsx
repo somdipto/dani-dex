@@ -33,8 +33,8 @@ export function AppLogo({
   interactive = false,
   size = VIEWBOX_SIZE,
 }: AppLogoProps) {
-  const backgroundColor = resolveColor(useCSSVariable("--openbot-logo-production"), "#d6adf2");
-  const eyeColor = resolveColor(useCSSVariable("--openbot-logo-eye"), "#040007");
+  const backgroundColor = resolveColor(useCSSVariable("--dani-dex-logo-production"), "#d6adf2");
+  const eyeColor = resolveColor(useCSSVariable("--dani-dex-logo-eye"), "#040007");
   const { deviceRotationAnimatedStyle, handlePressIn, leftEyeAnimatedStyle, rightEyeAnimatedStyle } = useAppLogoMotion({
     animation,
     followDeviceOrientation,

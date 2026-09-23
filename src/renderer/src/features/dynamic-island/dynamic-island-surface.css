@@ -13,8 +13,8 @@ body:has(.dynamic-island-surface),
   display: flex;
   justify-content: center;
   background: transparent;
-  color: var(--openbot-text-primary);
-  font-family: var(--openbot-font-sans);
+  color: var(--dani-dex-text-primary);
+  font-family: var(--dani-dex-font-sans);
   user-select: none;
 }
 
@@ -124,7 +124,7 @@ body:has(.dynamic-island-surface),
   width: 100%;
   height: 100%;
   flex: 0 0 auto;
-  border-radius: var(--openbot-radius-xs);
+  border-radius: var(--dani-dex-radius-xs);
 }
 
 .dynamic-island-external.dynamic-island-idle .dynamic-island-surface-logo {
@@ -143,12 +143,12 @@ body:has(.dynamic-island-surface),
 
 .dynamic-island-surface-idle-greeting {
   position: relative;
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
   display: block;
   flex: 0 0 auto;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  font-size: var(--openbot-text-md);
+  font-size: var(--dani-dex-text-md);
   line-height: 1;
 }
 
@@ -159,7 +159,7 @@ body:has(.dynamic-island-surface),
   place-items: center;
   opacity: 0;
   transform: translateY(-1px);
-  transition: opacity 250ms var(--openbot-ease-out);
+  transition: opacity 250ms var(--dani-dex-ease-out);
 }
 
 .dynamic-island-external.dynamic-island-idle .dynamic-island-surface-idle-greeting-layer {
@@ -193,7 +193,7 @@ body:has(.dynamic-island-surface),
   transform: translate3d(0, 0, 0);
   transform-origin: center;
   transition:
-    opacity var(--openbot-duration-fast) var(--openbot-ease-out),
+    opacity var(--dani-dex-duration-fast) var(--dani-dex-ease-out),
     transform 450ms var(--dynamic-island-shared-ease);
 }
 
@@ -202,8 +202,8 @@ body:has(.dynamic-island-surface),
   width: 20px;
   height: 20px;
   flex: 0 0 auto;
-  border: 1px solid var(--openbot-bg-notch);
-  border-radius: var(--openbot-radius-pill);
+  border: 1px solid var(--dani-dex-bg-notch);
+  border-radius: var(--dani-dex-radius-pill);
 }
 
 .dynamic-island-surface-compact-identity {
@@ -213,21 +213,21 @@ body:has(.dynamic-island-surface),
 .dynamic-island-surface-compact-name {
   position: absolute;
   top: 50%;
-  left: calc(100% + var(--openbot-space-1-5));
+  left: calc(100% + var(--dani-dex-space-1-5));
   width: max-content;
   overflow: hidden;
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-semibold);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-semibold);
+  line-height: var(--dani-dex-leading-sm);
   text-align: left;
   text-overflow: ellipsis;
   transform: translateY(-50%);
-  transition: opacity var(--openbot-duration-fast) var(--openbot-ease-out);
+  transition: opacity var(--dani-dex-duration-fast) var(--dani-dex-ease-out);
 }
 
 .dynamic-island-surface-status-badge {
-  font-weight: var(--openbot-weight-semibold);
+  font-weight: var(--dani-dex-weight-semibold);
 }
 
 .dynamic-island-surface-status-badge-label {
@@ -237,21 +237,21 @@ body:has(.dynamic-island-surface),
 }
 
 .dynamic-island-surface-status-badge-icon {
-  stroke-width: var(--openbot-icon-stroke);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .dynamic-island-surface-question-badge {
-  background: var(--openbot-question-badge-soft);
-  color: var(--openbot-question-badge-text);
+  background: var(--dani-dex-question-badge-soft);
+  color: var(--dani-dex-question-badge-text);
 }
 
 .dynamic-island-surface-message-badge {
-  background: var(--openbot-message-badge-soft);
-  color: var(--openbot-message-badge-text);
+  background: var(--dani-dex-message-badge-soft);
+  color: var(--dani-dex-message-badge-text);
 }
 
 .dynamic-island-surface-working-badge .ui-spinner {
-  border-color: var(--openbot-success-soft);
+  border-color: var(--dani-dex-success-soft);
   border-top-color: currentColor;
 }
 
@@ -270,7 +270,7 @@ body:has(.dynamic-island-surface),
 }
 
 .dynamic-island-working[data-state="expanded"] .dynamic-island-surface-avatar-stack > * {
-  transition-duration: var(--openbot-duration-fast), var(--dynamic-island-shared-duration);
+  transition-duration: var(--dani-dex-duration-fast), var(--dynamic-island-shared-duration);
 }
 
 .dynamic-island-working[data-state="expanded"] .dynamic-island-surface-avatar-stack > :nth-child(2) {
@@ -283,18 +283,18 @@ body:has(.dynamic-island-surface),
 
 @media (prefers-reduced-motion: reduce) {
   .dynamic-island-surface-avatar-stack > * {
-    transition-duration: var(--openbot-duration-hover);
+    transition-duration: var(--dani-dex-duration-hover);
   }
 }
 
 .dynamic-island-surface-approval-badge {
-  background: var(--openbot-approval-badge-soft);
-  color: var(--openbot-warning);
+  background: var(--dani-dex-approval-badge-soft);
+  color: var(--dani-dex-warning);
 }
 
 .dynamic-island-surface-takeover-badge {
-  background: var(--openbot-accent-soft);
-  color: var(--openbot-accent-text);
+  background: var(--dani-dex-accent-soft);
+  color: var(--dani-dex-accent-text);
 }
 
 .dynamic-island-surface-content-swap {
@@ -322,26 +322,26 @@ body:has(.dynamic-island-surface),
 
 .dynamic-island-surface-row {
   min-width: 0;
-  width: calc(100% + 2 * var(--openbot-space-2));
+  width: calc(100% + 2 * var(--dani-dex-space-2));
   height: auto;
   min-height: 44px;
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr);
   align-items: center;
-  gap: var(--openbot-space-2);
-  margin-inline: calc(-1 * var(--openbot-space-2));
+  gap: var(--dani-dex-space-2);
+  margin-inline: calc(-1 * var(--dani-dex-space-2));
   border: 0;
-  border-radius: var(--openbot-radius-md);
+  border-radius: var(--dani-dex-radius-md);
   background: transparent;
-  padding: var(--openbot-space-1-5) var(--openbot-space-2);
+  padding: var(--dani-dex-space-1-5) var(--dani-dex-space-2);
   color: inherit;
   cursor: pointer;
   font: inherit;
   outline: none;
   text-align: left;
   transition:
-    background-color var(--openbot-duration-normal) var(--openbot-ease-out),
-    transform var(--openbot-duration-normal) var(--openbot-ease-out);
+    background-color var(--dani-dex-duration-normal) var(--dani-dex-ease-out),
+    transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .dynamic-island-surface-row .dynamic-island-surface-avatar,
@@ -352,7 +352,7 @@ body:has(.dynamic-island-surface),
 
 @media (hover: hover) and (pointer: fine) {
   .dynamic-island-surface-row:hover {
-    background: var(--openbot-hover);
+    background: var(--dani-dex-hover);
   }
 }
 
@@ -361,10 +361,10 @@ body:has(.dynamic-island-surface),
 }
 
 .dynamic-island-surface-row:focus-visible {
-  background: var(--openbot-hover);
+  background: var(--dani-dex-hover);
   box-shadow:
-    inset 0 0 0 1px var(--openbot-border-focus),
-    0 0 0 3px var(--openbot-accent-soft);
+    inset 0 0 0 1px var(--dani-dex-border-focus),
+    0 0 0 3px var(--dani-dex-accent-soft);
 }
 
 .dynamic-island-surface-row-copy {
@@ -376,34 +376,34 @@ body:has(.dynamic-island-surface),
 
 .dynamic-island-surface-row strong {
   overflow: hidden;
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-medium);
-  line-height: var(--openbot-leading-sm);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-medium);
+  line-height: var(--dani-dex-leading-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .dynamic-island-surface-row small {
   overflow: hidden;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-regular);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-regular);
+  line-height: var(--dani-dex-leading-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .dynamic-island-message-first-panel {
   display: grid;
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 
 .dynamic-island-message-first-unread {
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-regular);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-regular);
   font-variant-numeric: tabular-nums;
-  line-height: var(--openbot-leading-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 .dynamic-island-message-first-footer {
@@ -411,14 +411,14 @@ body:has(.dynamic-island-surface),
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--openbot-space-3);
-  border-top: 1px solid var(--openbot-border);
-  padding-top: var(--openbot-space-2);
+  gap: var(--dani-dex-space-3);
+  border-top: 1px solid var(--dani-dex-border);
+  padding-top: var(--dani-dex-space-2);
 }
 
 .dynamic-island-message-first-footer .ui-button {
   min-width: 92px;
-  transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+  transition: transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .dynamic-island-message-first-footer .ui-button:active {
@@ -426,27 +426,27 @@ body:has(.dynamic-island-surface),
 }
 
 .dynamic-island-message-first-footer svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
-  stroke-width: var(--openbot-icon-stroke);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .dynamic-island-surface-attention-panel {
-  gap: var(--openbot-space-3);
+  gap: var(--dani-dex-space-3);
 }
 
 .dynamic-island-surface-request-copy {
   min-width: 0;
   width: 100%;
   display: grid;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 
 .dynamic-island-surface-command {
   min-width: 0;
   display: grid;
   gap: 3px;
-  border-left: 1px solid var(--openbot-warning);
+  border-left: 1px solid var(--dani-dex-warning);
   padding: 2px 0 2px 10px;
 }
 
@@ -455,15 +455,15 @@ body:has(.dynamic-island-surface),
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
 }
 
 .dynamic-island-surface-command-meta small,
 .dynamic-island-surface-command-meta span {
   overflow: hidden;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -479,10 +479,10 @@ body:has(.dynamic-island-surface),
 
 .dynamic-island-surface-command code {
   overflow: hidden;
-  color: var(--openbot-text-primary);
-  font-family: var(--openbot-font-mono);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-primary);
+  font-family: var(--dani-dex-font-mono);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -491,22 +491,22 @@ body:has(.dynamic-island-surface),
   min-width: 0;
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   align-items: baseline;
 }
 
 .dynamic-island-surface-context-line small,
 .dynamic-island-surface-more {
-  color: var(--openbot-text-dim);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-dim);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 div.dynamic-island-surface-context-line span {
   overflow: hidden;
-  color: var(--openbot-text-secondary);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-secondary);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -531,10 +531,10 @@ div.dynamic-island-surface-context-line span {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);
   align-items: center;
-  gap: var(--openbot-space-2);
+  gap: var(--dani-dex-space-2);
   border: 0;
-  border-radius: var(--openbot-radius-md);
-  background: var(--openbot-question-option-soft);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-question-option-soft);
   padding: 7px 10px;
   color: inherit;
   cursor: pointer;
@@ -542,8 +542,8 @@ div.dynamic-island-surface-context-line span {
   text-align: left;
   outline: none;
   transition:
-    background-color var(--openbot-duration-fast) var(--openbot-ease-out),
-    transform var(--openbot-duration-fast) var(--openbot-ease-out);
+    background-color var(--dani-dex-duration-fast) var(--dani-dex-ease-out),
+    transform var(--dani-dex-duration-fast) var(--dani-dex-ease-out);
 }
 
 .dynamic-island-surface-question-option-copy {
@@ -560,17 +560,17 @@ div.dynamic-island-surface-context-line span {
 }
 
 .dynamic-island-surface-question-option-copy strong {
-  color: var(--openbot-text-primary);
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-medium);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-primary);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-medium);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 .dynamic-island-surface-question-option-copy small {
   min-width: 0;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
-  line-height: var(--openbot-leading-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
+  line-height: var(--dani-dex-leading-sm);
 }
 
 .dynamic-island-surface-question-option-index {
@@ -579,48 +579,48 @@ div.dynamic-island-surface-context-line span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--openbot-radius-sm);
-  background: var(--openbot-question-option-hover);
-  color: var(--openbot-question-option);
-  font-size: var(--openbot-text-sm);
-  font-weight: var(--openbot-weight-semibold);
+  border-radius: var(--dani-dex-radius-sm);
+  background: var(--dani-dex-question-option-hover);
+  color: var(--dani-dex-question-option);
+  font-size: var(--dani-dex-text-sm);
+  font-weight: var(--dani-dex-weight-semibold);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .dynamic-island-surface-question-options button:hover:not(:disabled):not([data-disabled]) {
-    background: var(--openbot-question-option-hover);
+    background: var(--dani-dex-question-option-hover);
   }
 }
 
 .dynamic-island-surface-question-options button:active:not(:disabled):not([data-disabled]) {
-  background: var(--openbot-question-option-pressed);
+  background: var(--dani-dex-question-option-pressed);
   transform: scale(0.96);
 }
 
 .dynamic-island-surface-question-options button:focus-visible {
   box-shadow:
-    inset 0 0 0 1px var(--openbot-question-option),
-    0 0 0 3px var(--openbot-question-option-soft);
+    inset 0 0 0 1px var(--dani-dex-question-option),
+    0 0 0 3px var(--dani-dex-question-option-soft);
 }
 
 .dynamic-island-surface-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--openbot-space-1);
-  border-top: 1px solid var(--openbot-border);
-  padding-top: var(--openbot-space-2);
+  gap: var(--dani-dex-space-1);
+  border-top: 1px solid var(--dani-dex-border);
+  padding-top: var(--dani-dex-space-2);
 }
 
 .dynamic-island-surface-actions svg {
-  width: var(--openbot-icon-sm);
-  height: var(--openbot-icon-sm);
-  stroke-width: var(--openbot-icon-stroke);
+  width: var(--dani-dex-icon-sm);
+  height: var(--dani-dex-icon-sm);
+  stroke-width: var(--dani-dex-icon-stroke);
 }
 
 .dynamic-island-surface-attention-panel .ui-button {
-  transition: transform var(--openbot-duration-normal) var(--openbot-ease-out);
+  transition: transform var(--dani-dex-duration-normal) var(--dani-dex-ease-out);
 }
 
 .dynamic-island-surface-attention-panel .ui-button:active {
@@ -635,10 +635,10 @@ div.dynamic-island-surface-context-line span {
   display: inline-flex;
   align-items: baseline;
   padding-top: 2px;
-  color: var(--openbot-text-muted);
-  font-size: var(--openbot-text-sm);
+  color: var(--dani-dex-text-muted);
+  font-size: var(--dani-dex-text-sm);
   font-variant-numeric: tabular-nums;
-  line-height: var(--openbot-leading-sm);
+  line-height: var(--dani-dex-leading-sm);
   white-space: nowrap;
 }
 
@@ -676,7 +676,7 @@ div.dynamic-island-surface-context-line span {
 }
 
 .dynamic-island-surface-animated-row {
-  animation: dynamic-island-surface-row-in var(--openbot-duration-slow) var(--openbot-ease-out) both;
+  animation: dynamic-island-surface-row-in var(--dani-dex-duration-slow) var(--dani-dex-ease-out) both;
 }
 
 .dynamic-island-surface-animated-row:nth-child(2) {
