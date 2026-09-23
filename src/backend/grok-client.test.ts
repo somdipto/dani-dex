@@ -25,7 +25,7 @@ let logPath: string;
 let client: AcpAgentClient | null = null;
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "openbot-grok-acp-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-grok-acp-"));
   executable = join(root, "grok");
   logPath = join(root, "fake-grok.jsonl");
   await writeFile(executable, FAKE_GROK_ACP);
@@ -246,7 +246,7 @@ describe.sequential("GrokAgentClient", () => {
         decodeTurnResponse,
       );
       await waitFor(() => notifications.some((notification) => notification.method === "turn/completed"));
-      expect(notifications.find((event) => event.method === "openbot/usage")?.params).toMatchObject({
+      expect(notifications.find((event) => event.method === "danidex/usage")?.params).toMatchObject({
         usage: { inputTokens: 300, outputTokens: 50, cachedReadTokens: 200 },
       });
       const history = await client.request("thread/read", { threadId: thread.id }, decodeThreadResponse);

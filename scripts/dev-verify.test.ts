@@ -28,7 +28,7 @@ describe("dev verification planning", () => {
   });
 
   it("builds the narrow renderer verification loop", () => {
-    const root = mkdtempSync(join(tmpdir(), "openbot-dev-verify-"));
+    const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-verify-"));
     mkdirSync(join(root, "src/renderer/src"), { recursive: true });
     writeFileSync(join(root, "src/renderer/src/App.test.tsx"), "export {};\n");
     expect(verificationCommands(["src/renderer/src/App.test.tsx"], ["renderer"], true, false, root)).toEqual({
@@ -53,7 +53,7 @@ describe("dev verification planning", () => {
   });
 
   it("finds a sibling test for a changed source file", () => {
-    const root = mkdtempSync(join(tmpdir(), "openbot-dev-verify-"));
+    const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-verify-"));
     mkdirSync(join(root, "src/main"), { recursive: true });
     writeFileSync(join(root, "src/main/example.ts"), "export const value = 1;\n");
     writeFileSync(join(root, "src/main/example.test.ts"), "export {};\n");
@@ -61,7 +61,7 @@ describe("dev verification planning", () => {
   });
 
   it("routes delegated tests to their workspace runners", () => {
-    const root = mkdtempSync(join(tmpdir(), "openbot-dev-verify-"));
+    const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-verify-"));
     const files = [
       "apps/auth-api/test/auth-service.test.ts",
       "apps/auth-api/test/content.test.tsx",
@@ -84,12 +84,12 @@ describe("dev verification planning", () => {
   });
 
   it("does not suggest a deleted test", () => {
-    const root = mkdtempSync(join(tmpdir(), "openbot-dev-verify-"));
+    const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-verify-"));
     expect(suggestedTestsForFiles(["src/main/deleted.test.ts"], root)).toEqual([]);
   });
 
   it("keeps API builds out of safe execution and avoids repeated typechecks", () => {
-    const root = mkdtempSync(join(tmpdir(), "openbot-dev-verify-"));
+    const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-verify-"));
     const plan = verificationCommands(
       [
         "apps/auth-api/src/index.ts",
@@ -155,7 +155,7 @@ describe("dev verification planning", () => {
   });
 
   it("reports setup blockers before dependencies are installed", async () => {
-    const root = mkdtempSync(join(tmpdir(), "openbot-dev-verify-fresh-"));
+    const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-verify-fresh-"));
     mkdirSync(join(root, "apps/auth-api"), { recursive: true });
     writeFileSync(join(root, "README.md"), "fresh checkout\n");
     execFileSync("git", ["init"], { cwd: root });
@@ -179,7 +179,7 @@ describe("dev verification planning", () => {
   });
 
   it("prints setup blockers and skips --run checks when setup is incomplete", () => {
-    const root = mkdtempSync(join(tmpdir(), "openbot-dev-verify-run-fresh-"));
+    const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-verify-run-fresh-"));
     mkdirSync(join(root, "apps/auth-api"), { recursive: true });
     writeFileSync(join(root, "README.md"), "fresh checkout\n");
     execFileSync("git", ["init"], { cwd: root });

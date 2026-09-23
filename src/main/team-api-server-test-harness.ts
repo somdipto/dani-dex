@@ -198,7 +198,7 @@ export async function createTeamApiFixture(
   slug: string,
   settings: { configure?: boolean } = {},
 ): Promise<TeamApiFixture> {
-  const root = await mkdtemp(join(tmpdir(), `openbot-team-api-${slug}-`));
+  const root = await mkdtemp(join(tmpdir(), `dani-dex-team-api-${slug}-`));
   roots.push(root);
   const store = new TeamStore(join(root, "team.json"));
   await store.initialize();

@@ -10,7 +10,7 @@ const projectRoot = fileURLToPath(new URL("../apps/mobile", import.meta.url));
 
 describe("mobile RocketSim integration", () => {
   it.skipIf(process.platform !== "darwin")("runs without RocketSim by default and enables it only on request", () => {
-    const directory = mkdtempSync(join(tmpdir(), "openbot-mobile-ios-"));
+    const directory = mkdtempSync(join(tmpdir(), "dani-dex-mobile-ios-"));
     const launcher = fileURLToPath(new URL("./mobile-ios.ts", import.meta.url));
     const expo = createRequire(join(projectRoot, "package.json")).resolve("expo/bin/cli");
     const app = join(directory, "RocketSim.app");

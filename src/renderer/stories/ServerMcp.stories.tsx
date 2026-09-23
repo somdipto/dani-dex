@@ -229,7 +229,7 @@ export const AddCustomStdio: Story = {
     await userEvent.click(body.getByRole("button", { name: "Add argument" }));
     await enter(await body.findByRole("textbox", { name: "Argument 2" }), "--database");
     await userEvent.click(body.getByRole("button", { name: "Add argument" }));
-    await enter(await body.findByRole("textbox", { name: "Argument 3" }), "./openbot.db");
+    await enter(await body.findByRole("textbox", { name: "Argument 3" }), "./danidex.db");
     await enter(body.getByRole("textbox", { name: "Environment variable 1 key" }), "SQLITE_READONLY");
     await enter(body.getByRole("textbox", { name: "Environment variable 1 value" }), "1");
     await enter(body.getByRole("textbox", { name: "Working directory" }), "~/code");
@@ -245,7 +245,7 @@ export const AddCustomStdio: Story = {
         name: "Local SQLite",
         transport: "stdio",
         command: "openai-dev-mcp",
-        args: ["serve-sqlite", "--database", "./openbot.db"],
+        args: ["serve-sqlite", "--database", "./danidex.db"],
         env: [{ key: "SQLITE_READONLY", value: "1" }],
         workingDirectory: "~/code",
         url: "",
@@ -281,7 +281,7 @@ export const EditExisting: Story = {
     await expect(await body.findByRole("textbox", { name: "Name" })).toHaveValue("Local SQLite");
     await expect(body.getByRole("textbox", { name: "Command to launch" })).toHaveValue("openai-dev-mcp");
     await expect(body.getByRole("textbox", { name: "Argument 1" })).toHaveValue("serve-sqlite");
-    await expect(body.getByRole("textbox", { name: "Argument 3" })).toHaveValue("./openbot.db");
+    await expect(body.getByRole("textbox", { name: "Argument 3" })).toHaveValue("./danidex.db");
     await expect(body.getByRole("textbox", { name: "Environment variable 1 key" })).toHaveValue("SQLITE_READONLY");
   },
 };

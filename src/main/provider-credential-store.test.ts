@@ -16,7 +16,7 @@ const cipher = {
 };
 
 async function createStore(): Promise<{ path: string; store: ProviderCredentialStore }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-provider-credentials-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-provider-credentials-"));
   const path = join(root, "credentials.json");
   const store = new ProviderCredentialStore(path, cipher);
   await store.load();
@@ -147,7 +147,7 @@ describe("ProviderCredentialStore", () => {
   });
 
   it("refuses to report a key before it is loaded", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-provider-credentials-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-provider-credentials-"));
     const store = new ProviderCredentialStore(join(root, "credentials.json"), cipher);
     // Reporting "no key" here would start the free tier for a user who paid for the full catalog,
     // and the mistake would look like an OpenCode fault rather than a load Dani-Dex never ran.

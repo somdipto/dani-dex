@@ -274,7 +274,7 @@ export class DrainScheduler {
                 "Do not send a reply, an acknowledgement, or a result for it. Dani-Dex sends the sender nothing back.",
               ]
             : [
-                `After completing the request, send a concise result back to ${sender?.name ?? senderAgentId} with openbot.send_message.`,
+                `After completing the request, send a concise result back to ${sender?.name ?? senderAgentId} with danidex.send_message.`,
                 `Use recipientAgentIds ["${senderAgentId}"], replyToMessageId "${delivery.messageId}", and expectsReply false.`,
                 "Format the reply as three lines: Status: done | partial | blocked, Result: <concrete outcome>, Evidence: <file, test, command, or none>.",
                 "Do not acknowledge without a Status line. Do not leave the sender waiting for a result.",

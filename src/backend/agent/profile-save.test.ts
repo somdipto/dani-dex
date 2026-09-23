@@ -24,7 +24,7 @@ const draft: AgentProfileDraft = {
   sectionId: null,
 };
 async function fixture() {
-  const root = await mkdtemp(join(tmpdir(), "openbot-profile-save-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-profile-save-"));
   const store = new AgentStore(join(root, "data"), join(root, "home"));
   await store.initialize();
   const sidebar = new SidebarLayoutStore(join(root, "sidebar.json"));

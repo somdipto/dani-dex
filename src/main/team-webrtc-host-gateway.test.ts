@@ -61,7 +61,7 @@ class FakeBridge extends TeamWebRtcBridge {
 
 describe("TeamWebRtcHostGateway", () => {
   it("isolates devices' RPCs, live subscriptions and revocation while preserving authenticated reconnects", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-webrtc-host-gateway-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-webrtc-host-gateway-"));
     directories.push(directory);
     const bridge = new FakeBridge();
     const store = new TeamStore(join(directory, "team.json"));
@@ -101,7 +101,7 @@ describe("TeamWebRtcHostGateway", () => {
     const localServer = createServer((request, response) => {
       localRequests.push({
         path: request.url ?? "",
-        protocol: String(request.headers["openbot-protocol-version"] ?? ""),
+        protocol: String(request.headers["dani-dex-protocol-version"] ?? ""),
       });
       if (request.url === "/v1/attachments/file-1") {
         response.writeHead(200, {
@@ -112,7 +112,7 @@ describe("TeamWebRtcHostGateway", () => {
         return;
       }
       if (request.url === "/v1/agents/bot-1/conversation/unread") {
-        const supported = request.headers["openbot-protocol-version"] === "3";
+        const supported = request.headers["dani-dex-protocol-version"] === "3";
         response.writeHead(supported ? 200 : 400, { "content-type": "application/json" });
         response.end(JSON.stringify(supported ? unreadState : { error: "Mark unread requires protocol 3." }));
         return;
@@ -574,7 +574,7 @@ describe("TeamWebRtcHostGateway", () => {
   });
 
   it("drops only the active WebRTC peer after a malformed known frame", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-webrtc-host-protocol-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-webrtc-host-protocol-"));
     directories.push(directory);
     const bridge = new FakeBridge();
     const store = new TeamStore(join(directory, "team.json"));

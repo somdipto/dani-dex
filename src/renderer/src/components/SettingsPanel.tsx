@@ -3,7 +3,7 @@ import { createSignal, createUniqueId, Show } from "solid-js";
 import { PanelResizer, readPanelWidth, savePanelWidth } from "./PanelResizer";
 import { Button, ChevronRight, FieldContext } from "./ui";
 
-export const SETTINGS_PANEL_STORAGE_KEY = "openbot:settings-panel-width";
+export const SETTINGS_PANEL_STORAGE_KEY = "danidex:settings-panel-width";
 export const SETTINGS_PANEL_DEFAULT = 296;
 export const SETTINGS_PANEL_MIN = 180;
 export const SETTINGS_PANEL_MAX = 1600;

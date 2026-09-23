@@ -16,7 +16,7 @@ export type QueueEditRequest =
     };
 export function isQueueEditRoute(method: string, path: string): boolean {
   return (
-    method === "POST" && /^\/v1\/agents\/[^/]+\/queue\/edit$/u.test(new URL(path, "http://openbot.invalid").pathname)
+    method === "POST" && /^\/v1\/agents\/[^/]+\/queue\/edit$/u.test(new URL(path, "http://danidex.invalid").pathname)
   );
 }
 export function decodeQueueEditRequest(value: unknown): QueueEditRequest {

@@ -107,7 +107,7 @@ export class AgentMemories {
     this.#memories.duplicate(sourceAgentId, targetAgentId);
   }
 
-  /** The two `openbot` memory tools. Returns null when `tool` is not one of them. */
+  /** The two `danidex` memory tools. Returns null when `tool` is not one of them. */
   handleTool(params: DynamicToolCallParams, senderAgentId: string): DaniDexToolResponse | null {
     if (params.tool === "remember") {
       const args = params.arguments;

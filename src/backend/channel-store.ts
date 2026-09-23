@@ -360,7 +360,7 @@ export class ChannelStore {
         throughSequence: requiredNumberColumn(row, "through_sequence"),
         summaryVersion: requiredNumberColumn(row, "summary_version"),
       };
-    const threadId = `openbot-thread-${randomUUID()}`;
+    const threadId = `dani-dex-thread-${randomUUID()}`;
     return this.database.dispatch(
       `channel-context:${channelId}:${agentId}`,
       [

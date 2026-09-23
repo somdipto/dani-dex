@@ -133,7 +133,7 @@ function createTransport(
     getPrincipalId: () => "user-1",
     controlPlaneUrl: "https://api.example.test",
     downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
-    transferDirectory: join(tmpdir(), "openbot-webrtc-client-test"),
+    transferDirectory: join(tmpdir(), "dani-dex-webrtc-client-test"),
     ...overrides,
   });
 }
@@ -202,7 +202,7 @@ describe("TeamWebRtcClientTransport", () => {
       getPrincipalId: () => "user-1",
       controlPlaneUrl: "https://api.example.test",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
-      transferDirectory: join(tmpdir(), "openbot-webrtc-client-test"),
+      transferDirectory: join(tmpdir(), "dani-dex-webrtc-client-test"),
     });
     await transport.listHosts();
     await expect(transport.connect("host-1")).rejects.toThrow("pinned device key");
@@ -358,7 +358,7 @@ describe("TeamWebRtcClientTransport", () => {
       getPrincipalId: () => "user-1",
       controlPlaneUrl: "https://api.example.test",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
-      transferDirectory: join(tmpdir(), "openbot-webrtc-client-cancel-test"),
+      transferDirectory: join(tmpdir(), "dani-dex-webrtc-client-cancel-test"),
     });
     transport.pinHostKey("host-1", hostKeys.publicKey);
 
@@ -422,7 +422,7 @@ describe("TeamWebRtcClientTransport", () => {
       getPrincipalId: () => principalId,
       controlPlaneUrl: "https://api.example.test",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
-      transferDirectory: join(tmpdir(), "openbot-webrtc-client-principal-test"),
+      transferDirectory: join(tmpdir(), "dani-dex-webrtc-client-principal-test"),
     });
     transport.pinHostKey("host-1", hostKeys.publicKey);
 
@@ -488,7 +488,7 @@ describe("TeamWebRtcClientTransport", () => {
       getPrincipalId: () => "user-1",
       controlPlaneUrl: "https://api.example.test",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
-      transferDirectory: join(tmpdir(), "openbot-webrtc-client-expiration-test"),
+      transferDirectory: join(tmpdir(), "dani-dex-webrtc-client-expiration-test"),
     });
     transport.pinHostKey("host-1", hostKeys.publicKey);
 
@@ -663,7 +663,7 @@ describe("TeamWebRtcClientTransport", () => {
       getPrincipalId: () => "user-1",
       controlPlaneUrl: "https://api.example.test",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
-      transferDirectory: join(tmpdir(), "openbot-webrtc-client-failure-test"),
+      transferDirectory: join(tmpdir(), "dani-dex-webrtc-client-failure-test"),
     });
     transport.pinHostKey("host-1", hostKeys.publicKey);
 

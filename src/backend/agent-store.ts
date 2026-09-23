@@ -122,12 +122,12 @@ export class AgentStore {
   #creationQueue: Promise<void> = Promise.resolve();
 
   constructor(userDataPath: string, homePath: string, database = new DaniDexDatabase(userDataPath)) {
-    const openbotRoot = join(homePath, "Dani-Dex");
+    const danidexRoot = join(homePath, "Dani-Dex");
     this.#statePath = join(userDataPath, LEGACY_AGENTS_STATE_FILE);
-    this.#agentsRoot = join(openbotRoot, "Agents");
-    this.#legacyAgentsRoot = join(openbotRoot, "Bots");
-    this.#sharedRoot = join(openbotRoot, "Shared");
-    this.#downloadsRoot = join(openbotRoot, "Downloads");
+    this.#agentsRoot = join(danidexRoot, "Agents");
+    this.#legacyAgentsRoot = join(danidexRoot, "Bots");
+    this.#sharedRoot = join(danidexRoot, "Shared");
+    this.#downloadsRoot = join(danidexRoot, "Downloads");
     this.#avatarsRoot = join(userDataPath, "avatars", "agents");
     this.#duplicationsRoot = join(userDataPath, "agent-duplications");
     this.#database = database;
@@ -305,9 +305,9 @@ export class AgentStore {
     record.avatarSeed = source.avatarSeed;
     record.avatarHue = source.avatarHue;
 
-    const stagedWorkspace = `${record.workspacePath}.openbot-stage`;
+    const stagedWorkspace = `${record.workspacePath}.dani-dex-stage`;
     const avatarDirectory = join(this.#avatarsRoot, record.id);
-    const stagedAvatarDirectory = `${avatarDirectory}.openbot-stage`;
+    const stagedAvatarDirectory = `${avatarDirectory}.dani-dex-stage`;
     const duplicationMarker = this.#duplicationMarkerPath(record.id);
     let stagedAvatarPath: string | null = null;
     try {
@@ -614,9 +614,9 @@ export class AgentStore {
     const agent = this.#state.agents.find((candidate) => candidate.id === id);
     for (const path of [
       join(this.#avatarsRoot, id),
-      `${join(this.#avatarsRoot, id)}.openbot-stage`,
+      `${join(this.#avatarsRoot, id)}.dani-dex-stage`,
       join(this.#agentsRoot, id),
-      `${join(this.#agentsRoot, id)}.openbot-stage`,
+      `${join(this.#agentsRoot, id)}.dani-dex-stage`,
     ]) {
       await rm(path, { recursive: true, force: true });
     }
@@ -821,14 +821,14 @@ export class AgentStore {
     // are deleted rather than moved.
     await Promise.all(
       entries
-        .filter((entry) => entry.endsWith(".openbot-stage"))
+        .filter((entry) => entry.endsWith(".dani-dex-stage"))
         .map((entry) =>
           rm(join(this.#legacyAgentsRoot, entry), { recursive: true, force: true }).catch((error: unknown) => {
             logger.warn("Could not remove an unfinished copy under the legacy workspace root.", toLogValue(error));
           }),
         ),
     );
-    if (!entries.every((entry) => entry.endsWith(".openbot-stage"))) return;
+    if (!entries.every((entry) => entry.endsWith(".dani-dex-stage"))) return;
     try {
       await rmdir(this.#legacyAgentsRoot);
     } catch (error) {
@@ -875,7 +875,7 @@ export class AgentStore {
         ...roots.flatMap((root) =>
           names.flatMap((name) => [
             rm(join(root, name), { recursive: true, force: true }),
-            rm(`${join(root, name)}.openbot-stage`, { recursive: true, force: true }),
+            rm(`${join(root, name)}.dani-dex-stage`, { recursive: true, force: true }),
           ]),
         ),
         rm(join(this.#duplicationsRoot, entry.name), { force: true }),
@@ -1501,7 +1501,7 @@ function stringList(value: unknown): string[] {
 }
 
 function agentAvatarUrl(agentId: string, version: string, mimeType: string): string {
-  const url = new URL(`openbot-avatar://agent/${encodeURIComponent(agentId)}`);
+  const url = new URL(`dani-dex-avatar://agent/${encodeURIComponent(agentId)}`);
   url.searchParams.set("v", version);
   url.searchParams.set("type", mimeType);
   return url.toString();
@@ -1517,7 +1517,7 @@ function parseAgentAvatarUrl(
     const version = url.searchParams.get("v") ?? "";
     const mimeType = url.searchParams.get("type") ?? "";
     if (
-      url.protocol !== "openbot-avatar:" ||
+      url.protocol !== "dani-dex-avatar:" ||
       url.hostname !== "agent" ||
       agentId !== expectedAgentId ||
       !isUuidV4(version) ||

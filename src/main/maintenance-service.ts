@@ -31,7 +31,7 @@ export async function exportDaniDexData(
   );
   if (!destination) return { saved: false };
 
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-export-"));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-export-"));
   const exportRoot = join(temporaryRoot, "Dani-Dex Backup");
   const archiveCandidate = `${destination}.${randomUUID()}.tmp.zip`;
   try {
@@ -64,7 +64,7 @@ export async function exportDaniDexData(
       conversations,
       queues,
     };
-    await writeFile(join(exportRoot, "openbot-data.json"), `${JSON.stringify(manifest, null, 2)}\n`, {
+    await writeFile(join(exportRoot, "dani-dex-data.json"), `${JSON.stringify(manifest, null, 2)}\n`, {
       encoding: "utf8",
       mode: 0o600,
     });

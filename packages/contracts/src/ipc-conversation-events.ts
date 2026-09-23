@@ -241,7 +241,7 @@ export function isHostedSiteConversationEventUrl(value: unknown, hostname: unkno
     const port = Number(parsed.port);
     const label = hostname.slice(0, -".openbot.site".length);
     return (
-      Number.isInteger(port) && port >= 1_024 && port <= 65_535 && parsed.hostname === `${label}.openbot.localhost`
+      Number.isInteger(port) && port >= 1_024 && port <= 65_535 && parsed.hostname === `${label}.danidex.localhost`
     );
   } catch {
     return false;

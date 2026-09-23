@@ -543,7 +543,7 @@ describe("hosted site conversation events", () => {
   });
 
   it("accepts a matching local development URL for a canonical hosted-site hostname", () => {
-    const localUrl = "http://launch-page-23456789ab.openbot.localhost:3100/";
+    const localUrl = "http://launch-page-23456789ab.danidex.localhost:3100/";
     const details = { ...publishedSite, url: localUrl };
     const message = {
       id: "local-site-publish",
@@ -559,12 +559,12 @@ describe("hosted site conversation events", () => {
     expect(isHostedSiteConversationEventUrl(localUrl, publishedSite.hostname)).toBe(true);
     expect(
       isHostedSiteConversationEventUrl(
-        "http://different-page-23456789ab.openbot.localhost:3100/",
+        "http://different-page-23456789ab.danidex.localhost:3100/",
         publishedSite.hostname,
       ),
     ).toBe(false);
     expect(
-      isHostedSiteConversationEventUrl("http://launch-page-23456789ab.openbot.localhost/", publishedSite.hostname),
+      isHostedSiteConversationEventUrl("http://launch-page-23456789ab.danidex.localhost/", publishedSite.hostname),
     ).toBe(false);
   });
 

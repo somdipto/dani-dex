@@ -859,11 +859,11 @@ window.addEventListener("paste", (event) => {
 });
 window.addEventListener("change", (event) => {
   const input = event.target;
-  if (!(input instanceof HTMLInputElement) || input.dataset.openbotAttachmentPicker !== "true") return;
+  if (!(input instanceof HTMLInputElement) || input.dataset.danidexAttachmentPicker !== "true") return;
   void importFiles([...(input.files ?? [])]);
 });
 
-const openbotApi: DaniDexDesktopApi = {
+const danidexApi: DaniDexDesktopApi = {
   getAppInfo: () => ipcRenderer.invoke(IPC_CHANNELS.getAppInfo),
   getSetupState: () => ipcRenderer.invoke(IPC_CHANNELS.getSetupState),
   saveSetup: (input) => ipcRenderer.invoke(IPC_CHANNELS.saveSetup, input),
@@ -1346,7 +1346,7 @@ const openbotApi: DaniDexDesktopApi = {
   },
 };
 
-contextBridge.exposeInMainWorld("danidex", openbotApi);
+contextBridge.exposeInMainWorld("danidex", danidexApi);
 
 function decodeAgentAnalyticsFromMain(value: unknown) {
   return decodeOptionalAgentAnalytics(value);

@@ -22,7 +22,7 @@ import type { ComposerDraft, ConversationProps, RightPanelMode, SidebarFilePrevi
 
 const SETTINGS_PANEL_DEFAULT = 296;
 const BROWSER_PANEL_DEFAULT = 380;
-const BROWSER_PIP_STORAGE_KEY = "openbot:browser-pip-native-bounds";
+const BROWSER_PIP_STORAGE_KEY = "danidex:browser-pip-native-bounds";
 
 function readBrowserPipBounds(): BrowserBounds | null {
   const values = (window.localStorage.getItem(BROWSER_PIP_STORAGE_KEY) ?? "")

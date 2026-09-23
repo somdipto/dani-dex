@@ -68,7 +68,7 @@ const MAX_BROWSER_UPLOAD_BYTES_PER_TAB = ATTACHMENT_LIMITS.totalBytes;
 const MAX_BROWSER_UPLOAD_BYTES_TOTAL = ATTACHMENT_LIMITS.totalBytes * 2;
 
 /**
- * Staging for `openbot_browser.upload_files`.
+ * Staging for `danidex_browser.upload_files`.
  *
  * A tab keeps a file input's selection until the page navigates, and a page can keep the `File` objects
  * it took from an earlier selection for just as long, so the files behind both have to outlive the tool
@@ -145,7 +145,7 @@ export class BrowserUploads {
         root: null,
       };
       this.#reserve(tabId, reservationId, reservation);
-      stagingRoot = await mkdtemp(join(tmpdir(), "openbot-browser-upload-"));
+      stagingRoot = await mkdtemp(join(tmpdir(), "dani-dex-browser-upload-"));
       reservation.root = stagingRoot;
       if (reservation.invalidated) throw new Error("The browser document changed during upload staging.");
       await chmod(stagingRoot, 0o700);

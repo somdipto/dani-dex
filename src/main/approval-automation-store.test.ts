@@ -24,8 +24,8 @@ describe("approval automation store", () => {
 
   it("preserves the released file and gives the new settings precedence after migration", async () => {
     const root = await temporaryRoot();
-    const legacyPath = join(root, "openbot-approval-automation-v1.json");
-    const path = join(root, "openbot-approval-automation-v2.json");
+    const legacyPath = join(root, "dani-dex-approval-automation-v1.json");
+    const path = join(root, "dani-dex-approval-automation-v2.json");
     const legacy = JSON.stringify({ version: 1, turbo: true, autoApproveAgentIds: ["agent-1"] });
     await writeFile(legacyPath, legacy);
     const initial = await readApprovalAutomation(path, ["agent-1", "agent-2"], legacyPath);
@@ -281,7 +281,7 @@ async function entries(root: string): Promise<string[]> {
 }
 
 async function temporaryRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-approval-automation-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-approval-automation-"));
   roots.push(root);
   await mkdir(root, { recursive: true });
   return root;

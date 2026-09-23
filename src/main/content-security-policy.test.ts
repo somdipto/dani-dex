@@ -6,7 +6,7 @@ describe("buildContentSecurityPolicy", () => {
     const policy = buildContentSecurityPolicy(true);
 
     expect(policy).toContain(
-      "connect-src 'self' openbot-attachment: openbot-remote-attachment: https://analytics.openbot.run ws://127.0.0.1:* wss://*.openbot.run",
+      "connect-src 'self' dani-dex-attachment: dani-dex-remote-attachment: https://analytics.openbot.run ws://127.0.0.1:* wss://*.openbot.run",
     );
     expect(policy.split("; ").find((directive) => directive.startsWith("connect-src "))).not.toContain("localhost");
   });
@@ -14,7 +14,7 @@ describe("buildContentSecurityPolicy", () => {
   it.each([true, false])("allows loopback viewer frames when packaged=%s", (packaged) => {
     const directives = buildContentSecurityPolicy(packaged).split("; ");
     expect(directives.find((directive) => directive.startsWith("frame-src "))).toBe(
-      "frame-src 'self' openbot-attachment: openbot-remote-attachment: https://*.openbot.run http://127.0.0.1:* http://localhost:*",
+      "frame-src 'self' dani-dex-attachment: dani-dex-remote-attachment: https://*.openbot.run http://127.0.0.1:* http://localhost:*",
     );
     expect(directives.find((directive) => directive.startsWith("script-src "))).toBe("script-src 'self'");
   });
@@ -22,8 +22,8 @@ describe("buildContentSecurityPolicy", () => {
   it("lets the renderer play an attachment recording, but only from the attachment schemes", () => {
     const policy = buildContentSecurityPolicy(true);
 
-    expect(policy).toContain("media-src 'self' blob: openbot-attachment: openbot-remote-attachment:");
-    expect(policy).not.toContain("media-src 'self' blob: openbot-attachment: openbot-remote-attachment: https:");
+    expect(policy).toContain("media-src 'self' blob: dani-dex-attachment: dani-dex-remote-attachment:");
+    expect(policy).not.toContain("media-src 'self' blob: dani-dex-attachment: dani-dex-remote-attachment: https:");
   });
 
   it("keeps local development sources", () => {

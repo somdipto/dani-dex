@@ -9,7 +9,7 @@ import { useSetup } from "../onboarding/onboarding-context";
 import { DEFAULT_GENERAL_SETTINGS, type GeneralSettingsValue } from "./app-settings";
 import { isOpenSettingsShortcut } from "./settings-shortcut";
 
-const ANALYTICS_APP_VERSION_STORAGE_KEY = "openbot:analytics-app-version";
+const ANALYTICS_APP_VERSION_STORAGE_KEY = "danidex:analytics-app-version";
 
 /**
  * Application-wide preferences and the two surfaces that edit them: the
@@ -37,7 +37,7 @@ const Settings = createSimpleContext({
     const [analyticsPreferenceLoaded, setAnalyticsPreferenceLoaded] = createSignal<boolean | null>(null);
     const [skillsMarketplaceOpen, setSkillsMarketplaceOpen] = createSignal(false);
     /**
-     * The plugin an `openbot://plugins/<slug>` link asked for, held beside the open flag because the
+     * The plugin an `dani-dex://plugins/<slug>` link asked for, held beside the open flag because the
      * marketplace is loaded lazily: the slug has to outlive the chunk load that shows it. It is a
      * slug and never a listing, so the link cannot describe what the user is about to install.
      */

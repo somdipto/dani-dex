@@ -8,7 +8,7 @@ import { clamp } from "../../components/ui/utils";
 const MESSAGE_TEXT_SELECTOR = ".message-copy[data-selection-message-id]";
 const INTERACTIVE_SELECTOR =
   'a, button, input, textarea, select, [contenteditable="true"], [role="button"], .message-citation';
-const HIGHLIGHT_NAME = "openbot-message-selection";
+const HIGHLIGHT_NAME = "dani-dex-message-selection";
 const VIEWPORT_MARGIN = 12;
 const TOOLBAR_GAP = 8;
 

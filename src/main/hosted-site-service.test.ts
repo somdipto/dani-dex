@@ -176,7 +176,7 @@ describe("hosted site upload recovery", () => {
 });
 
 async function fixture(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-site-test-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-site-test-"));
   roots.push(root);
   return root;
 }

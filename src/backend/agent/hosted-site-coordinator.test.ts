@@ -79,7 +79,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
       const params = {
         threadId,
         turnId,
-        namespace: "openbot",
+        namespace: "danidex",
         tool: `${action}_site`,
         arguments: {
           siteId: site.id,
@@ -143,7 +143,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
     const hostedSite = {
       id: "site-1",
       hostname: "approved-public-site-for-students-k7m2q9tzab.openbot.site",
-      url: "http://approved-public-site-for-students-k7m2q9tzab.openbot.localhost:3100/",
+      url: "http://approved-public-site-for-students-k7m2q9tzab.danidex.localhost:3100/",
       title: "Approved public site",
       description: "A public test site.",
       framework: "vanilla" as const,
@@ -189,7 +189,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "invalid-site-approval",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "publish_site",
         arguments: { title: "Hidden source", description: "This request has no source path." },
       },
@@ -204,7 +204,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "publish-site-approval",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "publish_site",
         arguments: {
           sourcePath: agent.workspacePath,
@@ -266,7 +266,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "publish-site-persistence-failure",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "publish_site",
         arguments: {
           sourcePath: agent.workspacePath,
@@ -292,7 +292,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "delete-site-approval",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "delete_site",
         arguments: { siteId: "site-1" },
       },
@@ -373,7 +373,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "replace-site-approval",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "replace_site",
         arguments: {
           siteId: hostedSite.id,
@@ -398,7 +398,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "delete-site-success",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "delete_site",
         arguments: { siteId: hostedSite.id },
       },
@@ -471,7 +471,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "publish-site-durable-result",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "publish_site",
         arguments: {
           sourcePath: agent.workspacePath,
@@ -576,7 +576,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "delete-legacy-site",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "delete_site",
         arguments: { siteId: hostedSite.id },
       },
@@ -691,7 +691,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
         threadId,
         turnId,
         callId: "publish-site-response-failure",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "publish_site",
         arguments: {
           sourcePath: agent.workspacePath,

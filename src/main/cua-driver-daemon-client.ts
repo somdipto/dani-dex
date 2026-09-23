@@ -26,7 +26,7 @@ const REQUEST_TIMEOUT_MS = 2_000;
  */
 const MAX_RESPONSE_BYTES = 4_194_304;
 /** The lease this connection takes, which the daemon keeps alive while the connection is open. */
-const SESSION_ID = "openbot-highlight";
+const SESSION_ID = "dani-dex-highlight";
 /**
  * How this lease is told apart from an agent's in `sessions_list`, which is what keeps the rim from
  * reading its own connection as an agent holding the desktop.

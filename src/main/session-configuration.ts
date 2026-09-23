@@ -56,7 +56,7 @@ export interface AttachmentProtocolDependencies {
 }
 
 export function configureAttachmentProtocol({ mailbox, agents, remoteServers }: AttachmentProtocolDependencies): void {
-  session.defaultSession.protocol.handle("openbot-attachment", async (request) => {
+  session.defaultSession.protocol.handle("dani-dex-attachment", async (request) => {
     try {
       const url = new URL(request.url);
       const id = url.pathname.split("/").filter(Boolean).at(-1);
@@ -76,7 +76,7 @@ export function configureAttachmentProtocol({ mailbox, agents, remoteServers }: 
       return new Response("Not found", { status: 404 });
     }
   });
-  session.defaultSession.protocol.handle("openbot-remote-attachment", async (request) => {
+  session.defaultSession.protocol.handle("dani-dex-remote-attachment", async (request) => {
     try {
       const url = new URL(request.url);
       const serverId = decodeURIComponent(url.hostname);
@@ -97,7 +97,7 @@ export function configureAttachmentProtocol({ mailbox, agents, remoteServers }: 
       return new Response("Not found", { status: 404 });
     }
   });
-  session.defaultSession.protocol.handle("openbot-avatar", async (request) => {
+  session.defaultSession.protocol.handle("dani-dex-avatar", async (request) => {
     try {
       const url = new URL(request.url);
       if (url.hostname !== "agent") return new Response("Not found", { status: 404 });
@@ -117,7 +117,7 @@ export function configureAttachmentProtocol({ mailbox, agents, remoteServers }: 
       return new Response("Not found", { status: 404 });
     }
   });
-  session.defaultSession.protocol.handle("openbot-remote-avatar", async (request) => {
+  session.defaultSession.protocol.handle("dani-dex-remote-avatar", async (request) => {
     try {
       const url = new URL(request.url);
       const serverId = decodeURIComponent(url.hostname);
@@ -145,7 +145,7 @@ export interface ServerLogoProtocolDependencies {
 }
 
 export function configureServerLogoProtocols({ teamStore, remoteServers }: ServerLogoProtocolDependencies): void {
-  session.defaultSession.protocol.handle("openbot-server-logo", async (request) => {
+  session.defaultSession.protocol.handle("dani-dex-server-logo", async (request) => {
     try {
       const url = new URL(request.url);
       const logo = teamStore.resolveLogo();
@@ -163,7 +163,7 @@ export function configureServerLogoProtocols({ teamStore, remoteServers }: Serve
       return new Response("Not found", { status: 404 });
     }
   });
-  session.defaultSession.protocol.handle("openbot-remote-server-logo", async (request) => {
+  session.defaultSession.protocol.handle("dani-dex-remote-server-logo", async (request) => {
     try {
       const url = new URL(request.url);
       const serverId = decodeURIComponent(url.hostname);
@@ -185,7 +185,7 @@ export function configureServerLogoProtocols({ teamStore, remoteServers }: Serve
 
 export function configureApplicationProtocol(): void {
   const rendererRoot = resolve(__dirname, "../renderer");
-  session.defaultSession.protocol.handle("openbot-app", async (request) => {
+  session.defaultSession.protocol.handle("dani-dex-app", async (request) => {
     try {
       const url = new URL(request.url);
       if (url.host !== "app") return new Response("Not found", { status: 404 });

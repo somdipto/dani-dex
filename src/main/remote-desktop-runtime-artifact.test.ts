@@ -6,7 +6,7 @@ import { resolveRemoteDesktopRuntime } from "./remote-desktop-runtime-artifact";
 
 describe("resolveRemoteDesktopRuntime", () => {
   it("requires all three pinned runtime executables", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-runtime-test-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-runtime-test-"));
     await mkdir(join(root, "Sunshine.app", "Contents", "MacOS"), { recursive: true });
     await Promise.all([
       writeFile(join(root, "Sunshine.app", "Contents", "MacOS", "Sunshine"), "sunshine"),

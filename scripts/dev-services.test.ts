@@ -127,7 +127,7 @@ describe("development service runner", () => {
     expect(environment).toEqual({
       SITE_PUBLISH_ENABLED: "true",
       SITE_COOKIE_ISOLATION_READY: "true",
-      SITE_LOCAL_ORIGIN: "http://openbot.localhost:3100",
+      SITE_LOCAL_ORIGIN: "http://danidex.localhost:3100",
     });
   });
 

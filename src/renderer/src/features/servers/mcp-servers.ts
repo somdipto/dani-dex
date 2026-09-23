@@ -134,7 +134,7 @@ export function mcpToolRuntimeNote(status: ProviderRuntimeStatus | undefined): s
   return null;
 }
 
-const MCP_CONFIG_DOOR_NOTICE_STORAGE_KEY = "openbot:mcp-config-door-notice";
+const MCP_CONFIG_DOOR_NOTICE_STORAGE_KEY = "danidex:mcp-config-door-notice";
 
 /** Reads and writes the one flag below, so a test can answer twice without a browser. */
 type NoticeStorage = Pick<Storage, "getItem" | "setItem">;

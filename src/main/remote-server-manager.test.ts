@@ -66,12 +66,12 @@ describe("remote browser responses", () => {
 describe("remote server links", () => {
   it("creates token-free preview URLs", () => {
     const preview = remoteAttachmentPreviewUrl("00000000-0000-4000-8000-000000000000", "draft 1");
-    expect(preview).toBe("openbot-remote-attachment://00000000-0000-4000-8000-000000000000/draft%201");
+    expect(preview).toBe("dani-dex-remote-attachment://00000000-0000-4000-8000-000000000000/draft%201");
     expect(preview).not.toContain("token");
   });
 
   it("rejects a WebRTC invitation whose pinned host key does not match the control plane", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-webrtc-invite-key-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-webrtc-invite-key-"));
     const statePath = join(directory, "servers.json");
     const hostId = "00000000-0000-4000-8000-000000000000";
     const acceptInvite = vi.fn();
@@ -137,7 +137,7 @@ describe("remote server links", () => {
   });
 
   it("disconnects a stored WebRTC host removed from the authenticated directory", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-webrtc-revoked-host-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-webrtc-revoked-host-"));
     const statePath = join(directory, "servers.json");
     const hostId = "revoked-host";
     await writeFile(
@@ -234,7 +234,7 @@ describe("remote server links", () => {
       apiUrl: "http://localhost:63762",
       fingerprint: "fingerprint",
       publicKey: "public-key",
-      username: "openbot-dev-client",
+      username: "dani-dex-dev-client",
       sessionToken: "development-token",
     });
 
@@ -244,7 +244,7 @@ describe("remote server links", () => {
   });
 
   it("keeps the saved WebRTC host order and loads Remote Desktop readiness after connection", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-webrtc-host-order-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-webrtc-host-order-"));
     const statePath = join(directory, "servers.json");
     const alphaId = "00000000-0000-4000-8000-000000000001";
     const betaId = "00000000-0000-4000-8000-000000000002";
@@ -417,7 +417,7 @@ describe("remote server links", () => {
   });
 
   it("sends viewer JSON through RPC and keeps viewer authorization errors scoped to Remote Desktop", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-webrtc-viewer-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-webrtc-viewer-"));
     const statePath = join(directory, "servers.json");
     const hostId = "viewer-host";
     const publicKey = "viewer-host-public-key";
@@ -535,7 +535,7 @@ describe("remote server links", () => {
 
 describe("remote server order", () => {
   it("recovers the persistence queue after a write failure", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-server-persistence-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-server-persistence-"));
     const unavailableDirectory = `${directory}-unavailable`;
     const statePath = join(directory, "servers.json");
     await writeFile(
@@ -587,7 +587,7 @@ describe("remote server order", () => {
   });
 
   it("keeps the local server first and persists the remote server order", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-server-order-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-server-order-"));
     const statePath = join(directory, "servers.json");
     const storedServer = (id: string) => ({
       id,
@@ -634,7 +634,7 @@ describe("remote server order", () => {
   });
 
   it("downloads shared and workspace files with authenticated requests", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-shared-download-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-shared-download-"));
     const statePath = join(directory, "servers.json");
     const serverId = "remote-shared";
     await writeFile(
@@ -920,14 +920,14 @@ describe("remote connection failures", () => {
 
 describe("remote control capability discovery", () => {
   it("joins a server when remote control is unavailable", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-remote-capability-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-remote-capability-"));
     const statePath = join(directory, "servers.json");
     const serverId = "00000000-0000-4000-8000-000000000000";
     const apiUrl = "https://remote-capability.trycloudflare.com/";
     const { publicKey, privateKey } = generateKeyPairSync("ed25519");
     const publicKeyPem = publicKey.export({ type: "spki", format: "pem" }).toString();
     const expectedFingerprint = fingerprint(publicKeyPem);
-    const inviteUrl = new URL("openbot://join");
+    const inviteUrl = new URL("dani-dex://join");
     inviteUrl.searchParams.set("api", apiUrl);
     inviteUrl.searchParams.set("server", serverId);
     inviteUrl.searchParams.set("fingerprint", expectedFingerprint);

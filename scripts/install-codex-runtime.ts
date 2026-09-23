@@ -54,7 +54,7 @@ export async function installCodexRuntime(
     throw new Error(`The ${target} Codex runtime archive checksum is invalid.`);
   }
 
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-codex-install-"));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-codex-install-"));
   try {
     const archive = join(temporaryRoot, artifact.asset);
     const extracted = join(temporaryRoot, "extracted");

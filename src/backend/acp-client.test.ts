@@ -192,7 +192,7 @@ interface FakeOpencode {
 }
 
 async function createFakeOpencodeAgent(source?: "system" | "managed"): Promise<FakeOpencode> {
-  const directory = await mkdtemp(join(tmpdir(), "openbot-acp-opencode-"));
+  const directory = await mkdtemp(join(tmpdir(), "dani-dex-acp-opencode-"));
   const executable = join(directory, "opencode");
   await writeFile(executable, FAKE_AGENT);
   await chmod(executable, 0o755);
@@ -557,7 +557,7 @@ describe("OpenCode ACP reasoning efforts", () => {
 describe("OpenCode ACP MCP servers", () => {
   it("sends the enabled servers as ACP name/value pairs", async () => {
     const fake = await createFakeOpencodeAgent("system");
-    const sessionLog = join(tmpdir(), `openbot-acp-session-${Date.now()}.ndjson`);
+    const sessionLog = join(tmpdir(), `dani-dex-acp-session-${Date.now()}.ndjson`);
     vi.stubEnv("DANI_DEX_FAKE_ACP_SESSION_LOG", sessionLog);
     const configs: McpServerConfig[] = [
       {
@@ -627,7 +627,7 @@ describe("OpenCode ACP MCP servers", () => {
 describe("OpenCode MCP sign-in", () => {
   it("gives the session the token Dani-Dex minted for an http server", async () => {
     const fake = await createFakeOpencodeAgent();
-    const sessionLog = join(tmpdir(), `openbot-acp-signin-${Date.now()}.ndjson`);
+    const sessionLog = join(tmpdir(), `dani-dex-acp-signin-${Date.now()}.ndjson`);
     vi.stubEnv("DANI_DEX_FAKE_ACP_SESSION_LOG", sessionLog);
     const config: McpServerConfig = {
       id: "mcp-1",

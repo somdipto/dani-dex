@@ -73,7 +73,7 @@ const installedSkills: InstalledSkill[] = [
   },
   {
     skillId: "skill-site-hosting",
-    slug: "openbot-site-hosting",
+    slug: "dani-dex-site-hosting",
     name: "Site Hosting",
     installedVersion: 1,
     availableVersion: 1,

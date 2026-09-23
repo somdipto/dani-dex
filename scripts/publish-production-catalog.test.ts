@@ -25,8 +25,8 @@ describe("production catalog publication", () => {
       skills: [
         {
           featured: true,
-          id: "openbot-curated-skill-example",
-          versionId: "openbot-curated-version-example-v1-deadbeefdeadbeef",
+          id: "dani-dex-curated-skill-example",
+          versionId: "dani-dex-curated-version-example-v1-deadbeefdeadbeef",
           slug: "example",
           name: "Example",
           description: "An example skill.",
@@ -42,12 +42,12 @@ describe("production catalog publication", () => {
         {
           featured: true,
           category: "research",
-          id: "openbot-curated-agent-example",
-          versionId: "openbot-curated-agent-version-example-v1-deadbeefdeadbeef",
+          id: "dani-dex-curated-agent-example",
+          versionId: "dani-dex-curated-agent-version-example-v1-deadbeefdeadbeef",
           name: "Example Agent",
           title: "Example",
           description: "An example agent.",
-          avatarSeed: "openbot-curated-agent-example",
+          avatarSeed: "dani-dex-curated-agent-example",
           avatarHue: 120,
           version: 1,
           skills: [],
@@ -64,21 +64,21 @@ describe("production catalog publication", () => {
       agents: publication.agents.map((agent) => ({ ...agent, version: 2, versionId: `${agent.versionId}-v2` })),
     };
 
-    expect(sql).toContain("'openbot-production-catalog'");
+    expect(sql).toContain("'dani-dex-production-catalog'");
     expect(sql).toContain("'Dani-Dex'");
     expect(sql.match(/'approved'/gu)).toHaveLength(2);
     expect(sql).toContain("ON CONFLICT(id) DO NOTHING");
     expect(sql).not.toMatch(/DO UPDATE SET[^;]*(?:installs|featured)/u);
     expect(sql).toContain(
-      "skills/openbot-curated-skill-example/versions/openbot-curated-version-example-v1-deadbeefdeadbeef.zip",
+      "skills/dani-dex-curated-skill-example/versions/dani-dex-curated-version-example-v1-deadbeefdeadbeef.zip",
     );
     expect(sql).toContain(
-      "skills/openbot-curated-skill-example/versions/openbot-curated-version-example-v1-deadbeefdeadbeef.icon",
+      "skills/dani-dex-curated-skill-example/versions/dani-dex-curated-version-example-v1-deadbeefdeadbeef.icon",
     );
 
     const verification = spawnSync("/usr/bin/sqlite3", [":memory:"], {
       encoding: "utf8",
-      input: `${schema}\n${sql}\nCREATE TEMP TABLE initial AS SELECT (SELECT featured FROM marketplace_skills) AS skill_featured, (SELECT featured FROM marketplace_agents) AS agent_featured;\nUPDATE users SET avatar_url = NULL;\nUPDATE marketplace_skill_versions SET icon_key = NULL;\nUPDATE marketplace_skills SET installs = 8, featured = 0, show_creator_avatar = 0;\nUPDATE marketplace_agents SET installs = 5, featured = 0, show_creator_avatar = 0;\n${createPublicationSql(newer, 4567)}\n${createPublicationSql(publication, 5678)}\n.mode json\nSELECT (SELECT name FROM users WHERE id = 'openbot-production-catalog') AS owner, (SELECT avatar_url FROM users WHERE id = 'openbot-production-catalog') AS owner_avatar, (SELECT show_creator_avatar FROM marketplace_skills) AS skill_creator_avatar, (SELECT show_creator_avatar FROM marketplace_agents) AS agent_creator_avatar, (SELECT installs FROM marketplace_skills) AS skill_installs, (SELECT featured FROM marketplace_skills) AS skill_featured, (SELECT installs FROM marketplace_agents) AS agent_installs, (SELECT featured FROM marketplace_agents) AS agent_featured, (SELECT icon_key FROM marketplace_skill_versions WHERE id = (SELECT approved_version_id FROM marketplace_skills)) AS skill_icon, (SELECT status FROM marketplace_skill_versions) AS skill_status, (SELECT status FROM marketplace_agent_versions) AS agent_status, (SELECT category FROM marketplace_agent_versions) AS category, (SELECT skill_featured FROM initial) AS initial_skill_featured, (SELECT agent_featured FROM initial) AS initial_agent_featured, (SELECT count(*) FROM marketplace_skill_versions) AS skill_versions, (SELECT version FROM marketplace_skill_versions WHERE id = (SELECT approved_version_id FROM marketplace_skills)) AS approved_skill_version, (SELECT version FROM marketplace_agent_versions WHERE id = (SELECT approved_version_id FROM marketplace_agents)) AS approved_agent_version;\n`,
+      input: `${schema}\n${sql}\nCREATE TEMP TABLE initial AS SELECT (SELECT featured FROM marketplace_skills) AS skill_featured, (SELECT featured FROM marketplace_agents) AS agent_featured;\nUPDATE users SET avatar_url = NULL;\nUPDATE marketplace_skill_versions SET icon_key = NULL;\nUPDATE marketplace_skills SET installs = 8, featured = 0, show_creator_avatar = 0;\nUPDATE marketplace_agents SET installs = 5, featured = 0, show_creator_avatar = 0;\n${createPublicationSql(newer, 4567)}\n${createPublicationSql(publication, 5678)}\n.mode json\nSELECT (SELECT name FROM users WHERE id = 'dani-dex-production-catalog') AS owner, (SELECT avatar_url FROM users WHERE id = 'dani-dex-production-catalog') AS owner_avatar, (SELECT show_creator_avatar FROM marketplace_skills) AS skill_creator_avatar, (SELECT show_creator_avatar FROM marketplace_agents) AS agent_creator_avatar, (SELECT installs FROM marketplace_skills) AS skill_installs, (SELECT featured FROM marketplace_skills) AS skill_featured, (SELECT installs FROM marketplace_agents) AS agent_installs, (SELECT featured FROM marketplace_agents) AS agent_featured, (SELECT icon_key FROM marketplace_skill_versions WHERE id = (SELECT approved_version_id FROM marketplace_skills)) AS skill_icon, (SELECT status FROM marketplace_skill_versions) AS skill_status, (SELECT status FROM marketplace_agent_versions) AS agent_status, (SELECT category FROM marketplace_agent_versions) AS category, (SELECT skill_featured FROM initial) AS initial_skill_featured, (SELECT agent_featured FROM initial) AS initial_agent_featured, (SELECT count(*) FROM marketplace_skill_versions) AS skill_versions, (SELECT version FROM marketplace_skill_versions WHERE id = (SELECT approved_version_id FROM marketplace_skills)) AS approved_skill_version, (SELECT version FROM marketplace_agent_versions WHERE id = (SELECT approved_version_id FROM marketplace_agents)) AS approved_agent_version;\n`,
     });
     expect(verification.status).toBe(0);
     expect(JSON.parse(verification.stdout)).toEqual([
@@ -92,7 +92,7 @@ describe("production catalog publication", () => {
         agent_installs: 5,
         agent_featured: 0,
         skill_icon:
-          "skills/openbot-curated-skill-example/versions/openbot-curated-version-example-v1-deadbeefdeadbeef-v2.icon",
+          "skills/dani-dex-curated-skill-example/versions/dani-dex-curated-version-example-v1-deadbeefdeadbeef-v2.icon",
         skill_status: "approved",
         agent_status: "approved",
         category: "research",

@@ -96,7 +96,7 @@ function withUsageReadTimeout<T>(promise: Promise<T>): Promise<T> {
  * server the user configured in their own provider files is still nobody's failure but theirs.
  */
 export function isMcpSubsystemDiagnostic(message: string, configuredNames: readonly string[] = []): boolean {
-  if (/openbot/i.test(message)) return false;
+  if (/danidex/i.test(message)) return false;
   if (configuredNames.some((name) => name && message.includes(name))) return false;
   return /\b(mcp|rmcp)\b/i.test(message);
 }
@@ -116,7 +116,7 @@ export function isMcpSubsystemDiagnostic(message: string, configuredNames: reado
  * that does not name telemetry, is the provider's work and stays visible.
  */
 export function isTelemetryExportDiagnostic(message: string): boolean {
-  if (/openbot/i.test(message)) return false;
+  if (/danidex/i.test(message)) return false;
   return /\b(?:batch(?:span|log|logrecord)processor|(?:span|log|logrecord|metric)exporter|opentelemetry|otlp|otel)\b/i.test(
     message,
   );
@@ -1065,7 +1065,7 @@ export class ProviderRuntime implements ProviderPort {
       await client.request(
         "initialize",
         {
-          clientInfo: { name: "openbot", title: "Dani-Dex", version: "0.1.0" },
+          clientInfo: { name: "danidex", title: "Dani-Dex", version: "0.1.0" },
           capabilities: { experimentalApi: true, mcpServerOpenaiFormElicitation: true },
         },
         decodeRecordResponse,
@@ -1358,7 +1358,7 @@ export class ProviderRuntime implements ProviderPort {
       await client.request(
         "initialize",
         {
-          clientInfo: { name: "openbot", title: "Dani-Dex", version: "0.1.0" },
+          clientInfo: { name: "danidex", title: "Dani-Dex", version: "0.1.0" },
           capabilities: { experimentalApi: true, mcpServerOpenaiFormElicitation: true },
         },
         decodeRecordResponse,
@@ -1558,7 +1558,7 @@ export class ProviderRuntime implements ProviderPort {
           await client.request(
             "initialize",
             {
-              clientInfo: { name: "openbot", title: "Dani-Dex", version: "0.1.0" },
+              clientInfo: { name: "danidex", title: "Dani-Dex", version: "0.1.0" },
               capabilities: { experimentalApi: true, mcpServerOpenaiFormElicitation: true },
             },
             decodeRecordResponse,

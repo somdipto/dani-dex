@@ -267,7 +267,7 @@ export class RoutineScheduler implements RoutineDueSource {
     return this.#routines.listRuns(input.agentId, input.routineId, input.limit);
   }
 
-  /** The six `openbot` routine tools. Returns null when `tool` is not one of them. */
+  /** The six `danidex` routine tools. Returns null when `tool` is not one of them. */
   async handleTool(params: DynamicToolCallParams, senderAgentId: string): Promise<DaniDexToolResponse | null> {
     if (params.tool === "list_routines") {
       const args = routineToolArguments(params.arguments, ["agentId"]);

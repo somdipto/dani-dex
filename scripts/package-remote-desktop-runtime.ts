@@ -18,7 +18,7 @@ const lock = await loadNativeRuntimeLock();
 const inputDigest = createRemoteDesktopInputDigest(lock);
 const runtimeRoot = resolve("build/remote-desktop-runtime");
 const outputRoot = resolve("build/remote-desktop-release");
-const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-runtime-package-"));
+const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-runtime-package-"));
 const stagedRoot = join(temporaryRoot, "remote-desktop-runtime");
 
 try {

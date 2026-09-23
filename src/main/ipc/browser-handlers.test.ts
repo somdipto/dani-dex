@@ -16,7 +16,7 @@ vi.mock("electron", () => ({
 
 const { browserIpcHandlers } = await import("./browser-handlers");
 
-const APP_FRAME = { senderFrame: { url: "openbot-app://app/index.html" } };
+const APP_FRAME = { senderFrame: { url: "dani-dex-app://app/index.html" } };
 const REMOTE = "studio-mac";
 const TAB = {
   id: "tab-1",

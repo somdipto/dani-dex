@@ -20,7 +20,7 @@ afterEach(async () => {
 });
 
 async function storePath(contents: unknown): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "openbot-remote-store-"));
+  const directory = await mkdtemp(join(tmpdir(), "dani-dex-remote-store-"));
   directories.push(directory);
   const path = join(directory, "servers.json");
   await writeFile(path, JSON.stringify(contents), "utf8");

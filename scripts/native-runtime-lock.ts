@@ -24,7 +24,7 @@ const remoteDesktopArtifactReleaseSchema = z.object({
   manifestSha256: sha256Schema,
 });
 const sourceRuntimeSchema = z.object({
-  sourceMode: z.enum(["upstream-with-patch", "openbot-fork"]),
+  sourceMode: z.enum(["upstream-with-patch", "dani-dex-fork"]),
   repository: z.url(),
   version: z.string().min(1),
   commit: commitSchema,

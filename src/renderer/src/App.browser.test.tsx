@@ -13,7 +13,7 @@ import {
   emitAgentEvent,
   emitBrowserLiveView,
   emitBrowserPictureInPicture,
-  installOpenbotStub,
+  installDanidexStub,
   testServer,
 } from "./app-test-harness";
 import { toast } from "./components/ui";
@@ -35,7 +35,7 @@ async function openComputerAndCard(title: string): Promise<void> {
 
 describe("Dani-Dex connected desktop shell", () => {
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
 
   afterEach(() => {
@@ -458,7 +458,7 @@ describe("Dani-Dex connected desktop shell", () => {
       type: "bounds-changed",
       bounds: { x: 720, y: 360, width: 460, height: 340 },
     });
-    expect(window.localStorage.getItem("openbot:browser-pip-native-bounds")).toBe("720,360,460,340");
+    expect(window.localStorage.getItem("danidex:browser-pip-native-bounds")).toBe("720,360,460,340");
 
     emitBrowserPictureInPicture?.({ type: "dock" });
     expect(await screen.findByRole("complementary", { name: "Browser" })).toBeInTheDocument();
@@ -554,7 +554,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("restores desktop Picture in Picture per conversation without overriding it during agent control", async () => {
-    window.localStorage.setItem("openbot:browser-pip-native-bounds", "640,320,460,340");
+    window.localStorage.setItem("danidex:browser-pip-native-bounds", "640,320,460,340");
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     emitAgentEvent?.({

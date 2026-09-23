@@ -671,7 +671,7 @@ function SkillMoreMenu(props: {
 
 function isBuiltInSkill(skill: InstalledSkill): boolean {
   return (
-    skill.origin === "managed" || skill.slug === "openbot-site-hosting" || skill.skillId === "openbot-site-hosting"
+    skill.origin === "managed" || skill.slug === "dani-dex-site-hosting" || skill.skillId === "dani-dex-site-hosting"
   );
 }
 

@@ -42,7 +42,7 @@ async function runtime(overrides: Partial<CuaDriverRuntimeOptions> = {}) {
     executable: "/opt/cua/bin/cua-driver",
     endpoint: { kind: "unix-socket", directory: socketDirectory },
     supported: true,
-    hostBundleId: "app.openbot.desktop",
+    hostBundleId: "app.danidex.desktop",
     platform: "darwin",
     spawnProcess,
     waitForSocket: async () => undefined,
@@ -97,7 +97,7 @@ describe("CuaDriverRuntime", () => {
     await driver.start();
 
     expect(spawned[0].options.env.CUA_DRIVER_EMBEDDED).toBe("1");
-    expect(spawned[0].options.env.CUA_DRIVER_HOST_BUNDLE_ID).toBe("app.openbot.desktop");
+    expect(spawned[0].options.env.CUA_DRIVER_HOST_BUNDLE_ID).toBe("app.danidex.desktop");
   });
 
   it("leaves the cursor to Dani-Dex on every display", async () => {
@@ -455,7 +455,7 @@ describe("CuaDriverRuntime", () => {
   // nothing is unlinked, and the path-length rule that macOS and Linux need does not apply.
   it("serves on a named pipe on Windows, and measures no path", async () => {
     const { driver, spawned } = await runtime({
-      endpoint: { kind: "windows-pipe", name: `\\\\.\\pipe\\openbot-cua-${"x".repeat(200)}` },
+      endpoint: { kind: "windows-pipe", name: `\\\\.\\pipe\\dani-dex-cua-${"x".repeat(200)}` },
       platform: "win32",
     });
     await driver.start();
@@ -518,7 +518,7 @@ describe("CuaDriverRuntime", () => {
   // empty permission list must read as ready, never as "nothing granted yet".
   it("treats a driver that answers as ready where the system grants no permission", async () => {
     const { driver } = await runtime({
-      endpoint: { kind: "windows-pipe", name: "\\\\.\\pipe\\openbot-cua-test" },
+      endpoint: { kind: "windows-pipe", name: "\\\\.\\pipe\\dani-dex-cua-test" },
       platform: "win32",
       readPermissions: async () => [],
     });
@@ -558,7 +558,7 @@ describe("CuaDriverRuntime", () => {
 
       expect(first).toEqual(second);
       expect(first.kind).toBe("windows-pipe");
-      expect(first.kind === "windows-pipe" && first.name).toMatch(/^\\\\\.\\pipe\\openbot-cua-[0-9a-f-]{36}$/);
+      expect(first.kind === "windows-pipe" && first.name).toMatch(/^\\\\\.\\pipe\\dani-dex-cua-[0-9a-f-]{36}$/);
 
       const other = await mkdtemp(join(tmpdir(), "cua-profile-"));
       directories.push(other);
@@ -579,7 +579,7 @@ describe("CuaDriverRuntime", () => {
         userDataPath,
         temporaryDirectory: tmpdir(),
       });
-      expect(endpoint.kind === "windows-pipe" && endpoint.name).toMatch(/openbot-cua-[0-9a-f-]{36}$/);
+      expect(endpoint.kind === "windows-pipe" && endpoint.name).toMatch(/dani-dex-cua-[0-9a-f-]{36}$/);
     });
 
     it("names the same socket directory for one profile, and a different one for another", async () => {

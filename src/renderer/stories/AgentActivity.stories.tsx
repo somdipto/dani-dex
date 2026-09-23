@@ -45,7 +45,7 @@ export const CustomImage: IndicatorStory = {
  */
 export const CustomImageUnavailable: IndicatorStory = {
   args: {
-    agent: { ...STORY_AGENTS[0], avatarUrl: "openbot-avatar://agent/chief?v=missing" },
+    agent: { ...STORY_AGENTS[0], avatarUrl: "dani-dex-avatar://agent/chief?v=missing" },
     label: "Connecting the dots…",
   },
 };

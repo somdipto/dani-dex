@@ -97,7 +97,7 @@ function presentationFor(
         approval: {
           kind: "command",
           command: "bun install --frozen-lockfile",
-          cwd: "~/Projects/openbot",
+          cwd: "~/Projects/danidex",
           reason: "Install the locked dependencies before running the test suite.",
           grantRoot: null,
           permissions: null,

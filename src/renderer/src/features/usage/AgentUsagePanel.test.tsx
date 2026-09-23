@@ -2,10 +2,10 @@ import { analyticsRange, emptyAnalyticsTotals, type HostAnalytics } from "@dani-
 import { fireEvent, render, screen, within } from "@solidjs/testing-library";
 import { createSignal, flush } from "solid-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { emitScopedAgentEvent, installOpenbotStub } from "../../app-test-harness";
+import { emitScopedAgentEvent, installDanidexStub } from "../../app-test-harness";
 import { AgentUsagePanel } from "./AgentUsagePanel";
 
-beforeEach(installOpenbotStub);
+beforeEach(installDanidexStub);
 function result(agentId = "a"): HostAnalytics {
   return {
     ...analyticsRange(agentId),

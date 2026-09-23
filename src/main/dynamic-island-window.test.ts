@@ -721,7 +721,7 @@ class FakeWindow extends EventEmitter {
 }
 
 async function temporaryRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-dynamic-island-window-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-dynamic-island-window-"));
   roots.push(root);
   return root;
 }

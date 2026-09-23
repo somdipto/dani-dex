@@ -122,8 +122,8 @@ describe("TeamApiServer team", () => {
       expect(store.authenticate(ownerConnection.sessionToken)?.email).toBe("owner@example.com");
 
       const socket = new WebSocket(`ws://127.0.0.1:${port}/v1/events`, [
-        "openbot-events-v2",
-        `openbot-token.${joined.sessionToken}`,
+        "dani-dex-events-v2",
+        `dani-dex-token.${joined.sessionToken}`,
       ]);
       const initialEvents = nextJsonEvents(socket, 2);
       await new Promise<void>((resolve, reject) => {

@@ -113,7 +113,7 @@ describe("readDevInstanceRecords", () => {
   let directory = "";
 
   beforeEach(() => {
-    directory = mkdtempSync(join(tmpdir(), "openbot-dev-instances-test-"));
+    directory = mkdtempSync(join(tmpdir(), "dani-dex-dev-instances-test-"));
   });
 
   afterEach(() => {
@@ -240,7 +240,7 @@ describe("createDevInstanceRecord", () => {
 
 describe("writeDevInstanceRecord permissions", () => {
   it("keeps the registry directory and its records readable only by their owner", () => {
-    const directory = mkdtempSync(join(tmpdir(), "openbot-registry-mode-"));
+    const directory = mkdtempSync(join(tmpdir(), "dani-dex-registry-mode-"));
     writeDevInstanceRecord(record(), directory);
     // The path is predictable and lives in a shared /tmp, so the mode is the
     // only thing keeping another local account from reading which worktree a
@@ -274,7 +274,7 @@ describe("assertOwnerOnlyDirectory", () => {
   });
 
   it("guards the reader too, not only the writer", () => {
-    const directory = mkdtempSync(join(tmpdir(), "openbot-registry-read-"));
+    const directory = mkdtempSync(join(tmpdir(), "dani-dex-registry-read-"));
     writeDevInstanceRecord(record(), directory);
     chmodSync(directory, 0o777);
     // A reader that never publishes would otherwise trust a planted record.

@@ -419,7 +419,7 @@ function chunk(transferId: string, offset: number, bytes: Uint8Array): ArrayBuff
 }
 
 async function temporaryDirectory(): Promise<string> {
-  const path = await mkdtemp(join(tmpdir(), "openbot-webrtc-files-"));
+  const path = await mkdtemp(join(tmpdir(), "dani-dex-webrtc-files-"));
   directories.push(path);
   return path;
 }

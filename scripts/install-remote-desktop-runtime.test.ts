@@ -94,7 +94,7 @@ describe("remote desktop runtime installer", () => {
 });
 
 async function createFixture() {
-  const sourceRoot = await mkdtemp(join(tmpdir(), "openbot-runtime-source-"));
+  const sourceRoot = await mkdtemp(join(tmpdir(), "dani-dex-runtime-source-"));
   const outputRoot = join(sourceRoot, "build/remote-desktop-runtime");
   const stagingRoot = join(sourceRoot, "staging");
   const targetRoot = join(stagingRoot, "darwin/arm64");

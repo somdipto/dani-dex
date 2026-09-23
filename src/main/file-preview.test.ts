@@ -63,7 +63,7 @@ describe("file previews", () => {
   });
 
   it("does not transfer bytes for unsupported local files", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-file-preview-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-file-preview-"));
     temporaryDirectories.push(directory);
     const path = join(directory, "archive.zip");
     await writeFile(path, new Uint8Array([1, 2, 3]));

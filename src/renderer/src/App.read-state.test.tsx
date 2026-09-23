@@ -18,7 +18,7 @@ import {
   emitDynamicIslandAction,
   emitPresence,
   emitServers,
-  installOpenbotStub,
+  installDanidexStub,
   presenceMember,
   testConversationPage,
   testServer,
@@ -88,7 +88,7 @@ function CloseChannelProbe() {
 
 describe("Dani-Dex connected desktop shell", () => {
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
 
   it.each(["older response", "older failure", "latest failure"])(

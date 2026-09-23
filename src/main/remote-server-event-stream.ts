@@ -48,8 +48,8 @@ const REMOTE_EVENT_RECONNECT_JITTER = 0.2;
 const REMOTE_EVENT_HEALTHY_MS = 30_000;
 const REMOTE_EVENT_PAYLOAD_LIMIT = 1024 * 1024;
 const REMOTE_EVENT_INITIAL_BUFFER_LIMIT = 1_000;
-const REMOTE_EVENT_PROTOCOL = "openbot-events";
-const REMOTE_EVENT_SNAPSHOT_PROTOCOL = "openbot-events-v2";
+const REMOTE_EVENT_PROTOCOL = "dani-dex-events";
+const REMOTE_EVENT_SNAPSHOT_PROTOCOL = "dani-dex-events-v2";
 
 // What the stream needs of the request client: the negotiated range, and the headers that carry it.
 export interface RemoteEventCompatibilitySource {
@@ -310,8 +310,8 @@ export class RemoteEventStream {
       const eventsUrl = new URL(TEAM_API_ROUTES.events, server.apiUrl);
       eventsUrl.protocol = eventsUrl.protocol === "https:" ? "wss:" : "ws:";
       const socketProtocols = this.#appVersion
-        ? [TEAM_PROTOCOL_V1_WEBSOCKET, `openbot-token.${this.#servers.token(server)}`]
-        : [REMOTE_EVENT_SNAPSHOT_PROTOCOL, REMOTE_EVENT_PROTOCOL, `openbot-token.${this.#servers.token(server)}`];
+        ? [TEAM_PROTOCOL_V1_WEBSOCKET, `dani-dex-token.${this.#servers.token(server)}`]
+        : [REMOTE_EVENT_SNAPSHOT_PROTOCOL, REMOTE_EVENT_PROTOCOL, `dani-dex-token.${this.#servers.token(server)}`];
       const socket = new WebSocket(eventsUrl, socketProtocols);
       let agentEventsReady = false;
       const bufferedAgentEvents: AgentEvent[] = [];

@@ -264,7 +264,7 @@ describe("ServerSettingsModal", () => {
     await fireEvent.click(screen.getByRole("tab", { name: "Remote desktop" }));
     await fireEvent.click(await screen.findByRole("button", { name: "Check again" }));
     expect(await screen.findByText("Blocked")).toBeInTheDocument();
-    expect(screen.getByText(/Mac mini · openbot/)).toBeInTheDocument();
+    expect(screen.getByText(/Mac mini · danidex/)).toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "Grant Accessibility access" }));
     await fireEvent(window, new Event("focus"));
     await waitFor(() => expect(check).toHaveBeenCalledTimes(2));
@@ -324,7 +324,7 @@ describe("ServerSettingsModal", () => {
         new MessageEvent("message", {
           source: frame.contentWindow,
           origin: new URL(session.viewerUrl).origin,
-          data: { source: "openbot-moonlight", type: "viewer-state", sessionId: session.id, state: "connected" },
+          data: { source: "dani-dex-moonlight", type: "viewer-state", sessionId: session.id, state: "connected" },
         }),
       );
       await waitFor(() => expect(confirm).toBeEnabled());
@@ -361,7 +361,7 @@ describe("ServerSettingsModal", () => {
       new MessageEvent("message", {
         source: frame.contentWindow,
         origin: new URL(session.viewerUrl).origin,
-        data: { source: "openbot-moonlight", type: "viewer-state", sessionId: session.id, state: "connected" },
+        data: { source: "dani-dex-moonlight", type: "viewer-state", sessionId: session.id, state: "connected" },
       }),
     );
     await waitFor(() => expect(confirm).toBeEnabled());

@@ -1,12 +1,12 @@
 # `src/backend`
 
-The stores, the SQLite database (`openbot-database.ts` and the controllers under `database/`), the
+The stores, the SQLite database (`dani-dex-database.ts` and the controllers under `database/`), the
 provider clients and `agent-service.ts`. The user's SQLite is the source of truth here, not a cache
 of something remote — which is what makes the first section below non-negotiable.
 
 ## Database migrations
 
-- Nothing copies `openbot.db` before an upgrade. Every migration is an irreversible production data
+- Nothing copies `danidex.db` before an upgrade. Every migration is an irreversible production data
   operation: preserve all user data, support every shipped source schema, never depend on a backup.
 - Keep each schema change and its `schema_migrations` marker in one transaction. Roll back on any
   error, restore foreign-key enforcement in `finally`, and run the integrity checks before startup
@@ -21,13 +21,13 @@ of something remote — which is what makes the first section below non-negotiab
 
 ### The two build paths
 
-`openbot-database-schema.ts` builds a database twice. `createLatestDatabase` execs
+`dani-dex-database-schema.ts` builds a database twice. `createLatestDatabase` execs
 `LATEST_SCHEMA_SQL` and then stamps every entry in `MIGRATIONS` as applied **without running it**;
 an existing database runs them for real. A DDL migration that is not also mirrored by hand into
 `LATEST_SCHEMA_SQL` therefore ships new installs a database missing that column while upgraded
 installs get it, silently, on the user's machine.
 
-`openbot-database-schema-parity.test.ts` builds a database both ways and compares the normalised
+`dani-dex-database-schema-parity.test.ts` builds a database both ways and compares the normalised
 `sqlite_master` SQL and `PRAGMA table_info` per table, so that divergence is a red test rather than a
 support ticket. Do not weaken it; a new DDL migration means editing `LATEST_SCHEMA_SQL` in the same
 change.
@@ -69,7 +69,7 @@ generated-attachment map in the store. Apply it to mailbox state only after the 
 and mailbox commit succeeds. Keep deletion-outbox completion in the store, after file removal.
 
 The two that used to be larger are both worth copying. `agent-service.ts` was split into one
-controller per concern, each constructed and owned by the service; `openbot-database.ts` was split
+controller per concern, each constructed and owned by the service; `dani-dex-database.ts` was split
 into nine under `database/`, leaving a ~300-line facade that had to keep its class name, instance
 identity, constructor signature and public surface because callers reach past it into `connection`
 and `dispatch`. The shape in both: one class per file, kebab-case, `<Name>Options` + `<Name>`,
@@ -97,7 +97,7 @@ touches the agents' shared SQLite files. Two rules keep it that way.
 
 **Its runtime imports are limited to `node:*`.** Every repository reference in it is an `import
 type`, which both the bundler and Node's type stripping erase. That gives it a standalone chunk with
-no Electron and no `openbot.db` facade behind it, and it lets a test spawn the `.ts` source under a
+no Electron and no `danidex.db` facade behind it, and it lets a test spawn the `.ts` source under a
 real `node` and drive the true host instead of a fake.
 
 **Its isolation is the process, not a thread.** `sqlite3_step` never returns to JavaScript, so a

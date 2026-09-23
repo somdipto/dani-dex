@@ -31,7 +31,7 @@ const generate = vi.fn<ChannelTextModel>(async () => JSON.stringify({ agentId: "
 let count = 0;
 const operationId = () => `command-${++count}`;
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "openbot-channels-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-channels-"));
   data = stores(root);
   await data.store.initialize();
   await data.mailbox.initialize();

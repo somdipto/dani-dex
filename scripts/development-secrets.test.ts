@@ -32,7 +32,7 @@ describe("generated development secrets", () => {
   it("claims the ticket key ID that wrangler.jsonc pins", () => {
     const { publicJwks } = createDevelopmentTicketKeyPair();
 
-    expect(JSON.parse(publicJwks).keys[0].kid).toBe("openbot-remote-1");
+    expect(JSON.parse(publicJwks).keys[0].kid).toBe("dani-dex-remote-1");
   });
 
   it("writes secrets the Signal service accepts, and a different set each time", () => {
@@ -85,7 +85,7 @@ function readGeneratedValues(): Record<string, string> {
 }
 
 function createTemporaryRoot(): string {
-  const root = mkdtempSync(join(tmpdir(), "openbot-dev-secrets-"));
+  const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-secrets-"));
   temporaryRoots.push(root);
   mkdirSync(join(root, "apps", "auth-api"), { recursive: true });
   return root;

@@ -62,7 +62,7 @@ export function localTimezone(): string {
   }
 }
 
-/** The shape every `openbot` namespace dynamic tool answers with. */
+/** The shape every `danidex` namespace dynamic tool answers with. */
 export interface DaniDexToolResponse {
   success: boolean;
   contentItems: Array<{ type: "inputText"; text: string }>;

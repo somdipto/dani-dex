@@ -37,9 +37,9 @@ await Promise.all([
   access(resolve(resourcesPath, "remote-desktop-runtime/source-manifest.json")),
   access(resolve(resourcesPath, "remote-desktop-runtime/DISTRIBUTION-SHA256SUMS.txt")),
   access(resolve(resourcesPath, "remote-desktop-runtime/sources/Sunshine-v2026.516.143833-source.tar.gz")),
-  access(resolve(resourcesPath, "remote-desktop-runtime/sources/sunshine-v2026.516.143833-openbot.patch")),
-  access(resolve(resourcesPath, "remote-desktop-runtime/sources/moonlight-web-stream-v2.10.0-openbot-source.tar.gz")),
-  access(resolve(resourcesPath, "remote-desktop-runtime/sources/moonlight-web-stream-v2.10.0-openbot.patch")),
+  access(resolve(resourcesPath, "remote-desktop-runtime/sources/sunshine-v2026.516.143833-danidex.patch")),
+  access(resolve(resourcesPath, "remote-desktop-runtime/sources/moonlight-web-stream-v2.10.0-dani-dex-source.tar.gz")),
+  access(resolve(resourcesPath, "remote-desktop-runtime/sources/moonlight-web-stream-v2.10.0-danidex.patch")),
   access(resolve(resourcesPath, "remote-desktop-runtime/win32/x64/sunshine.exe")),
   access(resolve(resourcesPath, "remote-desktop-runtime/win32/x64/web-server.exe")),
   access(resolve(resourcesPath, "remote-desktop-runtime/win32/x64/streamer.exe")),
@@ -165,7 +165,7 @@ function verifyAuthenticode(path: string, expectedStatus: "NotSigned" | "Valid")
 }
 
 async function verifyLaunch(executable: string): Promise<void> {
-  const userDataPath = await mkdtemp(join(tmpdir(), "openbot-package-smoke-"));
+  const userDataPath = await mkdtemp(join(tmpdir(), "dani-dex-package-smoke-"));
   const child = spawn(executable, [`--user-data-dir=${userDataPath}`], {
     env: {
       ...process.env,

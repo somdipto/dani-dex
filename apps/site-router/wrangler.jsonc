@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "openbot-site-router",
+  "name": "dani-dex-site-router",
   "main": "src/index.ts",
   "compatibility_date": "2026-08-18",
   "compatibility_flags": ["nodejs_compat"],
@@ -15,8 +15,8 @@
   "r2_buckets": [
     {
       "binding": "SITES",
-      "bucket_name": "openbot-sites",
-      "preview_bucket_name": "openbot-sites-test"
+      "bucket_name": "dani-dex-sites",
+      "preview_bucket_name": "dani-dex-sites-test"
     }
   ]
 }

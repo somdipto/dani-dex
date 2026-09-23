@@ -463,7 +463,7 @@ describe("TeamStore", () => {
   });
 
   it("adopts the host of a build without accounts without writing over its file", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-team-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-team-"));
     roots.push(root);
     const legacyPath = join(root, "team.json");
     const owner = { id: "owner-account", email: "owner@example.com", name: "Owner", avatarUrl: null };
@@ -495,7 +495,7 @@ describe("TeamStore", () => {
   });
 
   it("copies the logo of an imported host on a later start when the first copy could not", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-team-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-team-"));
     roots.push(root);
     const legacyPath = join(root, "team.json");
     const path = join(root, "team-v2.json");
@@ -524,7 +524,7 @@ describe("TeamStore", () => {
   });
 
   it("reconciles what each build did to the host after they went their separate ways", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-team-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-team-"));
     roots.push(root);
     const legacyPath = join(root, "team.json");
     const path = join(root, "team-v2.json");
@@ -556,7 +556,7 @@ describe("TeamStore", () => {
   });
 
   it("keeps a member disabled here when the other build only changed their name", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-team-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-team-"));
     roots.push(root);
     const legacyPath = join(root, "team.json");
     const path = join(root, "team-v2.json");
@@ -599,7 +599,7 @@ describe("TeamStore", () => {
   });
 
   it("keeps the owner's account when the other build binds the host to a recycled address", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-team-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-team-"));
     roots.push(root);
     const legacyPath = join(root, "team.json");
     const path = join(root, "team-v2.json");
@@ -770,7 +770,7 @@ describe("TeamStore", () => {
   });
 
   it("keeps a team file it cannot read instead of writing over it", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-team-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-team-"));
     roots.push(root);
     const path = join(root, "team.json");
     // A file a newer build wrote. Nothing here is backed up, so it has to survive.
@@ -1074,7 +1074,7 @@ async function readStoredHost(path: string, index = 0): Promise<StoredHostFields
 }
 
 async function createStore() {
-  const root = await mkdtemp(join(tmpdir(), "openbot-team-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-team-"));
   roots.push(root);
   const path = join(root, "team.json");
   const store = new TeamStore(path);

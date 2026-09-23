@@ -20,7 +20,7 @@ describe("McpServerStore", () => {
     const { database, store } = await setup();
     const saved = store.save(
       stdioConfig({
-        args: ["--database", "./openbot.db", "--verbose"],
+        args: ["--database", "./danidex.db", "--verbose"],
         env: [
           { key: "SQLITE_READONLY", value: "1" },
           { key: "TOKEN", value: "secret-value" },
@@ -34,7 +34,7 @@ describe("McpServerStore", () => {
     await reopened.initialize();
     const [config] = new McpServerStore(reopened).list();
     expect(config).toEqual({ ...saved, id: saved.id });
-    expect(config?.args).toEqual(["--database", "./openbot.db", "--verbose"]);
+    expect(config?.args).toEqual(["--database", "./danidex.db", "--verbose"]);
     expect(config?.env).toEqual([
       { key: "SQLITE_READONLY", value: "1" },
       { key: "TOKEN", value: "secret-value" },
@@ -87,7 +87,7 @@ describe("McpServerStore", () => {
     expect(() => store.save(stdioConfig({ name: "Local SQLite" }))).toThrow(
       "An MCP server named Local SQLite already exists.",
     );
-    expect(() => store.save(stdioConfig({ name: "openbot" }))).toThrow("Dani-Dex already uses the name openbot.");
+    expect(() => store.save(stdioConfig({ name: "danidex" }))).toThrow("Dani-Dex already uses the name danidex.");
   });
 
   it("omits a disabled server from the enabled list", async () => {
@@ -177,7 +177,7 @@ function stdioConfig(overrides: Partial<McpServerConfig> = {}): McpServerConfig 
     name: "Local SQLite",
     transport: "stdio",
     enabled: true,
-    command: "openbot-dev-mcp",
+    command: "dani-dex-dev-mcp",
     args: [],
     env: [],
     envPassthrough: [],
@@ -189,7 +189,7 @@ function stdioConfig(overrides: Partial<McpServerConfig> = {}): McpServerConfig 
 }
 
 async function setup(): Promise<{ database: DaniDexDatabase; store: McpServerStore }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-mcp-store-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-mcp-store-"));
   roots.push(root);
   const database = new DaniDexDatabase(root);
   await database.initialize();

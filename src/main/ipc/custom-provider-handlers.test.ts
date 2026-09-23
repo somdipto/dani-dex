@@ -15,7 +15,7 @@ vi.mock("electron", () => ({
 
 const { customProviderIpcHandlers } = await import("./custom-provider-handlers");
 
-const APP_FRAME = { senderFrame: { url: "openbot-app://app/index.html" } };
+const APP_FRAME = { senderFrame: { url: "dani-dex-app://app/index.html" } };
 
 /**
  * A delete reads the catalogue to pick a fallback, then writes the file, then records the exclusion.

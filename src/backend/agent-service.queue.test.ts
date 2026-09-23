@@ -850,7 +850,7 @@ describe.sequential("AgentService: queue", () => {
     expect(instructions).toContain("Be pragmatic and direct");
     expect(instructions).toContain("Give the shortest answer that is complete and useful");
     expect(instructions).toContain("Do not add filler");
-    expect(instructions).toContain("openbot.ask_user");
+    expect(instructions).toContain("danidex.ask_user");
     expect(instructions).toContain("GitHub-flavored Markdown tables");
     expect(instructions).toContain("at least three dashes per column");
     expect(instructions).toContain("put exactly ✓ or — in every option cell");

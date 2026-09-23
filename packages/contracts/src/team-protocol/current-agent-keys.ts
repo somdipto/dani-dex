@@ -77,7 +77,7 @@ const DYNAMIC_MAP_KEYS: ReadonlySet<string> = new Set(["responses", "references"
  * translation should touch, and both would be corrupted by one.
  */
 function isUntranslatedPath(path: string): boolean {
-  const { pathname } = new URL(path, "http://openbot.invalid");
+  const { pathname } = new URL(path, "http://danidex.invalid");
   return pathname.startsWith("/v1/sidebar-layout") || pathname === "/v1/agents/conversation-reads";
 }
 

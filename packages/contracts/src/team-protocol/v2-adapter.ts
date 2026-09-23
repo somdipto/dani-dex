@@ -105,7 +105,7 @@ function isEmptyRequest(value: unknown): boolean {
 }
 
 function isTeamProtocolV2NoBodyRoute(method: string, path: string): boolean {
-  const pathname = new URL(path, "http://openbot.invalid").pathname;
+  const pathname = new URL(path, "http://danidex.invalid").pathname;
   if (method === "GET") {
     if (
       new Set([
@@ -157,7 +157,7 @@ function isTeamProtocolV2NoBodyRoute(method: string, path: string): boolean {
 }
 
 function isRemoteViewerRoute(path: string): boolean {
-  const pathname = new URL(path, "http://openbot.invalid").pathname;
+  const pathname = new URL(path, "http://danidex.invalid").pathname;
   return /^\/v1\/remote-screen\/sessions\/[A-Za-z0-9-]+\/(?:viewer|authorize|viewer-state|moonlight(?:\/.*)?)$/u.test(
     pathname,
   );

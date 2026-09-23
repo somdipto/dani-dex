@@ -50,7 +50,7 @@ describe("remote tokens", () => {
       sessionExpiresAt: now + 24 * 60 * 60,
     })
       .setProtectedHeader({ alg: "ES256", kid: "test-key" })
-      .setAudience("openbot-remote")
+      .setAudience("dani-dex-remote")
       .setJti("ticket-1")
       .setIssuedAt(now)
       .setExpirationTime(now + 300)
@@ -145,7 +145,7 @@ describe("remote tokens", () => {
         sessionExpiresAt,
       })
         .setProtectedHeader({ alg: "ES256", kid: "test-key" })
-        .setAudience("openbot-remote")
+        .setAudience("dani-dex-remote")
         .setJti(crypto.randomUUID())
         .setIssuedAt(now)
         .setExpirationTime(now + 300)

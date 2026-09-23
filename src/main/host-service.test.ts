@@ -51,7 +51,7 @@ async function createHostService(
   /** Announces an account the way the renderer is told, before the queued switch is applied. */
   announce: (user: CentralAuthUser) => void;
 }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-host-service-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-host-service-"));
   roots.push(root);
   const store = new TeamStore(join(root, "team.json"));
   await store.initialize();

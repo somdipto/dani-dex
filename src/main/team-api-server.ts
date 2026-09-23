@@ -89,8 +89,8 @@ const RATE_LIMIT_SWEEP_MS = 60_000;
 const RATE_LIMIT_ATTEMPTS = 5;
 const RATE_LIMIT_CAPACITY = 10_000;
 const RUNTIME_SNAPSHOT_REQUEST_INTERVAL_MS = 1_000;
-const TEST_LEGACY_EVENT_PROTOCOL = "openbot-events";
-const TEST_LEGACY_SNAPSHOT_PROTOCOL = "openbot-events-v2";
+const TEST_LEGACY_EVENT_PROTOCOL = "dani-dex-events";
+const TEST_LEGACY_SNAPSHOT_PROTOCOL = "dani-dex-events-v2";
 const requireModule = createRequire(import.meta.url);
 const webSockets: typeof Ws = requireModule(join(dirname(requireModule.resolve("ws/package.json")), "index.js"));
 
@@ -191,8 +191,8 @@ export class TeamApiServer {
         socket.destroy();
         return;
       }
-      const encodedToken = protocols.find((value) => value.startsWith("openbot-token."));
-      const token = encodedToken?.slice("openbot-token.".length) ?? "";
+      const encodedToken = protocols.find((value) => value.startsWith("dani-dex-token."));
+      const token = encodedToken?.slice("dani-dex-token.".length) ?? "";
       const member = token.length <= 512 ? this.#options.store.authenticate(token) : null;
       if (!member) {
         socket.write("HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n");

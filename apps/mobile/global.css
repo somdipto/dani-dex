@@ -42,8 +42,8 @@
   --text-caption: 0.75rem;
   --text-caption--line-height: 1rem;
 
-  --tracking-openbot-tight: var(--dani-dex-tracking-tight);
-  --tracking-openbot-wide: var(--dani-dex-tracking-wide);
+  --tracking-dani-dex-tight: var(--dani-dex-tracking-tight);
+  --tracking-dani-dex-wide: var(--dani-dex-tracking-wide);
 }
 
 @layer theme {

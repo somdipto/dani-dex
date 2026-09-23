@@ -96,8 +96,8 @@ describe.sequential("AgentService: restart", () => {
     const start = (await protocolMessages(logPath)).find((message) => message.method === "thread/start");
     expect(start?.params).toMatchObject({
       dynamicTools: expect.arrayContaining([
-        expect.objectContaining({ type: "namespace", name: "openbot_browser" }),
-        expect.objectContaining({ type: "namespace", name: "openbot" }),
+        expect.objectContaining({ type: "namespace", name: "danidex_browser" }),
+        expect.objectContaining({ type: "namespace", name: "danidex" }),
       ]),
     });
     expect((await store.getOrCreate("chief")).threadId).toBe(threadId);

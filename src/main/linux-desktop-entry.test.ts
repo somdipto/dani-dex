@@ -98,7 +98,7 @@ describe("linux desktop entry", () => {
 });
 
 async function temporaryHome(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-desktop-entry-test-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-desktop-entry-test-"));
   roots.push(root);
   return root;
 }

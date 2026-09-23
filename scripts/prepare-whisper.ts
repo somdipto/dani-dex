@@ -12,7 +12,7 @@ const MODEL_REVISION = "5359861c739e955e79d9a303bcbc70fb988958b1";
 const MODEL_NAME = "ggml-medium-q5_0.bin";
 const MODEL_BYTES = 539_212_467;
 const MODEL_SHA256 = "19fea4b380c3a618ec4723c3eef2eb785ffba0d0538cf43f8f235e7b3b34220f";
-const buildRoot = resolve(".openbot-build/whisper");
+const buildRoot = resolve(".dani-dex-build/whisper");
 const sourceRoot = join(buildRoot, "source");
 const cmakeRoot = join(buildRoot, "cmake");
 const binaryRoot = join(buildRoot, "bin");
@@ -68,7 +68,7 @@ async function isExpectedModel(): Promise<boolean> {
 }
 
 async function prepareSource(): Promise<void> {
-  const marker = join(sourceRoot, ".openbot-whisper-commit");
+  const marker = join(sourceRoot, ".dani-dex-whisper-commit");
   if (existsSync(marker)) {
     const value = await readFile(marker, "utf8");
     if (value.trim() === WHISPER_CPP_COMMIT) return;

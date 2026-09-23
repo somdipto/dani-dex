@@ -72,21 +72,21 @@ function RoutinesStory(props: { routines?: Routine[]; runs?: RoutineRun[] }) {
 
 function FullSettingsPanelStory() {
   const previousApi = window.danidex;
-  const previousWidth = window.localStorage.getItem("openbot:settings-panel-width");
+  const previousWidth = window.localStorage.getItem("danidex:settings-panel-width");
   const mock = createMockDaniDex({ routines: { chief: storyRoutines } });
   window.danidex = mock.api;
   mock.api.agent.listRoutineRuns = async (input) =>
     input.routineId === morningBrief.id ? structuredClone(fullPanelRuns) : [];
-  window.localStorage.setItem("openbot:settings-panel-width", "380");
+  window.localStorage.setItem("danidex:settings-panel-width", "380");
 
   onCleanup(() => {
     mock.dispose();
     window.danidex = previousApi;
     if (previousWidth === null) {
-      window.localStorage.removeItem("openbot:settings-panel-width");
+      window.localStorage.removeItem("danidex:settings-panel-width");
       return;
     }
-    window.localStorage.setItem("openbot:settings-panel-width", previousWidth);
+    window.localStorage.setItem("danidex:settings-panel-width", previousWidth);
   });
 
   return (

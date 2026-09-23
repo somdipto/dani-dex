@@ -18,7 +18,7 @@ let root: string;
 let store: MailboxStore;
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "openbot-mailbox-test-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-mailbox-test-"));
   store = new MailboxStore(join(root, "user-data"), join(root, "Shared"));
   await store.initialize();
 });
@@ -491,7 +491,7 @@ describe("MailboxStore", () => {
     await expect(access(first?.managedAttachments[0]?.path ?? "missing")).resolves.toBeUndefined();
 
     const manifest = JSON.parse(
-      await readFile(join(root, "Shared", "Transfers", receipt.messageId, ".openbot-transfer.json"), "utf8"),
+      await readFile(join(root, "Shared", "Transfers", receipt.messageId, ".dani-dex-transfer.json"), "utf8"),
     );
     expect(manifest).toMatchObject({
       version: 2,
@@ -923,7 +923,7 @@ describe("MailboxStore", () => {
       kind: "image",
       mimeType: "image/png",
       previewKind: "image",
-      previewUrl: `openbot-attachment://file/${attachment.id}`,
+      previewUrl: `dani-dex-attachment://file/${attachment.id}`,
     });
     await expect(store.resolveAttachment(attachment.id)).resolves.toMatchObject({
       mimeType: "image/png",

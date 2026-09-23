@@ -74,7 +74,7 @@ export class VoiceTranscriptionService extends EventEmitter<VoiceTranscriptionEv
     const startedAt = Date.now();
 
     try {
-      temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-voice-"));
+      temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-voice-"));
       const inputPath = join(temporaryRoot, "recording.wav");
       const outputPath = join(temporaryRoot, "transcript");
       await writeFile(inputPath, audio);

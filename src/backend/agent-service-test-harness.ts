@@ -71,7 +71,7 @@ const originalProviderPaths = new Map(PROVIDER_PATH_ENV_VARS.map((name) => [name
  * so the fake-runtime variables and the fixture layout live in one place.
  */
 export async function startAgentTestFixture(): Promise<{ root: string; logPath: string }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-agent-test-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-agent-test-"));
   const logPath = join(root, "protocol.jsonl");
   process.env.DANI_DEX_FAKE_CODEX_LOG = logPath;
   process.env.DANI_DEX_CODEX_PATH = await createFakeCodex(root);
@@ -280,7 +280,7 @@ export async function callDaniDexTool(
   turnId = "routine-tool-turn",
   callId: string = randomUUID(),
 ): Promise<{ result?: unknown; error?: RpcError }> {
-  const id = `openbot-tool-${randomUUID()}`;
+  const id = `dani-dex-tool-${randomUUID()}`;
   client.emit("request", {
     id,
     method: "item/tool/call",
@@ -288,7 +288,7 @@ export async function callDaniDexTool(
       threadId,
       turnId,
       callId,
-      namespace: "openbot",
+      namespace: "danidex",
       tool,
       arguments: args,
     },
@@ -589,7 +589,7 @@ process.stdin.on("data", (chunk) => {
         }
         write({ method: "item/agentMessage/delta", params: { threadId: message.params.threadId, turnId, itemId: "message-" + turnId, delta: "Streaming" } });
         if (process.env.DANI_DEX_FAKE_AGENT_TOOL === "1" && turnCounter === 1) {
-          setTimeout(() => write({ id: "agent-tool-1", method: "item/tool/call", params: { threadId: message.params.threadId, turnId, callId: "call-1", namespace: "openbot", tool: "send_message", arguments: { recipientAgentIds: ["sales-outbound", "inbox-manager"], text: "Please prepare your reports.", paths: JSON.parse(process.env.DANI_DEX_FAKE_AGENT_TOOL_PATHS || "[]") } } }), 30);
+          setTimeout(() => write({ id: "agent-tool-1", method: "item/tool/call", params: { threadId: message.params.threadId, turnId, callId: "call-1", namespace: "danidex", tool: "send_message", arguments: { recipientAgentIds: ["sales-outbound", "inbox-manager"], text: "Please prepare your reports.", paths: JSON.parse(process.env.DANI_DEX_FAKE_AGENT_TOOL_PATHS || "[]") } } }), 30);
         }
         if (process.env.DANI_DEX_FAKE_AGENT_TOOL_CALLS && turnCounter === 1) {
           const calls = JSON.parse(process.env.DANI_DEX_FAKE_AGENT_TOOL_CALLS);
@@ -600,7 +600,7 @@ process.stdin.on("data", (chunk) => {
               threadId: message.params.threadId,
               turnId,
               callId: "configured-call-" + index,
-              namespace: "openbot",
+              namespace: "danidex",
               tool: call.tool,
               arguments: call.arguments,
             },

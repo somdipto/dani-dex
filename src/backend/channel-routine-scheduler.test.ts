@@ -26,7 +26,7 @@ beforeEach(async () => {
   errors.length = 0;
   generate.mockReset();
   generate.mockImplementation(async () => JSON.stringify({ agentId: "agent-a" }));
-  root = await mkdtemp(join(tmpdir(), "openbot-channel-routines-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-channel-routines-"));
   data = stores(root);
   await data.store.initialize();
   await data.mailbox.initialize();

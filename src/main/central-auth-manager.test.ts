@@ -251,7 +251,7 @@ describe("CentralAuthManager", () => {
     });
     expect(await manager.createMobileConnect({ hostId: serverId, fingerprint: "a".repeat(43) })).toMatchObject({
       qrData: expect.stringMatching(
-        /^openbot:\/\/mobile-connect\?api=http%3A%2F%2F192\.168\.1\.143%3A3100&ticket=mobile-ticket_1234567890abcdefghijklmnop&host=00000000-0000-4000-8000-000000000000&fingerprint=a{43}$/u,
+        /^danidex:\/\/mobile-connect\?api=http%3A%2F%2F192\.168\.1\.143%3A3100&ticket=mobile-ticket_1234567890abcdefghijklmnop&host=00000000-0000-4000-8000-000000000000&fingerprint=a{43}$/u,
       ),
     });
     expect(await manager.listMobileConnectedDevices()).toEqual([
@@ -340,7 +340,7 @@ describe("CentralAuthManager", () => {
       if (path === "/v1/team-auth/ticket") {
         return Response.json({ ticket: "memory-ticket", expiresAt: 20_000 });
       }
-      return Response.json({ service: "openbot-auth-api", status: "ok" });
+      return Response.json({ service: "dani-dex-auth-api", status: "ok" });
     });
     const options = {
       apiUrl: "http://127.0.0.1:3100",
@@ -389,7 +389,7 @@ describe("CentralAuthManager", () => {
       if (path === "/v1/team-auth/ticket") {
         return Response.json({ ticket: "memory-ticket", expiresAt: 20_000 });
       }
-      return Response.json({ service: "openbot-auth-api", status: "ok" });
+      return Response.json({ service: "dani-dex-auth-api", status: "ok" });
     });
     const manager = new CentralAuthManager({
       apiUrl: "http://127.0.0.1:3100",
@@ -715,7 +715,7 @@ describe("CentralAuthManager", () => {
         attempts.push(Date.now() - startedAt);
         expect(new URL(input.toString()).pathname).toBe("/health/live");
         if (attempts.length < 3) throw new TypeError("fetch failed");
-        return Response.json({ service: "openbot-auth-api", status: "ok" });
+        return Response.json({ service: "dani-dex-auth-api", status: "ok" });
       })
       .mockName("health fetch");
     const manager = new CentralAuthManager({
@@ -820,7 +820,7 @@ describe("CentralAuthManager", () => {
       },
     });
 
-    fetchMock.mockResolvedValueOnce(Response.json({ service: "openbot-auth-api", status: "ok" }));
+    fetchMock.mockResolvedValueOnce(Response.json({ service: "dani-dex-auth-api", status: "ok" }));
     await expect(manager.retry()).resolves.toEqual({ status: "signed_out" });
   });
 
@@ -1182,7 +1182,7 @@ describe("CentralAuthManager", () => {
 });
 
 async function createRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-central-auth-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-central-auth-"));
   roots.push(root);
   return root;
 }

@@ -140,7 +140,7 @@ export const OpenModal: Story = {
     const dialog = await within(document.body).findByRole("dialog", { name: "Skills" });
     await expect(dialog).toBeVisible();
     await expect(within(dialog).queryByText("Managed")).toBeNull();
-    await expect(within(dialog).queryByText("openbot-site-hosting")).toBeNull();
+    await expect(within(dialog).queryByText("dani-dex-site-hosting")).toBeNull();
     await expect(within(dialog).getByText("Release notes")).toBeVisible();
     await expect(within(dialog).getByRole("button", { name: "Update Source check" })).toBeVisible();
     await expect(within(dialog).getByRole("switch", { name: "Enable Release notes" })).toBeChecked();

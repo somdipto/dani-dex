@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { beforeAll, beforeEach, expect, it, vi } from "vitest";
 import { App } from "./App";
-import { emitAgentEvent, installOpenbotStub, testServer } from "./app-test-harness";
+import { emitAgentEvent, installDanidexStub, testServer } from "./app-test-harness";
 import { CHANNEL_SELECTION_STORAGE_KEY } from "./features/channels/channel-selection";
 import { AccountDock } from "./lazy-views";
 
@@ -9,7 +9,7 @@ beforeAll(async () => {
   await AccountDock.preload();
 });
 
-beforeEach(installOpenbotStub);
+beforeEach(installDanidexStub);
 
 async function openSavedChannel(onUnmount?: (unmount: () => void) => void) {
   await window.danidex.agent.channelCommand({

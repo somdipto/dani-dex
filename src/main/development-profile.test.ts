@@ -28,11 +28,11 @@ describe("development profile", () => {
   });
 
   it("keeps an isolated worktree on one profile whichever port it wins", () => {
-    const instanceId = developmentInstanceIdForWorktree("/worktrees/openbot-191");
+    const instanceId = developmentInstanceIdForWorktree("/worktrees/dani-dex-191");
 
     // These paths collided under the old five-digit hash.
-    expect(developmentInstanceIdForWorktree("/worktrees/openbot-191")).toBe(instanceId);
-    expect(developmentInstanceIdForWorktree("/worktrees/openbot-356")).not.toBe(instanceId);
+    expect(developmentInstanceIdForWorktree("/worktrees/dani-dex-191")).toBe(instanceId);
+    expect(developmentInstanceIdForWorktree("/worktrees/dani-dex-356")).not.toBe(instanceId);
     expect(instanceId).not.toBe("22200");
     expect(readDevelopmentInstanceId(instanceId)).toBe(instanceId);
     expect(developmentUserDataName("app", instanceId)).toBe(`Dani-Dex Dev ${instanceId}`);

@@ -5,8 +5,8 @@ import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { parse as parseYaml } from "yaml";
 
-const MANAGED_SKILL_SLUG = "openbot-site-hosting";
-const OWNERSHIP_MARKER = ".openbot-managed.json";
+const MANAGED_SKILL_SLUG = "dani-dex-site-hosting";
+const OWNERSHIP_MARKER = ".dani-dex-managed.json";
 
 const logger = createDaniDexLogger("managed-skill-service");
 
@@ -105,7 +105,7 @@ async function syncTarget(
   content: string,
   slug: string,
 ): Promise<"synced" | "collision"> {
-  const ownershipContent = `${JSON.stringify({ managedBy: "openbot", slug, version: 1 })}\n`;
+  const ownershipContent = `${JSON.stringify({ managedBy: "danidex", slug, version: 1 })}\n`;
   const parent = dirname(target);
   await ensureSafeDirectory(workspaceRoot, parent);
   const marker = join(parent, OWNERSHIP_MARKER);
@@ -250,7 +250,7 @@ export async function listManagedSkillsForChat(agent: AgentSummary): Promise<Ins
         await rejectSymlink(marker);
         await rejectSymlink(file);
         if (
-          (await optionalText(marker)) !== `${JSON.stringify({ managedBy: "openbot", slug: entry.name, version: 1 })}\n`
+          (await optionalText(marker)) !== `${JSON.stringify({ managedBy: "danidex", slug: entry.name, version: 1 })}\n`
         )
           continue;
         const content = await readFile(file, "utf8");

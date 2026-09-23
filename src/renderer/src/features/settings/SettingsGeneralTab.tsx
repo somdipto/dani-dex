@@ -42,7 +42,7 @@ const linkTargetOptions: GeneralSettingsValue["externalLinkTarget"][] = ["Defaul
  */
 const LINK_TARGET_KEYS = {
   "Default browser": "settings.externalLinks.defaultBrowser",
-  "Dani-Dex": "settings.externalLinks.openbot",
+  "Dani-Dex": "settings.externalLinks.danidex",
 } as const satisfies Record<GeneralSettingsValue["externalLinkTarget"], AppTextKey>;
 
 interface SettingsGeneralTabProps {

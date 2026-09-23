@@ -39,7 +39,7 @@ Set the provider in \`~/Dani-Dex/config.json\`:
 }
 \`\`\`
 
-> Migrations are irreversible. No backup of \`openbot.db\` is made before an upgrade.
+> Migrations are irreversible. No backup of \`danidex.db\` is made before an upgrade.
 
 | Kind | Rendered as |
 | --- | --- |

@@ -465,7 +465,7 @@ export function DaniDexDynamicIsland(props: DaniDexDynamicIslandProps): JSX.Elem
   return (
     <div
       ref={transitionRoot}
-      class="openbot-dynamic-island-transition-root"
+      class="dani-dex-dynamic-island-transition-root"
       data-mode-transitioning={modeTransitioning() ? "true" : undefined}
     >
       <DynamicIsland
@@ -486,7 +486,7 @@ export function DaniDexDynamicIsland(props: DaniDexDynamicIslandProps): JSX.Elem
         hoverContentMotion={DANI_DEX_COMPACT_HOVER_MOTION}
         pointerToggle={config().badge ? false : undefined}
         class={[
-          "openbot-dynamic-island",
+          "dani-dex-dynamic-island",
           `dynamic-island-${visiblePresentation().mode === "message" ? "message-first" : visiblePresentation().mode}`,
           config().badge ? "dynamic-island-status" : undefined,
           visiblePresentation().mode !== "idle" && visiblePresentation().mode !== "working"

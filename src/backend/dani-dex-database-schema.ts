@@ -281,7 +281,7 @@ const BASELINE_V8_SCHEMA_SQL = `
 // v12 rewrites `projection_reactions`, so the fresh schema is no longer the v8 baseline. It is derived
 // from that baseline by substituting the one table that changed rather than by copying all of it, so a
 // table added to the baseline still reaches new installs from a single declaration.
-// `openbot-database-schema-parity.test.ts` proves the result matches what the migrations produce.
+// `dani-dex-database-schema-parity.test.ts` proves the result matches what the migrations produce.
 const BASELINE_REACTIONS_TABLE_SQL = `  CREATE TABLE IF NOT EXISTS projection_reactions (
     agent_id TEXT NOT NULL,
     message_id TEXT NOT NULL,
@@ -390,7 +390,7 @@ export interface DaniDexMigrationOptions {
   warn?: (message: string, error: unknown) => void;
 }
 
-const logger = createDaniDexLogger("openbot-database-schema");
+const logger = createDaniDexLogger("dani-dex-database-schema");
 
 interface DaniDexMigration {
   version: number;

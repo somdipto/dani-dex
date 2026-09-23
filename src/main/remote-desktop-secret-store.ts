@@ -21,7 +21,7 @@ export async function loadOrCreateRemoteDesktopCredentials(
   } catch (error) {
     if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
   }
-  const credentials = { username: "openbot", password: randomBytes(32).toString("base64url") };
+  const credentials = { username: "danidex", password: randomBytes(32).toString("base64url") };
   const encrypted = cipher.encrypt(JSON.stringify(credentials));
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
   const temporaryPath = `${path}.tmp`;

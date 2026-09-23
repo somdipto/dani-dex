@@ -68,7 +68,7 @@ describe("development environment preparation", () => {
 });
 
 function createTemporaryRoot(): string {
-  const root = mkdtempSync(join(tmpdir(), "openbot-dev-prepare-"));
+  const root = mkdtempSync(join(tmpdir(), "dani-dex-dev-prepare-"));
   temporaryRoots.push(root);
   mkdirSync(join(root, "apps", "auth-api"), { recursive: true });
   return root;

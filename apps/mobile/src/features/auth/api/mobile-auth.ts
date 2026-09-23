@@ -18,9 +18,9 @@ import { z } from "zod";
 
 import { isAndroid, isIOS } from "@/shared/lib/platform";
 
-const MOBILE_SESSION_KEY = "openbot.mobile.session.v1";
-const MOBILE_REVOCATIONS_KEY = "openbot.mobile.pending-revocations.v1";
-const MOBILE_DEVICE_ID_KEY = "openbot.mobile.device-id.v1";
+const MOBILE_SESSION_KEY = "danidex.mobile.session.v1";
+const MOBILE_REVOCATIONS_KEY = "danidex.mobile.pending-revocations.v1";
+const MOBILE_DEVICE_ID_KEY = "danidex.mobile.device-id.v1";
 const MOBILE_AUTH_REQUEST_TIMEOUT_MS = 10_000;
 
 let mobileSessionStorageTail = Promise.resolve();
@@ -505,7 +505,7 @@ function decodeStoredMobileCredential(value: unknown): MobileCredential {
   )
     throw new Error("Invalid stored mobile credential.");
   const parsed = parseMobileConnectUrl(
-    `openbot://mobile-connect?api=${encodeURIComponent(value.apiUrl)}&ticket=${"x".repeat(32)}`,
+    `dani-dex://mobile-connect?api=${encodeURIComponent(value.apiUrl)}&ticket=${"x".repeat(32)}`,
   );
   if (!parsed) throw new Error("Invalid stored account API.");
   return { apiUrl: parsed.apiUrl, sessionToken: value.sessionToken };

@@ -791,7 +791,7 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       },
       createMobileConnect: async () => ({
         qrData:
-          "openbot://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=preview-mobile-ticket_1234567890abcdef",
+          "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=preview-mobile-ticket_1234567890abcdef",
         expiresAt: Date.now() + 120_000,
       }),
       listMobileConnectedDevices: async () =>
@@ -2154,7 +2154,7 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       checkSetup: async () => ({
         platform: "darwin",
         hostName: "Mac mini",
-        username: "openbot",
+        username: "danidex",
         checkedAt: new Date().toISOString(),
         screenRecording: hostStatus.remoteDesktopScreenRecordingDenied ? "blocked" : "allowed",
         accessibility: "blocked",

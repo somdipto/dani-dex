@@ -391,7 +391,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
           elicitation: { form: {} },
           session: { configOptions: { boolean: {} } },
         },
-        clientInfo: { name: "openbot", title: "Dani-Dex", version: "0.1.0" },
+        clientInfo: { name: "danidex", title: "Dani-Dex", version: "0.1.0" },
       }),
       this.#requestTimeoutMs,
       "ACP initialization timed out.",
@@ -707,7 +707,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     if (!steer && thread.developerInstructions) {
       blocks.unshift({
         type: "text",
-        text: `<openbot-developer-instructions>\n${thread.developerInstructions}\n</openbot-developer-instructions>`,
+        text: `<dani-dex-developer-instructions>\n${thread.developerInstructions}\n</dani-dex-developer-instructions>`,
       });
     }
     this.#requireServedModel(thread);
@@ -754,7 +754,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       const response = await this.#requireConnection().prompt({ sessionId: thread.id, prompt });
       if (response.usage)
         this.emit("notification", {
-          method: "openbot/usage",
+          method: "danidex/usage",
           params: { threadId: thread.id, turnId: turn.id, usage: response.usage },
         });
       // OpenCode can swallow provider errors and report a successful, empty ACP turn.

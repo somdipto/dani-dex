@@ -69,7 +69,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId: externalId,
         turnId,
         command: ["npm", "test"],
-        cwd: "/tmp/openbot",
+        cwd: "/tmp/danidex",
         reason: "r".repeat(1_000),
       },
     });
@@ -83,7 +83,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
           agentId: "chief",
           kind: "command",
           command: "npm test",
-          cwd: "/tmp/openbot",
+          cwd: "/tmp/danidex",
         }),
       }),
     );
@@ -110,7 +110,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId: externalId,
         turnId,
         permissions: {
-          fileSystem: { read: ["/tmp/openbot"], write: ["/tmp/openbot/out"] },
+          fileSystem: { read: ["/tmp/danidex"], write: ["/tmp/danidex/out"] },
           network: { enabled: true },
         },
       },
@@ -403,7 +403,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId,
         turnId,
         callId: "question-call",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "ask_user",
         arguments: {
           questions: [
@@ -498,7 +498,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId,
         turnId,
         callId: "skipped-question-call",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "ask_user",
         arguments: {
           questions: [{ id: "favorite", header: "Favorite", question: "Choose again." }],
@@ -520,7 +520,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId,
         turnId,
         callId: "cancelled-question-call",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "ask_user",
         arguments: {
           questions: [{ id: "favorite", header: "Favorite", question: "Choose one more time." }],
@@ -542,7 +542,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId,
         turnId,
         callId: "duplicate-question-call",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "ask_user",
         arguments: {
           questions: [
@@ -591,7 +591,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
           threadId,
           turnId,
           callId: invalidPrompt.id,
-          namespace: "openbot",
+          namespace: "danidex",
           tool: "ask_user",
           arguments: { questions: invalidPrompt.questions },
         },
@@ -621,7 +621,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId,
         turnId,
         callId: "retry-question-call",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "ask_user",
         arguments: {
           questions: [{ id: "retry", header: "Retry", question: "Can this answer be retried?" }],
@@ -662,7 +662,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId,
         turnId,
         callId: "persistence-question-call",
-        namespace: "openbot",
+        namespace: "danidex",
         tool: "ask_user",
         arguments: {
           questions: [{ id: "delivery", header: "Delivery", question: "Was the answer delivered?" }],
@@ -740,7 +740,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId: externalThreadId,
         turnId: started.turnId,
         callId: "open-call",
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "open",
         arguments: { url: "https://example.com/login" },
       },
@@ -758,7 +758,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId: externalThreadId,
         turnId: started.turnId,
         callId: "takeover-call",
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "request_takeover",
         arguments: { tabId: "protected-tab" },
       },
@@ -778,7 +778,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId: externalThreadId,
         turnId: started.turnId,
         callId: "snapshot-during-takeover",
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "snapshot",
         arguments: { tabId: "protected-tab" },
       },
@@ -798,7 +798,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId: externalThreadId,
         turnId: started.turnId,
         callId: "takeover-duplicate",
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "request_takeover",
         arguments: { tabId: "protected-tab" },
       },
@@ -834,7 +834,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
         threadId: externalThreadId,
         turnId: started.turnId,
         callId: "takeover-cancel",
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "request_takeover",
         arguments: { tabId: "protected-tab" },
       },
@@ -946,7 +946,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
       params: {
         threadId: externalId,
         turnId,
-        permissions: { fileSystem: { read: ["/tmp/openbot"], write: [] }, network: { enabled: true } },
+        permissions: { fileSystem: { read: ["/tmp/danidex"], write: [] }, network: { enabled: true } },
       },
     });
     await waitFor(() => client.responses.some((response) => response.id === "granted-permissions"));
@@ -954,7 +954,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
     expect(client.responses.at(-1)).toEqual({
       id: "granted-permissions",
       result: {
-        permissions: { fileSystem: { read: ["/tmp/openbot"], write: [] }, network: { enabled: true } },
+        permissions: { fileSystem: { read: ["/tmp/danidex"], write: [] }, network: { enabled: true } },
         scope: "turn",
       },
     });
@@ -1038,7 +1038,7 @@ it.each(["submitted", "takeover"] as const)(
       method: "item/tool/call",
       id: "auth-request",
       params: {
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "submit_secret",
         threadId,
         turnId: started.turnId,

@@ -94,7 +94,7 @@ describe("host package signature", () => {
 
 describe.skipIf(process.platform !== "darwin")("real macOS package expansion", () => {
   it("builds and expands a harmless unsigned fixture and rejects version/content changes", async () => {
-    const temp = await mkdtemp(join(tmpdir(), "openbot-host-pkg-test-"));
+    const temp = await mkdtemp(join(tmpdir(), "dani-dex-host-pkg-test-"));
     const payload = join(temp, "payload");
     const scripts = join(temp, "scripts");
     try {
@@ -102,7 +102,7 @@ describe.skipIf(process.platform !== "darwin")("real macOS package expansion", (
         const target = join(payload, path);
         await mkdir(dirname(target), { recursive: true });
         let body = "fixture executable, never installed\n";
-        const source = path.endsWith(".plist") || path.endsWith(".sh") || path === "/usr/local/bin/openbot-host";
+        const source = path.endsWith(".plist") || path.endsWith(".sh") || path === "/usr/local/bin/dani-dex-host";
         if (source) body = await readFile(`build/macos/host-updates/${path.split("/").at(-1)}`, "utf8");
         if (path.endsWith("host-release.json"))
           body = JSON.stringify({ version: "1.2.3", commit: "a".repeat(40), arch: "arm64" });

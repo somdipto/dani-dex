@@ -14,7 +14,7 @@ import {
   type RequestId,
 } from "../src/backend/protocol";
 
-const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-filesystem-smoke-"));
+const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-filesystem-smoke-"));
 const sharedRoot = join(temporaryRoot, "shared");
 const useImagegen = process.argv.includes("--imagegen");
 const providers = requestedProviders();
@@ -71,7 +71,7 @@ async function runFilesystemSmoke(provider: AgentProvider, completedProviders: A
         sandbox: "danger-full-access",
         ephemeral: provider === "codex",
         persistSession: false,
-        serviceName: "openbot_filesystem_smoke",
+        serviceName: "danidex_filesystem_smoke",
         developerInstructions: [
           "This is an isolated local filesystem smoke test.",
           `Your persistent workspace is ${workspaceRoot}.`,
@@ -199,7 +199,7 @@ async function runImagegenSmoke(): Promise<void> {
         approvalPolicy: "never",
         sandbox: "danger-full-access",
         ephemeral: true,
-        serviceName: "openbot_filesystem_smoke",
+        serviceName: "danidex_filesystem_smoke",
         developerInstructions: [
           "This is an isolated local image-generation smoke test.",
           `Only create files inside ${workspaceRoot}.`,
@@ -281,7 +281,7 @@ async function initialize(client: AgentClient): Promise<void> {
     "initialize",
     {
       clientInfo: {
-        name: "openbot_filesystem_smoke",
+        name: "danidex_filesystem_smoke",
         title: "Dani-Dex Filesystem Smoke",
         version: "0.1.0",
       },

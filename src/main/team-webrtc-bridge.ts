@@ -178,7 +178,7 @@ export class TeamWebRtcBridge extends EventEmitter<TeamWebRtcBridgeEvents> {
     window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
     await (this.#options.developmentUrl
       ? window.loadURL(new URL("team-webrtc.html", `${this.#options.developmentUrl}/`).toString())
-      : window.loadURL("openbot-app://app/team-webrtc.html"));
+      : window.loadURL("dani-dex-app://app/team-webrtc.html"));
     const { port1, port2 } = new MessageChannelMain();
     this.#port = port1;
     port1.on("message", (event) => this.#handleMessage(bridgeMessageSchema.parse(event.data)));
@@ -194,7 +194,7 @@ export class TeamWebRtcBridge extends EventEmitter<TeamWebRtcBridgeEvents> {
       const listener = (event: { data: unknown }) => ready(bridgeMessageSchema.parse(event.data));
       port1.on("message", listener);
     });
-    window.webContents.postMessage("openbot-team-webrtc-port", null, [port2]);
+    window.webContents.postMessage("dani-dex-team-webrtc-port", null, [port2]);
     await rendererReady;
   }
 

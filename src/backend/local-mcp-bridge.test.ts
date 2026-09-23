@@ -9,7 +9,7 @@ import { type DynamicToolNamespace, LocalMcpBridge } from "./local-mcp-bridge";
 const TOOLS: DynamicToolNamespace[] = [
   {
     type: "namespace" as const,
-    name: "openbot",
+    name: "danidex",
     description: "Dani-Dex test tools",
     tools: [
       {
@@ -136,7 +136,7 @@ describe("LocalMcpBridge", () => {
 });
 
 async function connect(server: { url: string; headers: Array<{ name: string; value: string }> }): Promise<Client> {
-  const client = new Client({ name: "openbot-test", version: "1" });
+  const client = new Client({ name: "dani-dex-test", version: "1" });
   clients.push(client);
   await client.connect(
     new StreamableHTTPClientTransport(new URL(server.url), {

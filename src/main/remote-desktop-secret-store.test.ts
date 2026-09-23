@@ -6,7 +6,7 @@ import { loadOrCreateRemoteDesktopCredentials } from "./remote-desktop-secret-st
 
 describe("loadOrCreateRemoteDesktopCredentials", () => {
   it("persists only encrypted Sunshine credentials", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-secret-test-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-secret-test-"));
     const cipher = {
       encrypt: (value: string) => Buffer.from(value.split("").reverse().join("")),
       decrypt: (value: Buffer) => value.toString().split("").reverse().join(""),

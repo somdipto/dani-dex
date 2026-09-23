@@ -75,7 +75,7 @@ describe("AgentMemoryStore", () => {
   });
 
   it("keeps memories after the database restarts", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-memory-restart-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-memory-restart-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -137,7 +137,7 @@ describe("AgentMemoryStore", () => {
   });
 
   it("removes every memory and memory event when its agent is deleted", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-memory-delete-agent-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-memory-delete-agent-"));
     roots.push(root);
     const agentStore = new AgentStore(join(root, "data"), join(root, "home"));
     await agentStore.initialize();
@@ -158,7 +158,7 @@ describe("AgentMemoryStore", () => {
 });
 
 async function setup(): Promise<{ database: DaniDexDatabase; memories: AgentMemoryStore }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-memory-store-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-memory-store-"));
   roots.push(root);
   const database = new DaniDexDatabase(root);
   await database.initialize();

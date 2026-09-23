@@ -51,7 +51,7 @@ import type { AuthenticatedMember, RemoteDirectoryMember, TeamIdentity, TeamStor
 import type { TeamWebRtcBridge } from "./team-webrtc-bridge";
 import { TeamWebRtcHostGateway } from "./team-webrtc-host-gateway";
 
-export const DEVELOPMENT_REMOTE_CLIENT_USERNAME = "openbot-dev-client";
+export const DEVELOPMENT_REMOTE_CLIENT_USERNAME = "dani-dex-dev-client";
 
 const logger = createDaniDexLogger("host-service");
 
@@ -173,10 +173,10 @@ export class HostService extends EventEmitter<HostEvents> {
       platform: options.platform ?? normalizeRemoteDesktopPlatform(process.platform),
       unattended: options.unattended ?? false,
       runtimePaths: options.remoteDesktopRuntimePaths ?? null,
-      runtimeStateDirectory: options.remoteDesktopStateDirectory ?? ".openbot-remote-desktop",
+      runtimeStateDirectory: options.remoteDesktopStateDirectory ?? ".dani-dex-remote-desktop",
       getRuntimeCredentials:
         options.getRemoteDesktopRuntimeCredentials ??
-        (async () => ({ username: "openbot", password: "development-runtime-not-for-release" })),
+        (async () => ({ username: "danidex", password: "development-runtime-not-for-release" })),
       getDisplays: options.getRemoteDesktopDisplays,
       getIceServers:
         options.getRemoteDesktopIceServers ??
@@ -240,7 +240,7 @@ export class HostService extends EventEmitter<HostEvents> {
           bridge: options.teamWebRtcBridge,
           store: options.store,
           appVersion: options.appVersion,
-          transferDirectory: join(options.logDirectory ?? ".openbot-remote", "transfers"),
+          transferDirectory: join(options.logDirectory ?? ".dani-dex-remote", "transfers"),
           renewSignal: async (hostId) => {
             if (!options.issueRemoteHostTicket) throw new Error("The WebRTC host service is not configured.");
             return options.issueRemoteHostTicket(hostId);
@@ -642,7 +642,7 @@ export class HostService extends EventEmitter<HostEvents> {
     const apiUrl = this.#localApiUrl();
     if (!identity || !apiUrl) throw new Error("The local development host is not ready.");
     const username = DEVELOPMENT_REMOTE_CLIENT_USERNAME;
-    const password = "openbot-local-development-client";
+    const password = "dani-dex-local-development-client";
     let authenticated: AuthenticatedMember;
     try {
       authenticated = await this.#options.store.login(username, password);
@@ -1108,7 +1108,7 @@ function initialHostStatus(identity: TeamIdentity | null, unattended: boolean): 
 }
 
 export function serverLogoUrl(version: string): string {
-  return `openbot-server-logo://local/logo?v=${encodeURIComponent(version)}`;
+  return `dani-dex-server-logo://local/logo?v=${encodeURIComponent(version)}`;
 }
 
 function normalizeRemoteDesktopPlatform(platform: NodeJS.Platform): "darwin" | "win32" | "linux" {

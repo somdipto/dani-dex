@@ -38,13 +38,13 @@ describe("storedBrowserTab", () => {
       storedBrowserTab({
         id: "tab-1",
         url: "https://example.com/app",
-        ownerThreadId: `openbot-thread-bot-${uuid}`,
+        ownerThreadId: `dani-dex-thread-bot-${uuid}`,
         ownerBotId: `bot-${uuid}`,
       }),
     ).toEqual({
       id: "tab-1",
       url: "https://example.com/app",
-      ownerThreadId: `openbot-thread-bot-${uuid}`,
+      ownerThreadId: `dani-dex-thread-bot-${uuid}`,
       ownerAgentId: `bot-${uuid}`,
     });
     expect(
@@ -111,7 +111,7 @@ describe("storedBrowserTab", () => {
     const tab = {
       id: "tab-1",
       url: "https://example.com/app",
-      ownerThreadId: `openbot-thread-bot-${uuid}`,
+      ownerThreadId: `dani-dex-thread-bot-${uuid}`,
       ownerAgentId: `bot-${uuid}`,
     };
 
@@ -119,27 +119,27 @@ describe("storedBrowserTab", () => {
     // spellings alone means `#canUseToolTab` compares a thread that no longer exists, so every tool call
     // against the tab the agent itself opened is refused.
     expect(
-      reownStoredBrowserTab(tab, [{ id: `agent-${uuid}`, threadId: `openbot-thread-agent-${uuid}` }]),
-    ).toMatchObject({ ownerAgentId: `agent-${uuid}`, ownerThreadId: `openbot-thread-agent-${uuid}` });
+      reownStoredBrowserTab(tab, [{ id: `agent-${uuid}`, threadId: `dani-dex-thread-agent-${uuid}` }]),
+    ).toMatchObject({ ownerAgentId: `agent-${uuid}`, ownerThreadId: `dani-dex-thread-agent-${uuid}` });
 
     // v13 declines when the `agent-` spelling is already taken, so both agents exist and the `bot-` one
     // still answers to its own name. Renaming by shape would hand this tab to the stranger beside it.
     expect(
       reownStoredBrowserTab(tab, [
-        { id: `agent-${uuid}`, threadId: `openbot-thread-agent-${uuid}` },
-        { id: `bot-${uuid}`, threadId: `openbot-thread-bot-${uuid}` },
+        { id: `agent-${uuid}`, threadId: `dani-dex-thread-agent-${uuid}` },
+        { id: `bot-${uuid}`, threadId: `dani-dex-thread-bot-${uuid}` },
       ]),
     ).toEqual(tab);
 
     // A generated agent's thread id is a bare UUID that v13 never rewrote, so it matches on its own while
     // the owner id beside it is still the old spelling. Calling that tab correct leaves `#canUseToolTab`,
     // which checks both, refusing every tool call against it.
-    const threadId = `openbot-thread-${uuid}`;
+    const threadId = `dani-dex-thread-${uuid}`;
     expect(
       reownStoredBrowserTab({ ...tab, ownerThreadId: threadId }, [{ id: `agent-${uuid}`, threadId }]),
     ).toMatchObject({ ownerAgentId: `agent-${uuid}`, ownerThreadId: threadId });
 
     // Nobody to give it to. Keeping the id it was found with orphans the tab; inventing one hands it over.
-    expect(reownStoredBrowserTab(tab, [{ id: "chief", threadId: "openbot-thread-chief" }])).toEqual(tab);
+    expect(reownStoredBrowserTab(tab, [{ id: "chief", threadId: "dani-dex-thread-chief" }])).toEqual(tab);
   });
 });

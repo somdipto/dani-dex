@@ -14,11 +14,11 @@ const authApiRoot = join(projectRoot, "apps", "auth-api");
 const executableSuffix = process.platform === "win32" ? ".exe" : "";
 const wrangler = join(projectRoot, "node_modules", ".bin", `wrangler${executableSuffix}`);
 const productionApiUrl = "https://api.openbot.run";
-const productionDatabase = "openbot-auth";
-const productionBucket = "openbot-skills";
+const productionDatabase = "dani-dex-auth";
+const productionBucket = "dani-dex-skills";
 const owner = {
-  id: "openbot-production-catalog",
-  identityKey: "openbot-production-catalog",
+  id: "dani-dex-production-catalog",
+  identityKey: "dani-dex-production-catalog",
   email: "catalog@openbot.run",
   name: "Dani-Dex",
   avatarUrl: "https://openbot.run/icon-192x192.png",
@@ -94,8 +94,8 @@ export async function publishProductionCatalog(
   target: "local" | "production" = "production",
 ): Promise<void> {
   const mode = target === "local" ? "--local" : "--remote";
-  const bucket = target === "local" ? "openbot-skills-test" : productionBucket;
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-production-publish-"));
+  const bucket = target === "local" ? "dani-dex-skills-test" : productionBucket;
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-production-publish-"));
   try {
     const artifactRoot = join(temporaryRoot, "artifacts");
     await buildProductionCatalog(artifactRoot);

@@ -299,7 +299,7 @@ function fakeTokens() {
     sessionId = role === "host" ? "host-session" : "client-session",
     authEpoch = 1,
   ): RemoteTicketClaims => ({
-    aud: "openbot-remote",
+    aud: "dani-dex-remote",
     jti,
     sessionId,
     hostId: "host-1",

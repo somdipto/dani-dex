@@ -191,7 +191,7 @@ describe("ClaudeAgentClient", () => {
   });
 
   it("streams a Claude SDK turn through the App Server event contract", async () => {
-    root = await mkdtemp(join(tmpdir(), "openbot-claude-client-"));
+    root = await mkdtemp(join(tmpdir(), "dani-dex-claude-client-"));
     const sharedRoot = join(root, "shared");
     const executable = join(root, "claude");
     await writeFile(
@@ -216,7 +216,7 @@ fi
       });
       const options: DynamicRecord | null = isDynamicRecord(params.options) ? params.options : null;
       const mcpServers: DynamicRecord | null = isDynamicRecord(options?.mcpServers) ? options.mcpServers : null;
-      const browserServer = mcpServers?.openbot_browser;
+      const browserServer = mcpServers?.danidex_browser;
       const browserServerInstance = isDynamicRecord(browserServer) ? browserServer.instance : null;
       const registeredBrowserTools = isDynamicRecord(browserServerInstance)
         ? browserServerInstance._registeredTools
@@ -224,8 +224,8 @@ fi
       expect(isDynamicRecord(registeredBrowserTools) ? Object.keys(registeredBrowserTools) : []).toEqual(
         expect.arrayContaining(["evaluate", "request_takeover"]),
       );
-      const openbotServer = mcpServers?.openbot;
-      const serverInstance = isDynamicRecord(openbotServer) ? openbotServer.instance : null;
+      const danidexServer = mcpServers?.danidex;
+      const serverInstance = isDynamicRecord(danidexServer) ? danidexServer.instance : null;
       const registeredTools = isDynamicRecord(serverInstance) ? serverInstance._registeredTools : null;
       // Compare the declarations passed to the providers, including schema constraints and guidance.
       // Claude uses the SDK's AskUserQuestion instead of the ask_user MCP tool.
@@ -316,7 +316,7 @@ fi
     });
     await waitFor(() => notifications.some((event) => event.method === "turn/completed"));
 
-    expect(notifications.find((event) => event.method === "openbot/usage")?.params).toMatchObject({
+    expect(notifications.find((event) => event.method === "danidex/usage")?.params).toMatchObject({
       turnId: deliveryId,
       modelUsage: {
         "claude-sonnet-5": {
@@ -530,7 +530,7 @@ fi
   });
 
   it("uses alias-only discovery values for Claude SDK model selection", async () => {
-    root = await mkdtemp(join(tmpdir(), "openbot-claude-model-alias-"));
+    root = await mkdtemp(join(tmpdir(), "dani-dex-claude-model-alias-"));
     const discoveryQuery = new TestQuery(new TestQueue<TestStreamMessage>(), [
       {
         value: "sonnet",
@@ -574,7 +574,7 @@ fi
   });
 
   it("keeps neutral UI effort for unsupported models without sending effort to Claude", async () => {
-    root = await mkdtemp(join(tmpdir(), "openbot-claude-effort-support-"));
+    root = await mkdtemp(join(tmpdir(), "dani-dex-claude-effort-support-"));
     const discoveryQuery = new TestQuery(new TestQueue<TestStreamMessage>(), [
       {
         value: "haiku",
@@ -674,7 +674,7 @@ fi
   });
 
   it("restarts an inactive session when resumed with updated memory instructions", async () => {
-    root = await mkdtemp(join(tmpdir(), "openbot-claude-memory-resume-"));
+    root = await mkdtemp(join(tmpdir(), "dani-dex-claude-memory-resume-"));
     const instructions: string[] = [];
     const client = new ClaudeAgentClient({ executable: "/bin/true", version: "2.1.231" }, (params) => {
       const options: DynamicRecord | null = isDynamicRecord(params.options) ? params.options : null;
@@ -1300,7 +1300,7 @@ async function createHarness(history?: SessionMessage[]): Promise<{
   prompt: AsyncIterable<SDKUserMessage>;
   threadId: string;
 }> {
-  root = await mkdtemp(join(tmpdir(), "openbot-claude-client-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-claude-client-"));
   const output = new TestQueue<TestStreamMessage>();
   let prompt: AsyncIterable<SDKUserMessage> | null = null;
   const generator = new TestQuery(output);
@@ -1549,7 +1549,7 @@ it("hands the enabled MCP servers to the spawn and keeps the bridge names", asyn
     mcpConfig({ id: "mcp-2", name: "Disabled", enabled: false }),
     // All four providers key MCP servers by name, so a configuration taking a bridge name would
     // displace the tools the agent depends on.
-    mcpConfig({ id: "mcp-3", name: "openbot", command: "/bin/echo" }),
+    mcpConfig({ id: "mcp-3", name: "danidex", command: "/bin/echo" }),
   ];
   const client = new ClaudeAgentClient(
     { executable: "/bin/true", version: "2.1.251" },
@@ -1568,11 +1568,11 @@ it("hands the enabled MCP servers to the spawn and keeps the bridge names", asyn
     const servers = isDynamicRecord(started?.mcpServers) ? started.mcpServers : {};
     expect(servers.Filesystem).toMatchObject({ type: "stdio", command: "/bin/echo", args: ["ready"] });
     expect(servers.Disabled).toBeUndefined();
-    expect(isDynamicRecord(servers.openbot) ? servers.openbot.instance : null).toBeTruthy();
+    expect(isDynamicRecord(servers.danidex) ? servers.danidex.instance : null).toBeTruthy();
     /*
      * The record above is the whole set. Without the flag, Claude adds the servers of project
      * `.mcp.json`, user settings, plugins and agent frontmatter to it - including one that takes
-     * the bridge name `openbot` - and the panel stops describing what the agent has. The setting
+     * the bridge name `danidex` - and the panel stops describing what the agent has. The setting
      * sources stay, because the flag takes away MCP and leaves permissions and hooks.
      */
     expect(started?.strictMcpConfig).toBe(true);
@@ -1598,7 +1598,7 @@ it("reports an MCP server whose command this machine does not have", async () =>
     undefined,
     () => [
       mcpConfig({ id: "mcp-1", name: "Filesystem", command: "/bin/echo", args: ["ready"] }),
-      mcpConfig({ id: "mcp-2", name: "Missing", command: "openbot-not-a-real-command" }),
+      mcpConfig({ id: "mcp-2", name: "Missing", command: "dani-dex-not-a-real-command" }),
     ],
     reportMcpDrops,
   );
@@ -1606,7 +1606,7 @@ it("reports an MCP server whose command this machine does not have", async () =>
   try {
     await client.request("thread/start", { cwd: process.cwd() }, decodeThreadResponse);
     expect(reportMcpDrops).toHaveBeenCalledWith("claude", [
-      { name: "Missing", reason: "command_not_found", detail: "Command not found: openbot-not-a-real-command" },
+      { name: "Missing", reason: "command_not_found", detail: "Command not found: dani-dex-not-a-real-command" },
     ]);
     const servers = isDynamicRecord(spawned.at(-1)?.mcpServers) ? spawned.at(-1)?.mcpServers : {};
     expect(isDynamicRecord(servers) ? servers.Missing : null).toBeUndefined();

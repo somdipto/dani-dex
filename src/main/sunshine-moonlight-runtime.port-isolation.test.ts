@@ -182,7 +182,7 @@ function sunshineHandler(harness: Harness): (request: IncomingMessage, response:
       response.end();
       return;
     }
-    if (request.method === "GET" && url.pathname === "/api/openbot/displays") {
+    if (request.method === "GET" && url.pathname === "/api/danidex/displays") {
       json({ displays: [] });
       return;
     }
@@ -393,14 +393,14 @@ async function createStartedRuntime(
   runtime: SunshineMoonlightRuntime;
   harness: Harness;
 }> {
-  const stateDirectory = await mkdtemp(join(tmpdir(), "openbot-sunshine-port-test-"));
+  const stateDirectory = await mkdtemp(join(tmpdir(), "dani-dex-sunshine-port-test-"));
   const harness = createHarness(stateDirectory);
   configureHarness?.(harness);
   const runtime = new SunshineMoonlightRuntime({
     paths: TEST_PATHS,
     stateDirectory,
     platform: "darwin",
-    credentials: { username: "openbot-test", password: "test-password" },
+    credentials: { username: "dani-dex-test", password: "test-password" },
     getDisplays: () => structuredClone(TEST_DISPLAYS),
     getIceServers,
     spawnProcess: harness.spawn,
@@ -647,7 +647,7 @@ describe("Sunshine port isolation", () => {
         expect(httpsPort).not.toBe(47_990);
         expect(harness.pinBodies.length).toBeGreaterThan(0);
         const paths = harness.sunshineHits.map((hit) => hit.path);
-        expect(paths).toContain("/api/openbot/displays");
+        expect(paths).toContain("/api/danidex/displays");
         expect(paths).toContain("/api/pin");
         for (const hit of harness.sunshineHits) {
           expect(hit.localPort).toBe(httpsPort);
@@ -670,7 +670,7 @@ describe("Sunshine port isolation", () => {
         expect(first.runtime.state).toBeNull();
         expect(second.runtime.state).not.toBeNull();
         const authenticate = await fetch(`${secondBaseUrl}/api/authenticate`, {
-          headers: { [second.harness.authHeader]: "openbot-remote-slot-1" },
+          headers: { [second.harness.authHeader]: "dani-dex-remote-slot-1" },
         });
         expect(authenticate.ok).toBe(true);
         await expect(fetch(first.runtime.state?.baseUrl ?? "http://127.0.0.1:1/")).rejects.toThrow();
@@ -678,7 +678,7 @@ describe("Sunshine port isolation", () => {
         await first.runtime.start();
         expect(first.runtime.state).not.toBeNull();
         const stillThere = await fetch(`${secondBaseUrl}/api/authenticate`, {
-          headers: { [second.harness.authHeader]: "openbot-remote-slot-1" },
+          headers: { [second.harness.authHeader]: "dani-dex-remote-slot-1" },
         });
         expect(stillThere.ok).toBe(true);
       } finally {
@@ -701,7 +701,7 @@ describe("Sunshine port isolation", () => {
       expect(first.runtime.sunshineHttpPort).not.toBe(oldPort);
       expect(new Set(first.harness.observedSunshineHttpPorts)).toEqual(new Set([first.runtime.sunshineHttpPort]));
       const denied = await fetch(`${first.runtime.state?.baseUrl}/api/authenticate`, {
-        headers: { "X-Dani-Dex-Remote-User": "openbot-remote-slot-1" },
+        headers: { "X-Dani-Dex-Remote-User": "dani-dex-remote-slot-1" },
       });
       expect(denied.status).toBe(401);
       expect(first.harness.authHeader).not.toBe(other.harness.authHeader);

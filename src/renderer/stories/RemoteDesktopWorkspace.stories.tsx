@@ -93,7 +93,7 @@ export const UpdateRequired: Story = {
 function createMockViewerUrl(imageUrl: string, id: string) {
   const absoluteImageUrl = new URL(imageUrl, window.location.origin).href;
   const viewerState = JSON.stringify({
-    source: "openbot-moonlight",
+    source: "dani-dex-moonlight",
     type: "viewer-state",
     sessionId: id,
     state: "connected",

@@ -51,8 +51,8 @@ describe("TeamApiServer events", () => {
     const login = await store.login("owner", "correct horse battery");
     for (const supportsOpencode of [false, true]) {
       const socket = new WebSocket(`ws://127.0.0.1:${port}/v1/events`, [
-        "openbot-team-v1",
-        `openbot-token.${login.sessionToken}`,
+        "dani-dex-team-v1",
+        `dani-dex-token.${login.sessionToken}`,
       ]);
       const presence = nextJsonEvent(socket);
       await new Promise<void>((resolve) => socket.addEventListener("open", () => resolve(), { once: true }));
@@ -145,8 +145,8 @@ describe("TeamApiServer events", () => {
 
     const owner = await store.login("owner", "correct horse battery");
     const socket = new WebSocket(`ws://127.0.0.1:${port}/v1/events`, [
-      "openbot-events-v2",
-      `openbot-token.${member.sessionToken}`,
+      "dani-dex-events-v2",
+      `dani-dex-token.${member.sessionToken}`,
     ]);
     const initialEvents = nextJsonEvents(socket, 2);
     await new Promise<void>((resolve, reject) => {
@@ -282,8 +282,8 @@ describe("TeamApiServer events", () => {
     socket.close();
     await firstSocketClosed;
     const oversizedSocket = new WebSocket(`ws://127.0.0.1:${port}/v1/events`, [
-      "openbot-events-v2",
-      `openbot-token.${member.sessionToken}`,
+      "dani-dex-events-v2",
+      `dani-dex-token.${member.sessionToken}`,
     ]);
     const oversizedInitialEvents = nextJsonEvents(oversizedSocket, 2);
     await new Promise<void>((resolve, reject) => {
@@ -325,8 +325,8 @@ describe("TeamApiServer events", () => {
       agents: createAgents({}, agentEvents),
     });
     const socket = new WebSocket(`ws://127.0.0.1:${port}/v1/events`, [
-      "openbot-events",
-      `openbot-token.${login.sessionToken}`,
+      "dani-dex-events",
+      `dani-dex-token.${login.sessionToken}`,
     ]);
     const firstEvent = nextJsonEvent(socket);
 
@@ -336,7 +336,7 @@ describe("TeamApiServer events", () => {
         socket.addEventListener("error", () => reject(new Error("WebSocket did not open.")), { once: true });
       });
       await expect(firstEvent).resolves.toMatchObject({ type: "team-presence" });
-      expect(socket.protocol).toBe("openbot-events");
+      expect(socket.protocol).toBe("dani-dex-events");
       const supportedEvent = nextJsonEvent(socket);
       agentEvents.emit("event", { type: "runtime-snapshot", snapshot: createAgents().getRuntimeSnapshot() });
       agentEvents.emit("event", { type: "agents-changed", agents: [] });

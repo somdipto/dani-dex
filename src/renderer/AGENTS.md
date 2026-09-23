@@ -64,7 +64,7 @@ wiring (`App.tsx`, `AppView.tsx`, `app-providers.tsx`, `app-bootstrap.tsx`, `Wor
 `WorkspaceOverlays.tsx`, `lazy-views.ts`), the cross-domain modules every feature reads and none
 owns (`navigation.tsx`, `layout.tsx`, `turns.tsx`, `providers.tsx`, `data.ts`,
 `simple-context.tsx`, `scope-lifetime.ts`), `preview/` — whose mocks are the second implementation
-of the IPC surface and belong beside `mock-openbot.ts` — and the base stylesheets
+of the IPC surface and belong beside `mock-danidex.ts` — and the base stylesheets
 (`primitives.css`, `base.css`, `transitions.css`, `action-menu.css`, `sliding-tabs.css`) —
 plus `app-shell.css`, which ends in a theme layer that assigns the palette across every domain
 at once and cannot be split until that layer is lifted out; its header says so. Stories stay in
@@ -127,7 +127,7 @@ component. Needing either for logic means the logic is not separable from the DO
 | `await screen.findByText(...)` | Copy that is a product contract and has no accessible role of its own. |
 | `emitAgentEvent(...)` and the other `emit*` bridges — `app-test-harness.ts` | Driving a main-process event into the renderer. Await a `findBy*` after it; do not wait on the clock. |
 | `subscriberCounts()` — same file | Asserting a screen actually unsubscribed. This is how a leaked bridge subscription is caught. |
-| `installOpenbotStub()` | The whole `window.danidex` surface. Extend the stub rather than reaching around it. |
+| `installDanidexStub()` | The whole `window.danidex` surface. Extend the stub rather than reaching around it. |
 | `vi.waitFor(() => expect(spy)...)` | A call that produces no visible change — an analytics event, an IPC invoke. |
 | `vi.useFakeTimers()` + `vi.advanceTimersByTime(n)` | A debounce or a poll interval. Advancing the clock is input, not waiting. |
 

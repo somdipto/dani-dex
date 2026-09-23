@@ -9,7 +9,7 @@ import { withoutElectronRuntimeFlags } from "./electron-spawn-env";
 
 const scriptsRoot = dirname(fileURLToPath(import.meta.url));
 const projectRoot = dirname(scriptsRoot);
-const outputRoot = await mkdtemp(join(tmpdir(), "openbot-browser-build-"));
+const outputRoot = await mkdtemp(join(tmpdir(), "dani-dex-browser-build-"));
 try {
   const outputPath = join(outputRoot, "browser-smoke.mjs");
   const smokeRoot = join(outputRoot, "single-process");
@@ -47,10 +47,10 @@ try {
       if (phase === "write") {
         response.setHeader(
           "set-cookie",
-          "openbot_persistence=kept; Max-Age=31536000; Expires=Tue, 19 Jan 2038 03:14:07 GMT; Path=/; SameSite=Lax",
+          "danidex_persistence=kept; Max-Age=31536000; Expires=Tue, 19 Jan 2038 03:14:07 GMT; Path=/; SameSite=Lax",
         );
       } else if (phase === "clear") {
-        response.setHeader("set-cookie", "openbot_persistence=; Max-Age=0; Path=/; SameSite=Lax");
+        response.setHeader("set-cookie", "danidex_persistence=; Max-Age=0; Path=/; SameSite=Lax");
       }
       response.setHeader("content-type", "text/html; charset=utf-8");
       response.end(persistencePage());
@@ -88,7 +88,7 @@ try {
 function persistencePage(): string {
   return `<!doctype html><body>loading<script>
   const phase = new URL(location.href).searchParams.get("phase");
-  const databaseName = "openbot-persistence-smoke";
+  const databaseName = "dani-dex-persistence-smoke";
   function openDatabase() {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(databaseName, 1);
@@ -129,17 +129,17 @@ function persistencePage(): string {
   }
   async function main() {
     if (phase === "write") {
-      localStorage.setItem("openbot-persistence", "kept");
+      localStorage.setItem("dani-dex-persistence", "kept");
       await writeDatabase();
     } else if (phase === "clear") {
-      localStorage.removeItem("openbot-persistence");
+      localStorage.removeItem("dani-dex-persistence");
       await deleteDatabase();
     }
     const indexedDbValue = phase === "clear" ? null : await readDatabase();
     document.body.textContent = JSON.stringify({
       ready: true,
       cookie: document.cookie,
-      localStorage: localStorage.getItem("openbot-persistence"),
+      localStorage: localStorage.getItem("dani-dex-persistence"),
       indexedDb: indexedDbValue,
     });
   }

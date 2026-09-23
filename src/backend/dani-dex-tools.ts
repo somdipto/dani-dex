@@ -229,7 +229,7 @@ export const DANI_DEX_TOOL_DEFINITIONS: readonly DaniDexToolDefinition[] = [
 
 export const DANI_DEX_DYNAMIC_TOOLS = {
   type: "namespace",
-  name: "openbot",
+  name: "danidex",
   description:
     "Attach files to the current response, keep structured data in the shared SQLite database, and work with persistent Dani-Dex teammates.",
   tools: DANI_DEX_TOOL_DEFINITIONS.map((definition) => ({

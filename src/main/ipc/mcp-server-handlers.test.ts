@@ -31,7 +31,7 @@ vi.mock("electron", () => ({
   },
 }));
 
-const TRUSTED_EVENT = { senderFrame: { url: "openbot-app://app/index.html" } };
+const TRUSTED_EVENT = { senderFrame: { url: "dani-dex-app://app/index.html" } };
 
 function stdioConfig(overrides: Partial<McpServerConfig> = {}): McpServerConfig {
   return {
@@ -39,7 +39,7 @@ function stdioConfig(overrides: Partial<McpServerConfig> = {}): McpServerConfig 
     name: "Tool",
     transport: "stdio",
     enabled: true,
-    command: "openbot-no-such-command",
+    command: "dani-dex-no-such-command",
     args: [],
     env: [],
     envPassthrough: [],

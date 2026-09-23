@@ -25,7 +25,7 @@ export function OtpInput(props: OtpInputProps) {
   const length = () => props.length ?? ONE_TIME_CODE_LENGTH;
   const alphabet = () => (props.numeric ? "0123456789" : ONE_TIME_CODE_ALPHABET);
   const groupAt = () => Math.ceil(length() / 2);
-  const inputId = `openbot-otp-${createUniqueId()}`;
+  const inputId = `dani-dex-otp-${createUniqueId()}`;
   const messageId = `${inputId}-message`;
   const initialSlots = toSlots(untrack(() => props.value));
   const [slots, setSlots] = createSignal(initialSlots);

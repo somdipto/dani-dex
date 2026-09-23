@@ -13,7 +13,7 @@ import {
   emitDynamicIslandAction,
   emitScopedAgentEvent,
   emitServers,
-  installOpenbotStub,
+  installDanidexStub,
   queuedDelivery,
   subscriberCounts,
   testServer,
@@ -26,7 +26,7 @@ import { TestResizeObserver } from "./setupTests";
 
 describe("Dani-Dex connected desktop shell", () => {
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
 
   it.each(["darwin", "win32", "linux"] as const)(
@@ -1142,7 +1142,7 @@ describe("Dani-Dex connected desktop shell", () => {
                 kind: "file",
                 mimeType: "text/markdown",
                 previewKind: "text",
-                previewUrl: "openbot-attachment://file/markdown-file",
+                previewUrl: "dani-dex-attachment://file/markdown-file",
               },
             ],
           },
@@ -1407,7 +1407,7 @@ describe("Dani-Dex connected desktop shell", () => {
 });
 
 it("mutes and unmutes a server without changing other servers", async () => {
-  installOpenbotStub();
+  installDanidexStub();
   let servers = [testServer("local", true), testServer("remote-1", false)];
   vi.mocked(window.danidex.servers.list).mockResolvedValue(servers);
   vi.mocked(window.danidex.servers.setMuted).mockImplementation(async ({ serverId, muted }) => {

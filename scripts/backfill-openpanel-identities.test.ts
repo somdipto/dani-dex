@@ -25,7 +25,7 @@ describe("OpenPanel identity backfill", () => {
   });
 
   it("counts profiles using the same normalized ids as the update join", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-openpanel-backfill-test-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-openpanel-backfill-test-"));
     try {
       await writeFile(join(directory, "users.json"), JSON.stringify([{ id: " account-1 ", email: "one@example.com" }]));
       await writeFile(join(directory, "profiles.json"), JSON.stringify([{ profileId: " account-1 ", email: null }]));
@@ -67,7 +67,7 @@ describe("OpenPanel identity backfill", () => {
   });
 
   it("keeps dry runs read-only", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "openbot-openpanel-backfill-test-"));
+    const directory = await mkdtemp(join(tmpdir(), "dani-dex-openpanel-backfill-test-"));
     try {
       await writeFile(
         join(directory, "users.json"),

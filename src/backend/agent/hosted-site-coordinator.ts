@@ -78,7 +78,7 @@ interface HostedSiteMutationResult {
   eventDetails: HostedSiteConversationEventDetails;
 }
 
-export const HOSTED_SITE_APPROVAL_METHOD = "openbot/hosted-site-mutation";
+export const HOSTED_SITE_APPROVAL_METHOD = "danidex/hosted-site-mutation";
 
 /**
  * Owns publishing to openbot.site: the approval a mutation needs, the mutation itself, and the
@@ -387,7 +387,7 @@ export class HostedSiteCoordinator {
           threadId: event.threadId,
           turnId: event.turnId,
           callId: event.operationId,
-          namespace: "openbot",
+          namespace: "danidex",
           tool: hostedSiteTool(event.action),
           arguments: {},
         },
@@ -487,7 +487,7 @@ export class HostedSiteCoordinator {
           threadId,
           turnId: turnId ?? `hosted-site-${event.operationId}`,
           callId: event.operationId,
-          namespace: "openbot",
+          namespace: "danidex",
           tool: hostedSiteTool(event.action),
           arguments: {},
         },

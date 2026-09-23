@@ -11,7 +11,7 @@ import {
   emitAgentEvent,
   emitDynamicIslandAction,
   emitPresence,
-  installOpenbotStub,
+  installDanidexStub,
   presenceMember,
   testConversationPage,
   testServer,
@@ -29,7 +29,7 @@ import { useProviders } from "./providers";
 
 describe("Dani-Dex connected desktop shell", () => {
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
 
   // The toast store is module-global, so a notification outlives the render that raised it.

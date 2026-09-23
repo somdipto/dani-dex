@@ -12,7 +12,7 @@ import {
   emitDirectMessage,
   emitDirectTyping,
   emitPresence,
-  installOpenbotStub,
+  installDanidexStub,
   presenceMember,
   queuedDelivery,
   testServer,
@@ -22,7 +22,7 @@ import { TestResizeObserver } from "./setupTests";
 
 describe("Dani-Dex connected desktop shell", () => {
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
 
   it("keeps a failed send in the composer and clears it only after a successful retry", async () => {
@@ -1133,7 +1133,7 @@ describe("Dani-Dex connected desktop shell", () => {
         turnId: "turn-1",
         kind: "command",
         command: "npm test -- --runInBand",
-        cwd: "/Users/norbertbodziony/projects/openbot",
+        cwd: "/Users/norbertbodziony/projects/danidex",
         reason: "Run the verification suite.",
         grantRoot: null,
         permissions: null,
@@ -1195,7 +1195,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
 describe("queue edit", () => {
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
 
   /** One running turn the edit must leave alone, plus the deliveries the case is about. */
@@ -1271,7 +1271,7 @@ describe("queue edit", () => {
     await fireEvent.click(screen.getByRole("button", { name: "Save queued message" }));
     await screen.findByText("Connection lost");
     // The exact Save request stays durable for retry, including after a restart.
-    const stored = window.localStorage.getItem("openbot:queue-edit");
+    const stored = window.localStorage.getItem("danidex:queue-edit");
     expect(stored).toContain(begin.editId);
     expect(stored).toContain("First save");
     expect(stored).toContain("pendingSave");
@@ -1280,8 +1280,8 @@ describe("queue edit", () => {
     // change the durable draft or the retry payload.
     composer.textContent = "Changed after lost response";
     await fireEvent.input(composer);
-    expect(window.localStorage.getItem("openbot:queue-edit")).toContain("First save");
-    expect(window.localStorage.getItem("openbot:queue-edit")).not.toContain("Changed after lost response");
+    expect(window.localStorage.getItem("danidex:queue-edit")).toContain("First save");
+    expect(window.localStorage.getItem("danidex:queue-edit")).not.toContain("Changed after lost response");
     await fireEvent.click(screen.getByRole("button", { name: "Save queued message" }));
     await waitFor(() =>
       expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
@@ -1303,7 +1303,7 @@ describe("queue edit", () => {
     expect(saves).toHaveLength(2);
     expect(saves[0][0]).toEqual(saves[1][0]);
     await waitFor(() => expect(screen.queryByRole("button", { name: "Save queued message" })).not.toBeInTheDocument());
-    expect(window.localStorage.getItem("openbot:queue-edit")).toBeNull();
+    expect(window.localStorage.getItem("danidex:queue-edit")).toBeNull();
   });
 
   it.each(["cancelled", "missing"] as const)(
@@ -1339,7 +1339,7 @@ describe("queue edit", () => {
       );
       expect(composer).toHaveTextContent("My original draft");
       expect(screen.getByRole("button", { name: "Remove backup.pdf" })).toBeInTheDocument();
-      expect(window.localStorage.getItem("openbot:queue-edit")).toBeNull();
+      expect(window.localStorage.getItem("danidex:queue-edit")).toBeNull();
       expect(vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls.map(([input]) => input.action)).toEqual([
         "begin",
         "retain-attachments",
@@ -1356,7 +1356,7 @@ describe("queue edit", () => {
     await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
     await screen.findByText("Connection lost");
     const begin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[0][0];
-    expect(window.localStorage.getItem("openbot:queue-edit")).toContain(begin.editId);
+    expect(window.localStorage.getItem("danidex:queue-edit")).toContain(begin.editId);
     await fireEvent.click(screen.getByRole("button", { name: "Edit queued message 2" }));
     await waitFor(() =>
       expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith({ ...begin, action: "cancel" }, "local"),
@@ -1364,7 +1364,7 @@ describe("queue edit", () => {
     expect(
       vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls.filter(([input]) => input.action === "begin"),
     ).toHaveLength(1);
-    expect(window.localStorage.getItem("openbot:queue-edit")).toContain(begin.editId);
+    expect(window.localStorage.getItem("danidex:queue-edit")).toContain(begin.editId);
     expect(screen.getByRole("textbox", { name: "Message Chief" })).toHaveTextContent("First draft");
     vi.mocked(window.danidex.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [first] });
     await waitFor(() => expect(screen.getByRole("button", { name: "Save queued message" })).toBeEnabled());
@@ -1507,14 +1507,14 @@ describe("queue edit", () => {
       await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
       await screen.findByText("Connection lost");
       const begin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[0][0];
-      expect(window.localStorage.getItem("openbot:queue-edit")).toContain(begin.editId);
+      expect(window.localStorage.getItem("danidex:queue-edit")).toContain(begin.editId);
       expect(composer).toHaveTextContent("Queued text");
       await fireEvent.keyDown(document, { key: "Escape" });
       await waitFor(() =>
         expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith({ ...begin, action: "cancel" }, "local"),
       );
       await waitFor(() => expect(screen.getByRole("button", { name: "Save queued message" })).toBeEnabled());
-      expect(window.localStorage.getItem("openbot:queue-edit")).toContain(begin.editId);
+      expect(window.localStorage.getItem("danidex:queue-edit")).toContain(begin.editId);
       // A renderer restart must restore the same edit and its backup, not allocate another hold.
       composer.textContent = "Still editing after connection loss";
       await fireEvent.input(composer);
@@ -1530,7 +1530,7 @@ describe("queue edit", () => {
       await waitFor(() =>
         expect(screen.queryByRole("button", { name: "Save queued message" })).not.toBeInTheDocument(),
       );
-      expect(window.localStorage.getItem("openbot:queue-edit")).toBeNull();
+      expect(window.localStorage.getItem("danidex:queue-edit")).toBeNull();
       const calls = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls;
       expect(calls.every(([input]) => input.editId === begin.editId)).toBe(true);
       if (action === "cancel") {

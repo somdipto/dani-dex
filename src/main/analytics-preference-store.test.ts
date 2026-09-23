@@ -34,7 +34,7 @@ describe("analytics preference store", () => {
 });
 
 async function temporaryRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-analytics-preference-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-analytics-preference-"));
   roots.push(root);
   await mkdir(root, { recursive: true });
   return root;

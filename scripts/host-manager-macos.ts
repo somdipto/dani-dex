@@ -8,10 +8,10 @@ import { HOST_MANAGER_DIRECTORY, verifyHostDirectory } from "../src/main/host-up
 
 const exec = promisify(execFile);
 export const SHARED_APP = "/Applications/Dani-Dex.app";
-const STAGING = "/Applications/.openbot-host-stage";
+const STAGING = "/Applications/.dani-dex-host-stage";
 const PRIVATE = join(HOST_MANAGER_DIRECTORY, "private");
 const SIGNING_REQUIREMENT =
-  '=anchor apple generic and identifier "app.openbot.desktop" and certificate leaf[subject.OU] = "ZTRDTUL87R"';
+  '=anchor apple generic and identifier "app.danidex.desktop" and certificate leaf[subject.OU] = "ZTRDTUL87R"';
 const releaseSchema = z.object({
   tag_name: z.string().regex(/^v?\d+\.\d+\.\d+$/),
   draft: z.literal(false),

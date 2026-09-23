@@ -1,5 +1,5 @@
 ---
-name: openbot-skill-creator
+name: dani-dex-skill-creator
 description: Create or revise a reusable local Dani-Dex skill when the user asks to save a workflow as a skill. Use the local skill tools to register it. Do not use for ordinary one-off tasks.
 ---
 

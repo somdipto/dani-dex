@@ -45,91 +45,91 @@
     {
       "slug": "change-review",
       "category": "coding",
-      "source": "openbot",
+      "source": "danidex",
       "featured": true
     },
     {
       "slug": "bug-triage",
       "category": "coding",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "interface-critique",
       "category": "design",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "evidence-brief",
       "category": "research",
-      "source": "openbot",
+      "source": "danidex",
       "featured": true
     },
     {
       "slug": "competitor-comparison",
       "category": "research",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "launch-notes",
       "category": "documents",
-      "source": "openbot",
+      "source": "danidex",
       "featured": true
     },
     {
       "slug": "meeting-actions",
       "category": "productivity",
-      "source": "openbot",
+      "source": "danidex",
       "featured": true
     },
     {
       "slug": "project-plan",
       "category": "productivity",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "support-reply",
       "category": "documents",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "account-brief",
       "category": "research",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "outreach-draft",
       "category": "documents",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "campaign-analysis",
       "category": "data-analytics",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "data-quality-review",
       "category": "data-analytics",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "workflow-playbook",
       "category": "automation",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     },
     {
       "slug": "hiring-scorecard",
       "category": "other",
-      "source": "openbot",
+      "source": "danidex",
       "featured": false
     }
   ],

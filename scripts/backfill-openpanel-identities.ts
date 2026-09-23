@@ -143,7 +143,7 @@ async function identifyProfile(
           "content-type": "application/json",
           "openpanel-client-id": clientId,
           "openpanel-client-secret": clientSecret,
-          "openpanel-sdk-name": "openbot-backfill",
+          "openpanel-sdk-name": "dani-dex-backfill",
         },
         body: JSON.stringify({ type: "identify", payload: identity }),
         redirect: "error",

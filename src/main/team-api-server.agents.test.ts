@@ -192,7 +192,7 @@ describe("TeamApiServer agents", () => {
     }).toEqual({
       downloads: images.map((bytes) => ({
         uploadStatus: 200,
-        protocol: "openbot-remote-avatar:",
+        protocol: "dani-dex-remote-avatar:",
         body: {},
         status: 200,
         mimeType: "image/png",

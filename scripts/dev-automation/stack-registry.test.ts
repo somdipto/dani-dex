@@ -111,7 +111,7 @@ describe("the stack registry directory", () => {
   let directory = "";
 
   beforeEach(() => {
-    directory = mkdtempSync(join(tmpdir(), "openbot-stack-registry-"));
+    directory = mkdtempSync(join(tmpdir(), "dani-dex-stack-registry-"));
   });
 
   afterEach(() => {

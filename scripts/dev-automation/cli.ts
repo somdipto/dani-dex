@@ -1,6 +1,6 @@
 // AI-facing bridge to the live dev app. Read-only by default; anything that
 // changes app state needs --allow-mutations. This tool never seeds, resets or
-// copies openbot.db: it drives the instance you already have open.
+// copies danidex.db: it drives the instance you already have open.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { createDaniDexLogger, redactText } from "@dani-dex/logging";
@@ -43,7 +43,7 @@ import {
 const logger = createDaniDexLogger("dev-automation", (line) => process.stderr.write(`${line}\n`), "debug");
 
 const DEFAULT_TIMEOUT_MS = 10_000;
-const SCREENSHOT_ROOT = join(process.cwd(), ".openbot-build", "dev-automation");
+const SCREENSHOT_ROOT = join(process.cwd(), ".dani-dex-build", "dev-automation");
 const CPU_ROOT = join(SCREENSHOT_ROOT, "cpu");
 const DEFAULT_CPU_DURATION_MS = 60_000;
 const MAX_CPU_DURATION_MS = 600_000;

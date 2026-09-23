@@ -139,7 +139,7 @@ export class TurnLifecycle {
     if (
       threadId &&
       agentId &&
-      ["turn/started", "thread/tokenUsage/updated", "openbot/usage", "model/rerouted"].includes(notification.method)
+      ["turn/started", "thread/tokenUsage/updated", "danidex/usage", "model/rerouted"].includes(notification.method)
     ) {
       const agent = this.#store.list().find((entry) => entry.id === agentId);
       const session = agent?.threadId

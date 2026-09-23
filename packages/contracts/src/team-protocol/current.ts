@@ -62,13 +62,13 @@ export function supportsTeamSemanticTags(capabilities: readonly string[] | Reado
 export function isConversationUnreadRoute(method: string, path: string): boolean {
   return (
     method === "POST" &&
-    /^\/v1\/agents\/[^/]+\/conversation\/unread$/u.test(new URL(path, "http://openbot.invalid").pathname)
+    /^\/v1\/agents\/[^/]+\/conversation\/unread$/u.test(new URL(path, "http://danidex.invalid").pathname)
   );
 }
 
 /** The queue snapshot route. Its response carries the `editing` mark beside the frozen keys. */
 export function isQueueSnapshotRoute(method: string, path: string): boolean {
-  return method === "GET" && /^\/v1\/agents\/[^/]+\/queue$/u.test(new URL(path, "http://openbot.invalid").pathname);
+  return method === "GET" && /^\/v1\/agents\/[^/]+\/queue$/u.test(new URL(path, "http://danidex.invalid").pathname);
 }
 
 /**
@@ -78,25 +78,25 @@ export function isQueueSnapshotRoute(method: string, path: string): boolean {
 export function isConversationRoute(method: string, path: string): boolean {
   return (
     method === "GET" &&
-    /^\/v1\/agents\/[^/]+\/conversation(?:-page)?$/u.test(new URL(path, "http://openbot.invalid").pathname)
+    /^\/v1\/agents\/[^/]+\/conversation(?:-page)?$/u.test(new URL(path, "http://danidex.invalid").pathname)
   );
 }
 
 export function isAgentProfileRoute(method: string, path: string): boolean {
   return (
     method === "POST" &&
-    /^\/v1\/agents\/profile\/(generate|save)$/u.test(new URL(path, "http://openbot.invalid").pathname)
+    /^\/v1\/agents\/profile\/(generate|save)$/u.test(new URL(path, "http://danidex.invalid").pathname)
   );
 }
 
 export function isAgentAnalyticsRoute(method: string, path: string): boolean {
-  return method === "GET" && /^\/v1\/agents\/[^/]+\/analytics$/u.test(new URL(path, "http://openbot.invalid").pathname);
+  return method === "GET" && /^\/v1\/agents\/[^/]+\/analytics$/u.test(new URL(path, "http://danidex.invalid").pathname);
 }
 
 export function isHostAnalyticsRoute(method: string, path: string): boolean {
-  return method === "GET" && new URL(path, "http://openbot.invalid").pathname === "/v1/analytics";
+  return method === "GET" && new URL(path, "http://danidex.invalid").pathname === "/v1/analytics";
 }
 
 export function isAgentCreateRoute(method: string, path: string): boolean {
-  return method === "POST" && new URL(path, "http://openbot.invalid").pathname === "/v1/agents";
+  return method === "POST" && new URL(path, "http://danidex.invalid").pathname === "/v1/agents";
 }

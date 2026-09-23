@@ -13,7 +13,7 @@
 
 // The `aud` claim. A resume token is a different audience and never leaves the Signal service, so it
 // is not here.
-export const REMOTE_TICKET_AUDIENCE = "openbot-remote";
+export const REMOTE_TICKET_AUDIENCE = "dani-dex-remote";
 
 // The revision of the Signal-side protocol a ticket vouches for, minted as the `protocolMinimum` and
 // `protocolMaximum` range and checked by the service against the one revision it implements. It is

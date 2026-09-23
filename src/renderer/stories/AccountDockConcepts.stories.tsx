@@ -223,7 +223,7 @@ function AccountDockConceptPlayground(props: AccountDockConceptPlaygroundProps) 
     },
   );
 
-  const storageKey = "openbot:left-panel-collapsed";
+  const storageKey = "danidex:left-panel-collapsed";
   const previous = window.localStorage.getItem(storageKey);
   window.localStorage.setItem(storageKey, "false");
   onCleanup(() => {

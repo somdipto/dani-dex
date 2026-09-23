@@ -7,7 +7,7 @@ import { loadAvatarFile } from "./avatar-file";
 
 let root: string;
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "openbot-avatar-file-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-avatar-file-"));
 });
 afterEach(async () => {
   await rm(root, { recursive: true, force: true });

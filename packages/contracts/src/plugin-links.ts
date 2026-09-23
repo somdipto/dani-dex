@@ -4,7 +4,7 @@
  *
  * ```
  * https://openbot.run/plugins/<slug>    the link a person shares and the app copies
- * openbot://plugins/<slug>              the link the page button opens
+ * dani-dex://plugins/<slug>              the link the page button opens
  * ```
  *
  * The host gives the kind and the path gives the argument, which is the rule `parseInviteUrl`
@@ -64,7 +64,7 @@ export function parsePluginUrl(value: string): string {
     url.origin === DANI_DEX_PLUGIN_ORIGIN &&
     url.pathname.startsWith(DANI_DEX_PLUGIN_PATH_PREFIX);
   const customScheme =
-    (url.protocol === "dani-dex:" || url.protocol === "openbot:") && url.hostname === DANI_DEX_PLUGIN_HOST;
+    (url.protocol === "dani-dex:" || url.protocol === "dani-dex:") && url.hostname === DANI_DEX_PLUGIN_HOST;
   if (
     (!canonical && !customScheme) ||
     url.username !== "" ||

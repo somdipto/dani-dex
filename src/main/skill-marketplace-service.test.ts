@@ -14,7 +14,7 @@ const encoder = new TextEncoder();
 let root = "";
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "openbot-skills-test-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-skills-test-"));
 });
 afterEach(async () => {
   await rm(root, { recursive: true, force: true });

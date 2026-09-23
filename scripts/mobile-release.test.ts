@@ -20,7 +20,7 @@ describe("iOS release", () => {
     const manifest = z
       .object({ scripts: z.record(z.string(), z.string()) })
       .parse(JSON.parse(readFileSync(join(root, "package.json"), "utf8")));
-    const directory = mkdtempSync(join(tmpdir(), "openbot-ios-dispatch-"));
+    const directory = mkdtempSync(join(tmpdir(), "dani-dex-ios-dispatch-"));
     try {
       writeFileSync(join(directory, "package.json"), JSON.stringify({ scripts: manifest.scripts }));
       mkdirSync(join(directory, "apps/mobile"), { recursive: true });
@@ -66,7 +66,7 @@ describe("iOS release", () => {
   });
 
   it("uploads only an existing IPA using the API key and propagates upload failures", () => {
-    const directory = mkdtempSync(join(tmpdir(), "openbot-ios-upload-"));
+    const directory = mkdtempSync(join(tmpdir(), "dani-dex-ios-upload-"));
     const ipa = join(directory, "release.ipa");
     // Execute the Fastfile with a small Fastlane DSL fake. No Apple request or signing occurs.
     const harness = `
@@ -84,7 +84,7 @@ describe("iOS release", () => {
       end
       def upload_to_testflight(**options)
         expected = {api_key: {token: "fake-token"}, ipa: ENV.fetch("IPA_PATH"),
-          app_identifier: "run.openbot.mobile", skip_waiting_for_build_processing: true, distribute_external: false}
+          app_identifier: "run.danidex.mobile", skip_waiting_for_build_processing: true, distribute_external: false}
         raise "Wrong upload destination or options" unless options == expected
         raise "Apple rejected the upload" if ENV["TEST_UPLOAD_FAILURE"] == "1"
         puts "uploaded"

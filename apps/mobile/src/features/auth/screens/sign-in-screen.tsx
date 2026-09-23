@@ -148,7 +148,7 @@ export function SignInScreen() {
                 type="h2"
                 accessibilityRole="header"
                 align="center"
-                className="tracking-openbot-tight"
+                className="tracking-dani-dex-tight"
               >
                 Your agents, anywhere.
               </Typography.Heading>

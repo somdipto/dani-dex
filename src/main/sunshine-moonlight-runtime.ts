@@ -286,7 +286,7 @@ export class SunshineMoonlightRuntime {
   #moonlight: ChildProcess | null = null;
   #iceServer: Server | null = null;
   #iceToken = "";
-  readonly #pairingName = `openbot-remote-${randomBytes(16).toString("hex")}`;
+  readonly #pairingName = `dani-dex-remote-${randomBytes(16).toString("hex")}`;
   #state: SunshineMoonlightRuntimeState | null = null;
   #screenCaptureDenied = false;
   readonly #moonlightHeader = `X-Dani-Dex-Remote-${randomBytes(32).toString("hex")}`;
@@ -351,7 +351,7 @@ export class SunshineMoonlightRuntime {
   > {
     return sunshineJson(
       this.#requireSunshineHttpsPort(),
-      "/api/openbot/setup",
+      "/api/danidex/setup",
       this.#options.credentials,
       join(this.#options.stateDirectory, "sunshine-cert.pem"),
       sunshineSetupSchema,
@@ -364,12 +364,12 @@ export class SunshineMoonlightRuntime {
     if (action !== "status")
       await sunshineRequest(
         port,
-        "/api/openbot/test",
+        "/api/danidex/test",
         this.#options.credentials,
         certificate,
         JSON.stringify({ action, displayId: this.#selectedDisplayId ?? "" }),
       );
-    return sunshineJson(port, "/api/openbot/test", this.#options.credentials, certificate, sunshineTestSchema);
+    return sunshineJson(port, "/api/danidex/test", this.#options.credentials, certificate, sunshineTestSchema);
   }
 
   async selectDisplay(displayId: string): Promise<void> {
@@ -539,7 +539,7 @@ export class SunshineMoonlightRuntime {
         ice_servers: [],
         ice_server_script: join(
           this.#options.stateDirectory,
-          this.#options.platform === "win32" ? "openbot-ice-helper.cmd" : "openbot-ice-helper.sh",
+          this.#options.platform === "win32" ? "dani-dex-ice-helper.cmd" : "dani-dex-ice-helper.sh",
         ),
         port_range: { min: webRtcRange.min, max: webRtcRange.max },
         nat_1to1: null,
@@ -575,7 +575,7 @@ export class SunshineMoonlightRuntime {
   async #writeIceHelper(): Promise<void> {
     const path = join(
       this.#options.stateDirectory,
-      this.#options.platform === "win32" ? "openbot-ice-helper.cmd" : "openbot-ice-helper.sh",
+      this.#options.platform === "win32" ? "dani-dex-ice-helper.cmd" : "dani-dex-ice-helper.sh",
     );
     const contents =
       this.#options.platform === "win32"
@@ -739,7 +739,7 @@ export class SunshineMoonlightRuntime {
   async #getSunshineDisplays(): Promise<RemoteDesktopDisplay[]> {
     const native = await sunshineJson(
       this.#requireSunshineHttpsPort(),
-      "/api/openbot/displays",
+      "/api/danidex/displays",
       this.#options.credentials,
       join(this.#options.stateDirectory, "sunshine-cert.pem"),
       sunshineDisplaysSchema,
@@ -1096,7 +1096,7 @@ function arrayUrls(urls: string | string[]): string[] {
 }
 
 function moonlightSlotUser(slot: number): string {
-  return `openbot-remote-slot-${slot}`;
+  return `dani-dex-remote-slot-${slot}`;
 }
 
 /** Pinned Sunshine http::save_user_creds / util::Hex encoding. */

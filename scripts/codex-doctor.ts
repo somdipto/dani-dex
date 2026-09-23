@@ -12,7 +12,7 @@ try {
   await client.request(
     "initialize",
     {
-      clientInfo: { name: "openbot_doctor", title: "Dani-Dex Doctor", version: "0.1.0" },
+      clientInfo: { name: "danidex_doctor", title: "Dani-Dex Doctor", version: "0.1.0" },
       capabilities: { experimentalApi: true },
     },
     decodeRecordResponse,

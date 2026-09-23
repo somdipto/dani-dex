@@ -438,7 +438,7 @@ function targetDirectories(workspace: string, slug: string): string[] {
 }
 
 function disabledDirectory(workspace: string, slug: string): string {
-  return join(workspace, ".openbot", "skills-disabled", slug);
+  return join(workspace, ".danidex", "skills-disabled", slug);
 }
 
 function toInstalledSkill(
@@ -517,8 +517,8 @@ async function replaceTargets(
   try {
     for (const target of targets) {
       await mkdir(dirname(target), { recursive: true, mode: 0o700 });
-      const stage = `${target}.openbot-stage-${randomUUID()}`;
-      const backup = (await pathExists(target)) ? `${target}.openbot-backup-${randomUUID()}` : null;
+      const stage = `${target}.dani-dex-stage-${randomUUID()}`;
+      const backup = (await pathExists(target)) ? `${target}.dani-dex-backup-${randomUUID()}` : null;
       await writeFiles(stage, files);
       if (backup) await rename(target, backup);
       try {
@@ -594,7 +594,7 @@ async function installedState(workspace: string, entry: LockEntry): Promise<"ins
 }
 
 function lockPath(workspace: string): string {
-  return join(workspace, ".openbot", "skills-lock.json");
+  return join(workspace, ".danidex", "skills-lock.json");
 }
 async function readLock(workspace: string): Promise<SkillsLock> {
   let text: string;

@@ -271,7 +271,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("reads a completed conversation after a database restart without a provider", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-restart-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-restart-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -515,7 +515,7 @@ describe("DaniDexDatabase", () => {
     const database = await createDatabase();
     const agent = testAgent();
     database.replaceAgents("agents-channel-search", [agent], "agents.imported");
-    const channelThreadId = "openbot-thread-channel-search";
+    const channelThreadId = "dani-dex-thread-channel-search";
     const now = "2026-09-01T12:00:00.000Z";
     database.connection
       .prepare("INSERT INTO projection_channels(channel_id, channel_json) VALUES (?, ?)")
@@ -853,7 +853,7 @@ describe("DaniDexDatabase", () => {
               kind: "image",
               mimeType: "image/png",
               previewKind: "image",
-              previewUrl: "openbot-attachment://file/generated-1",
+              previewUrl: "dani-dex-attachment://file/generated-1",
               path: "/tmp/screenshot.png",
               sha256: "hash",
             },
@@ -979,7 +979,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("migrates version 3 history, preserves the current chat, and reclaims disk space", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-v3-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-v3-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1061,7 +1061,7 @@ describe("DaniDexDatabase", () => {
   // release stands at 16 with no channel storage. Channel storage has to arrive above it: numbered
   // at or below 16 it would be filtered out as already applied, and the tables would never appear.
   it("adds channel projections to a database that already ran the analytics versions", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-v16-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-v16-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1115,7 +1115,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("repairs the provider constraint in a pre-merge channel schema without losing channel data", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-channel-v18-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-channel-v18-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1210,7 +1210,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("adds the MCP server projection to a version 19 database and keeps its rows", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-v19-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-v19-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1253,7 +1253,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("moves a saved server off the Computer Use name and keeps what the user configured", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-v20-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-v20-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1298,7 +1298,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("adds post-v4 agent memory and routine projections", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-v4-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-v4-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1355,7 +1355,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("migrates legacy reactions to user-owned rows and permits another actor", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-reactions-v7-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-reactions-v7-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1388,7 +1388,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("rolls back a failed baseline migration and succeeds on retry", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-rollback-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-rollback-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1434,7 +1434,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("deactivates existing provider sessions when reaction guidance changes", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-runtime-v9-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-runtime-v9-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1465,7 +1465,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("deactivates existing provider sessions when response attachment tools are added", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-runtime-v11-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-runtime-v11-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1499,7 +1499,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("rolls back a failed response attachment session refresh and succeeds on retry", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-runtime-v11-rollback-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-runtime-v11-rollback-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1549,7 +1549,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("keeps an agent's reaction attributed to that agent across the actor column rename", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-reactions-v12-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-reactions-v12-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1581,7 +1581,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("rolls back a failed reaction actor rename and succeeds on retry", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-reactions-rollback-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-reactions-rollback-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1632,7 +1632,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("rewrites agent ids without losing a thread, its messages, or its hosted-site history", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-ids-v13-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-ids-v13-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1653,7 +1653,7 @@ describe("DaniDexDatabase", () => {
 
     expect(migrated.connection.prepare("SELECT agent_id, thread_id FROM projection_agents").get()).toEqual({
       agent_id: agentId,
-      thread_id: `openbot-thread-${agentId}`,
+      thread_id: `dani-dex-thread-${agentId}`,
     });
     expect(
       migrated.connection
@@ -1661,7 +1661,7 @@ describe("DaniDexDatabase", () => {
         .get(),
     ).toEqual({ path: workspace });
     expect(migrated.connection.prepare("SELECT thread_id, message_id FROM projection_thread_messages").get()).toEqual({
-      thread_id: `openbot-thread-${agentId}`,
+      thread_id: `dani-dex-thread-${agentId}`,
       message_id: "message-1",
     });
     // A message that quoted the old workspace path points at where that workspace lives now.
@@ -1718,7 +1718,7 @@ describe("DaniDexDatabase", () => {
     // also edit a message quoting it. So the released spellings arrive at the reader, and the reader has to
     // answer with the message rather than with "Invalid conversation message." -- which is the whole page,
     // not one message, for anyone whose agents ever wrote to each other.
-    const page = migrated.readConversationPage(agentId, `openbot-thread-${agentId}`);
+    const page = migrated.readConversationPage(agentId, `dani-dex-thread-${agentId}`);
     expect(page.messages).toEqual([
       expect.objectContaining({
         id: "message-1",
@@ -1735,7 +1735,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("rolls back a failed agent id rewrite and succeeds on retry", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-ids-rollback-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-ids-rollback-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1760,7 +1760,7 @@ describe("DaniDexDatabase", () => {
     expect(rolledBack.prepare("SELECT 1 FROM schema_migrations WHERE version = 13").get()).toBeUndefined();
     expect(rolledBack.prepare("SELECT agent_id FROM projection_agents").all()).toEqual([{ agent_id: legacyId }]);
     expect(rolledBack.prepare("SELECT thread_id FROM projection_thread_messages").all()).toEqual([
-      { thread_id: `openbot-thread-${legacyId}` },
+      { thread_id: `dani-dex-thread-${legacyId}` },
     ]);
     rolledBack.exec("DROP TABLE blocker");
     rolledBack.close();
@@ -1775,7 +1775,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("leaves an agent id the application did not mint alone", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-ids-custom-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-ids-custom-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1818,7 +1818,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("rejects a database created by a newer application", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-newer-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-newer-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1836,7 +1836,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("rejects modern migration history with a missing baseline", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-gap-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-gap-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1851,7 +1851,7 @@ describe("DaniDexDatabase", () => {
   });
 
   it("widens the provider-session constraint for Grok without losing Codex or Claude sessions", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-db-provider-v6-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-db-provider-v6-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -1927,7 +1927,7 @@ describe("DaniDexDatabase", () => {
   it.each([false, true])(
     "widens the provider-session constraint without losing data (failed attempt=%s)",
     async (failFirst) => {
-      const root = await mkdtemp(join(tmpdir(), "openbot-db-provider-v16-"));
+      const root = await mkdtemp(join(tmpdir(), "dani-dex-db-provider-v16-"));
       roots.push(root);
       const database = new DaniDexDatabase(root);
       await database.initialize();
@@ -2084,7 +2084,7 @@ describe("DaniDexDatabase", () => {
     );
     database.recordPendingHostedSiteTerminalEvent({
       agentId: agent.id,
-      threadId: "openbot-thread-chief",
+      threadId: "dani-dex-thread-chief",
       turnId: "turn-1",
       operationId: "operation-1",
       action: "publish",
@@ -2142,7 +2142,7 @@ function downgradeToV11(database: DatabaseSync): void {
 
 // One agent whose id, thread, message text and hosted-site history all still spell the id `bot-<uuid>`.
 function seedLegacyAgent(database: DatabaseSync, legacyId: string, workspacePath: string): void {
-  const threadId = `openbot-thread-${legacyId}`;
+  const threadId = `dani-dex-thread-${legacyId}`;
   const agentJson = JSON.stringify({ id: legacyId, name: "Chief", threadId, workspacePath, avatarSeed: legacyId });
   const rosterJson = JSON.stringify({
     agents: [{ id: legacyId, name: "Chief", threadId, workspacePath, avatarSeed: legacyId }],
@@ -2254,7 +2254,7 @@ function downgradeReactionsToV7(database: DatabaseSync): void {
 }
 
 async function createDatabase(): Promise<DaniDexDatabase> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-db-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-db-"));
   roots.push(root);
   const database = new DaniDexDatabase(root);
   await database.initialize();
@@ -2271,8 +2271,8 @@ function testAgent(): AgentSummary {
     notifications: true,
     model: "gpt-5.6-luna",
     reasoningEffort: "medium",
-    threadId: "openbot-thread-chief",
-    workspacePath: "/tmp/openbot-chief",
+    threadId: "dani-dex-thread-chief",
+    workspacePath: "/tmp/dani-dex-chief",
     preview: "42",
     updatedAt: "2026-08-18T10:00:01.000Z",
     avatarSeed: "chief",

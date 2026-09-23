@@ -948,7 +948,7 @@ describe("every busy update phase is bounded", () => {
 
 describe("pruneShipItLogs", () => {
   it("keeps state files and the ten newest rotated logs", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-shipit-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-shipit-"));
     await Promise.all([
       writeFile(join(root, "ShipItState.plist"), "state"),
       ...Array.from({ length: 12 }, (_, index) => writeFile(join(root, `ShipIt_stdout.log.${index + 1}`), "log")),

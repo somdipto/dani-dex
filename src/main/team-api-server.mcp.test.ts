@@ -207,7 +207,7 @@ describe("Team API MCP server access", () => {
       fetch(`${base}/v1/mcp-servers/${path}`, { method: "POST", headers, body: JSON.stringify(body) });
 
     // A command nothing names waits for the download, then still probes.
-    const missing = { ...config, id: "", name: "Missing", command: "openbot-no-such-command" };
+    const missing = { ...config, id: "", name: "Missing", command: "dani-dex-no-such-command" };
     expect(decodeMcpTestResult(await (await post("test", { config: missing })).json())).toEqual({
       toolCount: 3,
       error: null,

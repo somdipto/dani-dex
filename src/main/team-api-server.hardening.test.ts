@@ -13,7 +13,7 @@ afterEach(stopTeamApiFixtures);
 describe("TeamApiServer hardening", () => {
   it("does not expose unexpected internal errors", async () => {
     const { start, signIn } = await createTeamApiFixture("errors", { configure: true });
-    const internalError = Object.assign(new Error("EACCES: /Users/private/openbot.db"), { code: "EACCES" });
+    const internalError = Object.assign(new Error("EACCES: /Users/private/danidex.db"), { code: "EACCES" });
     const lines: string[] = [];
     const { base } = await start({
       agents: createAgents({
@@ -68,8 +68,8 @@ describe("TeamApiServer hardening", () => {
     const login = await store.login("owner", "correct horse battery");
     const { port } = await start();
     const socket = new WebSocket(`ws://127.0.0.1:${port}/v1/events`, [
-      "openbot-events",
-      `openbot-token.${login.sessionToken}`,
+      "dani-dex-events",
+      `dani-dex-token.${login.sessionToken}`,
     ]);
 
     try {

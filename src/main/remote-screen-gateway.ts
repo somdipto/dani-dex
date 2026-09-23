@@ -26,13 +26,13 @@ import {
 
 const GRANT_TTL_MS = 60_000;
 export const REMOTE_DESKTOP_MAX_SESSIONS = 4;
-const VIEWER_COOKIE = "openbotRemoteViewer";
+const VIEWER_COOKIE = "danidexRemoteViewer";
 const MAX_PENDING_STREAM_FRAMES = 32;
 const MAX_PENDING_STREAM_BYTES = 1_048_576;
 const MAX_TIMER_DELAY_MS = 2_147_000_000;
 const viewerGrantSchema = z.object({ grant: z.string().min(1).max(256) });
 const viewerStateSchema = z.object({
-  source: z.literal("openbot-moonlight"),
+  source: z.literal("dani-dex-moonlight"),
   type: z.literal("viewer-state"),
   sessionId: z.string().min(1).max(128),
   state: z.enum(["connecting", "connected", "error"]),
@@ -860,7 +860,7 @@ export class RemoteScreenGateway {
   }
 
   #viewerAuthorized(request: IncomingMessage, session: ManagedRemoteScreenSession): boolean {
-    const remoteSession = request.headers["x-openbot-webrtc-session"];
+    const remoteSession = request.headers["x-dani-dex-webrtc-session"];
     if (remoteSession === session.teamSessionId) return true;
     const cookie = parseCookie(request.headers.cookie, VIEWER_COOKIE);
     return Boolean(cookie && session.viewerCookieHash && safeHashEqual(secretHash(cookie), session.viewerCookieHash));
@@ -943,7 +943,7 @@ function rawDataText(data: Ws.RawData): string {
 }
 
 function moonlightRuntimeUser(session: ManagedRemoteScreenSession): string {
-  return `openbot-remote-slot-${session.streamerSlot}`;
+  return `dani-dex-remote-slot-${session.streamerSlot}`;
 }
 
 async function readSmallJson<T>(request: IncomingMessage, schema: z.ZodType<T>): Promise<T | null> {

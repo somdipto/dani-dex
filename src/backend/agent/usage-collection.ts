@@ -27,7 +27,7 @@ export function collectProviderUsage(
     if (turnId && isAgentModel(model)) usage.reroute(agent.id, session.id, turnId, model);
     return;
   }
-  if (method !== "thread/tokenUsage/updated" && method !== "openbot/usage") return;
+  if (method !== "thread/tokenUsage/updated" && method !== "danidex/usage") return;
   const turnId = getString(params, "turnId") ?? "baseline";
   if (session.provider === "codex") {
     const total = getRecord(getRecord(params, "tokenUsage"), "total");

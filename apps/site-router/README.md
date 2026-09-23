@@ -6,7 +6,7 @@ This Worker is the public, read-only application path for `*.openbot.site`. The 
 
 1. Use the same Cloudflare account as `openbot.site`.
 2. Create the private Standard bucket with `bun run sites:bucket:create`.
-3. Create `openbot-sites-test` for preview and test deployments.
+3. Create `dani-dex-sites-test` for preview and test deployments.
 4. Add a proxied wildcard `AAAA` record. Use name `*` and placeholder value `100::`.
 5. Confirm that Universal SSL covers `*.openbot.site`.
 6. Apply the lifecycle rule with `bun run sites:lifecycle`.

@@ -127,11 +127,11 @@ export class BrowserViewGateway {
    * the member the session was made for -- another member's token opens their own view, not this one.
    */
   #authorized(request: IncomingMessage, session: ManagedViewSession): boolean {
-    const remoteSession = request.headers["x-openbot-webrtc-session"];
+    const remoteSession = request.headers["x-dani-dex-webrtc-session"];
     if (remoteSession === session.teamSessionId) return true;
     const protocols = (request.headers["sec-websocket-protocol"] ?? "").split(",").map((value) => value.trim());
-    const encodedToken = protocols.find((value) => value.startsWith("openbot-token."));
-    const token = encodedToken?.slice("openbot-token.".length) ?? "";
+    const encodedToken = protocols.find((value) => value.startsWith("dani-dex-token."));
+    const token = encodedToken?.slice("dani-dex-token.".length) ?? "";
     if (!token || token.length > 512) return false;
     return this.#options.authenticate(token)?.id === session.memberId;
   }

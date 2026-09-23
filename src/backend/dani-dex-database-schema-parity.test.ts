@@ -73,9 +73,9 @@ async function upgradedInstallDatabase(): Promise<DatabaseSync> {
 }
 
 async function openDatabase(): Promise<DatabaseSync> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-schema-parity-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-schema-parity-"));
   roots.push(root);
-  const database = new DatabaseSync(join(root, "openbot.db"));
+  const database = new DatabaseSync(join(root, "danidex.db"));
   connections.push(database);
   return database;
 }

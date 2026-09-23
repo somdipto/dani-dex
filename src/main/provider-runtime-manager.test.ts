@@ -472,7 +472,7 @@ describe("ProviderRuntimeManager", () => {
   });
 
   it("keeps the store inside a user data directory the caller named", () => {
-    const override = join("/tmp", "openbot-automation");
+    const override = join("/tmp", "dani-dex-automation");
     expect(providerRuntimeRoot({ appData: "/home/someone/.config", userDataOverride: `${override} ` })).toBe(
       join(override, "provider-runtimes"),
     );
@@ -1068,7 +1068,7 @@ function opencodeManager(root: string, fixture: OpencodeFixture): ProviderRuntim
 }
 
 async function temporaryRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-provider-runtime-test-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-provider-runtime-test-"));
   roots.push(root);
   return root;
 }

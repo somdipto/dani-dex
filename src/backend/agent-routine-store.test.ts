@@ -180,7 +180,7 @@ describe("AgentRoutineStore", () => {
   });
 
   it("removes routines when the agent is deleted", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-routine-agent-delete-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-routine-agent-delete-"));
     roots.push(root);
     const agents = new AgentStore(join(root, "data"), join(root, "home"));
     await agents.initialize();
@@ -411,7 +411,7 @@ describe("ChannelRoutineStore", () => {
 });
 
 async function setup(): Promise<{ database: DaniDexDatabase; routines: AgentRoutineStore }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-routine-store-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-routine-store-"));
   roots.push(root);
   const database = new DaniDexDatabase(root);
   await database.initialize();
@@ -422,7 +422,7 @@ async function setup(): Promise<{ database: DaniDexDatabase; routines: AgentRout
 async function channelSetup(
   channelIds: string[] = ["channel-1"],
 ): Promise<{ database: DaniDexDatabase; routines: ChannelRoutineStore }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-channel-routine-store-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-channel-routine-store-"));
   roots.push(root);
   const database = new DaniDexDatabase(root);
   await database.initialize();

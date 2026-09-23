@@ -15,7 +15,7 @@ afterEach(async () => {
 });
 
 async function fixturePath(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-voice-model-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-voice-model-"));
   roots.push(root);
   const directory = join(root, "runtimes", "whisper");
   await mkdir(directory, { recursive: true });

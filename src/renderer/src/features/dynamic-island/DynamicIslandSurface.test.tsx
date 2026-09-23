@@ -307,7 +307,7 @@ function truncatedApprovalPresentation(): Extract<DynamicIslandPresentation, { m
       approval: {
         kind: "command",
         command: "bun install --frozen-lockfile",
-        cwd: "~/Projects/openbot",
+        cwd: "~/Projects/danidex",
         reason: "Install the locked dependencies.",
         grantRoot: null,
         permissions: null,

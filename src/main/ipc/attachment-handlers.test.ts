@@ -121,7 +121,7 @@ describe("ZIP attachment IPC", () => {
     await writeFile(sourcePath, "local file");
     saveDialog.mockResolvedValue({ canceled: false, filePath: path });
     const invoke = register(sourcePath);
-    await invoke({ senderFrame: { url: "openbot-app://app/index.html" } }, { serverId, payload: input });
+    await invoke({ senderFrame: { url: "dani-dex-app://app/index.html" } }, { serverId, payload: input });
     const files = unzipSync(await readFile(path));
     expect(Object.values(files).map((bytes) => strFromU8(bytes))).toEqual(
       input.attachments.map((item) => (serverId === "local" ? "local file" : `${serverId}:${item.id}`)),
@@ -174,7 +174,7 @@ describe("single attachment download", () => {
     saveDialog.mockResolvedValue({ canceled: false, filePath: targetPath });
     const invoke = registerSingle({ path: sourcePath, mimeType: "text/markdown", name: "launch-brief.md" });
     await invoke(
-      { senderFrame: { url: "openbot-app://app/index.html" } },
+      { senderFrame: { url: "dani-dex-app://app/index.html" } },
       { serverId: "local", payload: { attachmentId: "some-id", action: "download" } },
     );
     expect(saveDialog).toHaveBeenCalledOnce();

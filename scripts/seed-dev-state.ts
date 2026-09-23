@@ -48,14 +48,14 @@ import { writeSetupState } from "../src/main/setup-store";
 import { TeamStore } from "../src/main/team-store";
 import { resolveDevelopmentAppDataRoot } from "./development-state-paths";
 
-export const DEVELOPMENT_SEED_MANIFEST_FILE = "openbot-dev-seed-v1.json";
+export const DEVELOPMENT_SEED_MANIFEST_FILE = "dani-dex-dev-seed-v1.json";
 
 const logger = createDaniDexLogger("seed-dev-state");
 
-const TEAM_FILE = "openbot-team-server-v2.json";
+const TEAM_FILE = "dani-dex-team-server-v2.json";
 /** Read only, exactly as the app reads it: the file a build without accounts owns. */
-const LEGACY_TEAM_FILE = "openbot-team-server-v1.json";
-const SETUP_FILE = "openbot-setup-v2.json";
+const LEGACY_TEAM_FILE = "dani-dex-team-server-v1.json";
+const SETUP_FILE = "dani-dex-setup-v2.json";
 const SEED_VERSION = 1;
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -134,7 +134,7 @@ function managedOpencodeExecutable(appDataRoot: string): string | null {
 
 const GENERATED_DIRECTORY_PATTERN =
   /^generated\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
-const SHOWCASE_IMAGE_PATH = resolve(process.cwd(), "src", "renderer", "src", "assets", "openbot-logo-dev.png");
+const SHOWCASE_IMAGE_PATH = resolve(process.cwd(), "src", "renderer", "src", "assets", "dani-dex-logo-dev.png");
 
 function previewPdf(): string {
   const stream = "BT /F1 18 Tf 24 150 Td (Dani-Dex file preview) Tj ET";
@@ -310,7 +310,7 @@ export async function seedDevelopmentState(options: DevelopmentSeedOptions = {})
   }
 
   await mkdir(appDataRoot, { recursive: true, mode: 0o700 });
-  const stagingProfile = await mkdtemp(join(appDataRoot, ".openbot-dev-seed-"));
+  const stagingProfile = await mkdtemp(join(appDataRoot, ".dani-dex-dev-seed-"));
   const newTransferDirectories: string[] = [];
   try {
     await buildSeedProfile(stagingProfile, homeDirectory, newTransferDirectories, agentModel);
@@ -623,7 +623,7 @@ async function seedAttachments(
       bytes: bytes(`${JSON.stringify({ sources: 8, verified: 7, needsReview: 1 }, null, 2)}\n`),
     }),
     image: await store(launch, {
-      name: "openbot-launch-concept.png",
+      name: "dani-dex-launch-concept.png",
       mimeType: "image/png",
       sourcePath: SHOWCASE_IMAGE_PATH,
     }),
@@ -1325,17 +1325,17 @@ async function seedTeam(profilePath: string, agentStore: AgentStore, clock: Seed
   const team = new TeamStore(join(profilePath, TEAM_FILE), join(profilePath, LEGACY_TEAM_FILE));
   await team.initialize();
   const owner = {
-    id: "openbot-dev-owner",
-    email: "openbot-dev-host@example.com",
+    id: "dani-dex-dev-owner",
+    email: "dani-dex-dev-host@example.com",
     name: "Dev Owner",
     avatarUrl: null,
   };
   const teamIdentity = await team.configureWithAccount("Dani-Dex Dev Team", owner);
   const joined = [];
   for (const member of [
-    { id: "openbot-dev-alice", email: "alice@example.com", name: "Alice Chen", role: "admin" as const },
-    { id: "openbot-dev-jon", email: "jon@example.com", name: "Jon Bell", role: "member" as const },
-    { id: "openbot-dev-maya", email: "maya@example.com", name: "Maya Singh", role: "member" as const },
+    { id: "dani-dex-dev-alice", email: "alice@example.com", name: "Alice Chen", role: "admin" as const },
+    { id: "dani-dex-dev-jon", email: "jon@example.com", name: "Jon Bell", role: "member" as const },
+    { id: "dani-dex-dev-maya", email: "maya@example.com", name: "Maya Singh", role: "member" as const },
   ]) {
     const invite = await team.createInvite(member.role, member.email);
     joined.push(
@@ -1385,7 +1385,7 @@ async function seedTeam(profilePath: string, agentStore: AgentStore, clock: Seed
 }
 
 async function replaceDevelopmentProfile(target: string, staging: string, homeDirectory: string): Promise<void> {
-  const backup = resolve(dirname(target), `.openbot-dev-backup-${randomUUID()}`);
+  const backup = resolve(dirname(target), `.dani-dex-dev-backup-${randomUUID()}`);
   const targetExists = await pathExists(target);
   if (targetExists) await rename(target, backup);
   try {

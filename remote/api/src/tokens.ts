@@ -23,7 +23,7 @@ import {
 
 // The resume token is this service's own, minted and verified here and never seen by the account
 // API, so its audience stays local while the ticket's comes from the shared contract.
-const RESUME_AUDIENCE = "openbot-remote-resume";
+const RESUME_AUDIENCE = "dani-dex-remote-resume";
 export const RESUME_TTL_SECONDS = 10 * 60;
 const MAXIMUM_STALE_RESUME_SECONDS = 24 * 60 * 60;
 const MAXIMUM_TRUSTED_RESUME_TOKENS = 100_000;

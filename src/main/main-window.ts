@@ -272,7 +272,7 @@ export function createMainWindowController({
   function loadRenderer(window: BrowserWindow): Promise<void> {
     onRendererLoadStarted();
     const developmentUrl = process.env.ELECTRON_RENDERER_URL;
-    return developmentUrl ? window.loadURL(developmentUrl) : window.loadURL("openbot-app://app/index.html");
+    return developmentUrl ? window.loadURL(developmentUrl) : window.loadURL("dani-dex-app://app/index.html");
   }
 
   async function ensureMainWindow(): Promise<BrowserWindow> {
@@ -456,7 +456,7 @@ export function loadComputerUsePermissionHelpRenderer(
   sunshine = false,
 ): Promise<void> {
   const developmentUrl = process.env.ELECTRON_RENDERER_URL;
-  const url = new URL(developmentUrl ?? "openbot-app://app/index.html");
+  const url = new URL(developmentUrl ?? "dani-dex-app://app/index.html");
   url.searchParams.set("surface", "computer-use-permission-help");
   url.searchParams.set("permission", permission);
   if (sunshine) url.searchParams.set("application", "sunshine");
@@ -465,7 +465,7 @@ export function loadComputerUsePermissionHelpRenderer(
 
 export function loadComputerUseHighlightRenderer(window: BrowserWindow): Promise<void> {
   const developmentUrl = process.env.ELECTRON_RENDERER_URL;
-  const url = new URL(developmentUrl ?? "openbot-app://app/index.html");
+  const url = new URL(developmentUrl ?? "dani-dex-app://app/index.html");
   url.searchParams.set("surface", "computer-use-highlight");
   return window.loadURL(url.toString());
 }
@@ -496,7 +496,7 @@ export function showMainWindow(window: BrowserWindow): void {
 export function loadDynamicIslandRenderer(window: BrowserWindow, display: Display): Promise<void> {
   const displayMode = display.internal ? "notch" : "island";
   const developmentUrl = process.env.ELECTRON_RENDERER_URL;
-  const url = new URL(developmentUrl ?? "openbot-app://app/index.html");
+  const url = new URL(developmentUrl ?? "dani-dex-app://app/index.html");
   url.searchParams.set("surface", "dynamic-island");
   url.searchParams.set("display", displayMode);
   const notch = dynamicIslandNotchSizeForDisplay(display);

@@ -523,7 +523,7 @@ async function runDevelopmentServices(specs: DevelopmentServiceSpec[], stack: De
 export function configureSiteHostingDevelopmentEnvironment(environment: NodeJS.ProcessEnv, apiPort: number): void {
   environment.SITE_PUBLISH_ENABLED ??= "true";
   environment.SITE_COOKIE_ISOLATION_READY ??= "true";
-  environment.SITE_LOCAL_ORIGIN ??= `http://openbot.localhost:${apiPort}`;
+  environment.SITE_LOCAL_ORIGIN ??= `http://danidex.localhost:${apiPort}`;
 }
 
 export function configureMobileConnectDevelopmentNetwork(

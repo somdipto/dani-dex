@@ -309,7 +309,7 @@ describe.sequential("AgentService: providers", () => {
     expect(paramsRecord(starts[1]?.params)?.dynamicTools).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: "openbot",
+          name: "danidex",
           tools: expect.arrayContaining([expect.objectContaining({ name: "create_section" })]),
         }),
       ]),
@@ -739,7 +739,7 @@ describe.sequential("AgentService: providers", () => {
               transport: "stdio",
               enabled: true,
               command: "/opt/cua/bin/cua-driver",
-              args: ["mcp", "--socket", "/tmp/openbot-test.sock"],
+              args: ["mcp", "--socket", "/tmp/dani-dex-test.sock"],
               env: [{ key: "CUA_DRIVER_EMBEDDED", value: "1" }],
               envPassthrough: [],
               workingDirectory: "",
@@ -758,7 +758,7 @@ describe.sequential("AgentService: providers", () => {
       mcp_servers: {
         [COMPUTER_USE_MCP_SERVER_NAME]: {
           command: "/opt/cua/bin/cua-driver",
-          args: ["mcp", "--socket", "/tmp/openbot-test.sock"],
+          args: ["mcp", "--socket", "/tmp/dani-dex-test.sock"],
           env: await launchEnvironment({ CUA_DRIVER_EMBEDDED: "1" }),
         },
       },
@@ -2312,7 +2312,7 @@ describe.sequential("AgentService: providers", () => {
         approvalPolicy: "on-request",
         sandbox: "danger-full-access",
         ephemeral: false,
-        serviceName: "openbot",
+        serviceName: "danidex",
       });
       expect(params.runtimeWorkspaceRoots).toEqual([params.cwd, store.sharedRoot]);
       expect(params.developerInstructions).toContain(
@@ -2323,14 +2323,14 @@ describe.sequential("AgentService: providers", () => {
       );
       expect(params.developerInstructions).toContain("For every browser task");
       expect(params.developerInstructions).toContain(`Use ${COMPUTER_USE_MCP_SERVER_NAME} for every GUI task`);
-      expect(params.developerInstructions).toContain("openbot_browser.submit_secret");
-      expect(params.developerInstructions).toContain("openbot.create_routine");
+      expect(params.developerInstructions).toContain("danidex_browser.submit_secret");
+      expect(params.developerInstructions).toContain("danidex.create_routine");
       expect(params.developerInstructions).toContain("Never use ChatGPT Sites");
-      expect(params.developerInstructions).toContain("openbot.attach_files_to_response");
+      expect(params.developerInstructions).toContain("danidex.attach_files_to_response");
       expect(params.developerInstructions).toContain("sadness, disappointment, frustration, loneliness");
       expect(params.developerInstructions).toContain("An emoji written inside your answer does not count");
       expect(params.developerInstructions).toContain("Omit agentId to target yourself");
-      expect.soft(params.developerInstructions).toContain("call openbot.list_agents and openbot.list_sections");
+      expect.soft(params.developerInstructions).toContain("call danidex.list_agents and danidex.list_sections");
       expect.soft(params.developerInstructions).toContain("Prefer suitable agents in your own section first");
       expect
         .soft(params.developerInstructions)
@@ -2349,10 +2349,10 @@ describe.sequential("AgentService: providers", () => {
         );
       expect(params.dynamicTools).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ type: "namespace", name: "openbot_browser" }),
+          expect.objectContaining({ type: "namespace", name: "danidex_browser" }),
           expect.objectContaining({
             type: "namespace",
-            name: "openbot",
+            name: "danidex",
             tools: expect.arrayContaining([
               expect.objectContaining({ name: "attach_files_to_response" }),
               expect.objectContaining({ name: "ask_user" }),
@@ -2377,7 +2377,7 @@ describe.sequential("AgentService: providers", () => {
       );
       const browserTools = (Array.isArray(params.dynamicTools) ? params.dynamicTools : [])
         .filter(isDynamicRecord)
-        .find((tool) => tool.type === "namespace" && tool.name === "openbot_browser");
+        .find((tool) => tool.type === "namespace" && tool.name === "danidex_browser");
       expect(browserTools).toMatchObject({
         tools: expect.arrayContaining([expect.objectContaining({ name: "request_takeover" })]),
       });
@@ -2529,10 +2529,10 @@ describe.sequential("AgentService: providers", () => {
     await waitFor(() => Boolean(store.activeProviderSession("chief")));
 
     const providerThreadId = store.activeProviderSession("chief")?.externalSessionId;
-    const openbotThreadId = (await store.getOrCreate("chief")).threadId;
+    const danidexThreadId = (await store.getOrCreate("chief")).threadId;
     const client = clients.get("codex");
-    if (!providerThreadId || !openbotThreadId || !client) throw new Error("Browser test thread was not created.");
-    expect(providerThreadId).not.toBe(openbotThreadId);
+    if (!providerThreadId || !danidexThreadId || !client) throw new Error("Browser test thread was not created.");
+    expect(providerThreadId).not.toBe(danidexThreadId);
 
     client.emit("request", {
       method: "item/tool/call",
@@ -2541,13 +2541,13 @@ describe.sequential("AgentService: providers", () => {
         threadId: providerThreadId,
         turnId: "turn-browser",
         callId: "browser-call",
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "list_tabs",
         arguments: {},
       },
     });
 
     await waitFor(() => calls.length === 1);
-    expect(calls[0]).toMatchObject({ threadId: openbotThreadId, ownerAgentId: "chief" });
+    expect(calls[0]).toMatchObject({ threadId: danidexThreadId, ownerAgentId: "chief" });
   });
 });

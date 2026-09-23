@@ -58,7 +58,7 @@ export async function installClaudeRuntime(
     throw new Error(`The ${target} Claude runtime archive checksum is invalid.`);
   }
 
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-claude-install-"));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-claude-install-"));
   try {
     const archive = join(temporaryRoot, artifact.asset);
     const extracted = join(temporaryRoot, "extracted");

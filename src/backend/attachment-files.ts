@@ -26,7 +26,7 @@ import type {
 const MAX_ATTACHMENTS = INPUT_LIMITS.attachments;
 const MAX_FILE_BYTES = ATTACHMENT_LIMITS.fileBytes;
 const MAX_TOTAL_BYTES = ATTACHMENT_LIMITS.totalBytes;
-const TRANSFER_MANIFEST_FILE = ".openbot-transfer.json";
+const TRANSFER_MANIFEST_FILE = ".dani-dex-transfer.json";
 
 export interface StoredAttachment extends AttachmentSummary {
   path: string;
@@ -516,7 +516,7 @@ function attachmentMetadata(
 }
 
 function attachmentPreviewUrl(id: string): string {
-  return `openbot-attachment://file/${id}`;
+  return `dani-dex-attachment://file/${id}`;
 }
 
 export function toAttachmentSummary(attachment: StoredAttachment): AttachmentSummary {

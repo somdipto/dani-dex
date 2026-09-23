@@ -41,7 +41,7 @@ const DRAFT: McpServerConfig = {
   name: "Draft",
   transport: "stdio",
   enabled: false,
-  command: "openbot-no-such-command",
+  command: "dani-dex-no-such-command",
   args: [],
   env: [],
   envPassthrough: [],

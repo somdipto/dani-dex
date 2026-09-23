@@ -52,13 +52,13 @@ async function build(): Promise<void> {
     ])
   ).trim();
   if (appVersion !== version) throw new Error("Dani-Dex.app and Host package versions differ.");
-  const temp = await mkdtemp(join(tmpdir(), "openbot-host-build-"));
+  const temp = await mkdtemp(join(tmpdir(), "dani-dex-host-build-"));
   const payload = join(temp, "payload");
   const installerScripts = join(temp, "scripts");
   const destination = resolve(`dist/Dani-Dex-Host-${version}-arm64.pkg`);
   try {
     await mkdir(join(payload, HOST_MANAGER_DIRECTORY), { recursive: true });
-    for (const name of ["host-manager", "openbot-host"]) {
+    for (const name of ["host-manager", "dani-dex-host"]) {
       await command("bun", [
         "build",
         `scripts/${name}.ts`,
@@ -92,7 +92,7 @@ async function build(): Promise<void> {
         "--options",
         "runtime",
         "--identifier",
-        `app.openbot.host.${name}`,
+        `app.danidex.host.${name}`,
         ...(name === "create-tenants" ? [] : ["--entitlements", "build/macos/host-updates/entitlements.plist"]),
         binary,
       ]);
@@ -106,10 +106,10 @@ async function build(): Promise<void> {
       ]);
     }
     for (const [source, target] of [
-      ["openbot-host", "/usr/local/bin/openbot-host"],
-      ["openbot-relaunch.sh", `${HOST_MANAGER_DIRECTORY}/openbot-relaunch.sh`],
-      ["app.openbot.host-manager.plist", "/Library/LaunchDaemons/app.openbot.host-manager.plist"],
-      ["app.openbot.desktop.relaunch.plist", "/Library/LaunchAgents/app.openbot.desktop.relaunch.plist"],
+      ["dani-dex-host", "/usr/local/bin/dani-dex-host"],
+      ["dani-dex-relaunch.sh", `${HOST_MANAGER_DIRECTORY}/dani-dex-relaunch.sh`],
+      ["app.danidex.host-manager.plist", "/Library/LaunchDaemons/app.danidex.host-manager.plist"],
+      ["app.danidex.desktop.relaunch.plist", "/Library/LaunchAgents/app.danidex.desktop.relaunch.plist"],
     ]) {
       await mkdir(dirname(join(payload, target)), { recursive: true });
       await copyFile(`build/macos/host-updates/${source}`, join(payload, target));

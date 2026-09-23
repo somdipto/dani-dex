@@ -96,7 +96,7 @@ const server = createServer((request, response) => {
   if (url.pathname === "/download") {
     response.writeHead(200, {
       "content-type": "text/plain",
-      "content-disposition": 'attachment; filename="openbot-smoke.txt"',
+      "content-disposition": 'attachment; filename="dani-dex-smoke.txt"',
     });
     response.end("local download");
     return;
@@ -107,7 +107,7 @@ const server = createServer((request, response) => {
     return;
   }
   if (url.pathname === "/cookie") {
-    if (url.searchParams.has("set")) response.setHeader("set-cookie", "openbot=shared; Path=/");
+    if (url.searchParams.has("set")) response.setHeader("set-cookie", "danidex=shared; Path=/");
     response.setHeader("content-type", "text/html; charset=utf-8");
     response.end(`<main>cookie:${request.headers.cookie ?? "none"}</main><span data-load-environment></span><script>
       document.querySelector('[data-load-environment]').textContent = 'load-environment:' + innerWidth + ':' + (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') + ':' + (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'motion');
@@ -393,7 +393,7 @@ async function main(): Promise<void> {
   const configuredRoot = argumentValue("--smoke-root=");
   const persistencePhase = argumentValue("--persistence-phase=");
   const persistenceOrigin = argumentValue("--persistence-origin=");
-  const temporaryRoot = configuredRoot ?? (await mkdtemp(join(tmpdir(), "openbot-browser-smoke-")));
+  const temporaryRoot = configuredRoot ?? (await mkdtemp(join(tmpdir(), "dani-dex-browser-smoke-")));
   const userDataPath = join(temporaryRoot, "user-data");
   await mkdir(userDataPath, { recursive: true });
   app.setName("Dani-Dex");
@@ -893,7 +893,10 @@ async function main(): Promise<void> {
       true,
     );
     await browser.snapshot(v2Tab.id);
-    const noDomRefs = await v2Contents.executeJavaScript("document.querySelector('[data-openbot-ref]') === null", true);
+    const noDomRefs = await v2Contents.executeJavaScript(
+      "document.querySelector('[data-dani-dex-ref]') === null",
+      true,
+    );
     if (noDomRefs !== true) throw new Error("V2 snapshot mutated the page DOM.");
     await runControlActions(browser, v2Tab.id, v2Contents);
     await runKeyboardScenario(browser, origin, temporaryRoot);
@@ -1230,7 +1233,7 @@ async function main(): Promise<void> {
     // not run in the default flow: its millisecond dispatch budgets fail on a
     // loaded software-rendered runner for timing reasons, not product ones.
     await v2Contents.executeJavaScript(
-      "globalThis.__openbotSlowNoise = setInterval(() => document.body.toggleAttribute('data-slow-noise'), 10); setTimeout(() => { clearInterval(globalThis.__openbotSlowNoise); delete globalThis.__openbotSlowNoise; }, 1200); true",
+      "globalThis.__danidexSlowNoise = setInterval(() => document.body.toggleAttribute('data-slow-noise'), 10); setTimeout(() => { clearInterval(globalThis.__danidexSlowNoise); delete globalThis.__danidexSlowNoise; }, 1200); true",
       true,
     );
     const patientQuietWait = await callBrowserTool(browser, "wait_for", {
@@ -1242,7 +1245,7 @@ async function main(): Promise<void> {
       throw new Error(`V2 DOM-quiet wait ignored the requested timeout: ${toolError(patientQuietWait)}`);
     }
     await v2Contents.executeJavaScript(
-      "globalThis.__openbotTransient = document.body.appendChild(Object.assign(document.createElement('span'), { textContent: 'transient quiet condition' })); setTimeout(() => { globalThis.__openbotTransient.remove(); delete globalThis.__openbotTransient; }, 100); true",
+      "globalThis.__danidexTransient = document.body.appendChild(Object.assign(document.createElement('span'), { textContent: 'transient quiet condition' })); setTimeout(() => { globalThis.__danidexTransient.remove(); delete globalThis.__danidexTransient; }, 100); true",
       true,
     );
     const invalidatedQuietWait = await callBrowserTool(browser, "wait_for", {
@@ -1667,7 +1670,7 @@ async function main(): Promise<void> {
     await browser.open(`${origin}/cookie?set=1`, "smoke-thread");
     const cookieTab = await browser.open(`${origin}/cookie`, "other-thread");
     const cookieSnapshot = await browser.snapshot(cookieTab.id);
-    if (!cookieSnapshot.text.includes("openbot=shared")) throw new Error("Cookies were not shared.");
+    if (!cookieSnapshot.text.includes("danidex=shared")) throw new Error("Cookies were not shared.");
     process.stdout.write("BrowserHost: shared cookies passed.\n");
 
     const firstCachedTab = await browser.open(`${origin}/cached`, "smoke-thread");
@@ -1698,7 +1701,7 @@ async function main(): Promise<void> {
       type: "click",
       ref: download.ref,
     });
-    const downloadPath = join(downloadsRoot, "openbot-smoke.txt");
+    const downloadPath = join(downloadsRoot, "dani-dex-smoke.txt");
     await waitFor(async () => (await readFile(downloadPath, "utf8")) === "local download");
     const nextDownloadSnapshot = await browser.snapshot(downloadPage.id);
     const nextDownload = nextDownloadSnapshot.elements.find((element) => element.name === "Download");
@@ -1708,7 +1711,7 @@ async function main(): Promise<void> {
       ref: nextDownload.ref,
     });
     await waitFor(
-      async () => (await readFile(join(downloadsRoot, "openbot-smoke (2).txt"), "utf8")) === "local download",
+      async () => (await readFile(join(downloadsRoot, "dani-dex-smoke (2).txt"), "utf8")) === "local download",
     );
     process.stdout.write("BrowserHost: download passed.\n");
 
@@ -1717,7 +1720,7 @@ async function main(): Promise<void> {
       turnId: "browser-smoke-turn",
       callId: "browser-smoke-call",
       ownerAgentId: "smoke-bot",
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool: "open",
       arguments: { url: `${origin}/cookie` },
     });
@@ -1914,7 +1917,7 @@ async function runWaitDeadlines(browser: BrowserHost, tabId: string, v2Contents:
     throw new Error("V2 bounded action point fixture was not available.");
   }
   await v2Contents.executeJavaScript(
-    "globalThis.__openbotNoise = setInterval(() => document.querySelector('output').toggleAttribute('data-noise'), 10); true",
+    "globalThis.__danidexNoise = setInterval(() => document.querySelector('output').toggleAttribute('data-noise'), 10); true",
     true,
   );
   const actionTimeoutStarted = Date.now();
@@ -1943,7 +1946,7 @@ async function runWaitDeadlines(browser: BrowserHost, tabId: string, v2Contents:
     throw new Error("V2 DOM-quiet wait suppressed its timeout.");
   }
   await v2Contents.executeJavaScript(
-    "clearInterval(globalThis.__openbotNoise); delete globalThis.__openbotNoise; true",
+    "clearInterval(globalThis.__danidexNoise); delete globalThis.__danidexNoise; true",
     true,
   );
 }
@@ -2522,7 +2525,7 @@ async function runToolBoundaryScenario(browser: BrowserHost, origin: string): Pr
       turnId: "browser-smoke-scope-turn",
       callId: "browser-smoke-scope-call",
       ownerAgentId: "smoke-bot",
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool: "list_tabs",
       arguments: {},
     });
@@ -2541,7 +2544,7 @@ async function runToolBoundaryScenario(browser: BrowserHost, origin: string): Pr
       turnId: "browser-smoke-scope-turn",
       callId: "browser-smoke-cross-agent-call",
       ownerAgentId: "smoke-bot",
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool: "snapshot",
       arguments: { tabId: otherAgentTab.id },
     });
@@ -2551,7 +2554,7 @@ async function runToolBoundaryScenario(browser: BrowserHost, origin: string): Pr
       turnId: "browser-smoke-cross-agent-close-turn",
       callId: "browser-smoke-cross-agent-close-call",
       ownerAgentId: "smoke-bot",
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool: "close_tab",
       arguments: { tabId: otherAgentTab.id },
     });
@@ -2564,7 +2567,7 @@ async function runToolBoundaryScenario(browser: BrowserHost, origin: string): Pr
       turnId: "browser-smoke-close-turn-1",
       callId: "browser-smoke-close-call-1",
       ownerAgentId: "smoke-bot",
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool: "close_tab",
       arguments: { tabId: closableToolTab.id },
     });
@@ -2573,7 +2576,7 @@ async function runToolBoundaryScenario(browser: BrowserHost, origin: string): Pr
       turnId: "browser-smoke-close-turn-2",
       callId: "browser-smoke-close-call-2",
       ownerAgentId: "smoke-bot",
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool: "close_tab",
       arguments: { tabId: closableToolTab.id },
     });
@@ -2636,13 +2639,13 @@ async function checkOnePersistencePage(
       (expectedStored &&
         (localStorageValue !== "kept" ||
           indexedDbValue !== "kept" ||
-          (requireCrossProcessCookie && !cookie.includes("openbot_persistence=kept")))) ||
+          (requireCrossProcessCookie && !cookie.includes("danidex_persistence=kept")))) ||
       (!expectedStored &&
-        (cookie.includes("openbot_persistence=kept") || localStorageValue !== null || indexedDbValue !== null))
+        (cookie.includes("danidex_persistence=kept") || localStorageValue !== null || indexedDbValue !== null))
     ) {
       throw new Error(`Browser persistence phase ${phase} returned invalid state: ${JSON.stringify(snapshot)}`);
     }
-    if (expectedStored && !requireCrossProcessCookie && !cookie.includes("openbot_persistence=kept")) {
+    if (expectedStored && !requireCrossProcessCookie && !cookie.includes("danidex_persistence=kept")) {
       process.stdout.write("BrowserHost: signed macOS app must verify encrypted cookie persistence.\n");
     }
   } finally {
@@ -2794,7 +2797,7 @@ function callBrowserTool(
       turnId: `browser-v2-${browserToolCall}`,
       callId: `browser-v2-call-${browserToolCall}`,
       ownerAgentId: "smoke-bot",
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool,
       arguments: argumentsValue,
     },
@@ -2869,7 +2872,7 @@ async function runGoogleLiveProbe(browser: BrowserHost): Promise<void> {
   await browser.act(googleTab.id, identifierPage.revision, {
     type: "type",
     ref: identifier.ref,
-    text: "openbot-google-probe@example.com",
+    text: "dani-dex-google-probe@example.com",
     submit: true,
   });
   const outcome = await waitForGoogleSnapshot(browser, googleTab.id, (snapshot) => {

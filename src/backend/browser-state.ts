@@ -175,7 +175,7 @@ export function reownStoredBrowserTab(tab: StoredBrowserTab, agents: readonly Br
   const owner = tabOwner(tab, agents);
   if (!owner) return tab;
   // Both fields are brought to the owner, not just the one that failed to match. A generated agent's
-  // thread id is `openbot-thread-<uuid>` with no agent id inside it, so v13 never touched it and it
+  // thread id is `dani-dex-thread-<uuid>` with no agent id inside it, so v13 never touched it and it
   // matches on its own -- while the owner id beside it is still the pre-rename spelling. Stopping at the
   // first match would call that tab correct and leave `#canUseToolTab`, which checks both, refusing it.
   const ownerThreadId = tab.ownerThreadId === null || owner.threadId === null ? tab.ownerThreadId : owner.threadId;

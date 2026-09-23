@@ -268,7 +268,7 @@ bun run mobile:ios:build:local
 
 From `apps/mobile`, the equivalent command is `bun run ios:build:local`.
 This runs EAS Build locally with the `production` profile and writes
-`/private/tmp/openbot-testflight.ipa`. Each successful build replaces that output file.
+`/private/tmp/dani-dex-testflight.ipa`. Each successful build replaces that output file.
 The profile uses remote build numbers and increments the build number automatically.
 EAS CLI prompts for signing credentials when needed.
 
@@ -299,7 +299,7 @@ One-time setup:
    EAS before retrying; the upload API key is not passed to the build step.
 4. Keep the OpenPanel variables in EAS `production` with `Plain text` or `Sensitive` visibility.
    `Secret` variables are unavailable to this local build. Do not copy these values into source.
-5. Ensure App Store Connect has the app `run.openbot.mobile` and the intended TestFlight group.
+5. Ensure App Store Connect has the app `run.danidex.mobile` and the intended TestFlight group.
 
 After this workflow is merged into `main`, authenticate GitHub CLI with `gh auth login`, then run
 from the repository root:
@@ -344,7 +344,7 @@ The endpoint is fixed to `https://analytics.openbot.run/api`. No analytics crede
    Do not create or select a separate **Openbot Mobile** project.
    Create a separate client for Dani-Dex Mobile with **write** access only. Copy its Client ID and
    Client Secret. Do not use an organization/root client or a client with read access.
-2. In the Expo dashboard, open the **openbot** project → **Environment variables**, select the
+2. In the Expo dashboard, open the **danidex** project → **Environment variables**, select the
    **production** environment, and add:
 
    | Variable | Value |

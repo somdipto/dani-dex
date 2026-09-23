@@ -8,7 +8,7 @@ export type SidebarPinnedItem = Readonly<{
 
 export type SidebarPinsByServer = Record<string, SidebarPinnedItem[]>;
 
-export const SIDEBAR_PINS_STORAGE_KEY = "openbot:sidebar-pins:v1";
+export const SIDEBAR_PINS_STORAGE_KEY = "danidex:sidebar-pins:v1";
 
 type SidebarPinStorage = Pick<Storage, "getItem" | "setItem">;
 

@@ -9,7 +9,7 @@ import {
   emitAgentEvent,
   emitScopedAgentEvent,
   emitUpdateStatus,
-  installOpenbotStub,
+  installDanidexStub,
   testConversationPage,
   testServer,
   trackAnalytics,
@@ -33,7 +33,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect((await screen.findAllByRole("button", { name: "Add from marketplace" }))[0]).toBeEnabled();
   });
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
   afterEach(() => toast.dismiss());
 
@@ -622,7 +622,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("confirms an installed app version on the next launch", async () => {
     const configureAnalytics = vi.spyOn(desktopAnalytics, "configure").mockReturnValue(true);
-    window.localStorage.setItem("openbot:analytics-app-version", "0.0.9");
+    window.localStorage.setItem("danidex:analytics-app-version", "0.0.9");
     render(() => <App />);
 
     await waitFor(() =>
@@ -631,7 +631,7 @@ describe("Dani-Dex connected desktop shell", () => {
         to_version: "0.1.0",
       }),
     );
-    expect(window.localStorage.getItem("openbot:analytics-app-version")).toBe("0.1.0");
+    expect(window.localStorage.getItem("danidex:analytics-app-version")).toBe("0.1.0");
     configureAnalytics.mockRestore();
   });
 
@@ -906,7 +906,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("removes a custom agent avatar and keeps its generated avatar settings", async () => {
     vi.mocked(window.danidex.agent.listAgents).mockResolvedValueOnce([
-      { ...AGENTS[0], avatarUrl: "openbot-avatar://agent/chief?v=image-1" },
+      { ...AGENTS[0], avatarUrl: "dani-dex-avatar://agent/chief?v=image-1" },
     ]);
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });

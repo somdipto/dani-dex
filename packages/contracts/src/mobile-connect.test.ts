@@ -15,7 +15,7 @@ describe("Mobile Connect URLs", () => {
       "different desktop",
     );
     expect(
-      parseMobileConnectUrl(`openbot://mobile-connect?api=https://api.openbot.run&ticket=${ticket}&host=host-a`),
+      parseMobileConnectUrl(`dani-dex://mobile-connect?api=https://api.openbot.run&ticket=${ticket}&host=host-a`),
     ).toBeNull();
   });
   it("round-trips an HTTPS account API and one-time ticket", () => {
@@ -42,12 +42,12 @@ describe("Mobile Connect URLs", () => {
 
   it("rejects other schemes, hosts, parameters, and malformed tickets", () => {
     expect(parseMobileConnectUrl(`https://mobile-connect?api=https://api.openbot.run&ticket=${ticket}`)).toBeNull();
-    expect(parseMobileConnectUrl(`openbot://other?api=https://api.openbot.run&ticket=${ticket}`)).toBeNull();
+    expect(parseMobileConnectUrl(`dani-dex://other?api=https://api.openbot.run&ticket=${ticket}`)).toBeNull();
     expect(
       parseMobileConnectUrl(
-        `openbot://mobile-connect?api=https://api.openbot.run&ticket=${ticket}&redirect=https://evil.example`,
+        `dani-dex://mobile-connect?api=https://api.openbot.run&ticket=${ticket}&redirect=https://evil.example`,
       ),
     ).toBeNull();
-    expect(parseMobileConnectUrl("openbot://mobile-connect?api=https://api.openbot.run&ticket=short")).toBeNull();
+    expect(parseMobileConnectUrl("dani-dex://mobile-connect?api=https://api.openbot.run&ticket=short")).toBeNull();
   });
 });

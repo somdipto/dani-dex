@@ -62,7 +62,7 @@ export const ja = {
   "settings.externalLinks.title": "外部リンクの開き方",
   "settings.externalLinks.description": "会話内のリンクをどこで開くかを選びます。",
   "settings.externalLinks.defaultBrowser": "既定のブラウザ",
-  "settings.externalLinks.openbot": "Dani-Dex",
+  "settings.externalLinks.danidex": "Dani-Dex",
   "settings.autonomy.title": "エージェントの自律動作",
   "settings.turbo.title": "ターボモード",
   "settings.turbo.description":

@@ -35,7 +35,7 @@ interface FakeServer {
 }
 
 /** The one field of a registration request this fake reads back. */
-const registrationRequestSchema = z.object({ redirect_uris: z.array(z.string()).default(["openbot://mcp-auth"]) });
+const registrationRequestSchema = z.object({ redirect_uris: z.array(z.string()).default(["dani-dex://mcp-auth"]) });
 
 async function readBody(request: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
@@ -309,7 +309,7 @@ describe("signing in to an http MCP server", () => {
     const opened: string[] = [];
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       // The browser stands in for the user: it goes to the address it was given and comes back on
       // the deep link, which is the only way a grant reaches this process.
       openExternal: async (url) => {
@@ -325,7 +325,7 @@ describe("signing in to an http MCP server", () => {
     const authorize = new URL(opened[0] ?? "");
     expect(authorize.origin + authorize.pathname).toBe(`${server.base}/authorize`);
     expect(authorize.searchParams.get("code_challenge_method")).toBe("S256");
-    expect(authorize.searchParams.get("redirect_uri")).toBe("openbot://mcp-auth");
+    expect(authorize.searchParams.get("redirect_uri")).toBe("dani-dex://mcp-auth");
     expect(server.tokenRequests[0]?.get("code_verifier")).toBeTruthy();
     expect(storage.read(server.url)?.tokens?.access_token).toBe(ACCESS_TOKEN);
   });
@@ -334,14 +334,14 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer();
     const storage = memoryStorage();
     storage.records.set(server.url, {
-      client: { client_id: "test-client", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: { access_token: ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600, refresh_token: REFRESH_TOKEN },
       // Long expired: this is the token a thread would otherwise hand a provider on its way out.
       obtainedAt: Date.now() - 7_200_000,
     });
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("A refresh must never open a browser."),
     });
 
@@ -358,7 +358,7 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer();
     const storage = memoryStorage();
     storage.records.set(server.url, {
-      client: { client_id: "test-client", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: { access_token: ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600, refresh_token: REFRESH_TOKEN },
       // Long expired, so the probe must refresh before it connects. A remote administrator's test
       // reaches the server through this same authority: stored tokens are spent, and `signIn`
@@ -367,7 +367,7 @@ describe("signing in to an http MCP server", () => {
     });
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("A silent test must never open a browser."),
     });
     const silent: McpOAuthAuthority = {
@@ -388,13 +388,13 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer({ hangToken: true });
     const storage = memoryStorage();
     storage.records.set(server.url, {
-      client: { client_id: "test-client", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: { access_token: ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600, refresh_token: REFRESH_TOKEN },
       obtainedAt: Date.now() - 7_200_000,
     });
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("A refresh must never open a browser."),
       refreshTimeoutMs: 200,
     });
@@ -410,7 +410,7 @@ describe("signing in to an http MCP server", () => {
     const storage = memoryStorage();
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
       },
@@ -431,7 +431,7 @@ describe("signing in to an http MCP server", () => {
     const opened: string[] = [];
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         opened.push(url);
       },
@@ -454,7 +454,7 @@ describe("signing in to an http MCP server", () => {
     const storage = memoryStorage();
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
       },
@@ -495,7 +495,7 @@ describe("signing in to an http MCP server", () => {
     const storage = memoryStorage();
     const signIn = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         signIn.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
       },
@@ -519,7 +519,7 @@ describe("signing in to an http MCP server", () => {
     });
     const restarted = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("A refresh must never open a browser."),
     });
     const silent: McpOAuthAuthority = {
@@ -537,13 +537,13 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer({ delayTokenMs: 300 });
     const storage = memoryStorage();
     storage.records.set(server.url, {
-      client: { client_id: "test-client", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: { access_token: ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600, refresh_token: REFRESH_TOKEN },
       obtainedAt: Date.now() - 7_200_000,
     });
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("A refresh must never open a browser."),
       refreshTimeoutMs: 100,
     });
@@ -560,7 +560,7 @@ describe("signing in to an http MCP server", () => {
     const opened: string[] = [];
     const oauth = new McpOAuth({
       storage: memoryStorage(),
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         opened.push(url);
       },
@@ -580,13 +580,13 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer({ hangToken: true });
     const storage = memoryStorage();
     storage.records.set(server.url, {
-      client: { client_id: "test-client", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: { access_token: ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600, refresh_token: REFRESH_TOKEN },
       obtainedAt: Date.now() - 7_200_000,
     });
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("A refresh must never open a browser."),
       refreshTimeoutMs: 200,
     });
@@ -604,7 +604,7 @@ describe("signing in to an http MCP server", () => {
     const storage = memoryStorage();
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("Nothing is signed in here."),
     });
     const signIn = oauth.signIn("https://mcp.example.com/mcp");
@@ -624,7 +624,7 @@ describe("signing in to an http MCP server", () => {
     const storage = memoryStorage();
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("Nothing is signed in here."),
     });
     const stale = oauth.signIn("https://mcp.example.com/mcp");
@@ -645,7 +645,7 @@ describe("signing in to an http MCP server", () => {
     const storage = memoryStorage();
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
       },
@@ -667,7 +667,7 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer({ tokenUrl: "http://auth.example.com/token" });
     const oauth = new McpOAuth({
       storage: memoryStorage(),
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
       },
@@ -685,7 +685,7 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer({ quoteCredentialsOnTokenError: true });
     const oauth = new McpOAuth({
       storage: memoryStorage(),
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
       },
@@ -709,7 +709,7 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer({ rejectEveryToken: true, tokenUrl: "http://auth.example.com/token" });
     const storage = memoryStorage();
     storage.records.set(server.url, {
-      client: { client_id: "test-client", client_secret: "test-secret", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", client_secret: "test-secret", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: { access_token: ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600, refresh_token: REFRESH_TOKEN },
       // Well inside its life, so nothing refreshes before the connection: only the 401 does.
       obtainedAt: Date.now(),
@@ -717,7 +717,7 @@ describe("signing in to an http MCP server", () => {
     });
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
       },
@@ -763,7 +763,7 @@ describe("signing in to an http MCP server", () => {
       const server = await fakeServer({ redirectTokenTo: `http://127.0.0.1:${address.port}/token` });
       const oauth = new McpOAuth({
         storage: memoryStorage(),
-        redirectUrl: "openbot://mcp-auth",
+        redirectUrl: "dani-dex://mcp-auth",
         openExternal: async (url) => {
           oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
         },
@@ -786,7 +786,7 @@ describe("signing in to an http MCP server", () => {
     const opened: string[] = [];
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         opened.push(url);
         oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
@@ -817,13 +817,13 @@ describe("signing in to an http MCP server", () => {
     const server = await fakeServer({ delayTokenMs: 300 });
     const storage = memoryStorage();
     storage.records.set(server.url, {
-      client: { client_id: "test-client", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: { access_token: ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600, refresh_token: REFRESH_TOKEN },
       obtainedAt: Date.now() - 7_200_000,
     });
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => expect.unreachable("A refresh must never open a browser."),
     });
 
@@ -845,7 +845,7 @@ describe("signing in to an http MCP server", () => {
     const storage = memoryStorage();
     const oauth = new McpOAuth({
       storage,
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async (url) => {
         oauth.receiveAuthorizationCode(new URL(url).searchParams.get("state") ?? "", GRANT);
       },
@@ -861,17 +861,17 @@ describe("signing in to an http MCP server", () => {
   it("ignores a grant for a sign-in this run never started", async () => {
     const oauth = new McpOAuth({
       storage: memoryStorage(),
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => undefined,
     });
-    // Which is what makes a forged or replayed `openbot://mcp-auth` link do nothing at all.
+    // Which is what makes a forged or replayed `dani-dex://mcp-auth` link do nothing at all.
     expect(oauth.receiveAuthorizationCode("state-nobody-issued", GRANT)).toBe(false);
   });
 
   it("offers no sign-in for an address a grant must not be sent to", () => {
     const oauth = new McpOAuth({
       storage: memoryStorage(),
-      redirectUrl: "openbot://mcp-auth",
+      redirectUrl: "dani-dex://mcp-auth",
       openExternal: async () => undefined,
     });
     expect(normalizeResource("http://mcp.example.com/mcp")).toBeNull();
@@ -882,7 +882,7 @@ describe("signing in to an http MCP server", () => {
 });
 
 /**
- * The address a grant comes back to. Canva registers `openbot://mcp-auth` without complaint and
+ * The address a grant comes back to. Canva registers `dani-dex://mcp-auth` without complaint and
  * then answers the authorization request with `Invalid redirect URI.`, which happens on its own
  * page where Dani-Dex sees nothing - so what is checked here is what leaves this machine.
  */
@@ -917,7 +917,7 @@ describe("the address a returning grant is sent to", () => {
     const storage = memoryStorage();
     // What a build that used the deep link left behind. Sending the loopback address against this
     // registration is exactly the refusal the user cannot act on.
-    storage.records.set(server.url, { client: { client_id: "old-client", redirect_uris: ["openbot://mcp-auth"] } });
+    storage.records.set(server.url, { client: { client_id: "old-client", redirect_uris: ["dani-dex://mcp-auth"] } });
     const oauth = new McpOAuth({
       storage,
       redirectUrl: LOOPBACK,
@@ -943,7 +943,7 @@ describe("the address a returning grant is sent to", () => {
     storage.records.set(server.url, {
       // Stale in two ways at once, which is what a restart leaves behind: the registration names
       // the address of another run, and the access token is one the server no longer takes.
-      client: { client_id: "test-client", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: {
         access_token: "stale-access-token",
         token_type: "Bearer",
@@ -977,7 +977,7 @@ describe("the address a returning grant is sent to", () => {
     const server = await fakeServer();
     const storage = memoryStorage();
     storage.records.set(server.url, {
-      client: { client_id: "test-client", redirect_uris: ["openbot://mcp-auth"] },
+      client: { client_id: "test-client", redirect_uris: ["dani-dex://mcp-auth"] },
       tokens: { access_token: ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600, refresh_token: REFRESH_TOKEN },
       obtainedAt: Date.now() - 7_200_000,
     });
@@ -1004,6 +1004,6 @@ describe("the address a returning grant is sent to", () => {
     );
     expect(() => new McpOAuth({ storage, openExternal, redirectUrl: "mcp-auth" })).toThrow(/complete address/);
     expect(describeUnusableRedirectUrl(LOOPBACK)).toBeNull();
-    expect(describeUnusableRedirectUrl("openbot://mcp-auth")).toBeNull();
+    expect(describeUnusableRedirectUrl("dani-dex://mcp-auth")).toBeNull();
   });
 });

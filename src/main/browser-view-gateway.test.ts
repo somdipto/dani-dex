@@ -117,7 +117,7 @@ describe("the live browser view on a host", () => {
 
     for (const options of [
       { headers: { "X-Dani-Dex-WebRTC-Session": "another-team-session" } },
-      { protocols: ["openbot-token.other-member-token"] },
+      { protocols: ["dani-dex-token.other-member-token"] },
       {},
     ]) {
       const socket = new webSockets.WebSocket(`${origin}${session.streamPath}`, options.protocols ?? [], options);

@@ -512,8 +512,8 @@ export class TeamWebRtcHostPeer {
     if (!this.#localApiPort) return;
     this.#eventsSocket?.close();
     const socket = new webSockets.WebSocket(`ws://127.0.0.1:${this.#localApiPort}${TEAM_API_ROUTES.events}`, [
-      "openbot-team-v1",
-      `openbot-token.${token}`,
+      "dani-dex-team-v1",
+      `dani-dex-token.${token}`,
     ]);
     this.#eventsSocket = socket;
     socket.once("open", () => {

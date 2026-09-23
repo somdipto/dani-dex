@@ -29,7 +29,7 @@ function threadRowCount(): number {
 }
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "openbot-conversation-transaction-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-conversation-transaction-"));
   store = new AgentStore(join(root, "user-data"), join(root, "home"));
   await store.initialize();
   await store.getOrCreate(AGENT_ID, "Design Studio", "Product design");

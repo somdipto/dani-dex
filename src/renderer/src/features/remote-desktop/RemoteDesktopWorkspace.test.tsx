@@ -96,7 +96,7 @@ describe("RemoteDesktopWorkspace", () => {
         origin: new URL(session.viewerUrl).origin,
         source: frame.contentWindow,
         data: {
-          source: "openbot-moonlight",
+          source: "dani-dex-moonlight",
           type: "viewer-state",
           sessionId: session.id,
           state: "connected",

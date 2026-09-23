@@ -647,7 +647,7 @@ describe("SettingsModal", () => {
         onUpdateAccountName={vi.fn(async () => undefined)}
         onUpdateAccountAvatar={vi.fn(async () => undefined)}
         onCreateMobileConnect={async () => ({
-          qrData: "openbot://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=mobile-ticket_success_1234567890",
+          qrData: "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=mobile-ticket_success_1234567890",
           expiresAt: Date.now() + 120_000,
         })}
         onListMobileConnectedDevices={onListMobileConnectedDevices}
@@ -708,7 +708,7 @@ describe("SettingsModal", () => {
       .mockImplementationOnce(() => initialDevices)
       .mockResolvedValue([existingDevice]);
     const onCreateMobileConnect = vi.fn(async () => ({
-      qrData: "openbot://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=mobile-ticket_baseline_1234567890",
+      qrData: "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=mobile-ticket_baseline_1234567890",
       expiresAt: Date.now() + 120_000,
     }));
     const view = render(() => (

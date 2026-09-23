@@ -16,7 +16,7 @@ describe("applicationBundlePath", () => {
   });
 
   it("finds nothing for an executable in a plain directory", () => {
-    expect(applicationBundlePath("/usr/local/bin/openbot", "darwin")).toBeNull();
+    expect(applicationBundlePath("/usr/local/bin/danidex", "darwin")).toBeNull();
   });
 
   // Only macOS asks for a bundle in a permission list, so there is nothing to drag anywhere else.
@@ -33,8 +33,8 @@ describe("applicationBundleName", () => {
 
 describe("applicationIconName", () => {
   it("prefers the icon named after the bundle", () => {
-    expect(applicationIconName("/Applications/Dani-Dex.app", ["document.icns", "openbot.icns", "en.lproj"])).toBe(
-      "openbot.icns",
+    expect(applicationIconName("/Applications/Dani-Dex.app", ["document.icns", "dani-dex.icns", "en.lproj"])).toBe(
+      "dani-dex.icns",
     );
   });
 

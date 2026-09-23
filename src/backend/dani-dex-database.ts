@@ -338,5 +338,5 @@ export class DaniDexDatabase {
 }
 
 export function stableThreadId(agentId: string): string {
-  return `openbot-thread-${agentId}`;
+  return `dani-dex-thread-${agentId}`;
 }

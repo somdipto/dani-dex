@@ -22,8 +22,8 @@ describe("the deep link router", () => {
   });
 
   it.each([
-    ["an unknown openbot:// host", "openbot://something-else/aave"],
-    ["a bare scheme", "openbot://"],
+    ["an unknown dani-dex:// host", "dani-dex://something-else/aave"],
+    ["a bare scheme", "dani-dex://"],
     ["an ordinary web page", "https://openbot.run/news"],
     ["a command-line argument", "--enable-logging"],
     ["an empty string", ""],
@@ -35,7 +35,7 @@ describe("the deep link router", () => {
      invitation's token in it. */
   it("never reads an invitation as a plugin", () => {
     expect(parseDeepLink(inviteUrl)?.kind).toBe("invite");
-    expect(parseDeepLink("openbot://join")).toBeNull();
+    expect(parseDeepLink("dani-dex://join")).toBeNull();
   });
 
   it("refuses a local development invitation unless that is allowed", () => {

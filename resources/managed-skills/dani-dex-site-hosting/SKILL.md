@@ -1,5 +1,5 @@
 ---
-name: openbot-site-hosting
+name: dani-dex-site-hosting
 description: Build, publish, replace, list, and delete small static websites hosted by Dani-Dex. Use when the user asks to host or manage a site on openbot.site.
 ---
 
@@ -15,9 +15,9 @@ Every site must contain `index.html`. Allowed files are HTML, CSS, JavaScript, J
 
 Use these tools:
 
-- `openbot.list_sites` lists the user's sites. Use it before a retry.
-- `openbot.publish_site` publishes a new site from this agent's workspace or Dani-Dex Shared.
-- `openbot.replace_site` replaces one owned site and keeps its URL.
-- `openbot.delete_site` deletes one owned site and makes its URL return `410 Gone`.
+- `danidex.list_sites` lists the user's sites. Use it before a retry.
+- `danidex.publish_site` publishes a new site from this agent's workspace or Dani-Dex Shared.
+- `danidex.replace_site` replaces one owned site and keeps its URL.
+- `danidex.delete_site` deletes one owned site and makes its URL return `410 Gone`.
 
 Call a hosting mutation tool only after the user gives an explicit publish, replace, or delete instruction. A request to build, preview, discuss, or review a site is not permission to publish it. Never ask for or use R2 credentials, R2 tokens, presigned URLs, or direct Cloudflare API access.

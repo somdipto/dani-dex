@@ -2,14 +2,14 @@ import type { AgentStatus } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { expect, it, vi } from "vitest";
 import { App } from "./App";
-import { emitAgentEvent, emitAuth, emitInvite, installOpenbotStub, trackAnalytics } from "./app-test-harness";
+import { emitAgentEvent, emitAuth, emitInvite, installDanidexStub, trackAnalytics } from "./app-test-harness";
 
 /** A model of a custom endpoint, which only the first-run flow can choose. */
 const CUSTOM_ENDPOINT_MODEL = "opencode/local-studio/qwen3-coder";
 
 describe("Dani-Dex connected desktop shell", () => {
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
 
   it("shows the first-run onboarding before starting agents", async () => {

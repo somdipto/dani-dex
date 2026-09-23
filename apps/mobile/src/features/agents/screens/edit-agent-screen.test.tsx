@@ -171,7 +171,7 @@ const workspace = {
     ) => {
       workspace.agents = workspace.agents.map((agent) => ({
         ...agent,
-        avatarUrl: image ? "openbot-avatar://agent-one?v=new" : null,
+        avatarUrl: image ? "dani-dex-avatar://agent-one?v=new" : null,
       }));
     },
   ),
@@ -1518,7 +1518,7 @@ it("keeps a selected avatar draft after a failed upload and retries on its origi
 });
 
 it("removes the desktop photo only after Save", async () => {
-  workspace.agents = [{ ...original, avatarUrl: "openbot-avatar://agent-one?v=desktop" }];
+  workspace.agents = [{ ...original, avatarUrl: "dani-dex-avatar://agent-one?v=desktop" }];
   await renderSheet("appearance");
   await click("Remove photo");
   expect(workspace.setAgentAvatar).not.toHaveBeenCalled();
@@ -1541,7 +1541,7 @@ it("keeps the form unchanged when photo selection is canceled or the file is too
 });
 
 it("loads desktop avatar revisions from the correct host and returns to the generated face after removal", async () => {
-  workspace.agents = [{ ...original, avatarUrl: "openbot-avatar://agent-one?v=desktop" }];
+  workspace.agents = [{ ...original, avatarUrl: "dani-dex-avatar://agent-one?v=desktop" }];
   const renderPhoto = (disconnected = false) =>
     act(() =>
       root.render(
@@ -1556,7 +1556,7 @@ it("loads desktop avatar revisions from the correct host and returns to the gene
   await waitFor(() => expect(screen.getByRole("img", { name: "Agent avatar" })).toBeTruthy());
   expect(workspace.loadAgentAvatar).toHaveBeenLastCalledWith(
     original.id,
-    "openbot-avatar://agent-one?v=desktop",
+    "dani-dex-avatar://agent-one?v=desktop",
     host.id,
   );
   workspace.servers = [{ ...host, state: "offline" }];
@@ -1571,12 +1571,12 @@ it("loads desktop avatar revisions from the correct host and returns to the gene
     "data:image/png;base64,iVBORw0KGgo=",
   );
   expect(workspace.loadAgentAvatar).toHaveBeenCalledTimes(1);
-  workspace.agents = [{ ...original, avatarUrl: "openbot-avatar://agent-one?v=replaced" }];
+  workspace.agents = [{ ...original, avatarUrl: "dani-dex-avatar://agent-one?v=replaced" }];
   await renderPhoto();
   await waitFor(() =>
     expect(workspace.loadAgentAvatar).toHaveBeenLastCalledWith(
       original.id,
-      "openbot-avatar://agent-one?v=replaced",
+      "dani-dex-avatar://agent-one?v=replaced",
       host.id,
     ),
   );

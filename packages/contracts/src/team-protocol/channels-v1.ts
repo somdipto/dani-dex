@@ -252,11 +252,11 @@ export function isChannelSettingsRoute(pathname: string): boolean {
 }
 
 export function isChannelRoute(path: string): boolean {
-  return CHANNEL_ROUTE_PATHS.has(new URL(path, "http://openbot.invalid").pathname);
+  return CHANNEL_ROUTE_PATHS.has(new URL(path, "http://danidex.invalid").pathname);
 }
 
 export function channelRequest(path: string, value: unknown): TeamProtocolV2Json {
-  const pathname = new URL(path, "http://openbot.invalid").pathname;
+  const pathname = new URL(path, "http://danidex.invalid").pathname;
   if (pathname === CHANNEL_ROUTES.list) return {};
   if (pathname === CHANNEL_ROUTES.delete) return record(value, { channelId: identifier });
   if (isChannelSettingsRoute(pathname)) return channelSettingsRequest(pathname, value);
@@ -367,7 +367,7 @@ function channelSettingsResponse(pathname: string, value: unknown): TeamProtocol
 
 export function channelResponse(path: string, status: number, value: unknown): TeamProtocolV2Json {
   if (status >= 400) return record(value, { error: string(100000) });
-  const pathname = new URL(path, "http://openbot.invalid").pathname;
+  const pathname = new URL(path, "http://danidex.invalid").pathname;
   if (pathname === CHANNEL_ROUTES.delete) return null;
   if (isChannelSettingsRoute(pathname)) return channelSettingsResponse(pathname, value);
   if (pathname === CHANNEL_ROUTES.list)

@@ -14,7 +14,7 @@ export function createWorkspacePreferences(
   storage: { get(key: string): string | null; set(key: string, value: string): void },
 ) {
   const scope = remoteHostFingerprint(JSON.stringify([new URL(apiUrl).origin, userId]));
-  const key = (hostId: string) => `openbot.workspace.v1.${scope}.${remoteHostFingerprint(hostId)}`;
+  const key = (hostId: string) => `danidex.workspace.v1.${scope}.${remoteHostFingerprint(hostId)}`;
   return {
     read(hostId: string): RemoteWorkspacePreferences {
       const stored = storage.get(key(hostId));

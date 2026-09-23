@@ -840,7 +840,7 @@ export class RemoteServerManager extends EventEmitter<RemoteServerEvents> {
     }
     const url = new URL(session.streamPath, server.apiUrl);
     url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
-    return { sessionId: session.id, url: url.toString(), protocols: [`openbot-token.${this.#store.token(server)}`] };
+    return { sessionId: session.id, url: url.toString(), protocols: [`dani-dex-token.${this.#store.token(server)}`] };
   }
 
   closeBrowserViewSession(serverId: string, sessionId: string): Promise<void> {

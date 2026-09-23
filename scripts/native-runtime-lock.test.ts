@@ -75,7 +75,7 @@ describe("native runtime lock", () => {
 
   it("keeps the embedded runtime on WebRTC without audio or WebSocket media", async () => {
     const patch = await readFile(
-      resolve("vendor/remote-desktop/patches/moonlight-web-stream-v2.10.0-openbot.patch"),
+      resolve("vendor/remote-desktop/patches/moonlight-web-stream-v2.10.0-danidex.patch"),
       "utf8",
     );
 
@@ -92,11 +92,11 @@ describe("native runtime lock", () => {
 
   it("adds the authenticated Sunshine native display endpoint", async () => {
     const patch = await readFile(
-      resolve("vendor/remote-desktop/patches/sunshine-v2026.516.143833-openbot.patch"),
+      resolve("vendor/remote-desktop/patches/sunshine-v2026.516.143833-danidex.patch"),
       "utf8",
     );
 
-    expect(patch).toContain('server.resource["^/api/openbot/displays$"]["GET"]');
+    expect(patch).toContain('server.resource["^/api/danidex/displays$"]["GET"]');
     expect(patch).toContain("if (!authenticate(response, request))");
     expect(patch).toContain("platf::display_names");
   });

@@ -20,7 +20,7 @@ import {
 } from "../src/backend/protocol";
 
 const EXPECTED = "DANI_DEX_SQLITE_SMOKE_OK";
-const root = await mkdtemp(join(tmpdir(), "openbot-provider-storage-smoke-"));
+const root = await mkdtemp(join(tmpdir(), "dani-dex-provider-storage-smoke-"));
 
 try {
   const database = new DaniDexDatabase(join(root, "user-data"));
@@ -79,7 +79,7 @@ async function runProvider(
   model: AgentSummary["model"],
 ): Promise<void> {
   const agentId = `smoke-${provider}`;
-  const threadId = `openbot-thread-${agentId}`;
+  const threadId = `dani-dex-thread-${agentId}`;
   const workspace = join(root, "workspace", provider);
   await mkdir(workspace, { recursive: true, mode: 0o700 });
   const agent: AgentSummary = {
@@ -148,7 +148,7 @@ async function runProvider(
     await client.request(
       "initialize",
       {
-        clientInfo: { name: "openbot-storage-smoke", version: "1.0.0" },
+        clientInfo: { name: "dani-dex-storage-smoke", version: "1.0.0" },
         capabilities: { experimentalApi: true },
       },
       decodeRecordResponse,

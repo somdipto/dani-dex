@@ -7,7 +7,7 @@ const binding = { hostId: "host-a", fingerprint: "a".repeat(43) };
 describe("createHostedMobileConnect", () => {
   it("creates and starts a local server before issuing the pairing code", async () => {
     const operations: string[] = [];
-    const ticket = { qrData: "openbot://mobile-connect?ticket=test", expiresAt: Date.now() + 60_000 };
+    const ticket = { qrData: "dani-dex://mobile-connect?ticket=test", expiresAt: Date.now() + 60_000 };
 
     await expect(
       createHostedMobileConnect({
@@ -48,7 +48,7 @@ describe("createHostedMobileConnect", () => {
       centralAuth: {
         createMobileConnect: async () => {
           operations.push("ticket");
-          return { qrData: "openbot://mobile-connect?ticket=test", expiresAt: Date.now() + 60_000 };
+          return { qrData: "dani-dex://mobile-connect?ticket=test", expiresAt: Date.now() + 60_000 };
         },
       },
       host: {

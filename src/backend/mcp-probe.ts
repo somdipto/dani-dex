@@ -133,7 +133,7 @@ async function connectAndCount(
   timeoutMs: number,
   authProvider: OAuthClientProvider | undefined,
 ): Promise<number> {
-  const client = new Client({ name: "openbot-probe", version: "1" }, { capabilities: {} });
+  const client = new Client({ name: "dani-dex-probe", version: "1" }, { capabilities: {} });
   const transport = createTransport(server, authProvider);
   try {
     return await withDeadline(

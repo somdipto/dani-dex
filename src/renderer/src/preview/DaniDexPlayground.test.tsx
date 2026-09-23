@@ -65,14 +65,14 @@ describe("DaniDexPlayground", () => {
     frames.get(1)?.(0);
     expect(postMessage).not.toHaveBeenCalled();
     frames.get(2)?.(16);
-    expect(postMessage).toHaveBeenCalledWith({ type: "openbot:landing-preview-ready" }, window.location.origin);
+    expect(postMessage).toHaveBeenCalledWith({ type: "danidex:landing-preview-ready" }, window.location.origin);
     vi.advanceTimersByTime(250);
     expect(postMessage).toHaveBeenCalledTimes(2);
     window.dispatchEvent(
       new MessageEvent("message", {
         origin: "https://invalid.example",
         source: parentWindow,
-        data: { type: "openbot:landing-preview-start" },
+        data: { type: "danidex:landing-preview-start" },
       }),
     );
     expect(updateConversation).not.toHaveBeenCalled();
@@ -81,7 +81,7 @@ describe("DaniDexPlayground", () => {
       new MessageEvent("message", {
         origin: window.location.origin,
         source: parentWindow,
-        data: { type: "openbot:landing-preview-start" },
+        data: { type: "danidex:landing-preview-start" },
       }),
     );
     await Promise.resolve();

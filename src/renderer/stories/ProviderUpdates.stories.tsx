@@ -51,7 +51,7 @@ function readyRuntimes(): Record<ManagedProviderId, ProviderRuntimeStatus> {
 /**
  * The update flow with main simulated locally, the same way `OnboardingFlow.stories.tsx`
  * simulates a download: local signals, a `setInterval` progress tick and per-provider timer
- * cleanup. `mock-openbot.ts` still stubs `providerRuntimes` inert, and no contract carries
+ * cleanup. `mock-danidex.ts` still stubs `providerRuntimes` inert, and no contract carries
  * `availableVersion` yet, so props are the only honest source for these states today.
  */
 function ProviderUpdateFlow(props: { failOnce?: boolean; controls?: boolean }) {

@@ -155,7 +155,7 @@ describe("RemoteScreenGateway", () => {
       body: JSON.stringify({ grant: session.viewerGrant }),
     });
     expect(first.status).toBe(204);
-    expect(first.headers.get("set-cookie")).toContain("openbotRemoteViewer=");
+    expect(first.headers.get("set-cookie")).toContain("danidexRemoteViewer=");
     const viewerCookie = first.headers.get("set-cookie")?.split(";")[0] ?? "";
     for (const blockedPath of ["admin.html", "index.html", "api/host/stream"]) {
       const blocked = await fetch(`${origin}/v1/remote-screen/sessions/${session.id}/moonlight/${blockedPath}`, {
@@ -167,7 +167,7 @@ describe("RemoteScreenGateway", () => {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: viewerCookie },
       body: JSON.stringify({
-        source: "openbot-moonlight",
+        source: "dani-dex-moonlight",
         type: "viewer-state",
         sessionId: session.id,
         state: "connected",
@@ -514,7 +514,7 @@ describe("RemoteScreenGateway", () => {
       upstreamWebSockets.handleUpgrade(request, socket, head, (webSocket) => {
         webSocket.on("message", (data) => {
           upstreamMessages.push({
-            user: String(request.headers["x-openbot-remote-user"]),
+            user: String(request.headers["x-dani-dex-remote-user"]),
             message: data.toString(),
           });
         });
@@ -563,7 +563,7 @@ describe("RemoteScreenGateway", () => {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: cookies[firstIndex] },
       body: JSON.stringify({
-        source: "openbot-moonlight",
+        source: "dani-dex-moonlight",
         type: "viewer-state",
         sessionId: sessions[firstIndex]?.id,
         state: "connected",
@@ -646,8 +646,8 @@ function createGateway(
       options.runtimeInstalled === false
         ? null
         : { sunshine: "/sunshine", moonlightWebServer: "/web-server", moonlightStreamer: "/streamer" },
-    runtimeStateDirectory: "/tmp/openbot-test-runtime",
-    getRuntimeCredentials: async () => ({ username: "openbot", password: "secret" }),
+    runtimeStateDirectory: "/tmp/dani-dex-test-runtime",
+    getRuntimeCredentials: async () => ({ username: "danidex", password: "secret" }),
     getDisplays: () => displays,
     getIceServers: options.getIceServers ?? (async () => [{ urls: "stun:127.0.0.1:3478" }]),
     ...(options.onScreenRecordingDenied ? { onScreenRecordingDenied: options.onScreenRecordingDenied } : {}),

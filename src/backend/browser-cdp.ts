@@ -40,8 +40,8 @@ async function dispatchMouseClick(
 const ACTION_TIMEOUT_MS = 10_000;
 const WAIT_TIMEOUT_MS = 30_000;
 const MAX_RESULT_BYTES = 64 * 1024;
-const AUTOMATION_WORLD_NAME = "openbot-browser-automation";
-const DOCUMENT_ID_PROPERTY = "__openbot_browser_document_id__";
+const AUTOMATION_WORLD_NAME = "dani-dex-browser-automation";
+const DOCUMENT_ID_PROPERTY = "__danidex_browser_document_id__";
 const MAX_SNAPSHOT_FRAMES = 12;
 const MAX_SNAPSHOT_ELEMENTS = 200;
 const MAX_SNAPSHOT_CANDIDATES = MAX_SNAPSHOT_ELEMENTS * 2;

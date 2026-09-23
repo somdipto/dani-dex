@@ -28,7 +28,7 @@ type SkillSpec = {
   slug: string;
   category: SkillCategory;
   featured: boolean;
-} & ({ source: "openbot" } | { source: "openai" | "anthropic"; upstreamSkill: string });
+} & ({ source: "danidex" } | { source: "openai" | "anthropic"; upstreamSkill: string });
 
 interface AgentSpec {
   category: SkillCategory;
@@ -65,7 +65,7 @@ interface BuiltSkill {
   featured: boolean;
   license: "Apache-2.0" | "PolyForm-Noncommercial-1.0.0";
   source:
-    | { provider: "openbot"; url: string }
+    | { provider: "danidex"; url: string }
     | {
         provider: "openai" | "anthropic";
         upstreamSkill: string;
@@ -81,8 +81,8 @@ export async function buildProductionCatalog(outputArgument?: string): Promise<s
   validateOutputTarget(output);
   const version = catalogVersionNumber(spec.catalogVersion);
   const license = await readFile(join(sourceRoot, "licenses", "APACHE-2.0.txt"), "utf8");
-  const openbotLicense = await readFile(join(projectRoot, "LICENSE"), "utf8");
-  const staging = await mkdtemp(join(tmpdir(), "openbot-production-catalog-"));
+  const danidexLicense = await readFile(join(projectRoot, "LICENSE"), "utf8");
+  const staging = await mkdtemp(join(tmpdir(), "dani-dex-production-catalog-"));
 
   try {
     const skillOutput = join(staging, "skills");
@@ -93,12 +93,12 @@ export async function buildProductionCatalog(outputArgument?: string): Promise<s
       const markdown = await readFile(join(sourceRoot, "skills", skill.slug, "SKILL.md"), "utf8");
       validateSkillMarkdown(skill.slug, markdown);
       const notice =
-        skill.source === "openbot"
+        skill.source === "danidex"
           ? "Original Skill instructions by the Dani-Dex team. Licensed under PolyForm Noncommercial 1.0.0 (LICENSE.txt).\n"
           : createSkillNotice(skill, spec.sources[skill.source]);
       const archive = zipSync(
         {
-          "LICENSE.txt": [utf8Bytes(skill.source === "openbot" ? openbotLicense : license), { mtime: zipTimestamp }],
+          "LICENSE.txt": [utf8Bytes(skill.source === "danidex" ? danidexLicense : license), { mtime: zipTimestamp }],
           "NOTICE.txt": [utf8Bytes(notice), { mtime: zipTimestamp }],
           "SKILL.md": [utf8Bytes(markdown), { mtime: zipTimestamp }],
         },
@@ -128,11 +128,11 @@ export async function buildProductionCatalog(outputArgument?: string): Promise<s
         bundleSha256,
         files: preview.files,
         featured: skill.featured,
-        license: skill.source === "openbot" ? "PolyForm-Noncommercial-1.0.0" : "Apache-2.0",
+        license: skill.source === "danidex" ? "PolyForm-Noncommercial-1.0.0" : "Apache-2.0",
         source:
-          skill.source === "openbot"
+          skill.source === "danidex"
             ? {
-                provider: "openbot",
+                provider: "danidex",
                 url: `marketplace/production-catalog/skills/${skill.slug}/SKILL.md`,
               }
             : {
@@ -230,14 +230,14 @@ function buildAgent(agent: AgentSpec, skills: BuiltSkill[], version: number) {
     };
   });
   const snapshot = {
-    id: `openbot-curated-agent-${agent.slug}`,
+    id: `dani-dex-curated-agent-${agent.slug}`,
     slug: agent.slug,
     name: agent.name,
     title: agent.title,
     category: agent.category,
     featured: agent.featured,
     description: agent.description,
-    avatarSeed: `openbot-curated-agent-${agent.slug}`,
+    avatarSeed: `dani-dex-curated-agent-${agent.slug}`,
     avatarHue: agent.avatarHue,
     version,
     skills: selected,
@@ -246,7 +246,7 @@ function buildAgent(agent: AgentSpec, skills: BuiltSkill[], version: number) {
   const snapshotHash = sha256(JSON.stringify(snapshot));
   return {
     ...snapshot,
-    versionId: `openbot-curated-agent-version-${agent.slug}-v${version}-${snapshotHash.slice(0, 16)}`,
+    versionId: `dani-dex-curated-agent-version-${agent.slug}-v${version}-${snapshotHash.slice(0, 16)}`,
   };
 }
 
@@ -296,14 +296,14 @@ function parseSkillSpec(value: unknown): SkillSpec {
     !isDynamicRecord(value) ||
     !isString(value.slug) ||
     !isSkillCategory(value.category) ||
-    (value.source !== "openai" && value.source !== "anthropic" && value.source !== "openbot") ||
-    (value.source !== "openbot" && !isString(value.upstreamSkill)) ||
+    (value.source !== "openai" && value.source !== "anthropic" && value.source !== "danidex") ||
+    (value.source !== "danidex" && !isString(value.upstreamSkill)) ||
     (value.featured !== undefined && typeof value.featured !== "boolean")
   ) {
     throw new Error("Production catalog contains an invalid skill.");
   }
   const base = { slug: value.slug, category: value.category, featured: value.featured === true };
-  if (value.source === "openbot") return { ...base, source: "openbot" };
+  if (value.source === "danidex") return { ...base, source: "danidex" };
   if (!isString(value.upstreamSkill)) throw new Error("Upstream skill is required.");
   return { ...base, source: value.source, upstreamSkill: value.upstreamSkill };
 }
@@ -342,7 +342,7 @@ function createSkillNotice(skill: Extract<SkillSpec, { upstreamSkill: string }>,
 
 function createUpstreamNotices(spec: CatalogSpec, skills: BuiltSkill[]): string {
   const entries = skills.map((skill) =>
-    skill.source.provider === "openbot"
+    skill.source.provider === "danidex"
       ? `- **${skill.slug}** — original Dani-Dex team instructions; PolyForm Noncommercial 1.0.0.`
       : `- **${skill.slug}** — derivative of [${skill.source.upstreamSkill}](${skill.source.url}) from ${skill.source.provider} commit \`${skill.source.commit}\`.`,
   );
@@ -355,11 +355,11 @@ function upstreamSkillUrl(skill: Extract<SkillSpec, { upstreamSkill: string }>, 
 }
 
 function skillId(slug: string): string {
-  return `openbot-curated-skill-${slug}`;
+  return `dani-dex-curated-skill-${slug}`;
 }
 
 function skillVersionId(slug: string, version: number, bundleSha256: string): string {
-  return `openbot-curated-version-${slug}-v${version}-${bundleSha256.slice(0, 16)}`;
+  return `dani-dex-curated-version-${slug}-v${version}-${bundleSha256.slice(0, 16)}`;
 }
 
 function catalogVersionNumber(value: string): number {

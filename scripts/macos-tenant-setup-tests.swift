@@ -40,7 +40,7 @@ final class FakeTenantSetup: TenantAccountSetup {
 final class TenantSetupTests {
     func testMembershipCheckAcceptsNonmemberAndRejectsMissingUser() throws {
         try requireStandardUser("nobody")
-        expectFailure(try requireStandardUser("__openbot_nonexistent_account_test__"))
+        expectFailure(try requireStandardUser("__danidex_nonexistent_account_test__"))
     }
     func testInvalidOrDuplicateNamesNeverReachAccountOperations() {
         for names in [[], ["root", "root"], ["../other"], ["-admin"], ["a b"], ["name\n"], ["UPPER"], [String(repeating: "a", count: 32)]] {

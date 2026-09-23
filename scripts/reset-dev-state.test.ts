@@ -37,19 +37,19 @@ describe("reset dev state", () => {
       mkdir(productionPath, { recursive: true }),
     ]);
     await Promise.all([
-      writeFile(join(appPath, "openbot.db"), "database"),
-      writeFile(join(appPath, "openbot.db-wal"), "wal"),
-      writeFile(join(appPath, "openbot.db-shm"), "shm"),
-      writeFile(join(testClientPath, "openbot.db"), "test-client database"),
-      writeFile(join(legacyHostPath, "openbot.db"), "legacy host database"),
-      writeFile(join(productionPath, "openbot.db"), "production database"),
+      writeFile(join(appPath, "danidex.db"), "database"),
+      writeFile(join(appPath, "danidex.db-wal"), "wal"),
+      writeFile(join(appPath, "danidex.db-shm"), "shm"),
+      writeFile(join(testClientPath, "danidex.db"), "test-client database"),
+      writeFile(join(legacyHostPath, "danidex.db"), "legacy host database"),
+      writeFile(join(productionPath, "danidex.db"), "production database"),
     ]);
 
     await expect(resetDevelopmentState(appDataRoot)).resolves.toEqual([appPath, testClientPath, legacyHostPath]);
     await expect(stat(appPath)).rejects.toMatchObject({ code: "ENOENT" });
     await expect(stat(testClientPath)).rejects.toMatchObject({ code: "ENOENT" });
     await expect(stat(legacyHostPath)).rejects.toMatchObject({ code: "ENOENT" });
-    await expect(stat(join(productionPath, "openbot.db"))).resolves.toBeDefined();
+    await expect(stat(join(productionPath, "danidex.db"))).resolves.toBeDefined();
   });
 
   it("is idempotent when no development data exists", async () => {
@@ -92,7 +92,7 @@ describe("reset dev state", () => {
 });
 
 async function makeTemporaryDirectory(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "openbot-dev-reset-"));
+  const directory = await mkdtemp(join(tmpdir(), "dani-dex-dev-reset-"));
   temporaryDirectories.push(directory);
   return directory;
 }

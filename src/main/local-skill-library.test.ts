@@ -18,7 +18,7 @@ const network = vi.fn(async () => {
 const markdown = (body: string) =>
   `---\nname: Weekly summary\ndescription: Summarize the week.\nexample-prompt: Summarize this week.\n---\n${body}`;
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "openbot-local-skills-"));
+  root = await mkdtemp(join(tmpdir(), "dani-dex-local-skills-"));
   agents = ["writer", "reader"].map((id) => ({
     id,
     name: id,
@@ -174,7 +174,7 @@ describe("local skill library", () => {
       state: "installed",
     });
     await expect(
-      readFile(join(agents[0].workspacePath, ".openbot/skills-disabled/weekly-summary/old.md")),
+      readFile(join(agents[0].workspacePath, ".danidex/skills-disabled/weekly-summary/old.md")),
     ).rejects.toThrow();
   });
 
@@ -191,7 +191,7 @@ describe("local skill library", () => {
 
   it("does not overwrite a damaged installation record", async () => {
     const skill = await library.create("writer", "draft");
-    const directory = join(agents[0].workspacePath, ".openbot");
+    const directory = join(agents[0].workspacePath, ".danidex");
     await mkdir(directory);
     const path = join(directory, "skills-lock.json");
     await writeFile(path, "damaged record");

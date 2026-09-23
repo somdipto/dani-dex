@@ -11,7 +11,7 @@
 
 umask 077
 test "$APPLE_TEAM_ID" = ZTRDTUL87R
-host_signing_dir="$(mktemp -d "$RUNNER_TEMP/openbot-host-signing.XXXXXX")"
+host_signing_dir="$(mktemp -d "$RUNNER_TEMP/dani-dex-host-signing.XXXXXX")"
 export HOST_SIGNING_KEYCHAIN="$host_signing_dir/host.keychain-db"
 # `codesign --keychain` restricts which keychain is searched, it does not open one outside the
 # session search list. An electron-builder run replaces that list with its own temporary keychain

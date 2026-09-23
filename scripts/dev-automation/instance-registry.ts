@@ -43,7 +43,7 @@ export interface DevInstanceRecord {
 // process, so losing every record on reboot is correct, and it keeps automation
 // discovery away from the SQLite profiles.
 export function devInstanceRegistryDirectory(): string {
-  return join(tmpdir(), "openbot-dev-instances");
+  return join(tmpdir(), "dani-dex-dev-instances");
 }
 
 function recordPath(directory: string, record: Pick<DevInstanceRecord, "pid" | "service">): string {

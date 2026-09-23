@@ -304,7 +304,7 @@ export function ConversationComposer() {
               multiple
               hidden
               tabindex={-1}
-              data-openbot-attachment-picker="true"
+              data-dani-dex-attachment-picker="true"
             />
             <Input
               ref={setContextAttachmentPickerElement}
@@ -313,7 +313,7 @@ export function ConversationComposer() {
               multiple
               hidden
               tabindex={-1}
-              data-openbot-attachment-picker="true"
+              data-dani-dex-attachment-picker="true"
             />
             <DropdownMenu.Root
               open={showComposerActions()}

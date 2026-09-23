@@ -11,7 +11,7 @@ if (process.platform !== "darwin") {
   throw new Error("The local runtime smoke test currently supports macOS only.");
 }
 
-const stateDirectory = await mkdtemp(join(tmpdir(), "openbot-remote-runtime-smoke-"));
+const stateDirectory = await mkdtemp(join(tmpdir(), "dani-dex-remote-runtime-smoke-"));
 const runtimeRoot = resolve("build/remote-desktop-runtime/darwin/arm64");
 const runtime = new SunshineMoonlightRuntime({
   paths: {
@@ -22,7 +22,7 @@ const runtime = new SunshineMoonlightRuntime({
   stateDirectory,
   platform: "darwin",
   credentials: {
-    username: process.env.DANI_DEX_SMOKE_USERNAME ?? `openbot-${randomBytes(8).toString("hex")}`,
+    username: process.env.DANI_DEX_SMOKE_USERNAME ?? `dani-dex-${randomBytes(8).toString("hex")}`,
     password: process.env.DANI_DEX_SMOKE_PASSWORD ?? randomBytes(24).toString("base64url"),
   },
   getDisplays: () => [],

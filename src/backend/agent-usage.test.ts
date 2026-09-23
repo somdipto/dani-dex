@@ -34,7 +34,7 @@ const sample: UsageSample = {
   occurredAt: "2026-09-02T12:00:00Z",
 };
 async function database() {
-  const root = await mkdtemp(join(tmpdir(), "openbot-usage-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-usage-"));
   roots.push(root);
   const db = new DaniDexDatabase(root);
   await db.initialize();
@@ -102,7 +102,7 @@ describe("local agent usage", () => {
       turnId: "turn-a",
       tokenUsage: { total: { inputTokens: 300, cachedInputTokens: 200, outputTokens: 50, reasoningOutputTokens: 20 } },
     });
-    collectProviderUsage(db.usage, agent, { ...session, provider: "claude" }, "openbot/usage", {
+    collectProviderUsage(db.usage, agent, { ...session, provider: "claude" }, "danidex/usage", {
       turnId: "turn-a",
       counterId: "query-a",
       modelUsage: {
@@ -115,7 +115,7 @@ describe("local agent usage", () => {
         },
       },
     });
-    collectProviderUsage(db.usage, agent, { ...session, provider: "grok" }, "openbot/usage", {
+    collectProviderUsage(db.usage, agent, { ...session, provider: "grok" }, "danidex/usage", {
       turnId: "turn-a",
       usage: { inputTokens: 100, outputTokens: 40 },
     });

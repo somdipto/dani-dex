@@ -229,7 +229,7 @@ describe("remote event connections", () => {
     });
     // The v1 subprotocol has no runtime snapshot, so the client loads the agent state itself and has
     // to hold live events until it lands.
-    const { sockets } = stubEventSockets({ protocol: "openbot-events" });
+    const { sockets } = stubEventSockets({ protocol: "dani-dex-events" });
     const fixture = await createRemoteManager({ servers: [storedHttpsServer("fallback")] });
     const agentEvent = vi.fn();
     fixture.manager.on("agent", agentEvent);
@@ -273,7 +273,7 @@ describe("remote event connections", () => {
     fixture.manager.startEventConnections();
     await vi.waitFor(() => expect(sockets[0]?.sent).not.toHaveLength(0));
 
-    expect(sockets[0]?.protocols).toContain("openbot-team-v1");
+    expect(sockets[0]?.protocols).toContain("dani-dex-team-v1");
     // The host cannot push a runtime snapshot, so the scope has to say what this client understands
     // for the host to know which events are worth sending at all.
     expect(sockets[0]?.sent).toContainEqual({

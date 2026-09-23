@@ -76,7 +76,7 @@ export async function installRemoteDesktopRuntime(
   const archiveBytes = await download(fetchImpl, archiveAsset.browser_download_url);
   if (sha256(archiveBytes) !== artifact.sha256) throw new Error(`The ${target} runtime archive checksum is invalid.`);
 
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-runtime-install-"));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-runtime-install-"));
   try {
     const archive = join(temporaryRoot, artifact.asset);
     const extracted = join(temporaryRoot, "extracted");

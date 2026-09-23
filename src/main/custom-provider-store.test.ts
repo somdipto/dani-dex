@@ -11,8 +11,8 @@ let root = "";
 let path = "";
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), "openbot-custom-providers-"));
-  path = join(root, "nested", "openbot-custom-providers-v1.json");
+  root = await mkdtemp(join(tmpdir(), "dani-dex-custom-providers-"));
+  path = join(root, "nested", "dani-dex-custom-providers-v1.json");
 });
 
 afterEach(async () => {

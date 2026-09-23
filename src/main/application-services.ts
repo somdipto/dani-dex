@@ -135,26 +135,26 @@ import { WHISPER_MODEL_NAME, WHISPER_MODEL_URL } from "./voice-model-service";
 import { VoiceTranscriptionService } from "./voice-transcription-service";
 
 const logger = createDaniDexLogger("application-services");
-const SETUP_FILE = "openbot-setup-v2.json";
-const ANALYTICS_PREFERENCE_FILE = "openbot-analytics-preference-v1.json";
-const APPROVAL_AUTOMATION_FILE = "openbot-approval-automation-v2.json";
-const LEGACY_APPROVAL_AUTOMATION_FILE = "openbot-approval-automation-v1.json";
-const LANGUAGE_PREFERENCE_FILE = "openbot-language-preference-v1.json";
-const UPDATE_PREFERENCE_FILE = "openbot-update-preference-v1.json";
-const DYNAMIC_ISLAND_PREFERENCE_FILE = "openbot-dynamic-island-preference-v1.json";
-const BROWSER_STATE_FILE = "openbot-browser-state-v1.json";
-const SIDEBAR_LAYOUT_FILE = "openbot-sidebar-layout-v1.json";
-const TEAM_FILE = "openbot-team-server-v1.json";
+const SETUP_FILE = "dani-dex-setup-v2.json";
+const ANALYTICS_PREFERENCE_FILE = "dani-dex-analytics-preference-v1.json";
+const APPROVAL_AUTOMATION_FILE = "dani-dex-approval-automation-v2.json";
+const LEGACY_APPROVAL_AUTOMATION_FILE = "dani-dex-approval-automation-v1.json";
+const LANGUAGE_PREFERENCE_FILE = "dani-dex-language-preference-v1.json";
+const UPDATE_PREFERENCE_FILE = "dani-dex-update-preference-v1.json";
+const DYNAMIC_ISLAND_PREFERENCE_FILE = "dani-dex-dynamic-island-preference-v1.json";
+const BROWSER_STATE_FILE = "dani-dex-browser-state-v1.json";
+const SIDEBAR_LAYOUT_FILE = "dani-dex-sidebar-layout-v1.json";
+const TEAM_FILE = "dani-dex-team-server-v1.json";
 /** One host per account. The v1 file above stays as the last build without accounts left it. */
-const TEAM_FILE_V2 = "openbot-team-server-v2.json";
-const REMOTE_SERVERS_FILE = "openbot-remote-servers-v1.json";
-const CENTRAL_AUTH_FILE = "openbot-central-auth-v1.bin";
-const LEGACY_REMOTE_DESKTOP_CREDENTIAL_FILE = "openbot-remote-desktop-credential-v1.json";
-const REMOTE_DESKTOP_RUNTIME_SECRET_FILE = "openbot-remote-desktop-runtime-v1.json";
-const CUSTOM_PROVIDERS_FILE = "openbot-custom-providers-v1.json";
-const PROVIDER_CREDENTIAL_FILE = "openbot-provider-credentials-v1.json";
+const TEAM_FILE_V2 = "dani-dex-team-server-v2.json";
+const REMOTE_SERVERS_FILE = "dani-dex-remote-servers-v1.json";
+const CENTRAL_AUTH_FILE = "dani-dex-central-auth-v1.bin";
+const LEGACY_REMOTE_DESKTOP_CREDENTIAL_FILE = "dani-dex-remote-desktop-credential-v1.json";
+const REMOTE_DESKTOP_RUNTIME_SECRET_FILE = "dani-dex-remote-desktop-runtime-v1.json";
+const CUSTOM_PROVIDERS_FILE = "dani-dex-custom-providers-v1.json";
+const PROVIDER_CREDENTIAL_FILE = "dani-dex-provider-credentials-v1.json";
 /** The MCP sign-ins. Separate from the keys above: a key is typed by the user, a token is not. */
-const MCP_OAUTH_FILE = "openbot-mcp-oauth-v1.json";
+const MCP_OAUTH_FILE = "dani-dex-mcp-oauth-v1.json";
 
 /**
  * Where each service stops, as a position in the shutdown sequence rather than a position in the
@@ -168,7 +168,7 @@ const MCP_OAUTH_FILE = "openbot-mcp-oauth-v1.json";
  * the Electron binary - which is also the name macOS shows in the Privacy & Security panes, and the
  * reason a dev grant does not carry over to a packaged build.
  */
-const PACKAGED_BUNDLE_IDENTIFIER = "app.openbot.desktop";
+const PACKAGED_BUNDLE_IDENTIFIER = "app.danidex.desktop";
 const DEVELOPMENT_BUNDLE_IDENTIFIER = "com.github.Electron";
 
 const TEARDOWN_ORDER = {
@@ -367,24 +367,24 @@ export async function createApplicationServices({
   await store.initialize();
   const managedSkills = new ManagedSkillService(
     app.isPackaged
-      ? join(process.resourcesPath, "managed-skills", "openbot-site-hosting", "SKILL.md")
-      : resolve(__dirname, "../../resources/managed-skills/openbot-site-hosting/SKILL.md"),
+      ? join(process.resourcesPath, "managed-skills", "dani-dex-site-hosting", "SKILL.md")
+      : resolve(__dirname, "../../resources/managed-skills/dani-dex-site-hosting/SKILL.md"),
   );
   const skillCreator = new ManagedSkillService(
     app.isPackaged
-      ? join(process.resourcesPath, "managed-skills", "openbot-skill-creator", "SKILL.md")
-      : resolve(__dirname, "../../resources/managed-skills/openbot-skill-creator/SKILL.md"),
+      ? join(process.resourcesPath, "managed-skills", "dani-dex-skill-creator", "SKILL.md")
+      : resolve(__dirname, "../../resources/managed-skills/dani-dex-skill-creator/SKILL.md"),
     undefined,
     undefined,
-    "openbot-skill-creator",
+    "dani-dex-skill-creator",
   );
   const dataSkill = new ManagedSkillService(
     app.isPackaged
-      ? join(process.resourcesPath, "managed-skills", "openbot-data", "SKILL.md")
-      : resolve(__dirname, "../../resources/managed-skills/openbot-data/SKILL.md"),
+      ? join(process.resourcesPath, "managed-skills", "dani-dex-data", "SKILL.md")
+      : resolve(__dirname, "../../resources/managed-skills/dani-dex-data/SKILL.md"),
     undefined,
     undefined,
-    "openbot-data",
+    "dani-dex-data",
   );
   await managedSkills.syncAll(store.list());
   await skillCreator.syncAll(store.list());
@@ -527,7 +527,7 @@ export async function createApplicationServices({
   }
   /*
    * Where a returning grant lands. The loopback listener is the address RFC 8252 gives a native
-   * app and the only one some authorization servers accept - Canva refuses `openbot://mcp-auth`
+   * app and the only one some authorization servers accept - Canva refuses `dani-dex://mcp-auth`
    * on its own authorization page, where Dani-Dex cannot see the failure or explain it.
    *
    * A port that cannot be bound is not fatal: the deep link is still registered with the
@@ -548,7 +548,7 @@ export async function createApplicationServices({
     },
   }).catch((error: unknown) => {
     logger.warn(
-      "Dani-Dex could not listen for MCP sign-ins on this machine, so the openbot:// link is used instead. Servers that refuse it cannot be signed in to:",
+      "Dani-Dex could not listen for MCP sign-ins on this machine, so the dani-dex:// link is used instead. Servers that refuse it cannot be signed in to:",
       toLogValue(error),
     );
     return null;
@@ -1026,10 +1026,10 @@ export async function createApplicationServices({
   });
   teardown.push(TEARDOWN_ORDER.remoteDesktop, "remote desktop", () => remoteDesktop.stop());
   const voice = new VoiceTranscriptionService({
-    resourcesRoot: app.isPackaged ? join(process.resourcesPath, "whisper") : resolve(".openbot-build/whisper"),
+    resourcesRoot: app.isPackaged ? join(process.resourcesPath, "whisper") : resolve(".dani-dex-build/whisper"),
     modelPath: app.isPackaged
       ? join(app.getPath("userData"), "runtimes", "whisper", WHISPER_MODEL_NAME)
-      : resolve(".openbot-build/whisper/model", WHISPER_MODEL_NAME),
+      : resolve(".dani-dex-build/whisper/model", WHISPER_MODEL_NAME),
     modelDownloadUrl: WHISPER_MODEL_URL,
   });
   teardown.push(TEARDOWN_ORDER.voice, "voice transcription", () => voice.shutdown());
@@ -1083,7 +1083,7 @@ export async function createApplicationServices({
     logDirectory: join(app.getPath("userData"), "logs", "update"),
     // Squirrel.Mac only. The path is meaningless under a Linux or Windows home directory.
     shipItDirectory:
-      process.platform === "darwin" ? join(homedir(), "Library", "Caches", "app.openbot.desktop.ShipIt") : undefined,
+      process.platform === "darwin" ? join(homedir(), "Library", "Caches", "app.danidex.desktop.ShipIt") : undefined,
   });
   teardown.push(TEARDOWN_ORDER.updater, "the update service", () => updater.stop());
   const agentInitialization = new AgentInitializationGate(async () => {

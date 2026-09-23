@@ -17,7 +17,7 @@ const recorderResultSchema = z.object({
   error: z.string().nullable().optional(),
 });
 const recorderStartErrorSchema = z.object({
-  __openbotRecorderError: z.literal(true),
+  __danidexRecorderError: z.literal(true),
   name: z.string(),
   message: z.string(),
 });
@@ -82,10 +82,10 @@ export class BrowserRecorder {
       const startedAt = Date.now();
       const path = join(
         this.#downloadsRoot,
-        `openbot-browser-${new Date(startedAt).toISOString().replace(/[:.]/g, "-")}-${randomUUID().slice(0, 8)}.webm`,
+        `dani-dex-browser-${new Date(startedAt).toISOString().replace(/[:.]/g, "-")}-${randomUUID().slice(0, 8)}.webm`,
       );
       const file = await open(path, "wx", 0o600);
-      const recorderPartition = `openbot-recorder-${randomUUID()}`;
+      const recorderPartition = `dani-dex-recorder-${randomUUID()}`;
       let recorderWindow: BrowserWindow;
       try {
         recorderWindow = new BrowserWindow({
@@ -135,8 +135,8 @@ export class BrowserRecorder {
         void this.#discardSession(session, false);
       });
       recorderWindow.webContents.on("page-title-updated", (_event, title) => {
-        if (!title.startsWith("openbot-recorder:stopped:")) return;
-        const reason = title.slice("openbot-recorder:stopped:".length);
+        if (!title.startsWith("dani-dex-recorder:stopped:")) return;
+        const reason = title.slice("dani-dex-recorder:stopped:".length);
         session.stoppedReason = parseStoppedReason(reason);
         this.#onStateChanged(tabId, false);
         if (session.discarding || session.finalizing) return;
@@ -158,14 +158,14 @@ export class BrowserRecorder {
               return new Response("Unable to save recording chunk.", { status: 500 });
             }
           }
-          return new Response("<!doctype html><title>openbot-recorder:ready</title>", {
+          return new Response("<!doctype html><title>dani-dex-recorder:ready</title>", {
             headers: {
               "content-type": "text/html; charset=utf-8",
               "content-security-policy": "default-src 'none'; connect-src 'self'",
             },
           });
         });
-        await recorderWindow.loadURL("https://recorder.openbot.invalid/");
+        await recorderWindow.loadURL("https://recorder.danidex.invalid/");
         const sourceId = contents.getMediaSourceId(recorderWindow.webContents);
         const started = recorderStartErrorSchema.safeParse(
           await recorderWindow.webContents.executeJavaScript(startScript(sourceId, this.#maxRecordingMs), true),
@@ -345,7 +345,7 @@ function startScript(sourceId: string, maxRecordingMs: number): string {
       stream.getTracks().forEach(track => track.stop());
       const reason = state.error ? 'error' : (state.reason || 'requested');
       const result = { durationMs: Math.round(performance.now() - state.startedAt), reason, error: state.error };
-      document.title = 'openbot-recorder:stopped:' + reason;
+      document.title = 'dani-dex-recorder:stopped:' + reason;
       resolve(result);
     }, { once: true }));
     recorder.addEventListener('dataavailable', event => {
@@ -360,19 +360,19 @@ function startScript(sourceId: string, maxRecordingMs: number): string {
       });
       if (state.bytes >= STOP_BYTES) state.stop('size-limit');
     });
-    globalThis.__openbotRecorder = state;
+    globalThis.__danidexRecorder = state;
     stage = 'start'; recorder.start(1000);
     setTimeout(() => state.stop('duration-limit'), MAX_MS);
     return true;
     } catch (error) {
-      return { __openbotRecorderError: true, name: String(error?.name || 'Error'), message: stage + ': ' + String(error?.message || error) };
+      return { __danidexRecorderError: true, name: String(error?.name || 'Error'), message: stage + ': ' + String(error?.message || error) };
     }
   })()`;
 }
 
 function stopScript(reason: BrowserRecordingArtifact["stoppedReason"]): string {
   return `(async () => {
-    const state = globalThis.__openbotRecorder;
+    const state = globalThis.__danidexRecorder;
     if (!state) throw new Error('Recorder is not initialized.');
     state.stop(${JSON.stringify(reason)});
     return state.stopped;

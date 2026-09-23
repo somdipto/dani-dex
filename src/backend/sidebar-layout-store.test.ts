@@ -12,7 +12,7 @@ afterEach(async () => {
 });
 
 async function createStore(): Promise<{ root: string; path: string; store: SidebarLayoutStore }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-sidebar-layout-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-sidebar-layout-"));
   roots.push(root);
   const path = join(root, "sidebar-layout.json");
   const store = new SidebarLayoutStore(path);

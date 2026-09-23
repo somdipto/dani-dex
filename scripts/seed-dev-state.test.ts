@@ -63,7 +63,7 @@ describe("development state seed", () => {
       channelRoutines: 2,
       channelRoutineRuns: 2,
     });
-    await expect(readSetupState(join(profilePath, "openbot-setup-v2.json"))).resolves.toEqual({
+    await expect(readSetupState(join(profilePath, "dani-dex-setup-v2.json"))).resolves.toEqual({
       completed: true,
       preferredProvider: "codex",
       preferredModel: null,
@@ -133,7 +133,7 @@ describe("development state seed", () => {
       "invoice-2026-09.pdf",
       "launch-brief.md",
       "launch-metrics.csv",
-      "openbot-launch-concept.png",
+      "dani-dex-launch-concept.png",
       "operating-plan.xlsx",
       "provider-session.log",
       "standup-recap.mp3",
@@ -204,13 +204,13 @@ describe("development state seed", () => {
     }
 
     const team = new TeamStore(
-      join(profilePath, "openbot-team-server-v2.json"),
-      join(profilePath, "openbot-team-server-v1.json"),
+      join(profilePath, "dani-dex-team-server-v2.json"),
+      join(profilePath, "dani-dex-team-server-v1.json"),
     );
     await team.initialize();
     const members = team.listMembers();
     const owner = members.find((member) => member.role === "owner");
-    expect(owner?.email).toBe("openbot-dev-host@example.com");
+    expect(owner?.email).toBe("dani-dex-dev-host@example.com");
     expect(members).toHaveLength(4);
     expect(team.listInvites().filter((invite) => invite.usedAt === null)).toHaveLength(1);
     expect(team.listSessions()).toHaveLength(4);
@@ -348,14 +348,14 @@ describe("development state seed", () => {
       instanceId: "5197",
       agentModel: SEED_FALLBACK_AGENT,
     });
-    while (!(await readdir(appDataRoot)).some((entry) => entry.startsWith(".openbot-dev-seed-"))) {
+    while (!(await readdir(appDataRoot)).some((entry) => entry.startsWith(".dani-dex-dev-seed-"))) {
       await new Promise<void>((resolve) => setImmediate(resolve));
     }
     await writeSentinel(sentinel, "keep");
     await expect(seeding).resolves.toMatchObject({ targetProfile: profilePath });
 
     await expect(readFile(sentinel, "utf8")).resolves.toBe("keep");
-    expect((await readdir(appDataRoot)).filter((entry) => entry.startsWith(".openbot-dev-seed-"))).toEqual([]);
+    expect((await readdir(appDataRoot)).filter((entry) => entry.startsWith(".dani-dex-dev-seed-"))).toEqual([]);
     await expect(readdir(join(homeDirectory, "Dani-Dex", "Shared", "Transfers", "generated"))).resolves.toEqual([]);
   });
 
@@ -397,7 +397,7 @@ describe("development state seed", () => {
 });
 
 async function createRoots(): Promise<{ appDataRoot: string; homeDirectory: string }> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-dev-seed-test-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-dev-seed-test-"));
   temporaryDirectories.push(root);
   const appDataRoot = join(root, "app-data");
   const homeDirectory = join(root, "home");

@@ -73,7 +73,7 @@ export function isTeamProtocolV3OnlyRoute(method: string, path: string): boolean
     isQueueEditRoute(method, path)
   )
     return true;
-  const pathname = new URL(path, "http://openbot.invalid").pathname;
+  const pathname = new URL(path, "http://danidex.invalid").pathname;
   return (
     (method === "POST" && /^\/v1\/agents\/[^/]+\/duplicate$/u.test(pathname)) ||
     (method === "GET" && /^\/v1\/agents\/[^/]+\/usage$/u.test(pathname))

@@ -50,7 +50,7 @@ async function pinArtifact(fetchImpl: typeof fetch, target: CuaDriverTarget, ver
   const descriptor = CUA_DRIVER_TARGETS[target];
   const asset = `cua-driver-rs-${version}-${descriptor.assetSuffix}`;
   const archiveBytes = await download(fetchImpl, `${REPOSITORY}/releases/download/${tag}/${asset}`);
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-cua-driver-pin-"));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-cua-driver-pin-"));
   try {
     const archive = join(temporaryRoot, asset);
     const extracted = join(temporaryRoot, "extracted");

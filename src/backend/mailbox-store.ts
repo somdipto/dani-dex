@@ -1484,7 +1484,7 @@ function compareQueueOrder(left: StoredDelivery, right: StoredDelivery): number 
  * Mailbox state written before the bot-to-agent rename spells the product agent `bot`. The validators
  * below run *before* normalization and throw "Stored mailbox projection is invalid.", so an old
  * spelling does not degrade -- it blocks startup outright. Migration v13 rewrites the database, but a
- * user who restores `openbot.db` from their own copy of the file never runs it, and `mailbox.json`
+ * user who restores `danidex.db` from their own copy of the file never runs it, and `mailbox.json`
  * predates the database entirely. So every read tolerates both spellings and every write emits only
  * the new one. This renames keys and the `sender.kind` / `actor.kind` discriminant, never message text.
  */

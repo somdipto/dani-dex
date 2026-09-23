@@ -279,7 +279,7 @@ export class ThreadLifecycle {
         sandbox: "danger-full-access",
         developerInstructions: developerInstructions(agent, this.#store.sharedRoot, this.#memories.listFor(agent.id)),
         ephemeral: false,
-        serviceName: "openbot",
+        serviceName: "danidex",
         dynamicTools: [...BROWSER_DYNAMIC_TOOLS, DANI_DEX_DYNAMIC_TOOLS],
       },
       decodeThreadResponse,

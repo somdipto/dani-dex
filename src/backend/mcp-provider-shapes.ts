@@ -130,7 +130,7 @@ function unusableDrop(server: UnusableMcpServer): McpServerDrop {
  * Two jobs, both of which have to happen exactly once and before anything else reads the list:
  *
  * - A configuration that takes one of Dani-Dex's own bridge names is dropped. All four providers key
- *   MCP servers by name, so `openbot` here would displace the bridge the agent depends on.
+ *   MCP servers by name, so `danidex` here would displace the bridge the agent depends on.
  * - A stdio command is resolved to an absolute path. Claude and Codex spawn with no shell, so a bare
  *   `npx` fails in the provider even though a probe using the SDK's default environment succeeded.
  *   Resolving here, and probing the resolved value, keeps the panel's answer and the agent's answer

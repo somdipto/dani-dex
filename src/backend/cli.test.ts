@@ -192,7 +192,7 @@ describe("bundled Grok CLI resolution", () => {
   });
 
   it.runIf(process.platform !== "win32")("honors DANI_DEX_GROK_PATH and probes --version", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-grok-cli-test-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-grok-cli-test-"));
     temporaryPaths.push(root);
     const executable = join(root, "grok");
     await writeFile(executable, "#!/bin/sh\nprintf 'grok 1.0.5\\n'\n");
@@ -271,7 +271,7 @@ describe("Windows CLI fallback paths", () => {
   });
 
   it.runIf(process.platform === "win32")("reports a CLI that exists but cannot start", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-cli-test-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-cli-test-"));
     temporaryPaths.push(root);
     const appData = join(root, "User Name", "AppData", "Roaming");
     await mkdir(join(appData, "npm"), { recursive: true });
@@ -315,7 +315,7 @@ describe("CLI spawn target", () => {
 });
 
 async function createWindowsNpmShims(): Promise<void> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-cli-test-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-cli-test-"));
   temporaryPaths.push(root);
   const appData = join(root, "User Name", "AppData", "Roaming");
   const npmDirectory = join(appData, "npm");
@@ -328,7 +328,7 @@ async function createWindowsNpmShims(): Promise<void> {
 }
 
 async function createExecutable(name: string, versionOutput: string): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-cli-test-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-cli-test-"));
   temporaryPaths.push(root);
   const path = join(root, name);
   await writeFile(path, `#!/bin/sh\nprintf '%s\\n' '${versionOutput}'\n`);

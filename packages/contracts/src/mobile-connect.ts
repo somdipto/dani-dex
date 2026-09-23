@@ -1,4 +1,4 @@
-const MOBILE_CONNECT_PROTOCOL = "openbot:";
+const MOBILE_CONNECT_PROTOCOL = "dani-dex:";
 const MOBILE_CONNECT_HOST = "mobile-connect";
 
 export interface MobileConnectHostBinding {

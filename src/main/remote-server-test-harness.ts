@@ -156,7 +156,7 @@ export function fakeWebRtcTransport(hosts: readonly RemoteHostSummary[] = []): T
     getPrincipalId: () => "user-1",
     controlPlaneUrl: "https://api.example.test",
     downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
-    transferDirectory: join(tmpdir(), "openbot-remote-harness-transfers"),
+    transferDirectory: join(tmpdir(), "dani-dex-remote-harness-transfers"),
   });
 }
 
@@ -184,7 +184,7 @@ const openFixtures: RemoteManagerFixture[] = [];
 
 export async function createRemoteManager(options: RemoteManagerOptions = {}): Promise<RemoteManagerFixture> {
   const servers = options.servers ?? [storedHttpsServer("server-1")];
-  const directory = await mkdtemp(join(tmpdir(), "openbot-remote-servers-"));
+  const directory = await mkdtemp(join(tmpdir(), "dani-dex-remote-servers-"));
   const statePath = join(directory, "servers.json");
   await writeFile(
     statePath,

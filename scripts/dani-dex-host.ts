@@ -6,7 +6,7 @@ async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2);
   if (!command || command === "--help" || command === "help") {
     process.stdout.write(
-      "Usage: sudo openbot-host setup [--dry-run] --create-user <name> | --tenant <name> ...\n       sudo openbot-host verify\n",
+      "Usage: sudo dani-dex-host setup [--dry-run] --create-user <name> | --tenant <name> ...\n       sudo dani-dex-host verify\n",
     );
     return;
   }

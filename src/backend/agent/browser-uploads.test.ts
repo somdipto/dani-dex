@@ -104,7 +104,7 @@ async function upload(
       threadId,
       turnId: "turn-upload",
       callId: id,
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool: "upload_files",
       arguments: {
         tabId: "tab",
@@ -123,7 +123,7 @@ const missing = (path: string) =>
     () => true,
   );
 
-describe.sequential("BrowserUploads: staging files for openbot_browser.upload_files", () => {
+describe.sequential("BrowserUploads: staging files for danidex_browser.upload_files", () => {
   it("gives the page a private copy of a file from outside the agent's workspace", async () => {
     const { browser, staged } = uploadBrowser();
     const { client, threadId } = await startService(browser);
@@ -264,7 +264,7 @@ describe.sequential("BrowserUploads: staging files for openbot_browser.upload_fi
       threadId: "thread-chief",
       turnId: "turn-upload",
       callId: "call-upload",
-      namespace: "openbot_browser",
+      namespace: "danidex_browser",
       tool: "upload_files",
       arguments: { tabId: "tab", target: { kind: "css", selector: "input" }, paths: [source] },
     };

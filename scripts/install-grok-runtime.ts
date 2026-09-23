@@ -58,7 +58,7 @@ export async function installGrokRuntime(
   verifyChecksum(license, lock.grok.licenseSha256, "Grok license");
   verifyChecksum(notices, lock.grok.noticesSha256, "Grok third-party notices");
 
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-grok-install-"));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-grok-install-"));
   try {
     const staged = join(temporaryRoot, "runtime");
     await mkdir(join(staged, "bin"), { recursive: true });

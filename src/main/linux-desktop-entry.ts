@@ -6,7 +6,7 @@ import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 const logger = createDaniDexLogger("linux-desktop-entry");
 
 /**
- * The file name has to stay `openbot.desktop`: it is `desktopName` in package.json, which is what
+ * The file name has to stay `danidex.desktop`: it is `desktopName` in package.json, which is what
  * Electron uses as the application id it hands to `xdg-settings`, and what electron-builder writes
  * into `StartupWMClass` so a window groups with this entry.
  */

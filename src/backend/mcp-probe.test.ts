@@ -68,7 +68,7 @@ function config(overrides: Partial<McpServerConfig>): McpServerConfig {
 }
 
 async function scriptConfig(source: string, overrides: Partial<McpServerConfig> = {}): Promise<McpServerConfig> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-mcp-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-mcp-"));
   roots.push(root);
   const script = join(root, "server.mjs");
   await writeFile(script, source, "utf8");
@@ -96,9 +96,9 @@ describe("testMcpServer", () => {
   it("finds a command on the PATH the configuration carries", async () => {
     const config = await scriptConfig(FAKE_SERVER);
     const [script] = config.args;
-    const root = await mkdtemp(join(tmpdir(), "openbot-mcp-bin-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-mcp-bin-"));
     roots.push(root);
-    const launcher = join(root, "openbot-fake-mcp");
+    const launcher = join(root, "dani-dex-fake-mcp");
     await writeFile(
       launcher,
       `#!/bin/sh\nexec ${JSON.stringify(process.execPath)} ${JSON.stringify(script)}\n`,
@@ -107,7 +107,7 @@ describe("testMcpServer", () => {
     await chmod(launcher, 0o755);
 
     expect(
-      await testMcpServer({ ...config, command: "openbot-fake-mcp", args: [], env: [{ key: "PATH", value: root }] }),
+      await testMcpServer({ ...config, command: "dani-dex-fake-mcp", args: [], env: [{ key: "PATH", value: root }] }),
     ).toEqual({ toolCount: 2, error: null });
   });
 
@@ -129,16 +129,16 @@ describe("testMcpServer", () => {
   });
 
   it("names the command that this machine does not have", async () => {
-    expect(await testMcpServer(config({ command: "openbot-no-such-command" }))).toEqual({
+    expect(await testMcpServer(config({ command: "dani-dex-no-such-command" }))).toEqual({
       toolCount: 0,
-      error: "Command not found: openbot-no-such-command",
+      error: "Command not found: dani-dex-no-such-command",
     });
   });
 
   // The IPC decoder and the remote codec both reject a longer text, so an unbounded failure would
   // reach the panel as "Invalid MCP server response." instead of the failure the user asked about.
   it("holds a long failure to the length the panel can be given", async () => {
-    const result = await testMcpServer(config({ command: `openbot-${"long".repeat(1_000)}` }));
+    const result = await testMcpServer(config({ command: `dani-dex-${"long".repeat(1_000)}` }));
     expect(result.toolCount).toBe(0);
     expect(result.error).toMatch(/^Command not found: /u);
     expect(decodeMcpTestResult(result)).toBe(result);
@@ -147,7 +147,7 @@ describe("testMcpServer", () => {
   // The lookup of a bare command name needs a login shell, and the name is written by the user -
   // and by a remote administrator of this machine's host.
   it("looks up a command name that holds a shell substitution as a name", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-mcp-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-mcp-"));
     roots.push(root);
     const mark = join(root, "ran");
     expect(await testMcpServer(config({ command: `node$(touch ${mark})` }))).toEqual({

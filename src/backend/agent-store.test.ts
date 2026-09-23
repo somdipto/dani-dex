@@ -29,7 +29,7 @@ afterEach(async () => {
 
 describe("AgentStore", () => {
   it("starts a new user with no agents", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
 
@@ -39,7 +39,7 @@ describe("AgentStore", () => {
   });
 
   it("creates separate agent workspaces and a shared directory", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -60,7 +60,7 @@ describe("AgentStore", () => {
   });
 
   it("moves a workspace left behind in the pre-rename directory without overwriting the new one", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -78,7 +78,7 @@ describe("AgentStore", () => {
     const legacyWorkspace = join(legacyRoot, `bot-${agent.id.slice("agent-".length)}`);
     await mkdir(legacyRoot, { recursive: true });
     await rename(agent.workspacePath, legacyWorkspace);
-    await mkdir(`${legacyWorkspace}.openbot-stage`, { recursive: true });
+    await mkdir(`${legacyWorkspace}.dani-dex-stage`, { recursive: true });
     // An id the application never minted keeps its spelling across the rename, so migration v13 leaves its
     // stored path alone as well: after the upgrade this agent is still *recorded* under `Bots/chief`, and
     // that is the state the move has to start from. A reconciler that reads the destination out of the
@@ -154,7 +154,7 @@ describe("AgentStore", () => {
   });
 
   it("persists stable Dani-Dex thread ids in SQLite", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const store = new AgentStore(userData, join(root, "home"));
@@ -166,7 +166,7 @@ describe("AgentStore", () => {
     // so reading a chat whose roster row is gone rebuilds the agent with no thread and arrives here --
     // and a random id would file it against an empty thread while the user's own thread, with every
     // message in it, stays on disk addressable by nothing.
-    expect(threadId).toBe("openbot-thread-chief");
+    expect(threadId).toBe("dani-dex-thread-chief");
     const restored = new AgentStore(userData, join(root, "home"));
     await restored.initialize();
     expect(restored.list().find((agent) => agent.id === "chief")?.threadId).toBe(threadId);
@@ -181,7 +181,7 @@ describe("AgentStore", () => {
   // roster with no join, and nothing enumerates threads -- so the user sees an empty chat while every
   // message is still on disk. Startup gives the thread back rather than leaving it addressable by nothing.
   it("gives back a thread its roster row stopped naming", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -216,14 +216,14 @@ describe("AgentStore", () => {
   });
 
   it("does not reclaim a channel execution thread as an agent chat", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
     const store = new AgentStore(userData, home);
     await store.initialize();
     const agent = await store.getOrCreate("chief");
-    const channelThreadId = "openbot-thread-channel-chief";
+    const channelThreadId = "dani-dex-thread-channel-chief";
     const now = "2026-09-01T12:00:00.000Z";
     store.database.connection
       .prepare("INSERT INTO projection_channels(channel_id, channel_json) VALUES (?, ?)")
@@ -247,7 +247,7 @@ describe("AgentStore", () => {
   });
 
   it("rebuilds a roster its projection lost from the event log", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -311,7 +311,7 @@ describe("AgentStore", () => {
   });
 
   it("persists marketplace installation versions", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -339,7 +339,7 @@ describe("AgentStore", () => {
   });
 
   it("migrates version 1 avatars to stable id seeds", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const statePath = join(userData, "bots.json");
@@ -375,11 +375,11 @@ describe("AgentStore", () => {
       avatarSeed: "chief",
       avatarHue: null,
     });
-    expect(restored.list()[0]?.threadId).toBe("openbot-thread-chief");
+    expect(restored.list()[0]?.threadId).toBe("dani-dex-thread-chief");
     // Imported and kept, but not resumable: the tool parameters were renamed in the same upgrade, and this
     // session arrives after the migration that retires every other one for exactly that reason.
     expect(restored.activeProviderSession("chief")).toBeNull();
-    expect(restored.database.listProviderSessions("openbot-thread-chief")).toMatchObject([
+    expect(restored.database.listProviderSessions("dani-dex-thread-chief")).toMatchObject([
       { externalSessionId: "native-codex-thread", state: "inactive" },
     ]);
     await expect(readFile(statePath, "utf8")).resolves.toContain('"version": 1');
@@ -387,7 +387,7 @@ describe("AgentStore", () => {
   });
 
   it("imports a version 2 agent file without changing the legacy source", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const statePath = join(userData, "bots.json");
@@ -425,7 +425,7 @@ describe("AgentStore", () => {
   });
 
   it("rejects old role-based profiles without overwriting the source", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-old-role-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-old-role-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const statePath = join(userData, "bots.json");
@@ -447,7 +447,7 @@ describe("AgentStore", () => {
   });
 
   it("resets a stored profile field it cannot read and keeps the agent, its thread and its workspace", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-unreadable-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-unreadable-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -507,7 +507,7 @@ describe("AgentStore", () => {
   });
 
   it("refuses to start on a stored profile field no default can stand in for", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-unusable-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-unusable-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -534,7 +534,7 @@ describe("AgentStore", () => {
   });
 
   it("refuses to store a profile value the next launch could not read", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-rejects-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-rejects-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const store = new AgentStore(userData, join(root, "home"));
@@ -567,7 +567,7 @@ describe("AgentStore", () => {
   it.each(["", "   ", AGENT_PROFILE_INPUT.description])(
     "creates unique agents with description %j at the top of the persistent list",
     async (description) => {
-      const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+      const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
       temporaryRoots.push(root);
       const userData = join(root, "user-data");
       const store = new AgentStore(userData, join(root, "home"));
@@ -610,7 +610,7 @@ describe("AgentStore", () => {
   );
 
   it("duplicates the profile, avatar, workspace, and symbolic links into an independent agent", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -695,7 +695,7 @@ describe("AgentStore", () => {
   });
 
   it("removes a durable pending duplicate during restart recovery", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-recovery-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-recovery-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -716,7 +716,7 @@ describe("AgentStore", () => {
   });
 
   it("removes a pending duplicate a pre-rename release left half-copied", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-recovery-legacy-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-recovery-legacy-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -750,7 +750,7 @@ describe("AgentStore", () => {
   });
 
   it("keeps a committed duplicate whose pending marker a pre-rename release wrote", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-recovery-legacy-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-recovery-legacy-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -781,7 +781,7 @@ describe("AgentStore", () => {
   });
 
   it("returns the committed duplicate for the same operation after restart", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-idempotency-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-idempotency-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -816,7 +816,7 @@ describe("AgentStore", () => {
   });
 
   it("removes a partial duplicate when profile persistence fails", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-rollback-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-rollback-"));
     temporaryRoots.push(root);
     const home = join(root, "home");
     const store = new AgentStore(join(root, "user-data"), home);
@@ -835,7 +835,7 @@ describe("AgentStore", () => {
   });
 
   it("duplicates an agent whose preview moves while its workspace is being copied", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-preview-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-preview-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
@@ -856,7 +856,7 @@ describe("AgentStore", () => {
   });
 
   it("removes the copy when a duplicated profile field changes while the workspace is being copied", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-profile-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-profile-"));
     temporaryRoots.push(root);
     const home = join(root, "home");
     const store = new AgentStore(join(root, "user-data"), home);
@@ -875,7 +875,7 @@ describe("AgentStore", () => {
   });
 
   it("rejects duplication after the host reaches its agent limit", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-duplicate-limit-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-limit-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
@@ -889,7 +889,7 @@ describe("AgentStore", () => {
   });
 
   it("validates the complete Agent profile before it writes data", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
@@ -903,7 +903,7 @@ describe("AgentStore", () => {
   });
 
   it("rejects path traversal agent ids", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "data"), join(root, "home"));
     await store.initialize();
@@ -912,7 +912,7 @@ describe("AgentStore", () => {
   });
 
   it("fails closed instead of overwriting agent state from a newer version", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const statePath = join(userData, "bots.json");
@@ -926,7 +926,7 @@ describe("AgentStore", () => {
   });
 
   it("persists editable agent settings", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const store = new AgentStore(userData, join(root, "home"));
@@ -959,7 +959,7 @@ describe("AgentStore", () => {
   });
 
   it("stores, restores, and removes managed agent avatar files", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const store = new AgentStore(userData, join(root, "home"));
@@ -968,7 +968,7 @@ describe("AgentStore", () => {
     const image = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
     const updated = await store.setAvatar("chief", { mimeType: "image/png", bytes: image });
-    expect(updated.avatarUrl).toMatch(/^openbot-avatar:\/\/agent\/chief\?v=/u);
+    expect(updated.avatarUrl).toMatch(/^dani-dex-avatar:\/\/agent\/chief\?v=/u);
     const storedAvatar = store.resolveAvatar("chief");
     expect(storedAvatar?.mimeType).toBe("image/png");
     await expect(readFile(storedAvatar?.path ?? "")).resolves.toEqual(Buffer.from(image));
@@ -983,7 +983,7 @@ describe("AgentStore", () => {
   });
 
   it("restores the previous avatar when SQLite persistence fails", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
@@ -1010,7 +1010,7 @@ describe("AgentStore", () => {
   });
 
   it("rejects agent fields above their limits without truncating stored values", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
@@ -1032,7 +1032,7 @@ describe("AgentStore", () => {
   });
 
   it("keeps the Dani-Dex thread when the model changes provider", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
@@ -1047,7 +1047,7 @@ describe("AgentStore", () => {
   });
 
   it("keeps provider sessions private and creates a new session when returning", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
@@ -1073,7 +1073,7 @@ describe("AgentStore", () => {
   });
 
   it("retains the agent across reload after partial file deletion and permits retry", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
@@ -1100,7 +1100,7 @@ describe("AgentStore", () => {
   });
 
   it("keeps the in-memory roster when the deletion transaction fails", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
@@ -1115,7 +1115,7 @@ describe("AgentStore", () => {
   });
 
   it("deletes agents persistently without reseeding examples", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-store-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");

@@ -67,7 +67,7 @@ export const en = {
   "settings.externalLinks.description": "Choose where links from conversations open.",
   // The two link targets. The saved value stays in English; only the label is translated.
   "settings.externalLinks.defaultBrowser": "Default browser",
-  "settings.externalLinks.openbot": "Dani-Dex",
+  "settings.externalLinks.danidex": "Dani-Dex",
   "settings.autonomy.title": "Agent autonomy",
   "settings.turbo.title": "Turbo mode",
   "settings.turbo.description":

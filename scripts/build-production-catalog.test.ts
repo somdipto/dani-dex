@@ -86,7 +86,7 @@ describe("production marketplace catalog", () => {
 });
 
 async function temporaryRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-production-catalog-test-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-production-catalog-test-"));
   temporaryRoots.push(root);
   return root;
 }
@@ -123,7 +123,7 @@ function parseGeneratedSkill(value: unknown): GeneratedSkill {
   ) {
     throw new Error("Generated catalog contains an invalid skill.");
   }
-  expect(value.versionId).toMatch(/^openbot-curated-version-.+-v2-[a-f0-9]{16}$/u);
+  expect(value.versionId).toMatch(/^dani-dex-curated-version-.+-v2-[a-f0-9]{16}$/u);
   return {
     id: value.id,
     versionId: value.versionId,

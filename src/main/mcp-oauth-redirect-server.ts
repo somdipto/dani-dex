@@ -2,7 +2,7 @@
  * Where an MCP authorization server sends its grant back: a listener on this machine's loopback
  * address, and nothing that leaves it.
  *
- * `openbot://mcp-auth` was the address before this. It is the shorter path - the operating system
+ * `dani-dex://mcp-auth` was the address before this. It is the shorter path - the operating system
  * hands the link straight to the running app - but it is not an address every authorization server
  * accepts. Canva registers a custom scheme without complaint and then refuses it at `/authorize`
  * with `Invalid redirect URI.`, which leaves the user on an error page with nothing to act on. The

@@ -1,5 +1,5 @@
 /**
- * What an `openbot://` or `https://openbot.run/...` link means.
+ * What an `dani-dex://` or `https://openbot.run/...` link means.
  *
  * The scheme carries more than one kind of link now, so the decision of which kind a URL is has one
  * home rather than one `try` per entry point. `src/main/index.ts` has four ways a link arrives -
@@ -56,7 +56,7 @@ export function parseDeepLink(value: string, options: InviteLinkOptions = {}): D
 }
 
 /**
- * The return leg of an MCP sign-in: `openbot://mcp-auth?code=…&state=…`.
+ * The return leg of an MCP sign-in: `dani-dex://mcp-auth?code=…&state=…`.
  *
  * Both halves are required and neither is inspected here. `state` is what the waiting sign-in is
  * keyed by, so a link this run did not start finds nothing and does nothing - which is the check
@@ -71,7 +71,7 @@ function parseMcpAuthUrl(value: string): DeepLink | null {
   } catch {
     return null;
   }
-  if ((url.protocol !== "dani-dex:" && url.protocol !== "openbot:") || url.hostname !== MCP_OAUTH_HOST) return null;
+  if ((url.protocol !== "dani-dex:" && url.protocol !== "dani-dex:") || url.hostname !== MCP_OAUTH_HOST) return null;
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   if (!code || !state) return null;

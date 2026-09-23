@@ -101,7 +101,7 @@ describe("main window state", () => {
   });
 
   it("persists valid bounds and ignores malformed state", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-main-window-state-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-main-window-state-"));
     const path = join(root, "state.json");
     const bounds = { x: 25, y: 30, width: 1200, height: 820 };
 
@@ -164,7 +164,7 @@ describe("main window bounds recorder", () => {
   });
 
   it("reopens the window where the last one was left", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-main-window-recorder-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-main-window-recorder-"));
     const statePath = join(root, "state.json");
     // Wired to the real file the way the main process wires it, so this covers the round trip and
     // not just the recorder's half of it.

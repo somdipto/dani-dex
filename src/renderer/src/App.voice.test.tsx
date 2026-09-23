@@ -2,11 +2,11 @@ import type { VoiceModelStatus } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { expect, it, vi } from "vitest";
 import { App } from "./App";
-import { emitAgentEvent, installOpenbotStub, installVoiceRecordingMocks, testServer } from "./app-test-harness";
+import { emitAgentEvent, installDanidexStub, installVoiceRecordingMocks, testServer } from "./app-test-harness";
 
 describe("Dani-Dex connected desktop shell", () => {
   beforeEach(() => {
-    installOpenbotStub();
+    installDanidexStub();
   });
 
   it("explains blocked microphone access, then records and offers the send arrow", async () => {

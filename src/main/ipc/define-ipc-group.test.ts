@@ -17,7 +17,7 @@ vi.mock("electron", () => ({
   },
 }));
 
-const TRUSTED_EVENT = { senderFrame: { url: "openbot-app://app/index.html" } };
+const TRUSTED_EVENT = { senderFrame: { url: "dani-dex-app://app/index.html" } };
 const UNTRUSTED_EVENT = { senderFrame: { url: "https://evil.example/index.html" } };
 
 // `voice` is the group under test because it is the smallest with all three shapes: a request that

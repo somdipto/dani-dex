@@ -393,7 +393,7 @@ export function installVoiceRecordingMocks(): void {
   });
 }
 
-export function installOpenbotStub(): void {
+export function installDanidexStub(): void {
   for (const bridge of Object.values(eventBridges)) bridge.reset();
   trackAnalytics.mockClear();
   installAnalyticsSpies();
@@ -698,7 +698,7 @@ export function installOpenbotStub(): void {
         })),
         setAvatar: vi.fn().mockImplementation(async (input) => ({
           ...AGENTS.find((agent) => agent.id === input.agentId),
-          avatarUrl: input.image ? "openbot-avatar://agent/chief?v=test" : null,
+          avatarUrl: input.image ? "dani-dex-avatar://agent/chief?v=test" : null,
         })),
         deleteAgent: vi.fn().mockResolvedValue(undefined),
         readConversation: vi.fn().mockImplementation(async (agentId) => ({
@@ -1051,6 +1051,6 @@ export function attachment(id: string, name: string, kind: "image" | "pdf") {
     kind: kind === "image" ? ("image" as const) : ("file" as const),
     mimeType: kind === "image" ? "image/png" : "application/pdf",
     previewKind: kind,
-    previewUrl: `openbot-attachment://file/${id}`,
+    previewUrl: `dani-dex-attachment://file/${id}`,
   };
 }

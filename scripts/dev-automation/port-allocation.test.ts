@@ -39,7 +39,7 @@ describe("withDevPortAllocation", () => {
   let directory = "";
 
   beforeEach(() => {
-    directory = mkdtempSync(join(tmpdir(), "openbot-port-allocation-"));
+    directory = mkdtempSync(join(tmpdir(), "dani-dex-port-allocation-"));
   });
 
   afterEach(() => {

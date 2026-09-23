@@ -3,7 +3,7 @@ import { createEffect, createMemo, createSignal, createStore, For, onSettled, Sh
 import { PanelResizer, readPanelWidth, savePanelWidth } from "../../components/PanelResizer";
 import { Button, ChevronRight, Maximize2, Monitor, Plus, Skeleton, X } from "../../components/ui";
 
-const BROWSER_PANEL_STORAGE_KEY = "openbot:browser-preview-panel-width";
+const BROWSER_PANEL_STORAGE_KEY = "danidex:browser-preview-panel-width";
 const BROWSER_PANEL_MIN = 220;
 const BROWSER_PANEL_MAX = 1600;
 

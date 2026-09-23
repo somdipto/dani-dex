@@ -13,7 +13,7 @@ const uid = process.getuid?.() ?? 501;
 
 describe.skipIf(process.platform === "win32")("application staging permissions", () => {
   it("stages under the administrator-writable Applications parent but rejects unsafe staging paths", async () => {
-    const stage = "/Applications/.openbot-host-stage";
+    const stage = "/Applications/.dani-dex-host-stage";
     const metadata = { uid: 0, mode: 0o40700, directory: true, acl: "" };
     vi.resetModules();
     vi.doMock("node:fs/promises", async (importOriginal) => ({

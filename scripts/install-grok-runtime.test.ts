@@ -20,7 +20,7 @@ describe.runIf(process.platform !== "win32")("bundled Grok installer", () => {
     ["darwin-arm64", "mac/arm64"],
     ["linux-x64", "linux/x64"],
   ] as const)("installs a verified %s binary into %s and reuses the current runtime", async (target, directory) => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-grok-runtime-test-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-grok-runtime-test-"));
     temporaryPaths.push(root);
     const output = join(root, "output");
     const executable = Buffer.from("#!/bin/sh\nprintf 'grok 1.0.22\\n'\n");
@@ -49,7 +49,7 @@ describe.runIf(process.platform !== "win32")("bundled Grok installer", () => {
   });
 
   it("rejects a binary with the wrong checksum", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-grok-runtime-test-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-grok-runtime-test-"));
     temporaryPaths.push(root);
     const lock = structuredClone(await loadAgentRuntimeLock());
     const fetchImpl = async () => new Response("unexpected", { status: 200 });

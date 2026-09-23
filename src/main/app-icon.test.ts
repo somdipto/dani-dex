@@ -27,16 +27,16 @@ describe("app icon variant", () => {
         platform: "win32",
         isPackaged: false,
         resourcesPath: "/Applications/Dani-Dex.app/Contents/Resources",
-        sourceRoot: "/workspace/openbot",
+        sourceRoot: "/workspace/danidex",
       }),
-    ).toBe("/workspace/openbot/build/icon-dev.png");
+    ).toBe("/workspace/danidex/build/icon-dev.png");
     expect(
       resolveAppIconPath({
         variant: "production",
         platform: "darwin",
         isPackaged: true,
         resourcesPath: "/Applications/Dani-Dex.app/Contents/Resources",
-        sourceRoot: "/workspace/openbot",
+        sourceRoot: "/workspace/danidex",
       }),
     ).toBe("/Applications/Dani-Dex.app/Contents/Resources/icons/icon-production-macos-safe-area.png");
   });

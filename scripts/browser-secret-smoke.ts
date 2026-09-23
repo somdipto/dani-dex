@@ -10,7 +10,7 @@ export async function runSecretHandoffScenario(browser: BrowserHost, localOrigin
   const protocol = seedContents.session.protocol;
   await protocol.handle("https", (request) => {
     const url = new URL(request.url);
-    if (url.hostname !== "authentication.openbot.test") return new Response("Not found", { status: 404 });
+    if (url.hostname !== "authentication.danidex.test") return new Response("Not found", { status: 404 });
     const html =
       url.pathname === "/complete"
         ? "<h1>Signed in</h1>"
@@ -34,9 +34,9 @@ export async function runSecretHandoffScenario(browser: BrowserHost, localOrigin
       ["password", "component"],
       ["password", "native-submit"],
     ] as const) {
-      const tab = await browser.open(`https://authentication.openbot.test/${path}`, "secret-thread", "secret-agent");
+      const tab = await browser.open(`https://authentication.danidex.test/${path}`, "secret-thread", "secret-agent");
       const params: DynamicToolCallParams = {
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "submit_secret",
         threadId: "secret-thread",
         ownerAgentId: "secret-agent",
@@ -75,10 +75,10 @@ export async function runSecretHandoffScenario(browser: BrowserHost, localOrigin
         await browser.close(tab.id);
       }
     }
-    const staleTab = await browser.open("https://authentication.openbot.test/login", "secret-thread", "secret-agent");
+    const staleTab = await browser.open("https://authentication.danidex.test/login", "secret-thread", "secret-agent");
     try {
       const handoff = await browser.prepareSecret({
-        namespace: "openbot_browser",
+        namespace: "danidex_browser",
         tool: "submit_secret",
         threadId: "secret-thread",
         ownerAgentId: "secret-agent",

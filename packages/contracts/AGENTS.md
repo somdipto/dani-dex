@@ -59,7 +59,7 @@ invokes exactly the request endpoints and subscribes to exactly the event ones.
 The mock needs no test. Both it and the preload bridge are annotated `: DaniDexDesktopApi`, so a
 missing method is `TS2741` and a method the interface never declared is `TS2353` — the type checker
 already covers both directions, and under Tests rule 3 that is the end of it. What it cannot cover is
-the *behaviour*: `mock-openbot.ts` is a product surface, not a test double, and it is what the preview
+the *behaviour*: `mock-danidex.ts` is a product surface, not a test double, and it is what the preview
 and every Storybook story exercise. A method that satisfies the type by returning an empty array is a
 story that silently shows nothing.
 

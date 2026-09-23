@@ -952,7 +952,7 @@ export function createRemoteTeamPeer(actions: ActionsRef) {
   }
 
   function channelLabel(kind: ChannelKind): string {
-    if (kind === "desktop") return "openbot.remote-desktop.signal.v1";
+    if (kind === "desktop") return "danidex.remote-desktop.signal.v1";
     return TEAM_PROTOCOL_V2_CHANNELS[kind];
   }
 
@@ -960,7 +960,7 @@ export function createRemoteTeamPeer(actions: ActionsRef) {
     if (label === TEAM_PROTOCOL_V2_CHANNELS.rpc) return "rpc";
     if (label === TEAM_PROTOCOL_V2_CHANNELS.events) return "events";
     if (label === TEAM_PROTOCOL_V2_CHANNELS.files) return "files";
-    if (label === "openbot.remote-desktop.signal.v1") return "desktop";
+    if (label === "danidex.remote-desktop.signal.v1") return "desktop";
     return null;
   }
 

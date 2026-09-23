@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const TABLE = join(ROOT, "tools/vitest/test-durations.json");
 
-const report = join(mkdtempSync(join(tmpdir(), "openbot-durations-")), "report.json");
+const report = join(mkdtempSync(join(tmpdir(), "dani-dex-durations-")), "report.json");
 const run = spawnSync("bun", ["run", "test:desktop", "--", "--reporter=json", `--outputFile=${report}`], {
   cwd: ROOT,
   stdio: "inherit",

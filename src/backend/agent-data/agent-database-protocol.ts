@@ -103,7 +103,7 @@ export const AGENT_DATABASE_LIMITS = {
 } as const;
 
 /** The reserved table that records which agent created each shared table. */
-export const AGENT_DATABASE_METADATA_TABLE = "openbot_metadata";
+export const AGENT_DATABASE_METADATA_TABLE = "danidex_metadata";
 
 /**
  * One running database host, seen from the supervisor.

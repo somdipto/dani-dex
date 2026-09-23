@@ -5,7 +5,7 @@ export const TEAM_PROTOCOL_V4Base = 4;
 export const TEAM_PROTOCOL_VERSION_HEADER = "Dani-Dex-Protocol-Version";
 export const TEAM_APP_VERSION_HEADER = "Dani-Dex-App-Version";
 export const TEAM_CAPABILITIES_HEADER = "Dani-Dex-Capabilities";
-export const TEAM_PROTOCOL_V4Base_WEBSOCKET = "openbot-team-v4";
+export const TEAM_PROTOCOL_V4Base_WEBSOCKET = "dani-dex-team-v4";
 
 export const TEAM_PROTOCOL_V4Base_CAPABILITIES = [
   "agent-runtime-snapshots",
@@ -1916,7 +1916,7 @@ function projectV4BaseRoutineSchedule(value: DynamicRecord): TeamProtocolV4BaseJ
 // frozen list cannot name is a route no client can be answered on. Classification only: it reads the
 // list below and decides nothing, so exporting it leaves every released response meaning what it did.
 export function teamProtocolV4BaseHttpRoute(method: string, path: string): TeamProtocolV4BaseHttpRoute | null {
-  const pathname = new URL(path, "http://openbot.invalid").pathname;
+  const pathname = new URL(path, "http://danidex.invalid").pathname;
   const exact: Record<string, TeamProtocolV4BaseHttpRoute> = {
     "GET /v1/compatibility": "GET compatibility",
     "GET /v1/identity": "GET identity",

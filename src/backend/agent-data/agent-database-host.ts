@@ -8,7 +8,7 @@
 // RULE: every runtime import here is `node:*`. Repo shapes come in through `import type`, which both
 // Rollup and Node's type stripping erase. That keeps the built chunk standalone, lets the tests
 // spawn this source directly and drive the real host, and makes it impossible for Electron or the
-// `openbot.db` facade to be dragged in behind it.
+// `danidex.db` facade to be dragged in behind it.
 
 import { existsSync } from "node:fs";
 import { basename } from "node:path";
@@ -27,7 +27,7 @@ import type {
 } from "./agent-database-protocol";
 
 /** Mirrors `AGENT_DATABASE_METADATA_TABLE`; inlined because the protocol module must stay type-only here. */
-const METADATA_TABLE = "openbot_metadata";
+const METADATA_TABLE = "danidex_metadata";
 
 const MAX_OPEN_DATABASES = 8;
 

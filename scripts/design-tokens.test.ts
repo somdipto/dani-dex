@@ -210,7 +210,7 @@ function stylesheetImports(path: string): readonly string[] {
     const specifier = match[1];
     if (specifier.startsWith(".")) imports.push(join(dirname(path), specifier));
     else {
-      const packaged = /^@openbot\/brand\/(.+\.css)$/u.exec(specifier);
+      const packaged = /^@danidex\/brand\/(.+\.css)$/u.exec(specifier);
       if (packaged) imports.push(`packages/brand/src/${packaged[1]}`);
     }
   }

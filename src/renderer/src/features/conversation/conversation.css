@@ -344,11 +344,11 @@
   margin-right: 3px;
 }
 
-::highlight(openbot-chat-search-results) {
+::highlight(dani-dex-chat-search-results) {
   background: var(--dani-dex-accent-soft);
 }
 
-::highlight(openbot-chat-search-current) {
+::highlight(dani-dex-chat-search-current) {
   background: var(--dani-dex-warning);
   color: var(--dani-dex-text-on-light);
 }
@@ -4640,7 +4640,7 @@ button.chat-action-target:active,
   text-align: right;
 }
 
-::highlight(openbot-message-selection) {
+::highlight(dani-dex-message-selection) {
   background: var(--dani-dex-accent-strong);
   color: inherit;
 }

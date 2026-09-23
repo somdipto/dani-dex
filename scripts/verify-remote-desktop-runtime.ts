@@ -41,7 +41,7 @@ await Promise.all([
   access(resolve("build/remote-desktop-runtime/sources", sunshinePatch)),
   access(
     resolve(
-      `build/remote-desktop-runtime/sources/moonlight-web-stream-${lock.remoteDesktop.moonlightWeb.version}-openbot-source.tar.gz`,
+      `build/remote-desktop-runtime/sources/moonlight-web-stream-${lock.remoteDesktop.moonlightWeb.version}-dani-dex-source.tar.gz`,
     ),
   ),
   access(resolve("build/remote-desktop-runtime/sources", moonlightPatch)),

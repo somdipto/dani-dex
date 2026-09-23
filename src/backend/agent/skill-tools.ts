@@ -29,7 +29,7 @@ export const LOCAL_SKILL_TOOL_DEFINITIONS = [
   {
     name: "create_skill",
     description:
-      "Create a reusable local skill from a folder inside your workspace after the user asks to create a skill. Follow openbot-skill-creator. Saves to the shared local library and installs for you. Does not publish or execute scripts.",
+      "Create a reusable local skill from a folder inside your workspace after the user asks to create a skill. Follow dani-dex-skill-creator. Saves to the shared local library and installs for you. Does not publish or execute scripts.",
     shape: createSkillSchema.shape,
   },
   {

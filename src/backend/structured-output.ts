@@ -69,7 +69,7 @@ function balancedObject(value: string): string | null {
 /**
  * Pairs a schema with the two things a text completion needs from it: the JSON Schema to put in the
  * prompt, and one validating parse of the reply. `z.toJSONSchema` output is already sent to
- * providers as tool input schemas (`openbot-tools.ts`), so the rendering is the same one models
+ * providers as tool input schemas (`dani-dex-tools.ts`), so the rendering is the same one models
  * already read here.
  */
 export function structuredOutput<Schema extends z.ZodType>(

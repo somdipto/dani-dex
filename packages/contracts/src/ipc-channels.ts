@@ -227,7 +227,7 @@ export const IPC_CHANNELS = {
   serversRemoveMcpServer: "servers:mcp:remove",
   serversSetMcpServerEnabled: "servers:mcp:set-enabled",
   serversTestMcpServer: "servers:mcp:test",
-  // The plugin deep link. `openbot://plugins/<slug>` opens a listing and nothing more, so there is
+  // The plugin deep link. `dani-dex://plugins/<slug>` opens a listing and nothing more, so there is
   // no install channel beside these two: the user still presses Install inside the dialog and picks
   // an agent. The pair mirrors the invitation's, because it solves the same problem - a link can
   // arrive before the window that shows it exists.

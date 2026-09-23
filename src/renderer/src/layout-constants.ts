@@ -4,8 +4,8 @@
  * not import `App.tsx` without closing an import cycle.
  */
 
-export const LEFT_PANEL_STORAGE_KEY = "openbot:left-panel-width";
-export const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "openbot:left-panel-collapsed";
+export const LEFT_PANEL_STORAGE_KEY = "danidex:left-panel-width";
+export const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "danidex:left-panel-collapsed";
 export const LEFT_PANEL_DEFAULT = 280;
 export const LEFT_PANEL_MIN = 128;
 export const LEFT_PANEL_MAX = 400;

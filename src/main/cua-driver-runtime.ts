@@ -184,11 +184,11 @@ export async function resolveCuaDriverEndpoint(input: CuaDriverEndpointInput): P
       ? runtimeDirectory
       : input.temporaryDirectory;
   const digest = createHash("sha256").update(input.userDataPath).digest("hex").slice(0, 12);
-  return { kind: "unix-socket", directory: join(parent, `openbot-cua-${digest}`) };
+  return { kind: "unix-socket", directory: join(parent, `dani-dex-cua-${digest}`) };
 }
 
 /** Only this shape is read back, so a truncated or edited file is replaced rather than served. */
-const WINDOWS_PIPE_NAME = /^\\\\\.\\pipe\\openbot-cua-[0-9a-f-]{36}$/;
+const WINDOWS_PIPE_NAME = /^\\\\\.\\pipe\\dani-dex-cua-[0-9a-f-]{36}$/;
 
 async function windowsPipeName(userDataPath: string): Promise<string> {
   const file = join(userDataPath, ...PIPE_NAME_FILE);
@@ -196,7 +196,7 @@ async function windowsPipeName(userDataPath: string): Promise<string> {
     .then((text) => text.trim())
     .catch(() => "");
   if (WINDOWS_PIPE_NAME.test(stored)) return stored;
-  const name = `\\\\.\\pipe\\openbot-cua-${randomUUID()}`;
+  const name = `\\\\.\\pipe\\dani-dex-cua-${randomUUID()}`;
   await mkdir(dirname(file), { recursive: true, mode: 0o700 });
   await writeFile(file, name, { mode: 0o600 });
   return name;
@@ -803,7 +803,7 @@ async function readPermissionsOverMcp(
   config: McpServerConfig,
   platform: NodeJS.Platform,
 ): Promise<readonly ComputerUsePermission[]> {
-  const client = new Client({ name: "openbot-computer-use", version: "1" }, { capabilities: {} });
+  const client = new Client({ name: "dani-dex-computer-use", version: "1" }, { capabilities: {} });
   const transport = new StdioClientTransport({
     command: config.command,
     args: config.args,

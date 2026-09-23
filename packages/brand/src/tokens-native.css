@@ -56,7 +56,7 @@
     /* Not a colour, and identical in both themes. uniwind only ever learns a
      * variable from a @variant block, so a token @theme inline reaches through
      * var() has to be declared here or the utility resolves to nothing on native.
-     * These two back tracking-openbot-tight and tracking-openbot-wide. */
+     * These two back tracking-dani-dex-tight and tracking-dani-dex-wide. */
     --dani-dex-tracking-tight: -0.1px;
     --dani-dex-tracking-wide: 0.02em;
     --dani-dex-bg-sheet: #fcfcfc;

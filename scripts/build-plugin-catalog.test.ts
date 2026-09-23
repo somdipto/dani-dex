@@ -26,7 +26,7 @@ describe("plugin catalog source", () => {
   });
 
   it("matches the checked-in outputs byte for byte, without touching the repository", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-plugin-catalog-test-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-plugin-catalog-test-"));
     temporaryRoots.push(root);
     const generated = {
       sourceRoot: paths.sourceRoot,
@@ -164,7 +164,7 @@ describe("plugin catalog validation", () => {
   });
 
   it("refuses a reserved server name", () => {
-    const reserved = pluginWithServer({ ...httpServer, name: "openbot" });
+    const reserved = pluginWithServer({ ...httpServer, name: "danidex" });
     expect(() => validatePlugin("example", reserved, false, updatedAt)).toThrow("Dani-Dex already uses the name");
   });
 

@@ -124,7 +124,7 @@ function withLock(change: (value: CuaDriverLock) => CuaDriverLock): { cuaDriver:
 }
 
 async function makeTemporaryRoot(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "openbot-cua-driver-layout-"));
+  const root = await mkdtemp(join(tmpdir(), "dani-dex-cua-driver-layout-"));
   temporaryRoots.push(root);
   return root;
 }

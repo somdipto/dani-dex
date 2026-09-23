@@ -6,7 +6,7 @@ import type { AgentProfile } from "../../data";
 import { MarkdownFilePreview } from "./MarkdownFilePreview";
 import { SpreadsheetFilePreview } from "./SpreadsheetFilePreview";
 
-const PANEL_STORAGE_KEY = "openbot:browser-panel-width";
+const PANEL_STORAGE_KEY = "danidex:browser-panel-width";
 const PANEL_MIN = 220;
 const PANEL_MAX = 1600;
 const TEXT_LIMIT = 1_000_000;

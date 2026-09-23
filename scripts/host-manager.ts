@@ -19,7 +19,7 @@ import {
 
 async function main(): Promise<void> {
   if (process.argv[2] === "--help") {
-    process.stdout.write("Dani-Dex Host Manager: run through launchd; administrator setup uses openbot-host.\n");
+    process.stdout.write("Dani-Dex Host Manager: run through launchd; administrator setup uses dani-dex-host.\n");
     return;
   }
   if (process.argv[2] === "--runtime-check") {

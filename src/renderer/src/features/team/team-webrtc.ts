@@ -71,7 +71,7 @@ const dataChannelNames = ["rpc", "events", "files", "desktop"] as const;
 let mainPort: MessagePort;
 
 const receiveMainPort = (event: MessageEvent): void => {
-  if (event.source !== window || event.data !== "openbot-team-webrtc-port") return;
+  if (event.source !== window || event.data !== "dani-dex-team-webrtc-port") return;
   const port = event.ports[0];
   if (!port) throw new Error("The Team WebRTC message port is missing.");
   window.removeEventListener("message", receiveMainPort);
@@ -403,7 +403,7 @@ function createDataChannel(
   connection: RTCPeerConnection,
   channel: "rpc" | "events" | "files" | "desktop",
 ): void {
-  const label = channel === "desktop" ? "openbot.remote-desktop.signal.v1" : TEAM_PROTOCOL_V2_CHANNELS[channel];
+  const label = channel === "desktop" ? "danidex.remote-desktop.signal.v1" : TEAM_PROTOCOL_V2_CHANNELS[channel];
   bindDataChannel(state, channel, connection.createDataChannel(label, { ordered: true }));
 }
 
@@ -648,7 +648,7 @@ function channelKind(label: string): "rpc" | "events" | "files" | "desktop" | nu
   if (label === TEAM_PROTOCOL_V2_CHANNELS.rpc) return "rpc";
   if (label === TEAM_PROTOCOL_V2_CHANNELS.events) return "events";
   if (label === TEAM_PROTOCOL_V2_CHANNELS.files) return "files";
-  if (label === "openbot.remote-desktop.signal.v1") return "desktop";
+  if (label === "danidex.remote-desktop.signal.v1") return "desktop";
   return null;
 }
 

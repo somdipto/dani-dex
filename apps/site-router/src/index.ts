@@ -44,7 +44,7 @@ export default {
 
 async function openAssetCache(): Promise<Cache | undefined> {
   try {
-    return await caches.open("openbot-site-assets-v1");
+    return await caches.open("dani-dex-site-assets-v1");
   } catch (error) {
     console.error(JSON.stringify({ event: "site_asset_cache_open_error", message: errorMessage(error) }));
     return undefined;

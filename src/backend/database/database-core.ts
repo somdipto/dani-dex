@@ -39,7 +39,7 @@ export class DatabaseCore {
   #db: DatabaseSync | null = null;
 
   constructor(options: DatabaseCoreOptions) {
-    this.path = join(options.userDataPath, "openbot.db");
+    this.path = join(options.userDataPath, "danidex.db");
     this.#legacyBackupRoot = join(options.userDataPath, "legacy-backup-v1");
   }
 

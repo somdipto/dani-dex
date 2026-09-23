@@ -82,10 +82,10 @@ export async function verifyHostPayload(expanded: string, version: string): Prom
       throw new Error("Installer script does not match release source.");
   }
   for (const [source, destination] of [
-    ["openbot-host", "/usr/local/bin/openbot-host"],
-    ["openbot-relaunch.sh", `${HOST_MANAGER_DIRECTORY}/openbot-relaunch.sh`],
-    ["app.openbot.host-manager.plist", "/Library/LaunchDaemons/app.openbot.host-manager.plist"],
-    ["app.openbot.desktop.relaunch.plist", "/Library/LaunchAgents/app.openbot.desktop.relaunch.plist"],
+    ["dani-dex-host", "/usr/local/bin/dani-dex-host"],
+    ["dani-dex-relaunch.sh", `${HOST_MANAGER_DIRECTORY}/dani-dex-relaunch.sh`],
+    ["app.danidex.host-manager.plist", "/Library/LaunchDaemons/app.danidex.host-manager.plist"],
+    ["app.danidex.desktop.relaunch.plist", "/Library/LaunchAgents/app.danidex.desktop.relaunch.plist"],
   ]) {
     if (
       (await readFile(join(root, destination), "utf8")) !==
@@ -121,7 +121,7 @@ export async function verifyHostInstaller(pkg: string, version: string, requireN
     await command("/usr/sbin/spctl", ["--assess", "--type", "install", "--verbose=2", pkg]);
     await command("/usr/bin/xcrun", ["stapler", "validate", pkg]);
   }
-  const temp = await mkdtemp(join(tmpdir(), "openbot-host-package-"));
+  const temp = await mkdtemp(join(tmpdir(), "dani-dex-host-package-"));
   const expanded = join(temp, "expanded");
   try {
     await command("/usr/sbin/pkgutil", ["--expand-full", resolve(pkg), expanded]);

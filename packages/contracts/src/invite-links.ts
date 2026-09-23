@@ -80,9 +80,7 @@ export function parseInviteUrl(value: string, options: InviteLinkOptions = {}): 
   const canonical =
     url.protocol === "https:" && url.origin === DANI_DEX_INVITE_ORIGIN && url.pathname === DANI_DEX_INVITE_PATH;
   const customScheme =
-    (url.protocol === "dani-dex:" || url.protocol === "openbot:") &&
-    url.hostname === "join" &&
-    (url.pathname === "" || url.pathname === "/");
+    url.protocol === "dani-dex:" && url.hostname === "join" && (url.pathname === "" || url.pathname === "/");
   if (
     (!canonical && !customScheme) ||
     url.username !== "" ||

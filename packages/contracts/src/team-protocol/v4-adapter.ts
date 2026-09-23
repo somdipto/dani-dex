@@ -325,11 +325,11 @@ function decodeAgentCreateModel(value: unknown): TeamProtocolV4BaseJsonObject {
 }
 
 function readPath(path: string): string {
-  return new URL(path, "http://openbot.invalid").pathname.replace(/\/unread$/u, "/read");
+  return new URL(path, "http://danidex.invalid").pathname.replace(/\/unread$/u, "/read");
 }
 
 function scopedUsageRoute(method: string, path: string): boolean {
-  const pathname = new URL(path, "http://openbot.invalid").pathname;
+  const pathname = new URL(path, "http://danidex.invalid").pathname;
   return method === "GET" && /^\/v1\/agents\/[^/]+\/usage$/u.test(pathname);
 }
 
@@ -341,25 +341,25 @@ function decodeScopedUsageRequest(value: unknown): TeamProtocolV4BaseJsonObject 
 }
 
 function duplicateRoute(method: string, path: string): boolean {
-  const pathname = new URL(path, "http://openbot.invalid").pathname;
+  const pathname = new URL(path, "http://danidex.invalid").pathname;
   return method === "POST" && /^\/v1\/agents\/[^/]+\/duplicate$/u.test(pathname);
 }
 
 function profileRequest(path: string, value: unknown): TeamProtocolV4BaseJsonObject {
-  const parsed = new URL(path, "http://openbot.invalid").pathname.endsWith("/generate")
+  const parsed = new URL(path, "http://danidex.invalid").pathname.endsWith("/generate")
     ? parseGenerateAgentProfile(value)
     : parseSaveAgentProfile(value);
   return JSON.parse(JSON.stringify(parsed));
 }
 function profileResponse(path: string, value: unknown): TeamProtocolV4BaseJsonObject {
-  const parsed = new URL(path, "http://openbot.invalid").pathname.endsWith("/generate")
+  const parsed = new URL(path, "http://danidex.invalid").pathname.endsWith("/generate")
     ? decodeAgentProfileDraft(value)
     : decodeSaveAgentProfileResult(value);
   return JSON.parse(JSON.stringify(parsed));
 }
 
 function profileGeneration(path: string): boolean {
-  return new URL(path, "http://openbot.invalid").pathname.endsWith("/generate");
+  return new URL(path, "http://danidex.invalid").pathname.endsWith("/generate");
 }
 function encodeProfileRequest(path: string, value: unknown): TeamProtocolV4BaseJsonObject {
   return decodeProfileV4Request(profileGeneration(path), profileRequest(path, value));

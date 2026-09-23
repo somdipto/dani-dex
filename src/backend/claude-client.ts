@@ -287,7 +287,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
         pathToClaudeCodeExecutable: this.#cli.executable,
         settingSources: ["user", "project", "local"],
         persistSession: false,
-        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "openbot/0.1.0" },
+        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
       },
     });
     let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -358,7 +358,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
         pathToClaudeCodeExecutable: this.#cli.executable,
         settingSources: ["user", "project", "local"],
         persistSession: false,
-        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "openbot/0.1.0" },
+        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
       },
     });
     let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -453,7 +453,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
         additionalDirectories: config.additionalDirectories,
         canUseTool,
         mcpServers,
-        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "openbot/0.1.0" },
+        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
       },
     });
     const runtime: ThreadRuntime = {
@@ -645,7 +645,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
       runtime.usageCost = message.total_cost_usd ?? runtime.usageCost;
     if (runtime.activeTurn && message.modelUsage)
       this.emit("notification", {
-        method: "openbot/usage",
+        method: "danidex/usage",
         params: {
           threadId: runtime.id,
           turnId: runtime.activeTurn.id,
@@ -935,7 +935,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
     const call = (namespace: string, name: string, args: unknown) =>
       this.#callDynamicTool(threadId, namespace, name, args);
     return {
-      openbot_browser: createSdkMcpServer({
+      danidex_browser: createSdkMcpServer({
         name: DANI_DEX_BROWSER_NAMESPACE,
         version: "0.2.0",
         tools: BROWSER_TOOL_DEFINITIONS.map((definition) =>
@@ -944,13 +944,13 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
           ),
         ),
       }),
-      openbot: createSdkMcpServer({
-        name: "openbot",
+      danidex: createSdkMcpServer({
+        name: "danidex",
         version: "0.1.0",
         // Claude uses the SDK's AskUserQuestion permission flow.
         tools: DANI_DEX_TOOL_DEFINITIONS.filter((definition) => definition.name !== "ask_user").map((definition) =>
           tool(definition.name, definition.description, definition.shape, (args) =>
-            call("openbot", definition.name, args),
+            call("danidex", definition.name, args),
           ),
         ),
       }),

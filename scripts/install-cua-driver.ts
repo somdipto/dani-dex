@@ -53,7 +53,7 @@ export async function installCuaDriver(
   const licenseBytes = await download(fetchImpl, cuaDriverLicenseUrl(lock));
   if (sha256(licenseBytes) !== lock.licenseSha256) throw new Error("The cua-driver licence checksum is invalid.");
 
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "openbot-cua-driver-install-"));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "dani-dex-cua-driver-install-"));
   // The staging tree is a sibling of the installed one so the final step is a rename inside one
   // directory. A temporary directory could sit on another volume, where a rename fails.
   const staging = join(dirname(outputRoot), `.${basename(outputRoot)}.installing`);

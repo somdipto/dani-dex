@@ -95,7 +95,7 @@ interface SkillsMarketplaceModalProps {
   /** Insert a listing's example question into the chosen agent's composer. */
   onRunPluginPrompt?: (agentId: string, prompt: MarketplacePluginPrompt) => void;
   /**
-   * The listing an `openbot://plugins/<slug>` link asked for. It selects the tab and opens the page;
+   * The listing an `dani-dex://plugins/<slug>` link asked for. It selects the tab and opens the page;
    * it never installs, so what a link can do is show a user a listing they then decide about.
    */
   initialPluginSlug?: string;

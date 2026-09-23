@@ -19,7 +19,7 @@ afterEach(async () => {
 
 describe("ConversationReadStore", () => {
   it("keeps durable monotonic read boundaries per team member", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-conversation-read-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-conversation-read-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -89,7 +89,7 @@ describe("ConversationReadStore", () => {
   });
 
   it("rebases a filtered marker cursor to the preceding supported message", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-conversation-read-filter-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-conversation-read-filter-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -146,9 +146,9 @@ describe("ConversationReadStore", () => {
   });
 
   it("baselines agent history that existed before the read-state migration", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-conversation-read-migration-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-conversation-read-migration-"));
     roots.push(root);
-    const legacy = legacyDatabase(join(root, "openbot.db"));
+    const legacy = legacyDatabase(join(root, "danidex.db"));
     legacy
       .prepare(
         `INSERT INTO projection_threads (

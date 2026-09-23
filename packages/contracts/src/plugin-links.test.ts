@@ -28,7 +28,7 @@ describe("Dani-Dex plugin links", () => {
   it.each([
     ["a foreign origin", "https://evil.example/plugins/aave"],
     ["a host that only ends in the real one", "https://openbot.run.example.com/plugins/aave"],
-    ["the lookalike host the app once used", "https://openbot.app/plugins/aave"],
+    ["the lookalike host the app once used", "https://danidex.app/plugins/aave"],
     ["http", "http://openbot.run/plugins/aave"],
     ["another path", "https://openbot.run/other/aave"],
     ["no slug", "https://openbot.run/plugins/"],
@@ -41,9 +41,9 @@ describe("Dani-Dex plugin links", () => {
     ["an upper-case slug", "https://openbot.run/plugins/Aave"],
     ["a slug with a dot", "https://openbot.run/plugins/catalog.json"],
     ["an over-long slug", `https://openbot.run/plugins/${"a".repeat(64)}`],
-    ["another custom-scheme host", "openbot://plugin/aave"],
-    ["a custom-scheme link with a query", "openbot://plugins/aave?install=1"],
-    ["a custom-scheme link with no slug", "openbot://plugins"],
+    ["another custom-scheme host", "dani-dex://plugin/aave"],
+    ["a custom-scheme link with a query", "dani-dex://plugins/aave?install=1"],
+    ["a custom-scheme link with no slug", "dani-dex://plugins"],
     ["nonsense", "not a url"],
   ])("refuses %s", (_reason, value) => {
     expect(() => parsePluginUrl(value)).toThrow();
@@ -54,6 +54,6 @@ describe("Dani-Dex plugin links", () => {
      its own. `join` is the invite's host and `/join` is its path. */
   it("refuses an invitation link", () => {
     expect(isPluginUrl(createInviteUrl(invitePayload))).toBe(false);
-    expect(isPluginUrl("openbot://join")).toBe(false);
+    expect(isPluginUrl("dani-dex://join")).toBe(false);
   });
 });

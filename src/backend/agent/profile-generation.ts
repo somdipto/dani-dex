@@ -52,7 +52,7 @@ export async function generateTextWithoutTools(
    */
   cancelled: () => boolean = () => false,
 ): Promise<string> {
-  const cwd = await mkdtemp(join(tmpdir(), "openbot-profile-"));
+  const cwd = await mkdtemp(join(tmpdir(), "dani-dex-profile-"));
   let timer: NodeJS.Timeout | undefined;
   let text = "";
   const completion = new Promise<string>((resolve, reject) => {
@@ -86,7 +86,7 @@ export async function generateTextWithoutTools(
     await client.request(
       "initialize",
       {
-        clientInfo: { name: "openbot-profile", title: "Dani-Dex profile generation", version: "0.1.0" },
+        clientInfo: { name: "dani-dex-profile", title: "Dani-Dex profile generation", version: "0.1.0" },
         capabilities: { experimentalApi: true },
       },
       decodeRecordResponse,

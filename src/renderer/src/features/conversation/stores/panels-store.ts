@@ -90,7 +90,7 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
   function saveBrowserPipBounds(bounds: BrowserBounds) {
     deps.setBrowserPipBounds(bounds);
     window.localStorage.setItem(
-      "openbot:browser-pip-native-bounds",
+      "danidex:browser-pip-native-bounds",
       [bounds.x, bounds.y, bounds.width, bounds.height].join(","),
     );
   }

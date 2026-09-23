@@ -18,7 +18,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 function SidebarStatePlayground(props: { compact: boolean; options?: MockDaniDexOptions }) {
-  const key = "openbot:left-panel-collapsed";
+  const key = "danidex:left-panel-collapsed";
   const previous = window.localStorage.getItem(key);
   window.localStorage.setItem(key, props.compact ? "true" : "false");
   onCleanup(() => {

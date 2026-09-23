@@ -236,7 +236,7 @@ function SettingsModalStory(props: {
     }
     return {
       qrData:
-        "openbot://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=storybook-mobile-ticket_1234567890abcdef",
+        "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=storybook-mobile-ticket_1234567890abcdef",
       expiresAt: Date.now() + 120_000,
     };
   }
@@ -323,7 +323,7 @@ const meta = {
     onUpdateAccountAvatar: fn(async () => undefined),
     onCreateMobileConnect: fn(async () => ({
       qrData:
-        "openbot://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=storybook-mobile-ticket_1234567890abcdef",
+        "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=storybook-mobile-ticket_1234567890abcdef",
       expiresAt: Date.now() + 120_000,
     })),
   },

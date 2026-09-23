@@ -39,7 +39,7 @@ const createdSchema = z
     credentials: z.array(
       z.object({ username: z.string(), uid: z.number().int().min(501), password: z.string().min(32) }),
     ),
-    credentialFile: z.string().regex(/^\/private\/var\/root\/openbot-tenant-credentials-[A-Fa-f0-9-]+\.json$/),
+    credentialFile: z.string().regex(/^\/private\/var\/root\/dani-dex-tenant-credentials-[A-Fa-f0-9-]+\.json$/),
   })
   .strict();
 
@@ -76,7 +76,7 @@ async function verifyInstallation(): Promise<void> {
     (await hostCommand("/usr/bin/plutil", ["-extract", "ProgramArguments.0", "raw", HOST_DAEMON_PLIST])) !==
       join(ROOT, "host-manager") ||
     (await hostCommand("/usr/bin/plutil", ["-extract", "ProgramArguments.0", "raw", HOST_AGENT_PLIST])) !==
-      join(ROOT, "openbot-relaunch.sh") ||
+      join(ROOT, "dani-dex-relaunch.sh") ||
     (await hostCommand("/usr/bin/plutil", ["-extract", "LimitLoadToSessionType", "raw", HOST_AGENT_PLIST])) !== "Aqua"
   ) {
     throw new Error("Unexpected launchd definition.");
@@ -261,7 +261,7 @@ export function macHostAdminOperations(): HostAdminOperations {
           continue;
         } // Logged-out users load the global Aqua agent at next GUI login.
         try {
-          await hostCommand("/bin/launchctl", ["print", `gui/${tenant.uid}/app.openbot.desktop.relaunch`]);
+          await hostCommand("/bin/launchctl", ["print", `gui/${tenant.uid}/app.danidex.desktop.relaunch`]);
         } catch {
           await hostCommand("/bin/launchctl", ["bootstrap", `gui/${tenant.uid}`, HOST_AGENT_PLIST]);
         }
@@ -292,7 +292,7 @@ export function macHostAdminOperations(): HostAdminOperations {
       await verifyNoWriteAcl(join(ROOT, "state.json"));
     },
     verifyDaemon: async () => {
-      const output = await hostCommand("/bin/launchctl", ["print", "system/app.openbot.host-manager"]);
+      const output = await hostCommand("/bin/launchctl", ["print", "system/app.danidex.host-manager"]);
       if (!/^\s*state = running\s*$/m.test(output) || !/^\s*pid = \d+\s*$/m.test(output))
         throw new Error("Host daemon is not running.");
     },

@@ -52,7 +52,7 @@ function appendDraftLine(draft: ComposerDraft, line: string): ComposerDraft {
   return { ...draft, text: draft.text ? `${draft.text}\n${line}` : line };
 }
 
-export const QUEUE_EDIT_STORAGE_KEY = "openbot:queue-edit";
+export const QUEUE_EDIT_STORAGE_KEY = "danidex:queue-edit";
 export type StoredQueueSave = Extract<QueueEditRequest, { action: "save" }>;
 export interface StoredQueueEdit {
   agentId: string;

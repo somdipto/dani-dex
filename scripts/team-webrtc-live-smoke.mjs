@@ -185,7 +185,7 @@ async function runWebRtcSmoke(input) {
 
     const hostChannel = deferred();
     host.ondatachannel = (event) => hostChannel.resolve(event.channel);
-    const clientChannel = client.createDataChannel("openbot.team.rpc.v2", { ordered: true });
+    const clientChannel = client.createDataChannel("danidex.team.rpc.v2", { ordered: true });
     const clientOpened = new Promise((resolve, reject) => {
       clientChannel.onopen = resolve;
       clientChannel.onerror = () => reject(new Error("Client DataChannel failed."));

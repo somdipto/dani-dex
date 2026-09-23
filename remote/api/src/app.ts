@@ -20,8 +20,8 @@ const authEventSchema = z.discriminatedUnion("type", [
 
 export function createRemoteApiApp(config: RemoteApiConfig, signal: SignalService) {
   const app = new Elysia()
-    .get("/health/live", () => ({ service: "openbot-remote-api", status: "live" }))
-    .get("/health/ready", () => ({ service: "openbot-remote-api", status: "ready" }))
+    .get("/health/live", () => ({ service: "dani-dex-remote-api", status: "live" }))
+    .get("/health/ready", () => ({ service: "dani-dex-remote-api", status: "ready" }))
     .post("/internal/auth-events", async ({ request, set }) => {
       const timestamp = request.headers.get("Dani-Dex-Timestamp") ?? "";
       const signature = request.headers.get("Dani-Dex-Signature") ?? "";
@@ -111,16 +111,16 @@ function decodeAuthEvent(body: string): z.infer<typeof authEventSchema> | null {
 export function prometheusMetrics(signal: SignalService): string {
   const metrics = signal.metrics();
   return [
-    "# TYPE openbot_remote_signal_sockets gauge",
-    `openbot_remote_signal_sockets ${metrics.activeSockets}`,
-    "# TYPE openbot_remote_peer_connections gauge",
-    `openbot_remote_peer_connections ${metrics.activePeerConnections}`,
-    "# TYPE openbot_remote_signal_messages_total counter",
-    `openbot_remote_signal_messages_total ${metrics.relayedMessages}`,
-    "# TYPE openbot_remote_auth_failures_total counter",
-    `openbot_remote_auth_failures_total ${metrics.authenticationFailures}`,
-    "# TYPE openbot_remote_protocol_failures_total counter",
-    `openbot_remote_protocol_failures_total ${metrics.protocolFailures}`,
+    "# TYPE danidex_remote_signal_sockets gauge",
+    `danidex_remote_signal_sockets ${metrics.activeSockets}`,
+    "# TYPE danidex_remote_peer_connections gauge",
+    `danidex_remote_peer_connections ${metrics.activePeerConnections}`,
+    "# TYPE danidex_remote_signal_messages_total counter",
+    `danidex_remote_signal_messages_total ${metrics.relayedMessages}`,
+    "# TYPE danidex_remote_auth_failures_total counter",
+    `danidex_remote_auth_failures_total ${metrics.authenticationFailures}`,
+    "# TYPE danidex_remote_protocol_failures_total counter",
+    `danidex_remote_protocol_failures_total ${metrics.protocolFailures}`,
     "",
   ].join("\n");
 }

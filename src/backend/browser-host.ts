@@ -221,7 +221,7 @@ export class BrowserHost {
     this.#window = window;
     this.#downloadsRoot = downloadsRoot;
     this.#statePath = statePath;
-    this.#session = session.fromPartition("persist:openbot-browser", { cache: true });
+    this.#session = session.fromPartition("persist:dani-dex-browser", { cache: true });
     this.#recorder = new BrowserRecorder(
       downloadsRoot,
       (tabId, recording) => {

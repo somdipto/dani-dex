@@ -566,7 +566,7 @@ export const STORY_APP_INFO = {
 
 /**
  * The marketplace surfaces. Storybook and the preview both reach the modal through
- * `mock-openbot.ts`, so an empty list here reads as "the marketplace is empty" rather than "the
+ * `mock-danidex.ts`, so an empty list here reads as "the marketplace is empty" rather than "the
  * preview never wired this up" — which is what the three stubs it replaced looked like.
  */
 // Self-contained sample artwork keeps preview icons available without network requests.
@@ -697,9 +697,9 @@ export const STORY_MARKETPLACE_SKILL_DETAILS: Record<string, MarketplaceSkillDet
 export const STORY_INSTALLED_SKILLS: Record<string, InstalledSkill[]> = {
   chief: [
     {
-      skillId: "openbot-skill-creator",
-      slug: "openbot-skill-creator",
-      name: "openbot-skill-creator",
+      skillId: "dani-dex-skill-creator",
+      slug: "dani-dex-skill-creator",
+      name: "dani-dex-skill-creator",
       description: "Create or revise a reusable local Dani-Dex skill.",
       installedVersion: 1,
       availableVersion: 1,
@@ -708,9 +708,9 @@ export const STORY_INSTALLED_SKILLS: Record<string, InstalledSkill[]> = {
       origin: "managed",
     },
     {
-      skillId: "openbot-site-hosting",
-      slug: "openbot-site-hosting",
-      name: "openbot-site-hosting",
+      skillId: "dani-dex-site-hosting",
+      slug: "dani-dex-site-hosting",
+      name: "dani-dex-site-hosting",
       installedVersion: 1,
       availableVersion: 1,
       state: "installed",
@@ -771,7 +771,7 @@ export const STORY_MCP_SERVERS: McpServerConfig[] = [
     transport: "stdio",
     enabled: true,
     command: "openai-dev-mcp",
-    args: ["serve-sqlite", "--database", "./openbot.db"],
+    args: ["serve-sqlite", "--database", "./danidex.db"],
     env: [{ key: "SQLITE_READONLY", value: "1" }],
     envPassthrough: ["HOME"],
     workingDirectory: "~/code",

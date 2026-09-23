@@ -23,7 +23,7 @@ import type { TeamStore } from "./team-store";
 
 export type DevelopmentRemoteRole = "host" | "client";
 
-const DEVELOPMENT_REMOTE_CONNECTION_FILE = "openbot-dev-remote-connection-v1.json";
+const DEVELOPMENT_REMOTE_CONNECTION_FILE = "dani-dex-dev-remote-connection-v1.json";
 const developmentRemoteServerConnectionSchema: z.ZodType<DevelopmentRemoteServerConnection> = z.object({
   serverId: z.string().min(1),
   serverName: z.string().min(1),
@@ -56,7 +56,9 @@ export async function applyDevelopmentRemoteAccount({
   setupCompleted,
 }: DevelopmentRemoteAccountOptions): Promise<void> {
   const email =
-    role === "host" ? (teamStore.getOwnerEmail() ?? "openbot-dev-host@example.com") : "openbot-dev-client@example.com";
+    role === "host"
+      ? (teamStore.getOwnerEmail() ?? "dani-dex-dev-host@example.com")
+      : "dani-dex-dev-client@example.com";
   const user = await ensureDevelopmentAccount(centralAuth, email);
   await teamStore.activateAccount(user);
   if (role === "host" && !teamStore.configured) {

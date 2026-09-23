@@ -14,7 +14,7 @@ vi.mock("electron", () => ({
 
 const { computerUseIpcHandlers } = await import("./computer-use-handlers");
 
-const APP_FRAME = { sender: { id: 99 }, senderFrame: { url: "openbot-app://app/index.html" } };
+const APP_FRAME = { sender: { id: 99 }, senderFrame: { url: "dani-dex-app://app/index.html" } };
 const HELP_WINDOW_FRAME = { ...APP_FRAME, sender: { id: 7 } };
 
 const READY: ComputerUseState = {

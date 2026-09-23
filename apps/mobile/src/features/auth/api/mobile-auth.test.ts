@@ -32,7 +32,7 @@ vi.mock("expo-secure-store", () => ({
   WHEN_UNLOCKED_THIS_DEVICE_ONLY: "when-unlocked-this-device-only",
 }));
 
-const key = "openbot.mobile.session.v1";
+const key = "danidex.mobile.session.v1";
 const session: MobileSession = {
   apiUrl: "https://api.openbot.run",
   sessionToken: "test-session-token",
@@ -60,17 +60,17 @@ describe("mobile session revocation", () => {
       native.fetch.mockResolvedValueOnce(Response.json(session.user));
       await logoutMobileSession(session);
       expect(native.storage.has(key)).toBe(false);
-      expect(JSON.parse(native.storage.get("openbot.mobile.pending-revocations.v1") ?? "null")).toEqual([
+      expect(JSON.parse(native.storage.get("danidex.mobile.pending-revocations.v1") ?? "null")).toEqual([
         { apiUrl: session.apiUrl, sessionToken: session.sessionToken },
       ]);
       const retry = retryMobileSessionRevocations();
       await vi.advanceTimersByTimeAsync(20_000);
       await retry;
-      expect(native.storage.has("openbot.mobile.pending-revocations.v1")).toBe(true);
+      expect(native.storage.has("danidex.mobile.pending-revocations.v1")).toBe(true);
       native.fetch.mockResolvedValueOnce(new Response(null, { status: 204 }));
       expect(await readMobileSession()).toBeNull();
       await retryMobileSessionRevocations();
-      expect(native.storage.has("openbot.mobile.pending-revocations.v1")).toBe(false);
+      expect(native.storage.has("danidex.mobile.pending-revocations.v1")).toBe(false);
     },
   );
 
@@ -98,7 +98,7 @@ describe("mobile session revocation", () => {
       [`${session.apiUrl}/v1/mobile-auth/session`, "GET"],
       [`${replacement.apiUrl}/v1/mobile-auth/session`, "DELETE"],
     ]);
-    expect(JSON.parse(native.storage.get("openbot.mobile.pending-revocations.v1") ?? "null")).toEqual([
+    expect(JSON.parse(native.storage.get("danidex.mobile.pending-revocations.v1") ?? "null")).toEqual([
       { apiUrl: session.apiUrl, sessionToken: session.sessionToken },
     ]);
     expect(native.storage.has(key)).toBe(false);
@@ -106,18 +106,18 @@ describe("mobile session revocation", () => {
 
   it("does not restore a login if the app stopped after queuing sign-out", async () => {
     native.storage.set(
-      "openbot.mobile.pending-revocations.v1",
+      "danidex.mobile.pending-revocations.v1",
       JSON.stringify([{ apiUrl: session.apiUrl, sessionToken: session.sessionToken }]),
     );
     native.fetch.mockRejectedValue(new TypeError("Network unavailable"));
     expect(await readMobileSession()).toBeNull();
     await retryMobileSessionRevocations();
     expect(native.storage.has(key)).toBe(false);
-    expect(native.storage.has("openbot.mobile.pending-revocations.v1")).toBe(true);
+    expect(native.storage.has("danidex.mobile.pending-revocations.v1")).toBe(true);
   });
 
   it("allows a new QR login while the old account service is unreachable", async () => {
-    native.storage.set("openbot.mobile.device-id.v1", "existing-device");
+    native.storage.set("danidex.mobile.device-id.v1", "existing-device");
     const replacement = { ...session, apiUrl: "https://other.example.com", sessionToken: "replacement-token" };
     native.fetch.mockImplementation(async (url, init) => {
       if (url === `${replacement.apiUrl}/v1/mobile-auth/redeem` && init?.method === "POST") {
@@ -131,7 +131,7 @@ describe("mobile session revocation", () => {
     expect(await redeemMobileConnectUrl(code)).toEqual(replacement);
     expect(await readMobileSession()).toEqual(replacement);
     await retryMobileSessionRevocations();
-    expect(JSON.parse(native.storage.get("openbot.mobile.pending-revocations.v1") ?? "null")).toEqual([
+    expect(JSON.parse(native.storage.get("danidex.mobile.pending-revocations.v1") ?? "null")).toEqual([
       { apiUrl: session.apiUrl, sessionToken: session.sessionToken },
     ]);
   });
@@ -142,7 +142,7 @@ describe("mobile session revocation", () => {
     await logoutMobileSession(session);
     await retryMobileSessionRevocations();
     expect(native.storage.has(key)).toBe(false);
-    expect(native.storage.has("openbot.mobile.pending-revocations.v1")).toBe(false);
+    expect(native.storage.has("danidex.mobile.pending-revocations.v1")).toBe(false);
     expect(native.fetch).toHaveBeenLastCalledWith(
       "https://api.openbot.run/v1/mobile-auth/session",
       expect.objectContaining({ headers: { Authorization: "Bearer test-session-token" } }),
@@ -164,7 +164,7 @@ describe("mobile session revocation", () => {
     response.resolve(new Response(null, { status: 204 }));
     await retryMobileSessionRevocations();
     expect(await readMobileSession()).toEqual(replacement);
-    expect(native.storage.has("openbot.mobile.pending-revocations.v1")).toBe(false);
+    expect(native.storage.has("danidex.mobile.pending-revocations.v1")).toBe(false);
   });
 
   it("preserves a login at another API with the same token", async () => {
@@ -184,7 +184,7 @@ describe("stored mobile desktop binding", () => {
     ["Saved name", "Saved name"],
   ])("keeps the profile name available through connection and restore (%j)", async (name, expected) => {
     native.storage.clear();
-    native.storage.set("openbot.mobile.device-id.v1", "existing-device");
+    native.storage.set("danidex.mobile.device-id.v1", "existing-device");
     const connected = { ...session, user: { ...session.user, name } };
     native.fetch.mockResolvedValueOnce(Response.json(connected));
     const redeemed = await redeemMobileConnectUrl(qrCode);
@@ -257,7 +257,7 @@ describe("stored mobile desktop binding", () => {
   it("revokes at the old API before redeeming a QR for another service and restoring its bound session", async () => {
     const oldApi = "https://previous.openbot.run";
     native.storage.set(key, JSON.stringify({ ...session, apiUrl: oldApi, host: undefined }));
-    native.storage.set("openbot.mobile.device-id.v1", "existing-device");
+    native.storage.set("danidex.mobile.device-id.v1", "existing-device");
     native.fetch.mockResolvedValueOnce(new Response(null, { status: 204 }));
     native.fetch.mockResolvedValueOnce(Response.json(session));
     expect(await redeemMobileConnectUrl(qrCode)).toEqual(session);
@@ -270,7 +270,7 @@ describe("stored mobile desktop binding", () => {
 
   it("serializes legacy cleanup with a new QR login so cleanup cannot erase the new session", async () => {
     native.storage.set(key, JSON.stringify({ ...session, host: undefined }));
-    native.storage.set("openbot.mobile.device-id.v1", "existing-device");
+    native.storage.set("danidex.mobile.device-id.v1", "existing-device");
     let confirm!: (response: Response) => void;
     native.fetch.mockImplementationOnce(
       () =>

@@ -15,7 +15,7 @@ afterEach(async () => {
 
 describe("TeamChatStore", () => {
   it("stores one durable and idempotent direct thread per member pair", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-direct-chat-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-direct-chat-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();
@@ -72,7 +72,7 @@ describe("TeamChatStore", () => {
   });
 
   it("pages a 10,000-message direct conversation without gaps or duplicates", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openbot-direct-chat-large-"));
+    const root = await mkdtemp(join(tmpdir(), "dani-dex-direct-chat-large-"));
     roots.push(root);
     const database = new DaniDexDatabase(root);
     await database.initialize();

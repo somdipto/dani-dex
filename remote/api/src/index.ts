@@ -54,8 +54,8 @@ const healthServer = Bun.serve({
   hostname: "127.0.0.1",
   port: config.healthPort,
   routes: {
-    "/health/live": () => Response.json({ service: "openbot-remote-api", status: "live" }),
-    "/health/ready": () => Response.json({ service: "openbot-remote-api", status: "ready" }),
+    "/health/live": () => Response.json({ service: "dani-dex-remote-api", status: "live" }),
+    "/health/ready": () => Response.json({ service: "dani-dex-remote-api", status: "ready" }),
     "/metrics": (request) => {
       const authorization = request.headers.get("Authorization");
       if (!config.metricsToken || authorization !== `Bearer ${config.metricsToken}`)

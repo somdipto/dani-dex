@@ -1538,7 +1538,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
   /**
    * A deleted agent's tabs are reachable by nobody: no agent passes the host's owner check for them,
    * and the renderer lists tabs per agent, so they hold a view the user cannot even see to close.
-   * They also survive a restart, because the browser persists its tabs outside `openbot.db`.
+   * They also survive a restart, because the browser persists its tabs outside `danidex.db`.
    *
    * The owner test matches the renderer's, so a tab the user could see under this agent is a tab this
    * closes -- including a legacy tab carrying only the thread id. Runs after the agent record is
@@ -2226,7 +2226,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
             );
             return;
           }
-          if (request.params.namespace === "openbot") {
+          if (request.params.namespace === "danidex") {
             if (request.params.tool === "ask_user") {
               this.#attention.surfaceDynamicPrompt(client, request);
               return;
@@ -2321,7 +2321,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
         contentItems: [
           {
             type: "inputText",
-            text: "This chat has no active channel assignment. Channel tools work only inside a channel task. Use openbot.send_message for direct teammate work, or sidebar section tools (list_sections, create_section, assign_agent_section) to group agents.",
+            text: "This chat has no active channel assignment. Channel tools work only inside a channel task. Use danidex.send_message for direct teammate work, or sidebar section tools (list_sections, create_section, assign_agent_section) to group agents.",
           },
         ],
       };

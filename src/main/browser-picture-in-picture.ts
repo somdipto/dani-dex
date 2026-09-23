@@ -122,10 +122,10 @@ export class BrowserPictureInPicture {
     const developmentUrl = this.#options.developmentUrl;
     await (developmentUrl
       ? window.loadURL(new URL("browser-pip.html", `${developmentUrl}/`).toString())
-      : window.loadURL("openbot-app://app/browser-pip.html"));
+      : window.loadURL("dani-dex-app://app/browser-pip.html"));
     await (developmentUrl
       ? controlsView.webContents.loadURL(new URL("browser-pip-controls.html", `${developmentUrl}/`).toString())
-      : controlsView.webContents.loadURL("openbot-app://app/browser-pip-controls.html"));
+      : controlsView.webContents.loadURL("dani-dex-app://app/browser-pip-controls.html"));
     if (!window.isDestroyed()) {
       this.#startHoverTracking(window, controlsView);
       window.showInactive();
