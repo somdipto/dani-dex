@@ -195,6 +195,7 @@
     "package:win:verify": "bun run package:win && bun run verify:package:win",
     "dist:mac": "bun run voice:prepare-runtime && bun run prepare:remote-desktop-runtime && bun run verify:remote-desktop-runtime && bun run prepare:cua-driver && bun run build && electron-builder --mac --arm64 --config.mac.identity=null --config.mac.notarize=false",
     "dist:win": "bun run voice:prepare-runtime && bun scripts/prepare-remote-desktop-runtime.ts win32 x64 && bun run verify:remote-desktop-runtime --windows && bun scripts/install-cua-driver.ts win32 x64 && bun run build && electron-builder --win nsis --x64 --publish never",
+    "dist:mac:universal": "bun scripts/dist-mac-universal.ts",
     "dist:linux": "bun scripts/install-cua-driver.ts linux x64 && bun run build && electron-builder --linux AppImage --x64 --publish never",
     "dist:release": "bun run voice:prepare-runtime && bun run prepare:remote-desktop-runtime && bun run verify:remote-desktop-runtime && bun run prepare:cua-driver && bun run build && electron-builder --mac --arm64 --publish never"
   },

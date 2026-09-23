@@ -190,3 +190,62 @@ jobs:
           path: dist/*.dmg
           if-no-files-found: error
           retention-days: 14
+
+  macos-universal:
+    # The Intel slice gets the providers, Hermes and the app itself. Voice, remote desktop and
+    # Computer Use still ship arm64 binaries only, so they stay unavailable on an Intel Mac.
+    name: macOS universal DMG (unsigned)
+    runs-on: macos-14
+    timeout-minutes: 75
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      # Both Hermes trees are staged on this arm64 runner: uv installs the x64 wheels by platform, and
+      # only the arm64 tree can be started here.
+      - name: Install and verify runtimes
+        run: |
+          bun run install:codex-runtime
+          bun run install:claude-runtime
+          bun run install:grok-runtime
+          bun scripts/install-hermes-runtime.ts darwin arm64
+          bun scripts/install-hermes-runtime.ts darwin x64
+          bun run install:remote-desktop-runtime
+          bun run verify:remote-desktop-runtime
+          bun run prepare:cua-driver
+
+      - name: Build unsigned universal DMG
+        run: |
+          bun run voice:prepare-runtime
+          bun run build
+          bun run dist:mac:universal
+
+      - name: Verify both slices and packaged Hermes
+        run: |
+          set -euo pipefail
+          app=dist/mac-universal/Dani-Dex.app
+          archs=$(lipo -archs "$app/Contents/MacOS/Dani-Dex")
+          echo "Main executable: $archs"
+          grep -qw arm64 <<<"$archs"
+          grep -qw x86_64 <<<"$archs"
+          test -x "$app/Contents/Resources/hermes/mac/x64/bin/hermes"
+          version=$(jq -r .hermes.version native-runtime.lock.json)
+          output=$("$app/Contents/Resources/hermes/mac/arm64/bin/hermes" --version)
+          echo "$output"
+          grep -Fq "v$version" <<<"$output"
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dani-dex-main-macos-universal-${{ github.sha }}
+          path: dist/*.dmg
+          if-no-files-found: error
+          retention-days: 14
