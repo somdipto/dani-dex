@@ -2,7 +2,7 @@
 
 ## Status
 
-Draft for owner review. Do not publish or push until Somdipto provides the target repository URL and explicitly asks for the hard push.
+Active. Repository: https://github.com/somdipto/dani-dex (private). Issue #1 is the single master issue: this spec plus the delivery ledger. Pushes to `main` go through the owner-approved push path.
 
 ## Product statement
 
