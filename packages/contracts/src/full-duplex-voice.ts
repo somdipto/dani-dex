@@ -25,7 +25,9 @@ export class FullDuplexVoiceSession {
 
   constructor(private readonly ports: FullDuplexVoicePorts) {}
 
-  get phase(): DuplexVoicePhase { return this.#phase; }
+  get phase(): DuplexVoicePhase {
+    return this.#phase;
+  }
 
   listen(): DuplexVoiceEvent {
     this.#interrupt();
