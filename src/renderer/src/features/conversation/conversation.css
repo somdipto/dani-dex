@@ -8854,8 +8854,8 @@ body:has(.browser-panel-expanded) .app-frame {
   resize: none;
   border-color: var(--dani-dex-border);
   background: transparent;
-  font-family: var(--dani-dex-font-mono, ui-monospace, monospace);
-  font-size: 12px;
+  font-family: var(--dani-dex-font-mono);
+  font-size: var(--dani-dex-text-sm);
   line-height: 1.55;
 }
 
