@@ -54,7 +54,7 @@ jobs:
       - name: Select and verify iOS tools
         shell: bash
         run: |
-          echo "IPA_PATH=$RUNNER_TEMP/openbot-testflight.ipa" >> "$GITHUB_ENV"
+          echo "IPA_PATH=$RUNNER_TEMP/dani-dex-testflight.ipa" >> "$GITHUB_ENV"
           sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
           xcodebuild -version
           pod --version

@@ -34,7 +34,7 @@ import { stringPayload } from "./validation";
  * Computer Use panel opens, so it is read from `mac-permission-urls.ts` rather than written twice.
  */
 export const EXTERNAL_DESTINATIONS: Record<ExternalDestination, string> = {
-  "agent-setup": "https://github.com/nightly-labs/openbot/blob/main/docs/TROUBLESHOOTING.md",
+  "agent-setup": "https://github.com/somdipto/dani-dex/blob/main/docs/TROUBLESHOOTING.md",
   "opencode-install": "https://opencode.ai/docs/",
   "opencode-auth": "https://opencode.ai/auth",
   "claude-install": "https://code.claude.com/docs",

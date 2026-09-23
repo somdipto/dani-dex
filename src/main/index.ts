@@ -91,7 +91,7 @@ if (commandLineUserDataDirectory) {
 }
 app.setName("Dani-Dex");
 app.enableSandbox();
-if (process.platform === "win32") app.setAppUserModelId("app.danidex.desktop");
+if (process.platform === "win32") app.setAppUserModelId("dev.danlab.danidex.desktop");
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 const appVariant = readAppVariant(process.env.DANI_DEX_APP_VARIANT, app.isPackaged);
 if (!app.isPackaged) guardDevelopmentOutput([process.stdout, process.stderr], () => app.quit());

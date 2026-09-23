@@ -83,7 +83,7 @@ const plist = JSON.parse(run("plutil", ["-convert", "json", "-o", "-", plistPath
 if (!isDynamicRecord(plist)) throw new Error("Info.plist is not a JSON object.");
 expectEqual(plist.CFBundleDisplayName, "Dani-Dex", "display name");
 expectEqual(plist.CFBundleExecutable, "Dani-Dex", "executable name");
-expectEqual(plist.CFBundleIdentifier, "app.danidex.desktop", "bundle identifier");
+expectEqual(plist.CFBundleIdentifier, "dev.danlab.danidex.desktop", "bundle identifier");
 expectEqual(plist.CFBundleIconFile, "icon.icns", "application icon");
 expectEqual(plist.LSMinimumSystemVersion, "13.0", "minimum macOS version");
 expectEqual(plist.ElectronTeamID, "ZTRDTUL87R", "Apple Team ID");

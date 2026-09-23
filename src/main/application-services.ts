@@ -168,7 +168,7 @@ const MCP_OAUTH_FILE = "dani-dex-mcp-oauth-v1.json";
  * the Electron binary - which is also the name macOS shows in the Privacy & Security panes, and the
  * reason a dev grant does not carry over to a packaged build.
  */
-const PACKAGED_BUNDLE_IDENTIFIER = "app.danidex.desktop";
+const PACKAGED_BUNDLE_IDENTIFIER = "dev.danlab.danidex.desktop";
 const DEVELOPMENT_BUNDLE_IDENTIFIER = "com.github.Electron";
 
 const TEARDOWN_ORDER = {
@@ -1083,7 +1083,9 @@ export async function createApplicationServices({
     logDirectory: join(app.getPath("userData"), "logs", "update"),
     // Squirrel.Mac only. The path is meaningless under a Linux or Windows home directory.
     shipItDirectory:
-      process.platform === "darwin" ? join(homedir(), "Library", "Caches", "app.danidex.desktop.ShipIt") : undefined,
+      process.platform === "darwin"
+        ? join(homedir(), "Library", "Caches", "dev.danlab.danidex.desktop.ShipIt")
+        : undefined,
   });
   teardown.push(TEARDOWN_ORDER.updater, "the update service", () => updater.stop());
   const agentInitialization = new AgentInitializationGate(async () => {

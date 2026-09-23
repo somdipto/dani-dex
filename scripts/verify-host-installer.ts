@@ -84,8 +84,8 @@ export async function verifyHostPayload(expanded: string, version: string): Prom
   for (const [source, destination] of [
     ["dani-dex-host", "/usr/local/bin/dani-dex-host"],
     ["dani-dex-relaunch.sh", `${HOST_MANAGER_DIRECTORY}/dani-dex-relaunch.sh`],
-    ["app.danidex.host-manager.plist", "/Library/LaunchDaemons/app.danidex.host-manager.plist"],
-    ["app.danidex.desktop.relaunch.plist", "/Library/LaunchAgents/app.danidex.desktop.relaunch.plist"],
+    ["dev.danlab.danidex.host-manager.plist", "/Library/LaunchDaemons/dev.danlab.danidex.host-manager.plist"],
+    ["dev.danlab.danidex.desktop.relaunch.plist", "/Library/LaunchAgents/dev.danlab.danidex.desktop.relaunch.plist"],
   ]) {
     if (
       (await readFile(join(root, destination), "utf8")) !==

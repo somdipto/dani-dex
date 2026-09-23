@@ -11,7 +11,7 @@ export const SHARED_APP = "/Applications/Dani-Dex.app";
 const STAGING = "/Applications/.dani-dex-host-stage";
 const PRIVATE = join(HOST_MANAGER_DIRECTORY, "private");
 const SIGNING_REQUIREMENT =
-  '=anchor apple generic and identifier "app.danidex.desktop" and certificate leaf[subject.OU] = "ZTRDTUL87R"';
+  '=anchor apple generic and identifier "dev.danlab.danidex.desktop" and certificate leaf[subject.OU] = "ZTRDTUL87R"';
 const releaseSchema = z.object({
   tag_name: z.string().regex(/^v?\d+\.\d+\.\d+$/),
   draft: z.literal(false),
@@ -156,7 +156,7 @@ export function macHostOperations(): HostManagerOperations {
       await verifySharedAppParent();
       await verifyBundleTree(SHARED_APP, true);
       await verifySignature(SHARED_APP);
-      const response = await fetch("https://api.github.com/repos/nightly-labs/openbot/releases/latest", {
+      const response = await fetch("https://api.github.com/repos/somdipto/dani-dex/releases/latest", {
         signal: AbortSignal.timeout(30_000),
         headers: { Accept: "application/vnd.github+json" },
       });
@@ -170,7 +170,7 @@ export function macHostOperations(): HostManagerOperations {
       const dmg = join(PRIVATE, "release.dmg");
       await rm(dmg, { force: true });
       // Asset names and repository are fixed. No tenant supplies a network destination.
-      const url = `https://github.com/nightly-labs/openbot/releases/download/${release.tag_name}/Dani-Dex-${version}-arm64.dmg`;
+      const url = `https://github.com/somdipto/dani-dex/releases/download/${release.tag_name}/Dani-Dex-${version}-arm64.dmg`;
       await command(
         "/usr/bin/curl",
         [

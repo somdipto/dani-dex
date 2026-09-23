@@ -13,7 +13,7 @@ describe("Apple app site association", () => {
     await expect(response.json()).resolves.toEqual(APPLE_APP_SITE_ASSOCIATION);
     expect(APPLE_APP_SITE_ASSOCIATION.applinks.details).toEqual([
       {
-        appID: "ZTRDTUL87R.app.openbot.desktop",
+        appID: "ZTRDTUL87R.dev.danlab.danidex.desktop",
         paths: ["/join"],
       },
     ]);

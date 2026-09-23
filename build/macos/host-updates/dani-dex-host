@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
 exec /usr/bin/env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin \
-  '/Library/Application Support/Dani-Dex/HostManager/openbot-host' "$@"
+  '/Library/Application Support/Dani-Dex/HostManager/dani-dex-host' "$@"

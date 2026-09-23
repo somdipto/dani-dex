@@ -17,10 +17,10 @@ for path in / /Library '/Library/Application Support' '/Library/Application Supp
   check_existing "$path"
   [ ! -e "$path" ] || [ -d "$path" ] || exit 1
 done
-for path in "$ROOT/host-manager" "$ROOT/openbot-host" "$ROOT/create-tenants" "$ROOT/openbot-relaunch.sh" \
+for path in "$ROOT/host-manager" "$ROOT/dani-dex-host" "$ROOT/create-tenants" "$ROOT/dani-dex-relaunch.sh" \
   "$ROOT/host-release.json" "$ROOT/config.json" "$ROOT/state.json" \
-  /Library/LaunchAgents/app.openbot.desktop.relaunch.plist \
-  /Library/LaunchDaemons/app.openbot.host-manager.plist /usr/local/bin/openbot-host; do
+  /Library/LaunchAgents/dev.danlab.danidex.desktop.relaunch.plist \
+  /Library/LaunchDaemons/dev.danlab.danidex.host-manager.plist /usr/local/bin/dani-dex-host; do
   check_existing "$path"
   [ ! -e "$path" ] || { [ -f "$path" ] && [ "$(stat -f %l "$path")" = 1 ]; } || exit 1
 done
@@ -29,6 +29,6 @@ if [ -e "$ROOT/config.json" ]; then
   phase=$(plutil -extract phase raw "$ROOT/state.json")
   case "$phase" in idle|aborted) ;; *) echo 'Wait for host maintenance to finish before upgrading the package.' >&2; exit 1;; esac
 fi
-if launchctl print system/app.openbot.host-manager >/dev/null 2>&1; then
-  launchctl bootout system/app.openbot.host-manager
+if launchctl print system/dev.danlab.danidex.host-manager >/dev/null 2>&1; then
+  launchctl bootout system/dev.danlab.danidex.host-manager
 fi

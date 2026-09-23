@@ -92,7 +92,7 @@ async function build(): Promise<void> {
         "--options",
         "runtime",
         "--identifier",
-        `app.danidex.host.${name}`,
+        `dev.danlab.danidex.host.${name}`,
         ...(name === "create-tenants" ? [] : ["--entitlements", "build/macos/host-updates/entitlements.plist"]),
         binary,
       ]);
@@ -108,8 +108,8 @@ async function build(): Promise<void> {
     for (const [source, target] of [
       ["dani-dex-host", "/usr/local/bin/dani-dex-host"],
       ["dani-dex-relaunch.sh", `${HOST_MANAGER_DIRECTORY}/dani-dex-relaunch.sh`],
-      ["app.danidex.host-manager.plist", "/Library/LaunchDaemons/app.danidex.host-manager.plist"],
-      ["app.danidex.desktop.relaunch.plist", "/Library/LaunchAgents/app.danidex.desktop.relaunch.plist"],
+      ["dev.danlab.danidex.host-manager.plist", "/Library/LaunchDaemons/dev.danlab.danidex.host-manager.plist"],
+      ["dev.danlab.danidex.desktop.relaunch.plist", "/Library/LaunchAgents/dev.danlab.danidex.desktop.relaunch.plist"],
     ]) {
       await mkdir(dirname(join(payload, target)), { recursive: true });
       await copyFile(`build/macos/host-updates/${source}`, join(payload, target));

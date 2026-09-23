@@ -58,7 +58,7 @@ for tenant in "$@"; do
 done
 # The operator supplies trusted compiled code. Never compile repository hooks as root.
 [ -f "$HELPER" ] && [ ! -L "$HELPER" ] || exit 1
-for destination in "$ROOT/host-manager" "$ROOT/dani-dex-relaunch.sh" /Library/LaunchAgents/app.danidex.desktop.relaunch.plist /Library/LaunchDaemons/app.danidex.host-manager.plist; do
+for destination in "$ROOT/host-manager" "$ROOT/dani-dex-relaunch.sh" /Library/LaunchAgents/dev.danlab.danidex.desktop.relaunch.plist /Library/LaunchDaemons/dev.danlab.danidex.host-manager.plist; do
   [ ! -e "$destination" ] && [ ! -L "$destination" ] || { echo "Existing installation asset: $destination" >&2; exit 1; }
 done
 install -o root -g wheel -m 755 "$HELPER" "$ROOT/host-manager"
@@ -66,12 +66,12 @@ install -o root -g wheel -m 755 "$ASSETS/dani-dex-relaunch.sh" "$ROOT/dani-dex-r
 # UIDS contains only numbers returned by id above.
 # shellcheck disable=SC2086
 "$ROOT/host-manager" --setup $UIDS
-install -o root -g wheel -m 644 "$ASSETS/app.danidex.desktop.relaunch.plist" /Library/LaunchAgents/app.danidex.desktop.relaunch.plist
-install -o root -g wheel -m 644 "$ASSETS/app.danidex.host-manager.plist" /Library/LaunchDaemons/app.danidex.host-manager.plist
-launchctl bootstrap system /Library/LaunchDaemons/app.danidex.host-manager.plist
+install -o root -g wheel -m 644 "$ASSETS/dev.danlab.danidex.desktop.relaunch.plist" /Library/LaunchAgents/dev.danlab.danidex.desktop.relaunch.plist
+install -o root -g wheel -m 644 "$ASSETS/dev.danlab.danidex.host-manager.plist" /Library/LaunchDaemons/dev.danlab.danidex.host-manager.plist
+launchctl bootstrap system /Library/LaunchDaemons/dev.danlab.danidex.host-manager.plist
 for tenant in "$@"; do
   tenant_uid=$(id -u "$tenant")
-  if ! launchctl bootstrap "gui/$tenant_uid" /Library/LaunchAgents/app.danidex.desktop.relaunch.plist; then
+  if ! launchctl bootstrap "gui/$tenant_uid" /Library/LaunchAgents/dev.danlab.danidex.desktop.relaunch.plist; then
     echo "LaunchAgent for $tenant will load at the next GUI login."
   fi
 done

@@ -42,7 +42,7 @@ async function runtime(overrides: Partial<CuaDriverRuntimeOptions> = {}) {
     executable: "/opt/cua/bin/cua-driver",
     endpoint: { kind: "unix-socket", directory: socketDirectory },
     supported: true,
-    hostBundleId: "app.danidex.desktop",
+    hostBundleId: "dev.danlab.danidex.desktop",
     platform: "darwin",
     spawnProcess,
     waitForSocket: async () => undefined,
@@ -97,7 +97,7 @@ describe("CuaDriverRuntime", () => {
     await driver.start();
 
     expect(spawned[0].options.env.CUA_DRIVER_EMBEDDED).toBe("1");
-    expect(spawned[0].options.env.CUA_DRIVER_HOST_BUNDLE_ID).toBe("app.danidex.desktop");
+    expect(spawned[0].options.env.CUA_DRIVER_HOST_BUNDLE_ID).toBe("dev.danlab.danidex.desktop");
   });
 
   it("leaves the cursor to Dani-Dex on every display", async () => {

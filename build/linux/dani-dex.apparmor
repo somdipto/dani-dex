@@ -8,7 +8,7 @@
 #
 # Install it as root, then reload AppArmor:
 #
-#   sudo install -m 0644 openbot.apparmor /etc/apparmor.d/openbot
+#   sudo install -m 0644 dani-dex.apparmor /etc/apparmor.d/dani-dex
 #   sudo systemctl reload apparmor
 #
 # The attachment path below covers the usual places to keep an AppImage. If you keep yours
@@ -17,7 +17,7 @@
 abi <abi/4.0>,
 include <tunables/global>
 
-profile openbot "/{home/*/{Applications,Desktop,Downloads,.local/bin},opt/Dani-Dex}/Dani-Dex*.AppImage" flags=(unconfined) {
+profile dani-dex "/{home/*/{Applications,Desktop,Downloads,.local/bin},opt/Dani-Dex}/Dani-Dex*.AppImage" flags=(unconfined) {
   userns,
-  include if exists <local/openbot>
+  include if exists <local/dani-dex>
 }

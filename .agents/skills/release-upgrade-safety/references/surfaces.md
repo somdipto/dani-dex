@@ -179,7 +179,7 @@ deploy-race reasoning in gate E only holds while *both* keep that order.
 
 | Path | Fields that matter |
 | --- | --- |
-| `electron-builder.yml` | `appId` (`app.openbot.desktop`), `artifactName`, `electronUpdaterCompatibility`, `publish` owner/repo, `mac.extendInfo.ElectronTeamID` (`ZTRDTUL87R`), `extraResources` |
+| `electron-builder.yml` | `appId` (`dev.danlab.danidex.desktop`), `artifactName`, `electronUpdaterCompatibility`, `publish` owner/repo, `mac.extendInfo.ElectronTeamID` (`ZTRDTUL87R`), `extraResources` |
 | `src/main/update-service.ts` | the four `UpdateAdapter` behaviours, documented on the type |
 | `src/main/electron-updater-assumptions.test.ts` | `VERIFIED_VERSION` |
 | `scripts/verify-update-artifacts.ts` | 700 MiB update artifact, 750 MiB DMG, manifest, blockmap, no Whisper model |

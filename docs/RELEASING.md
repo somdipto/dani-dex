@@ -26,7 +26,7 @@ Create the `release` environment in `nightly-labs/openbot`, then add these envir
 
 - `CSC_LINK` — a base64-encoded Developer ID Application `.p12` file.
 - `MAC_PROVISIONING_PROFILE` — the base64-encoded Developer ID provisioning profile for
-  `app.openbot.desktop`, with the `applinks:openbot.run` entitlement.
+  `dev.danlab.danidex.desktop`, with the `applinks:openbot.run` entitlement.
 - `CSC_KEY_PASSWORD` — the application `.p12` export password.
 - `CSC_INSTALLER_LINK` — a base64-encoded **Developer ID Installer** `.p12` file for team `ZTRDTUL87R`.
 - `CSC_INSTALLER_KEY_PASSWORD` — the installer `.p12` export password.

@@ -5,7 +5,7 @@ export const APPLE_APP_SITE_ASSOCIATION = {
     apps: [],
     details: [
       {
-        appID: "ZTRDTUL87R.app.openbot.desktop",
+        appID: "ZTRDTUL87R.dev.danlab.danidex.desktop",
         paths: ["/join"],
       },
     ],

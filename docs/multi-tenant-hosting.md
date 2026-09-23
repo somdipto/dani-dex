@@ -38,7 +38,7 @@ runtime's salted hash file format, so plaintext passwords do not appear in proce
 
 ## Host Manager boundary
 
-A standalone compiled helper runs as the root LaunchDaemon `app.openbot.host-manager`.
+A standalone compiled helper runs as the root LaunchDaemon `dev.danlab.danidex.host-manager`.
 Its entry point is `scripts/host-manager.ts`. It owns only these functions:
 
 1. Read the admin configuration and non-sensitive tenant status.

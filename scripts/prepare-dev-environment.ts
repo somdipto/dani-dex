@@ -55,7 +55,7 @@ export function assertSupportedBunVersion(version: string): void {
   if (version === supportedBunVersion) return;
 
   throw new Error(
-    `Unsupported Bun ${version}. Dani-Dex development requires stable Bun ${supportedBunVersion}. Install the exact version with the command in https://github.com/nightly-labs/openbot#development, then retry.`,
+    `Unsupported Bun ${version}. Dani-Dex development requires stable Bun ${supportedBunVersion}. Install the exact version with the command in https://github.com/somdipto/dani-dex#development, then retry.`,
   );
 }
 
