@@ -126,7 +126,7 @@ async function packageCorrespondingSource(
     tarExecutable,
     [
       "-czf",
-      join(sourceOutput, `moonlight-web-stream-${lock.remoteDesktop.moonlightWeb.version}-dani-dex-source.tar.gz`),
+      join(sourceOutput, `moonlight-web-stream-${lock.remoteDesktop.moonlightWeb.version}-openbot-source.tar.gz`),
       ...exclusions,
       "-C",
       moonlightSource,

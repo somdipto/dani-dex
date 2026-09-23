@@ -56,7 +56,7 @@ await Promise.all([
   access(resolve(resourcesPath, "remote-desktop-runtime/DISTRIBUTION-SHA256SUMS.txt")),
   access(resolve(resourcesPath, "remote-desktop-runtime/sources/Sunshine-v2026.516.143833-source.tar.gz")),
   access(resolve(resourcesPath, "remote-desktop-runtime/sources/sunshine-v2026.516.143833-danidex.patch")),
-  access(resolve(resourcesPath, "remote-desktop-runtime/sources/moonlight-web-stream-v2.10.0-dani-dex-source.tar.gz")),
+  access(resolve(resourcesPath, "remote-desktop-runtime/sources/moonlight-web-stream-v2.10.0-openbot-source.tar.gz")),
   access(resolve(resourcesPath, "remote-desktop-runtime/sources/moonlight-web-stream-v2.10.0-danidex.patch")),
   access(resolve(remoteRuntimePath, "Sunshine.app/Contents/MacOS/Sunshine")),
   access(resolve(remoteRuntimePath, "web-server")),

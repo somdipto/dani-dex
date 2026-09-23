@@ -20,7 +20,7 @@ const requireUpdateMetadata = process.argv.includes("--require-update-metadata")
 const appPathArgument = process.argv.slice(2).find((argument) => !argument.startsWith("--"));
 const appPath = resolve(appPathArgument ?? "dist/linux-unpacked");
 // electron-builder names the Linux binary after `name` in package.json, not `productName`.
-const executablePath = resolve(appPath, "danidex");
+const executablePath = resolve(appPath, "dani-dex");
 const resourcesPath = resolve(appPath, "resources");
 const asarPath = resolve(resourcesPath, "app.asar");
 
@@ -66,7 +66,7 @@ if (!isString(packageJson.version)) throw new Error("package.json version is mis
 // was built. It is the same file the running app reports through `app.getVersion()`.
 const packagedManifest = JSON.parse(await readAsarFile(asarPath, "package.json"));
 if (!isDynamicRecord(packagedManifest)) throw new Error("The packaged package.json is not a JSON object.");
-expectEqual(packagedManifest.name, "danidex", "packaged name");
+expectEqual(packagedManifest.name, "dani-dex", "packaged name");
 expectEqual(packagedManifest.productName, "Dani-Dex", "packaged product name");
 expectEqual(packagedManifest.version, packageJson.version, "packaged version");
 
