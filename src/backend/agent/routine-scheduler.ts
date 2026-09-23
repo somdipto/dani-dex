@@ -29,9 +29,9 @@ import type { RoutineDueSource, RoutineTimer } from "../routine-timer";
 import { type ConversationRuntime, withDatabaseTransaction } from "./conversation-runtime";
 import { routineStatusForDelivery } from "./delivery-content";
 import {
+  type DaniDexToolResponse,
+  daniDexToolResult,
   localTimezone,
-  type OpenBotToolResponse,
-  openBotToolResult,
   routineToolAgentId,
   routineToolArguments,
   routineToolSchedule,
@@ -268,11 +268,11 @@ export class RoutineScheduler implements RoutineDueSource {
   }
 
   /** The six `openbot` routine tools. Returns null when `tool` is not one of them. */
-  async handleTool(params: DynamicToolCallParams, senderAgentId: string): Promise<OpenBotToolResponse | null> {
+  async handleTool(params: DynamicToolCallParams, senderAgentId: string): Promise<DaniDexToolResponse | null> {
     if (params.tool === "list_routines") {
       const args = routineToolArguments(params.arguments, ["agentId"]);
       const agentId = routineToolAgentId(args, senderAgentId);
-      return openBotToolResult({ routines: this.list(agentId) });
+      return daniDexToolResult({ routines: this.list(agentId) });
     }
 
     if (params.tool === "create_routine") {
@@ -307,7 +307,7 @@ export class RoutineScheduler implements RoutineDueSource {
         },
         { turnId: agentId === senderAgentId ? params.turnId : undefined },
       );
-      return openBotToolResult(routine);
+      return daniDexToolResult(routine);
     }
 
     if (params.tool === "update_routine") {
@@ -347,7 +347,7 @@ export class RoutineScheduler implements RoutineDueSource {
         hasUpdate = true;
       }
       if (!hasUpdate) throw new Error("At least one routine update is required.");
-      return openBotToolResult(
+      return daniDexToolResult(
         this.update(input, { turnId: input.agentId === senderAgentId ? params.turnId : undefined }),
       );
     }
@@ -362,7 +362,7 @@ export class RoutineScheduler implements RoutineDueSource {
         "routineId is required.",
       );
       await this.delete({ agentId, routineId }, { turnId: agentId === senderAgentId ? params.turnId : undefined });
-      return openBotToolResult({ deleted: true, agentId, routineId });
+      return daniDexToolResult({ deleted: true, agentId, routineId });
     }
 
     if (params.tool === "test_routine") {
@@ -374,7 +374,7 @@ export class RoutineScheduler implements RoutineDueSource {
         INPUT_LIMITS.identifier,
         "routineId is required.",
       );
-      return openBotToolResult(await this.test({ agentId, routineId }));
+      return daniDexToolResult(await this.test({ agentId, routineId }));
     }
 
     return null;

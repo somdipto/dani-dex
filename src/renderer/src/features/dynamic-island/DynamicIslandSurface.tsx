@@ -6,7 +6,7 @@ import type {
   DynamicIslandStateChangeReason,
   DynamicIslandViewState,
 } from "../../components/ui";
-import { OpenBotDynamicIsland } from "./OpenBotDynamicIsland";
+import { DaniDexDynamicIsland } from "./DaniDexDynamicIsland";
 
 const DEFAULT_NOTCH_WIDTH = 192;
 const DEFAULT_NOTCH_HEIGHT = 32;
@@ -176,7 +176,7 @@ export function DynamicIslandSurface() {
           onBlur={leaveFocusInteraction}
           onFocusOut={leaveFocusInteraction}
         >
-          <OpenBotDynamicIsland
+          <DaniDexDynamicIsland
             presentation={presentation()}
             state={viewState()}
             displayMode={displayMode}

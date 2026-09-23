@@ -1,5 +1,5 @@
 import { createInviteUrl } from "@dani-dex/contracts/invite-links";
-import { createOpenBotPluginUrl, createPluginShareUrl } from "@dani-dex/contracts/plugin-links";
+import { createDaniDexPluginUrl, createPluginShareUrl } from "@dani-dex/contracts/plugin-links";
 import { describe, expect, it } from "vitest";
 import { findDeepLink, MCP_OAUTH_REDIRECT_URL, parseDeepLink } from "./deep-link-router";
 
@@ -17,7 +17,7 @@ describe("the deep link router", () => {
   });
 
   it("reads a plugin link in both of its forms", () => {
-    expect(parseDeepLink(createOpenBotPluginUrl("aave"))).toEqual({ kind: "plugin", slug: "aave" });
+    expect(parseDeepLink(createDaniDexPluginUrl("aave"))).toEqual({ kind: "plugin", slug: "aave" });
     expect(parseDeepLink(createPluginShareUrl("aave"))).toEqual({ kind: "plugin", slug: "aave" });
   });
 
@@ -72,14 +72,14 @@ describe("the deep link router", () => {
     /* A plugin link carries no query, so the host it owns cannot be reached with a grant on it -
        which is what keeps the grant out of the one kind that is forwarded to a renderer. */
     it("never reads a plugin link as a grant", () => {
-      expect(parseDeepLink(`${createOpenBotPluginUrl("canva")}?code=grant-abc&state=run-xyz`)).toBeNull();
-      expect(parseDeepLink(createOpenBotPluginUrl("canva"))).toEqual({ kind: "plugin", slug: "canva" });
+      expect(parseDeepLink(`${createDaniDexPluginUrl("canva")}?code=grant-abc&state=run-xyz`)).toBeNull();
+      expect(parseDeepLink(createDaniDexPluginUrl("canva"))).toEqual({ kind: "plugin", slug: "canva" });
     });
   });
 
   describe("findDeepLink", () => {
     it("finds the first link among ordinary arguments", () => {
-      expect(findDeepLink(["/path/to/Dani-Dex", "--enable-logging", createOpenBotPluginUrl("canva")])).toEqual({
+      expect(findDeepLink(["/path/to/Dani-Dex", "--enable-logging", createDaniDexPluginUrl("canva")])).toEqual({
         kind: "plugin",
         slug: "canva",
       });

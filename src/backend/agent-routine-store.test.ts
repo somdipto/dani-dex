@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { AgentRoutineStore } from "./agent-routine-store";
 import { AgentStore } from "./agent-store";
 import { ChannelRoutineStore } from "./channel-routine-store";
-import { OpenBotDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./openbot-database";
 
 const roots: string[] = [];
 
@@ -40,7 +40,7 @@ describe("AgentRoutineStore", () => {
     });
     database.close();
 
-    const reopened = new OpenBotDatabase(database.userDataPath);
+    const reopened = new DaniDexDatabase(database.userDataPath);
     await reopened.initialize();
     expect(new AgentRoutineStore(reopened).list("chief")).toHaveLength(1);
     reopened.close();
@@ -231,7 +231,7 @@ describe("ChannelRoutineStore", () => {
     });
     database.close();
 
-    const reopened = new OpenBotDatabase(database.userDataPath);
+    const reopened = new DaniDexDatabase(database.userDataPath);
     await reopened.initialize();
     expect(new ChannelRoutineStore(reopened).list("channel-1")).toHaveLength(1);
     reopened.close();
@@ -410,10 +410,10 @@ describe("ChannelRoutineStore", () => {
   });
 });
 
-async function setup(): Promise<{ database: OpenBotDatabase; routines: AgentRoutineStore }> {
+async function setup(): Promise<{ database: DaniDexDatabase; routines: AgentRoutineStore }> {
   const root = await mkdtemp(join(tmpdir(), "openbot-routine-store-"));
   roots.push(root);
-  const database = new OpenBotDatabase(root);
+  const database = new DaniDexDatabase(root);
   await database.initialize();
   return { database, routines: new AgentRoutineStore(database) };
 }
@@ -421,10 +421,10 @@ async function setup(): Promise<{ database: OpenBotDatabase; routines: AgentRout
 /** A routine needs its channel row: the owner column is a cascading foreign key. */
 async function channelSetup(
   channelIds: string[] = ["channel-1"],
-): Promise<{ database: OpenBotDatabase; routines: ChannelRoutineStore }> {
+): Promise<{ database: DaniDexDatabase; routines: ChannelRoutineStore }> {
   const root = await mkdtemp(join(tmpdir(), "openbot-channel-routine-store-"));
   roots.push(root);
-  const database = new OpenBotDatabase(root);
+  const database = new DaniDexDatabase(root);
   await database.initialize();
   const insert = database.connection.prepare("INSERT INTO projection_channels(channel_id, channel_json) VALUES (?, ?)");
   for (const channelId of channelIds) insert.run(channelId, JSON.stringify({ id: channelId }));

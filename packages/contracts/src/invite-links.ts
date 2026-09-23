@@ -1,4 +1,4 @@
-import { isOpenBotTeamApiHostname } from "./validation";
+import { isDaniDexTeamApiHostname } from "./validation";
 
 export const OPENBOT_INVITE_ORIGIN = "https://openbot.run";
 export const OPENBOT_INVITE_PATH = "/join";
@@ -48,15 +48,15 @@ export function createInviteUrl(payload: InviteLinkPayload, options: InviteLinkO
   return url.toString();
 }
 
-export function createOpenBotInviteUrl(payload: InviteLinkPayload, options: InviteLinkOptions = {}): string {
+export function createDaniDexInviteUrl(payload: InviteLinkPayload, options: InviteLinkOptions = {}): string {
   validatePayload(payload, options);
   const url = new URL("dani-dex://join");
   writePayload(url, payload);
   return url.toString();
 }
 
-export function toOpenBotInviteUrl(value: string, options: InviteLinkOptions = {}): string {
-  return createOpenBotInviteUrl(parseInviteUrl(value, options), options);
+export function toDaniDexInviteUrl(value: string, options: InviteLinkOptions = {}): string {
+  return createDaniDexInviteUrl(parseInviteUrl(value, options), options);
 }
 
 export function isCanonicalInviteUrl(value: string, options: InviteLinkOptions = {}): boolean {
@@ -123,7 +123,7 @@ export function isValidRemoteApiUrl(value: string, options: InviteLinkOptions = 
           url.port === "" &&
           (url.origin === OPENBOT_CONTROL_PLANE_ORIGIN ||
             TRY_CLOUDFLARE_HOST_PATTERN.test(url.hostname) ||
-            isOpenBotTeamApiHostname(url.hostname))))
+            isDaniDexTeamApiHostname(url.hostname))))
     );
   } catch {
     return false;

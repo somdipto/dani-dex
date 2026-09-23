@@ -1,4 +1,4 @@
-export function IntroducingOpenBot() {
+export function IntroducingDaniDex() {
   return (
     <>
       <p>

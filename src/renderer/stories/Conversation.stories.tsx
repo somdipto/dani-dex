@@ -35,7 +35,7 @@ import {
   STORY_REMOTE_DESKTOP_SESSION,
   STORY_SERVERS,
 } from "./fixtures";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 const messages: RendererAgentMessage[] = STORY_CONVERSATION_MESSAGES.map((message) => ({
   id: message.id,
@@ -861,7 +861,7 @@ function MockedConversation(props: {
   conversationError?: string;
 }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot();
+  const mock = createMockDaniDex();
   const controller = createConversationController({ onTypingChange: props.args.onTypingChange });
   const previewUrls = new Set<string>();
   let storyFrameElement: HTMLDivElement | undefined;

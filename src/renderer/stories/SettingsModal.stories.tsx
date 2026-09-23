@@ -16,7 +16,7 @@ import { createProviderRuntimeStore } from "../src/features/provider-updates/pro
 import { DEFAULT_GENERAL_SETTINGS } from "../src/features/settings/app-settings";
 import { SettingsModal } from "../src/features/settings/SettingsModal";
 import { createFakeCodeLogin } from "./code-login-fixture";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 const storyAppInfo = { name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" } as const;
 const storyAccount: CentralAuthUser = {
@@ -143,7 +143,7 @@ function SettingsModalStory(props: {
   codeSignIn?: boolean;
 }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot({
+  const mock = createMockDaniDex({
     providerRuntimeSnapshot: props.providerUpdate
       ? {
           revision: 0,

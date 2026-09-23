@@ -9,7 +9,7 @@ import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-lib
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type AnalyticsEventName, type DesktopAnalyticsEvents, desktopAnalytics } from "../../analytics";
-import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
 import { AgentMemoriesModal } from "./AgentMemoriesModal";
 import { agentMemoriesPort } from "./memories-port";
 
@@ -30,7 +30,7 @@ let createMemory: Mock<(input: CreateAgentMemoryInput) => Promise<AgentMemory>>;
 let updateMemory: Mock<(input: UpdateAgentMemoryInput) => Promise<AgentMemory>>;
 let deleteMemory: Mock<(input: DeleteAgentMemoryInput) => Promise<void>>;
 let clearMemories: Mock<(agentId: string) => Promise<void>>;
-let activeMock: MockOpenBotControls | undefined;
+let activeMock: MockDaniDexControls | undefined;
 const trackMemoryAnalytics = vi.fn();
 
 function trackScopedMemoryAnalytics<Name extends AnalyticsEventName>(
@@ -77,7 +77,7 @@ beforeEach(() => {
     memoryState = memoryState.filter((item) => item.agentId !== agentId);
   });
 
-  activeMock = createMockOpenBot();
+  activeMock = createMockDaniDex();
   activeMock.api.agent.listMemories = listMemories;
   activeMock.api.agent.createMemory = createMemory;
   activeMock.api.agent.updateMemory = updateMemory;

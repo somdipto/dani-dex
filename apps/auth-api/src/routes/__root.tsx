@@ -5,11 +5,11 @@ import "@dani-dex/brand/logo.css";
 import "../styles.css";
 import { PageError } from "../components/landing/PageError";
 import { servingSiteUrl } from "../lib/serving-site-url";
-import { OPENBOT_SECURITY_HEADERS, openBotRootHead } from "../lib/site-metadata";
+import { daniDexRootHead, OPENBOT_SECURITY_HEADERS } from "../lib/site-metadata";
 
 export const Route = createRootRoute({
   beforeLoad: () => ({ siteUrl: servingSiteUrl() }),
-  head: () => openBotRootHead(interLatinFont),
+  head: () => daniDexRootHead(interLatinFont),
   headers: () => OPENBOT_SECURITY_HEADERS,
   component: RootComponent,
   shellComponent: RootDocument,

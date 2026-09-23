@@ -5,7 +5,7 @@ import { execFile } from "node:child_process";
  * macOS users this is how one tenant finds the others: the bundle is shared, the network
  * namespace is shared, and replacing the bundle under a live session breaks it.
  */
-export interface OpenBotSiblingInstance {
+export interface DaniDexSiblingInstance {
   pid: number;
   uid: number;
 }
@@ -24,7 +24,7 @@ interface SiblingScanInput {
  *
  * A failed scan blocks installation: failure is not proof that the shared bundle is unused.
  */
-export async function listSiblingOpenBotInstances(input: SiblingScanInput): Promise<OpenBotSiblingInstance[]> {
+export async function listSiblingDaniDexInstances(input: SiblingScanInput): Promise<DaniDexSiblingInstance[]> {
   const platform = input.platform ?? process.platform;
   if (platform !== "darwin" && platform !== "linux") return [];
   const output = await (input.listProcesses ?? (() => listProcessesWithPs(platform)))();
@@ -34,8 +34,8 @@ export async function listSiblingOpenBotInstances(input: SiblingScanInput): Prom
 export function parseSiblingInstances(
   output: string,
   input: Pick<SiblingScanInput, "executablePath" | "currentPid">,
-): OpenBotSiblingInstance[] {
-  const siblings: OpenBotSiblingInstance[] = [];
+): DaniDexSiblingInstance[] {
+  const siblings: DaniDexSiblingInstance[] = [];
   if (!input.executablePath.trim()) return siblings;
   for (const line of output.split("\n")) {
     const match = /^\s*(\d+)\s+(\d+)\s+(.+?)\s*$/.exec(line);

@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { Button, Heading, Text, Toaster, toast } from "../src/components/ui";
 import { SkillsMarketplaceModal } from "../src/features/settings/SkillsMarketplaceModal";
 import { STORY_AGENT_SUMMARIES, STORY_MARKETPLACE_PLUGINS } from "../src/preview/fixtures";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 const storyAgents: Array<Pick<AgentSummary, "id" | "name" | "marketplaceSource">> = STORY_AGENT_SUMMARIES.map(
   (agent) => ({ id: agent.id, name: agent.name }),
@@ -19,7 +19,7 @@ function SkillsMarketplaceModalStory(props: {
 }) {
   const catalogState = untrack(() => props.catalogState);
   const previousApi = window.danidex;
-  const mock = createMockOpenBot();
+  const mock = createMockDaniDex();
   if (catalogState === "empty") {
     mock.api.skills.list = async () => ({ skills: [], nextCursor: null });
     mock.api.marketplaceAgents.list = async () => ({ agents: [], nextCursor: null });

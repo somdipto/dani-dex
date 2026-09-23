@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { describe, expect, it, vi } from "vitest";
-import { listSiblingOpenBotInstances, parseSiblingInstances } from "./update-sibling-instances";
+import { listSiblingDaniDexInstances, parseSiblingInstances } from "./update-sibling-instances";
 
 const processMock = vi.hoisted(() => ({ execFile: vi.fn() }));
 vi.mock("node:child_process", () => processMock);
@@ -42,7 +42,7 @@ describe("parseSiblingInstances", () => {
   });
 });
 
-describe("listSiblingOpenBotInstances", () => {
+describe("listSiblingDaniDexInstances", () => {
   it("blocks installation when the OS process command fails", async () => {
     processMock.execFile.mockImplementation(
       (_file: string, _args: string[], callback: (error: Error, stdout: string) => void) => {
@@ -50,7 +50,7 @@ describe("listSiblingOpenBotInstances", () => {
       },
     );
     await expect(
-      listSiblingOpenBotInstances({ executablePath: EXECUTABLE, currentPid: 101, platform: "darwin" }),
+      listSiblingDaniDexInstances({ executablePath: EXECUTABLE, currentPid: 101, platform: "darwin" }),
     ).rejects.toThrow("Could not verify other Dani-Dex sessions");
     expect(processMock.execFile).toHaveBeenCalledWith(
       "/bin/ps",
@@ -60,7 +60,7 @@ describe("listSiblingOpenBotInstances", () => {
   });
   it("scans with ps on macOS", async () => {
     const listProcesses = vi.fn(async () => PS_OUTPUT);
-    const siblings = await listSiblingOpenBotInstances({
+    const siblings = await listSiblingDaniDexInstances({
       executablePath: EXECUTABLE,
       currentPid: 101,
       platform: "darwin",
@@ -72,7 +72,7 @@ describe("listSiblingOpenBotInstances", () => {
 
   it("rejects a failed scan instead of reporting no siblings", async () => {
     await expect(
-      listSiblingOpenBotInstances({
+      listSiblingDaniDexInstances({
         executablePath: EXECUTABLE,
         currentPid: 101,
         platform: "darwin",
@@ -85,7 +85,7 @@ describe("listSiblingOpenBotInstances", () => {
 
   it("does not scan where ps is unavailable", async () => {
     const listProcesses = vi.fn(async () => PS_OUTPUT);
-    const siblings = await listSiblingOpenBotInstances({
+    const siblings = await listSiblingDaniDexInstances({
       executablePath: EXECUTABLE,
       currentPid: 101,
       platform: "win32",

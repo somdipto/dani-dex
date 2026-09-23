@@ -139,13 +139,13 @@ async function bundleProcesses(): Promise<Array<{ uid: number; pid: number; main
   return processes;
 }
 
-export async function runningOpenBotProcesses(): Promise<Array<{ uid: number; pid: number }>> {
+export async function runningDaniDexProcesses(): Promise<Array<{ uid: number; pid: number }>> {
   return (await bundleProcesses()).filter((process) => process.main).map(({ uid, pid }) => ({ uid, pid }));
 }
 
 export function macHostOperations(): HostManagerOperations {
   return {
-    runningTenants: runningOpenBotProcesses,
+    runningTenants: runningDaniDexProcesses,
     applicationInUse: async () => (await bundleProcesses()).length !== 0,
     installedVersion: async () => {
       await verifyBundleTree(SHARED_APP, true);

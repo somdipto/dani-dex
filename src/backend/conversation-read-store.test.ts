@@ -7,8 +7,8 @@ import { DatabaseSync } from "node:sqlite";
 import type { ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { ConversationReadStore } from "./conversation-read-store";
-import { OpenBotDatabase } from "./openbot-database";
-import { migrateOpenBotDatabase } from "./openbot-database-schema";
+import { DaniDexDatabase } from "./openbot-database";
+import { migrateDaniDexDatabase } from "./openbot-database-schema";
 import { directThreadId, TeamChatStore } from "./team-chat-store";
 
 const roots: string[] = [];
@@ -21,7 +21,7 @@ describe("ConversationReadStore", () => {
   it("keeps durable monotonic read boundaries per team member", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-conversation-read-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.connection
       .prepare(
@@ -65,7 +65,7 @@ describe("ConversationReadStore", () => {
     expect(reads.readState("member-b", third).unreadCount).toBe(3);
     database.close();
 
-    const restoredDatabase = new OpenBotDatabase(root);
+    const restoredDatabase = new DaniDexDatabase(root);
     await restoredDatabase.initialize();
     const restored = new ConversationReadStore(restoredDatabase);
     expect(restored.readState("member-a", third).throughMessageId).toBe("message-2");
@@ -79,7 +79,7 @@ describe("ConversationReadStore", () => {
     restored.markUnread("member-a", third);
     expect(restored.readState("member-owner", third).throughMessageId).toBe("message-2");
     restoredDatabase.close();
-    const reopenedDatabase = new OpenBotDatabase(root);
+    const reopenedDatabase = new DaniDexDatabase(root);
     await reopenedDatabase.initialize();
     expect(new ConversationReadStore(reopenedDatabase).readState("member-a", third)).toMatchObject({
       unreadCount: 3,
@@ -91,7 +91,7 @@ describe("ConversationReadStore", () => {
   it("rebases a filtered marker cursor to the preceding supported message", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-conversation-read-filter-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.connection
       .prepare(
@@ -211,12 +211,12 @@ describe("ConversationReadStore", () => {
         legacyDirectMessage.createdAt,
         JSON.stringify(legacyDirectMessage),
       );
-    migrateOpenBotDatabase(legacy, {
+    migrateDaniDexDatabase(legacy, {
       appliedAt: "2026-08-19T10:00:00.000Z",
     });
     legacy.close();
 
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const reads = new ConversationReadStore(database);
     const legacySnapshot = snapshot([message("legacy-answer", "assistant")]);

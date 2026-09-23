@@ -22,7 +22,7 @@ import type {
   BrowserVisibilityInput,
 } from "@dani-dex/contracts/ipc";
 import { isNumber, isString } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger, redactText, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, redactText, toLogValue } from "@dani-dex/logging";
 import {
   app,
   BrowserWindow,
@@ -124,7 +124,7 @@ interface BrowserConsoleMessageDetails {
   sourceId: string;
 }
 
-const logger = createOpenBotLogger("browser-host");
+const logger = createDaniDexLogger("browser-host");
 const BROWSER_WEB_PREFERENCES = {
   sandbox: true,
   contextIsolation: true,

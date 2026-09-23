@@ -9,16 +9,16 @@ import type { AgentProvider } from "./agent-client";
 import type { AgentService } from "./agent-service";
 import {
   CREATE_AGENT_INPUT,
-  callOpenBotTool,
+  callDaniDexTool,
   createFakeClaude,
   createFakeGrok,
   createFakeOpencode,
   createTestService,
+  daniDexToolPayload,
   FakeAgentClient,
   firstInputText,
   inputRecords,
   notification,
-  openBotToolPayload,
   protocolMessages,
   startAgentTestFixture,
   startService,
@@ -1638,7 +1638,7 @@ describe.sequential("AgentService: queue", () => {
       return enqueue(...args);
     });
 
-    const result = await callOpenBotTool(client, threadId, "create_agent", {
+    const result = await callDaniDexTool(client, threadId, "create_agent", {
       name: "Research Partner",
       description: "Find primary sources.",
       initialMessage: "Research train routes to Berlin.",
@@ -1692,7 +1692,7 @@ describe.sequential("AgentService: queue", () => {
     const client = clients.get("codex");
     const threadId = store.activeProviderSession("chief")?.externalSessionId;
     if (!client || !threadId) throw new Error("The agent session did not start.");
-    const result = await callOpenBotTool(client, threadId, "create_agent", {
+    const result = await callDaniDexTool(client, threadId, "create_agent", {
       name: "Research Partner",
       title: "Research",
       description: "Find primary sources.",
@@ -1701,7 +1701,7 @@ describe.sequential("AgentService: queue", () => {
       avatarHue: 150,
     });
     expect(result.error).toBeUndefined();
-    const created = openBotToolPayload(result.result);
+    const created = daniDexToolPayload(result.result);
     expect(created).toMatchObject({
       name: "Research Partner",
       title: "Research",
@@ -1727,14 +1727,14 @@ describe.sequential("AgentService: queue", () => {
     await writeFile(avatarPath, avatarBytes);
     const events: AgentEvent[] = [];
     service.on("event", (event) => events.push(event));
-    const custom = await callOpenBotTool(client, threadId, "update_profile", {
+    const custom = await callDaniDexTool(client, threadId, "update_profile", {
       agentId,
       avatarPath: "custom-avatar.png",
     });
     expect(custom.error).toBeUndefined();
     const customUrl = service.listAgents().find((agent) => agent.id === agentId)?.avatarUrl;
     expect(customUrl).toBeTruthy();
-    expect(openBotToolPayload(custom.result)).toMatchObject({ id: agentId, avatarUrl: customUrl });
+    expect(daniDexToolPayload(custom.result)).toMatchObject({ id: agentId, avatarUrl: customUrl });
     expect(await readFile(store.resolveAvatar(agentId)?.path ?? "")).toEqual(avatarBytes);
     expect(await readFile(avatarPath)).toEqual(avatarBytes);
     expect(events).toContainEqual(
@@ -1752,7 +1752,7 @@ describe.sequential("AgentService: queue", () => {
       { avatarPath, avatarHue: null },
       { avatarPath, avatarSeed: "new-seed" },
     ]) {
-      const rejected = await callOpenBotTool(client, threadId, "update_profile", {
+      const rejected = await callDaniDexTool(client, threadId, "update_profile", {
         agentId,
         name: "Must not change",
         ...fields,
@@ -1763,37 +1763,37 @@ describe.sequential("AgentService: queue", () => {
         avatarUrl: customUrl,
       });
     }
-    const replaced = await callOpenBotTool(client, threadId, "update_profile", { agentId, avatarPath });
+    const replaced = await callDaniDexTool(client, threadId, "update_profile", { agentId, avatarPath });
     expect(replaced.error).toBeUndefined();
     expect(service.listAgents().find((agent) => agent.id === agentId)?.avatarUrl).not.toBe(customUrl);
-    const invalid = await callOpenBotTool(client, threadId, "update_profile", {
+    const invalid = await callDaniDexTool(client, threadId, "update_profile", {
       agentId,
       name: "Invalid",
       avatarHue: 999,
     });
     expect(invalid.error).toBeDefined();
     expect(service.listAgents().find((agent) => agent.id === agentId)?.name).toBe("Research Partner");
-    const invalidCreation = await callOpenBotTool(client, threadId, "create_agent", {
+    const invalidCreation = await callDaniDexTool(client, threadId, "create_agent", {
       name: "Invalid",
       description: "",
       initialMessage: " ",
     });
     expect(invalidCreation.error).toBeDefined();
     expect(service.listAgents().filter((agent) => agent.name === "Invalid")).toEqual([]);
-    await callOpenBotTool(client, threadId, "update_profile", { agentId, avatarHue: null });
+    await callDaniDexTool(client, threadId, "update_profile", { agentId, avatarHue: null });
     expect(service.listAgents().find((agent) => agent.id === agentId)?.avatarUrl).toBeNull();
     expect(store.resolveAvatar(agentId)).toBeNull();
-    const initialLayout = await callOpenBotTool(client, threadId, "list_sections", {});
-    expect(openBotToolPayload(initialLayout.result)).toMatchObject({ sections: [], agentAssignments: {} });
-    const grouped = await callOpenBotTool(client, threadId, "create_section", { name: "Research" });
+    const initialLayout = await callDaniDexTool(client, threadId, "list_sections", {});
+    expect(daniDexToolPayload(initialLayout.result)).toMatchObject({ sections: [], agentAssignments: {} });
+    const grouped = await callDaniDexTool(client, threadId, "create_section", { name: "Research" });
     expect(grouped.error).toBeUndefined();
     const sectionId = sidebar.getSnapshot().sections[0]?.id;
     if (!sectionId) throw new Error("The section was not created.");
-    const assigned = await callOpenBotTool(client, threadId, "assign_agent_section", { agentId, sectionId });
-    expect(openBotToolPayload(assigned.result)).toMatchObject({ agentAssignments: { [agentId]: sectionId } });
+    const assigned = await callDaniDexTool(client, threadId, "assign_agent_section", { agentId, sectionId });
+    expect(daniDexToolPayload(assigned.result)).toMatchObject({ agentAssignments: { [agentId]: sectionId } });
     expect(changes.at(-1)).toMatchObject({ agentAssignments: { [agentId]: sectionId } });
-    const renamed = await callOpenBotTool(client, threadId, "rename_section", { sectionId, name: "Travel" });
-    expect(openBotToolPayload(renamed.result)).toMatchObject({ sections: [{ id: sectionId, name: "Travel" }] });
+    const renamed = await callDaniDexTool(client, threadId, "rename_section", { sectionId, name: "Travel" });
+    expect(daniDexToolPayload(renamed.result)).toMatchObject({ sections: [{ id: sectionId, name: "Travel" }] });
     const persistedSidebar = new SidebarLayoutStore(sidebarPath);
     await persistedSidebar.initialize();
     expect(persistedSidebar.getSnapshot()).toMatchObject({
@@ -1807,16 +1807,16 @@ describe.sequential("AgentService: queue", () => {
       ["assign_agent_section", { agentId: "missing-agent", sectionId }],
       ["assign_agent_section", { agentId, sectionId: "missing-section" }],
     ] as const) {
-      const rejected = await callOpenBotTool(client, threadId, tool, args);
+      const rejected = await callDaniDexTool(client, threadId, tool, args);
       expect(rejected.error).toBeDefined();
       expect(sidebar.getSnapshot()).toEqual(beforeInvalid);
     }
-    const ungrouped = await callOpenBotTool(client, threadId, "assign_agent_section", { agentId, sectionId: null });
-    expect(openBotToolPayload(ungrouped.result).agentAssignments).toEqual({});
-    await callOpenBotTool(client, threadId, "assign_agent_section", { agentId, sectionId });
-    const deleted = await callOpenBotTool(client, threadId, "delete_section", { sectionId });
-    expect(openBotToolPayload(deleted.result).sections).toEqual([]);
-    expect(openBotToolPayload(deleted.result).agentAssignments).toEqual({});
+    const ungrouped = await callDaniDexTool(client, threadId, "assign_agent_section", { agentId, sectionId: null });
+    expect(daniDexToolPayload(ungrouped.result).agentAssignments).toEqual({});
+    await callDaniDexTool(client, threadId, "assign_agent_section", { agentId, sectionId });
+    const deleted = await callDaniDexTool(client, threadId, "delete_section", { sectionId });
+    expect(daniDexToolPayload(deleted.result).sections).toEqual([]);
+    expect(daniDexToolPayload(deleted.result).agentAssignments).toEqual({});
     expect(service.listAgents().some((agent) => agent.id === agentId)).toBe(true);
     await service.stop();
     service = null;

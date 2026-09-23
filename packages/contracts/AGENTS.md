@@ -44,7 +44,7 @@ Two files still mirror the list by hand, and they are not enforced the same way.
 | Mirror | What it is | What holds it |
 | --- | --- | --- |
 | `src/preload/index.ts` | the `invoke` calls the renderer actually reaches | `src/main/ipc-channel-coverage.test.ts` |
-| `src/renderer/src/preview/mock-openbot.ts` | the second implementation Storybook and the preview run against | `tsc`, against `OpenBotDesktopApi` |
+| `src/renderer/src/preview/mock-openbot.ts` | the second implementation Storybook and the preview run against | `tsc`, against `DaniDexDesktopApi` |
 
 The main process is no longer one of them. `registerIpcGroups` in `src/main/ipc/define-ipc-group.ts`
 takes one object per group, keyed by every request endpoint in it, so a channel with no handler is
@@ -56,7 +56,7 @@ decoding results — so nothing pairs a method with an endpoint, and a channel i
 trust-boundary surface that compiles. `ipc-channel-coverage.test.ts` reads its source and asserts it
 invokes exactly the request endpoints and subscribes to exactly the event ones.
 
-The mock needs no test. Both it and the preload bridge are annotated `: OpenBotDesktopApi`, so a
+The mock needs no test. Both it and the preload bridge are annotated `: DaniDexDesktopApi`, so a
 missing method is `TS2741` and a method the interface never declared is `TS2353` — the type checker
 already covers both directions, and under Tests rule 3 that is the end of it. What it cannot cover is
 the *behaviour*: `mock-openbot.ts` is a product surface, not a test double, and it is what the preview

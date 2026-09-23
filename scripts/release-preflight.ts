@@ -1,9 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 
-const logger = createOpenBotLogger("release-preflight");
+const logger = createDaniDexLogger("release-preflight");
 
 const packageJson = JSON.parse(await readFile("package.json", "utf8"));
 if (!isDynamicRecord(packageJson) || !isString(packageJson.version)) {

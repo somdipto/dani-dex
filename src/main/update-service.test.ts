@@ -15,7 +15,7 @@ import {
   supportsInstalledUpdates,
   UpdateService,
 } from "./update-service";
-import type { OpenBotSiblingInstance } from "./update-sibling-instances";
+import type { DaniDexSiblingInstance } from "./update-sibling-instances";
 
 const CHECK_TIMEOUT = 1_000;
 const CHECK_INTERVAL = 10_000;
@@ -61,7 +61,7 @@ function createService(
     beforeInstall?: () => Promise<void>;
     autoDownload?: boolean;
     checkIntervalMs?: number;
-    checkSiblingInstances?: () => Promise<readonly OpenBotSiblingInstance[]>;
+    checkSiblingInstances?: () => Promise<readonly DaniDexSiblingInstance[]>;
   } = {},
 ) {
   return new UpdateService(updater, {
@@ -230,7 +230,7 @@ describe("UpdateService", () => {
     const beforeInstall = vi.fn(async () => undefined);
     makeUpdateAvailable(updater);
     completeDownload(updater);
-    let siblings: readonly OpenBotSiblingInstance[] = [{ pid: 4242, uid: 502 }];
+    let siblings: readonly DaniDexSiblingInstance[] = [{ pid: 4242, uid: 502 }];
     const checkSiblingInstances = vi.fn(async () => siblings);
     const service = createService(updater, { platform: "darwin", beforeInstall, checkSiblingInstances });
     service.start(false);
@@ -319,8 +319,8 @@ describe("UpdateService", () => {
     const updater = new FakeUpdater();
     makeUpdateAvailable(updater);
     completeDownload(updater);
-    let finishScan: (value: readonly OpenBotSiblingInstance[]) => void = () => undefined;
-    const scan = new Promise<readonly OpenBotSiblingInstance[]>((resolve) => {
+    let finishScan: (value: readonly DaniDexSiblingInstance[]) => void = () => undefined;
+    const scan = new Promise<readonly DaniDexSiblingInstance[]>((resolve) => {
       finishScan = resolve;
     });
     let finishPrepare: () => void = () => undefined;

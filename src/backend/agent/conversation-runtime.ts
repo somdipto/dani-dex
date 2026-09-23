@@ -2,7 +2,7 @@ import type { AgentEvent, AgentSummary, ConversationSnapshot } from "@dani-dex/c
 import type { AgentClient } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import { sortConversationMessages } from "../conversation-snapshots";
-import type { OpenBotDatabase } from "../openbot-database";
+import type { DaniDexDatabase } from "../openbot-database";
 import { conversationContentSignature } from "./delivery-content";
 
 interface TransactionScope {
@@ -11,7 +11,7 @@ interface TransactionScope {
 }
 
 /** Only the caller that opened the transaction holds a scope, so a nested call finds the owner's. */
-const openTransactions = new WeakMap<OpenBotDatabase, TransactionScope>();
+const openTransactions = new WeakMap<DaniDexDatabase, TransactionScope>();
 
 /**
  * Runs `work` inside a SQLite transaction, opening one only when the caller is not already inside
@@ -25,7 +25,7 @@ const openTransactions = new WeakMap<OpenBotDatabase, TransactionScope>();
  * an owner that fails *after* a nested call succeeded still undoes that call's in-memory slice.
  */
 export function withDatabaseTransaction<T>(
-  database: OpenBotDatabase,
+  database: DaniDexDatabase,
   work: () => T,
   onRollback?: () => void,
   onCommit?: () => void,

@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import BrowserPreviewSidebar from "../src/features/conversation/BrowserPreviewSidebar";
 import browserPreviewUrl from "./assets/browser-takeover-preview.svg";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 const tabs = [
   {
@@ -43,7 +43,7 @@ const meta = {
   decorators: [
     (Story) => {
       const previous = window.danidex;
-      window.danidex = createMockOpenBot({
+      window.danidex = createMockDaniDex({
         browserPreviews: {
           docs: { dataUrl: browserPreviewUrl, width: 960, height: 600 },
           settings: null,

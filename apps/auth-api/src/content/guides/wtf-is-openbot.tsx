@@ -1,4 +1,4 @@
-export function WtfIsOpenBot() {
+export function WtfIsDaniDex() {
   return (
     <>
       <p>

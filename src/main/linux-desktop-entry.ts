@@ -1,9 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 
-const logger = createOpenBotLogger("linux-desktop-entry");
+const logger = createDaniDexLogger("linux-desktop-entry");
 
 /**
  * The file name has to stay `openbot.desktop`: it is `desktopName` in package.json, which is what

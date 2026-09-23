@@ -1,5 +1,5 @@
 import type { AgentEvent } from "@dani-dex/contracts/ipc";
-import type { OpenBotDatabase } from "../openbot-database";
+import type { DaniDexDatabase } from "../openbot-database";
 import type { ConversationRuntime } from "./conversation-runtime";
 
 export interface PendingDeltaInput {
@@ -22,7 +22,7 @@ export interface DeltaBufferHooks {
 
 export interface DeltaBufferOptions {
   conversation: ConversationRuntime;
-  database: OpenBotDatabase;
+  database: DaniDexDatabase;
   hooks: DeltaBufferHooks;
 }
 
@@ -37,7 +37,7 @@ export interface DeltaBufferOptions {
  */
 export class DeltaBuffer {
   readonly #conversation: ConversationRuntime;
-  readonly #database: OpenBotDatabase;
+  readonly #database: DaniDexDatabase;
   readonly #hooks: DeltaBufferHooks;
   readonly #pending = new Map<string, BufferedDelta>();
 

@@ -2,7 +2,7 @@ import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { decodeSaveAgentProfileResult } from "@dani-dex/contracts/ipc";
 import { isGeneratedAgentId, isUuidV4 } from "@dani-dex/contracts/validation";
-import type { OpenBotDatabase } from "../openbot-database";
+import type { DaniDexDatabase } from "../openbot-database";
 
 /** A marker precedes every profile-created row, so a crash cannot orphan an executable agent. */
 export class ProfileCreationRecovery {
@@ -18,7 +18,7 @@ export class ProfileCreationRecovery {
     await writeFile(join(this.root, `${agentId}.${operationId}.pending`), "", { flag: "wx", mode: 0o600 });
   }
 
-  async recover(database: OpenBotDatabase, removeAgent: (agentId: string) => Promise<void>): Promise<void> {
+  async recover(database: DaniDexDatabase, removeAgent: (agentId: string) => Promise<void>): Promise<void> {
     await mkdir(this.root, { recursive: true, mode: 0o700 });
     for (const entry of await readdir(this.root, { withFileTypes: true })) {
       if (!entry.isFile()) continue;

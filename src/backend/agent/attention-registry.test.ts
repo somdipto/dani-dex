@@ -14,9 +14,9 @@ import type { AgentProvider } from "../agent-client";
 import type { AgentService } from "../agent-service";
 import {
   createTestService,
+  daniDexToolPayload,
   FakeAgentClient,
   fakeBrowser,
-  openBotToolPayload,
   startAgentTestFixture,
   stopAgentTestFixture,
   stores,
@@ -813,7 +813,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
 
     await service.respondToBrowserTakeover({ requestId: "takeover-call", decision: "complete" });
     await waitFor(() => client.responses.length === 4);
-    expect(openBotToolPayload(client.responses[3]?.result)).toEqual({
+    expect(daniDexToolPayload(client.responses[3]?.result)).toEqual({
       status: "completed",
       next: "Take a fresh snapshot and continue the task.",
     });
@@ -846,7 +846,7 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
     );
     await service.respondToBrowserTakeover({ requestId: "takeover-cancel", decision: "cancel" });
     await waitFor(() => client.responses.length === 5);
-    expect(openBotToolPayload(client.responses[4]?.result)).toEqual({ status: "cancelled" });
+    expect(daniDexToolPayload(client.responses[4]?.result)).toEqual({ status: "cancelled" });
     // Cancelling returns the tab as surely as completing does.
     expect(control).toEqual(["begin:protected-tab", "end:protected-tab", "begin:protected-tab", "end:protected-tab"]);
   });

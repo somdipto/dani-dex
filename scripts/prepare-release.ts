@@ -1,8 +1,8 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { isDynamicRecord, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 
-const logger = createOpenBotLogger("prepare-release");
+const logger = createDaniDexLogger("prepare-release");
 
 type Increment = "major" | "minor" | "patch";
 

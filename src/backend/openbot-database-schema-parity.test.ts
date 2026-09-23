@@ -15,7 +15,7 @@ import { DatabaseSync } from "node:sqlite";
 import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it } from "vitest";
-import { migrateOpenBotDatabase } from "./openbot-database-schema";
+import { migrateDaniDexDatabase } from "./openbot-database-schema";
 
 const appliedAt = "2026-09-03T10:00:00.000Z";
 
@@ -50,11 +50,11 @@ describe("Dani-Dex database build paths", () => {
   });
 });
 
-// An empty database has no tables, so `migrateOpenBotDatabase` takes the
+// An empty database has no tables, so `migrateDaniDexDatabase` takes the
 // `createLatestDatabase` branch - the path every new install follows.
 async function newInstallDatabase(): Promise<DatabaseSync> {
   const database = await openDatabase();
-  migrateOpenBotDatabase(database, { appliedAt });
+  migrateDaniDexDatabase(database, { appliedAt });
   return database;
 }
 
@@ -68,7 +68,7 @@ async function newInstallDatabase(): Promise<DatabaseSync> {
 async function upgradedInstallDatabase(): Promise<DatabaseSync> {
   const database = await openDatabase();
   database.exec("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)");
-  migrateOpenBotDatabase(database, { appliedAt });
+  migrateDaniDexDatabase(database, { appliedAt });
   return database;
 }
 

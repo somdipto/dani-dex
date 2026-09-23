@@ -2,13 +2,13 @@ import { lstat, mkdir, readdir, readFile, realpath, rename, unlink, writeFile } 
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { AgentSummary, InstalledSkill } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { parse as parseYaml } from "yaml";
 
 const MANAGED_SKILL_SLUG = "openbot-site-hosting";
 const OWNERSHIP_MARKER = ".openbot-managed.json";
 
-const logger = createOpenBotLogger("managed-skill-service");
+const logger = createDaniDexLogger("managed-skill-service");
 
 interface SyncTargetsResult {
   collisions: string[];

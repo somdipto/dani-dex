@@ -5,7 +5,7 @@ import { createServer } from "node:net";
 import { type NetworkInterfaceInfo, networkInterfaces } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import {
   developmentInstanceIdForWorktree,
   developmentUserDataName,
@@ -30,7 +30,7 @@ import { resolveDevelopmentAppDataRoot } from "./development-state-paths";
 import { withoutElectronRuntimeFlags } from "./electron-spawn-env";
 import { prepareDevelopmentEnvironment } from "./prepare-dev-environment";
 
-const logger = createOpenBotLogger("dev-services");
+const logger = createDaniDexLogger("dev-services");
 
 export type DevelopmentService = "api" | "remote" | "app" | "test-client";
 type DevelopmentTarget = Exclude<DevelopmentService, "remote"> | "all";

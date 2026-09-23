@@ -2,7 +2,7 @@ import { join, resolve } from "node:path";
 import { parseInviteUrl } from "@dani-dex/contracts/invite-links";
 import { type CentralAuthState, IPC_CHANNELS } from "@dani-dex/contracts/ipc";
 import { translateFor } from "@dani-dex/i18n";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { createRemoteDirectoryRefresh } from "@dani-dex/team-client/remote-directory";
 import { app, BrowserWindow, dialog, powerMonitor, protocol, screen, shell } from "electron";
 import { readAppVariant, resolveAppIconPath } from "./app-icon";
@@ -55,7 +55,7 @@ import { sendToRenderer } from "./renderer-ipc";
 import { configureContentSecurityPolicy, configureRendererPermissions } from "./session-configuration";
 import { TeardownRegistry } from "./teardown-registry";
 
-const logger = createOpenBotLogger("main");
+const logger = createDaniDexLogger("main");
 
 const commandLineUserDataDirectory = app.commandLine.getSwitchValue("user-data-dir").trim();
 const developmentProfile = !app.isPackaged ? readDevelopmentProfile(process.env.OPENBOT_DEV_PROFILE) : null;

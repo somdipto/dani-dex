@@ -18,7 +18,7 @@ import {
   isFreeOpencodeModel,
   isReasoningEffort,
 } from "@dani-dex/contracts/ipc";
-import { createOpenBotLogger, redactText } from "@dani-dex/logging";
+import { createDaniDexLogger, redactText } from "@dani-dex/logging";
 import type { AgentClient, AgentProvider } from "./../agent-client";
 import { CodexAppServerClient } from "./../app-server-client";
 import {
@@ -60,7 +60,7 @@ import {
 } from "./provider-status";
 import { providerForAgent, providerLabel } from "./thread-items";
 
-const logger = createOpenBotLogger("provider-runtime");
+const logger = createDaniDexLogger("provider-runtime");
 
 const CODEX_LOGIN_TIMEOUT_MS = 10 * 60_000;
 const ACCOUNT_USAGE_READ_TIMEOUT_MS = 30_000;

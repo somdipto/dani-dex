@@ -6,7 +6,7 @@ import type {
   CreateChannelRoutineInput,
   UpdateChannelRoutineInput,
 } from "@dani-dex/contracts/ipc";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 import {
   type DueRoutine,
   type OwnedRoutine,
@@ -42,7 +42,7 @@ const CHANNEL_ROUTINE_TABLES: RoutineTables = {
  * joins a run to the tasks it produced.
  */
 export class ChannelRoutineStore extends RoutineStore {
-  constructor(database: OpenBotDatabase) {
+  constructor(database: DaniDexDatabase) {
     super(database, CHANNEL_ROUTINE_TABLES);
   }
 

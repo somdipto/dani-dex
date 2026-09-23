@@ -4,7 +4,7 @@
 // grow without bound, and input sizes it rejects before a service ever sees them.
 
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { afterEach, describe, expect, it } from "vitest";
 import { createAgents, createTeamApiFixture, stopTeamApiFixtures } from "./team-api-server-test-harness";
 
@@ -21,7 +21,7 @@ describe("TeamApiServer hardening", () => {
           throw internalError;
         },
       }),
-      logger: createOpenBotLogger("test", (line) => lines.push(line)),
+      logger: createDaniDexLogger("test", (line) => lines.push(line)),
     });
 
     const token = await signIn();

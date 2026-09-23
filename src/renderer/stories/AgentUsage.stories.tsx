@@ -4,7 +4,7 @@ import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { AgentUsagePanel } from "../src/features/usage/AgentUsagePanel";
 import { mockHostAnalytics } from "../src/preview/mock-agent-analytics";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 function UsageStory(props: {
   state: "ready" | "empty" | "partial" | "loading" | "error" | "unsupported" | "large" | "small" | "long";
@@ -12,7 +12,7 @@ function UsageStory(props: {
   agentId?: string;
 }) {
   const previous = window.danidex;
-  const mock = createMockOpenBot();
+  const mock = createMockDaniDex();
   window.danidex = mock.api;
   mock.api.agent.getHostAnalytics = async (input) => {
     if (props.state === "error") throw new Error("Host is offline.");

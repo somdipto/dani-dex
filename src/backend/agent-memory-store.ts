@@ -1,7 +1,7 @@
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { AgentMemory } from "@dani-dex/contracts/ipc";
 import { MemoryStore, type MemoryTables } from "./memory-store";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 
 export interface SaveAutomaticMemoryInput {
   agentId: string;
@@ -24,7 +24,7 @@ const AGENT_MEMORY_TABLES: MemoryTables = {
  * every row so `AgentMemory` keeps the exact shape its callers and IPC guards already expect.
  */
 export class AgentMemoryStore extends MemoryStore {
-  constructor(database: OpenBotDatabase) {
+  constructor(database: DaniDexDatabase) {
     super(database, AGENT_MEMORY_TABLES);
   }
 

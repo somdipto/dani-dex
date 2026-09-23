@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInviteUrl } from "./invite-links";
-import { createOpenBotPluginUrl, createPluginShareUrl, isPluginUrl, parsePluginUrl } from "./plugin-links";
+import { createDaniDexPluginUrl, createPluginShareUrl, isPluginUrl, parsePluginUrl } from "./plugin-links";
 
 const invitePayload = {
   apiUrl: "https://studio-mac-k7m4q2pz-host.openbot.run/",
@@ -12,17 +12,17 @@ const invitePayload = {
 describe("Dani-Dex plugin links", () => {
   it("builds both forms from a slug", () => {
     expect(createPluginShareUrl("aave")).toBe("https://openbot.run/plugins/aave");
-    expect(createOpenBotPluginUrl("aave")).toBe("dani-dex://plugins/aave");
+    expect(createDaniDexPluginUrl("aave")).toBe("dani-dex://plugins/aave");
   });
 
   it("reads back the slug it wrote, in either form", () => {
     expect(parsePluginUrl(createPluginShareUrl("linear-triage"))).toBe("linear-triage");
-    expect(parsePluginUrl(createOpenBotPluginUrl("linear-triage"))).toBe("linear-triage");
+    expect(parsePluginUrl(createDaniDexPluginUrl("linear-triage"))).toBe("linear-triage");
   });
 
   it("refuses to build a link for a slug it would not read back", () => {
     expect(() => createPluginShareUrl("Aave")).toThrow();
-    expect(() => createOpenBotPluginUrl("catalog.json")).toThrow();
+    expect(() => createDaniDexPluginUrl("catalog.json")).toThrow();
   });
 
   it.each([

@@ -11,7 +11,7 @@ import { articleGradient, articleGradientUniforms } from "./src/lib/article-grad
 
 declare global {
   interface Window {
-    openBotContentImage?: { render: (job: ContentImageJob) => Promise<string> };
+    daniDexContentImage?: { render: (job: ContentImageJob) => Promise<string> };
   }
 }
 
@@ -19,7 +19,7 @@ declare global {
 const SCRIM_COLOR = "26, 26, 26";
 const TITLE_MAX_LINES = 3;
 
-window.openBotContentImage = { render: renderContentImage };
+window.daniDexContentImage = { render: renderContentImage };
 
 async function renderContentImage(job: ContentImageJob): Promise<string> {
   const host = document.createElement("div");

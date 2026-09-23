@@ -6,7 +6,7 @@ import { AgentRoutinesSettings } from "../src/features/conversation/AgentRoutine
 import AgentSettingsPanel from "../src/features/conversation/AgentSettingsPanel";
 import { agentRoutinesPort } from "../src/features/conversation/routines-port";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_MODELS } from "./fixtures";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 const morningBrief: Routine = {
   id: "routine-morning-brief",
@@ -56,7 +56,7 @@ const fullPanelRuns: RoutineRun[] = [
 
 function RoutinesStory(props: { routines?: Routine[]; runs?: RoutineRun[] }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot({ routines: { chief: props.routines ?? storyRoutines } });
+  const mock = createMockDaniDex({ routines: { chief: props.routines ?? storyRoutines } });
   window.danidex = mock.api;
   if (props.runs) mock.api.agent.listRoutineRuns = async () => structuredClone(props.runs ?? []);
   onCleanup(() => {
@@ -73,7 +73,7 @@ function RoutinesStory(props: { routines?: Routine[]; runs?: RoutineRun[] }) {
 function FullSettingsPanelStory() {
   const previousApi = window.danidex;
   const previousWidth = window.localStorage.getItem("openbot:settings-panel-width");
-  const mock = createMockOpenBot({ routines: { chief: storyRoutines } });
+  const mock = createMockDaniDex({ routines: { chief: storyRoutines } });
   window.danidex = mock.api;
   mock.api.agent.listRoutineRuns = async (input) =>
     input.routineId === morningBrief.id ? structuredClone(fullPanelRuns) : [];

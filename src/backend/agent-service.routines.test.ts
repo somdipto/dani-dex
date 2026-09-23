@@ -6,13 +6,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProvider } from "./agent-client";
 import type { AgentService } from "./agent-service";
 import {
-  callOpenBotTool,
+  callDaniDexTool,
   createTestService,
-  expectOpenBotToolError,
+  daniDexToolPayload,
+  expectDaniDexToolError,
   FakeAgentClient,
   inputRecords,
   notification,
-  openBotToolPayload,
   protocolMessages,
   startAgentTestFixture,
   stopAgentTestFixture,
@@ -401,10 +401,10 @@ describe.sequential("AgentService: routines", () => {
     if (!client || !threadId || !turnId || !messageId) throw new Error("The reaction test turn did not start.");
 
     await service.setMessageReaction({ agentId: "chief", messageId, emoji: "❤️" });
-    const first = await callOpenBotTool(client, threadId, "react_to_user_message", { emoji: "🎉" }, turnId);
-    expect(openBotToolPayload(first.result)).toMatchObject({ status: "reacted", messageId, emoji: "🎉" });
-    const second = await callOpenBotTool(client, threadId, "react_to_user_message", { emoji: "👨‍👩‍👧‍👦" }, turnId);
-    expect(openBotToolPayload(second.result)).toMatchObject({ emoji: "👨‍👩‍👧‍👦" });
+    const first = await callDaniDexTool(client, threadId, "react_to_user_message", { emoji: "🎉" }, turnId);
+    expect(daniDexToolPayload(first.result)).toMatchObject({ status: "reacted", messageId, emoji: "🎉" });
+    const second = await callDaniDexTool(client, threadId, "react_to_user_message", { emoji: "👨‍👩‍👧‍👦" }, turnId);
+    expect(daniDexToolPayload(second.result)).toMatchObject({ emoji: "👨‍👩‍👧‍👦" });
 
     const message = (await service.readConversation("chief")).messages.find((candidate) => candidate.id === messageId);
     expect(message).toMatchObject({
@@ -414,7 +414,7 @@ describe.sequential("AgentService: routines", () => {
         { emoji: "👨‍👩‍👧‍👦", actor: { kind: "agent", agentId: "chief" } },
       ],
     });
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "react_to_user_message",
@@ -453,7 +453,7 @@ describe.sequential("AgentService: routines", () => {
     const threadId = store.activeProviderSession("chief")?.externalSessionId;
     const turnId = service.listQueue("chief").deliveries[0]?.turnId;
     if (!client || !threadId || !turnId) throw new Error("The teammate reaction test turn did not start.");
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "react_to_user_message",
@@ -488,14 +488,14 @@ describe.sequential("AgentService: routines", () => {
     const turnId = service.listQueue("chief").deliveries[0]?.turnId;
     if (!client || !threadId || !turnId) throw new Error("The screenshot attachment turn did not start.");
 
-    const result = await callOpenBotTool(
+    const result = await callDaniDexTool(
       client,
       threadId,
       "attach_files_to_response",
       { paths: [screenshotPath] },
       turnId,
     );
-    expect(openBotToolPayload(result.result)).toMatchObject({
+    expect(daniDexToolPayload(result.result)).toMatchObject({
       status: "attached",
       attachments: [{ name: "desktop-screenshot.png" }],
     });
@@ -525,7 +525,7 @@ describe.sequential("AgentService: routines", () => {
 
     const outsidePath = join(root, "outside.png");
     await writeFile(outsidePath, screenshot);
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "attach_files_to_response",
@@ -535,7 +535,7 @@ describe.sequential("AgentService: routines", () => {
     );
     const linkedPath = join(store.sharedRoot, "linked-outside.png");
     await symlink(outsidePath, linkedPath);
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "attach_files_to_response",
@@ -543,7 +543,7 @@ describe.sequential("AgentService: routines", () => {
       "inside this agent's workspace or the Dani-Dex shared directory",
       turnId,
     );
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "attach_files_to_response",
@@ -569,7 +569,7 @@ describe.sequential("AgentService: routines", () => {
     service.on("event", publicationFailure);
     service.on("event", recordPublicationEvent);
     const publicationCallId = "publication-failure-call";
-    const publicationResult = await callOpenBotTool(
+    const publicationResult = await callDaniDexTool(
       client,
       threadId,
       "attach_files_to_response",
@@ -579,7 +579,7 @@ describe.sequential("AgentService: routines", () => {
     );
     service.off("event", publicationFailure);
     service.off("event", recordPublicationEvent);
-    expect(openBotToolPayload(publicationResult.result)).toMatchObject({
+    expect(daniDexToolPayload(publicationResult.result)).toMatchObject({
       status: "attached",
       attachments: [{ name: "published-screenshot.png" }],
     });
@@ -635,7 +635,7 @@ describe.sequential("AgentService: routines", () => {
       return originalStore(input);
     });
     const callId = "concurrent-attachment-call";
-    const first = callOpenBotTool(
+    const first = callDaniDexTool(
       client,
       threadId,
       "attach_files_to_response",
@@ -644,7 +644,7 @@ describe.sequential("AgentService: routines", () => {
       callId,
     );
     await storeStarted;
-    const second = callOpenBotTool(
+    const second = callDaniDexTool(
       client,
       threadId,
       "attach_files_to_response",
@@ -662,7 +662,7 @@ describe.sequential("AgentService: routines", () => {
 
     const [firstResult, secondResult] = await Promise.all([first, second, stopping]);
     expect(stopCompleted).toBe(true);
-    expect(openBotToolPayload(firstResult.result)).toEqual(openBotToolPayload(secondResult.result));
+    expect(daniDexToolPayload(firstResult.result)).toEqual(daniDexToolPayload(secondResult.result));
     expect(storage).toHaveBeenCalledTimes(1);
     expect(
       (await service.readConversation("chief")).messages.filter(
@@ -700,7 +700,7 @@ describe.sequential("AgentService: routines", () => {
     const persistence = vi.spyOn(mailbox, "persistGeneratedAttachmentsWithConversation").mockImplementationOnce(() => {
       throw new Error("conversation write failed");
     });
-    const failed = await callOpenBotTool(
+    const failed = await callDaniDexTool(
       client,
       threadId,
       "attach_files_to_response",
@@ -715,7 +715,7 @@ describe.sequential("AgentService: routines", () => {
     await expect(mailbox.listExportAttachments()).resolves.toEqual([]);
 
     persistence.mockRestore();
-    const retried = await callOpenBotTool(
+    const retried = await callDaniDexTool(
       client,
       threadId,
       "attach_files_to_response",
@@ -723,7 +723,7 @@ describe.sequential("AgentService: routines", () => {
       turnId,
       callId,
     );
-    expect(openBotToolPayload(retried.result)).toMatchObject({
+    expect(daniDexToolPayload(retried.result)).toMatchObject({
       status: "attached",
       attachments: [{ name: "retry-screenshot.png" }],
     });

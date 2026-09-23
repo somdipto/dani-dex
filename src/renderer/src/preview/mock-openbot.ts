@@ -29,6 +29,7 @@ import type {
   ConversationSnapshot,
   CreateTeamInviteInput,
   CustomProviderSummary,
+  DaniDexDesktopApi,
   DirectConversationSnapshot,
   DirectMessage,
   DirectMessageRealtimeEvent,
@@ -45,7 +46,6 @@ import type {
   MacPermissionId,
   MarketplaceSkillDetail,
   OpenAttachmentInput,
-  OpenBotDesktopApi,
   OpenSharedFileInput,
   OpenWorkspaceFileInput,
   ProviderRuntimeSnapshot,
@@ -125,7 +125,7 @@ import { applySidebarLayoutAction } from "./mock-sidebar-layout";
 
 type Listener<T> = (value: T) => void;
 
-export interface MockOpenBotOptions {
+export interface MockDaniDexOptions {
   providerRuntimeSnapshot?: ProviderRuntimeSnapshot;
   providerRuntimeFailure?: boolean;
   appInfo?: AppInfo;
@@ -172,8 +172,8 @@ function mockCustomProviderModels(provider: CustomProviderSummary): AgentModelOp
   }));
 }
 
-export interface MockOpenBotControls {
-  api: OpenBotDesktopApi;
+export interface MockDaniDexControls {
+  api: DaniDexDesktopApi;
   emitAgentEvent: (event: AgentEvent) => void;
   onLatestConversationOpened: (listener: (agentId: string) => void) => () => void;
   onLatestDirectConversationOpened: (listener: (memberId: string) => void) => () => void;
@@ -221,7 +221,7 @@ function clone<T>(value: T): T {
   return structuredClone(value);
 }
 
-export function createMockOpenBot(options: MockOpenBotOptions = {}): MockOpenBotControls {
+export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDexControls {
   const appInfo = clone(options.appInfo ?? STORY_APP_INFO);
   const defaultAuthState: CentralAuthState = {
     status: "signed_in",
@@ -586,7 +586,7 @@ export function createMockOpenBot(options: MockOpenBotOptions = {}): MockOpenBot
     };
   }
 
-  const api: OpenBotDesktopApi = {
+  const api: DaniDexDesktopApi = {
     getAppInfo: async () => clone(appInfo),
     getSetupState: async () => clone(setupState),
     saveSetup: async ({ preferredProvider, preferredModel }) => {

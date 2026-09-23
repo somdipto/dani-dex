@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 import { access, readdir, readFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { bundledLibraryLicense, isPortableLoadPath, readMachOLoadPaths } from "./mac-runtime-dylibs";
 import { createRemoteDesktopInputDigest, loadNativeRuntimeLock } from "./native-runtime-lock";
 
-const logger = createOpenBotLogger("verify-remote-desktop-runtime");
+const logger = createDaniDexLogger("verify-remote-desktop-runtime");
 
 const platform = process.argv.includes("--windows") ? "win32" : "darwin";
 const architecture = platform === "win32" ? "x64" : "arm64";

@@ -10,7 +10,7 @@ import type {
 import developmentLogoUrl from "../assets/openbot-logo-dev.png";
 import productionLogoUrl from "../assets/openbot-logo-production.png";
 import { STORY_PRESENCE } from "./fixtures";
-import type { MockOpenBotOptions } from "./mock-openbot";
+import type { MockDaniDexOptions } from "./mock-openbot";
 
 const LANDING_PREVIEW_NOW = "2026-08-21T10:00:00.000Z";
 
@@ -375,4 +375,4 @@ export const LANDING_PREVIEW_OPTIONS = {
   browserTabs: [],
   browserControlState: { sessions: [] },
   remoteDesktopSessions: [],
-} satisfies MockOpenBotOptions;
+} satisfies MockDaniDexOptions;

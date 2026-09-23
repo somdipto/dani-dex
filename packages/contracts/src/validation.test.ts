@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   hasUnsafeAccountNameCharacters,
-  isOpenBotTeamApiHostname,
+  isDaniDexTeamApiHostname,
   isUuidV4,
   isValidHostname,
   normalizeAccountName,
@@ -73,12 +73,12 @@ describe("shared boundary validation", () => {
   });
 
   it("accepts readable first-level team hosts", () => {
-    expect(isOpenBotTeamApiHostname("studio-mac-k7m4q2pz-host.openbot.run")).toBe(true);
-    expect(isOpenBotTeamApiHostname("vnc-studio-mac-k7m4q2pz-host.openbot.run")).toBe(false);
-    expect(isOpenBotTeamApiHostname("Studio-mac-k7m4q2pz-host.openbot.run")).toBe(false);
-    expect(isOpenBotTeamApiHostname("studio-mac-k7m4q2p-host.openbot.run")).toBe(false);
-    expect(isOpenBotTeamApiHostname("studio-mac-k7m4q2pz.teams.openbot.run")).toBe(false);
-    expect(isOpenBotTeamApiHostname("host.example.com")).toBe(false);
+    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2pz-host.openbot.run")).toBe(true);
+    expect(isDaniDexTeamApiHostname("vnc-studio-mac-k7m4q2pz-host.openbot.run")).toBe(false);
+    expect(isDaniDexTeamApiHostname("Studio-mac-k7m4q2pz-host.openbot.run")).toBe(false);
+    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2p-host.openbot.run")).toBe(false);
+    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2pz.teams.openbot.run")).toBe(false);
+    expect(isDaniDexTeamApiHostname("host.example.com")).toBe(false);
   });
 
   it("slugifies friendly server names for DNS", () => {

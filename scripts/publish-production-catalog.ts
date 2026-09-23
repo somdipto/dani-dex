@@ -4,10 +4,10 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { buildProductionCatalog } from "./build-production-catalog";
 
-const logger = createOpenBotLogger("publish-production-catalog");
+const logger = createDaniDexLogger("publish-production-catalog");
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const authApiRoot = join(projectRoot, "apps", "auth-api");

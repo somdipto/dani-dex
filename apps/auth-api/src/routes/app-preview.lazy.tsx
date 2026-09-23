@@ -2,8 +2,8 @@ import { createLazyFileRoute } from "@tanstack/solid-router";
 import { createSignal, lazy, onSettled, Show } from "solid-js";
 import "../../../../src/renderer/src/preview/preview.css";
 
-const OpenBotPlayground = lazy(() =>
-  import("@dani-dex/renderer-preview").then((module) => ({ default: module.OpenBotPlayground })),
+const DaniDexPlayground = lazy(() =>
+  import("@dani-dex/renderer-preview").then((module) => ({ default: module.DaniDexPlayground })),
 );
 
 export const Route = createLazyFileRoute("/app-preview")({ component: AppPreviewPage });
@@ -20,7 +20,7 @@ export function AppPreviewPage() {
         when={mounted()}
         fallback={<div class="openbot-playground-loading" role="status" aria-label="Loading Dani-Dex preview" />}
       >
-        <OpenBotPlayground variant="landing" />
+        <DaniDexPlayground variant="landing" />
       </Show>
     </div>
   );

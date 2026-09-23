@@ -5,8 +5,8 @@ import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import productionLogoUrl from "../src/assets/openbot-logo-production.png";
 import { AccountUpdateIsland } from "../src/features/account/AccountUpdateIsland";
+import { DaniDexPlayground } from "../src/preview/DaniDexPlayground";
 import { STORY_AGENT_SUMMARIES, STORY_SERVERS, STORY_UPDATE_STATUS, STORY_USAGE } from "../src/preview/fixtures";
-import { OpenBotPlayground } from "../src/preview/OpenBotPlayground";
 import "./AccountDockConcepts.css";
 
 type UpdateIslandState = "none" | "available" | "ready";
@@ -236,7 +236,7 @@ function AccountDockConceptPlayground(props: AccountDockConceptPlaygroundProps) 
 
   return (
     <div class="account-dock-concept">
-      <OpenBotPlayground
+      <DaniDexPlayground
         options={{
           authState: {
             status: "signed_in",

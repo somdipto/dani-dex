@@ -7,7 +7,7 @@ import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { McpServerConfig } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { McpServerStore } from "./mcp-server-store";
-import { OpenBotDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./openbot-database";
 
 const roots: string[] = [];
 
@@ -30,7 +30,7 @@ describe("McpServerStore", () => {
     );
     database.close();
 
-    const reopened = new OpenBotDatabase(database.userDataPath);
+    const reopened = new DaniDexDatabase(database.userDataPath);
     await reopened.initialize();
     const [config] = new McpServerStore(reopened).list();
     expect(config).toEqual({ ...saved, id: saved.id });
@@ -188,10 +188,10 @@ function stdioConfig(overrides: Partial<McpServerConfig> = {}): McpServerConfig 
   };
 }
 
-async function setup(): Promise<{ database: OpenBotDatabase; store: McpServerStore }> {
+async function setup(): Promise<{ database: DaniDexDatabase; store: McpServerStore }> {
   const root = await mkdtemp(join(tmpdir(), "openbot-mcp-store-"));
   roots.push(root);
-  const database = new OpenBotDatabase(root);
+  const database = new DaniDexDatabase(root);
   await database.initialize();
   return { database, store: new McpServerStore(database) };
 }

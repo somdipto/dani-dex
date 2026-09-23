@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { OpenBotDesktopApi } from "@dani-dex/contracts/ipc";
+import type { DaniDexDesktopApi } from "@dani-dex/contracts/ipc";
 
 declare global {
   interface HighlightRegistry {
@@ -9,6 +9,6 @@ declare global {
   }
 
   interface Window {
-    danidex: OpenBotDesktopApi;
+    danidex: DaniDexDesktopApi;
   }
 }

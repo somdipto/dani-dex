@@ -4,7 +4,7 @@ import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProfile } from "../../data";
 import { STORY_AGENTS } from "../../preview/fixtures";
-import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
 import { SharedTablesModal } from "./SharedTablesModal";
 
 const people: SharedTable = { name: "people", ownerAgentId: "chief", rowCount: 214 };
@@ -13,7 +13,7 @@ const orphaned: SharedTable = { name: "handled_mail", ownerAgentId: null, rowCou
 let tableState: SharedTable[];
 let listTables: Mock<() => Promise<SharedTable[]>>;
 let deleteTable: Mock<(input: DeleteSharedTableInput) => Promise<void>>;
-let activeMock: MockOpenBotControls | undefined;
+let activeMock: MockDaniDexControls | undefined;
 const agents: AgentProfile[] = STORY_AGENTS;
 
 afterEach(() => {
@@ -27,7 +27,7 @@ beforeEach(() => {
   deleteTable = vi.fn(async (input: DeleteSharedTableInput) => {
     tableState = tableState.filter((table) => table.name !== input.name);
   });
-  activeMock = createMockOpenBot();
+  activeMock = createMockDaniDex();
   activeMock.api.agent.listTables = listTables;
   activeMock.api.agent.deleteTable = deleteTable;
   window.danidex = activeMock.api;

@@ -657,7 +657,7 @@ describe("remote server order", () => {
       }),
     );
 
-    const bytes = new TextEncoder().encode("name,value\nOpenBot,1\n");
+    const bytes = new TextEncoder().encode("name,value\nDaniDex,1\n");
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const url = new URL(input instanceof Request ? input.url : input.toString());
       const headers = new Headers(init?.headers);

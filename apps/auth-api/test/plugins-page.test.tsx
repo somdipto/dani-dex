@@ -1,4 +1,4 @@
-import { createOpenBotPluginUrl } from "@dani-dex/contracts/plugin-links";
+import { createDaniDexPluginUrl } from "@dani-dex/contracts/plugin-links";
 import { cleanup, fireEvent, render, screen } from "@solidjs/testing-library";
 import type { JSX } from "@solidjs/web";
 import { createRootRoute, createRoute, createRouter, isNotFound, RouterContextProvider } from "@tanstack/solid-router";
@@ -137,7 +137,7 @@ describe("plugin page", () => {
       "href",
       `openbot://plugins/${plugin.slug}`,
     );
-    expect(createOpenBotPluginUrl(plugin.slug)).toBe(`openbot://plugins/${plugin.slug}`);
+    expect(createDaniDexPluginUrl(plugin.slug)).toBe(`openbot://plugins/${plugin.slug}`);
   });
 
   /* The catalog becomes a fetched document, and a link row is the only place a listing's own string

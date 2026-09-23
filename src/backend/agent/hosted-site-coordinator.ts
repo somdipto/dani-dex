@@ -26,7 +26,7 @@ import {
   hostedSiteEventMessageId,
   hostedSiteTool,
 } from "./hosted-site-events";
-import { type OpenBotToolResponse, openBotToolResult, siteToolString } from "./routine-tools";
+import { type DaniDexToolResponse, daniDexToolResult, siteToolString } from "./routine-tools";
 
 /** The openbot.site host, injected so the backend never depends on the account Worker directly. */
 export interface AgentHostedSites {
@@ -74,7 +74,7 @@ interface HostedSiteApprovalDetails {
 }
 
 interface HostedSiteMutationResult {
-  response: OpenBotToolResponse;
+  response: DaniDexToolResponse;
   eventDetails: HostedSiteConversationEventDetails;
 }
 
@@ -281,7 +281,7 @@ export class HostedSiteCoordinator {
     if (context.action === "delete") {
       const siteId = siteToolString(args.siteId, "siteId", INPUT_LIMITS.identifier);
       await this.#requireHostedSites().delete(siteId);
-      return { response: openBotToolResult({ deleted: true, siteId }), eventDetails: context.eventDetails };
+      return { response: daniDexToolResult({ deleted: true, siteId }), eventDetails: context.eventDetails };
     }
 
     const sourcePath = siteToolString(args.sourcePath, "sourcePath", INPUT_LIMITS.path);
@@ -303,7 +303,7 @@ export class HostedSiteCoordinator {
     const site = siteId
       ? await this.#requireHostedSites().replace({ ...input, siteId }, roots)
       : await this.#requireHostedSites().publish(input, roots);
-    return { response: openBotToolResult(site), eventDetails: hostedSiteEventDetails(site, siteId) };
+    return { response: daniDexToolResult(site), eventDetails: hostedSiteEventDetails(site, siteId) };
   }
 
   #recordEvent(

@@ -2,10 +2,10 @@ import { randomBytes } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { SunshineMoonlightRuntime } from "../src/main/sunshine-moonlight-runtime";
 
-const logger = createOpenBotLogger("remote-desktop-runtime-smoke");
+const logger = createDaniDexLogger("remote-desktop-runtime-smoke");
 
 if (process.platform !== "darwin") {
   throw new Error("The local runtime smoke test currently supports macOS only.");

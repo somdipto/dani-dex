@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProvider } from "./agent-client";
 import type { AgentService } from "./agent-service";
 import {
-  callOpenBotTool,
+  callDaniDexTool,
   createTestService,
   FakeAgentClient,
   paramsRecord,
@@ -50,7 +50,7 @@ describe.sequential("AgentService: channel tools without assignment", () => {
     if (!client || !threadId) throw new Error("Provider session did not start.");
 
     const turnId = service.listQueue("chief").deliveries[0]?.turnId ?? "test-turn";
-    const { result, error } = await callOpenBotTool(client, threadId, "channel_history", {}, turnId);
+    const { result, error } = await callDaniDexTool(client, threadId, "channel_history", {}, turnId);
 
     expect(error).toBeUndefined();
     expect(result).toMatchObject({ success: false });
@@ -87,7 +87,7 @@ describe.sequential("AgentService: channel tools without assignment", () => {
     const tool = vi.spyOn(service.channels, "tool").mockResolvedValue(routed);
     try {
       const turnId = service.listQueue("chief").deliveries[0]?.turnId ?? "test-turn";
-      const { result, error } = await callOpenBotTool(client, threadId, "channel_history", {}, turnId);
+      const { result, error } = await callDaniDexTool(client, threadId, "channel_history", {}, turnId);
 
       expect(error).toBeUndefined();
       expect(tool).toHaveBeenCalledWith("channel-1", "chief", turnId, expect.any(String), "channel_history", {});

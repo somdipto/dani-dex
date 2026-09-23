@@ -13,10 +13,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ProviderCodeLoginState } from "../../components/ProviderCodeLoginDialog";
 import { Toaster, toast } from "../../components/ui";
 import { STORY_AGENT_STATUS } from "../../preview/fixtures";
-import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
 import { OnboardingFlow } from "./OnboardingFlow";
 
-let activeMock: MockOpenBotControls | undefined;
+let activeMock: MockDaniDexControls | undefined;
 const previousApi = window.danidex;
 
 afterEach(() => {
@@ -30,7 +30,7 @@ afterEach(() => {
 function renderFlow(
   options: { onSave?: (provider: AgentProviderId) => Promise<void>; platform?: "darwin" | "win32" | "linux" } = {},
 ) {
-  activeMock = createMockOpenBot();
+  activeMock = createMockDaniDex();
   window.danidex = activeMock.api;
   const view = render(() => (
     <>
@@ -113,7 +113,7 @@ describe("OnboardingFlow", () => {
   });
 
   it("counts a saved endpoint in the custom row and selects that row after the save", async () => {
-    activeMock = createMockOpenBot();
+    activeMock = createMockDaniDex();
     window.danidex = activeMock.api;
     const [customProviders, setCustomProviders] = createSignal<CustomProviderSummary[]>([]);
     const onAddCustomProvider = vi.fn(async (value: SaveCustomProviderInput): Promise<CustomProviderRestart> => {
@@ -161,7 +161,7 @@ describe("OnboardingFlow", () => {
   // The model belongs to the endpoint. Once the endpoint is gone the step must not store its model
   // on the first agent, which would start that agent on a provider that cannot answer.
   it("drops the endpoint's model from setup after the endpoint is removed", async () => {
-    activeMock = createMockOpenBot();
+    activeMock = createMockDaniDex();
     window.danidex = activeMock.api;
     vi.spyOn(window, "confirm").mockReturnValue(true);
     // A second endpoint stays behind, so the custom row keeps the choice and only the model of the
@@ -228,7 +228,7 @@ describe("OnboardingFlow", () => {
   // selects Custom without touching the dialog. Nothing in this component has seen its models, so
   // the model has to come from the list main sends.
   it("records a model of an endpoint saved before this screen opened", async () => {
-    activeMock = createMockOpenBot();
+    activeMock = createMockDaniDex();
     window.danidex = activeMock.api;
     const onSave = vi.fn(async (_provider: AgentProviderId) => undefined);
     const view = render(() => (
@@ -260,7 +260,7 @@ describe("OnboardingFlow", () => {
   });
 
   it("keeps provider downloads independent and blocks Next until the selected provider connects", async () => {
-    activeMock = createMockOpenBot();
+    activeMock = createMockDaniDex();
     window.danidex = activeMock.api;
     const initialAgentStatus: AgentStatus = {
       ...STORY_AGENT_STATUS,
@@ -337,7 +337,7 @@ describe("OnboardingFlow", () => {
   });
 
   it("keeps the downloads reachable while the local providers are still being checked", async () => {
-    activeMock = createMockOpenBot();
+    activeMock = createMockDaniDex();
     window.danidex = activeMock.api;
     // What a first run looks like before main answers: nothing downloaded, no provider checked yet,
     // and the agent runtime still starting. Every action on the screen used to be disabled here,
@@ -386,7 +386,7 @@ describe("OnboardingFlow", () => {
   });
 
   it("names the step Next is waiting for as the selected provider moves through it", async () => {
-    activeMock = createMockOpenBot();
+    activeMock = createMockDaniDex();
     window.danidex = activeMock.api;
     const agentStatus: AgentStatus = {
       ...STORY_AGENT_STATUS,
@@ -446,7 +446,7 @@ describe("OnboardingFlow", () => {
   });
 
   it("offers no OpenCode download to a user who installed the CLI already", () => {
-    activeMock = createMockOpenBot();
+    activeMock = createMockDaniDex();
     window.danidex = activeMock.api;
     // An empty managed directory is the normal state for anyone with their own OpenCode install, so
     // the row has to read the provider's answer and not the directory: the alternative offers a

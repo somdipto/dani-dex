@@ -1,7 +1,7 @@
 import { chmod, copyFile, lstat, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { extractCuaDriverArchive } from "./cua-driver-archive";
 import {
   CUA_DRIVER_LICENSE_FILE,
@@ -16,7 +16,7 @@ import {
 } from "./cua-driver-lock";
 import { sha256 } from "./remote-desktop-runtime-release";
 
-const logger = createOpenBotLogger("install-cua-driver");
+const logger = createDaniDexLogger("install-cua-driver");
 
 /**
  * Puts the pinned `cua-driver` build under `build/cua-driver/<platform>/<architecture>` so

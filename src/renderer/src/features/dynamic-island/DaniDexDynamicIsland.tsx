@@ -55,7 +55,7 @@ import {
   waitForAnimations,
 } from "./openbot-dynamic-island-motion";
 
-export interface OpenBotDynamicIslandProps {
+export interface DaniDexDynamicIslandProps {
   presentation: DynamicIslandPresentation;
   state: DynamicIslandViewState;
   displayMode?: "notch" | "island";
@@ -121,7 +121,7 @@ type StatusMode = Extract<
   "working" | "message" | "question" | "approval" | "takeover" | "failed"
 >;
 
-interface OpenBotIslandModeConfig {
+interface DaniDexIslandModeConfig {
   label: string;
   ariaLive?: "polite";
   badge?: {
@@ -147,7 +147,7 @@ const STATUS_SHARED_TRAILING: SharedLeadingMotion = {
   island: { x: 124, y: 51, scale: 1.08 },
 };
 
-const OPENBOT_ISLAND_MODE_CONFIG: Record<DynamicIslandPresentation["mode"], OpenBotIslandModeConfig> = {
+const OPENBOT_ISLAND_MODE_CONFIG: Record<DynamicIslandPresentation["mode"], DaniDexIslandModeConfig> = {
   idle: {
     label: "Open Dani-Dex",
   },
@@ -322,7 +322,7 @@ function measureCompactText(text: string, weight: number): number {
   }, 0);
 }
 
-export function OpenBotDynamicIsland(props: OpenBotDynamicIslandProps): JSX.Element {
+export function DaniDexDynamicIsland(props: DaniDexDynamicIslandProps): JSX.Element {
   const initialPresentation = untrack(() => props.presentation);
   const [visiblePresentation, setVisiblePresentation] = createSignal(initialPresentation);
   const config = () => OPENBOT_ISLAND_MODE_CONFIG[visiblePresentation().mode];
@@ -922,7 +922,7 @@ function ApprovalContent(props: {
   remainingCount: number;
   onAction: (action: DynamicIslandAction) => void | Promise<void>;
 }): JSX.Element {
-  const openInOpenBot = () =>
+  const openInDaniDex = () =>
     props.onAction({
       type: "review-attention",
       serverId: props.serverId,
@@ -956,7 +956,7 @@ function ApprovalContent(props: {
         </div>
       </IslandContentSwap>
       <div class="dynamic-island-surface-actions" data-island-motion-content>
-        <Button size="sm" variant="ghost" onClick={openInOpenBot}>
+        <Button size="sm" variant="ghost" onClick={openInDaniDex}>
           Review in Dani-Dex
         </Button>
         <Button size="sm" variant="ghost" onClick={() => respond("decline")}>
@@ -1011,7 +1011,7 @@ function QuestionContent(props: {
   );
   const currentQuestion = () => questions()[questionIndex()];
   const questionText = () => currentQuestion()?.question ?? props.item.detail ?? props.item.title;
-  const openInOpenBot = () =>
+  const openInDaniDex = () =>
     props.onAction({
       type: "review-attention",
       serverId: props.serverId,
@@ -1139,7 +1139,7 @@ function QuestionContent(props: {
         <Button size="sm" variant="ghost" onClick={props.onClose}>
           Later
         </Button>
-        <Button size="sm" onClick={openInOpenBot}>
+        <Button size="sm" onClick={openInDaniDex}>
           Answer in Dani-Dex
         </Button>
       </div>

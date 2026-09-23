@@ -425,7 +425,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
       ? null
       : claudeMcpServers(await usableMcpServers(this.#mcpServers(), this.#mcpToolRuntimes?.(), this.#mcpAuthorization));
     if (handoff) this.#reportMcpDrops?.(this.provider, handoff.dropped);
-    const mcpServers = handoff ? { ...handoff.servers, ...this.#createOpenBotServers(threadId) } : {};
+    const mcpServers = handoff ? { ...handoff.servers, ...this.#createDaniDexServers(threadId) } : {};
     const claudeQuery = this.#createQuery({
       prompt: input,
       options: {
@@ -931,7 +931,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
     return { thread: { id: threadId, turns } };
   }
 
-  #createOpenBotServers(threadId: string) {
+  #createDaniDexServers(threadId: string) {
     const call = (namespace: string, name: string, args: unknown) =>
       this.#callDynamicTool(threadId, namespace, name, args);
     return {

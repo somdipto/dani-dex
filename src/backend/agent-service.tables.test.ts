@@ -6,10 +6,10 @@ import { AgentTables } from "./agent-data/agent-tables";
 import { spawnNodeDatabaseHost } from "./agent-data/node-database-host";
 import type { AgentService } from "./agent-service";
 import {
-  callOpenBotTool,
+  callDaniDexTool,
   createTestService,
+  daniDexToolPayload,
   FakeAgentClient,
-  openBotToolPayload,
   startAgentTestFixture,
   stopAgentTestFixture,
   stores,
@@ -59,16 +59,16 @@ describe.sequential("AgentService: shared data tools", () => {
   it("creates a table, writes a row, and reads it back", async () => {
     const { client, threadId } = await startService();
 
-    await callOpenBotTool(client, threadId, "execute_data", {
+    await callDaniDexTool(client, threadId, "execute_data", {
       sql: "CREATE TABLE people (id INTEGER PRIMARY KEY, name TEXT UNIQUE)",
     });
-    await callOpenBotTool(client, threadId, "execute_data", {
+    await callDaniDexTool(client, threadId, "execute_data", {
       sql: "INSERT INTO people (name) VALUES (?)",
       params: ["Ada"],
     });
 
-    const read = await callOpenBotTool(client, threadId, "query_data", { sql: "SELECT name FROM people" });
-    expect(openBotToolPayload(read.result)).toMatchObject({ rows: [["Ada"]] });
+    const read = await callDaniDexTool(client, threadId, "query_data", { sql: "SELECT name FROM people" });
+    expect(daniDexToolPayload(read.result)).toMatchObject({ rows: [["Ada"]] });
     // The agent that ran the CREATE owns the table, with no separate call to claim it.
     expect(await service?.listTables()).toMatchObject([{ name: "people", ownerAgentId: "chief", rowCount: 1 }]);
   });
@@ -76,11 +76,11 @@ describe.sequential("AgentService: shared data tools", () => {
   it("answers a refused statement as a tool result, not a server error", async () => {
     const { client, threadId } = await startService();
 
-    const refused = await callOpenBotTool(client, threadId, "query_data", { sql: "PRAGMA journal_mode" });
+    const refused = await callDaniDexTool(client, threadId, "query_data", { sql: "PRAGMA journal_mode" });
 
     expect(refused.error).toBeUndefined();
     expect(refused.result).toMatchObject({ success: false });
-    expect(openBotToolPayload(refused.result).error).toEqual(expect.stringContaining("list_tables"));
+    expect(daniDexToolPayload(refused.result).error).toEqual(expect.stringContaining("list_tables"));
     expect(client.errors).toEqual([]);
   });
 });

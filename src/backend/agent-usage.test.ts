@@ -6,11 +6,11 @@ import { type AgentAnalyticsInput, parseAgentAnalyticsInput, type UsageTokens } 
 import { afterEach, describe, expect, it } from "vitest";
 import { collectProviderUsage } from "./agent/usage-collection";
 import { recordUsageMessage, type UsageSample } from "./database/agent-usage";
-import { OpenBotDatabase } from "./openbot-database";
-import { migrateOpenBotDatabase } from "./openbot-database-schema";
+import { DaniDexDatabase } from "./openbot-database";
+import { migrateDaniDexDatabase } from "./openbot-database-schema";
 
 const roots: string[] = [];
-const databases: OpenBotDatabase[] = [];
+const databases: DaniDexDatabase[] = [];
 afterEach(async () => {
   for (const db of databases.splice(0)) db.close();
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
@@ -36,7 +36,7 @@ const sample: UsageSample = {
 async function database() {
   const root = await mkdtemp(join(tmpdir(), "openbot-usage-"));
   roots.push(root);
-  const db = new OpenBotDatabase(root);
+  const db = new DaniDexDatabase(root);
   await db.initialize();
   databases.push(db);
   return db;
@@ -278,7 +278,7 @@ describe("local agent usage", () => {
   it("upgrades v14 without touching existing data and rolls back a failed migration", () => {
     const db = new DatabaseSync(":memory:");
     try {
-      migrateOpenBotDatabase(db);
+      migrateDaniDexDatabase(db);
       db.exec(
         "DROP TABLE agent_usage_records; DROP TABLE agent_usage_checkpoints; DROP TABLE agent_usage_activity; DELETE FROM schema_migrations WHERE version >= 15; CREATE TABLE preservation(value TEXT); INSERT INTO preservation VALUES ('keep'); CREATE TABLE agent_usage_date (conflict TEXT)",
       );
@@ -287,11 +287,11 @@ describe("local agent usage", () => {
       // The squatted name is the index's, not a table's: the migration creates its tables with
       // IF NOT EXISTS, and SQLite refuses an index whose name a table already holds however the
       // statement is spelled. What is under test is the rollback, not which object collides.
-      expect(() => migrateOpenBotDatabase(db)).toThrow("migration to version 15 failed");
+      expect(() => migrateDaniDexDatabase(db)).toThrow("migration to version 15 failed");
       expect(db.prepare("SELECT name FROM sqlite_master WHERE name = 'agent_usage_records'").get()).toBeUndefined();
       expect(db.prepare("SELECT version FROM schema_migrations WHERE version = 15").get()).toBeUndefined();
       db.exec("DROP TABLE agent_usage_date");
-      migrateOpenBotDatabase(db);
+      migrateDaniDexDatabase(db);
       expect(db.prepare("SELECT value FROM preservation").get()).toMatchObject({ value: "keep" });
       // A host-wide report constrains the date alone, so it can only seek on an index that
       // leads with `occurred_at`. Without these a report scans all retained history, and

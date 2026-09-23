@@ -3,7 +3,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { AgentMemoryOrigin, MemoryEntry } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 
 /**
  * One owner column and one table name are the whole difference between an agent's memories and a
@@ -39,7 +39,7 @@ export class MemoryStore {
   readonly #columns: string;
 
   constructor(
-    readonly database: OpenBotDatabase,
+    readonly database: DaniDexDatabase,
     protected readonly tables: MemoryTables,
   ) {
     this.#columns = `memory_id, text, origin, source_turn_id, created_at, updated_at`;

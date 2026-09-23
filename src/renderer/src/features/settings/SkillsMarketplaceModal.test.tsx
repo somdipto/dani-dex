@@ -1,10 +1,10 @@
 import type {
   AgentSummary,
+  DaniDexDesktopApi,
   InstalledSkill,
   MarketplaceAgentDetail,
   MarketplaceSkillPage,
   McpServerConfig,
-  OpenBotDesktopApi,
   SkillSubmission,
 } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
@@ -103,7 +103,7 @@ describe("SkillsMarketplaceModal", () => {
       ],
       nextCursor: null,
     };
-    const skills: OpenBotDesktopApi["skills"] = {
+    const skills: DaniDexDesktopApi["skills"] = {
       localList: vi.fn(async () => []),
       localGet: vi.fn(),
       localCreate: vi.fn(),
@@ -559,7 +559,7 @@ describe("SkillsMarketplaceModal", () => {
 
   it("keeps loaded pages and restores the category filter and focus after details", async () => {
     const detail = await window.danidex.skills.get("release-notes");
-    window.danidex.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => ({
+    window.danidex.skills.list = vi.fn<DaniDexDesktopApi["skills"]["list"]>(async (query) => ({
       skills:
         query?.category === "documents"
           ? [{ ...detail, id: query.cursor ? "second" : detail.id, name: query.cursor ? "Second skill" : detail.name }]
@@ -584,7 +584,7 @@ describe("SkillsMarketplaceModal", () => {
 
   it("offers a category page only when the overview does not already show every listing", async () => {
     const detail = await window.danidex.skills.get("release-notes");
-    window.danidex.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => {
+    window.danidex.skills.list = vi.fn<DaniDexDesktopApi["skills"]["list"]>(async (query) => {
       if (query?.category === "documents") return { skills: [detail], nextCursor: null };
       if (query?.category === "design")
         return {
@@ -607,7 +607,7 @@ describe("SkillsMarketplaceModal", () => {
     const oldPage = new Promise<MarketplaceSkillPage>((resolve) => {
       finishOld = resolve;
     });
-    window.danidex.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => {
+    window.danidex.skills.list = vi.fn<DaniDexDesktopApi["skills"]["list"]>(async (query) => {
       if (query?.limit === 50 && query.category === "design") return oldPage;
       return {
         skills: query?.category === "design" ? [{ ...detail, category: "design", name: "Overview design" }] : [],
@@ -1132,7 +1132,7 @@ describe("SkillsMarketplaceModal", () => {
 
     it("installs the app on the host it was given", async () => {
       const saved: McpServerConfig[] = [];
-      const saveMcpServer: OpenBotDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => {
+      const saveMcpServer: DaniDexDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => {
         saved.push(input.config);
         return saved;
       });
@@ -1185,8 +1185,8 @@ describe("SkillsMarketplaceModal", () => {
     };
 
     it("saves the configuration the connect dialog proved", async () => {
-      const saveMcpServer: OpenBotDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => [input.config]);
-      const testMcpServer: OpenBotDesktopApi["agent"]["testMcpServer"] = vi.fn(async () => ({
+      const saveMcpServer: DaniDexDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => [input.config]);
+      const testMcpServer: DaniDexDesktopApi["agent"]["testMcpServer"] = vi.fn(async () => ({
         toolCount: 4,
         error: null,
       }));
@@ -1218,7 +1218,7 @@ describe("SkillsMarketplaceModal", () => {
     });
 
     it("saves nothing when the connect dialog is closed", async () => {
-      const saveMcpServer: OpenBotDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => [input.config]);
+      const saveMcpServer: DaniDexDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => [input.config]);
       window.danidex.agent = { ...window.danidex.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
       renderMarketplace({
         open: true,
@@ -1238,7 +1238,7 @@ describe("SkillsMarketplaceModal", () => {
     });
 
     it("stops the connect step when the marketplace itself is closed", async () => {
-      const saveMcpServer: OpenBotDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => [input.config]);
+      const saveMcpServer: DaniDexDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => [input.config]);
       window.danidex.agent = { ...window.danidex.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
       const [open, setOpen] = createSignal(true);
       renderMarketplace(() => ({
@@ -1299,7 +1299,7 @@ describe("SkillsMarketplaceModal", () => {
         order.push("skill");
         return installedYield;
       });
-      const saveMcpServer: OpenBotDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => {
+      const saveMcpServer: DaniDexDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => {
         order.push("app");
         return [input.config];
       });
@@ -1434,7 +1434,7 @@ describe("SkillsMarketplaceModal", () => {
 
     it("removes the host's app row and the agent's skill when the uninstall is confirmed", async () => {
       const order: string[] = [];
-      const removeMcpServer: OpenBotDesktopApi["agent"]["removeMcpServer"] = vi.fn(async () => {
+      const removeMcpServer: DaniDexDesktopApi["agent"]["removeMcpServer"] = vi.fn(async () => {
         order.push("app");
         return [];
       });

@@ -2,12 +2,12 @@ import { execFileSync } from "node:child_process";
 import { cp, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { z } from "zod";
 import { type AgentRuntimeLock, loadAgentRuntimeLock } from "./agent-runtime-lock";
 import { rejectNonRegularFiles, sha256 } from "./remote-desktop-runtime-release";
 
-const logger = createOpenBotLogger("install-codex-runtime");
+const logger = createDaniDexLogger("install-codex-runtime");
 
 export type CodexRuntimeTarget = "darwin-arm64" | "linux-x64" | "win32-x64";
 

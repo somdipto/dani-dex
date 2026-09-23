@@ -3,26 +3,26 @@ import { onCleanup, onSettled } from "solid-js";
 import { App } from "../App";
 import { LANDING_PREVIEW_READY_MESSAGE, LANDING_PREVIEW_START_MESSAGE } from "./landing-demo-messages";
 import { LANDING_PREVIEW_OPTIONS } from "./landing-fixtures";
-import { createMockOpenBot, type MockOpenBotControls, type MockOpenBotOptions } from "./mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls, type MockDaniDexOptions } from "./mock-openbot";
 
 const LANDING_PREVIEW_READY_RETRY_MS = 250;
 
-export interface OpenBotPlaygroundDependencies {
-  createMock: (options?: MockOpenBotOptions) => MockOpenBotControls;
+export interface DaniDexPlaygroundDependencies {
+  createMock: (options?: MockDaniDexOptions) => MockDaniDexControls;
   loadLandingController?: () => Promise<typeof import("./landing-demo")>;
   renderApp: () => JSX.Element;
 }
 
-export interface OpenBotPlaygroundProps {
-  dependencies?: OpenBotPlaygroundDependencies;
-  options?: MockOpenBotOptions;
+export interface DaniDexPlaygroundProps {
+  dependencies?: DaniDexPlaygroundDependencies;
+  options?: MockDaniDexOptions;
   variant?: "default" | "landing";
 }
 
-export function OpenBotPlayground(props: OpenBotPlaygroundProps) {
+export function DaniDexPlayground(props: DaniDexPlaygroundProps) {
   const landingPreview = props.variant === "landing";
   const dependencies = props.dependencies ?? {
-    createMock: createMockOpenBot,
+    createMock: createMockDaniDex,
     renderApp: () => <App landingPreview={landingPreview} />,
   };
   const previousApi = window.danidex;

@@ -4,7 +4,7 @@ import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import AgentSettingsPanel from "../src/features/conversation/AgentSettingsPanel";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_MODELS } from "./fixtures";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 const chiefMemories: AgentMemory[] = [
   {
@@ -48,7 +48,7 @@ const fullMemoryList: AgentMemory[] = Array.from({ length: 64 }, (_, index) => (
 
 function AgentMemoriesStory(props: { memories: AgentMemory[] }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot({ memories: { chief: props.memories } });
+  const mock = createMockDaniDex({ memories: { chief: props.memories } });
   window.danidex = mock.api;
 
   onCleanup(() => {

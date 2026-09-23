@@ -12,14 +12,14 @@ import { LOCAL_SKILL_TOOL_DEFINITIONS } from "./agent/skill-tools";
 import { CHANNEL_TOOL_DEFINITIONS } from "./channel-tools";
 import { routineScheduleZodSchema } from "./routine-tool-schema";
 
-interface OpenBotToolDefinition {
+interface DaniDexToolDefinition {
   name: string;
   description: string;
   shape: z.ZodRawShape;
 }
 
 /** Shared declarations for Codex, Grok, and Claude. Service handlers enforce execution rules. */
-export const OPENBOT_TOOL_DEFINITIONS: readonly OpenBotToolDefinition[] = [
+export const OPENBOT_TOOL_DEFINITIONS: readonly DaniDexToolDefinition[] = [
   ...CHANNEL_TOOL_DEFINITIONS,
   ...DATA_TOOL_DEFINITIONS,
   ...LOCAL_SKILL_TOOL_DEFINITIONS,

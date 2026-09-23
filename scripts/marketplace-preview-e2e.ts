@@ -1,7 +1,7 @@
 // Exercises an existing local dev app. Does not create, submit, or install Agents.
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { assertMutationAllowed, connectToDevApp } from "./dev-automation/cdp-client";
 import { readDevInstanceRecords } from "./dev-automation/instance-registry";
 
@@ -17,7 +17,7 @@ assertMutationAllowed({
   instanceNamed: true,
   target: instance.instanceId,
 });
-const logger = createOpenBotLogger("marketplace-preview-e2e");
+const logger = createDaniDexLogger("marketplace-preview-e2e");
 const session = await connectToDevApp(instance.remoteDebuggingPort, logger, {
   expectedRendererPort: instance.rendererPort,
 });

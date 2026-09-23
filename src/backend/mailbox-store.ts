@@ -40,7 +40,7 @@ import {
 export type { ExportedAttachmentFile, GeneratedAttachmentSource } from "./attachment-files";
 
 import { MailboxDeliveryGate } from "./mailbox-delivery-gate";
-import { OpenBotDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./openbot-database";
 import { isRecord } from "./protocol";
 import { recordRestartActivity } from "./restart-activity";
 
@@ -134,13 +134,13 @@ const EMPTY_STATE: StoredState = {
 export class MailboxStore {
   readonly #statePath: string;
   readonly #files: AttachmentFiles;
-  readonly #database: OpenBotDatabase;
+  readonly #database: DaniDexDatabase;
   readonly #queueUpdates = new Set<string>();
   readonly #deliveryGate = new MailboxDeliveryGate();
   readonly #stagedGeneratedAttachments = new Map<string, StoredGeneratedAttachment>();
   #state: StoredState = structuredClone(EMPTY_STATE);
 
-  constructor(userDataPath: string, sharedRoot: string, database = new OpenBotDatabase(userDataPath)) {
+  constructor(userDataPath: string, sharedRoot: string, database = new DaniDexDatabase(userDataPath)) {
     this.#statePath = join(userDataPath, "mailbox.json");
     this.#files = new AttachmentFiles({ userDataPath, sharedRoot });
     this.#database = database;

@@ -17,7 +17,7 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { databaseRow, databaseRows, requiredNumberColumn, requiredStringColumn } from "./database/database-rows";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 
 export interface ChannelAssignment {
   id: string;
@@ -63,7 +63,7 @@ interface ChannelChange {
 
 /** Owns durable channel records. Every change and its retry receipt commit together. */
 export class ChannelStore {
-  constructor(readonly database: OpenBotDatabase) {}
+  constructor(readonly database: DaniDexDatabase) {}
 
   get(channelId: string): Channel {
     const row = databaseRow(

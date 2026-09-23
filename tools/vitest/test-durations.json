@@ -334,7 +334,7 @@
   "src/renderer/src/features/team/team-webrtc.test.ts": 0.44,
   "src/renderer/src/features/updates/update-status.test.ts": 0.0,
   "src/renderer/src/features/usage/AgentUsagePanel.test.tsx": 1.06,
-  "src/renderer/src/preview/OpenBotPlayground.test.tsx": 0.01,
+  "src/renderer/src/preview/DaniDexPlayground.test.tsx": 0.01,
   "src/renderer/src/preview/mock-sidebar-layout.test.ts": 0.0,
   "src/renderer/src/queue-reconciliation.test.ts": 0.01,
   "src/renderer/src/simple-context.test.tsx": 0.03

@@ -7,7 +7,7 @@ export const OPENBOT_DOWNLOAD_LINKS = {
 } as const;
 
 export const OPENBOT_LINKS = {
-  contact: "https://x.com/OpenBot_",
+  contact: "https://x.com/DaniDex_",
   download: "#download",
   /** The same anchor from a page that is not the landing page. */
   downloadFromOtherPage: "/#download",

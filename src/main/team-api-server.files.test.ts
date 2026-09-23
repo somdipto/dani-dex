@@ -31,7 +31,7 @@ describe("TeamApiServer files", () => {
   it("downloads authenticated shared files through the remote API", async () => {
     const { root, start, signIn } = await createTeamApiFixture("shared-file", { configure: true });
     const filePath = join(root, "report.csv");
-    await writeFile(filePath, "name,value\nOpenBot,1\n");
+    await writeFile(filePath, "name,value\nDaniDex,1\n");
     const agents = createAgents({
       resolveSharedFile: async (path) => ({
         path: filePath,
@@ -52,7 +52,7 @@ describe("TeamApiServer files", () => {
     });
     expect(response.status).toBe(200);
     expect(response.headers.get("content-disposition")).toContain("report.csv");
-    expect(await response.text()).toBe("name,value\nOpenBot,1\n");
+    expect(await response.text()).toBe("name,value\nDaniDex,1\n");
 
     const oversized = await fetch(`${base}/v1/shared-files?path=${encodeURIComponent("~/Dani-Dex/Shared/large.csv")}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -72,7 +72,7 @@ describe("TeamApiServer files", () => {
     );
     expect(workspaceResponse.status).toBe(200);
     expect(workspaceResponse.headers.get("content-disposition")).toContain("chief-page.tsx");
-    expect(await workspaceResponse.text()).toBe("name,value\nOpenBot,1\n");
+    expect(await workspaceResponse.text()).toBe("name,value\nDaniDex,1\n");
 
     const unauthorizedWorkspace = await fetch(`${base}/v1/workspace-files?botId=chief&path=app/page.tsx`);
     expect(unauthorizedWorkspace.status).toBe(401);

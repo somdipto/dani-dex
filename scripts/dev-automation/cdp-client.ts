@@ -89,7 +89,7 @@ export interface AutomationSession {
 // anything that does not identify as Dani-Dex before a mutation can reach it.
 // The token is gone from new builds, so this now only gates ports no live
 // record owns; record-owned ports prove ownership through the process tree.
-export function isOpenBotBrowser(userAgent: string): boolean {
+export function isDaniDexBrowser(userAgent: string): boolean {
   return userAgent.includes("Dani-Dex/");
 }
 
@@ -233,7 +233,7 @@ async function describeBrowser(port: number): Promise<{ targets: string; branded
     .filter((target) => target.type === "page")
     .map((target) => `- ${describeTarget(isString(target.url) ? target.url : "")}`)
     .join("\n");
-  return { targets, branded: isOpenBotBrowser(userAgent) };
+  return { targets, branded: isDaniDexBrowser(userAgent) };
 }
 
 export interface ConnectOptions {

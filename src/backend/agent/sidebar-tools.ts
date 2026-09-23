@@ -2,7 +2,7 @@ import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { SidebarLayoutAction } from "@dani-dex/contracts/ipc";
 import { z } from "zod";
 import type { SidebarLayoutStore } from "../sidebar-layout-store";
-import { type OpenBotToolResponse, openBotToolResult } from "./routine-tools";
+import { type DaniDexToolResponse, daniDexToolResult } from "./routine-tools";
 
 const sectionId = z.string().min(1).max(INPUT_LIMITS.identifier);
 const name = z.string().trim().min(1).max(INPUT_LIMITS.sidebarSectionName);
@@ -23,7 +23,7 @@ export async function handleSidebarTool(
   args: unknown,
   sidebar: AgentSidebar | null,
   agentIds: ReadonlySet<string>,
-): Promise<OpenBotToolResponse | null> {
+): Promise<DaniDexToolResponse | null> {
   let action: SidebarLayoutAction | null;
   switch (tool) {
     case "list_sections":
@@ -46,5 +46,5 @@ export async function handleSidebarTool(
   }
   if (!sidebar) throw new Error("Sidebar sections are unavailable.");
   const layout = action ? await sidebar.mutate(action, agentIds) : sidebar.getSnapshot();
-  return openBotToolResult(layout);
+  return daniDexToolResult(layout);
 }

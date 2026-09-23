@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  createDaniDexInviteUrl,
   createInviteUrl,
-  createOpenBotInviteUrl,
   isCanonicalInviteUrl,
   isNeverExpiringInvite,
   isValidRemoteApiUrl,
   parseInviteUrl,
   permanentInviteExpiresAt,
-  toOpenBotInviteUrl,
+  toDaniDexInviteUrl,
 } from "./invite-links";
 
 const payload = {
@@ -30,12 +30,12 @@ describe("Dani-Dex invite links", () => {
     expect(url).toMatch(/^https:\/\/openbot\.run\/join\?/u);
     expect(parseInviteUrl(url)).toEqual(payload);
     expect(isCanonicalInviteUrl(url)).toBe(true);
-    expect(isCanonicalInviteUrl(createOpenBotInviteUrl(payload))).toBe(false);
+    expect(isCanonicalInviteUrl(createDaniDexInviteUrl(payload))).toBe(false);
   });
 
   it("converts a canonical invitation to the desktop fallback scheme", () => {
-    expect(toOpenBotInviteUrl(createInviteUrl(payload))).toBe(createOpenBotInviteUrl(payload));
-    expect(parseInviteUrl(createOpenBotInviteUrl(payload))).toEqual(payload);
+    expect(toDaniDexInviteUrl(createInviteUrl(payload))).toBe(createDaniDexInviteUrl(payload));
+    expect(parseInviteUrl(createDaniDexInviteUrl(payload))).toEqual(payload);
   });
 
   it("accepts approved root tunnel URLs only", () => {

@@ -2,7 +2,7 @@ import type { ComputerUseState, MacPermissionId } from "@dani-dex/contracts/ipc"
 import { onCleanup } from "solid-js";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { ComputerUseSetup } from "../src/features/computer-use/ComputerUseSetup";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 function permissions(granted: readonly MacPermissionId[]): ComputerUseState["permissions"] {
   return (["screen-recording", "accessibility"] as const).map((id) => ({ id, granted: granted.includes(id) }));
@@ -16,7 +16,7 @@ const permissionsRequired: ComputerUseState = {
 
 function MockedSetup(props: { state?: ComputerUseState; error?: Error; loading?: boolean }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot();
+  const mock = createMockDaniDex();
   mock.api.getComputerUseState = props.loading
     ? () => new Promise(() => undefined)
     : props.error

@@ -7,7 +7,7 @@ import {
   type LandingDemoScript,
   type LandingDirectDemoScript,
 } from "./landing-demo-scripts";
-import type { MockOpenBotControls } from "./mock-openbot";
+import type { MockDaniDexControls } from "./mock-openbot";
 
 interface LandingDemoControllerOptions {
   reducedMotion?: boolean;
@@ -52,7 +52,7 @@ function splitIntoChunks(value: string, size = 24): string[] {
 }
 
 export function createLandingDemoController(
-  mock: MockOpenBotControls,
+  mock: MockDaniDexControls,
   options: LandingDemoControllerOptions = {},
 ): { activate: () => void; dispose: () => void } {
   const scripts = options.scripts ?? LANDING_DEMO_SCRIPTS;

@@ -43,9 +43,9 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isBoolean, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 import { isGeneratedAgentId, isUuidV4, legacyAgentId } from "@dani-dex/contracts/validation";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { ProfileCreationRecovery } from "./agent/profile-creation-recovery";
-import { OpenBotDatabase, type ProviderSession, stableThreadId } from "./openbot-database";
+import { DaniDexDatabase, type ProviderSession, stableThreadId } from "./openbot-database";
 import { isRecord } from "./protocol";
 
 type StoredAgent = AgentSummary;
@@ -105,7 +105,7 @@ const LEGACY_AGENTS_STATE_FILE = "bots.json";
 const LEGACY_AGENTS_STATE_KEY = "bots";
 const LEGACY_AGENTS_IMPORT_COMMAND_ID = "legacy-import:bots:v1";
 
-const logger = createOpenBotLogger("agent-store");
+const logger = createDaniDexLogger("agent-store");
 
 export class AgentStore {
   readonly #statePath: string;
@@ -116,12 +116,12 @@ export class AgentStore {
   readonly #avatarsRoot: string;
   readonly #duplicationsRoot: string;
   readonly #profileCreationRecovery: ProfileCreationRecovery;
-  readonly #database: OpenBotDatabase;
+  readonly #database: DaniDexDatabase;
   #state: StoredState = { version: 2, examplesInitialized: false, agents: [] };
   #avatarUpdateQueue: Promise<void> = Promise.resolve();
   #creationQueue: Promise<void> = Promise.resolve();
 
-  constructor(userDataPath: string, homePath: string, database = new OpenBotDatabase(userDataPath)) {
+  constructor(userDataPath: string, homePath: string, database = new DaniDexDatabase(userDataPath)) {
     const openbotRoot = join(homePath, "Dani-Dex");
     this.#statePath = join(userDataPath, LEGACY_AGENTS_STATE_FILE);
     this.#agentsRoot = join(openbotRoot, "Agents");
@@ -137,7 +137,7 @@ export class AgentStore {
     );
   }
 
-  get database(): OpenBotDatabase {
+  get database(): DaniDexDatabase {
     return this.#database;
   }
 

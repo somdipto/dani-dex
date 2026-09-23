@@ -37,8 +37,8 @@ try {
   );
   await preparePinnedCheckout(sunshineSource, lock.remoteDesktop.sunshine, requiredSunshineSubmodules(platform));
   await preparePinnedCheckout(moonlightSource, lock.remoteDesktop.moonlightWeb);
-  await prepareOpenBotSource(sunshineSource, lock.remoteDesktop.sunshine);
-  await prepareOpenBotSource(moonlightSource, lock.remoteDesktop.moonlightWeb);
+  await prepareDaniDexSource(sunshineSource, lock.remoteDesktop.sunshine);
+  await prepareDaniDexSource(moonlightSource, lock.remoteDesktop.moonlightWeb);
   auditNpmDependencies(sunshineSource);
   auditNpmDependencies(moonlightSource);
 
@@ -274,7 +274,7 @@ function buildMoonlight(source: string): void {
   execFileSync("cargo", ["build", "--locked", "--release"], { cwd: source, stdio: "inherit" });
 }
 
-async function applyOpenBotPatch(source: string, entry: { path: string; sha256: string }): Promise<void> {
+async function applyDaniDexPatch(source: string, entry: { path: string; sha256: string }): Promise<void> {
   const patch = resolve(entry.path);
   if (sha256(await readFile(patch)) !== entry.sha256) {
     throw new Error(`Runtime patch checksum failed for ${entry.path}.`);
@@ -283,12 +283,12 @@ async function applyOpenBotPatch(source: string, entry: { path: string; sha256: 
   execFileSync("git", ["apply", patch], { cwd: source, stdio: "inherit" });
 }
 
-async function prepareOpenBotSource(
+async function prepareDaniDexSource(
   source: string,
   runtime: Awaited<ReturnType<typeof loadNativeRuntimeLock>>["remoteDesktop"]["sunshine"],
 ): Promise<void> {
   if (runtime.sourceMode === "upstream-with-patch") {
-    await applyOpenBotPatch(source, runtime.patch);
+    await applyDaniDexPatch(source, runtime.patch);
     await applyRuntimeOverrides(source, runtime.overrides);
     return;
   }

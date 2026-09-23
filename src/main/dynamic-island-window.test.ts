@@ -10,7 +10,7 @@ import {
   type DynamicIslandPresentation,
   IPC_CHANNELS,
 } from "@dani-dex/contracts/ipc";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import type { BrowserWindow, Display, Rectangle } from "electron";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as preferenceStore from "./dynamic-island-preference-store";
@@ -297,7 +297,7 @@ describe("dynamic island window geometry", () => {
     const controller = new DynamicIslandWindowController({
       platform: "darwin",
       preferencePath: join(root, "preference.json"),
-      logger: createOpenBotLogger("test", (line) => lines.push(line)),
+      logger: createDaniDexLogger("test", (line) => lines.push(line)),
       createWindow: (bounds) => {
         const window = new FakeWindow(80 + windows.length, bounds);
         windows.push(window);

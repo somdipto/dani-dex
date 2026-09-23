@@ -155,7 +155,7 @@ untouched — they already spell the agent `agent` on both sides.
 | `src/renderer/src/preview/mock-openbot.ts` | the second implementation Storybook and the preview run against |
 
 `src/main/ipc-channel-coverage.test.ts` links main and preload statically. The mock is covered by
-`tsc` in both directions because it is annotated `: OpenBotDesktopApi`.
+`tsc` in both directions because it is annotated `: DaniDexDesktopApi`.
 
 ## Account Worker
 

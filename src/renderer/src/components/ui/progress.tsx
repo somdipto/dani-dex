@@ -4,7 +4,7 @@ import type { ComponentProps, JSX, ValidComponent } from "@solidjs/web";
 import { omit } from "solid-js";
 import { cx } from "./utils";
 
-type OpenBotProgressProps = {
+type DaniDexProgressProps = {
   class?: JSX.HTMLAttributes<HTMLElement>["class"];
 };
 
@@ -12,7 +12,7 @@ export type ProgressProps<T extends ValidComponent = "div"> = PolymorphicProps<
   T,
   ProgressPrimitive.ProgressRootProps<T>
 > &
-  OpenBotProgressProps &
+  DaniDexProgressProps &
   Partial<Pick<ComponentProps<T>, "class">>;
 
 export function Progress<T extends ValidComponent = "div">(props: ProgressProps<T>): JSX.Element {

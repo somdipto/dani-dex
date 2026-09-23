@@ -5,7 +5,7 @@ import type { UpdateBusyPhase, UpdateFailureCode, UpdateStatus } from "@dani-dex
 import { isUpdateBusyPhase } from "@dani-dex/contracts/ipc";
 import type { ProgressInfo, UpdateInfo } from "electron-updater";
 import type { HostUpdateState } from "../../packages/contracts/src/host-manager";
-import type { OpenBotSiblingInstance } from "./update-sibling-instances";
+import type { DaniDexSiblingInstance } from "./update-sibling-instances";
 
 /** Only the part of electron-updater's cancellation token this service depends on. */
 export type UpdateCancellationToken = {
@@ -80,7 +80,7 @@ interface UpdateServiceOptions {
   enabled: boolean;
   autoDownload: boolean;
   beforeInstall: () => Promise<void>;
-  checkSiblingInstances?: () => Promise<readonly OpenBotSiblingInstance[]>;
+  checkSiblingInstances?: () => Promise<readonly DaniDexSiblingInstance[]>;
   platform?: NodeJS.Platform;
   logDirectory?: string;
   shipItDirectory?: string;

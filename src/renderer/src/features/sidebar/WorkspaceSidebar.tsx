@@ -33,7 +33,7 @@ export function WorkspaceSidebar(props: { peopleEnabled: boolean }) {
   const { activeServer, activeServerSupportsCapability } = useServers();
   const { openServerSettings } = useServerSettings();
   const { setSkillsMarketplaceOpen } = useSettings();
-  const { agentList, activeAgent, agentSetupDraft, duplicatingAgentIds, openBotSetup } = useAgents();
+  const { agentList, activeAgent, agentSetupDraft, duplicatingAgentIds, daniDexSetup } = useAgents();
   const { editAgent, duplicateAgent, deleteAgent } = useAgentActions();
   const { activeTurns, queues, failedTurns, pendingPrompts, pendingApprovals } = useTurns();
   const { unreadReplies, recentReplies } = useConversation();
@@ -123,7 +123,7 @@ export function WorkspaceSidebar(props: { peopleEnabled: boolean }) {
       onPreloadDirectConversation={props.peopleEnabled ? () => void DirectConversation.preload() : undefined}
       onCreateAgent={() => {
         channels.close();
-        openBotSetup();
+        daniDexSetup();
       }}
       onEditAgent={editAgent}
       duplicateSupported={activeServerSupportsCapability("agent-duplication")}
@@ -141,7 +141,7 @@ export function WorkspaceSidebar(props: { peopleEnabled: boolean }) {
               avatarHue: agentSetupDraft().avatarHue,
               onSelect: () => {
                 channels.close();
-                openBotSetup();
+                daniDexSetup();
               },
             }
           : undefined

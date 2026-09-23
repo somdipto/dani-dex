@@ -9,7 +9,7 @@ import { stores } from "./agent-service-test-harness";
 import { ChannelRoutineScheduler, channelRunStatusForTasks } from "./channel-routine-scheduler";
 import { ChannelRoutineStore } from "./channel-routine-store";
 import { ChannelService } from "./channel-service";
-import { OpenBotDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./openbot-database";
 
 let root: string;
 let data: ReturnType<typeof stores>;
@@ -365,7 +365,7 @@ describe("ChannelRoutineScheduler", () => {
     await service.stop();
     data.store.database.close();
 
-    const reopened = new OpenBotDatabase(userDataPath);
+    const reopened = new DaniDexDatabase(userDataPath);
     await reopened.initialize();
     const restarted = new ChannelService(reopened, data.mailbox, {
       agents: () => [],

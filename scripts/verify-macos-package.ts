@@ -4,10 +4,10 @@ import { access, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { FuseV1Options, getCurrentFuseWire } from "@electron/fuses";
 
-const logger = createOpenBotLogger("verify-macos-package");
+const logger = createDaniDexLogger("verify-macos-package");
 
 const FUSE_DISABLED = 48;
 const FUSE_ENABLED = 49;

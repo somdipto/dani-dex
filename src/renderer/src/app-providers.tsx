@@ -43,7 +43,7 @@ import { UiErrorsProvider } from "./ui-errors";
 /**
  * How the renderer is mounted, as opposed to anything it later loads. Both
  * flags are fixed for the life of a mount: `index.tsx` passes neither, and
- * `preview/OpenBotPlayground.tsx` passes `landingPreview`.
+ * `preview/DaniDexPlayground.tsx` passes `landingPreview`.
  */
 export interface AppProps {
   landingPreview?: boolean;

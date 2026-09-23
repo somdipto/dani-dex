@@ -21,7 +21,7 @@ interface MaintenanceContext {
   parentWindow: BrowserWindow | null;
 }
 
-export async function exportOpenBotData(
+export async function exportDaniDexData(
   context: Pick<MaintenanceContext, "service" | "mailbox" | "parentWindow">,
 ): Promise<ExportResult> {
   const destination = await chooseExportDestination(

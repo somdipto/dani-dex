@@ -7,7 +7,7 @@ import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { afterEach, describe, expect, it } from "vitest";
 import { AgentMemoryStore } from "./agent-memory-store";
 import { AgentStore } from "./agent-store";
-import { OpenBotDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./openbot-database";
 
 const roots: string[] = [];
 
@@ -77,12 +77,12 @@ describe("AgentMemoryStore", () => {
   it("keeps memories after the database restarts", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-memory-restart-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     new AgentMemoryStore(database).createManual("chief", "Use metric units.");
     database.close();
 
-    const reopened = new OpenBotDatabase(root);
+    const reopened = new DaniDexDatabase(root);
     await reopened.initialize();
     expect(new AgentMemoryStore(reopened).list("chief").map((memory) => memory.text)).toEqual(["Use metric units."]);
     reopened.close();
@@ -157,10 +157,10 @@ describe("AgentMemoryStore", () => {
   });
 });
 
-async function setup(): Promise<{ database: OpenBotDatabase; memories: AgentMemoryStore }> {
+async function setup(): Promise<{ database: DaniDexDatabase; memories: AgentMemoryStore }> {
   const root = await mkdtemp(join(tmpdir(), "openbot-memory-store-"));
   roots.push(root);
-  const database = new OpenBotDatabase(root);
+  const database = new DaniDexDatabase(root);
   await database.initialize();
   return { database, memories: new AgentMemoryStore(database) };
 }

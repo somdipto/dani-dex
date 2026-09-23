@@ -10,7 +10,7 @@ import readAThreadPoster from "./media/write-a-guide-for-openbot/read-a-thread-p
 import switchProvider from "./media/write-a-guide-for-openbot/switch-provider.gif";
 import switchProviderStill from "./media/write-a-guide-for-openbot/switch-provider-still.webp";
 
-export function WriteAGuideForOpenBot() {
+export function WriteAGuideForDaniDex() {
   return (
     <>
       <p>

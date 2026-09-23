@@ -24,6 +24,7 @@ import {
   type ConversationWithReadState,
   type CustomProviderResult,
   type CustomProviderSummary,
+  type DaniDexDesktopApi,
   type DraftAttachment,
   type DuplicateAgentResult,
   type DynamicIslandAction,
@@ -86,7 +87,6 @@ import {
   type MarketplaceAgentSummary,
   type MarketplaceSkillDetail,
   type MarketplaceSkillPage,
-  type OpenBotDesktopApi,
   type ProviderApiKeyState,
   type ProviderCodeLoginStart,
   type QueuedMessageReceipt,
@@ -863,7 +863,7 @@ window.addEventListener("change", (event) => {
   void importFiles([...(input.files ?? [])]);
 });
 
-const openbotApi: OpenBotDesktopApi = {
+const openbotApi: DaniDexDesktopApi = {
   getAppInfo: () => ipcRenderer.invoke(IPC_CHANNELS.getAppInfo),
   getSetupState: () => ipcRenderer.invoke(IPC_CHANNELS.getSetupState),
   saveSetup: (input) => ipcRenderer.invoke(IPC_CHANNELS.saveSetup, input),

@@ -4,11 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProvider } from "../agent-client";
 import type { AgentService } from "../agent-service";
 import {
-  callOpenBotTool,
+  callDaniDexTool,
   createTestService,
-  expectOpenBotToolError,
+  daniDexToolPayload,
+  expectDaniDexToolError,
   FakeAgentClient,
-  openBotToolPayload,
   startAgentTestFixture,
   stopAgentTestFixture,
   stores,
@@ -50,13 +50,13 @@ describe.sequential("RoutineScheduler: routine mutations, runs and tools", () =>
     const threadId = store.activeProviderSession("chief")?.externalSessionId;
     if (!client || !threadId) throw new Error("The routine tool test thread did not start.");
 
-    const ownCreate = await callOpenBotTool(client, threadId, "create_routine", {
+    const ownCreate = await callDaniDexTool(client, threadId, "create_routine", {
       name: "Morning brief",
       instruction: "Prepare the daily brief.",
       schedule: { kind: "daily", time: "09:00" },
     });
     expect(ownCreate.error).toBeUndefined();
-    const ownRoutine = openBotToolPayload(ownCreate.result);
+    const ownRoutine = daniDexToolPayload(ownCreate.result);
     expect(ownRoutine).toMatchObject({
       agentId: "chief",
       name: "Morning brief",
@@ -64,7 +64,7 @@ describe.sequential("RoutineScheduler: routine mutations, runs and tools", () =>
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
     });
 
-    const otherCreate = await callOpenBotTool(client, threadId, "create_routine", {
+    const otherCreate = await callDaniDexTool(client, threadId, "create_routine", {
       agentId: "design",
       name: "Weekly review",
       instruction: "Review the current design work.",
@@ -73,39 +73,39 @@ describe.sequential("RoutineScheduler: routine mutations, runs and tools", () =>
       schedule: { kind: "weekly", weekday: 1, time: "10:30" },
     });
     expect(otherCreate.error).toBeUndefined();
-    const otherRoutine = openBotToolPayload(otherCreate.result);
+    const otherRoutine = daniDexToolPayload(otherCreate.result);
     expect(otherRoutine).toMatchObject({ agentId: "design", active: false, timezone: "UTC" });
 
-    const listResult = await callOpenBotTool(client, threadId, "list_routines", { agentId: "design" });
-    expect(openBotToolPayload(listResult.result).routines).toEqual([
+    const listResult = await callDaniDexTool(client, threadId, "list_routines", { agentId: "design" });
+    expect(daniDexToolPayload(listResult.result).routines).toEqual([
       expect.objectContaining({ id: otherRoutine.id, name: "Weekly review" }),
     ]);
 
-    const updated = await callOpenBotTool(client, threadId, "update_routine", {
+    const updated = await callDaniDexTool(client, threadId, "update_routine", {
       agentId: "design",
       routineId: otherRoutine.id,
       active: true,
       schedule: { kind: "weekdays", time: "08:15" },
     });
-    expect(openBotToolPayload(updated.result)).toMatchObject({
+    expect(daniDexToolPayload(updated.result)).toMatchObject({
       id: otherRoutine.id,
       active: true,
       trigger: { schedule: { kind: "weekdays", time: "08:15" } },
     });
 
-    const testRun = await callOpenBotTool(client, threadId, "test_routine", {
+    const testRun = await callDaniDexTool(client, threadId, "test_routine", {
       agentId: "design",
       routineId: otherRoutine.id,
     });
-    expect(openBotToolPayload(testRun.result)).toMatchObject({
+    expect(daniDexToolPayload(testRun.result)).toMatchObject({
       routineId: otherRoutine.id,
       agentId: "design",
       kind: "manual",
       status: "queued",
     });
 
-    const deleted = await callOpenBotTool(client, threadId, "delete_routine", { routineId: ownRoutine.id });
-    expect(openBotToolPayload(deleted.result)).toEqual({
+    const deleted = await callDaniDexTool(client, threadId, "delete_routine", { routineId: ownRoutine.id });
+    expect(daniDexToolPayload(deleted.result)).toEqual({
       deleted: true,
       agentId: "chief",
       routineId: ownRoutine.id,
@@ -265,8 +265,8 @@ describe.sequential("RoutineScheduler: routine mutations, runs and tools", () =>
     const threadId = store.activeProviderSession("chief")?.externalSessionId;
     if (!client || !threadId) throw new Error("The routine validation test thread did not start.");
 
-    await expectOpenBotToolError(client, threadId, "list_routines", { agentId: "missing" }, "Unknown agent");
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(client, threadId, "list_routines", { agentId: "missing" }, "Unknown agent");
+    await expectDaniDexToolError(
       client,
       threadId,
       "create_routine",
@@ -277,7 +277,7 @@ describe.sequential("RoutineScheduler: routine mutations, runs and tools", () =>
       },
       "schedule is invalid",
     );
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "create_routine",
@@ -298,14 +298,14 @@ describe.sequential("RoutineScheduler: routine mutations, runs and tools", () =>
       timezone: "UTC",
       schedule: { kind: "daily", time: "09:00" },
     });
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "update_routine",
       { routineId: routine.id },
       "At least one routine update is required",
     );
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "update_routine",
@@ -336,20 +336,20 @@ describe.sequential("RoutineScheduler: routine mutations, runs and tools", () =>
 
     const folderInstruction =
       "Watch /Users/kamicyrek/Desktop/Dani-Dex/INBOX for new invoice files and create a notification for each new file.";
-    const created = await callOpenBotTool(client, threadId, "create_routine", {
+    const created = await callDaniDexTool(client, threadId, "create_routine", {
       name: "Inbox watcher",
       instruction: folderInstruction,
       schedule: { kind: "interval", amount: 5, unit: "minutes", anchorAt: new Date().toISOString() },
     });
     expect(created.error).toBeUndefined();
-    const folderRoutine = openBotToolPayload(created.result);
+    const folderRoutine = daniDexToolPayload(created.result);
     expect(folderRoutine).toMatchObject({
       name: "Inbox watcher",
       trigger: { schedule: { kind: "interval", amount: 5, unit: "minutes" } },
     });
     expect(folderRoutine.instruction).toContain("/Users/kamicyrek/Desktop/Dani-Dex/INBOX");
 
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "create_routine",
@@ -360,7 +360,7 @@ describe.sequential("RoutineScheduler: routine mutations, runs and tools", () =>
       },
       "at least 3 minutes",
     );
-    await expectOpenBotToolError(
+    await expectDaniDexToolError(
       client,
       threadId,
       "update_routine",

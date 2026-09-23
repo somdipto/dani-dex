@@ -13,7 +13,7 @@ import { Button, buttonVariants, Input, ItemActions, ItemGroup, Plus, Textarea }
 import { ChannelMemberRow } from "../src/features/channels/ChannelMemberRow";
 import AgentSettingsPanel from "../src/features/conversation/AgentSettingsPanel";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_MODELS } from "./fixtures";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 /*
  * The channel panel and the agent panel open in the same slot, so this file draws them together:
@@ -90,7 +90,7 @@ function ChannelPanelStory(props: { title: string; body: () => ReturnType<typeof
 /** The agent panel beside it, so the two headers and the two field stacks can be compared. */
 function AgentPanelStory() {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot({});
+  const mock = createMockDaniDex({});
   window.danidex = mock.api;
   onCleanup(() => {
     mock.dispose();

@@ -86,7 +86,7 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { isString } from "@dani-dex/contracts/runtime-values";
 import { QueueEditRejectedError, type QueueEditRequest } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
-import { createOpenBotLogger, redactText } from "@dani-dex/logging";
+import { createDaniDexLogger, redactText } from "@dani-dex/logging";
 import { AgentMemories } from "./agent/agent-memories";
 import type { ApprovalAutomationPolicy } from "./agent/approval-automation";
 import { AttachmentGateway } from "./agent/attachment-gateway";
@@ -116,7 +116,7 @@ import { ProfileSave } from "./agent/profile-save";
 import { createAgentToolSchema, updateProfileToolSchema } from "./agent/profile-tools";
 import { type AgentClientFactory, ProviderRuntime } from "./agent/provider-runtime";
 import { type RoutineMutationOptions, RoutineScheduler } from "./agent/routine-scheduler";
-import { type OpenBotToolResponse, openBotToolResult } from "./agent/routine-tools";
+import { type DaniDexToolResponse, daniDexToolResult } from "./agent/routine-tools";
 import { fitRuntimeSnapshot } from "./agent/runtime-snapshot";
 import { type AgentSidebar, handleSidebarTool } from "./agent/sidebar-tools";
 import { LOCAL_SKILL_TOOL_DEFINITIONS, type LocalSkillTools, runLocalSkillTool } from "./agent/skill-tools";
@@ -151,7 +151,7 @@ import { RoutineTimer } from "./routine-timer";
 import type { SidebarLayoutStore } from "./sidebar-layout-store";
 import { isWithin, rebaseLegacyWorkspacePath, sharedPathFromInput, workspacePathFromInput } from "./workspace-paths";
 
-const logger = createOpenBotLogger("agent-service");
+const logger = createDaniDexLogger("agent-service");
 
 /**
  * Only the application knows which managed CLIs it downloaded, so a caller that says nothing gets
@@ -2235,7 +2235,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
               await this.#attention.surfaceHostedSiteApproval(client, request, request.params, request.params.tool);
               return;
             }
-            client.respond(request.id, await this.#handleOpenBotTool(request.params));
+            client.respond(request.id, await this.#handleDaniDexTool(request.params));
             return;
           }
           throw new Error(`Unsupported dynamic tool namespace: ${request.params.namespace}`);
@@ -2267,14 +2267,14 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     }
   }
 
-  async #handleOpenBotTool(params: DynamicToolCallParams): Promise<OpenBotToolResponse> {
+  async #handleDaniDexTool(params: DynamicToolCallParams): Promise<DaniDexToolResponse> {
     const senderAgentId = this.#conversation.agentForThread(params.threadId);
     if (!senderAgentId) throw new Error("The sending Dani-Dex agent is unknown.");
 
     if (LOCAL_SKILL_TOOL_DEFINITIONS.some((tool) => tool.name === params.tool)) {
       try {
         if (!this.#localSkillTools) throw new Error("Local skill tools are unavailable.");
-        const result = openBotToolResult(
+        const result = daniDexToolResult(
           await runLocalSkillTool(this.#localSkillTools(), senderAgentId, params.tool, params.arguments, (event) => {
             const executionThreadId = this.#conversation.publicThreadId(senderAgentId, params.threadId);
             const snapshot = structuredClone(this.#conversation.ensureSnapshot(senderAgentId, executionThreadId));
@@ -2311,7 +2311,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     const channelId = this.channels.store.channelForThread(executionThreadId);
     if (channelId && (params.tool.startsWith("channel_") || params.tool === "send_message")) {
       if (params.tool === "send_message") throw new Error("Use channel_assign or channel_transfer for channel work.");
-      return openBotToolResult(
+      return daniDexToolResult(
         await this.channels.tool(channelId, senderAgentId, params.turnId, params.callId, params.tool, params.arguments),
       );
     }
@@ -2328,7 +2328,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     }
 
     if (params.tool === "list_sites") {
-      return openBotToolResult({ sites: await this.#hostedSites.listSites(), limit: 10 });
+      return daniDexToolResult({ sites: await this.#hostedSites.listSites(), limit: 10 });
     }
 
     if (isHostedSiteMutationTool(params.tool)) throw new Error("Hosted site changes require user approval.");
@@ -2471,7 +2471,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       const snapshot = this.#conversation.ensureSnapshot(senderAgentId, params.threadId);
       this.#mailboxSync.syncMailboxMessages(snapshot);
       this.#conversation.emitConversation(snapshot);
-      return openBotToolResult({ status: "reacted", messageId: delivery.delivery.id, emoji: args.emoji });
+      return daniDexToolResult({ status: "reacted", messageId: delivery.delivery.id, emoji: args.emoji });
     }
 
     if (params.tool !== "send_message" || !isRecord(params.arguments)) {

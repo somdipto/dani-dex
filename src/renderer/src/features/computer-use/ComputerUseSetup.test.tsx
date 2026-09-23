@@ -1,11 +1,11 @@
 import { type ComputerUseState, LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, waitFor, within } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
 import { ComputerUsePermissionHelp } from "./ComputerUsePermissionHelp";
 import { ComputerUseSetup } from "./ComputerUseSetup";
 
-let mock: MockOpenBotControls | undefined;
+let mock: MockDaniDexControls | undefined;
 const previousApi = window.danidex;
 
 afterEach(() => {
@@ -30,7 +30,7 @@ function state(overrides: Partial<ComputerUseState>): ComputerUseState {
 
 describe("ComputerUseSetup", () => {
   it("opens the pane for the permission whose button was pressed", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const openPane = vi.spyOn(mock.api, "openComputerUsePermissionPane");
     const view = render(() => <ComputerUseSetup variant="settings" />);
@@ -44,7 +44,7 @@ describe("ComputerUseSetup", () => {
   });
 
   it("keeps the way back to System Settings on a permission already granted", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     mock.api.getComputerUseState = vi.fn().mockResolvedValue(
       state({
         permissions: [
@@ -66,7 +66,7 @@ describe("ComputerUseSetup", () => {
   // A grant is given in System Settings, outside this window. The driver reports only what it sees
   // when it is asked, so a panel that never asks again keeps a row the user has already granted.
   it("offers Check again, and asks the driver again when the window comes back", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     const read = vi
       .fn()
       .mockResolvedValueOnce(state({}))
@@ -87,7 +87,7 @@ describe("ComputerUseSetup", () => {
   // Every release carries the driver, so a build without one is a broken build and not a thing the
   // user installs by hand. The panel must name no command, on any desktop.
   it("reports a build with no driver as a fault, and offers no command to run", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     mock.api.getComputerUseState = vi
       .fn()
       .mockResolvedValue(
@@ -105,7 +105,7 @@ describe("ComputerUseSetup", () => {
   // Windows and Linux put no permission between Dani-Dex and the desktop. An empty list must read as
   // ready, and must draw no row naming a macOS setting the user cannot find.
   it("reports ready without permission rows where the system grants none", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     mock.api.getComputerUseState = vi.fn().mockResolvedValue(state({ status: "ready", permissions: [] }));
     window.danidex = mock.api;
     const view = render(() => <ComputerUseSetup variant="settings" />);
@@ -118,7 +118,7 @@ describe("ComputerUseSetup", () => {
 
 describe("Sunshine permission help", () => {
   it("reads Sunshine permissions and shows its bundle instead of the Computer Use application", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     mock.api.getComputerUsePermissionApp = async () => ({ name: "Sunshine", iconDataUrl: null });
     const readSunshine = vi.spyOn(mock.api.remoteDesktop, "checkSetup");

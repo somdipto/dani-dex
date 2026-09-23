@@ -10,9 +10,9 @@ import {
   type SkillCategory,
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 
-const logger = createOpenBotLogger("build-plugin-catalog");
+const logger = createDaniDexLogger("build-plugin-catalog");
 
 const scriptRoot = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(scriptRoot, "..");

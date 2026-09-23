@@ -7,7 +7,7 @@ import { Toaster, toast } from "../src/components/ui";
 import { OnboardingFlow } from "../src/features/onboarding/OnboardingFlow";
 import { createFakeCodeLogin } from "./code-login-fixture";
 import { STORY_AGENT_STATUS } from "./fixtures";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 const setupState: AppSetupState = { completed: false, preferredProvider: null, preferredModel: null };
 
@@ -89,7 +89,7 @@ const initialRuntimeStatuses = (): Record<ManagedProviderId, ProviderRuntimeStat
 
 function MockedOnboardingFlow(props: { args: Parameters<typeof OnboardingFlow>[0]; permissions?: boolean }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot();
+  const mock = createMockDaniDex();
   if (props.permissions) {
     mock.api.getComputerUseState = async () => ({
       status: "permissions-required",

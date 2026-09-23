@@ -14,7 +14,7 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it } from "vitest";
-import { OpenBotDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./openbot-database";
 
 const roots: string[] = [];
 
@@ -22,7 +22,7 @@ afterEach(async () => {
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
 
-describe("OpenBotDatabase", () => {
+describe("DaniDexDatabase", () => {
   it("rolls back a failed channel migration and preserves agent history on retry", async () => {
     const database = await createDatabase();
     const agent = testAgent();
@@ -53,7 +53,7 @@ describe("OpenBotDatabase", () => {
     // statement is spelled. What is under test is the rollback, not which object collides.
     legacy.exec("CREATE TABLE channel_tasks_channel (conflict TEXT)");
     legacy.close();
-    const failed = new OpenBotDatabase(root);
+    const failed = new DaniDexDatabase(root);
     await expect(failed.initialize()).rejects.toThrow("migration to version 18 failed");
     const check = new DatabaseSync(path);
     expect(check.prepare("SELECT name FROM sqlite_master WHERE name = 'projection_channels'").get()).toBeUndefined();
@@ -61,7 +61,7 @@ describe("OpenBotDatabase", () => {
     expect(check.prepare("SELECT version FROM schema_migrations WHERE version = 18").get()).toBeUndefined();
     check.exec("DROP TABLE channel_tasks_channel");
     check.close();
-    const retried = new OpenBotDatabase(root);
+    const retried = new DaniDexDatabase(root);
     await retried.initialize();
     expect(retried.listAgents()).toEqual([agent]);
     expect(retried.readConversation(agent.id, agent.threadId).messages).toEqual(original.messages);
@@ -273,7 +273,7 @@ describe("OpenBotDatabase", () => {
   it("reads a completed conversation after a database restart without a provider", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-restart-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const agent = testAgent();
     if (!agent.threadId) throw new Error("The test agent has no thread.");
@@ -315,7 +315,7 @@ describe("OpenBotDatabase", () => {
     ]);
     database.close();
 
-    const restored = new OpenBotDatabase(root);
+    const restored = new DaniDexDatabase(root);
     await restored.initialize();
     expect(restored.readConversation(agent.id, agent.threadId)).toMatchObject({
       revision: saved.revision,
@@ -981,7 +981,7 @@ describe("OpenBotDatabase", () => {
   it("migrates version 3 history, preserves the current chat, and reclaims disk space", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-v3-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const agent = testAgent();
     database.replaceAgents("agents-import", [agent], "agents.imported");
@@ -1030,7 +1030,7 @@ describe("OpenBotDatabase", () => {
     legacy.close();
     const sizeBefore = (await stat(database.path)).size;
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     const sizeAfter = (await stat(database.path)).size;
     expect(sizeAfter).toBeLessThan(sizeBefore / 2);
@@ -1051,7 +1051,7 @@ describe("OpenBotDatabase", () => {
     });
     migrated.close();
 
-    const reopened = new OpenBotDatabase(root);
+    const reopened = new DaniDexDatabase(root);
     await reopened.initialize();
     expect(snapshotEventCount(reopened, agent.threadId)).toBe(1);
     reopened.close();
@@ -1063,7 +1063,7 @@ describe("OpenBotDatabase", () => {
   it("adds channel projections to a database that already ran the analytics versions", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-v16-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1076,7 +1076,7 @@ describe("OpenBotDatabase", () => {
     analyticsRelease.exec("DELETE FROM schema_migrations WHERE version >= 17");
     analyticsRelease.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(
       migrated.connection
@@ -1117,7 +1117,7 @@ describe("OpenBotDatabase", () => {
   it("repairs the provider constraint in a pre-merge channel schema without losing channel data", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-channel-v18-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const agent = testAgent();
     if (!agent.threadId) throw new Error("The test agent has no thread.");
@@ -1181,7 +1181,7 @@ describe("OpenBotDatabase", () => {
     `);
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(
       migrated.connection
@@ -1212,7 +1212,7 @@ describe("OpenBotDatabase", () => {
   it("adds the MCP server projection to a version 19 database and keeps its rows", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-v19-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const agent = testAgent();
     database.replaceAgents("agents-import", [agent], "agents.imported");
@@ -1226,7 +1226,7 @@ describe("OpenBotDatabase", () => {
     `);
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(migrated.listAgents().map((summary) => summary.id)).toEqual([agent.id]);
     migrated.connection
@@ -1241,7 +1241,7 @@ describe("OpenBotDatabase", () => {
     migrated.close();
 
     // Re-running is a no-op: the row the user already has survives a second start.
-    const reopened = new OpenBotDatabase(root);
+    const reopened = new DaniDexDatabase(root);
     await reopened.initialize();
     expect(reopened.connection.prepare("SELECT name FROM projection_mcp_servers").all()).toEqual([
       { name: "Filesystem" },
@@ -1255,7 +1255,7 @@ describe("OpenBotDatabase", () => {
   it("moves a saved server off the Computer Use name and keeps what the user configured", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-v20-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1275,7 +1275,7 @@ describe("OpenBotDatabase", () => {
     `);
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(
       migrated.connection
@@ -1288,7 +1288,7 @@ describe("OpenBotDatabase", () => {
     migrated.close();
 
     // Running again renames nothing: the name is free now, so a second start leaves the row alone.
-    const reopened = new OpenBotDatabase(root);
+    const reopened = new DaniDexDatabase(root);
     await reopened.initialize();
     expect(reopened.connection.prepare("SELECT name FROM projection_mcp_servers ORDER BY position").all()).toEqual([
       { name: "computer_use_saved_2" },
@@ -1300,7 +1300,7 @@ describe("OpenBotDatabase", () => {
   it("adds post-v4 agent memory and routine projections", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-v4-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1317,7 +1317,7 @@ describe("OpenBotDatabase", () => {
     `);
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     const tables = migrated.connection
       .prepare(
@@ -1357,7 +1357,7 @@ describe("OpenBotDatabase", () => {
   it("migrates legacy reactions to user-owned rows and permits another actor", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-reactions-v7-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1366,7 +1366,7 @@ describe("OpenBotDatabase", () => {
     downgradeReactionsToV7(legacy);
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(
       migrated.connection
@@ -1390,7 +1390,7 @@ describe("OpenBotDatabase", () => {
   it("rolls back a failed baseline migration and succeeds on retry", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-rollback-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1400,7 +1400,7 @@ describe("OpenBotDatabase", () => {
     legacy.exec("CREATE TABLE projection_reactions_v8 (blocker TEXT)");
     legacy.close();
 
-    const failed = new OpenBotDatabase(root);
+    const failed = new DaniDexDatabase(root);
     await expect(failed.initialize()).rejects.toThrow("migration to version 8 failed");
 
     const rolledBack = new DatabaseSync(database.path);
@@ -1411,7 +1411,7 @@ describe("OpenBotDatabase", () => {
     rolledBack.exec("DROP TABLE projection_reactions_v8");
     rolledBack.close();
 
-    const retried = new OpenBotDatabase(root);
+    const retried = new DaniDexDatabase(root);
     await retried.initialize();
     expect(retried.connection.prepare("SELECT version FROM schema_migrations ORDER BY version").all()).toEqual([
       { version: 7 },
@@ -1436,7 +1436,7 @@ describe("OpenBotDatabase", () => {
   it("deactivates existing provider sessions when reaction guidance changes", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-runtime-v9-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const agent = testAgent();
     if (!agent.threadId) throw new Error("The test agent has no thread.");
@@ -1455,7 +1455,7 @@ describe("OpenBotDatabase", () => {
     legacy.prepare("DELETE FROM schema_migrations WHERE version >= 10").run();
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(migrated.activeProviderSession(agent.threadId, "codex")).toBeNull();
     expect(migrated.listProviderSessions(agent.threadId)).toEqual([
@@ -1467,7 +1467,7 @@ describe("OpenBotDatabase", () => {
   it("deactivates existing provider sessions when response attachment tools are added", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-runtime-v11-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const agent = testAgent();
     if (!agent.threadId) throw new Error("The test agent has no thread.");
@@ -1486,7 +1486,7 @@ describe("OpenBotDatabase", () => {
     legacy.prepare("DELETE FROM schema_migrations WHERE version >= 11").run();
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(migrated.activeProviderSession(agent.threadId, "codex")).toBeNull();
     expect(migrated.listProviderSessions(agent.threadId)).toEqual([
@@ -1501,7 +1501,7 @@ describe("OpenBotDatabase", () => {
   it("rolls back a failed response attachment session refresh and succeeds on retry", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-runtime-v11-rollback-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const agent = testAgent();
     if (!agent.threadId) throw new Error("The test agent has no thread.");
@@ -1527,7 +1527,7 @@ describe("OpenBotDatabase", () => {
     `);
     legacy.close();
 
-    const failed = new OpenBotDatabase(root);
+    const failed = new DaniDexDatabase(root);
     await expect(failed.initialize()).rejects.toThrow("migration to version 11 failed");
     const rolledBack = new DatabaseSync(database.path);
     expect(rolledBack.prepare("SELECT 1 FROM schema_migrations WHERE version = 11").get()).toBeUndefined();
@@ -1539,7 +1539,7 @@ describe("OpenBotDatabase", () => {
     rolledBack.exec("DROP TRIGGER reject_session_refresh");
     rolledBack.close();
 
-    const retried = new OpenBotDatabase(root);
+    const retried = new DaniDexDatabase(root);
     await retried.initialize();
     expect(retried.activeProviderSession(agent.threadId, "codex")).toBeNull();
     expect(retried.connection.prepare("SELECT 1 AS applied FROM schema_migrations WHERE version = 11").get()).toEqual({
@@ -1551,7 +1551,7 @@ describe("OpenBotDatabase", () => {
   it("keeps an agent's reaction attributed to that agent across the actor column rename", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-reactions-v12-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1567,7 +1567,7 @@ describe("OpenBotDatabase", () => {
     `);
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(
       migrated.connection
@@ -1583,7 +1583,7 @@ describe("OpenBotDatabase", () => {
   it("rolls back a failed reaction actor rename and succeeds on retry", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-reactions-rollback-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1612,7 +1612,7 @@ describe("OpenBotDatabase", () => {
     `);
     legacy.close();
 
-    const failed = new OpenBotDatabase(root);
+    const failed = new DaniDexDatabase(root);
     await expect(failed.initialize()).rejects.toThrow("migration to version 12 failed");
 
     const rolledBack = new DatabaseSync(database.path);
@@ -1623,7 +1623,7 @@ describe("OpenBotDatabase", () => {
     rolledBack.exec("DROP TABLE blocker");
     rolledBack.close();
 
-    const retried = new OpenBotDatabase(root);
+    const retried = new DaniDexDatabase(root);
     await retried.initialize();
     expect(retried.connection.prepare("SELECT actor_kind, actor_agent_id FROM projection_reactions").all()).toEqual([
       { actor_kind: "agent", actor_agent_id: "helper" },
@@ -1634,7 +1634,7 @@ describe("OpenBotDatabase", () => {
   it("rewrites agent ids without losing a thread, its messages, or its hosted-site history", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-ids-v13-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1648,7 +1648,7 @@ describe("OpenBotDatabase", () => {
     seedLegacyAgent(legacy, legacyId, legacyWorkspace);
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
 
     expect(migrated.connection.prepare("SELECT agent_id, thread_id FROM projection_agents").get()).toEqual({
@@ -1737,7 +1737,7 @@ describe("OpenBotDatabase", () => {
   it("rolls back a failed agent id rewrite and succeeds on retry", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-ids-rollback-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1753,7 +1753,7 @@ describe("OpenBotDatabase", () => {
     legacy.prepare("INSERT INTO blocker (value) VALUES (?)").run(legacyId);
     legacy.close();
 
-    const failed = new OpenBotDatabase(root);
+    const failed = new DaniDexDatabase(root);
     await expect(failed.initialize()).rejects.toThrow("migration to version 13 failed");
 
     const rolledBack = new DatabaseSync(database.path);
@@ -1765,7 +1765,7 @@ describe("OpenBotDatabase", () => {
     rolledBack.exec("DROP TABLE blocker");
     rolledBack.close();
 
-    const retried = new OpenBotDatabase(root);
+    const retried = new DaniDexDatabase(root);
     await retried.initialize();
     expect(retried.connection.prepare("SELECT agent_id FROM projection_agents").all()).toEqual([
       { agent_id: `agent-${legacyId.slice("bot-".length)}` },
@@ -1777,7 +1777,7 @@ describe("OpenBotDatabase", () => {
   it("leaves an agent id the application did not mint alone", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-ids-custom-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1802,7 +1802,7 @@ describe("OpenBotDatabase", () => {
     seedLegacyAgent(legacy, "agent-1f0a2b3c-4d5e-4f60-8a91-b2c3d4e5f607-copy", "/Users/dev/Dani-Dex/Agents/twin");
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
 
     expect(migrated.connection.prepare("SELECT agent_id FROM projection_agents ORDER BY agent_id").all()).toEqual([
@@ -1820,7 +1820,7 @@ describe("OpenBotDatabase", () => {
   it("rejects a database created by a newer application", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-newer-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1831,14 +1831,14 @@ describe("OpenBotDatabase", () => {
       .run("2026-08-20T10:00:00.000Z");
     newer.close();
 
-    const downgradedApp = new OpenBotDatabase(root);
+    const downgradedApp = new DaniDexDatabase(root);
     await expect(downgradedApp.initialize()).rejects.toThrow("newer than this application supports");
   });
 
   it("rejects modern migration history with a missing baseline", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-gap-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     database.close();
 
@@ -1846,14 +1846,14 @@ describe("OpenBotDatabase", () => {
     incomplete.prepare("DELETE FROM schema_migrations WHERE version = 8").run();
     incomplete.close();
 
-    const reopened = new OpenBotDatabase(root);
+    const reopened = new DaniDexDatabase(root);
     await expect(reopened.initialize()).rejects.toThrow("migration history is missing version 8");
   });
 
   it("widens the provider-session constraint for Grok without losing Codex or Claude sessions", async () => {
     const root = await mkdtemp(join(tmpdir(), "openbot-db-provider-v6-"));
     roots.push(root);
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const agent = testAgent();
     if (!agent.threadId) throw new Error("The test agent has no thread.");
@@ -1905,7 +1905,7 @@ describe("OpenBotDatabase", () => {
     `);
     legacy.close();
 
-    const migrated = new OpenBotDatabase(root);
+    const migrated = new DaniDexDatabase(root);
     await migrated.initialize();
     expect(migrated.listProviderSessions(threadId).map((session) => session.provider)).toEqual(["codex", "claude"]);
     const table = migrated.connection
@@ -1929,7 +1929,7 @@ describe("OpenBotDatabase", () => {
     async (failFirst) => {
       const root = await mkdtemp(join(tmpdir(), "openbot-db-provider-v16-"));
       roots.push(root);
-      const database = new OpenBotDatabase(root);
+      const database = new DaniDexDatabase(root);
       await database.initialize();
       const agent = testAgent();
       if (!agent.threadId) throw new Error("The test agent has no thread.");
@@ -1999,7 +1999,7 @@ describe("OpenBotDatabase", () => {
       legacy.close();
 
       if (failFirst) {
-        const failed = new OpenBotDatabase(root);
+        const failed = new DaniDexDatabase(root);
         await expect(failed.initialize()).rejects.toThrow("migration to version 17 failed");
         const rolledBack = new DatabaseSync(database.path);
         expect(rolledBack.prepare("SELECT * FROM projection_provider_sessions ORDER BY id").all()).toEqual(
@@ -2017,7 +2017,7 @@ describe("OpenBotDatabase", () => {
         rolledBack.close();
       }
 
-      const migrated = new OpenBotDatabase(root);
+      const migrated = new DaniDexDatabase(root);
       await migrated.initialize();
       expect(migrated.connection.prepare("SELECT * FROM projection_provider_sessions ORDER BY id").all()).toEqual(
         originalSessions,
@@ -2253,10 +2253,10 @@ function downgradeReactionsToV7(database: DatabaseSync): void {
   `);
 }
 
-async function createDatabase(): Promise<OpenBotDatabase> {
+async function createDatabase(): Promise<DaniDexDatabase> {
   const root = await mkdtemp(join(tmpdir(), "openbot-db-"));
   roots.push(root);
-  const database = new OpenBotDatabase(root);
+  const database = new DaniDexDatabase(root);
   await database.initialize();
   return database;
 }
@@ -2281,13 +2281,13 @@ function testAgent(): AgentSummary {
   };
 }
 
-function eventCount(database: OpenBotDatabase): number {
+function eventCount(database: DaniDexDatabase): number {
   const row = database.connection.prepare("SELECT COUNT(*) AS count FROM orchestration_events").get();
   if (!isDynamicRecord(row) || !isNumber(row.count)) throw new Error("Invalid event count row.");
   return row.count;
 }
 
-function snapshotEventCount(database: OpenBotDatabase, threadId: string | null): number {
+function snapshotEventCount(database: DaniDexDatabase, threadId: string | null): number {
   if (!threadId) throw new Error("The test agent has no thread.");
   const row = database.connection
     .prepare(
@@ -2300,7 +2300,7 @@ function snapshotEventCount(database: OpenBotDatabase, threadId: string | null):
   return row.count;
 }
 
-function streamedMessageEventCount(database: OpenBotDatabase, threadId: string | null): number {
+function streamedMessageEventCount(database: DaniDexDatabase, threadId: string | null): number {
   if (!threadId) throw new Error("The test agent has no thread.");
   const row = database.connection
     .prepare(
@@ -2314,7 +2314,7 @@ function streamedMessageEventCount(database: OpenBotDatabase, threadId: string |
 }
 
 /** The sequence each projected message was last written at, by message id. */
-function messageSequences(database: OpenBotDatabase, threadId: string): Record<string, number> {
+function messageSequences(database: DaniDexDatabase, threadId: string): Record<string, number> {
   const sequences: Record<string, number> = {};
   for (const row of database.connection
     .prepare("SELECT message_id, last_event_sequence FROM projection_thread_messages WHERE thread_id = ?")

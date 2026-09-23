@@ -4,7 +4,7 @@ import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import AgentSettingsPanel from "../src/features/conversation/AgentSettingsPanel";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_INSTALLED_SKILLS, STORY_MODELS } from "./fixtures";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 function AgentSkillsStory(props: {
   skills: InstalledSkill[];
@@ -14,7 +14,7 @@ function AgentSkillsStory(props: {
   onAddFromMarketplace?: (agentId: string) => void;
 }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot({ installedSkills: { chief: props.skills } });
+  const mock = createMockDaniDex({ installedSkills: { chief: props.skills } });
   if (props.localState === "empty") mock.api.skills.localList = async () => [];
   if (props.localState === "error")
     mock.api.skills.localList = async () => {

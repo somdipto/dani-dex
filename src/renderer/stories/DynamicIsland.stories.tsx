@@ -9,7 +9,7 @@ import { createMemo, createSignal } from "solid-js";
 import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import type { DynamicIslandViewState } from "../src/components/ui";
-import { OpenBotDynamicIsland } from "../src/features/dynamic-island/OpenBotDynamicIsland";
+import { DaniDexDynamicIsland } from "../src/features/dynamic-island/DaniDexDynamicIsland";
 import { DynamicIslandDisplayComparison } from "./DynamicIslandDisplayComparison";
 import { STORY_AGENTS } from "./fixtures";
 
@@ -37,7 +37,7 @@ function DynamicIslandDemo(props: DynamicIslandDemoProps): JSX.Element {
     <DynamicIslandDisplayComparison
       defaultState={props.defaultState}
       renderIsland={(preview) => (
-        <OpenBotDynamicIsland
+        <DaniDexDynamicIsland
           presentation={presentation()}
           state={preview.state()}
           displayMode={preview.displayMode}
@@ -285,7 +285,7 @@ export const OpenChatReturnsToIdle: Story = {
       renderIsland={(preview) => {
         const [presentation, setPresentation] = createSignal(presentationFor("chat", "standard", "single"));
         return (
-          <OpenBotDynamicIsland
+          <DaniDexDynamicIsland
             presentation={presentation()}
             state={preview.state()}
             displayMode={preview.displayMode}

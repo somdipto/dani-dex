@@ -8,9 +8,9 @@ import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal, flush } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DynamicIslandViewState } from "../../components/ui";
-import { createMockOpenBot } from "../../preview/mock-openbot";
+import { createMockDaniDex } from "../../preview/mock-openbot";
+import { DaniDexDynamicIsland } from "./DaniDexDynamicIsland";
 import { DynamicIslandSurface } from "./DynamicIslandSurface";
-import { OpenBotDynamicIsland } from "./OpenBotDynamicIsland";
 
 const RESEARCH = {
   id: "research",
@@ -58,7 +58,7 @@ describe("DynamicIslandSurface", () => {
   });
 
   it("hides only the idle island when that preference changes", async () => {
-    const mock = createMockOpenBot();
+    const mock = createMockDaniDex();
     let updatePreference: ((preference: DynamicIslandPreference) => void) | undefined;
     let publish: ((presentation: DynamicIslandPresentation) => void) | undefined;
     mock.api.dynamicIsland.onPreference = (listener) => {
@@ -262,7 +262,7 @@ function questionPresentation(
 }
 
 function createQuestionMock(presentation: DynamicIslandPresentation) {
-  const mock = createMockOpenBot();
+  const mock = createMockDaniDex();
   const performAction = vi.fn(async () => undefined);
   mock.api.dynamicIsland.getPresentation = async () => presentation;
   mock.api.dynamicIsland.performAction = performAction;
@@ -326,7 +326,7 @@ function renderControlledIsland(
     const [presentation] = createSignal(initialPresentation);
     const [state, setState] = createSignal(initialState);
     return (
-      <OpenBotDynamicIsland
+      <DaniDexDynamicIsland
         presentation={presentation()}
         state={state()}
         onStateChange={setState}

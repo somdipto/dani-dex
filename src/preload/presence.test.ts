@@ -1,15 +1,15 @@
-import type { OpenBotDesktopApi, ScopedTeamPresenceSnapshot } from "@dani-dex/contracts/ipc";
+import type { DaniDexDesktopApi, ScopedTeamPresenceSnapshot } from "@dani-dex/contracts/ipc";
 import { IPC_CHANNELS } from "@dani-dex/contracts/ipc";
 import { expect, it, vi } from "vitest";
 
 const bridge = vi.hoisted(() => {
   vi.stubGlobal("window", { addEventListener: () => {} });
-  const api: { current: OpenBotDesktopApi | null } = { current: null };
+  const api: { current: DaniDexDesktopApi | null } = { current: null };
   return { api, listeners: new Map<string, Set<(event: null, payload: ScopedTeamPresenceSnapshot) => void>>() };
 });
 vi.mock("electron", () => ({
   contextBridge: {
-    exposeInMainWorld: (_name: string, api: OpenBotDesktopApi) => {
+    exposeInMainWorld: (_name: string, api: DaniDexDesktopApi) => {
       bridge.api.current = api;
     },
   },

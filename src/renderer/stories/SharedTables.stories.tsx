@@ -4,11 +4,11 @@ import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import AgentSettingsPanel from "../src/features/conversation/AgentSettingsPanel";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_MODELS, STORY_SHARED_TABLES } from "./fixtures";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 function SharedTablesStory(props: { tables: SharedTable[] }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot({ tables: props.tables });
+  const mock = createMockDaniDex({ tables: props.tables });
   window.danidex = mock.api;
 
   onCleanup(() => {

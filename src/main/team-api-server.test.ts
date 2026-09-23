@@ -14,7 +14,7 @@ import {
   TEAM_PROTOCOL_VERSION_HEADER,
   teamProtocolV1HttpRoute,
 } from "@dani-dex/contracts/team-protocol/v1";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SidebarLayoutStore } from "../backend/sidebar-layout-store";
 import {
@@ -301,7 +301,7 @@ describe("TeamApiServer routing", () => {
     const { base } = await start({
       agents: createAgents({ listAgents: () => [] }),
       sidebarLayout,
-      logger: createOpenBotLogger("test", () => undefined),
+      logger: createDaniDexLogger("test", () => undefined),
     });
     // The point is which paths route, not what the stubs do once reached, so the failures they raise
     // are expected here and their logging would bury the assertion.
@@ -375,7 +375,7 @@ describe("TeamApiServer status contract", () => {
     // logger keeps what they raise from burying the row that failed.
     const { base } = await fixture.start({
       agents: createAgents({ listAgents: () => [] }),
-      logger: createOpenBotLogger("test", () => undefined),
+      logger: createDaniDexLogger("test", () => undefined),
       ...options,
     });
     return { base, signIn: fixture.signIn };

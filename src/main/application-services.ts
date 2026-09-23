@@ -41,7 +41,7 @@ import type {
   VoiceModelStatus,
 } from "@dani-dex/contracts/ipc";
 import { IPC_CHANNELS, isManagedToolRuntime, isUpdateBusyPhase } from "@dani-dex/contracts/ipc";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { REMOTE_ACCOUNT_CHECK_INTERVAL_MS } from "@dani-dex/team-client";
 import { app, type BrowserWindow, nativeImage, safeStorage, screen, shell } from "electron";
 import { AgentService } from "../backend/agent-service";
@@ -130,11 +130,11 @@ import {
   type UpdateAdapter,
   UpdateService,
 } from "./update-service";
-import { listSiblingOpenBotInstances } from "./update-sibling-instances";
+import { listSiblingDaniDexInstances } from "./update-sibling-instances";
 import { WHISPER_MODEL_NAME, WHISPER_MODEL_URL } from "./voice-model-service";
 import { VoiceTranscriptionService } from "./voice-transcription-service";
 
-const logger = createOpenBotLogger("application-services");
+const logger = createDaniDexLogger("application-services");
 const SETUP_FILE = "openbot-setup-v2.json";
 const ANALYTICS_PREFERENCE_FILE = "openbot-analytics-preference-v1.json";
 const APPROVAL_AUTOMATION_FILE = "openbot-approval-automation-v2.json";
@@ -1073,7 +1073,7 @@ export async function createApplicationServices({
     // enable updates, so there is nothing to guard there.
     checkSiblingInstances: app.isPackaged
       ? () =>
-          listSiblingOpenBotInstances({
+          listSiblingDaniDexInstances({
             executablePath: app.getPath("exe"),
             currentPid: process.pid,
             platform: process.platform,

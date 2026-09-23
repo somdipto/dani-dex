@@ -11,7 +11,7 @@ import { readAnalyticsPreference, writeAnalyticsPreference } from "../analytics-
 import type { ApprovalAutomation } from "../approval-automation-store";
 import type { LanguageService } from "../language-service";
 import { MAC_PERMISSION_URLS } from "../mac-permission-urls";
-import { exportDiagnostics, exportOpenBotData } from "../maintenance-service";
+import { exportDaniDexData, exportDiagnostics } from "../maintenance-service";
 import { readSetupState, writeSetupState } from "../setup-store";
 import type { UpdateService } from "../update-service";
 import {
@@ -38,7 +38,7 @@ export const EXTERNAL_DESTINATIONS: Record<ExternalDestination, string> = {
   "opencode-install": "https://opencode.ai/docs/",
   "opencode-auth": "https://opencode.ai/auth",
   "claude-install": "https://code.claude.com/docs",
-  feedback: "https://x.com/intent/post?text=Feedback%20for%20OpenBot%20%40norbertbodziony%3A%20",
+  feedback: "https://x.com/intent/post?text=Feedback%20for%20DaniDex%20%40norbertbodziony%3A%20",
   message: "https://x.com/norbertbodziony",
   "mac-screen-recording": MAC_PERMISSION_URLS["screen-recording"],
 };
@@ -112,7 +112,7 @@ export function appIpcHandlers({
       }),
     },
     maintenance: {
-      exportData: handler(() => exportOpenBotData({ service, mailbox, parentWindow: getMainWindow() })),
+      exportData: handler(() => exportDaniDexData({ service, mailbox, parentWindow: getMainWindow() })),
       exportDiagnostics: handler(() => exportDiagnostics({ service, browser, updater, parentWindow: getMainWindow() })),
     },
   };

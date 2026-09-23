@@ -7,10 +7,10 @@ import { join } from "node:path";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { VoiceModelStatus, VoiceTranscriptionResult } from "@dani-dex/contracts/ipc";
 import { isString } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { VoiceModelService } from "./voice-model-service";
 
-const logger = createOpenBotLogger("voice-transcription-service");
+const logger = createDaniDexLogger("voice-transcription-service");
 
 const TRANSCRIPTION_TIMEOUT_MS = 180_000;
 

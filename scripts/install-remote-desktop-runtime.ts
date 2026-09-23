@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { cp, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 import { z } from "zod";
 import { createRemoteDesktopInputDigest, loadNativeRuntimeLock, type NativeRuntimeLock } from "./native-runtime-lock";
 import {
@@ -25,7 +25,7 @@ const githubReleaseSchema = z.object({
 type GitHubRelease = z.infer<typeof githubReleaseSchema>;
 type GitHubReleaseAsset = GitHubRelease["assets"][number];
 
-const logger = createOpenBotLogger("install-remote-desktop-runtime");
+const logger = createDaniDexLogger("install-remote-desktop-runtime");
 
 export async function installRemoteDesktopRuntime(
   input: {

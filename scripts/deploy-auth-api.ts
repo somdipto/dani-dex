@@ -1,9 +1,9 @@
 import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 
-const logger = createOpenBotLogger("deploy-auth-api");
+const logger = createDaniDexLogger("deploy-auth-api");
 
 const scriptsRoot = dirname(fileURLToPath(import.meta.url));
 const apiRoot = join(scriptsRoot, "..", "apps", "auth-api");

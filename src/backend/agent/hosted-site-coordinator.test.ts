@@ -9,8 +9,8 @@ import type { AgentProvider } from "../agent-client";
 import type { AgentService } from "../agent-service";
 import {
   createTestService,
+  daniDexToolPayload,
   FakeAgentClient,
-  openBotToolPayload,
   startAgentTestFixture,
   stopAgentTestFixture,
   stores,
@@ -243,7 +243,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
     );
     await accepted;
     expect(hostedSites.publish).toHaveBeenCalledTimes(1);
-    expect(openBotToolPayload(client.responses[0]?.result)).toMatchObject({ id: "site-1", status: "active" });
+    expect(daniDexToolPayload(client.responses[0]?.result)).toMatchObject({ id: "site-1", status: "active" });
     expect(
       (await service.readConversation(agent.id)).messages.flatMap(
         (message) => hostedSiteConversationEvent(message) ?? [],

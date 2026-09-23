@@ -18,7 +18,7 @@ import type {
   Routine,
 } from "@dani-dex/contracts/ipc";
 import { channelRoutingConversationEventItemType } from "@dani-dex/contracts/ipc";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { strToU8, zipSync } from "fflate";
 import { z } from "zod";
 import { agentNamesById, displayMessageReferences } from "../src/backend/agent/delivery-content";
@@ -50,7 +50,7 @@ import { resolveDevelopmentAppDataRoot } from "./development-state-paths";
 
 export const DEVELOPMENT_SEED_MANIFEST_FILE = "openbot-dev-seed-v1.json";
 
-const logger = createOpenBotLogger("seed-dev-state");
+const logger = createDaniDexLogger("seed-dev-state");
 
 const TEAM_FILE = "openbot-team-server-v2.json";
 /** Read only, exactly as the app reads it: the file a build without accounts owns. */

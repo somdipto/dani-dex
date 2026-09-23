@@ -37,7 +37,7 @@ import type {
   UpdateTeamMemberInput,
 } from "@dani-dex/contracts/ipc";
 import { SIGNED_OUT_CHANNEL_MEMBER_ID } from "@dani-dex/contracts/ipc";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import type { AgentService } from "../backend/agent-service";
 import type { ChannelService } from "../backend/channel-service";
 import type { TeamChatStore } from "../backend/team-chat-store";
@@ -53,7 +53,7 @@ import { TeamWebRtcHostGateway } from "./team-webrtc-host-gateway";
 
 export const DEVELOPMENT_REMOTE_CLIENT_USERNAME = "openbot-dev-client";
 
-const logger = createOpenBotLogger("host-service");
+const logger = createDaniDexLogger("host-service");
 
 interface HostEvents {
   changed: [status: HostStatus];

@@ -11,7 +11,7 @@ import { AgentMemoryStore } from "../agent-memory-store";
 import type { AgentStore } from "../agent-store";
 import { type DynamicToolCallParams, isRecord } from "../protocol";
 import type { ConversationRuntime } from "./conversation-runtime";
-import { type OpenBotToolResponse, openBotToolResult } from "./routine-tools";
+import { type DaniDexToolResponse, daniDexToolResult } from "./routine-tools";
 
 type PendingMemoryMutation =
   | {
@@ -108,7 +108,7 @@ export class AgentMemories {
   }
 
   /** The two `openbot` memory tools. Returns null when `tool` is not one of them. */
-  handleTool(params: DynamicToolCallParams, senderAgentId: string): OpenBotToolResponse | null {
+  handleTool(params: DynamicToolCallParams, senderAgentId: string): DaniDexToolResponse | null {
     if (params.tool === "remember") {
       const args = params.arguments;
       if (!isRecord(args) || !isString(args.text)) throw new Error("Memory text is required.");
@@ -134,7 +134,7 @@ export class AgentMemories {
         sourceTurnId: params.turnId,
         ...(memoryId ? { expectedUpdatedAt: current?.updatedAt ?? null } : {}),
       });
-      return openBotToolResult({ status: "staged", memoryId: memoryId ?? null });
+      return daniDexToolResult({ status: "staged", memoryId: memoryId ?? null });
     }
 
     if (params.tool === "forget_memory") {
@@ -157,7 +157,7 @@ export class AgentMemories {
         memoryId: current.id,
         expectedUpdatedAt: current.updatedAt,
       });
-      return openBotToolResult({ status: "staged", memoryId: current.id });
+      return daniDexToolResult({ status: "staged", memoryId: current.id });
     }
 
     return null;

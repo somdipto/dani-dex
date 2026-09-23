@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 
-const logger = createOpenBotLogger("install-git-hooks");
+const logger = createDaniDexLogger("install-git-hooks");
 
 const repositoryRoot = runGit(["rev-parse", "--show-toplevel"], false);
 if (repositoryRoot === undefined) {

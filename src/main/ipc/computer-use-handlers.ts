@@ -1,13 +1,13 @@
 // The Computer Use driver's readiness, and the macOS permission panes it may need.
 
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import type { ComputerUsePermissionHelpWindowController } from "../computer-use-permission-help-window";
 import type { CuaDriverRuntime } from "../cua-driver-runtime";
 import { MAC_PERMISSION_URLS } from "../mac-permission-urls";
 import { parseMacPermission } from "./app-inputs";
 import { eventHandler, handler, type IpcGroupHandlers, payloadHandler } from "./define-ipc-group";
 
-const logger = createOpenBotLogger("computer-use");
+const logger = createDaniDexLogger("computer-use");
 
 // Only the methods these endpoints call. Naming that much lets a test pass a double without an
 // assertion, and keeps the group from reaching further into either owner than it needs to.

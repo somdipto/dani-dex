@@ -2,7 +2,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { COMPUTER_USE_MCP_SERVER_NAME } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { isGeneratedAgentId } from "@dani-dex/contracts/validation";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { CHANNEL_SCHEMA_SQL, CHANNEL_SETTINGS_SCHEMA_SQL } from "./channel-schema";
 import { MCP_SERVERS_SCHEMA_SQL } from "./mcp-schema";
 
@@ -385,21 +385,21 @@ function substituteOnce(source: string, search: string, replacement: string): st
   return `${source.slice(0, index)}${replacement}${source.slice(index + search.length)}`;
 }
 
-export interface OpenBotMigrationOptions {
+export interface DaniDexMigrationOptions {
   appliedAt?: string;
   warn?: (message: string, error: unknown) => void;
 }
 
-const logger = createOpenBotLogger("openbot-database-schema");
+const logger = createDaniDexLogger("openbot-database-schema");
 
-interface OpenBotMigration {
+interface DaniDexMigration {
   version: number;
   disableForeignKeys?: boolean;
   vacuumAfterCommit?: boolean;
   up: (db: DatabaseSync, appliedAt: string) => void;
 }
 
-const MIGRATIONS: readonly OpenBotMigration[] = [
+const MIGRATIONS: readonly DaniDexMigration[] = [
   {
     version: BASELINE_SCHEMA_VERSION,
     disableForeignKeys: true,
@@ -470,7 +470,7 @@ const MIGRATIONS: readonly OpenBotMigration[] = [
 
 const LATEST_SCHEMA_VERSION = MIGRATIONS[MIGRATIONS.length - 1]?.version ?? BASELINE_SCHEMA_VERSION;
 
-export function migrateOpenBotDatabase(db: DatabaseSync, options: OpenBotMigrationOptions = {}): void {
+export function migrateDaniDexDatabase(db: DatabaseSync, options: DaniDexMigrationOptions = {}): void {
   validateMigrationRegistry();
   const appliedAt = options.appliedAt ?? new Date().toISOString();
   if (!hasExistingSchema(db)) {
@@ -624,7 +624,7 @@ function latestAppliedVersion(versions: number[]): number {
   return baselineAndLater.at(-1) ?? BASELINE_SCHEMA_VERSION - 1;
 }
 
-function runMigration(db: DatabaseSync, migration: OpenBotMigration, appliedAt: string): void {
+function runMigration(db: DatabaseSync, migration: DaniDexMigration, appliedAt: string): void {
   if (migration.disableForeignKeys) db.exec("PRAGMA foreign_keys = OFF");
   try {
     db.exec("BEGIN IMMEDIATE");

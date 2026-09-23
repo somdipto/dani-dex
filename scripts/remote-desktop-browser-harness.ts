@@ -2,12 +2,12 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { z } from "zod";
 import { resolveRemoteDesktopRuntime } from "../src/main/remote-desktop-runtime-artifact";
 import { RemoteScreenGateway } from "../src/main/remote-screen-gateway";
 
-const logger = createOpenBotLogger("remote-desktop-browser-harness");
+const logger = createDaniDexLogger("remote-desktop-browser-harness");
 
 const runtimePaths = await resolveRemoteDesktopRuntime({
   isPackaged: false,

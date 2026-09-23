@@ -2,7 +2,7 @@ import type { Routine, RoutineRun } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
 import { AgentRoutinesSettings, type RoutineSelectionRequest } from "./AgentRoutinesSettings";
 import { agentRoutinesPort } from "./routines-port";
 
@@ -41,11 +41,11 @@ const run: RoutineRun = {
   updatedAt: "2026-08-25T05:01:00.000Z",
 };
 
-let mock: MockOpenBotControls | undefined;
+let mock: MockDaniDexControls | undefined;
 
-function setupOpenBot(options?: Parameters<typeof createMockOpenBot>[0]): MockOpenBotControls {
+function setupDaniDex(options?: Parameters<typeof createMockDaniDex>[0]): MockDaniDexControls {
   mock?.dispose();
-  mock = createMockOpenBot(options);
+  mock = createMockDaniDex(options);
   window.danidex = mock.api;
   return mock;
 }
@@ -59,7 +59,7 @@ afterEach(() => {
 describe("AgentRoutinesSettings", () => {
   it("opens the current routine from a message selection and can reopen it", async () => {
     const renamedRoutine = { ...routine, name: "Renamed morning brief" };
-    const mock = setupOpenBot({ routines: { chief: [renamedRoutine] } });
+    const mock = setupDaniDex({ routines: { chief: [renamedRoutine] } });
     const listRoutineRuns = vi.spyOn(mock.api.agent, "listRoutineRuns");
     const onSelectionRequestHandled = vi.fn();
     const [selectionRequest, setSelectionRequest] = createSignal<RoutineSelectionRequest | null>({
@@ -89,7 +89,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("keeps the routine list open and reports a missing message selection", async () => {
-    setupOpenBot();
+    setupDaniDex();
     const onSelectionRequestHandled = vi.fn();
     render(() => (
       <AgentRoutinesSettings
@@ -113,7 +113,7 @@ describe("AgentRoutinesSettings", () => {
       name: "Evening brief",
       trigger: { ...routine.trigger, id: "trigger-2", routineId: "routine-2" },
     };
-    setupOpenBot({ routines: { chief: [routine, eveningRoutine] } });
+    setupDaniDex({ routines: { chief: [routine, eveningRoutine] } });
     const [selectionRequest, setSelectionRequest] = createSignal<RoutineSelectionRequest | null>({
       routineId: routine.id,
       routineName: routine.name,
@@ -139,7 +139,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("protects unsaved changes before opening a run in chat", async () => {
-    const mock = setupOpenBot({ routines: { chief: [routine] } });
+    const mock = setupDaniDex({ routines: { chief: [routine] } });
     vi.spyOn(mock.api.agent, "listRoutineRuns").mockResolvedValue([run]);
     const onOpenRun = vi.fn();
     render(() => (
@@ -161,7 +161,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("keeps an empty draft local and discards it on Back", async () => {
-    const mock = setupOpenBot();
+    const mock = setupDaniDex();
     const createRoutine = vi.spyOn(mock.api.agent, "createRoutine");
     render(() => <AgentRoutinesSettings port={agentRoutinesPort("chief")} onCountChange={vi.fn()} />);
 
@@ -176,7 +176,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("asks before discarding an edited draft on Back", async () => {
-    setupOpenBot({ routines: { chief: [routine] } });
+    setupDaniDex({ routines: { chief: [routine] } });
     render(() => <AgentRoutinesSettings port={agentRoutinesPort("chief")} onCountChange={vi.fn()} />);
 
     await fireEvent.click(await screen.findByRole("button", { name: /Morning brief/ }));
@@ -195,7 +195,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("runs the requested Close action after discard confirmation", async () => {
-    setupOpenBot({ routines: { chief: [routine] } });
+    setupDaniDex({ routines: { chief: [routine] } });
     const onClose = vi.fn();
     render(() => <AgentRoutinesSettings port={agentRoutinesPort("chief")} onCountChange={vi.fn()} onClose={onClose} />);
 
@@ -211,7 +211,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("saves a valid draft only after the user clicks Save", async () => {
-    const mock = setupOpenBot();
+    const mock = setupDaniDex();
     const createRoutine = vi.spyOn(mock.api.agent, "createRoutine");
     const onCountChange = vi.fn();
     render(() => <AgentRoutinesSettings port={agentRoutinesPort("chief")} onCountChange={onCountChange} />);
@@ -247,7 +247,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("updates Active, starts a test run, shows history, and confirms deletion", async () => {
-    const mock = setupOpenBot({ routines: { chief: [routine] } });
+    const mock = setupDaniDex({ routines: { chief: [routine] } });
     const updateRoutine = vi.spyOn(mock.api.agent, "updateRoutine");
     const testRoutine = vi.spyOn(mock.api.agent, "testRoutine");
     const deleteRoutine = vi.spyOn(mock.api.agent, "deleteRoutine");
@@ -275,7 +275,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("blocks editor navigation while Save is running", async () => {
-    const mock = setupOpenBot({ routines: { chief: [routine] } });
+    const mock = setupDaniDex({ routines: { chief: [routine] } });
     let resolveUpdate: ((value: Routine) => void) | undefined;
     vi.spyOn(mock.api.agent, "updateRoutine").mockImplementation(
       () =>
@@ -298,7 +298,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("offers 96 quarter-hour values and saves a selected time", async () => {
-    const mock = setupOpenBot({ routines: { chief: [routine] } });
+    const mock = setupDaniDex({ routines: { chief: [routine] } });
     const updateRoutine = vi.spyOn(mock.api.agent, "updateRoutine");
     render(() => <AgentRoutinesSettings port={agentRoutinesPort("chief")} onCountChange={vi.fn()} />);
 
@@ -326,7 +326,7 @@ describe("AgentRoutinesSettings", () => {
       ...routine,
       trigger: { ...routine.trigger, schedule: { kind: "weekdays", time: "07:07" } },
     };
-    setupOpenBot({ routines: { chief: [customTimeRoutine] } });
+    setupDaniDex({ routines: { chief: [customTimeRoutine] } });
     render(() => <AgentRoutinesSettings port={agentRoutinesPort("chief")} onCountChange={vi.fn()} />);
 
     await fireEvent.click(await screen.findByRole("button", { name: /Morning brief/ }));
@@ -340,7 +340,7 @@ describe("AgentRoutinesSettings", () => {
   });
 
   it("opens the time picker from the keyboard", async () => {
-    setupOpenBot({ routines: { chief: [routine] } });
+    setupDaniDex({ routines: { chief: [routine] } });
     render(() => <AgentRoutinesSettings port={agentRoutinesPort("chief")} onCountChange={vi.fn()} />);
 
     await fireEvent.click(await screen.findByRole("button", { name: /Morning brief/ }));

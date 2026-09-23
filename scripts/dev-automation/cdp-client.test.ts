@@ -10,7 +10,7 @@ import {
   describeDevPages,
   findBrowserProcessId,
   findRendererPages,
-  isOpenBotBrowser,
+  isDaniDexBrowser,
   matchPages,
   processBelongsToInstance,
   resolveAutomationPort,
@@ -24,14 +24,14 @@ import {
   resolveWritablePath,
 } from "./tools";
 
-describe("isOpenBotBrowser", () => {
+describe("isDaniDexBrowser", () => {
   it("accepts the Electron user agent", () => {
-    expect(isOpenBotBrowser("Mozilla/5.0 Dani-Dex/44.0.0 Chrome/152 Electron/44.0.0")).toBe(true);
+    expect(isDaniDexBrowser("Mozilla/5.0 Dani-Dex/44.0.0 Chrome/152 Electron/44.0.0")).toBe(true);
   });
 
   it("rejects foreign Chromium instances sharing the machine", () => {
-    expect(isOpenBotBrowser("Mozilla/5.0 Chrome/152 Safari/537.36")).toBe(false);
-    expect(isOpenBotBrowser("")).toBe(false);
+    expect(isDaniDexBrowser("Mozilla/5.0 Chrome/152 Safari/537.36")).toBe(false);
+    expect(isDaniDexBrowser("")).toBe(false);
   });
 });
 

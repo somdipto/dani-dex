@@ -1,7 +1,7 @@
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { ChannelMemory } from "@dani-dex/contracts/ipc";
 import { MemoryStore, type MemoryTables } from "./memory-store";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 
 const CHANNEL_MEMORY_TABLES: MemoryTables = {
   table: "projection_channel_memories",
@@ -13,7 +13,7 @@ const CHANNEL_MEMORY_TABLES: MemoryTables = {
 
 /** The channel twin of `AgentMemoryStore`: the same `MemoryStore`, with a channel for an owner. */
 export class ChannelMemoryStore extends MemoryStore {
-  constructor(database: OpenBotDatabase) {
+  constructor(database: DaniDexDatabase) {
     super(database, CHANNEL_MEMORY_TABLES);
   }
 

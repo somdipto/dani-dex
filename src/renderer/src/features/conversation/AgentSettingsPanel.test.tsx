@@ -1,11 +1,11 @@
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_MODELS } from "../../preview/fixtures";
-import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
 import AgentSettingsPanel, { type AgentRuntimeSettings } from "./AgentSettingsPanel";
 import { AgentSkillsModal } from "./AgentSkillsModal";
 
-let mock: MockOpenBotControls | undefined;
+let mock: MockDaniDexControls | undefined;
 
 afterEach(() => {
   mock?.dispose();
@@ -16,7 +16,7 @@ describe("AgentSettingsPanel", () => {
   it("saves edited instructions while the field stays focused", async () => {
     vi.useFakeTimers();
     try {
-      mock = createMockOpenBot();
+      mock = createMockDaniDex();
       window.danidex = mock.api;
       const onUpdateAgent = vi.fn(async () => undefined);
       render(() => (
@@ -51,7 +51,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("flushes pasted instructions when the settings panel closes", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const onUpdateAgent = vi.fn(async () => undefined);
     const view = render(() => (
@@ -83,7 +83,7 @@ describe("AgentSettingsPanel", () => {
   it("queues a newer instruction behind an active save", async () => {
     vi.useFakeTimers();
     try {
-      mock = createMockOpenBot();
+      mock = createMockDaniDex();
       window.danidex = mock.api;
       let finishFirstSave!: () => void;
       const firstSave = new Promise<void>((resolve) => {
@@ -129,7 +129,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("opens a requested skill in the existing management modal", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     render(() => (
       <AgentSkillsModal
@@ -147,7 +147,7 @@ describe("AgentSettingsPanel", () => {
     await waitFor(() => expect(toggle).not.toBeChecked());
   });
   it("keeps keyboard focus on the skill switch after saving", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     render(() => (
       <AgentSkillsModal open agentId="chief" agentName="Chief" onOpenChange={vi.fn()} onCountChange={vi.fn()} />
@@ -160,7 +160,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("enables a library skill for this agent and shares its state across filters", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const install = vi.spyOn(mock.api.skills, "localInstall");
     render(() => (
@@ -182,7 +182,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("filters enabled skills and restores disabled skills in All", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     render(() => (
       <AgentSkillsModal open agentId="chief" agentName="Chief" onOpenChange={vi.fn()} onCountChange={vi.fn()} />
@@ -196,7 +196,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("starts skill creation and closes the preview", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const create = vi.fn();
     const close = vi.fn();
@@ -216,7 +216,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("adds a shared local skill to the selected agent and then tries it", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const install = vi.spyOn(mock.api.skills, "localInstall");
     const onTry = vi.fn();
@@ -250,7 +250,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("updates a local revision explicitly and keeps the skill disabled", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const skill = (await mock.api.skills.localList())[0];
     await mock.api.skills.localInstall({ agentId: "chief", skillId: skill.id, revision: 1 });
@@ -276,7 +276,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("retries a failed local library read and returns to assigned skills", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const list = mock.api.skills.localList;
     mock.api.skills.localList = vi.fn(async () => {
@@ -295,7 +295,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it.each([false, true])("enables a skill before Try and handles failure=%s", async (fails) => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const detail = await mock.api.skills.get("skill-source-check");
     vi.spyOn(mock.api.skills, "get").mockResolvedValue({ ...detail, version: 2 });
@@ -330,7 +330,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("requires an update before trying a different preview version", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const onTrySkill = vi.fn();
     render(() => (
@@ -350,7 +350,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("updates a skill from its chip without opening the detail", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const install = vi.spyOn(mock.api.skills, "install");
     render(() => (
@@ -364,7 +364,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("requires confirmation before replacing a modified skill", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const installed = await mock.api.skills.listInstalled("chief");
     const original = installed.find((item) => item.skillId === "skill-release-notes");
@@ -386,7 +386,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("does not read this computer's library for a remote local skill", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     const skill = (await mock.api.skills.localList())[0];
     vi.spyOn(mock.api.agent, "listInstalledSkills").mockResolvedValue([
@@ -421,7 +421,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("preserves settings after a failed save and a visit to Usage", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     // Sol does not run under Claude, and Claude does not offer Extra high, so a rejected save has
     // all three runtime fields to put back at once.
@@ -475,7 +475,7 @@ describe("AgentSettingsPanel", () => {
   });
 
   it("states that Claude acts without approval prompts", async () => {
-    mock = createMockOpenBot();
+    mock = createMockDaniDex();
     window.danidex = mock.api;
     render(() => (
       <AgentSettingsPanel

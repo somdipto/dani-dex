@@ -1,10 +1,10 @@
 import { render } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { DaniDexPlayground } from "./DaniDexPlayground";
 import { createLandingDemoController } from "./landing-demo";
-import { createMockOpenBot } from "./mock-openbot";
-import { OpenBotPlayground } from "./OpenBotPlayground";
+import { createMockDaniDex } from "./mock-openbot";
 
-describe("OpenBotPlayground", () => {
+describe("DaniDexPlayground", () => {
   let previousParent: PropertyDescriptor | undefined;
 
   afterEach(() => {
@@ -14,7 +14,7 @@ describe("OpenBotPlayground", () => {
   });
 
   it("returns host-wide usage and filters agent usage by provider", async () => {
-    const mock = createMockOpenBot();
+    const mock = createMockDaniDex();
 
     await expect(mock.api.agent.getUsage()).resolves.toMatchObject({
       limits: [{ id: "codex" }, { id: "claude" }, { id: "grok" }],
@@ -47,11 +47,11 @@ describe("OpenBotPlayground", () => {
     previousParent = Object.getOwnPropertyDescriptor(window, "parent");
     Object.defineProperty(window, "parent", { configurable: true, value: parentWindow });
 
-    const activeMock = createMockOpenBot();
+    const activeMock = createMockDaniDex();
     const updateConversation = vi.spyOn(activeMock, "updateConversationSnapshot");
     const postMessage = vi.spyOn(parentWindow, "postMessage");
     const view = render(() => (
-      <OpenBotPlayground
+      <DaniDexPlayground
         variant="landing"
         dependencies={{
           createMock: () => activeMock,

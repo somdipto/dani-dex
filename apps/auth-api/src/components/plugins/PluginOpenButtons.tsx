@@ -1,4 +1,4 @@
-import { createOpenBotPluginUrl } from "@dani-dex/contracts/plugin-links";
+import { createDaniDexPluginUrl } from "@dani-dex/contracts/plugin-links";
 import { Portal } from "@solidjs/web";
 import { createSignal, createUniqueId, onCleanup, Show } from "solid-js";
 import { DOWNLOAD_PLATFORMS, detectDownloadPlatform } from "../../lib/download-platforms";
@@ -87,7 +87,7 @@ export function PluginOpenButtons(props: PluginOpenButtonsProps) {
     <div>
       <div class="plugin-actions-row">
         <Button
-          href={createOpenBotPluginUrl(props.slug)}
+          href={createDaniDexPluginUrl(props.slug)}
           variant="primary"
           size="lg"
           icon="open"

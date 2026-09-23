@@ -1,5 +1,5 @@
 import { AppLogo } from "@dani-dex/brand";
-import { OPENBOT_INVITE_ORIGIN, toOpenBotInviteUrl } from "@dani-dex/contracts/invite-links";
+import { OPENBOT_INVITE_ORIGIN, toDaniDexInviteUrl } from "@dani-dex/contracts/invite-links";
 import { createSignal, onSettled, Show } from "solid-js";
 import { landingAnalytics } from "../../lib/analytics";
 import { detectDownloadPlatform } from "../../lib/download-platforms";
@@ -17,7 +17,7 @@ export function JoinPage() {
     try {
       const pageUrl = new URL(window.location.href);
       const canonicalUrl = new URL(`${pageUrl.pathname}${pageUrl.search}`, OPENBOT_INVITE_ORIGIN);
-      setOpenUrl(toOpenBotInviteUrl(canonicalUrl.toString()));
+      setOpenUrl(toDaniDexInviteUrl(canonicalUrl.toString()));
     } catch {
       validInvite = false;
       setInvalid(true);

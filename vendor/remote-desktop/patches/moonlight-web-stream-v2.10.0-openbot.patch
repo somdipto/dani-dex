@@ -2722,9 +2722,9 @@ index 28fa35e..ec27049 100644
  
  let I = getTranslations(getCurrentLanguage())
  
-+type OpenBotViewerState = "connecting" | "connected" | "error"
++type DaniDexViewerState = "connecting" | "connected" | "error"
 +
-+async function reportOpenBotState(state: OpenBotViewerState, transport?: "p2p" | "relay", message?: string) {
++async function reportDaniDexState(state: DaniDexViewerState, transport?: "p2p" | "relay", message?: string) {
 +    const match = /^\/v1\/remote-screen\/sessions\/([A-Za-z0-9-]+)\/moonlight(?:\/|$)/.exec(location.pathname)
 +    const sessionId = match?.[1]
 +    if (!sessionId) {
@@ -2751,7 +2751,7 @@ index 28fa35e..ec27049 100644
 +}
 +
  async function startApp() {
-+    void reportOpenBotState("connecting")
++    void reportDaniDexState("connecting")
      const api = await getApi()
  
      const bootstrapRole = await apiGetRole(api, { id: null })
@@ -2800,9 +2800,9 @@ index 28fa35e..ec27049 100644
              this.sidebar.onCapabilitiesChange(data.capabilities)
 +        } else if (data.type == "videoReady") {
 +            const transport = await this.stream.getConnectionRoute()
-+            void reportOpenBotState("connected", transport)
++            void reportDaniDexState("connected", transport)
 +        } else if (data.type == "addDebugLine" && (data.additional?.type == "fatal" || data.additional?.type == "fatalDescription")) {
-+            void reportOpenBotState("error", undefined, data.line)
++            void reportDaniDexState("error", undefined, data.line)
          }
      }
  
@@ -3218,7 +3218,7 @@ index 977a906..e51f447 100644
 +        }
 +
 +        const stats = await this.peer.getStats()
-+        type OpenBotRtcStats = RTCStats & {
++        type DaniDexRtcStats = RTCStats & {
 +            selectedCandidatePairId?: string
 +            nominated?: boolean
 +            state?: string
@@ -3226,20 +3226,20 @@ index 977a906..e51f447 100644
 +            remoteCandidateId?: string
 +            candidateType?: string
 +        }
-+        const reports: OpenBotRtcStats[] = []
-+        stats.forEach((report) => reports.push(report as OpenBotRtcStats))
++        const reports: DaniDexRtcStats[] = []
++        stats.forEach((report) => reports.push(report as DaniDexRtcStats))
 +        const transport = reports.find((report) => report.type == "transport" && report.selectedCandidatePairId)
-+        let selectedPair: OpenBotRtcStats | undefined
++        let selectedPair: DaniDexRtcStats | undefined
 +        const selectedPairId = transport?.selectedCandidatePairId
 +        if (selectedPairId) {
-+            selectedPair = stats.get(selectedPairId) as OpenBotRtcStats | undefined
++            selectedPair = stats.get(selectedPairId) as DaniDexRtcStats | undefined
 +        }
 +        selectedPair ??= reports.find((report) => report.type == "candidate-pair" && report.nominated && report.state == "succeeded")
 +        if (!selectedPair) {
 +            return "p2p"
 +        }
-+        const localCandidate = selectedPair.localCandidateId ? stats.get(selectedPair.localCandidateId) as OpenBotRtcStats : null
-+        const remoteCandidate = selectedPair.remoteCandidateId ? stats.get(selectedPair.remoteCandidateId) as OpenBotRtcStats : null
++        const localCandidate = selectedPair.localCandidateId ? stats.get(selectedPair.localCandidateId) as DaniDexRtcStats : null
++        const remoteCandidate = selectedPair.remoteCandidateId ? stats.get(selectedPair.remoteCandidateId) as DaniDexRtcStats : null
 +        return localCandidate?.candidateType == "relay" || remoteCandidate?.candidateType == "relay" ? "relay" : "p2p"
 +    }
 +

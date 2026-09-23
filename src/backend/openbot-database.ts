@@ -42,7 +42,7 @@ export type { StoredThreadSummary } from "./database/thread-summaries";
  * A command appends events, changes projections, and stores its receipt in one
  * SQLite transaction. Providers never receive direct access to this database.
  */
-export class OpenBotDatabase {
+export class DaniDexDatabase {
   readonly #core: DatabaseCore;
   readonly usage: AgentUsage;
   readonly #conversations: ConversationQueries;

@@ -60,7 +60,7 @@ export const OPENBOT_SECURITY_HEADERS = {
  * replaces it. The caller passes the same hashed asset the `@font-face` rule asks
  * for, so the preload below is that request and not a second one.
  */
-export function openBotRootHead(interLatinFont: string) {
+export function daniDexRootHead(interLatinFont: string) {
   return {
     meta: [
       { charSet: "utf-8" },
@@ -87,7 +87,7 @@ export function openBotRootHead(interLatinFont: string) {
   };
 }
 
-export function openBotHomeHead() {
+export function daniDexHomeHead() {
   return {
     meta: [
       { "script:ld+json": OPENBOT_SOFTWARE_APPLICATION },

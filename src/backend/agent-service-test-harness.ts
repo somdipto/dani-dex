@@ -272,7 +272,7 @@ export class FakeAgentClient extends EventEmitter implements AgentClient {
   }
 }
 
-export async function callOpenBotTool(
+export async function callDaniDexTool(
   client: FakeAgentClient,
   threadId: string,
   tool: string,
@@ -302,7 +302,7 @@ export async function callOpenBotTool(
   return { error: client.errors.find((item) => item.id === id)?.error };
 }
 
-export function openBotToolPayload(result: unknown): DynamicRecord {
+export function daniDexToolPayload(result: unknown): DynamicRecord {
   const contentItems = paramsRecord(result)?.contentItems;
   const text = Array.isArray(contentItems) ? getString(contentItems[0], "text") : null;
   if (!text) throw new Error("The Dani-Dex tool response has no text payload.");
@@ -311,7 +311,7 @@ export function openBotToolPayload(result: unknown): DynamicRecord {
   return payload;
 }
 
-export async function expectOpenBotToolError(
+export async function expectDaniDexToolError(
   client: FakeAgentClient,
   threadId: string,
   tool: string,
@@ -319,7 +319,7 @@ export async function expectOpenBotToolError(
   message: string,
   turnId?: string,
 ): Promise<void> {
-  const result = await callOpenBotTool(client, threadId, tool, args, turnId);
+  const result = await callDaniDexTool(client, threadId, tool, args, turnId);
   expect(result.result).toBeUndefined();
   expect(result.error?.message).toContain(message);
 }

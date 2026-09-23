@@ -37,7 +37,7 @@ export const buttonVariants = cva("ui-button", {
 
 export type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>;
 
-type OpenBotButtonProps = VariantProps<typeof buttonVariants> & {
+type DaniDexButtonProps = VariantProps<typeof buttonVariants> & {
   class?: JSX.HTMLAttributes<HTMLElement>["class"];
   children?: JSX.Element;
   loading?: boolean;
@@ -46,7 +46,7 @@ type OpenBotButtonProps = VariantProps<typeof buttonVariants> & {
 };
 
 export type ButtonProps<T extends ValidComponent = "button"> = PolymorphicProps<T, ButtonRootProps<T>> &
-  OpenBotButtonProps &
+  DaniDexButtonProps &
   Partial<Pick<ComponentProps<T>, "class">>;
 
 export function Button<T extends ValidComponent = "button">(props: ButtonProps<T>): JSX.Element {

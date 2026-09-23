@@ -2,7 +2,7 @@ import type { ComputerUseState, MacPermissionId } from "@dani-dex/contracts/ipc"
 import { onCleanup } from "solid-js";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { ComputerUsePermissionHelp } from "../src/features/computer-use/ComputerUsePermissionHelp";
-import { createMockOpenBot } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-openbot";
 
 function state(granted: readonly MacPermissionId[]): ComputerUseState {
   return {
@@ -19,7 +19,7 @@ function MockedHelp(props: {
   sunshine?: boolean;
 }) {
   const previousApi = window.danidex;
-  const mock = createMockOpenBot();
+  const mock = createMockDaniDex();
   mock.api.getComputerUseState = async () => state(props.granted ?? []);
   const name = props.app === undefined ? "Electron" : props.app;
   mock.api.getComputerUsePermissionApp = async () => (name ? { name, iconDataUrl: null } : null);

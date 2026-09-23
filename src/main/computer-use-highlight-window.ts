@@ -3,11 +3,11 @@ import type {
   ComputerUseCursorPoint,
   ComputerUseHighlightPlacement,
 } from "@dani-dex/contracts/ipc";
-import { createOpenBotLogger, type Logger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, type Logger, toLogValue } from "@dani-dex/logging";
 import type { BrowserWindow, Rectangle } from "electron";
 import type { ComputerUseHighlightTarget } from "./computer-use-target-window";
 
-const logger = createOpenBotLogger("computer-use-highlight");
+const logger = createDaniDexLogger("computer-use-highlight");
 
 /**
  * How often the driver is asked where the agent is working.

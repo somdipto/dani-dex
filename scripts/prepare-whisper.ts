@@ -3,9 +3,9 @@ import { createHash } from "node:crypto";
 import { chmodSync, copyFileSync, createReadStream, existsSync } from "node:fs";
 import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { createOpenBotLogger } from "@dani-dex/logging";
+import { createDaniDexLogger } from "@dani-dex/logging";
 
-const logger = createOpenBotLogger("prepare-whisper");
+const logger = createDaniDexLogger("prepare-whisper");
 
 const WHISPER_CPP_COMMIT = "86c40c3bd6fc86f1187fb751d111b49e0fc18e84";
 const MODEL_REVISION = "5359861c739e955e79d9a303bcbc70fb988958b1";

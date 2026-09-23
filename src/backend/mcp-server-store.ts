@@ -10,7 +10,7 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { databaseRow, databaseRows, requiredStringColumn } from "./database/database-rows";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 
 /**
  * The MCP server configurations this machine holds.
@@ -56,7 +56,7 @@ const MCP_REMOTE_BRIDGES: ReadonlyArray<{ name: string; remoteUrl: string; url: 
 const MCP_REMOTE_ARGS = (remoteUrl: string): string[] => ["-y", "mcp-remote@latest", remoteUrl];
 
 export class McpServerStore {
-  constructor(private readonly database: OpenBotDatabase) {}
+  constructor(private readonly database: DaniDexDatabase) {}
 
   list(): McpServerConfig[] {
     return databaseRows(

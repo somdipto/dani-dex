@@ -2,9 +2,9 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { normalizeEmailAddress } from "@dani-dex/contracts/validation";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 
-const logger = createOpenBotLogger("backfill-openpanel-identities");
+const logger = createDaniDexLogger("backfill-openpanel-identities");
 
 const DEFAULT_OPENPANEL_API_URL = "https://analytics.openbot.run/api";
 const MAX_RETRIES = 3;

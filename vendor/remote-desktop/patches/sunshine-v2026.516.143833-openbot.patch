@@ -302,7 +302,7 @@ index 2f703dbc..c9fb7f58 100644
 +   * @param response The HTTP response object.
 +   * @param request The HTTP request object.
 +   */
-+  void getOpenBotSetup(const resp_https_t &response, const req_https_t &request) {
++  void getDaniDexSetup(const resp_https_t &response, const req_https_t &request) {
 +    if (!authenticate(response, request)) return;
 +#ifdef __APPLE__
 +    send_response(response, platf::openbot_setup_status());
@@ -311,7 +311,7 @@ index 2f703dbc..c9fb7f58 100644
 +#endif
 +  }
 +
-+  void openBotTest(const resp_https_t &response, const req_https_t &request) {
++  void daniDexTest(const resp_https_t &response, const req_https_t &request) {
 +    if (!authenticate(response, request)) return;
 +#ifdef __APPLE__
 +    if (!std::getenv("OPENBOT_REMOTE_SETUP")) {
@@ -336,7 +336,7 @@ index 2f703dbc..c9fb7f58 100644
 +#endif
 +  }
 +
-+  void getOpenBotDisplays(const resp_https_t &response, const req_https_t &request) {
++  void getDaniDexDisplays(const resp_https_t &response, const req_https_t &request) {
 +    if (!authenticate(response, request)) {
 +      return;
 +    }
@@ -366,10 +366,10 @@ index 2f703dbc..c9fb7f58 100644
 +    server.resource["^/api/pin$"]["GET"] = getPendingPairings;
      server.resource["^/api/pin$"]["POST"] = savePin;
      server.resource["^/api/logs$"]["GET"] = getLogs;
-+    server.resource["^/api/openbot/setup$"]["GET"] = getOpenBotSetup;
-+    server.resource["^/api/openbot/test$"]["GET"] = openBotTest;
-+    server.resource["^/api/openbot/test$"]["POST"] = openBotTest;
-+    server.resource["^/api/openbot/displays$"]["GET"] = getOpenBotDisplays;
++    server.resource["^/api/openbot/setup$"]["GET"] = getDaniDexSetup;
++    server.resource["^/api/openbot/test$"]["GET"] = daniDexTest;
++    server.resource["^/api/openbot/test$"]["POST"] = daniDexTest;
++    server.resource["^/api/openbot/displays$"]["GET"] = getDaniDexDisplays;
      server.resource["^/api/reset-display-device-persistence$"]["POST"] = resetDisplayDevicePersistence;
      server.resource["^/api/restart$"]["POST"] = restart;
      server.resource["^/api/vigembus/status$"]["GET"] = getViGEmBusStatus;
@@ -381,7 +381,7 @@ index e8c4ea00..404fef87 100644
    void browseDirectory(const resp_https_t &response, const req_https_t &request);
    void getLocale(const resp_https_t &response, const req_https_t &request);
    void getCSRFToken(const resp_https_t &response, const req_https_t &request);
-+  void getOpenBotDisplays(const resp_https_t &response, const req_https_t &request);
++  void getDaniDexDisplays(const resp_https_t &response, const req_https_t &request);
 +
 +  void getPendingPairings(const resp_https_t &, const req_https_t &);
 +  void cancelPairing(const resp_https_t &, const req_https_t &);
@@ -1729,9 +1729,9 @@ index 00000000..e42489af
 +  }
 +}
 +
-+@interface OpenBotTestView : NSView
++@interface DaniDexTestView : NSView
 +@end
-+@implementation OpenBotTestView
++@implementation DaniDexTestView
 +- (BOOL)acceptsFirstResponder { return YES; }
 +- (void)drawRect:(NSRect)dirtyRect {
 +  [[NSColor windowBackgroundColor] setFill];
@@ -1825,7 +1825,7 @@ index 00000000..e42489af
 +      panel.movable = NO;
 +      panel.title = @"Dani-Dex remote desktop test";
 +      panel.level = NSFloatingWindowLevel;
-+      panel.contentView = [[OpenBotTestView alloc] initWithFrame:NSMakeRect(0, 0, 480, 290)];
++      panel.contentView = [[DaniDexTestView alloc] initWithFrame:NSMakeRect(0, 0, 480, 290)];
 +      NSScreen *target = NSScreen.screens.firstObject;
 +      for (NSScreen *screen in NSScreen.screens) {
 +        if (std::string([screen.deviceDescription[@"NSScreenNumber"] stringValue].UTF8String) == display_id) target = screen;
@@ -2322,7 +2322,7 @@ index 195a666c..50c6630e 100644
 +                                                               const std::shared_ptr<SimpleWeb::ServerBase<SimpleWeb::HTTPS>::Response> &response,
 +                                                               const std::shared_ptr<SimpleWeb::ServerBase<SimpleWeb::HTTPS>::Request> &request
 +                                                             ) {
-+      confighttp::getOpenBotDisplays(response, request);
++      confighttp::getDaniDexDisplays(response, request);
 +    };
 +
      // Add a route to test send_unauthorized
@@ -2488,12 +2488,12 @@ index 195a666c..50c6630e 100644
    ASSERT_EQ(body, "authenticated");
  }
  
-+TEST_F(ConfigHttpTest, OpenBotDisplaysRejectsNoAuth) {
++TEST_F(ConfigHttpTest, DaniDexDisplaysRejectsNoAuth) {
 +  const auto response = client->request("GET", "/api/openbot/displays");
 +  ASSERT_EQ(response->status_code, "401 Unauthorized");
 +}
 +
-+TEST_F(ConfigHttpTest, OpenBotDisplaysReturnsAnArray) {
++TEST_F(ConfigHttpTest, DaniDexDisplaysReturnsAnArray) {
 +  SimpleWeb::CaseInsensitiveMultimap headers;
 +  headers.emplace("Authorization", create_auth_header("testuser", "testpass"));
 +
@@ -3206,7 +3206,7 @@ index 00000000..7972aebd
 +    platf::openbot_test_action("start");
 +    require(platf::openbot_test_status()["active"] == true);
 +    require(!panel.movable);
-+    auto view = (OpenBotTestView *)panel.contentView;
++    auto view = (DaniDexTestView *)panel.contentView;
 +    CGEventRef native = CGEventCreateKeyboardEvent(nullptr, 18, true);
 +    NSEvent *event = [NSEvent eventWithCGEvent:native];
 +    require(![view remoteEvent:event]);

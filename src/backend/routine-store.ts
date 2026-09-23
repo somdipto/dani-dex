@@ -3,7 +3,7 @@ import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { RoutineFields, RoutineRunFields, RoutineRunStatus, RoutineSchedule } from "@dani-dex/contracts/ipc";
 import { isRoutineSchedule } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 import { nextRoutineOccurrence, normalizeRoutineSchedule, validateRoutineSchedule } from "./routine-schedule";
 
 /**
@@ -71,7 +71,7 @@ export interface RoutineUpdateFields {
  */
 export class RoutineStore {
   constructor(
-    protected readonly database: OpenBotDatabase,
+    protected readonly database: DaniDexDatabase,
     protected readonly tables: RoutineTables,
   ) {}
 
@@ -539,7 +539,7 @@ export class RoutineStore {
   #mutateRun(
     runId: string,
     eventType: string,
-    mutate: (db: OpenBotDatabase["connection"], sequence: number, now: string) => void,
+    mutate: (db: DaniDexDatabase["connection"], sequence: number, now: string) => void,
   ): OwnedRoutineRun {
     const current = this.#requireRun(runId);
     return this.database.dispatch(
@@ -553,7 +553,7 @@ export class RoutineStore {
   }
 
   #insertTrigger(
-    db: OpenBotDatabase["connection"],
+    db: DaniDexDatabase["connection"],
     routineId: string,
     timezone: string,
     schedule: RoutineSchedule,

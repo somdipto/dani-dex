@@ -40,7 +40,7 @@ export function createPluginShareUrl(slug: string): string {
 }
 
 /** The link the page's button opens, which raises the app on this listing. */
-export function createOpenBotPluginUrl(slug: string): string {
+export function createDaniDexPluginUrl(slug: string): string {
   assertPluginSlug(slug);
   return `dani-dex://${OPENBOT_PLUGIN_HOST}/${slug}`;
 }

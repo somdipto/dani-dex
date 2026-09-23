@@ -534,7 +534,7 @@ export interface CustomProvidersDesktopApi {
   delete: (input: DeleteCustomProviderInput) => Promise<CustomProviderResult>;
 }
 
-export interface OpenBotDesktopApi {
+export interface DaniDexDesktopApi {
   getAppInfo: () => Promise<AppInfo>;
   getSetupState: () => Promise<AppSetupState>;
   saveSetup: (input: SaveSetupInput) => Promise<AppSetupState>;

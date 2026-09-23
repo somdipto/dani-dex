@@ -6,7 +6,7 @@ import type {
   RoutineRunStatus,
   UpdateRoutineInput,
 } from "@dani-dex/contracts/ipc";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 import {
   type DueRoutine,
   type OwnedRoutine,
@@ -43,7 +43,7 @@ const AGENT_ROUTINE_TABLES: RoutineTables = {
  * change with the extraction.
  */
 export class AgentRoutineStore extends RoutineStore {
-  constructor(database: OpenBotDatabase) {
+  constructor(database: DaniDexDatabase) {
     super(database, AGENT_ROUTINE_TABLES);
   }
 

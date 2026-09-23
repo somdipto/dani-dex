@@ -52,7 +52,7 @@ import { encodeTeamProtocolV3CurrentHttpResponse } from "@dani-dex/contracts/tea
 import { TEAM_PROTOCOL_V4 } from "@dani-dex/contracts/team-protocol/v4";
 import { encodeTeamProtocolV4CurrentHttpResponse } from "@dani-dex/contracts/team-protocol/v4-adapter";
 import { encodeTeamProtocolV4BaseCurrentEvent } from "@dani-dex/contracts/team-protocol/v4-base-adapter";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import type * as Ws from "ws";
 import { McpServerError } from "../backend/mcp-server-store";
 import type { TeamChatStore } from "../backend/team-chat-store";
@@ -94,7 +94,7 @@ const TEST_LEGACY_SNAPSHOT_PROTOCOL = "openbot-events-v2";
 const requireModule = createRequire(import.meta.url);
 const webSockets: typeof Ws = requireModule(join(dirname(requireModule.resolve("ws/package.json")), "index.js"));
 
-const logger = createOpenBotLogger("team-api-server");
+const logger = createDaniDexLogger("team-api-server");
 
 interface EventClientState {
   token: string;

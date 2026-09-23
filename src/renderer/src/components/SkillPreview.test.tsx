@@ -2,10 +2,10 @@ import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-lib
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AgentSkillsModal } from "../features/conversation/AgentSkillsModal";
 import { STORY_MARKETPLACE_SKILL_DETAILS } from "../preview/fixtures";
-import { createMockOpenBot, type MockOpenBotControls } from "../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../preview/mock-openbot";
 import { SkillPreview } from "./SkillPreview";
 
-let mock: MockOpenBotControls | undefined;
+let mock: MockDaniDexControls | undefined;
 afterEach(() => {
   mock?.dispose();
   mock = undefined;
@@ -13,7 +13,7 @@ afterEach(() => {
 const skill = STORY_MARKETPLACE_SKILL_DETAILS["skill-release-notes"];
 
 function installSkillMock(): void {
-  mock = createMockOpenBot();
+  mock = createMockDaniDex();
   window.danidex = mock.api;
 }
 

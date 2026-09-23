@@ -5,7 +5,7 @@
 import { EventEmitter } from "node:events";
 import type { TeamPresenceSnapshot } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
-import { OpenBotDatabase } from "../backend/openbot-database";
+import { DaniDexDatabase } from "../backend/openbot-database";
 import { TeamChatStore } from "../backend/team-chat-store";
 import {
   createAgents,
@@ -29,7 +29,7 @@ describe("TeamApiServer team", () => {
       avatarUrl: null,
     });
     const invite = await store.createInvite("member", "alice@example.com");
-    const database = new OpenBotDatabase(root);
+    const database = new DaniDexDatabase(root);
     await database.initialize();
     const chat = new TeamChatStore(database);
     const agentEvents = new EventEmitter();

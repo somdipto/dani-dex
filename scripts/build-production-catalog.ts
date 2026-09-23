@@ -5,11 +5,11 @@ import { dirname, join, parse, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type AvatarHue, isAvatarHue, isSkillCategory, type SkillCategory } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
-import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { unzipSync, zipSync } from "fflate";
 import { parse as parseYaml } from "yaml";
 
-const logger = createOpenBotLogger("build-production-catalog");
+const logger = createDaniDexLogger("build-production-catalog");
 
 const scriptRoot = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(scriptRoot, "..");

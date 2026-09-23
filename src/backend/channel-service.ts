@@ -26,7 +26,7 @@ import { ChannelHistory, type ChannelTextModel } from "./channel-history";
 import { ChannelMemoryStore } from "./channel-memory-store";
 import { type ChannelAssignment, ChannelStore } from "./channel-store";
 import type { DeliveryContext, MailboxStore } from "./mailbox-store";
-import type { OpenBotDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./openbot-database";
 import { StructuredOutputError, structuredOutput } from "./structured-output";
 
 export interface ChannelHooks {
@@ -95,7 +95,7 @@ export class ChannelService {
   readonly #activeAssignments = new Map<string, string>();
 
   constructor(
-    database: OpenBotDatabase,
+    database: DaniDexDatabase,
     readonly mailbox: MailboxStore,
     readonly hooks: ChannelHooks,
   ) {

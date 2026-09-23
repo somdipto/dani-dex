@@ -12,7 +12,7 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MailboxStore } from "./mailbox-store";
-import { OpenBotDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./openbot-database";
 
 let root: string;
 let store: MailboxStore;
@@ -95,7 +95,7 @@ describe("MailboxStore", () => {
   it.each(["cancel-edit", "delete-message"] as const)(
     "preserves released backup bytes after %s, rollback, and restart",
     async (action) => {
-      const database = new OpenBotDatabase(join(root, "user-data"));
+      const database = new DaniDexDatabase(join(root, "user-data"));
       const mailbox = new MailboxStore(join(root, "user-data"), join(root, "Shared"), database);
       await mailbox.initialize();
       const file = join(root, "backup.txt");
@@ -145,7 +145,7 @@ describe("MailboxStore", () => {
   );
 
   it("rolls back failed hold, save and release writes without changing the message", async () => {
-    const database = new OpenBotDatabase(join(root, "user-data"));
+    const database = new DaniDexDatabase(join(root, "user-data"));
     const mailbox = new MailboxStore(join(root, "user-data"), join(root, "Shared"), database);
     await mailbox.initialize();
     const receipt = await mailbox.enqueue({ sender: { kind: "user" }, recipientAgentIds: ["chief"], text: "Original" });

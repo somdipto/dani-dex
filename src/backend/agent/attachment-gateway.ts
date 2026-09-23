@@ -6,7 +6,7 @@ import { sortConversationMessages } from "../conversation-snapshots";
 import type { GeneratedAttachmentSource, MailboxStore } from "../mailbox-store";
 import { isWithin, rebaseLegacyWorkspacePath, sharedPathFromInput, workspacePathFromInput } from "../workspace-paths";
 import type { ConversationRuntime } from "./conversation-runtime";
-import { type OpenBotToolResponse, openBotToolResult } from "./routine-tools";
+import { type DaniDexToolResponse, daniDexToolResult } from "./routine-tools";
 
 export interface AttachmentGatewayHooks {
   emit(event: AgentEvent): void;
@@ -60,7 +60,7 @@ export class AttachmentGateway {
   readonly #mailbox: MailboxStore;
   readonly #sharedRoot: string;
   readonly #hooks: AttachmentGatewayHooks;
-  readonly #inFlight = new Map<string, Promise<OpenBotToolResponse>>();
+  readonly #inFlight = new Map<string, Promise<DaniDexToolResponse>>();
 
   constructor(options: AttachmentGatewayOptions) {
     this.#conversation = options.conversation;
@@ -74,7 +74,7 @@ export class AttachmentGateway {
     params: { threadId: string; turnId: string; callId: string },
     paths: string[],
     messageId: string,
-  ): Promise<OpenBotToolResponse> {
+  ): Promise<DaniDexToolResponse> {
     const inFlight = this.#inFlight.get(messageId);
     if (inFlight) return inFlight;
     const command = this.#attachFilesToResponse(senderAgentId, params, paths, messageId);
@@ -93,7 +93,7 @@ export class AttachmentGateway {
     return this.#openSources(agentId, paths, scope);
   }
 
-  pendingCommands(): Promise<OpenBotToolResponse>[] {
+  pendingCommands(): Promise<DaniDexToolResponse>[] {
     return [...this.#inFlight.values()];
   }
 
@@ -106,12 +106,12 @@ export class AttachmentGateway {
     params: { threadId: string; turnId: string; callId: string },
     paths: string[],
     messageId: string,
-  ): Promise<OpenBotToolResponse> {
+  ): Promise<DaniDexToolResponse> {
     const publicThreadId = this.#conversation.publicThreadId(senderAgentId, params.threadId);
     const snapshot = this.#conversation.ensureSnapshot(senderAgentId, publicThreadId);
     const existing = snapshot.messages.find((message) => message.id === messageId);
     if (existing) {
-      return openBotToolResult({
+      return daniDexToolResult({
         status: "attached",
         messageId,
         attachments: (existing.attachments ?? []).map((attachment) => ({
@@ -173,7 +173,7 @@ export class AttachmentGateway {
         // A committed attachment remains successful even if event listeners fail.
       }
     }
-    return openBotToolResult({
+    return daniDexToolResult({
       status: "attached",
       messageId,
       attachments: attachments.map((attachment) => ({ id: attachment.id, name: attachment.name })),

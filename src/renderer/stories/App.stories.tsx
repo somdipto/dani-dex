@@ -2,8 +2,8 @@ import { onCleanup } from "solid-js";
 import { expect, fireEvent, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { App } from "../src/App";
-import type { MockOpenBotOptions } from "../src/preview/mock-openbot";
-import { OpenBotPlayground } from "../src/preview/OpenBotPlayground";
+import { DaniDexPlayground } from "../src/preview/DaniDexPlayground";
+import type { MockDaniDexOptions } from "../src/preview/mock-openbot";
 import { STORY_AGENT_STATUS, STORY_AGENT_SUMMARIES, STORY_APP_INFO, STORY_SERVERS } from "./fixtures";
 
 const meta = {
@@ -17,7 +17,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function SidebarStatePlayground(props: { compact: boolean; options?: MockOpenBotOptions }) {
+function SidebarStatePlayground(props: { compact: boolean; options?: MockDaniDexOptions }) {
   const key = "openbot:left-panel-collapsed";
   const previous = window.localStorage.getItem(key);
   window.localStorage.setItem(key, props.compact ? "true" : "false");
@@ -25,11 +25,11 @@ function SidebarStatePlayground(props: { compact: boolean; options?: MockOpenBot
     if (previous === null) window.localStorage.removeItem(key);
     else window.localStorage.setItem(key, previous);
   });
-  return <OpenBotPlayground options={props.options} />;
+  return <DaniDexPlayground options={props.options} />;
 }
 
 export const Playground: Story = {
-  render: () => <OpenBotPlayground />,
+  render: () => <DaniDexPlayground />,
   play: async ({ canvas, userEvent }) => {
     await expect(canvas.getByRole("navigation", { name: "Chat list" })).toBeInTheDocument();
     await expect(canvas.findByRole("heading", { name: "Agents" })).resolves.toBeInTheDocument();
@@ -51,7 +51,7 @@ export const Playground: Story = {
 };
 
 export const SettingsTyping: Story = {
-  render: () => <OpenBotPlayground />,
+  render: () => <DaniDexPlayground />,
   play: async ({ canvas, userEvent }) => {
     await canvas.findByRole("heading", { name: "Chief" });
     await userEvent.click(canvas.getByRole("button", { name: "View agent settings" }));
@@ -77,7 +77,7 @@ export const SettingsTyping: Story = {
 };
 
 export const CommandSearch: Story = {
-  render: () => <OpenBotPlayground />,
+  render: () => <DaniDexPlayground />,
   play: async ({ canvas, canvasElement, userEvent }) => {
     await canvas.findByRole("heading", { name: "Chief" });
     await fireEvent.keyDown(window, { key: "k", metaKey: true });
@@ -319,7 +319,7 @@ export const LongAccountEmail: Story = {
 
 export const EmptyWorkspace: Story = {
   render: () => (
-    <OpenBotPlayground
+    <DaniDexPlayground
       options={{
         agents: [],
         servers: STORY_SERVERS.filter((server) => server.kind === "local"),
@@ -347,7 +347,7 @@ export const EmptyWorkspace: Story = {
 
 export const IncompatibleRemoteHost: Story = {
   render: () => (
-    <OpenBotPlayground
+    <DaniDexPlayground
       options={{
         servers: [
           { ...STORY_SERVERS[0], active: false },
@@ -385,7 +385,7 @@ export const IncompatibleRemoteHost: Story = {
 
 export const DifferentRemoteVersions: Story = {
   render: () => (
-    <OpenBotPlayground
+    <DaniDexPlayground
       options={{
         servers: [
           { ...STORY_SERVERS[0], active: false },
@@ -423,7 +423,7 @@ export const DifferentRemoteVersions: Story = {
 
 export const Onboarding: Story = {
   render: () => (
-    <OpenBotPlayground options={{ setupState: { completed: false, preferredProvider: null, preferredModel: null } }} />
+    <DaniDexPlayground options={{ setupState: { completed: false, preferredProvider: null, preferredModel: null } }} />
   ),
   play: async ({ canvas, userEvent }) => {
     await expect(canvas.findByRole("heading", { name: "Meet Dani-Dex" })).resolves.toBeInTheDocument();
@@ -448,12 +448,12 @@ export const Onboarding: Story = {
 };
 
 export const SignedOut: Story = {
-  render: () => <OpenBotPlayground options={{ authState: { status: "signed_out" } }} />,
+  render: () => <DaniDexPlayground options={{ authState: { status: "signed_out" } }} />,
 };
 
 export const AgentStarting: Story = {
   render: () => (
-    <OpenBotPlayground
+    <DaniDexPlayground
       options={{
         agentStatus: {
           ...STORY_AGENT_STATUS,
@@ -467,7 +467,7 @@ export const AgentStarting: Story = {
 };
 
 export const HostUsage: Story = {
-  render: () => <OpenBotPlayground />,
+  render: () => <DaniDexPlayground />,
   play: async ({ canvas, canvasElement }) => {
     const server = await canvas.findByRole("button", { name: "Local server" });
     await fireEvent.contextMenu(server);
@@ -478,7 +478,7 @@ export const HostUsage: Story = {
 };
 
 export const SkillPreviewDraft: Story = {
-  render: () => <OpenBotPlayground />,
+  render: () => <DaniDexPlayground />,
   play: async ({ canvas, userEvent }) => {
     const editor = await canvas.findByRole("textbox", { name: "Message Chief" });
     await userEvent.click(editor);
@@ -498,7 +498,7 @@ export const SkillPreviewDraft: Story = {
 };
 
 export const MarketplaceSkillPreviewDraft: Story = {
-  render: () => <OpenBotPlayground />,
+  render: () => <DaniDexPlayground />,
   play: async ({ canvas, userEvent }) => {
     const chiefEditor = await canvas.findByRole("textbox", { name: "Message Chief" });
     chiefEditor.textContent = "Keep Chief's draft";
@@ -528,7 +528,7 @@ export const MarketplaceSkillPreviewDraft: Story = {
  */
 export const ProviderSignInRequired: Story = {
   render: () => (
-    <OpenBotPlayground
+    <DaniDexPlayground
       options={{
         agentStatus: {
           ...STORY_AGENT_STATUS,

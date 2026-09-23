@@ -10,12 +10,12 @@ import {
   IDLE_DYNAMIC_ISLAND_PRESENTATION,
   IPC_CHANNELS,
 } from "@dani-dex/contracts/ipc";
-import { createOpenBotLogger, type Logger, toLogValue } from "@dani-dex/logging";
+import { createDaniDexLogger, type Logger, toLogValue } from "@dani-dex/logging";
 import type { BrowserWindow, Display, Rectangle } from "electron";
 import { readDynamicIslandPreference, writeDynamicIslandPreference } from "./dynamic-island-preference-store";
 import { sendToRenderer } from "./renderer-ipc";
 
-const logger = createOpenBotLogger("dynamic-island-window");
+const logger = createDaniDexLogger("dynamic-island-window");
 
 export const DYNAMIC_ISLAND_WINDOW_SIZE = { width: 614, height: 380 } as const;
 const DYNAMIC_ISLAND_COMPACT_WINDOW_HEIGHT = 50;

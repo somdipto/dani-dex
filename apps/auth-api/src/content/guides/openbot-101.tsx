@@ -6,7 +6,7 @@ import aRoutine from "./media/openbot-101/a-routine.webp";
 import aThread from "./media/openbot-101/a-thread.webp";
 import pickAModel from "./media/openbot-101/pick-a-model.webp";
 
-export function OpenBot101() {
+export function DaniDex101() {
   return (
     <>
       <p>
