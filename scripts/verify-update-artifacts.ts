@@ -47,7 +47,7 @@ if (platform === "linux") {
 
 const resourcesRoot =
   platform === "macos"
-    ? join(distRoot, "mac-arm64", "Dani-Dex.app", "Contents", "Resources")
+    ? join(distRoot, macAppDirectory(), "Dani-Dex.app", "Contents", "Resources")
     : join(distRoot, platform === "linux" ? "linux-unpacked" : "win-unpacked", "resources");
 if (existsSync(join(resourcesRoot, "whisper", "model"))) {
   throw new Error("The packaged application contains the on-demand Whisper model.");
@@ -60,6 +60,11 @@ if (existsSync(unpackedRoot)) {
   }
 }
 logger.info(`Verified ${platform} update artifact ${basename(artifactPath)}.`);
+
+/** The release ships the universal app; the arm64-only build is what `dist:mac` produces locally. */
+function macAppDirectory(): "mac-universal" | "mac-arm64" {
+  return existsSync(join(distRoot, "mac-universal")) ? "mac-universal" : "mac-arm64";
+}
 
 async function verifyMaximumSize(path: string, maximumBytes: number): Promise<void> {
   const size = (await stat(path)).size;

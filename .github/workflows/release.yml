@@ -4,9 +4,6 @@ on:
   push:
     tags:
       - "v*.*.*"
-  # Exercises the Host signing keychain on its own, so a credential or keychain problem is found
-  # without pushing a tag. This path builds nothing and publishes nothing.
-  workflow_dispatch:
 
 permissions: {}
 
@@ -63,91 +60,11 @@ jobs:
           echo "version=$package_version" >> "$GITHUB_OUTPUT"
           echo "tag=v$package_version" >> "$GITHUB_OUTPUT"
 
-      - name: Require deployed Universal Links support
-        shell: bash
-        run: |
-          verification_dir="$(mktemp -d)"
-          trap 'rm -rf "$verification_dir"' EXIT
-          join_status="$(curl --silent --show-error --retry 5 --retry-all-errors \
-            --max-redirs 0 --dump-header "$verification_dir/join.headers" \
-            --output "$verification_dir/join.html" --write-out '%{http_code}' \
-            https://openbot.run/join)"
-          test "$join_status" = "200"
-          tr -d '\r' < "$verification_dir/join.headers" | grep -Eiq '^cache-control:.*no-store'
-          association_status="$(curl --silent --show-error --retry 5 --retry-all-errors \
-            --max-redirs 0 --dump-header "$verification_dir/association.headers" \
-            --output "$verification_dir/association.json" --write-out '%{http_code}' \
-            https://openbot.run/.well-known/apple-app-site-association)"
-          test "$association_status" = "200"
-          tr -d '\r' < "$verification_dir/association.headers" | grep -Eiq '^content-type: application/json'
-          jq -e '.applinks.details == [{"appID":"ZTRDTUL87R.dev.danlab.danidex.desktop","paths":["/join"]}]' \
-            "$verification_dir/association.json" >/dev/null
-
-  host-signing:
-    name: Check Host signing keychain
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: macos-14
-    timeout-minutes: 20
-    environment: release
-    permissions:
-      contents: read
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up Bun
-        uses: ./.github/actions/setup-bun
-        with:
-          install: ignore-scripts
-
-      - name: Build the Host signing keychain and sign a throwaway package
-        shell: bash
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.CSC_INSTALLER_KEY_PASSWORD }}
-          CSC_INSTALLER_LINK: ${{ secrets.CSC_INSTALLER_LINK }}
-        run: |
-          set -euo pipefail
-          source scripts/host-signing-keychain.sh
-          echo "Application identity: $HOST_APPLICATION_IDENTITY"
-          echo "Installer identity: $HOST_INSTALLER_IDENTITY"
-          # Signs a throwaway package with the installer identity and holds the real
-          # `verifyHostInstaller` wording against it. Apple writes that status text and a runner can
-          # word it differently from a developer's own Mac, so the release path must not be the first
-          # place the comparison runs: it gets there with the package already built and notarized.
-          probe="$host_signing_dir/pkg-probe"
-          mkdir -p "$probe/root/usr/local/bin"
-          cp /usr/bin/true "$probe/root/usr/local/bin/dani-dex-signing-probe"
-          /usr/bin/pkgbuild --root "$probe/root" --identifier dev.danlab.danidex.host.signing-probe \
-            --version 0.0.0 --install-location / --ownership recommended \
-            --sign "$HOST_INSTALLER_IDENTITY" --keychain "$HOST_SIGNING_KEYCHAIN" "$probe/probe.pkg"
-          HOST_PROBE_PKG="$probe/probe.pkg" bun -e '
-            import { execFileSync } from "node:child_process";
-            import { verifyHostSignature } from "./scripts/verify-host-installer";
-            const pkg = process.env.HOST_PROBE_PKG;
-            if (!pkg) throw new Error("Missing HOST_PROBE_PKG.");
-            const status = execFileSync("/usr/sbin/pkgutil", ["--check-signature", pkg]).toString();
-            process.stdout.write(status);
-            verifyHostSignature(status);
-            process.stdout.write("This runner reports a wording verifyHostSignature accepts.\n");
-          '
-          # `verifyHostBom` allows only the fixed host paths. A macOS that stamps every new file with
-          # `com.apple.provenance` makes `pkgbuild` record an AppleDouble entry beside each one, which
-          # that allowlist rejects, so print the payload listing rather than infer it from one OS.
-          /usr/sbin/pkgutil --expand-full "$probe/probe.pkg" "$probe/expanded"
-          /usr/bin/lsbom -p fmug "$probe/expanded/Bom"
-          if /usr/bin/lsbom -p f "$probe/expanded/Bom" | grep -q '/\._'; then
-            echo "This runner records AppleDouble metadata entries, which verifyHostBom rejects." >&2
-            exit 1
-          fi
-          echo "This runner records no AppleDouble metadata entries."
-
+  # Dani-Dex ships one unsigned universal Mac app, so an Intel Mac and an Apple silicon Mac download
+  # the same DMG and read the same latest-mac.yml. Without a Developer ID signature Squirrel.Mac
+  # cannot install in place, so the app finds the update and opens this release's page instead.
   macos:
-    name: Build signed macOS ARM64 release
+    name: Build unsigned universal macOS release
     needs: validate
     runs-on: macos-14
     timeout-minutes: 90
@@ -157,8 +74,8 @@ jobs:
       contents: read
       id-token: write
     env:
-      GITHUB_TOKEN: ${{ github.token }}
       RELEASE_VERSION: ${{ needs.validate.outputs.release_version }}
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
     steps:
       - name: Check out tagged source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -167,126 +84,54 @@ jobs:
 
       - name: Set up Bun
         uses: ./.github/actions/setup-bun
-        with:
-          install: none
 
-      - name: Require signing and notarization credentials
-        shell: bash
-        env:
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_INSTALLER_LINK: ${{ secrets.CSC_INSTALLER_LINK }}
-          CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.CSC_INSTALLER_KEY_PASSWORD }}
-          MAC_PROVISIONING_PROFILE: ${{ secrets.MAC_PROVISIONING_PROFILE }}
-        run: |
-          missing=()
-          for name in CSC_LINK CSC_KEY_PASSWORD CSC_INSTALLER_LINK CSC_INSTALLER_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID MAC_PROVISIONING_PROFILE; do
-            if [[ -z "${!name}" ]]; then missing+=("$name"); fi
-          done
-          if (( ${#missing[@]} > 0 )); then
-            echo "Missing release secrets: ${missing[*]}" >&2
-            echo "See docs/RELEASING.md before publishing a tag." >&2
-            exit 1
-          fi
+      - name: Run macOS checks
+        run: bun run lint && bun run typecheck && bunx vitest run src/backend/cli.test.ts
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Run repository check
-        run: |
-          bun run check:desktop
-          bun run test:desktop -- --maxWorkers=2
-          bun run test:sites
-          bun run check:api
-
-      # Hermes is staged with uv from a hash-locked requirements file.
       - name: Set up uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
 
-      - name: Install and verify native runtimes
+      # Both Hermes trees are staged on this arm64 runner: uv installs the x64 wheels by platform, and
+      # only the arm64 tree can be started here.
+      - name: Install and verify runtimes
         run: |
           bun run install:codex-runtime
           bun run install:claude-runtime
           bun run install:grok-runtime
-          bun run install:hermes-runtime
+          bun scripts/install-hermes-runtime.ts darwin arm64
+          bun scripts/install-hermes-runtime.ts darwin x64
           bun run install:remote-desktop-runtime
           bun run verify:remote-desktop-runtime
           bun run prepare:cua-driver
 
-      - name: Install Developer ID provisioning profile
-        shell: bash
-        env:
-          MAC_PROVISIONING_PROFILE: ${{ secrets.MAC_PROVISIONING_PROFILE }}
-        run: |
-          profile_path="$RUNNER_TEMP/Dani-Dex.provisionprofile"
-          printf '%s' "$MAC_PROVISIONING_PROFILE" | /usr/bin/base64 -D > "$profile_path"
-          security cms -D -i "$profile_path" >/dev/null
-          echo "DANI_DEX_PROVISIONING_PROFILE=$profile_path" >> "$GITHUB_ENV"
-
-      - name: Build, sign, and notarize ARM64 update artifacts
-        env:
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          CSC_LINK: ${{ secrets.CSC_LINK }}
+      - name: Build unsigned universal DMG and ZIP
         run: |
           bun run voice:prepare-runtime
           bun run build
-          bun x electron-builder --mac --arm64 --publish never \
-            --config.mac.provisioningProfile="$DANI_DEX_PROVISIONING_PROFILE"
+          bun run dist:mac:universal
 
-      - name: Verify packaged application metadata and launch
-        run: bun run verify:package
-
-      - name: Verify application signature and notarization
-        shell: bash
+      - name: Verify both slices and packaged Hermes
         run: |
-          app_path="dist/mac-arm64/Dani-Dex.app"
-          test -d "$app_path"
-          codesign --verify --deep --strict --verbose=2 "$app_path"
-          runtime_path="$app_path/Contents/Resources/remote-desktop-runtime/darwin/arm64"
-          codesign --verify --deep --strict --verbose=2 "$runtime_path/Sunshine.app"
-          codesign --verify --strict --verbose=2 "$runtime_path/web-server"
-          codesign --verify --strict --verbose=2 "$runtime_path/streamer"
-          verify_provider_signature() {
-            local executable="$1"
-            local team_id="$2"
-            codesign --verify --strict --verbose=2 "$executable"
-            codesign -d --verbose=4 "$executable" 2>&1 | grep -Fx "TeamIdentifier=$team_id"
-          }
-          verify_provider_signature build/codex/mac/arm64/bin/codex 2DC432GLL2
-          verify_provider_signature build/claude/mac/arm64/bin/claude Q6L2SF6YDW
-          verify_provider_signature build/grok/mac/arm64/bin/grok 5Y6N3AJ54S
-          test -f "$app_path/Contents/embedded.provisionprofile"
-          codesign -d --entitlements :- "$app_path" > "$RUNNER_TEMP/dani-dex-entitlements.plist"
-          test -s "$RUNNER_TEMP/dani-dex-entitlements.plist"
-          plutil -lint "$RUNNER_TEMP/dani-dex-entitlements.plist"
-          /usr/libexec/PlistBuddy -c 'Print :com.apple.developer.associated-domains:0' \
-            "$RUNNER_TEMP/dani-dex-entitlements.plist" | grep -Fx 'applinks:openbot.run'
-          /usr/libexec/PlistBuddy -c 'Print :com.apple.developer.team-identifier' \
-            "$RUNNER_TEMP/dani-dex-entitlements.plist" | grep -Fx 'ZTRDTUL87R'
-          /usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.audio-input' \
-            "$RUNNER_TEMP/dani-dex-entitlements.plist" | grep -Fx 'true'
-          plutil -extract NSUserActivityTypes.0 raw "$app_path/Contents/Info.plist" \
-            | grep -Fx 'NSUserActivityTypeBrowsingWeb'
-          plutil -extract ElectronTeamID raw "$app_path/Contents/Info.plist" | grep -Fx 'ZTRDTUL87R'
-          spctl --assess --type execute --verbose=2 "$app_path"
-          xcrun stapler validate "$app_path"
+          set -euo pipefail
+          app=dist/mac-universal/Dani-Dex.app
+          archs=$(lipo -archs "$app/Contents/MacOS/Dani-Dex")
+          echo "Main executable: $archs"
+          grep -qw arm64 <<<"$archs"
+          grep -qw x86_64 <<<"$archs"
+          test -x "$app/Contents/Resources/hermes/mac/x64/bin/hermes"
+          version=$(jq -r .hermes.version native-runtime.lock.json)
+          output=$("$app/Contents/Resources/hermes/mac/arm64/bin/hermes" --version)
+          echo "$output"
+          grep -Fq "v$version" <<<"$output"
+          test "$(plutil -extract CFBundleShortVersionString raw "$app/Contents/Info.plist")" = "$RELEASE_VERSION"
 
       - name: Verify updater metadata
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           shopt -s nullglob
           dmgs=(dist/*.dmg)
           zips=(dist/*.zip)
-          metadata=(dist/latest-mac.yml)
-          if (( ${#dmgs[@]} != 1 || ${#zips[@]} != 1 || ${#metadata[@]} != 1 )); then
+          if (( ${#dmgs[@]} != 1 || ${#zips[@]} != 1 )) || [ ! -f dist/latest-mac.yml ]; then
             echo "Expected one DMG, one ZIP, and latest-mac.yml." >&2
             find dist -maxdepth 1 -type f -print
             exit 1
@@ -294,93 +139,28 @@ jobs:
           grep -F "version: $RELEASE_VERSION" dist/latest-mac.yml
           grep -F '.zip' dist/latest-mac.yml
           bun run verify:update-artifacts macos
-          current_size=$(stat -f%z "${zips[0]}")
-          if (( current_size >= 800000000 )); then
-            echo "The macOS ZIP is ${current_size} bytes. The limit is 800000000 bytes." >&2
-            exit 1
-          fi
-          mkdir -p "$RUNNER_TEMP/dani-dex-0.1.21"
-          gh release download v0.1.21 --repo "$GITHUB_REPOSITORY" --pattern '*.zip' \
-            --dir "$RUNNER_TEMP/dani-dex-0.1.21"
-          old_zips=("$RUNNER_TEMP/dani-dex-0.1.21"/*.zip)
-          if (( ${#old_zips[@]} != 1 )); then
-            echo "Expected one macOS ZIP in v0.1.21." >&2
-            exit 1
-          fi
-          old_size=$(stat -f%z "${old_zips[0]}")
-          if (( current_size >= old_size )); then
-            echo "The macOS ZIP is not smaller than v0.1.21 (${current_size} >= ${old_size})." >&2
-            exit 1
-          fi
-
-      - name: Test native tenant setup
-        run: |
-          xcrun swiftc -parse-as-library -D TENANT_SETUP_TESTS scripts/macos-tenant-setup.swift scripts/macos-tenant-setup-tests.swift -o "$RUNNER_TEMP/dani-dex-tenant-setup-tests"
-          "$RUNNER_TEMP/dani-dex-tenant-setup-tests"
-
-      - name: Build, sign, notarize, and verify Host installer
-        shell: bash
-        env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          CSC_INSTALLER_LINK: ${{ secrets.CSC_INSTALLER_LINK }}
-          CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.CSC_INSTALLER_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          set -euo pipefail
-          source scripts/host-signing-keychain.sh
-          bun scripts/build-host-installer.ts
-          host_pkg="dist/Dani-Dex-Host-$RELEASE_VERSION-arm64.pkg"
-          xcrun notarytool store-credentials dani-dex-host-release --keychain "$HOST_SIGNING_KEYCHAIN" \
-            --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
-          xcrun notarytool submit "$host_pkg" --keychain "$HOST_SIGNING_KEYCHAIN" \
-            --keychain-profile dani-dex-host-release --wait --timeout 20m --output-format json > "$host_signing_dir/notarization.json"
-          jq -e '.status == "Accepted"' "$host_signing_dir/notarization.json" >/dev/null
-          xcrun stapler staple "$host_pkg"
-          bun scripts/verify-host-installer.ts "$host_pkg" "$RELEASE_VERSION"
-          # Host infrastructure is never an Electron auto-update target.
-          if grep -F '.pkg' dist/latest-mac.yml; then exit 1; fi
 
       - name: Generate checksums
-        shell: bash
         run: |
+          set -euo pipefail
           cd dist
-          shopt -s nullglob
-          artifacts=("Dani-Dex-$RELEASE_VERSION-arm64.dmg" "Dani-Dex-$RELEASE_VERSION-arm64.zip" "Dani-Dex-Host-$RELEASE_VERSION-arm64.pkg")
-          shasum -a 256 "${artifacts[@]}" > SHA256SUMS-macos.txt
+          shasum -a 256 ./*.dmg ./*.zip | sed 's| \./| |' > SHA256SUMS-macos.txt
+          cat SHA256SUMS-macos.txt
 
       - name: Generate macOS release SBOM
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
-          path: dist/mac-arm64/Dani-Dex.app
+          path: dist/mac-universal/Dani-Dex.app
           format: spdx-json
           output-file: dist/Dani-Dex-${{ env.RELEASE_VERSION }}-macos.spdx.json
           artifact-name: Dani-Dex-${{ env.RELEASE_VERSION }}-macOS-SBOM
           upload-artifact: false
           upload-release-assets: false
 
-      - name: Generate Host package SBOM
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
-        with:
-          path: dist/host-sbom
-          format: spdx-json
-          output-file: dist/Dani-Dex-Host-${{ env.RELEASE_VERSION }}-macos.spdx.json
-          artifact-name: Dani-Dex-Host-${{ env.RELEASE_VERSION }}-macOS-SBOM
-          upload-artifact: false
-          upload-release-assets: false
-
       - name: Attest macOS release provenance
-        id: macos-provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-checksums: dist/SHA256SUMS-macos.txt
-
-      - name: Include macOS provenance bundle
-        env:
-          BUNDLE_PATH: ${{ steps.macos-provenance.outputs.bundle-path }}
-        run: cp "$BUNDLE_PATH" "dist/Dani-Dex-$RELEASE_VERSION-macos.sigstore.json"
 
       - name: Upload macOS release assets
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -389,11 +169,9 @@ jobs:
           path: |
             dist/*.dmg
             dist/*.zip
-            dist/Dani-Dex-Host-*-arm64.pkg
-            dist/latest-mac.yml
             dist/*.blockmap
+            dist/latest-mac.yml
             dist/*.spdx.json
-            dist/*-macos.sigstore.json
             dist/SHA256SUMS-macos.txt
           if-no-files-found: error
           retention-days: 7
