@@ -108,7 +108,7 @@ describe("landing analytics", () => {
 
   it("tracks the invitation page anonymously and removes its click listener", () => {
     document.body.innerHTML = `
-      <a id="open" href="openbot://join?invite=private">Open app</a>
+      <a id="open" href="dani-dex://join?invite=private">Open app</a>
       <a id="download" href="/download/macos">Download</a>
     `;
     window.history.replaceState({}, "", "/join");
@@ -142,7 +142,7 @@ describe("landing analytics", () => {
   });
 
   it("replaces an existing document listener instead of double tracking clicks", () => {
-    document.body.innerHTML = '<a id="open" href="openbot://join">Open app</a>';
+    document.body.innerHTML = '<a id="open" href="dani-dex://join">Open app</a>';
     window.history.replaceState({}, "", "/join");
     const client = { setGlobalProperties: vi.fn(), track: vi.fn(), trackScreenView: vi.fn() };
     const analytics = new LandingAnalytics(() => client, true);

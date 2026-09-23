@@ -21,7 +21,7 @@ export const GUIDES_COLLECTION: ContentCollection = {
   feedTitle: "Dani-Dex guides",
   backLabel: "All guides",
   moreTitle: "More guides",
-  imageEyebrow: "DANI_DEX · GUIDES",
+  imageEyebrow: "DANI-DEX · GUIDES",
   articles: publishedFirst([
     {
       slug: "openbot-101",

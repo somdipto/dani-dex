@@ -7,7 +7,7 @@ export const DANI_DEX_SITE_URL = "https://openbot.run/";
 export const DANI_DEX_SITE_TITLE = "Dani-Dex: AI teammates for real work";
 export const DANI_DEX_SITE_DESCRIPTION =
   "Run Codex and Claude side by side as persistent AI teammates, each with its own workspace, queue, and context.";
-export const DANI_DEX_SOCIAL_IMAGE_URL = `${DANI_DEX_SITE_URL}openbot-social.png`;
+export const DANI_DEX_SOCIAL_IMAGE_URL = `${DANI_DEX_SITE_URL}dani-dex-social.png`;
 export const DANI_DEX_SOCIAL_IMAGE_ALT = "Meet Dani-Dex on a dark grid background";
 
 // The hosts production answers on. Both serve the same pages, and those pages go by

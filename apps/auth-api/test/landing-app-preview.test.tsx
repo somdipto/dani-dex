@@ -43,14 +43,14 @@ describe("LandingAppPreview", () => {
       new MessageEvent("message", {
         origin: "https://invalid.example",
         source: previewWindow,
-        data: { type: "openbot:landing-preview-ready" },
+        data: { type: "danidex:landing-preview-ready" },
       }),
     );
     window.dispatchEvent(
       new MessageEvent("message", {
         origin: window.location.origin,
         source: window,
-        data: { type: "openbot:landing-preview-ready" },
+        data: { type: "danidex:landing-preview-ready" },
       }),
     );
     expect(postMessage).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe("LandingAppPreview", () => {
       new MessageEvent("message", {
         origin: window.location.origin,
         source: previewWindow,
-        data: { type: "openbot:landing-preview-ready" },
+        data: { type: "danidex:landing-preview-ready" },
       }),
     );
     vi.advanceTimersByTime(240);
@@ -79,7 +79,7 @@ describe("LandingAppPreview", () => {
       new MessageEvent("message", {
         origin: window.location.origin,
         source: frame.contentWindow,
-        data: { type: "openbot:landing-preview-ready" },
+        data: { type: "danidex:landing-preview-ready" },
       }),
     );
     view.unmount();

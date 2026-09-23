@@ -1,15 +1,15 @@
 import { onSettled } from "solid-js";
 
-const LANDING_PREVIEW_READY_MESSAGE = "openbot:landing-preview-ready";
-const LANDING_PREVIEW_START_MESSAGE = "openbot:landing-preview-start";
+const LANDING_PREVIEW_READY_MESSAGE = "danidex:landing-preview-ready";
+const LANDING_PREVIEW_START_MESSAGE = "danidex:landing-preview-start";
 const LANDING_PREVIEW_URL = "/app-preview";
 const LANDING_PREVIEW_LOAD_DELAY_MS = 300;
 const LANDING_PREVIEW_REVEAL_FALLBACK_MS = 240;
 
 const LANDING_PREVIEW_MARKS = {
-  ready: "openbot:landing-preview:ready",
-  shown: "openbot:landing-preview:shown",
-  src: "openbot:landing-preview:src",
+  ready: "danidex:landing-preview:ready",
+  shown: "danidex:landing-preview:shown",
+  src: "danidex:landing-preview:src",
 } as const;
 
 function readDuration(name: string, fallback: number): number {

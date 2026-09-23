@@ -135,9 +135,9 @@ describe("plugin page", () => {
 
     expect(screen.getByRole("link", { name: "Open in Dani-Dex" })).toHaveAttribute(
       "href",
-      `openbot://plugins/${plugin.slug}`,
+      `dani-dex://plugins/${plugin.slug}`,
     );
-    expect(createDaniDexPluginUrl(plugin.slug)).toBe(`openbot://plugins/${plugin.slug}`);
+    expect(createDaniDexPluginUrl(plugin.slug)).toBe(`dani-dex://plugins/${plugin.slug}`);
   });
 
   /* The catalog becomes a fetched document, and a link row is the only place a listing's own string

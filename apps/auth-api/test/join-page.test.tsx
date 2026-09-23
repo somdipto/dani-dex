@@ -13,7 +13,7 @@ describe("invitation landing page", () => {
     render(() => <JoinPage />);
 
     const openButton = await screen.findByRole("link", { name: "Open Dani-Dex" });
-    await waitFor(() => expect(openButton).toHaveAttribute("href", expect.stringMatching(/^openbot:\/\/join\?/u)));
+    await waitFor(() => expect(openButton).toHaveAttribute("href", expect.stringMatching(/^dani-dex:\/\/join\?/u)));
     expect(screen.getByRole("link", { name: "Download Dani-Dex" })).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
   });
