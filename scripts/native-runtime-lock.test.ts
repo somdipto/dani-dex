@@ -75,12 +75,12 @@ describe("native runtime lock", () => {
 
   it("keeps the embedded runtime on WebRTC without audio or WebSocket media", async () => {
     const patch = await readFile(
-      resolve("vendor/remote-desktop/patches/moonlight-web-stream-v2.10.0-danidex.patch"),
+      resolve("vendor/remote-desktop/patches/moonlight-web-stream-v2.10.0-openbot.patch"),
       "utf8",
     );
 
     expect(patch).toContain("allow_transport_websockets: false");
-    expect(patch).toContain("Dani-Dex embedded mode rejects WebSocket media transport");
+    expect(patch).toContain("OpenBot embedded mode rejects WebSocket media transport");
     expect(patch).toContain('settings.dataTransport = "webrtc"');
     expect(patch).toContain("let _ = (audio_config, stream_config)");
     expect(patch).toContain('-import { WebSocketTransport } from "./transport/web_socket.js"');
@@ -92,11 +92,11 @@ describe("native runtime lock", () => {
 
   it("adds the authenticated Sunshine native display endpoint", async () => {
     const patch = await readFile(
-      resolve("vendor/remote-desktop/patches/sunshine-v2026.516.143833-danidex.patch"),
+      resolve("vendor/remote-desktop/patches/sunshine-v2026.516.143833-openbot.patch"),
       "utf8",
     );
 
-    expect(patch).toContain('server.resource["^/api/danidex/displays$"]["GET"]');
+    expect(patch).toContain('server.resource["^/api/openbot/displays$"]["GET"]');
     expect(patch).toContain("if (!authenticate(response, request))");
     expect(patch).toContain("platf::display_names");
   });

@@ -167,7 +167,7 @@ describe("RemoteScreenGateway", () => {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: viewerCookie },
       body: JSON.stringify({
-        source: "dani-dex-moonlight",
+        source: "openbot-moonlight",
         type: "viewer-state",
         sessionId: session.id,
         state: "connected",
@@ -563,7 +563,7 @@ describe("RemoteScreenGateway", () => {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: cookies[firstIndex] },
       body: JSON.stringify({
-        source: "dani-dex-moonlight",
+        source: "openbot-moonlight",
         type: "viewer-state",
         sessionId: sessions[firstIndex]?.id,
         state: "connected",

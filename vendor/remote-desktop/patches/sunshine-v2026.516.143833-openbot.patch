@@ -302,7 +302,7 @@ index 2f703dbc..c9fb7f58 100644
 +   * @param response The HTTP response object.
 +   * @param request The HTTP request object.
 +   */
-+  void getDaniDexSetup(const resp_https_t &response, const req_https_t &request) {
++  void getOpenBotSetup(const resp_https_t &response, const req_https_t &request) {
 +    if (!authenticate(response, request)) return;
 +#ifdef __APPLE__
 +    send_response(response, platf::openbot_setup_status());
@@ -311,10 +311,10 @@ index 2f703dbc..c9fb7f58 100644
 +#endif
 +  }
 +
-+  void daniDexTest(const resp_https_t &response, const req_https_t &request) {
++  void openBotTest(const resp_https_t &response, const req_https_t &request) {
 +    if (!authenticate(response, request)) return;
 +#ifdef __APPLE__
-+    if (!std::getenv("DANI_DEX_REMOTE_SETUP")) {
++    if (!std::getenv("OPENBOT_REMOTE_SETUP")) {
 +      not_found(response, request, "Remote desktop testing is unavailable.");
 +      return;
 +    }
@@ -336,7 +336,7 @@ index 2f703dbc..c9fb7f58 100644
 +#endif
 +  }
 +
-+  void getDaniDexDisplays(const resp_https_t &response, const req_https_t &request) {
++  void getOpenBotDisplays(const resp_https_t &response, const req_https_t &request) {
 +    if (!authenticate(response, request)) {
 +      return;
 +    }
@@ -366,10 +366,10 @@ index 2f703dbc..c9fb7f58 100644
 +    server.resource["^/api/pin$"]["GET"] = getPendingPairings;
      server.resource["^/api/pin$"]["POST"] = savePin;
      server.resource["^/api/logs$"]["GET"] = getLogs;
-+    server.resource["^/api/openbot/setup$"]["GET"] = getDaniDexSetup;
-+    server.resource["^/api/openbot/test$"]["GET"] = daniDexTest;
-+    server.resource["^/api/openbot/test$"]["POST"] = daniDexTest;
-+    server.resource["^/api/openbot/displays$"]["GET"] = getDaniDexDisplays;
++    server.resource["^/api/openbot/setup$"]["GET"] = getOpenBotSetup;
++    server.resource["^/api/openbot/test$"]["GET"] = openBotTest;
++    server.resource["^/api/openbot/test$"]["POST"] = openBotTest;
++    server.resource["^/api/openbot/displays$"]["GET"] = getOpenBotDisplays;
      server.resource["^/api/reset-display-device-persistence$"]["POST"] = resetDisplayDevicePersistence;
      server.resource["^/api/restart$"]["POST"] = restart;
      server.resource["^/api/vigembus/status$"]["GET"] = getViGEmBusStatus;
@@ -381,7 +381,7 @@ index e8c4ea00..404fef87 100644
    void browseDirectory(const resp_https_t &response, const req_https_t &request);
    void getLocale(const resp_https_t &response, const req_https_t &request);
    void getCSRFToken(const resp_https_t &response, const req_https_t &request);
-+  void getDaniDexDisplays(const resp_https_t &response, const req_https_t &request);
++  void getOpenBotDisplays(const resp_https_t &response, const req_https_t &request);
 +
 +  void getPendingPairings(const resp_https_t &, const req_https_t &);
 +  void cancelPairing(const resp_https_t &, const req_https_t &);
@@ -663,7 +663,7 @@ index 13df6784..26e77cec 100644
  
  void mainThreadLoop(const std::shared_ptr<safe::event_t<bool>> &shutdown_event) {
 +  #ifdef __APPLE__
-+  if (std::getenv("DANI_DEX_REMOTE_SETUP")) {
++  if (std::getenv("OPENBOT_REMOTE_SETUP")) {
 +    platf::openbot_main_loop([&] { return shutdown_event->peek(); });
 +    return;
 +  }
@@ -1686,7 +1686,7 @@ index 00000000..3821983e
 --- /dev/null
 +++ b/src/platform/macos/openbot_setup.h
 @@ -0,0 +1,12 @@
-+// Dani-Dex additions to Sunshine, distributed under GPL-3.0.
++// OpenBot additions to Sunshine, distributed under GPL-3.0.
 +#pragma once
 +#include <functional>
 +#include <ApplicationServices/ApplicationServices.h>
@@ -1704,7 +1704,7 @@ index 00000000..e42489af
 --- /dev/null
 +++ b/src/platform/macos/openbot_setup.mm
 @@ -0,0 +1,177 @@
-+// Dani-Dex additions to Sunshine, distributed under GPL-3.0.
++// OpenBot additions to Sunshine, distributed under GPL-3.0.
 +#import <AppKit/AppKit.h>
 +#import <CoreGraphics/CoreGraphics.h>
 +#include <mutex>
@@ -1729,15 +1729,15 @@ index 00000000..e42489af
 +  }
 +}
 +
-+@interface DaniDexTestView : NSView
++@interface OpenBotTestView : NSView
 +@end
-+@implementation DaniDexTestView
++@implementation OpenBotTestView
 +- (BOOL)acceptsFirstResponder { return YES; }
 +- (void)drawRect:(NSRect)dirtyRect {
 +  [[NSColor windowBackgroundColor] setFill];
 +  NSRectFill(self.bounds);
 +  NSDictionary *attributes = @{NSFontAttributeName: [NSFont systemFontOfSize:20], NSForegroundColorAttributeName: [NSColor labelColor]};
-+  [@"Dani-Dex remote desktop test" drawAtPoint:NSMakePoint(24, 240) withAttributes:attributes];
++  [@"OpenBot remote desktop test" drawAtPoint:NSMakePoint(24, 240) withAttributes:attributes];
 +  [@"Click the target through the remote connection." drawAtPoint:NSMakePoint(24, 198) withAttributes:attributes];
 +  [[NSColor controlAccentColor] setFill];
 +  NSRectFill(NSMakeRect(24, 110, 390, 60));
@@ -1823,9 +1823,9 @@ index 00000000..e42489af
 +      panel = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 480, 290) styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
 +      panel.releasedWhenClosed = NO;
 +      panel.movable = NO;
-+      panel.title = @"Dani-Dex remote desktop test";
++      panel.title = @"OpenBot remote desktop test";
 +      panel.level = NSFloatingWindowLevel;
-+      panel.contentView = [[DaniDexTestView alloc] initWithFrame:NSMakeRect(0, 0, 480, 290)];
++      panel.contentView = [[OpenBotTestView alloc] initWithFrame:NSMakeRect(0, 0, 480, 290)];
 +      NSScreen *target = NSScreen.screens.firstObject;
 +      for (NSScreen *screen in NSScreen.screens) {
 +        if (std::string([screen.deviceDescription[@"NSScreenNumber"] stringValue].UTF8String) == display_id) target = screen;
@@ -2182,8 +2182,8 @@ index 984481f6..f8118465 100644
      list(APPEND TEST_SOURCES ${MACOS_TEST_SOURCES})
  endif ()
  
-+# Compile only the backported security regressions for Dani-Dex's runtime build.
-+if(DANI_DEX_SECURITY_TESTS)
++# Compile only the backported security regressions for OpenBot's runtime build.
++if(OPENBOT_SECURITY_TESTS)
 +    set(TEST_SOURCES
 +        "${CMAKE_SOURCE_DIR}/tests/tests_main.cpp"
 +        "${CMAKE_SOURCE_DIR}/tests/unit/test_input.cpp"
@@ -2322,7 +2322,7 @@ index 195a666c..50c6630e 100644
 +                                                               const std::shared_ptr<SimpleWeb::ServerBase<SimpleWeb::HTTPS>::Response> &response,
 +                                                               const std::shared_ptr<SimpleWeb::ServerBase<SimpleWeb::HTTPS>::Request> &request
 +                                                             ) {
-+      confighttp::getDaniDexDisplays(response, request);
++      confighttp::getOpenBotDisplays(response, request);
 +    };
 +
      // Add a route to test send_unauthorized
@@ -2488,12 +2488,12 @@ index 195a666c..50c6630e 100644
    ASSERT_EQ(body, "authenticated");
  }
  
-+TEST_F(ConfigHttpTest, DaniDexDisplaysRejectsNoAuth) {
++TEST_F(ConfigHttpTest, OpenBotDisplaysRejectsNoAuth) {
 +  const auto response = client->request("GET", "/api/openbot/displays");
 +  ASSERT_EQ(response->status_code, "401 Unauthorized");
 +}
 +
-+TEST_F(ConfigHttpTest, DaniDexDisplaysReturnsAnArray) {
++TEST_F(ConfigHttpTest, OpenBotDisplaysReturnsAnArray) {
 +  SimpleWeb::CaseInsensitiveMultimap headers;
 +  headers.emplace("Authorization", create_auth_header("testuser", "testpass"));
 +
@@ -3192,7 +3192,7 @@ index 00000000..7972aebd
 --- /dev/null
 +++ b/tests/unit/test_openbot_setup.mm
 @@ -0,0 +1,55 @@
-+// Dani-Dex additions to Sunshine, distributed under GPL-3.0.
++// OpenBot additions to Sunshine, distributed under GPL-3.0.
 +#import <AppKit/AppKit.h>
 +#include <stdexcept>
 +#include "../../src/platform/macos/openbot_setup.mm"
@@ -3206,7 +3206,7 @@ index 00000000..7972aebd
 +    platf::openbot_test_action("start");
 +    require(platf::openbot_test_status()["active"] == true);
 +    require(!panel.movable);
-+    auto view = (DaniDexTestView *)panel.contentView;
++    auto view = (OpenBotTestView *)panel.contentView;
 +    CGEventRef native = CGEventCreateKeyboardEvent(nullptr, 18, true);
 +    NSEvent *event = [NSEvent eventWithCGEvent:native];
 +    require(![view remoteEvent:event]);

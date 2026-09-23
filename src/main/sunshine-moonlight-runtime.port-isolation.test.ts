@@ -182,7 +182,7 @@ function sunshineHandler(harness: Harness): (request: IncomingMessage, response:
       response.end();
       return;
     }
-    if (request.method === "GET" && url.pathname === "/api/danidex/displays") {
+    if (request.method === "GET" && url.pathname === "/api/openbot/displays") {
       json({ displays: [] });
       return;
     }
@@ -647,7 +647,7 @@ describe("Sunshine port isolation", () => {
         expect(httpsPort).not.toBe(47_990);
         expect(harness.pinBodies.length).toBeGreaterThan(0);
         const paths = harness.sunshineHits.map((hit) => hit.path);
-        expect(paths).toContain("/api/danidex/displays");
+        expect(paths).toContain("/api/openbot/displays");
         expect(paths).toContain("/api/pin");
         for (const hit of harness.sunshineHits) {
           expect(hit.localPort).toBe(httpsPort);

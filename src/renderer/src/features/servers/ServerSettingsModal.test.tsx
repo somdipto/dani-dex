@@ -324,7 +324,7 @@ describe("ServerSettingsModal", () => {
         new MessageEvent("message", {
           source: frame.contentWindow,
           origin: new URL(session.viewerUrl).origin,
-          data: { source: "dani-dex-moonlight", type: "viewer-state", sessionId: session.id, state: "connected" },
+          data: { source: "openbot-moonlight", type: "viewer-state", sessionId: session.id, state: "connected" },
         }),
       );
       await waitFor(() => expect(confirm).toBeEnabled());
@@ -361,7 +361,7 @@ describe("ServerSettingsModal", () => {
       new MessageEvent("message", {
         source: frame.contentWindow,
         origin: new URL(session.viewerUrl).origin,
-        data: { source: "dani-dex-moonlight", type: "viewer-state", sessionId: session.id, state: "connected" },
+        data: { source: "openbot-moonlight", type: "viewer-state", sessionId: session.id, state: "connected" },
       }),
     );
     await waitFor(() => expect(confirm).toBeEnabled());

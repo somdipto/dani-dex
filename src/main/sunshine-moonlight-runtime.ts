@@ -351,7 +351,7 @@ export class SunshineMoonlightRuntime {
   > {
     return sunshineJson(
       this.#requireSunshineHttpsPort(),
-      "/api/danidex/setup",
+      "/api/openbot/setup",
       this.#options.credentials,
       join(this.#options.stateDirectory, "sunshine-cert.pem"),
       sunshineSetupSchema,
@@ -364,12 +364,12 @@ export class SunshineMoonlightRuntime {
     if (action !== "status")
       await sunshineRequest(
         port,
-        "/api/danidex/test",
+        "/api/openbot/test",
         this.#options.credentials,
         certificate,
         JSON.stringify({ action, displayId: this.#selectedDisplayId ?? "" }),
       );
-    return sunshineJson(port, "/api/danidex/test", this.#options.credentials, certificate, sunshineTestSchema);
+    return sunshineJson(port, "/api/openbot/test", this.#options.credentials, certificate, sunshineTestSchema);
   }
 
   async selectDisplay(displayId: string): Promise<void> {
@@ -629,7 +629,8 @@ export class SunshineMoonlightRuntime {
     this.#screenCaptureDenied = false;
     this.#sunshine = this.#spawn(this.#options.paths.sunshine, [join(this.#options.stateDirectory, "sunshine.conf")], {
       cwd: dirname(this.#options.paths.sunshine),
-      env: { ...process.env, DANI_DEX_REMOTE_SETUP: "1" },
+      // Pinned upstream Sunshine/Moonlight binaries read these names; they change only with a Dani-Dex runtime build.
+      env: { ...process.env, OPENBOT_REMOTE_SETUP: "1" },
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
     });
@@ -739,7 +740,7 @@ export class SunshineMoonlightRuntime {
   async #getSunshineDisplays(): Promise<RemoteDesktopDisplay[]> {
     const native = await sunshineJson(
       this.#requireSunshineHttpsPort(),
-      "/api/danidex/displays",
+      "/api/openbot/displays",
       this.#options.credentials,
       join(this.#options.stateDirectory, "sunshine-cert.pem"),
       sunshineDisplaysSchema,

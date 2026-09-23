@@ -32,7 +32,7 @@ const MAX_PENDING_STREAM_BYTES = 1_048_576;
 const MAX_TIMER_DELAY_MS = 2_147_000_000;
 const viewerGrantSchema = z.object({ grant: z.string().min(1).max(256) });
 const viewerStateSchema = z.object({
-  source: z.literal("dani-dex-moonlight"),
+  source: z.literal("openbot-moonlight"),
   type: z.literal("viewer-state"),
   sessionId: z.string().min(1).max(128),
   state: z.enum(["connecting", "connected", "error"]),

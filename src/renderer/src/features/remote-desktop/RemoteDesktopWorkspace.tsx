@@ -36,7 +36,7 @@ interface RemoteDesktopWorkspaceProps {
 type ViewerState = "idle" | "connecting" | "connected" | "error";
 type RemoteDisplay = RemoteDesktopSession["displays"][number];
 const viewerMessageSchema = z.object({
-  source: z.literal("dani-dex-moonlight"),
+  source: z.literal("openbot-moonlight"),
   type: z.literal("viewer-state"),
   sessionId: z.string().min(1),
   state: z.enum(["connecting", "connected", "error"]),
