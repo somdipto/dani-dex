@@ -45,6 +45,7 @@ export const IPC_CHANNELS = {
   voiceGetModelStatus: "voice:get-model-status",
   voicePrepareModel: "voice:prepare-model",
   voiceTranscribe: "voice:transcribe",
+  voiceCreateRealtimeSession: "voice:create-realtime-session",
   voiceModelStatus: "voice:model-status",
   skillsLocalList: "skills:local-list",
   skillsLocalGet: "skills:local-get",

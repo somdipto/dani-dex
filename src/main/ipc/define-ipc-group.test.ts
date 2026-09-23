@@ -27,6 +27,7 @@ function registerVoice(transcribe: (text: string) => unknown): void {
     getModelStatus: handler(() => "status"),
     prepareModel: handler(() => "prepared"),
     transcribe: payloadHandler((value) => String(value), transcribe),
+    createRealtimeSession: handler(() => "session"),
   });
 }
 

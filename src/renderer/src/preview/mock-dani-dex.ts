@@ -747,6 +747,9 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       getModelStatus: async () => ({ phase: "ready", progress: 100, message: null }),
       prepareModel: async () => ({ phase: "ready", progress: 100, message: null }),
       transcribe: async () => ({ text: "Mock voice transcript" }),
+      createRealtimeSession: async () => {
+        throw new Error("Realtime voice is not available in the preview.");
+      },
       onModelStatus: () => () => undefined,
     },
     auth: {

@@ -501,6 +501,7 @@ export function installDanidexStub(): void {
         getModelStatus: vi.fn().mockResolvedValue({ phase: "ready", progress: 100, message: null }),
         prepareModel: vi.fn().mockResolvedValue({ phase: "ready", progress: 100, message: null }),
         transcribe: vi.fn().mockResolvedValue({ text: "Voice transcript" }),
+        createRealtimeSession: vi.fn().mockRejectedValue(new Error("Realtime voice is not configured.")),
         onModelStatus: vi.fn().mockReturnValue(() => undefined),
       },
       auth: {

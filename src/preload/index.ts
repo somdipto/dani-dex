@@ -977,6 +977,7 @@ const danidexApi: DaniDexDesktopApi = {
     getModelStatus: () => ipcRenderer.invoke(IPC_CHANNELS.voiceGetModelStatus),
     prepareModel: () => ipcRenderer.invoke(IPC_CHANNELS.voicePrepareModel),
     transcribe: (input) => ipcRenderer.invoke(IPC_CHANNELS.voiceTranscribe, input),
+    createRealtimeSession: () => ipcRenderer.invoke(IPC_CHANNELS.voiceCreateRealtimeSession),
     onModelStatus: (listener) => {
       const handler = (_event: Electron.IpcRendererEvent, status: Parameters<typeof listener>[0]) => listener(status);
       ipcRenderer.on(IPC_CHANNELS.voiceModelStatus, handler);

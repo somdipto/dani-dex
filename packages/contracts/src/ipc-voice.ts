@@ -14,6 +14,13 @@ export interface VoiceTranscriptionResult {
   text: string;
 }
 
+/** A short-lived browser credential for one OpenAI Realtime call; never the server API key. */
+export interface RealtimeVoiceSession {
+  clientSecret: string;
+  expiresAt: number;
+  model: string;
+}
+
 export type VoiceModelPhase = "missing" | "downloading" | "ready" | "error";
 
 export interface VoiceModelStatus {

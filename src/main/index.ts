@@ -49,6 +49,7 @@ import {
   showMainWindow,
 } from "./main-window";
 import { ensureMacApplicationPresence } from "./main-window-state";
+import { OpenAiRealtimeSessionService } from "./openai-realtime-session";
 import { watchRemoteHostDirectory } from "./remote-server-host-directory";
 import { createRendererForwarders } from "./renderer-forwarders";
 import { sendToRenderer } from "./renderer-ipc";
@@ -351,7 +352,7 @@ function registerIpcHandlers({
       permissionHelp: computerUsePermissionHelp,
     }),
     ...providerIpcHandlers({ service, providerRuntimes, credentials: providerCredentials }),
-    ...voiceIpcHandlers({ voice }),
+    ...voiceIpcHandlers({ voice, realtime: new OpenAiRealtimeSessionService(centralAuth) }),
     ...accountIpcHandlers({ centralAuth, host }),
     ...skillIpcHandlers({ skills, getMainWindow }),
     ...hostedSiteIpcHandlers({ hostedSites, getMainWindow }),

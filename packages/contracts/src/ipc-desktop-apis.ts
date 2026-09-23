@@ -211,7 +211,12 @@ import type {
   UpdateHostIdentityInput,
   UpdateTeamMemberInput,
 } from "./ipc-team-host";
-import type { VoiceModelStatus, VoiceTranscriptionInput, VoiceTranscriptionResult } from "./ipc-voice";
+import type {
+  RealtimeVoiceSession,
+  VoiceModelStatus,
+  VoiceTranscriptionInput,
+  VoiceTranscriptionResult,
+} from "./ipc-voice";
 import type { QueueEditRequest } from "./team-protocol/queue-edit-v1";
 
 export interface AgentDesktopApi {
@@ -494,6 +499,7 @@ export interface VoiceDesktopApi {
   getModelStatus: () => Promise<VoiceModelStatus>;
   prepareModel: () => Promise<VoiceModelStatus>;
   transcribe: (input: VoiceTranscriptionInput) => Promise<VoiceTranscriptionResult>;
+  createRealtimeSession: () => Promise<RealtimeVoiceSession>;
   onModelStatus: (listener: (status: VoiceModelStatus) => void) => () => void;
 }
 
