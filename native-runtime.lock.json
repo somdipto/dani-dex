@@ -324,5 +324,44 @@
         "executable": "bun.exe"
       }
     }
+  },
+  "hermes": {
+    "repository": "https://github.com/NousResearch/hermes-agent",
+    "package": "hermes-agent",
+    "version": "0.19.0",
+    "extras": ["acp"],
+    "wheel": "hermes_agent-0.19.0-py3-none-any.whl",
+    "wheelSha256": "bd0bac012aee38a60894781f4597dc29ee7bedb3448540249921f10d3bef327f",
+    "license": "MIT",
+    "requirements": "scripts/hermes-runtime-requirements.txt",
+    "requirementsSha256": "49ac1059e27dd5701cae470c49ae109db894f21b8b9ecc226784dce353c5e25d",
+    "python": {
+      "repository": "https://github.com/astral-sh/python-build-standalone",
+      "release": "20260901",
+      "version": "3.11.16",
+      "artifacts": {
+        "darwin-arm64": {
+          "asset": "cpython-3.11.16+20260901-aarch64-apple-darwin-install_only_stripped.tar.gz",
+          "assetSha256": "768f05cf200273bbdda9a5955a5a6892a4b22f2a0b1e4b0a9160f5c7fce86816",
+          "downloadBytes": 26961472,
+          "pythonPlatform": "aarch64-apple-darwin",
+          "platformDirectory": "mac"
+        },
+        "darwin-x64": {
+          "asset": "cpython-3.11.16+20260901-x86_64-apple-darwin-install_only_stripped.tar.gz",
+          "assetSha256": "908b381433f78b832c8d64960ced0f85871893cc8779f413f963e0c9e293c258",
+          "downloadBytes": 26864575,
+          "pythonPlatform": "x86_64-apple-darwin",
+          "platformDirectory": "mac"
+        },
+        "linux-x64": {
+          "asset": "cpython-3.11.16+20260901-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz",
+          "assetSha256": "64427febea27864d136db46c8efe968eb6fa5ca2813ce1dca4bb95aec31cb2e4",
+          "downloadBytes": 30778779,
+          "pythonPlatform": "x86_64-unknown-linux-gnu",
+          "platformDirectory": "linux"
+        }
+      }
+    }
   }
 }

@@ -202,11 +202,16 @@ jobs:
           bun run test:sites
           bun run check:api
 
+      # Hermes is staged with uv from a hash-locked requirements file.
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
       - name: Install and verify native runtimes
         run: |
           bun run install:codex-runtime
           bun run install:claude-runtime
           bun run install:grok-runtime
+          bun run install:hermes-runtime
           bun run install:remote-desktop-runtime
           bun run verify:remote-desktop-runtime
           bun run prepare:cua-driver
@@ -552,11 +557,16 @@ jobs:
       - name: Run Linux checks
         run: bun run lint && bun run typecheck && bunx vitest run src/backend/cli.test.ts
 
+      # Hermes is staged with uv from a hash-locked requirements file.
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
       - name: Install and verify provider control artifacts
         run: |
           bun scripts/install-codex-runtime.ts linux x64
           bun scripts/install-claude-runtime.ts linux x64
           bun scripts/install-grok-runtime.ts linux x64
+          bun scripts/install-hermes-runtime.ts linux x64
 
       - name: Build AppImage
         run: bun run dist:linux

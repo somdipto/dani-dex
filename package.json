@@ -120,6 +120,7 @@
     "install:codex-runtime": "bun scripts/install-codex-runtime.ts",
     "install:claude-runtime": "bun scripts/install-claude-runtime.ts",
     "install:grok-runtime": "bun scripts/install-grok-runtime.ts",
+    "install:hermes-runtime": "bun scripts/install-hermes-runtime.ts",
     "pin:opencode-runtime": "bun scripts/pin-opencode-runtime.ts",
     "pin:bun-runtime": "bun scripts/pin-bun-runtime.ts",
     "pin:cua-driver": "bun scripts/pin-cua-driver.ts",

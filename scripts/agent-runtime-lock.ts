@@ -55,6 +55,19 @@ const grokArtifactSchema = z.object({
   platformDirectory: z.enum(["linux", "mac", "win"]),
 });
 
+/**
+ * Hermes is a Python program, so its runtime is two pinned inputs: a relocatable CPython build per
+ * target, and one universal hash-locked requirements file that `uv` installs for that target. The
+ * requirements file is checksummed here so an edit to it cannot ship without a matching lock change.
+ */
+const hermesPythonArtifactSchema = z.object({
+  asset: z.string().regex(/^cpython-3\.11\.\d+\+\d{8}-[\w-]+-install_only_stripped\.tar\.gz$/u),
+  assetSha256: sha256Schema,
+  downloadBytes: z.number().int().positive(),
+  pythonPlatform: z.enum(["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu"]),
+  platformDirectory: z.enum(["linux", "mac"]),
+});
+
 const agentRuntimeLockSchema = z.object({
   schemaVersion: z.literal(1),
   codex: z.object({
@@ -118,6 +131,27 @@ const agentRuntimeLockSchema = z.object({
       "darwin-arm64": bunArtifactSchema,
       "linux-x64": bunArtifactSchema,
       "win32-x64": bunArtifactSchema,
+    }),
+  }),
+  hermes: z.object({
+    repository: z.literal("https://github.com/NousResearch/hermes-agent"),
+    package: z.literal("hermes-agent"),
+    version: z.string().regex(/^\d+\.\d+\.\d+$/u),
+    extras: z.array(z.literal("acp")).length(1),
+    wheel: z.string().regex(/^hermes_agent-\d+\.\d+\.\d+-py3-none-any\.whl$/u),
+    wheelSha256: sha256Schema,
+    license: z.literal("MIT"),
+    requirements: z.literal("scripts/hermes-runtime-requirements.txt"),
+    requirementsSha256: sha256Schema,
+    python: z.object({
+      repository: z.literal("https://github.com/astral-sh/python-build-standalone"),
+      release: z.string().regex(/^\d{8}$/u),
+      version: z.string().regex(/^3\.11\.\d+$/u),
+      artifacts: z.object({
+        "darwin-arm64": hermesPythonArtifactSchema,
+        "darwin-x64": hermesPythonArtifactSchema,
+        "linux-x64": hermesPythonArtifactSchema,
+      }),
     }),
   }),
   grok: z.object({

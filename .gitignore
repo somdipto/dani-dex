@@ -45,6 +45,7 @@ index-*.css
 /build/codex/
 /build/claude/
 /build/grok/
+/build/hermes/
 /build/remote-desktop-runtime/
 /build/remote-desktop-release/
 Bots
