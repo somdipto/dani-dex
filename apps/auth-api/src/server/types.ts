@@ -30,6 +30,8 @@ export interface WorkerBindings {
   REMOTE_SIGNAL_URL?: string;
   REMOTE_AUTH_WEBHOOK_URL?: string;
   REMOTE_AUTH_WEBHOOK_SECRET?: string;
+  OPENAI_API_KEY?: string;
+  OPENAI_REALTIME_MODEL?: string;
 }
 
 export function isWorkerBindings(value: unknown): value is WorkerBindings {
