@@ -56,17 +56,33 @@ export function universalMacConfig(base: UniversalMacConfig): UniversalMacConfig
   };
 }
 
+/**
+ * What `build()` is given on top of `electron-builder.yml`, which electron-builder loads itself.
+ *
+ * It must be a delta and not the whole derived config: electron-builder deep-merges options into the
+ * file config and concatenates arrays, so passing every `extraResources` entry again copies each tree
+ * twice at once. The first universal CI run failed that way, with one copy of the Hermes tree
+ * replacing files while the other was setting their modes.
+ */
+export function universalMacOverrides(base: UniversalMacConfig, sign: boolean) {
+  const derived = universalMacConfig(base);
+  const added = derived.mac.extraResources.filter((resource) => !base.mac.extraResources.includes(resource));
+  return {
+    mac: {
+      extraResources: added,
+      x64ArchFiles: derived.mac.x64ArchFiles,
+      ...(sign ? {} : { identity: null, notarize: false }),
+    },
+  };
+}
+
 if (import.meta.main) {
   const sign = process.argv.includes("--sign");
   const base = parseBuilderConfig(await readFile(resolve("electron-builder.yml"), "utf8"));
-  const config = universalMacConfig(base);
-  if (!sign) {
-    config.mac = { ...config.mac, identity: null, notarize: false };
-  }
   logger.info(`Building a universal macOS app (${sign ? "signed" : "unsigned"}).`);
   await build({
     targets: Platform.MAC.createTarget(["dmg", "zip"], Arch.universal),
-    config,
+    config: universalMacOverrides(base, sign),
     publish: "never",
   });
 }

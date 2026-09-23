@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
+import { deepAssign } from "builder-util-runtime";
 import { describe, expect, it } from "vitest";
-import { parseBuilderConfig, universalMacConfig } from "./dist-mac-universal";
+import { parseBuilderConfig, universalMacConfig, universalMacOverrides } from "./dist-mac-universal";
 
 describe("universal macOS configuration", () => {
   it("adds the x64 Hermes tree and the shared-resource pattern without touching the arm64 config", async () => {
@@ -19,5 +20,16 @@ describe("universal macOS configuration", () => {
       x64ArchFiles: undefined,
     });
     expect(universalMacConfig(config).mac.extraResources).toHaveLength(config.mac.extraResources.length);
+  });
+
+  it("gives electron-builder only the additions, so its array merge copies each tree once", async () => {
+    const text = await readFile("electron-builder.yml", "utf8");
+    const merged = deepAssign(parseBuilderConfig(text), universalMacOverrides(parseBuilderConfig(text), false));
+    const destinations = merged.mac.extraResources.map((resource: { to: string }) => resource.to);
+    expect(new Set(destinations).size).toBe(destinations.length);
+    expect(destinations).toContain("hermes/mac/arm64");
+    expect(destinations).toContain("hermes/mac/x64");
+    expect(merged.mac).toMatchObject({ identity: null, notarize: false });
+    expect(universalMacOverrides(parseBuilderConfig(text), true).mac).not.toHaveProperty("identity");
   });
 });
