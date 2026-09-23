@@ -1,18 +1,20 @@
 // App identity, first-run setup, the analytics preference, external links and the data and
 // diagnostics exports.
 
+import { access } from "node:fs/promises";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { AgentHarnessId, AppInfo, AppSetupState, AppVariant, ExternalDestination } from "@dani-dex/contracts/ipc";
 import { app, type BrowserWindow, shell } from "electron";
 import type { AgentService } from "../../backend/agent-service";
 import type { BrowserHost } from "../../backend/browser-host";
+import { bundledHermesExecutable } from "../../backend/hermes-cli";
 import type { MailboxStore } from "../../backend/mailbox-store";
 import { readAnalyticsPreference, writeAnalyticsPreference } from "../analytics-preference-store";
 import type { ApprovalAutomation } from "../approval-automation-store";
 import type { LanguageService } from "../language-service";
 import { MAC_PERMISSION_URLS } from "../mac-permission-urls";
 import { exportDaniDexData, exportDiagnostics } from "../maintenance-service";
-import { readSetupState, writeSetupState } from "../setup-store";
+import { readSetupState, withDefaultHarness, writeSetupState } from "../setup-store";
 import type { UpdateService } from "../update-service";
 import {
   parseAnalyticsPreference,
@@ -105,7 +107,11 @@ export function appIpcHandlers({
       getAppLanguagePreference: handler(() => language.preference),
       setAppLanguagePreference: payloadHandler(parseAppLanguagePreference, (parsed) => language.set(parsed)),
       saveSetup: payloadHandler(parseSetup, async (input): Promise<AppSetupState> => {
-        const state = await writeSetupState(setupFile, input);
+        const previous = await readSetupState(setupFile);
+        const state = await writeSetupState(
+          setupFile,
+          withDefaultHarness(previous, input, await bundledHermesAvailable()),
+        );
         await service.setPreferredProvider(input.preferredProvider, input.preferredModel);
         await initializeAgent();
         return { ...state, activeHarness };
@@ -127,4 +133,16 @@ export function appIpcHandlers({
       exportDiagnostics: handler(() => exportDiagnostics({ service, browser, updater, parentWindow: getMainWindow() })),
     },
   };
+}
+
+/** The bundled Hermes, which a packaged build always carries and a development checkout may not. */
+async function bundledHermesAvailable(): Promise<boolean> {
+  const executable = bundledHermesExecutable();
+  if (!executable) return false;
+  try {
+    await access(executable);
+    return true;
+  } catch {
+    return false;
+  }
 }

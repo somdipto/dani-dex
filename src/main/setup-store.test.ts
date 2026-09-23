@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { readSetupState, writeSetupState } from "./setup-store";
+import { readSetupState, withDefaultHarness, writeSetupState } from "./setup-store";
 
 const roots: string[] = [];
 
@@ -92,5 +92,23 @@ describe("setup harness", () => {
     const stored = JSON.parse(await readFile(path, "utf8"));
     await writeFile(path, JSON.stringify({ ...stored, harness: "unknown" }));
     await expect(readSetupState(path)).resolves.not.toHaveProperty("harness");
+  });
+});
+
+describe("default harness", () => {
+  const input = { preferredProvider: "codex" as const, preferredModel: null };
+  const fresh = { completed: false, preferredProvider: null, preferredModel: null };
+  const done = { completed: true, preferredProvider: "codex" as const, preferredModel: null };
+
+  it("gives a first setup Hermes when the bundled Hermes is there", () => {
+    expect(withDefaultHarness(fresh, input, true)).toEqual({ ...input, harness: "hermes" });
+    expect(withDefaultHarness(fresh, input, false)).toEqual(input);
+  });
+
+  it("never changes a later save or an explicit choice", () => {
+    // A completed setup without a harness is someone on the provider's own CLI, by choice or
+    // because they finished setup before Hermes shipped.
+    expect(withDefaultHarness(done, input, true)).toEqual(input);
+    expect(withDefaultHarness(fresh, { ...input, harness: "omp" }, true)).toEqual({ ...input, harness: "omp" });
   });
 });

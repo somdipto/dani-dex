@@ -64,6 +64,20 @@ export async function writeSetupState(path: string, input: SaveSetupInput): Prom
   return { completed: true, ...input };
 }
 
+/**
+ * Hermes is the default harness for a new setup. Only the first completion picks it, and only when
+ * the bundled Hermes is there to run: a setup finished before Hermes shipped keeps its provider's
+ * own CLI, and so does any later save, where a missing harness is the user's own choice.
+ */
+export function withDefaultHarness(
+  previous: AppSetupState,
+  input: SaveSetupInput,
+  hermesAvailable: boolean,
+): SaveSetupInput {
+  if (previous.completed || input.harness || !hermesAvailable) return input;
+  return { ...input, harness: "hermes" };
+}
+
 function isMissing(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && "code" in error && error.code === "ENOENT";
 }
