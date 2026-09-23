@@ -26,6 +26,7 @@ export const INPUT_LIMITS = {
   // full each time, against `ChannelHistory.prepare`'s hard character budget.
   channelMemories: 32,
   agentMemoryText: 500,
+  agentOperatingInstructions: 4_000,
   agentRoutines: 64,
   routineName: 80,
   routineInstruction: 100_000,

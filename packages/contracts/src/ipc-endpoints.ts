@@ -221,6 +221,11 @@ export const IPC_ENDPOINTS = {
     deleteMemory: request(IPC_CHANNELS.agentDeleteMemory),
     clearMemories: request(IPC_CHANNELS.agentClearMemories),
   },
+  agentOperatingInstructions: {
+    getOperatingInstructions: request(IPC_CHANNELS.agentGetOperatingInstructions),
+    updateOperatingInstructions: request(IPC_CHANNELS.agentUpdateOperatingInstructions),
+    refreshOperatingInstructions: request(IPC_CHANNELS.agentRefreshOperatingInstructions),
+  },
   sharedTables: {
     listTables: request(IPC_CHANNELS.sharedListTables),
     deleteTable: request(IPC_CHANNELS.sharedDeleteTable),

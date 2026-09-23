@@ -22,6 +22,7 @@ import {
   type PendingHostedSiteTerminalEvent,
 } from "./database/hosted-site-event-log";
 import { MailboxProjection, type MailboxProjectionState } from "./database/mailbox-projection";
+import { OperatingInstructionsTable } from "./database/operating-instructions";
 import { type ProviderSession, ProviderSessions } from "./database/provider-sessions";
 import { ThreadReplay } from "./database/thread-replay";
 import { type StoredThreadSummary, ThreadSummaries } from "./database/thread-summaries";
@@ -55,6 +56,7 @@ export class DaniDexDatabase {
   readonly #sessions: ProviderSessions;
   readonly #summaries: ThreadSummaries;
   readonly harnessRoutes: HarnessRoutes;
+  readonly operatingInstructions: OperatingInstructionsTable;
 
   constructor(readonly userDataPath: string) {
     this.#core = new DatabaseCore({ userDataPath });
@@ -68,6 +70,7 @@ export class DaniDexDatabase {
     this.#sessions = new ProviderSessions({ core: this.#core });
     this.#summaries = new ThreadSummaries({ core: this.#core });
     this.harnessRoutes = new HarnessRoutes({ core: this.#core });
+    this.operatingInstructions = new OperatingInstructionsTable({ core: this.#core });
   }
 
   get path(): string {

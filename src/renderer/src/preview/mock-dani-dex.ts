@@ -5,6 +5,7 @@ import type {
   AgentEvent,
   AgentMemory,
   AgentModelOption,
+  AgentOperatingInstructions,
   AgentProviderId,
   AgentStatus,
   AgentSubmission,
@@ -411,6 +412,22 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
   const queueEdits = new Map<string, { agentId: string; delivery: QueueDelivery }>();
   const queues = new Map<string, QueueSnapshot>(agents.map((agent) => [agent.id, emptyQueue(agent.id)]));
   const memories = new Map<string, AgentMemory[]>(Object.entries(clone(options.memories ?? {})));
+  const operatingInstructions = new Map<string, AgentOperatingInstructions>();
+  const previewInstructions = (agentId: string): AgentOperatingInstructions => ({
+    agentId,
+    text: [
+      "- Write a short spec with acceptance criteria before touching code, and ask before widening scope.",
+      "- Use Bun and TypeScript strict mode; run the type check and tests before calling anything done.",
+      "- Keep commits small, one concern each, with the why in the message body.",
+    ].join("\n"),
+    source: "generated",
+    revision: 3,
+    autoEvolve: true,
+    userTurns: 27,
+    turnsUntilRefresh: 3,
+    refreshing: false,
+    updatedAt: "2026-09-23T05:40:00.000Z",
+  });
   let tables: SharedTable[] = clone(options.tables ?? STORY_SHARED_TABLES);
   const routines = new Map<string, Routine[]>(Object.entries(clone(options.routines ?? {})));
   const routineRuns = new Map<string, RoutineRun[]>();
@@ -1445,6 +1462,34 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       clearMemories: async (agentId) => {
         memories.delete(agentId);
         emitAgentEvent({ type: "memories-changed", agentId });
+      },
+      getOperatingInstructions: async (agentId) =>
+        clone(operatingInstructions.get(agentId) ?? previewInstructions(agentId)),
+      updateOperatingInstructions: async (input) => {
+        const current = operatingInstructions.get(input.agentId) ?? previewInstructions(input.agentId);
+        const text = input.text?.trim();
+        const next: AgentOperatingInstructions = {
+          ...current,
+          ...(input.autoEvolve === undefined ? {} : { autoEvolve: input.autoEvolve }),
+          ...(text === undefined || text === current.text
+            ? {}
+            : { text, source: "edited" as const, revision: current.revision + 1, turnsUntilRefresh: 10 }),
+          updatedAt: new Date().toISOString(),
+        };
+        operatingInstructions.set(input.agentId, next);
+        return clone(next);
+      },
+      refreshOperatingInstructions: async (agentId) => {
+        const current = operatingInstructions.get(agentId) ?? previewInstructions(agentId);
+        const next: AgentOperatingInstructions = {
+          ...current,
+          source: "generated",
+          revision: current.revision + 1,
+          turnsUntilRefresh: 10,
+          updatedAt: new Date().toISOString(),
+        };
+        operatingInstructions.set(agentId, next);
+        return clone(next);
       },
       listTables: async () => clone(tables),
       deleteTable: async (input) => {

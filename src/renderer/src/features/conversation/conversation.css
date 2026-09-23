@@ -8835,3 +8835,31 @@ body:has(.browser-panel-expanded) .app-frame {
   min-height: 0;
   object-fit: contain;
 }
+
+.agent-operating-instructions-modal {
+  height: min(560px, calc(100dvh - 48px));
+}
+
+.agent-operating-instructions-body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: var(--dani-dex-space-3);
+  padding: var(--dani-dex-space-3);
+  overflow: hidden;
+}
+
+.agent-operating-instructions-input {
+  height: 100%;
+  min-height: 160px;
+  resize: none;
+  border-color: var(--dani-dex-border);
+  background: transparent;
+  font-family: var(--dani-dex-font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.agent-operating-instructions-footer {
+  justify-content: flex-end;
+  gap: var(--dani-dex-space-2);
+}

@@ -56,6 +56,8 @@ export interface ThreadLifecycleOptions {
   mailbox: MailboxStore;
   conversation: ConversationRuntime;
   memories: AgentMemories;
+  /** The bot's current operating instructions, read at every spawn and resume. */
+  operatingInstructions?: (agentId: string) => string | null;
   compaction: ContextCompaction;
   hooks: ThreadLifecycleHooks;
   /**
@@ -82,6 +84,7 @@ export class ThreadLifecycle {
   readonly #mailbox: MailboxStore;
   readonly #conversation: ConversationRuntime;
   readonly #memories: AgentMemories;
+  readonly #operatingInstructions: (agentId: string) => string | null;
   readonly #compaction: ContextCompaction;
   readonly #hooks: ThreadLifecycleHooks;
   readonly #mcpServers: McpServerSource;
@@ -104,6 +107,7 @@ export class ThreadLifecycle {
     this.#mailbox = options.mailbox;
     this.#conversation = options.conversation;
     this.#memories = options.memories;
+    this.#operatingInstructions = options.operatingInstructions ?? (() => null);
     this.#compaction = options.compaction;
     this.#hooks = options.hooks;
     this.#mcpServers = options.mcpServers ?? (() => []);
@@ -277,7 +281,7 @@ export class ThreadLifecycle {
         runtimeWorkspaceRoots: [agent.workspacePath, this.#store.sharedRoot],
         approvalPolicy: "on-request",
         sandbox: "danger-full-access",
-        developerInstructions: developerInstructions(agent, this.#store.sharedRoot, this.#memories.listFor(agent.id)),
+        developerInstructions: this.#developerInstructions(agent),
         ephemeral: false,
         serviceName: "danidex",
         dynamicTools: [...BROWSER_DYNAMIC_TOOLS, DANI_DEX_DYNAMIC_TOOLS],
@@ -439,7 +443,7 @@ export class ThreadLifecycle {
       runtimeWorkspaceRoots: [agent.workspacePath, this.#store.sharedRoot],
       approvalPolicy: "on-request",
       sandbox: "danger-full-access",
-      developerInstructions: developerInstructions(agent, this.#store.sharedRoot, this.#memories.listFor(agent.id)),
+      developerInstructions: this.#developerInstructions(agent),
       ...(client.provider === "codex" ? {} : { dynamicTools: [...BROWSER_DYNAMIC_TOOLS, DANI_DEX_DYNAMIC_TOOLS] }),
       ...(await this.codexConfig(client, this.#mcpServers(), await this.codexOwnServers(client), this.#toolRuntimes())),
     };
@@ -629,5 +633,14 @@ export class ThreadLifecycle {
       newest.join("\n\n"),
       "--- end previous transcript ---",
     ].join("\n");
+  }
+
+  #developerInstructions(agent: AgentSummary): string {
+    return developerInstructions(
+      agent,
+      this.#store.sharedRoot,
+      this.#memories.listFor(agent.id),
+      this.#operatingInstructions(agent.id),
+    );
   }
 }

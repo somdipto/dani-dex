@@ -131,6 +131,7 @@ describe("DaniDexDatabase", () => {
       { version: 20 },
       { version: 21 },
       { version: 22 },
+      { version: 23 },
     ]);
     database.close();
   });
@@ -1112,6 +1113,7 @@ describe("DaniDexDatabase", () => {
       { version: 20 },
       { version: 21 },
       { version: 22 },
+      { version: 23 },
     ]);
     expect(migrated.connection.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
     migrated.close();
@@ -1179,7 +1181,7 @@ describe("DaniDexDatabase", () => {
       ALTER TABLE projection_provider_sessions_v18 RENAME TO projection_provider_sessions;
       CREATE INDEX provider_sessions_thread
         ON projection_provider_sessions(thread_id, provider, state);
-      DELETE FROM schema_migrations WHERE version IN (19, 20, 21, 22);
+      DELETE FROM schema_migrations WHERE version IN (19, 20, 21, 22, 23);
       PRAGMA foreign_keys = ON;
     `);
     legacy.close();
@@ -1207,7 +1209,7 @@ describe("DaniDexDatabase", () => {
         .get(),
     ).toMatchObject({ sql: expect.stringContaining("'opencode'") });
     expect(migrated.connection.prepare("SELECT MAX(version) AS version FROM schema_migrations").get()).toEqual({
-      version: 22,
+      version: 23,
     });
     migrated.close();
   });
@@ -1225,7 +1227,7 @@ describe("DaniDexDatabase", () => {
     const legacy = new DatabaseSync(database.path);
     legacy.exec(`
       DROP TABLE projection_mcp_servers;
-      DELETE FROM schema_migrations WHERE version IN (20, 21, 22);
+      DELETE FROM schema_migrations WHERE version IN (20, 21, 22, 23);
     `);
     legacy.close();
 
@@ -1250,7 +1252,7 @@ describe("DaniDexDatabase", () => {
       { name: "Filesystem" },
     ]);
     expect(reopened.connection.prepare("SELECT MAX(version) AS version FROM schema_migrations").get()).toEqual({
-      version: 22,
+      version: 23,
     });
     reopened.close();
   });
@@ -1274,7 +1276,7 @@ describe("DaniDexDatabase", () => {
          '2026-09-14T10:00:00.000Z', '2026-09-14T10:00:00.000Z'),
         ('mcp-2', 'computer_use_saved', 'stdio', 1, 'other', '[]', '[]', '[]', '', '', '[]', 1,
          '2026-09-14T10:00:00.000Z', '2026-09-14T10:00:00.000Z');
-      DELETE FROM schema_migrations WHERE version IN (21, 22);
+      DELETE FROM schema_migrations WHERE version IN (21, 22, 23);
     `);
     legacy.close();
 
@@ -1354,6 +1356,7 @@ describe("DaniDexDatabase", () => {
       { version: 20 },
       { version: 21 },
       { version: 22 },
+      { version: 23 },
     ]);
     migrated.close();
   });
@@ -1434,6 +1437,7 @@ describe("DaniDexDatabase", () => {
       { version: 20 },
       { version: 21 },
       { version: 22 },
+      { version: 23 },
     ]);
     retried.close();
   });
@@ -2293,6 +2297,8 @@ describe("AgentHarnessRouter", () => {
     // A service without OMP running never hands out OMP, even when OMP is installed.
     const other = { ...testAgent(), id: `${agent.id}-2`, name: "Chef", title: "", description: "" };
     database.replaceAgents("agents-import-2", [agent, other], "agents.imported");
+    // Rewriting the roster, which every rename and reply does, keeps the routes already decided.
+    expect(database.harnessRoutes.get(agent.id)).toMatchObject({ kind: "technical", wanted: "omp" });
     const withOmpInstalled = new AgentHarnessRouter({
       routes: database.harnessRoutes,
       running: "hermes",

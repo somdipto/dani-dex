@@ -2,6 +2,7 @@ import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentModelId,
   AgentModelOption,
+  AgentOperatingInstructions,
   AgentProviderId,
   AgentReasoningEffort,
   AgentStatus,
@@ -41,6 +42,7 @@ import type { AgentProfile } from "../../data";
 import { errorMessage } from "../../error-message";
 import { AgentAvatar } from "../agents/AgentAvatar";
 import { AgentMemoriesModal } from "./AgentMemoriesModal";
+import { AgentOperatingInstructionsModal } from "./AgentOperatingInstructionsModal";
 import { AgentRoutinesSettings, type RoutineSelectionRequest } from "./AgentRoutinesSettings";
 import { AgentSkillsModal, type AgentSkillsMode, userAssignedSkills } from "./AgentSkillsModal";
 import { agentMemoriesPort } from "./memories-port";
@@ -124,6 +126,7 @@ interface AgentSettingsDraft {
   fields: AgentTextFields;
   tables: { count: number; open: boolean };
   memories: { count: number; open: boolean };
+  operating: { summary: string; open: boolean };
   notifications: boolean;
   routines: { count: number; open: boolean };
   skills: { count: number; open: boolean; reopenAfterMarketplace: boolean };
@@ -153,6 +156,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
     fields: { description: "", name: "", title: "" },
     tables: { count: 0, open: false },
     memories: { count: 0, open: false },
+    operating: { summary: "", open: false },
     notifications: true,
     routines: { count: 0, open: false },
     skills: { count: 0, open: false, reopenAfterMarketplace: false },
@@ -254,6 +258,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
           state.avatar.pickerOpen = false;
           state.tables.open = false;
           state.memories.open = false;
+          state.operating.open = false;
           state.routines.open = false;
           state.skills.open = false;
           state.skills.reopenAfterMarketplace = false;
@@ -274,6 +279,15 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
           .then((items) => {
             setDraft((state) => {
               state.memories.count = items.length;
+            });
+          });
+        void window.danidex.agent
+          .getOperatingInstructions(agent.id)
+          .then(operatingSummary)
+          .catch(() => "")
+          .then((summary) => {
+            setDraft((state) => {
+              state.operating.summary = summary;
             });
           });
         void window.danidex.agent
@@ -844,6 +858,17 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
                 })
               }
             />
+            <Show when={draft.operating.summary}>
+              <SettingsLinkRow
+                label="Operating instructions"
+                value={draft.operating.summary}
+                onClick={() =>
+                  setDraft((state) => {
+                    state.operating.open = true;
+                  })
+                }
+              />
+            </Show>
             <Show when={skillsMode() !== "hidden"}>
               <SettingsLinkRow
                 label="Skills"
@@ -1018,6 +1043,21 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
           })
         }
       />
+      <AgentOperatingInstructionsModal
+        agentId={props.agent.id}
+        agentName={props.agent.name}
+        open={draft.operating.open}
+        onOpenChange={(open) =>
+          setDraft((state) => {
+            state.operating.open = open;
+          })
+        }
+        onChange={(instructions) =>
+          setDraft((state) => {
+            state.operating.summary = operatingSummary(instructions);
+          })
+        }
+      />
       <Show when={skillsMode() !== "hidden"}>
         <AgentSkillsModal
           selectionRequest={props.skillSelectionRequest}
@@ -1061,4 +1101,11 @@ function sameRuntimeSettings(current: AgentRuntimeSettings, settings: AgentRunti
     current.model === settings.model &&
     current.reasoningEffort === settings.reasoningEffort
   );
+}
+
+/** Empty for a bot the settings cannot reach them for, such as one on another computer. */
+function operatingSummary(instructions: AgentOperatingInstructions): string {
+  if (instructions.source === "none") return instructions.autoEvolve ? "Learning" : "Paused";
+  const lines = instructions.text.split("\n").filter((line) => line.trim()).length;
+  return `${lines} ${lines === 1 ? "line" : "lines"}${instructions.autoEvolve ? "" : " · paused"}`;
 }

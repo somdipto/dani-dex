@@ -3,12 +3,8 @@ import type { AgentHarnessId } from "@dani-dex/contracts/agent-harnesses";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import type { DatabaseCore } from "./database-core";
 
-// Shared by migration v22 and the tail of the latest schema, so IF NOT EXISTS throughout.
-//
-// One row per bot, written once from its name, title and purpose, the first time the bot runs under
-// the automatic setting. The route sticks because each harness keeps its own session memory: moving
-// a bot to another harness would make it forget its conversations.
-export const HARNESS_ROUTES_SCHEMA_SQL = `
+// Migration v22 as it shipped. Frozen: v23 rebuilds the table as `HARNESS_ROUTES_SCHEMA_SQL`.
+export const HARNESS_ROUTES_V22_SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS projection_agent_harness_routes (
     agent_id TEXT PRIMARY KEY REFERENCES projection_agents(agent_id) ON DELETE CASCADE,
     task_kind TEXT NOT NULL CHECK(task_kind IN ('technical', 'general')),
@@ -18,6 +14,42 @@ export const HARNESS_ROUTES_SCHEMA_SQL = `
     created_at TEXT NOT NULL
   );
 `;
+
+// The tail of the latest schema and the table v23 rebuilds, so IF NOT EXISTS throughout.
+//
+// No foreign key to projection_agents: every roster change rewrites all of its rows, and a cascade
+// would drop every route each time a bot was renamed or answered. Deleting a bot deletes its route.
+//
+// One row per bot, written once from its name, title and purpose, the first time the bot runs under
+// the automatic setting. The route sticks because each harness keeps its own session memory: moving
+// a bot to another harness would make it forget its conversations.
+export const HARNESS_ROUTES_SCHEMA_SQL = `
+  CREATE TABLE IF NOT EXISTS projection_agent_harness_routes (
+    agent_id TEXT PRIMARY KEY,
+    task_kind TEXT NOT NULL CHECK(task_kind IN ('technical', 'general')),
+    harness TEXT CHECK(harness IS NULL OR harness IN ('hermes', 'omp')),
+    wanted_harness TEXT CHECK(wanted_harness IS NULL OR wanted_harness IN ('hermes', 'omp')),
+    signals_json TEXT NOT NULL CHECK(json_valid(signals_json)),
+    created_at TEXT NOT NULL
+  );
+`;
+
+/**
+ * v23: the v22 table cascaded from projection_agents, which every roster change rewrites, so routes
+ * were being dropped and decided again. Rebuilt under its own name, so the stored SQL matches a new
+ * install's text exactly, keeping whatever routes survived.
+ */
+export function rebuildHarnessRoutesWithoutCascade(db: { exec(sql: string): void }): void {
+  db.exec(`
+    ALTER TABLE projection_agent_harness_routes RENAME TO projection_agent_harness_routes_v22;
+    ${HARNESS_ROUTES_SCHEMA_SQL}
+    INSERT INTO projection_agent_harness_routes
+      (agent_id, task_kind, harness, wanted_harness, signals_json, created_at)
+    SELECT agent_id, task_kind, harness, wanted_harness, signals_json, created_at
+    FROM projection_agent_harness_routes_v22;
+    DROP TABLE projection_agent_harness_routes_v22;
+  `);
+}
 
 export interface StoredHarnessRoute extends HarnessRoute {
   readonly agentId: string;

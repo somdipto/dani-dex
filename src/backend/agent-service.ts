@@ -12,6 +12,7 @@ import type {
   AgentMemory,
   AgentModelId,
   AgentModelOption,
+  AgentOperatingInstructions,
   AgentProfileDraft,
   AgentRuntimeSnapshot,
   AgentStatus,
@@ -73,6 +74,7 @@ import type {
   TestRoutineInput,
   UpdateAgentInput,
   UpdateAgentMemoryInput,
+  UpdateAgentOperatingInstructionsInput,
   UpdateChannelMemoryInput,
   UpdateChannelRoutineInput,
   UpdateQueuedMessageInput,
@@ -114,6 +116,7 @@ import { type AgentHostedSites, HostedSiteCoordinator } from "./agent/hosted-sit
 import { isHostedSiteMutationTool } from "./agent/hosted-site-events";
 import { ImageGenRuntime } from "./agent/image-gen-runtime";
 import { MailboxSync } from "./agent/mailbox-sync";
+import { OperatingInstructions } from "./agent/operating-instructions";
 import { generateProfile, generateTextWithoutTools } from "./agent/profile-generation";
 import { ProfileSave } from "./agent/profile-save";
 import { createAgentToolSchema, updateProfileToolSchema } from "./agent/profile-tools";
@@ -285,6 +288,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
   readonly #browser: AgentBrowserHost;
   readonly #conversationReads: ConversationReadStore;
   readonly #memories: AgentMemories;
+  readonly #operatingInstructions: OperatingInstructions;
   readonly #tables: AgentTables | null;
   readonly #routines: RoutineScheduler;
   readonly #routineTimer: RoutineTimer;
@@ -406,6 +410,15 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       store,
       conversation: this.#conversation,
       emit: (event) => this.#emit(event),
+      emitError: (code, error, agentId) => this.#emitError(code, error, agentId),
+    });
+    this.#operatingInstructions = new OperatingInstructions({
+      table: store.database.operatingInstructions,
+      agent: (agentId) => this.#conversation.requireKnownAgent(agentId),
+      userMessages: (agent, limit) =>
+        agent.threadId ? store.database.operatingInstructions.recentUserMessages(agent.threadId, limit) : [],
+      generate: (agent, prompt) => this.#generateWithoutTools(agent, prompt),
+      changed: (agentId) => this.#conversation.unloadAgentThreads(agentId),
       emitError: (code, error, agentId) => this.#emitError(code, error, agentId),
     });
     // One timer for both routine owners. The sources are read lazily because `channels` and its
@@ -592,6 +605,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       mailbox,
       conversation: this.#conversation,
       memories: this.#memories,
+      operatingInstructions: (agentId) => this.#operatingInstructions.textFor(agentId),
       compaction: this.#compaction,
       // Read at each spawn, not now: the store is built further down this constructor.
       mcpServers: () => this.enabledMcpServers(),
@@ -623,24 +637,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     });
     this.channels = new ChannelService(store.database, mailbox, {
       agents: () => this.listAgents(),
-      generate: async (lead, prompt) => {
-        await this.#providers.ensureProvider(lead.provider);
-        const model = this.#availableModels().find((item) => item.provider === lead.provider && item.id === lead.model);
-        if (!model) throw new Error("The channel lead model is unavailable.");
-        const client = this.#providers.createProfileClient(lead.provider);
-        const generation = { cancelled: false };
-        this.#profileClients.set(client, generation);
-        try {
-          return await generateTextWithoutTools(
-            client,
-            { ...model, defaultReasoningEffort: lead.reasoningEffort },
-            prompt,
-            () => generation.cancelled,
-          );
-        } finally {
-          this.#profileClients.delete(client);
-        }
-      },
+      generate: (lead, prompt) => this.#generateWithoutTools(lead, prompt, "The channel lead model is unavailable."),
       schedule: (agentId) => this.#drain.scheduleDrain(agentId),
       awaitDrain: (agentId) => this.#drain.taskFor(agentId),
       contextCharacters: (agentId, threadId) => {
@@ -910,6 +907,18 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
 
   clearMemories(agentId: string): void {
     this.#memories.clear(agentId);
+  }
+  getOperatingInstructions(agentId: string): AgentOperatingInstructions {
+    return this.#operatingInstructions.get(agentId);
+  }
+
+  updateOperatingInstructions(input: UpdateAgentOperatingInstructionsInput): AgentOperatingInstructions {
+    return this.#operatingInstructions.update(input);
+  }
+
+  refreshOperatingInstructions(agentId: string): Promise<AgentOperatingInstructions> {
+    this.#operatingInstructions.get(agentId);
+    return this.#operatingInstructions.refresh(agentId);
   }
 
   listTables(): Promise<SharedTable[]> {
@@ -2611,8 +2620,34 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     this.#emit({ type: "runtime-snapshot", snapshot: this.getRuntimeSnapshot() });
   }
 
+  /** One tool-less, throwaway generation on an agent's own provider, model and effort. */
+  async #generateWithoutTools(
+    agent: AgentSummary,
+    prompt: string,
+    unavailable = "The agent's model is unavailable.",
+  ): Promise<string> {
+    await this.#providers.ensureProvider(agent.provider);
+    const model = this.#availableModels().find((item) => item.provider === agent.provider && item.id === agent.model);
+    if (!model) throw new Error(unavailable);
+    const client = this.#providers.createProfileClient(agent.provider);
+    const generation = { cancelled: false };
+    this.#profileClients.set(client, generation);
+    try {
+      return await generateTextWithoutTools(
+        client,
+        { ...model, defaultReasoningEffort: agent.reasoningEffort },
+        prompt,
+        () => generation.cancelled,
+      );
+    } finally {
+      this.#profileClients.delete(client);
+    }
+  }
+
   #emit(event: AgentEvent): void {
     recordAgentRestartActivity(event);
+    if (event.type === "turn-completed")
+      this.#operatingInstructions?.noteTurn(event.agentId, event.status, event.origin);
     if (this.channels?.event(event)) return;
     this.emit("event", event);
   }

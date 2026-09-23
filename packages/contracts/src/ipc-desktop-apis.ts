@@ -9,6 +9,10 @@ import type {
   UpdateAgentMemoryInput,
 } from "./ipc-agent-memories";
 import type {
+  AgentOperatingInstructions,
+  UpdateAgentOperatingInstructionsInput,
+} from "./ipc-agent-operating-instructions";
+import type {
   AgentProfileDraft,
   GenerateAgentProfileInput,
   SaveAgentProfileInput,
@@ -245,6 +249,10 @@ export interface AgentDesktopApi {
   updateMemory: (input: UpdateAgentMemoryInput) => Promise<AgentMemory>;
   deleteMemory: (input: DeleteAgentMemoryInput) => Promise<void>;
   clearMemories: (agentId: string) => Promise<void>;
+  /** A bot's evolving working method. Only bots on this computer have them. */
+  getOperatingInstructions: (agentId: string) => Promise<AgentOperatingInstructions>;
+  updateOperatingInstructions: (input: UpdateAgentOperatingInstructionsInput) => Promise<AgentOperatingInstructions>;
+  refreshOperatingInstructions: (agentId: string) => Promise<AgentOperatingInstructions>;
   /**
    * Shared tables are not scoped to an agent: there is no `agentId` on either call. The list is
    * every table in the one shared database, and the user's delete is not owner-gated.

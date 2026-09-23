@@ -3,6 +3,7 @@ import {
   type AgentIpcRequest,
   type AgentMemory,
   type AgentModelOption,
+  type AgentOperatingInstructions,
   type AgentPublicationPreview,
   type AgentStatus,
   type AgentSubmission,
@@ -54,6 +55,7 @@ import {
   isAccountUsage,
   isAgentMemory,
   isAgentModelOption,
+  isAgentOperatingInstructions,
   isAgentProvider,
   isAgentStatus,
   isAgentSummary,
@@ -491,6 +493,11 @@ function decodeMemory(value: unknown): AgentMemory {
 
 function decodeTables(value: unknown): SharedTable[] {
   if (!Array.isArray(value) || !value.every(isSharedTable)) throw new Error("Invalid shared tables response.");
+  return value;
+}
+
+function decodeOperatingInstructions(value: unknown): AgentOperatingInstructions {
+  if (!isAgentOperatingInstructions(value)) throw new Error("Invalid operating instructions response.");
   return value;
 }
 
@@ -1090,6 +1097,12 @@ const danidexApi: DaniDexDesktopApi = {
     updateMemory: (input) => invokeAgent(IPC_CHANNELS.agentUpdateMemory, input, decodeMemory),
     deleteMemory: (input) => invokeAgent(IPC_CHANNELS.agentDeleteMemory, input, decodeVoid),
     clearMemories: (agentId) => invokeAgent(IPC_CHANNELS.agentClearMemories, agentId, decodeVoid),
+    getOperatingInstructions: (agentId) =>
+      invokeAgent(IPC_CHANNELS.agentGetOperatingInstructions, agentId, decodeOperatingInstructions),
+    updateOperatingInstructions: (input) =>
+      invokeAgent(IPC_CHANNELS.agentUpdateOperatingInstructions, input, decodeOperatingInstructions),
+    refreshOperatingInstructions: (agentId) =>
+      invokeAgent(IPC_CHANNELS.agentRefreshOperatingInstructions, agentId, decodeOperatingInstructions),
     listTables: () => invokeAgent(IPC_CHANNELS.sharedListTables, null, decodeTables),
     deleteTable: (input) => invokeAgent(IPC_CHANNELS.sharedDeleteTable, input, decodeVoid),
     listRoutines: (agentId) => invokeAgent(IPC_CHANNELS.agentListRoutines, agentId, decodeRoutines),

@@ -4,7 +4,12 @@ import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-d
 import { isGeneratedAgentId } from "@dani-dex/contracts/validation";
 import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { CHANNEL_SCHEMA_SQL, CHANNEL_SETTINGS_SCHEMA_SQL } from "./channel-schema";
-import { HARNESS_ROUTES_SCHEMA_SQL } from "./database/harness-routes";
+import {
+  HARNESS_ROUTES_SCHEMA_SQL,
+  HARNESS_ROUTES_V22_SCHEMA_SQL,
+  rebuildHarnessRoutesWithoutCascade,
+} from "./database/harness-routes";
+import { OPERATING_INSTRUCTIONS_SCHEMA_SQL } from "./database/operating-instructions";
 import { MCP_SERVERS_SCHEMA_SQL } from "./mcp-schema";
 
 const BASELINE_SCHEMA_VERSION = 8;
@@ -375,7 +380,8 @@ const LATEST_SCHEMA_SQL =
   CHANNEL_SCHEMA_SQL +
   CHANNEL_SETTINGS_SCHEMA_SQL +
   MCP_SERVERS_SCHEMA_SQL +
-  HARNESS_ROUTES_SCHEMA_SQL;
+  HARNESS_ROUTES_SCHEMA_SQL +
+  OPERATING_INSTRUCTIONS_SCHEMA_SQL;
 
 // Silence here would ship new installs a table the migrations never produce, so an edit to the baseline
 // that moves this declaration out from under the substitution has to be loud.
@@ -471,7 +477,16 @@ const MIGRATIONS: readonly DaniDexMigration[] = [
   {
     version: 22,
     // Only creates a table, so no foreign-key pause and no vacuum.
-    up: (db) => db.exec(HARNESS_ROUTES_SCHEMA_SQL),
+    up: (db) => db.exec(HARNESS_ROUTES_V22_SCHEMA_SQL),
+  },
+  {
+    version: 23,
+    // Rebuilds the harness routes without their cascade and creates the operating instructions
+    // table. Neither table is referenced by another, so no foreign-key pause and no vacuum.
+    up: (db) => {
+      rebuildHarnessRoutesWithoutCascade(db);
+      db.exec(OPERATING_INSTRUCTIONS_SCHEMA_SQL);
+    },
   },
 ];
 

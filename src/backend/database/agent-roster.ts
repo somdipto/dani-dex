@@ -213,6 +213,8 @@ export class AgentRoster {
         db.prepare(`DELETE FROM orchestration_events WHERE ${sensitiveFilter}`).run(...sensitiveParameters);
         db.prepare("DELETE FROM projection_agents WHERE agent_id = ?").run(agentId);
         db.prepare("DELETE FROM projection_agent_memories WHERE agent_id = ?").run(agentId);
+        db.prepare("DELETE FROM projection_agent_harness_routes WHERE agent_id = ?").run(agentId);
+        db.prepare("DELETE FROM projection_agent_operating_instructions WHERE agent_id = ?").run(agentId);
         db.prepare("DELETE FROM projection_agent_routines WHERE agent_id = ?").run(agentId);
         db.prepare("DELETE FROM projection_reactions WHERE agent_id = ?").run(agentId);
         db.prepare("DELETE FROM projection_deliveries WHERE recipient_agent_id = ?").run(agentId);

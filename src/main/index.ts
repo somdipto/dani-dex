@@ -32,6 +32,7 @@ import { hostedSiteIpcHandlers } from "./ipc/hosted-site-handlers";
 import { marketplaceAgentIpcHandlers } from "./ipc/marketplace-agent-handlers";
 import { mcpServerIpcHandlers } from "./ipc/mcp-server-handlers";
 import { memoryIpcHandlers } from "./ipc/memory-handlers";
+import { operatingInstructionsIpcHandlers } from "./ipc/operating-instructions-handlers";
 import { pluginIpcHandlers } from "./ipc/plugin-handlers";
 import { providerIpcHandlers } from "./ipc/provider-handlers";
 import { routineIpcHandlers } from "./ipc/routine-handlers";
@@ -380,6 +381,7 @@ function registerIpcHandlers({
       takePendingPluginSlug: () => takePendingDeepLink("plugin"),
     }),
     ...memoryIpcHandlers({ service, remoteServers }),
+    ...operatingInstructionsIpcHandlers({ service }),
     ...sharedTableIpcHandlers({ service }),
     ...routineIpcHandlers({ service, remoteServers }),
     ...channelMemoryIpcHandlers({ service, remoteServers }),
