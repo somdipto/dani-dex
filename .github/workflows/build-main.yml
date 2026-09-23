@@ -19,6 +19,9 @@ concurrency:
 
 env:
   CSC_IDENTITY_AUTO_DISCOVERY: "false"
+  # The runtime installers read pinned GitHub releases. Unauthenticated API calls from shared
+  # runner IPs hit the 60-an-hour limit, which failed the first macOS runs; this token only reads.
+  GITHUB_TOKEN: ${{ github.token }}
 
 jobs:
   windows:
