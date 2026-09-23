@@ -1,4 +1,4 @@
-import { lstat, mkdir, readdir, readFile, realpath, rename, unlink, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdir, readdir, readFile, realpath, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { AgentSummary, InstalledSkill } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
@@ -10,7 +10,7 @@ const OWNERSHIP_MARKER = ".dani-dex-managed.json";
 
 const logger = createDaniDexLogger("managed-skill-service");
 
-interface SyncTargetsResult {
+export interface SyncTargetsResult {
   collisions: string[];
   failures: { target: string; error: unknown }[];
 }
@@ -234,7 +234,9 @@ function isFileExistsError(error: unknown): boolean {
 }
 
 /** Read only Dani-Dex-owned skills from the active provider's skill folder. */
-export async function listManagedSkillsForChat(agent: AgentSummary): Promise<InstalledSkill[]> {
+export async function listManagedSkillsForChat(
+  agent: Pick<AgentSummary, "workspacePath" | "provider">,
+): Promise<InstalledSkill[]> {
   const root = await realpath(agent.workspacePath);
   const directory = join(root, agent.provider === "claude" ? ".claude" : ".agents", "skills");
   const skills: InstalledSkill[] = [];
@@ -278,4 +280,68 @@ export async function listManagedSkillsForChat(agent: AgentSummary): Promise<Ins
     /* The workspace can have no managed skills yet. */
   }
   return skills;
+}
+
+export interface ManagedSkillFile {
+  /** Relative to the skill folder, e.g. `SKILL.md` or `references/plan.md`. */
+  path: string;
+  content: string;
+  executable?: boolean;
+}
+
+/**
+ * Writes one Dani-Dex-owned skill, with any files beside its SKILL.md, into a workspace's
+ * `.agents/skills` and `.claude/skills`. A folder the user made under the same name is left alone
+ * and reported as a collision, exactly as for the single-file managed skills.
+ */
+export async function syncManagedSkillFiles(
+  workspacePath: string,
+  slug: string,
+  files: readonly ManagedSkillFile[],
+): Promise<SyncTargetsResult> {
+  const skill = files.find((file) => file.path === "SKILL.md");
+  if (!skill) throw new Error(`The ${slug} skill has no SKILL.md.`);
+  const extras = files.filter((file) => file !== skill);
+  const workspaceRoot = await realpath(resolve(workspacePath));
+  const collisions: string[] = [];
+  const failures: SyncTargetsResult["failures"] = [];
+  for (const folder of [".agents", ".claude"]) {
+    const target = join(workspaceRoot, folder, "skills", slug, "SKILL.md");
+    try {
+      if ((await syncTarget(workspaceRoot, target, skill.content, slug)) === "collision") {
+        collisions.push(target);
+        continue;
+      }
+      for (const extra of extras) {
+        const path = join(dirname(target), extra.path);
+        containedRelativePath(dirname(target), path);
+        await ensureSafeDirectory(workspaceRoot, dirname(path));
+        await rejectSymlink(path);
+        await atomicWrite(workspaceRoot, path, extra.content);
+        if (extra.executable) await chmod(path, 0o700);
+      }
+    } catch (error) {
+      failures.push({ target, error });
+    }
+  }
+  return { collisions, failures };
+}
+
+/**
+ * Copies a scaffold into the workspace, one file at a time, never replacing a file that is already
+ * there: the scaffold is a starting point the bot and the user go on to edit.
+ */
+export async function seedWorkspaceFiles(workspacePath: string, files: readonly ManagedSkillFile[]): Promise<void> {
+  const workspaceRoot = await realpath(resolve(workspacePath));
+  for (const file of files) {
+    const path = join(workspaceRoot, file.path);
+    containedRelativePath(workspaceRoot, path);
+    await ensureSafeDirectory(workspaceRoot, dirname(path));
+    await rejectSymlink(path);
+    try {
+      await writeFile(path, file.content, { encoding: "utf8", mode: file.executable ? 0o700 : 0o600, flag: "wx" });
+    } catch (error) {
+      if (!isFileExistsError(error)) throw error;
+    }
+  }
 }

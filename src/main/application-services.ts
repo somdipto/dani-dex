@@ -118,6 +118,7 @@ import {
 } from "./session-configuration";
 import { readSetupState } from "./setup-store";
 import { SkillMarketplaceService } from "./skill-marketplace-service";
+import { SkillPackService } from "./skill-pack-service";
 import { readSupabaseAuthConfig } from "./supabase-auth";
 import { TeamStore } from "./team-store";
 import { TeamWebRtcBridge } from "./team-webrtc-bridge";
@@ -406,9 +407,18 @@ export async function createApplicationServices({
     undefined,
     "dani-dex-data",
   );
+  // Role skill packs: spec-kit ships in the app; unlicensed packs download on first use.
+  const skillPacks = new SkillPackService({
+    bundledRoot: app.isPackaged
+      ? join(process.resourcesPath, "skill-packs")
+      : resolve(__dirname, "../../resources/skill-packs"),
+    cacheRoot: join(app.getPath("userData"), "skill-packs"),
+  });
   await managedSkills.syncAll(store.list());
   await skillCreator.syncAll(store.list());
   await dataSkill.syncAll(store.list());
+  // Not awaited: a first-run download must not hold the window back.
+  void skillPacks.syncAll(store.list());
   const hostedSites = new HostedSiteDesktopService(centralAuth);
   const sidebarLayout = new SidebarLayoutStore(join(app.getPath("userData"), SIDEBAR_LAYOUT_FILE));
   await sidebarLayout.initialize();
@@ -727,6 +737,7 @@ export async function createApplicationServices({
       await managedSkills.syncAgent(agent);
       await skillCreator.syncAgent(agent);
       await dataSkill.syncAgent(agent);
+      await skillPacks.syncAgent(agent);
     },
     hostedSites,
     sidebarLayout,

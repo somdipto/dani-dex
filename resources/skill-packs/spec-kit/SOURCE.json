@@ -1,0 +1,17 @@
+{
+  "repository": "github/spec-kit",
+  "commit": "67ab049e8d43d59d7092531fd0f1ff56943ad015",
+  "license": "MIT",
+  "skills": [
+    "speckit-analyze",
+    "speckit-checklist",
+    "speckit-clarify",
+    "speckit-constitution",
+    "speckit-converge",
+    "speckit-implement",
+    "speckit-plan",
+    "speckit-specify",
+    "speckit-tasks",
+    "speckit-taskstoissues"
+  ]
+}
