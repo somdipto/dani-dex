@@ -7,6 +7,13 @@ on:
 
 permissions: {}
 
+# The runtime installers look up pinned releases through the GitHub API. Unauthenticated, that lookup
+# shares the hosted runner's 60-requests-an-hour address limit with every other job on the machine and
+# fails with 403 when it runs out; the job token raises it to the repository's own limit. Build main
+# does the same.
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
