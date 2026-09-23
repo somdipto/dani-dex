@@ -14,7 +14,7 @@
 // Only request endpoints appear. An event travels main-to-renderer through `sendToRenderer` and has
 // no handler to bind, so including it would ask every registrar for a key it cannot fill.
 
-import { IPC_ENDPOINTS, type IpcEndpointGroup, type IpcEndpoints, type RequestEndpoint } from "@openbot/contracts/ipc";
+import { IPC_ENDPOINTS, type IpcEndpointGroup, type IpcEndpoints, type RequestEndpoint } from "@dani-dex/contracts/ipc";
 import type { IpcMainInvokeEvent } from "electron";
 import {
   type AuthorizeSender,

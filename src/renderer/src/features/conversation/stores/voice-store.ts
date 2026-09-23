@@ -1,4 +1,4 @@
-import { VOICE_AUDIO_LIMITS } from "@openbot/contracts/ipc";
+import { VOICE_AUDIO_LIMITS } from "@dani-dex/contracts/ipc";
 import { onCleanup } from "solid-js";
 import { desktopAnalytics } from "../../../analytics";
 import { errorMessage } from "../../../error-message";
@@ -74,7 +74,7 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
     deps.setVoicePhase("preparing");
     deps.setVoiceModelProgress(0);
     try {
-      const modelStatus = await window.openbot.voice.prepareModel();
+      const modelStatus = await window.danidex.voice.prepareModel();
       if (resources.voiceDisposed || resources.voiceRequestGeneration !== generation) return;
       if (modelStatus.phase !== "ready") {
         deps.setVoicePhase("idle");
@@ -118,7 +118,7 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
     }
   }
 
-  const removeVoiceModelListener = window.openbot.voice.onModelStatus((status) => {
+  const removeVoiceModelListener = window.danidex.voice.onModelStatus((status) => {
     if (deps.voicePhase() !== "preparing") return;
     deps.setVoiceModelProgress(status.progress);
   });
@@ -151,7 +151,7 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
     try {
       if (chunks.length === 0) throw new Error("No speech was recorded.");
       const audio = await recordingToWav(new Blob(chunks, { type: mimeType }));
-      const result = await window.openbot.voice.transcribe({ audio });
+      const result = await window.danidex.voice.transcribe({ audio });
       if (!result.text.trim()) throw new Error("No speech was detected.");
       analytics.track("voice_transcription", {
         result: "succeeded",

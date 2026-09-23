@@ -1,4 +1,4 @@
-import type { AccountSession, MobileConnectHostBinding } from "@openbot/contracts/mobile-connect";
+import type { AccountSession, MobileConnectHostBinding } from "@dani-dex/contracts/mobile-connect";
 import { sha256 } from "./crypto";
 import type {
   AuthRepository,

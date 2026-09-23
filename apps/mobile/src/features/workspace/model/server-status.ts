@@ -1,4 +1,4 @@
-import { type RemoteRecoveryStatus, remoteRecoveryMessage } from "@openbot/team-client";
+import { type RemoteRecoveryStatus, remoteRecoveryMessage } from "@dani-dex/team-client";
 import type { MobileServer, MobileServerState } from "./workspace-types";
 
 const LABELS: Record<MobileServerState, string> = {

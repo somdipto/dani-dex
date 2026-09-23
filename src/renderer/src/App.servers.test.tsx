@@ -1,4 +1,4 @@
-import type { AgentEvent, ServerSummary } from "@openbot/contracts/ipc";
+import type { AgentEvent, ServerSummary } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { flush } from "solid-js";
 import { expect, it, vi } from "vitest";
@@ -32,7 +32,7 @@ describe("Dani-Dex connected desktop shell", () => {
   it.each(["darwin", "win32", "linux"] as const)(
     "switches servers with numbered shortcuts on %s and releases the listener",
     async (platform) => {
-      vi.mocked(window.openbot.getAppInfo).mockResolvedValue({
+      vi.mocked(window.danidex.getAppInfo).mockResolvedValue({
         name: "Dani-Dex",
         version: "test",
         platform,
@@ -41,25 +41,25 @@ describe("Dani-Dex connected desktop shell", () => {
       const modifier = platform === "darwin" ? { metaKey: true } : { ctrlKey: true };
       // Local must come first even when the source list puts it last.
       const servers = [testServer("remote-1", false), testServer("local", true)];
-      vi.mocked(window.openbot.servers.list).mockResolvedValue(servers);
-      vi.mocked(window.openbot.servers.select).mockImplementation(async (id) =>
+      vi.mocked(window.danidex.servers.list).mockResolvedValue(servers);
+      vi.mocked(window.danidex.servers.select).mockImplementation(async (id) =>
         servers.map((server) => ({ ...server, active: server.id === id })),
       );
       const view = render(() => <App />);
       const composer = await screen.findByRole("textbox", { name: "Message Chief" });
       composer.focus();
       await fireEvent.keyDown(composer, { key: "2", ...modifier });
-      await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledExactlyOnceWith("remote-1"));
-      await waitFor(() => expect(window.openbot.servers.onPresence).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledExactlyOnceWith("remote-1"));
+      await waitFor(() => expect(window.danidex.servers.onPresence).toHaveBeenCalledTimes(2));
       await fireEvent.keyDown(window, { key: "1", ...modifier });
-      await waitFor(() => expect(window.openbot.servers.select).toHaveBeenLastCalledWith("local"));
-      await waitFor(() => expect(window.openbot.servers.onPresence).toHaveBeenCalledTimes(3));
-      expect(window.openbot.servers.select).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(window.danidex.servers.select).toHaveBeenLastCalledWith("local"));
+      await waitFor(() => expect(window.danidex.servers.onPresence).toHaveBeenCalledTimes(3));
+      expect(window.danidex.servers.select).toHaveBeenCalledTimes(2);
       view.unmount();
       const afterUnmount = new KeyboardEvent("keydown", { key: "2", ...modifier, cancelable: true });
       window.dispatchEvent(afterUnmount);
       expect(afterUnmount.defaultPrevented).toBe(false);
-      expect(window.openbot.servers.select).toHaveBeenCalledTimes(2);
+      expect(window.danidex.servers.select).toHaveBeenCalledTimes(2);
     },
   );
 
@@ -67,20 +67,20 @@ describe("Dani-Dex connected desktop shell", () => {
     const local = testServer("local", true);
     const studio = testServer("remote-1", false);
     const office = { ...testServer("remote-2", false), name: "Office PC" };
-    vi.mocked(window.openbot.servers.list).mockResolvedValue([local, studio, office]);
-    vi.mocked(window.openbot.servers.select).mockRejectedValue(new Error("Server unavailable"));
+    vi.mocked(window.danidex.servers.list).mockResolvedValue([local, studio, office]);
+    vi.mocked(window.danidex.servers.select).mockRejectedValue(new Error("Server unavailable"));
     render(() => <App />);
     await screen.findByRole("button", { name: "Office PC server" });
     emitServers?.([local, office, studio]);
     await fireEvent.keyDown(window, { key: "2", metaKey: true });
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledExactlyOnceWith("remote-2"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledExactlyOnceWith("remote-2"));
     expect(await screen.findByText("Could not select the server")).toBeVisible();
     expect(await screen.findByText("Server unavailable")).toBeVisible();
     expect(screen.getByRole("button", { name: "Local server" })).toHaveAttribute("aria-pressed", "true");
   });
 
   it("ignores invalid numbered shortcuts and does not reload the active server", async () => {
-    vi.mocked(window.openbot.servers.list).mockResolvedValue([
+    vi.mocked(window.danidex.servers.list).mockResolvedValue([
       testServer("local", true),
       testServer("remote-1", false),
     ]);
@@ -109,15 +109,15 @@ describe("Dani-Dex connected desktop shell", () => {
     const active = new KeyboardEvent("keydown", { key: "1", metaKey: true, cancelable: true });
     window.dispatchEvent(active);
     expect(active.defaultPrevented).toBe(true);
-    expect(window.openbot.servers.select).not.toHaveBeenCalled();
+    expect(window.danidex.servers.select).not.toHaveBeenCalled();
   });
 
   it("restores a separate selected agent for each server", async () => {
-    vi.mocked(window.openbot.servers.list).mockResolvedValue([
+    vi.mocked(window.danidex.servers.list).mockResolvedValue([
       testServer("local", true),
       testServer("remote-1", false),
     ]);
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (id) => [
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (id) => [
       testServer("local", id === "local"),
       testServer("remote-1", id === "remote-1"),
     ]);
@@ -130,7 +130,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("heading", { name: "Sales Outbound" })).toBeVisible();
     view.unmount();
 
-    vi.mocked(window.openbot.servers.list).mockResolvedValue([
+    vi.mocked(window.danidex.servers.list).mockResolvedValue([
       testServer("local", false),
       testServer("remote-1", true),
     ]);
@@ -141,20 +141,20 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("keeps the newer saved selection when deletion finishes in a disposed server scope", async () => {
-    vi.mocked(window.openbot.servers.list).mockResolvedValue([
+    vi.mocked(window.danidex.servers.list).mockResolvedValue([
       testServer("local", true),
       testServer("remote-1", false),
     ]);
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (id) => [
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (id) => [
       testServer("local", id === "local"),
       testServer("remote-1", id === "remote-1"),
     ]);
-    vi.mocked(window.openbot.agent.listAgents).mockResolvedValue([
+    vi.mocked(window.danidex.agent.listAgents).mockResolvedValue([
       ...AGENTS,
       { ...AGENTS[1], id: "research", name: "Research" },
     ]);
     let finishDelete: (() => void) | undefined;
-    vi.mocked(window.openbot.agent.deleteAgent).mockReturnValueOnce(
+    vi.mocked(window.danidex.agent.deleteAgent).mockReturnValueOnce(
       new Promise((resolve) => {
         finishDelete = resolve;
       }),
@@ -164,7 +164,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.contextMenu(screen.getByRole("button", { name: /Research, Outbound specialist/ }));
     await fireEvent.pointerUp(screen.getByRole("menuitem", { name: "Delete agent" }), { button: 0 });
     await fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    await waitFor(() => expect(window.openbot.agent.deleteAgent).toHaveBeenCalledWith("research"));
+    await waitFor(() => expect(window.danidex.agent.deleteAgent).toHaveBeenCalledWith("research"));
 
     // A main-process server switch can arrive while the delete dialog is waiting.
     emitServers?.([testServer("local", false), testServer("remote-1", true)]);
@@ -192,16 +192,16 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("restores the active server before loading its workspace data", async () => {
     let resolveServers: ((servers: ServerSummary[]) => void) | undefined;
-    vi.mocked(window.openbot.servers.list).mockReturnValueOnce(
+    vi.mocked(window.danidex.servers.list).mockReturnValueOnce(
       new Promise<ServerSummary[]>((resolve) => {
         resolveServers = resolve;
       }),
     );
-    vi.mocked(window.openbot.agent.listAgents).mockResolvedValueOnce([{ ...AGENTS[0], name: "Remote Chief" }]);
+    vi.mocked(window.danidex.agent.listAgents).mockResolvedValueOnce([{ ...AGENTS[0], name: "Remote Chief" }]);
 
     render(() => <App />);
-    await waitFor(() => expect(window.openbot.servers.list).toHaveBeenCalledOnce());
-    expect(window.openbot.agent.listAgents).not.toHaveBeenCalled();
+    await waitFor(() => expect(window.danidex.servers.list).toHaveBeenCalledOnce());
+    expect(window.danidex.agent.listAgents).not.toHaveBeenCalled();
 
     resolveServers?.([testServer("local", false), testServer("remote-1", true)]);
 
@@ -212,24 +212,24 @@ describe("Dani-Dex connected desktop shell", () => {
   it("finishes the pending workspace load when the active server is selected again", async () => {
     const local = testServer("local", false);
     const remote = testServer("remote-1", true);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.select).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.select).mockResolvedValueOnce([local, remote]);
     let resolveAgents: ((agents: typeof AGENTS) => void) | undefined;
-    vi.mocked(window.openbot.agent.listAgents).mockReturnValueOnce(
+    vi.mocked(window.danidex.agent.listAgents).mockReturnValueOnce(
       new Promise((resolve) => {
         resolveAgents = resolve;
       }),
     );
     render(() => <App />);
-    await waitFor(() => expect(window.openbot.agent.listAgents).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.listAgents).toHaveBeenCalledOnce());
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith(remote.id));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith(remote.id));
     resolveAgents?.(AGENTS);
     expect(await screen.findByRole("heading", { name: "Chief" })).toBeInTheDocument();
   });
 
   it("blocks an incompatible remote workspace and offers a manual retry", async () => {
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([
       { ...testServer("local", false) },
       {
         ...testServer("remote-1", true),
@@ -253,9 +253,9 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
 
     expect(await screen.findByRole("heading", { name: "Update Dani-Dex on Studio Mac" })).toBeInTheDocument();
-    expect(window.openbot.agent.listAgents).not.toHaveBeenCalled();
+    expect(window.danidex.agent.listAgents).not.toHaveBeenCalled();
     await fireEvent.click(screen.getByRole("button", { name: "Retry" }));
-    await waitFor(() => expect(window.openbot.servers.retryConnection).toHaveBeenCalledWith("remote-1"));
+    await waitFor(() => expect(window.danidex.servers.retryConnection).toHaveBeenCalledWith("remote-1"));
   });
 
   it("keeps a busy-host error visible during retry and loads agents after recovery", async () => {
@@ -269,12 +269,12 @@ describe("Dani-Dex connected desktop shell", () => {
         retryable: true,
       },
     };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, busy]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, busy]);
     render(() => <App />);
     expect(await screen.findByRole("alert")).toHaveTextContent(busy.issue?.message ?? "");
-    expect(window.openbot.agent.listAgents).not.toHaveBeenCalled();
+    expect(window.danidex.agent.listAgents).not.toHaveBeenCalled();
     await fireEvent.click(screen.getByRole("button", { name: "Retry" }));
-    await waitFor(() => expect(window.openbot.servers.retryConnection).toHaveBeenCalledWith(busy.id));
+    await waitFor(() => expect(window.danidex.servers.retryConnection).toHaveBeenCalledWith(busy.id));
     emitServers?.([local, { ...busy, state: "connecting" }]);
     expect(screen.getByRole("alert")).toHaveTextContent("The host already has an active remote session.");
     emitServers?.([local, { ...busy, state: "online", issue: null, connectionSequence: 1 }]);
@@ -285,18 +285,18 @@ describe("Dani-Dex connected desktop shell", () => {
   it.each(["sequence", "online"])("refreshes after %s changes without clearing cached agents", async (change) => {
     const local = testServer("local", false);
     const remote: ServerSummary = { ...testServer("remote-1", true), connectionSequence: 1 };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     let resolveAgents: ((agents: typeof AGENTS) => void) | undefined;
-    vi.mocked(window.openbot.agent.listAgents).mockReturnValueOnce(
+    vi.mocked(window.danidex.agent.listAgents).mockReturnValueOnce(
       new Promise((resolve) => {
         resolveAgents = resolve;
       }),
     );
     if (change === "online") emitServers?.([local, { ...remote, state: "offline" }]);
     emitServers?.([local, { ...remote, connectionSequence: change === "sequence" ? 2 : 1 }]);
-    await waitFor(() => expect(window.openbot.agent.listAgents).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.danidex.agent.listAgents).toHaveBeenCalledTimes(2));
     expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
     resolveAgents?.([{ ...AGENTS[0], name: "Recovered Chief" }]);
     expect(await screen.findByRole("heading", { name: "Recovered Chief" })).toBeInTheDocument();
@@ -305,28 +305,28 @@ describe("Dani-Dex connected desktop shell", () => {
   it("keeps cached agents after a failed refresh and ignores an older reconnect response", async () => {
     const local = testServer("local", false);
     const remote: ServerSummary = { ...testServer("remote-1", true), connectionSequence: 1 };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     let rejectAgents: ((error: Error) => void) | undefined;
-    vi.mocked(window.openbot.agent.listAgents).mockReturnValueOnce(
+    vi.mocked(window.danidex.agent.listAgents).mockReturnValueOnce(
       new Promise((_resolve, reject) => {
         rejectAgents = reject;
       }),
     );
     emitServers?.([local, { ...remote, connectionSequence: 2 }]);
-    await waitFor(() => expect(window.openbot.agent.listAgents).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.danidex.agent.listAgents).toHaveBeenCalledTimes(2));
     rejectAgents?.(new Error("The host is not reachable."));
     // A later successful load is the barrier after the failed refresh.
     let resolveOld: ((agents: typeof AGENTS) => void) | undefined;
     const oldAgents = new Promise<typeof AGENTS>((resolve) => {
       resolveOld = resolve;
     });
-    vi.mocked(window.openbot.agent.listAgents).mockReturnValueOnce(oldAgents);
+    vi.mocked(window.danidex.agent.listAgents).mockReturnValueOnce(oldAgents);
     emitServers?.([local, { ...remote, connectionSequence: 3 }]);
-    await waitFor(() => expect(window.openbot.agent.listAgents).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(window.danidex.agent.listAgents).toHaveBeenCalledTimes(3));
     expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
-    vi.mocked(window.openbot.agent.listAgents).mockResolvedValueOnce([{ ...AGENTS[0], name: "Current Chief" }]);
+    vi.mocked(window.danidex.agent.listAgents).mockResolvedValueOnce([{ ...AGENTS[0], name: "Current Chief" }]);
     emitServers?.([local, { ...remote, connectionSequence: 4 }]);
     await screen.findByRole("heading", { name: "Current Chief" });
     resolveOld?.([]);
@@ -365,13 +365,13 @@ describe("Dani-Dex connected desktop shell", () => {
       connectionSequence: 1,
     };
     let resolveRetry: ((server: ServerSummary) => void) | undefined;
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, incompatible]);
-    vi.mocked(window.openbot.servers.retryConnection).mockReturnValueOnce(
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, incompatible]);
+    vi.mocked(window.danidex.servers.retryConnection).mockReturnValueOnce(
       new Promise((resolve) => {
         resolveRetry = resolve;
       }),
     );
-    vi.mocked(window.openbot.servers.select).mockRejectedValueOnce(new Error("Workspace refresh failed"));
+    vi.mocked(window.danidex.servers.select).mockRejectedValueOnce(new Error("Workspace refresh failed"));
 
     render(() => <App />);
     await screen.findByRole("heading", { name: "Update Dani-Dex on Studio Mac" });
@@ -396,7 +396,7 @@ describe("Dani-Dex connected desktop shell", () => {
       },
       connectionSequence: 0,
     };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
 
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
@@ -435,25 +435,25 @@ describe("Dani-Dex connected desktop shell", () => {
       },
       connectionSequence: 1,
     };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, provisional]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, provisional]);
 
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    expect(window.openbot.agent.getSidebarLayout).not.toHaveBeenCalled();
-    expect(window.openbot.browser.getDisplayState).not.toHaveBeenCalled();
+    expect(window.danidex.agent.getSidebarLayout).not.toHaveBeenCalled();
+    expect(window.danidex.browser.getDisplayState).not.toHaveBeenCalled();
 
     emitServers?.([local, negotiated]);
-    await waitFor(() => expect(window.openbot.agent.getSidebarLayout).toHaveBeenCalled());
-    expect(window.openbot.browser.getDisplayState).toHaveBeenCalled();
+    await waitFor(() => expect(window.danidex.agent.getSidebarLayout).toHaveBeenCalled());
+    expect(window.danidex.browser.getDisplayState).toHaveBeenCalled();
     // The server was already active, so the workspace reloads on
     // the completed handshake. Nothing asks main to select it a second time.
-    expect(window.openbot.servers.select).not.toHaveBeenCalled();
+    expect(window.danidex.servers.select).not.toHaveBeenCalled();
   });
 
   it("keeps a remote approval when Review in Dani-Dex switches to its host", async () => {
     const servers = [testServer("local", true), testServer("remote-1", false)];
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce(servers);
-    vi.mocked(window.openbot.servers.select).mockResolvedValueOnce(
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce(servers);
+    vi.mocked(window.danidex.servers.select).mockResolvedValueOnce(
       servers.map((server) => ({ ...server, active: server.id === "remote-1" })),
     );
 
@@ -479,28 +479,28 @@ describe("Dani-Dex connected desktop shell", () => {
       },
     });
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         serverId: "remote-1",
         mode: "approval",
         item: { requestId: "approval-remote" },
       }),
     );
 
-    const presentationCountBeforeReview = vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.length;
+    const presentationCountBeforeReview = vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.length;
     emitDynamicIslandAction?.({
       type: "review-attention",
       serverId: "remote-1",
       agentId: "chief",
       requestId: "approval-remote",
     });
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("remote-1"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("remote-1"));
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Studio Mac server" })).toHaveAttribute("aria-pressed", "true"),
     );
     await waitFor(() =>
       expect(
         vi
-          .mocked(window.openbot.dynamicIsland.publishPresentation)
+          .mocked(window.danidex.dynamicIsland.publishPresentation)
           .mock.calls.slice(presentationCountBeforeReview)
           .some(
             ([presentation]) =>
@@ -519,7 +519,7 @@ describe("Dani-Dex connected desktop shell", () => {
       decision: "accept",
     });
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         serverId: "remote-1",
         mode: "idle",
       }),
@@ -529,7 +529,7 @@ describe("Dani-Dex connected desktop shell", () => {
   it("removes stale Dynamic Island attention when a remote host goes offline", async () => {
     const local = testServer("local", true);
     const remote = testServer("remote-1", false);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
 
     render(() => <App />);
     await waitFor(() => expect(emitScopedAgentEvent).toBeTypeOf("function"));
@@ -553,7 +553,7 @@ describe("Dani-Dex connected desktop shell", () => {
       },
     });
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         serverId: remote.id,
         mode: "approval",
       }),
@@ -561,7 +561,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
     emitServers?.([local, { ...remote, state: "offline" }]);
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         serverId: "local",
         mode: "idle",
       }),
@@ -571,7 +571,7 @@ describe("Dani-Dex connected desktop shell", () => {
   it("reports a remote reply that arrives while its host is offline", async () => {
     const local = testServer("local", true);
     const remote = testServer("remote-1", false);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
     const snapshot = (messageId: string, text: string) => ({
       type: "runtime-snapshot" as const,
       snapshot: {
@@ -603,7 +603,7 @@ describe("Dani-Dex connected desktop shell", () => {
     emitScopedAgentEvent?.({ serverId: remote.id, event: snapshot("reply-old", "Earlier reply") });
     emitServers?.([local, { ...remote, state: "offline" }]);
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         serverId: "local",
         mode: "idle",
       }),
@@ -613,7 +613,7 @@ describe("Dani-Dex connected desktop shell", () => {
     emitScopedAgentEvent?.({ serverId: remote.id, event: snapshot("reply-new", "Reply from offline work") });
 
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         serverId: remote.id,
         mode: "message",
         unreadCount: 1,
@@ -626,7 +626,7 @@ describe("Dani-Dex connected desktop shell", () => {
     const local = testServer("local", true);
     const office: ServerSummary = { ...testServer("remote-1", false), name: "Office Mac", notificationsMuted: true };
     const studio: ServerSummary = { ...testServer("remote-2", false), name: "Studio Mac", notificationsMuted: true };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, office, studio]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, office, studio]);
     const approval = (serverId: string, requestId: string) => {
       emitScopedAgentEvent?.({ serverId, event: { type: "agents-changed", agents: AGENTS } });
       emitScopedAgentEvent?.({
@@ -648,7 +648,7 @@ describe("Dani-Dex connected desktop shell", () => {
         },
       });
     };
-    const published = vi.mocked(window.openbot.dynamicIsland.publishPresentation);
+    const published = vi.mocked(window.danidex.dynamicIsland.publishPresentation);
 
     render(() => <App />);
     await waitFor(() => expect(emitScopedAgentEvent).toBeTypeOf("function"));
@@ -677,7 +677,7 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     await confirmOnboardingModel();
-    await waitFor(() => expect(window.openbot.agent.listQueue).toHaveBeenCalledWith("chief"));
+    await waitFor(() => expect(window.danidex.agent.listQueue).toHaveBeenCalledWith("chief"));
 
     emitAgentEvent?.({
       type: "queue-changed",
@@ -775,7 +775,7 @@ describe("Dani-Dex connected desktop shell", () => {
     });
 
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         mode: "approval",
         item: { requestId: "approval-runtime" },
       }),
@@ -788,7 +788,7 @@ describe("Dani-Dex connected desktop shell", () => {
       agentId: "chief",
     });
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         mode: "idle",
       }),
     );
@@ -797,7 +797,7 @@ describe("Dani-Dex connected desktop shell", () => {
   it.each([true, false])(
     "opens, hides, resumes, and disconnects Remote Control with cached availability %s",
     async (remoteDesktopAvailable) => {
-      vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([
+      vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([
         {
           id: "remote-1",
           name: "Studio Mac",
@@ -813,13 +813,13 @@ describe("Dani-Dex connected desktop shell", () => {
       ]);
       const setupError = "The host has not allowed Dani-Dex to record its screen.";
       if (!remoteDesktopAvailable) {
-        vi.mocked(window.openbot.remoteDesktop.connect).mockResolvedValueOnce({
+        vi.mocked(window.danidex.remoteDesktop.connect).mockResolvedValueOnce({
           status: "refused",
           errorCode: "host_permissions_required",
           message: setupError,
         });
       }
-      vi.mocked(window.openbot.remoteDesktop.connect).mockResolvedValueOnce({
+      vi.mocked(window.danidex.remoteDesktop.connect).mockResolvedValueOnce({
         status: "connected",
         session: {
           id: "desktop-1",
@@ -839,7 +839,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
       render(() => <App />);
       await screen.findByRole("heading", { name: "Chief" });
-      expect(window.openbot.remoteDesktop.connect).not.toHaveBeenCalled();
+      expect(window.danidex.remoteDesktop.connect).not.toHaveBeenCalled();
       expect(screen.queryByTitle("Sunshine remote desktop")).not.toBeInTheDocument();
       const openButton = screen.getByRole("button", { name: "Open remote control" });
       await fireEvent.click(openButton);
@@ -849,7 +849,7 @@ describe("Dani-Dex connected desktop shell", () => {
       if (!appFrame) throw new Error("App frame is missing.");
       expect(appFrame.inert).toBe(true);
       expect(appFrame).toHaveAttribute("aria-hidden", "true");
-      await waitFor(() => expect(window.openbot.remoteDesktop.connect).toHaveBeenCalledWith({ serverId: "remote-1" }));
+      await waitFor(() => expect(window.danidex.remoteDesktop.connect).toHaveBeenCalledWith({ serverId: "remote-1" }));
 
       if (!remoteDesktopAvailable) {
         // The host named its refusal, so the member reads the repair step instead of the raw sentence.
@@ -865,13 +865,13 @@ describe("Dani-Dex connected desktop shell", () => {
       await fireEvent.click(within(remoteDesktop).getByRole("button", { name: "Back to Dani-Dex" }));
       await waitFor(() => expect(appFrame.inert).toBe(false));
       // Hiding keeps the session alive, so resuming must not open a second one.
-      expect(window.openbot.remoteDesktop.disconnect).not.toHaveBeenCalled();
+      expect(window.danidex.remoteDesktop.disconnect).not.toHaveBeenCalled();
 
       await fireEvent.click(screen.getByRole("button", { name: "Resume remote control" }));
       expect(await screen.findByTitle("Sunshine remote desktop")).toBeInTheDocument();
-      expect(window.openbot.remoteDesktop.connect).toHaveBeenCalledTimes(remoteDesktopAvailable ? 1 : 2);
+      expect(window.danidex.remoteDesktop.connect).toHaveBeenCalledTimes(remoteDesktopAvailable ? 1 : 2);
       await fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
-      await waitFor(() => expect(window.openbot.remoteDesktop.disconnect).toHaveBeenCalledWith("desktop-1"));
+      await waitFor(() => expect(window.danidex.remoteDesktop.disconnect).toHaveBeenCalledWith("desktop-1"));
       await waitFor(() => expect(screen.queryByTitle("Sunshine remote desktop")).not.toBeInTheDocument());
       expect(screen.getByRole("button", { name: "Open remote control" })).toBeInTheDocument();
     },
@@ -896,11 +896,11 @@ describe("Dani-Dex connected desktop shell", () => {
         role: "member" as const,
       },
     ];
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce(servers);
-    vi.mocked(window.openbot.servers.select).mockResolvedValueOnce(
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce(servers);
+    vi.mocked(window.danidex.servers.select).mockResolvedValueOnce(
       servers.map((server) => ({ ...server, active: server.id === "remote-2" })),
     );
-    vi.mocked(window.openbot.remoteDesktop.connect).mockResolvedValueOnce({
+    vi.mocked(window.danidex.remoteDesktop.connect).mockResolvedValueOnce({
       status: "connected",
       session: {
         id: "desktop-1",
@@ -925,22 +925,22 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(within(workspace).getByRole("button", { name: "Back to Dani-Dex" }));
     await fireEvent.click(screen.getByRole("button", { name: "Office PC server" }));
 
-    await waitFor(() => expect(window.openbot.remoteDesktop.disconnect).toHaveBeenCalledWith("desktop-1"));
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("remote-2"));
+    await waitFor(() => expect(window.danidex.remoteDesktop.disconnect).toHaveBeenCalledWith("desktop-1"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("remote-2"));
     expect(screen.queryByTitle("Sunshine remote desktop")).not.toBeInTheDocument();
     expect(await screen.findByRole("button", { name: "Open remote control" })).toBeInTheDocument();
-    expect(window.openbot.remoteDesktop.connect).toHaveBeenCalledTimes(1);
+    expect(window.danidex.remoteDesktop.connect).toHaveBeenCalledTimes(1);
   });
 
   it("tells the server the user is leaving that composing has stopped", async () => {
     const local = testServer("local", true);
     const remote = testServer("remote-1", false);
     const calls: string[] = [];
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.setTyping).mockImplementation(async (input) => {
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.setTyping).mockImplementation(async (input) => {
       calls.push(input.typing ? "typing on" : "typing off");
     });
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (serverId) => {
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (serverId) => {
       calls.push("select");
       return [
         { ...local, active: serverId === "local" },
@@ -956,26 +956,26 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
 
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("remote-1"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("remote-1"));
     expect(calls).toEqual(["typing on", "typing off", "select"]);
   });
 
   it("does not leave the next server's composer disabled by a send in flight", async () => {
     const local = testServer("local", true);
     const remote = testServer("remote-1", false);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (serverId) => [
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (serverId) => [
       { ...local, active: serverId === "local" },
       { ...remote, active: serverId === "remote-1" },
     ]);
-    vi.mocked(window.openbot.agent.sendMessage).mockImplementationOnce(() => new Promise(() => undefined));
+    vi.mocked(window.danidex.agent.sendMessage).mockImplementationOnce(() => new Promise(() => undefined));
 
     render(() => <App />);
     const composer = await screen.findByRole("textbox", { name: "Message Chief" });
     composer.textContent = "Still on its way";
     await fireEvent.input(composer);
     await fireEvent.click(screen.getByRole("button", { name: "Send message" }));
-    await waitFor(() => expect(window.openbot.agent.sendMessage).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.sendMessage).toHaveBeenCalledOnce());
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
     await waitFor(() =>
@@ -988,8 +988,8 @@ describe("Dani-Dex connected desktop shell", () => {
   it("does not offer an answered prompt again after leaving its server and coming back", async () => {
     const local = testServer("local", true);
     const remote = testServer("remote-1", false);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (serverId) => [
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (serverId) => [
       { ...local, active: serverId === "local" },
       { ...remote, active: serverId === "remote-1" },
     ]);
@@ -1009,7 +1009,7 @@ describe("Dani-Dex connected desktop shell", () => {
     const answer = await screen.findByRole("textbox", { name: "Custom answer for: Which account?" });
     await fireEvent.input(answer, { target: { value: "Acme" } });
     await fireEvent.keyDown(answer, { key: "Enter" });
-    await waitFor(() => expect(window.openbot.agent.respondToPrompt).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.respondToPrompt).toHaveBeenCalledOnce());
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
     await waitFor(() =>
@@ -1080,7 +1080,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.input(name, { target: { value: "Coordinator" } });
     await fireEvent.blur(name);
     await waitFor(() =>
-      expect(window.openbot.agent.updateAgent).toHaveBeenCalledWith({
+      expect(window.danidex.agent.updateAgent).toHaveBeenCalledWith({
         agentId: "chief",
         name: "Coordinator",
       }),
@@ -1109,7 +1109,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(await screen.findByRole("button", { name: "Preview brief.pdf" }));
     expect(await screen.findByRole("complementary", { name: "File preview" })).toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "Show file in Finder" }));
-    expect(window.openbot.agent.openAttachment).toHaveBeenCalledWith({
+    expect(window.danidex.agent.openAttachment).toHaveBeenCalledWith({
       attachmentId: "file-1",
       action: "reveal",
     });
@@ -1168,9 +1168,9 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await fireEvent.pointerUp(screen.getByRole("menuitem", { name: "Duplicate agent" }), { button: 0 });
 
-    await waitFor(() => expect(window.openbot.agent.duplicateAgent).toHaveBeenCalledWith("sales-outbound"));
+    await waitFor(() => expect(window.danidex.agent.duplicateAgent).toHaveBeenCalledWith("sales-outbound"));
     expect(await screen.findByRole("heading", { name: "Sales Outbound copy" })).toBeInTheDocument();
-    await waitFor(() => expect(window.openbot.agent.readConversation).toHaveBeenCalledWith("sales-outbound-copy"));
+    await waitFor(() => expect(window.danidex.agent.readConversation).toHaveBeenCalledWith("sales-outbound-copy"));
     expect(
       screen.getByRole("button", {
         name: "Sales Outbound copy, Outbound specialist. No messages yet",
@@ -1210,7 +1210,7 @@ describe("Dani-Dex connected desktop shell", () => {
       "Dani-Dex does not have permission to complete this action. Check the file or folder permissions, then try again.",
     ],
   ])("keeps the current selection and explains duplication failures: %s", async (error, message) => {
-    vi.mocked(window.openbot.agent.duplicateAgent).mockRejectedValueOnce(new Error(error));
+    vi.mocked(window.danidex.agent.duplicateAgent).mockRejectedValueOnce(new Error(error));
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     await fireEvent.contextMenu(screen.getByRole("button", { name: /Sales Outbound/ }), {
@@ -1235,7 +1235,7 @@ describe("Dani-Dex connected desktop shell", () => {
       "This removes the agent and its Dani-Dex conversation from the app. Its queue, memories, routines, and workspace are deleted. History stored separately by the connected CLI provider is not deleted.",
     );
     await fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    await waitFor(() => expect(window.openbot.agent.deleteAgent).toHaveBeenCalledWith("sales-outbound"));
+    await waitFor(() => expect(window.danidex.agent.deleteAgent).toHaveBeenCalledWith("sales-outbound"));
     await waitFor(() => expect(screen.queryByRole("button", { name: /Sales Outbound/ })).not.toBeInTheDocument());
   });
 
@@ -1257,9 +1257,9 @@ describe("Dani-Dex connected desktop shell", () => {
       remoteDesktopAvailable: true,
       role: "admin" as const,
     };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([testServer("local", true), remote]);
-    vi.mocked(window.openbot.servers.refreshIdentity).mockResolvedValueOnce(remote);
-    vi.mocked(window.openbot.servers.getPresenceFor).mockResolvedValueOnce({
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([testServer("local", true), remote]);
+    vi.mocked(window.danidex.servers.refreshIdentity).mockResolvedValueOnce(remote);
+    vi.mocked(window.danidex.servers.getPresenceFor).mockResolvedValueOnce({
       serverId: remote.id,
       members: [],
       updatedAt: "2026-08-20T10:00:00.000Z",
@@ -1273,7 +1273,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
     expect(await screen.findByRole("dialog", { name: "General" })).toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: "Server name" })).not.toBeInTheDocument();
-    expect(window.openbot.servers.select).not.toHaveBeenCalled();
+    expect(window.danidex.servers.select).not.toHaveBeenCalled();
     await fireEvent.click(screen.getByRole("button", { name: "Close server settings" }));
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "General" })).not.toBeInTheDocument());
   });
@@ -1315,8 +1315,8 @@ describe("Dani-Dex connected desktop shell", () => {
       },
       connectionSequence: 1,
     };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.agent.listInstalledSkills)
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.agent.listInstalledSkills)
       .mockRejectedValueOnce(new Error("Remote request failed"))
       .mockResolvedValueOnce([
         {
@@ -1331,14 +1331,14 @@ describe("Dani-Dex connected desktop shell", () => {
 
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    await waitFor(() => expect(window.openbot.agent.listInstalledSkills).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.listInstalledSkills).toHaveBeenCalledOnce());
 
     emitServers?.([local, { ...remote, connectionSequence: 2 }]);
-    await waitFor(() => expect(window.openbot.agent.listInstalledSkills).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.danidex.agent.listInstalledSkills).toHaveBeenCalledTimes(2));
 
     emitServers?.([local, { ...remote, connectionSequence: 3 }]);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(window.openbot.agent.listInstalledSkills).toHaveBeenCalledTimes(2);
+    expect(window.danidex.agent.listInstalledSkills).toHaveBeenCalledTimes(2);
   });
 
   // Switching servers tears the workspace down and builds it again. Every
@@ -1349,8 +1349,8 @@ describe("Dani-Dex connected desktop shell", () => {
   it("does not accumulate event subscriptions across server switches", async () => {
     const servers = [testServer("local", true), testServer("remote-1", false)];
     const activate = (activeId: string) => servers.map((server) => ({ ...server, active: server.id === activeId }));
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce(activate("local"));
-    vi.mocked(window.openbot.servers.select)
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce(activate("local"));
+    vi.mocked(window.danidex.servers.select)
       .mockResolvedValueOnce(activate("remote-1"))
       .mockResolvedValueOnce(activate("local"));
 
@@ -1362,9 +1362,9 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(afterMount.agentEvent).toBeGreaterThan(0);
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("remote-1"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("remote-1"));
     await fireEvent.click(screen.getByRole("button", { name: "Local server" }));
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("local"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("local"));
     await screen.findByRole("heading", { name: "Chief" });
 
     expect(subscriberCounts()).toEqual(afterMount);
@@ -1373,8 +1373,8 @@ describe("Dani-Dex connected desktop shell", () => {
   it("follows the host switch with an open Usage report", async () => {
     const servers = [testServer("local", true), testServer("remote-1", false)];
     const activate = (activeId: string) => servers.map((server) => ({ ...server, active: server.id === activeId }));
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce(activate("local"));
-    vi.mocked(window.openbot.servers.select).mockResolvedValueOnce(activate("remote-1"));
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce(activate("local"));
+    vi.mocked(window.danidex.servers.select).mockResolvedValueOnce(activate("remote-1"));
 
     // The report outlives a server switch, so it has to notice one. `ServerScopeBoundary` is
     // keyed on the active server and rebuilds everything under it, which is why the effect that
@@ -1400,7 +1400,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("heading", { name: /Usage.*Local/ })).toBeInTheDocument();
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("remote-1"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("remote-1"));
 
     expect(await screen.findByRole("heading", { name: /Usage.*Studio Mac/ })).toBeInTheDocument();
   });
@@ -1409,8 +1409,8 @@ describe("Dani-Dex connected desktop shell", () => {
 it("mutes and unmutes a server without changing other servers", async () => {
   installOpenbotStub();
   let servers = [testServer("local", true), testServer("remote-1", false)];
-  vi.mocked(window.openbot.servers.list).mockResolvedValue(servers);
-  vi.mocked(window.openbot.servers.setMuted).mockImplementation(async ({ serverId, muted }) => {
+  vi.mocked(window.danidex.servers.list).mockResolvedValue(servers);
+  vi.mocked(window.danidex.servers.setMuted).mockImplementation(async ({ serverId, muted }) => {
     servers = servers.map((server) => (server.id === serverId ? { ...server, notificationsMuted: muted } : server));
     return servers;
   });

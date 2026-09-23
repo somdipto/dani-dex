@@ -1,4 +1,4 @@
-import { VOICE_AUDIO_LIMITS, type VoiceTranscriptionInput } from "@openbot/contracts/ipc";
+import { VOICE_AUDIO_LIMITS, type VoiceTranscriptionInput } from "@dani-dex/contracts/ipc";
 import { isObject } from "./validation";
 
 export function parseVoiceTranscription(input: unknown): VoiceTranscriptionInput {

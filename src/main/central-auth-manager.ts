@@ -9,21 +9,21 @@ import type {
   CentralAuthUser,
   MobileConnectedDevice,
   MobileConnectTicket,
-} from "@openbot/contracts/ipc";
-import { decodeRecord, requiredString } from "@openbot/contracts/ipc-decoding";
-import { createMobileConnectUrl, type MobileConnectHostBinding } from "@openbot/contracts/mobile-connect";
+} from "@dani-dex/contracts/ipc";
+import { decodeRecord, requiredString } from "@dani-dex/contracts/ipc-decoding";
+import { createMobileConnectUrl, type MobileConnectHostBinding } from "@dani-dex/contracts/mobile-connect";
 import {
   decodeRemoteSession,
   decodeRemoteSessionTicket,
   type RemoteSession,
   type RemoteSessionTicket,
-} from "@openbot/contracts/remote-control-plane";
-import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/remote-control-plane";
+import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import {
   REMOTE_TICKET_AUDIENCE,
   type RemoteMemberRole,
   type RemoteTicketClaims,
-} from "@openbot/contracts/signal-protocol/ticket";
+} from "@dani-dex/contracts/signal-protocol/ticket";
 import { createLocalJWKSet, jwtVerify } from "jose";
 import { z } from "zod";
 
@@ -92,7 +92,7 @@ export interface RegisteredRemoteHost {
 }
 
 // The account API answers the same shape for a host credential and for a member session, so both
-// paths below decode it with the one function in `@openbot/contracts/remote-control-plane`.
+// paths below decode it with the one function in `@dani-dex/contracts/remote-control-plane`.
 export type RemoteConnectionBootstrap = RemoteSessionTicket;
 
 // The claims this host reads off a client's ticket, derived from the contract the account API mints

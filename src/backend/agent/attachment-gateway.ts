@@ -1,7 +1,7 @@
 import { constants } from "node:fs";
 import { lstat, open, realpath } from "node:fs/promises";
 import { isAbsolute } from "node:path";
-import type { AgentEvent, ConversationSnapshot } from "@openbot/contracts/ipc";
+import type { AgentEvent, ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import { sortConversationMessages } from "../conversation-snapshots";
 import type { GeneratedAttachmentSource, MailboxStore } from "../mailbox-store";
 import { isWithin, rebaseLegacyWorkspacePath, sharedPathFromInput, workspacePathFromInput } from "../workspace-paths";

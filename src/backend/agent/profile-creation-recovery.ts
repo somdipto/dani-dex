@@ -1,7 +1,7 @@
 import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { decodeSaveAgentProfileResult } from "@openbot/contracts/ipc";
-import { isGeneratedAgentId, isUuidV4 } from "@openbot/contracts/validation";
+import { decodeSaveAgentProfileResult } from "@dani-dex/contracts/ipc";
+import { isGeneratedAgentId, isUuidV4 } from "@dani-dex/contracts/validation";
 import type { OpenBotDatabase } from "../openbot-database";
 
 /** A marker precedes every profile-created row, so a crash cannot orphan an executable agent. */

@@ -3,7 +3,7 @@ import type {
   DynamicIslandPreference,
   DynamicIslandPresentation,
   DynamicIslandQuestionItem,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal, flush } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -73,7 +73,7 @@ describe("DynamicIslandSurface", () => {
         publish = undefined;
       };
     };
-    Object.defineProperty(window, "openbot", { configurable: true, value: mock.api });
+    Object.defineProperty(window, "danidex", { configurable: true, value: mock.api });
     render(() => <DynamicIslandSurface />);
 
     expect(await screen.findByRole("button", { name: "Expand Open Dani-Dex" })).toBeVisible();
@@ -266,7 +266,7 @@ function createQuestionMock(presentation: DynamicIslandPresentation) {
   const performAction = vi.fn(async () => undefined);
   mock.api.dynamicIsland.getPresentation = async () => presentation;
   mock.api.dynamicIsland.performAction = performAction;
-  Object.defineProperty(window, "openbot", { configurable: true, value: mock.api });
+  Object.defineProperty(window, "danidex", { configurable: true, value: mock.api });
   return { ...mock, performAction };
 }
 

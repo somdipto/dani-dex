@@ -1,5 +1,5 @@
-import { channelEvent } from "@openbot/contracts/team-protocol/channels-v1";
-import { decodeTeamProtocolV4BaseCurrentEvent } from "@openbot/contracts/team-protocol/v4-base-adapter";
+import { channelEvent } from "@dani-dex/contracts/team-protocol/channels-v1";
+import { decodeTeamProtocolV4BaseCurrentEvent } from "@dani-dex/contracts/team-protocol/v4-base-adapter";
 // The live event channel for HTTPS servers, and the reconnect policy both transports share.
 //
 // This is the only part of the remote-server family that owns a clock. Everything it does -- the
@@ -28,16 +28,16 @@ import type {
   ServerCompatibility,
   ServerSummary,
   TeamPresenceSnapshot,
-} from "@openbot/contracts/ipc";
-import { decodeRecord } from "@openbot/contracts/ipc-decoding";
-import { isString } from "@openbot/contracts/runtime-values";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { TEAM_CURRENT_CAPABILITIES, type TeamCurrentCapability } from "@openbot/contracts/team-protocol/current";
-import { TEAM_PROTOCOL_V1_WEBSOCKET } from "@openbot/contracts/team-protocol/v1";
+} from "@dani-dex/contracts/ipc";
+import { decodeRecord } from "@dani-dex/contracts/ipc-decoding";
+import { isString } from "@dani-dex/contracts/runtime-values";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { TEAM_CURRENT_CAPABILITIES, type TeamCurrentCapability } from "@dani-dex/contracts/team-protocol/current";
+import { TEAM_PROTOCOL_V1_WEBSOCKET } from "@dani-dex/contracts/team-protocol/v1";
 import {
   encodeTeamProtocolV1CurrentClientEvent,
   type TeamProtocolV1CurrentClientEvent,
-} from "@openbot/contracts/team-protocol/v1-adapter";
+} from "@dani-dex/contracts/team-protocol/v1-adapter";
 import { RemoteProtocolError, RemoteRequestError } from "./remote-server-errors";
 import { requestJson } from "./remote-server-http";
 import type { RemoteServerDirectory, StoredRemoteServerView } from "./remote-server-store";

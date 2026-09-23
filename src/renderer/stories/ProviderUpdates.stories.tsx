@@ -1,5 +1,5 @@
-import { isManagedRuntimeProvider, type ManagedProviderId } from "@openbot/contracts/agent-providers";
-import type { AgentProviderId, ProviderRuntimeStatus } from "@openbot/contracts/ipc";
+import { isManagedRuntimeProvider, type ManagedProviderId } from "@dani-dex/contracts/agent-providers";
+import type { AgentProviderId, ProviderRuntimeStatus } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, createUniqueId, onCleanup, Show } from "solid-js";
 import { expect, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";

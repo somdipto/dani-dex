@@ -1,4 +1,4 @@
-import { type ComputerUsePermissionApp, LOCAL_SERVER_ID, type MacPermissionId } from "@openbot/contracts/ipc";
+import { type ComputerUsePermissionApp, LOCAL_SERVER_ID, type MacPermissionId } from "@dani-dex/contracts/ipc";
 import { createSignal, onCleanup, onSettled, Show } from "solid-js";
 import { Button, FolderOpen, GripVertical, Monitor, MousePointer2 } from "../../components/ui";
 import { errorMessage } from "../../error-message";
@@ -38,7 +38,7 @@ export function permissionFromQuery(search: string): MacPermissionId {
 }
 
 export function ComputerUsePermissionHelp(props: { permission: MacPermissionId; sunshine?: boolean }) {
-  const desktopApi = window.openbot;
+  const desktopApi = window.danidex;
   const permission = props.permission;
   const help = PERMISSION_HELP[permission];
   const PermissionIcon = help.icon;

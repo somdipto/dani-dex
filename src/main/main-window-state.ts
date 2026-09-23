@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { readFile, rename, rm, writeFile } from "node:fs/promises";
-import { isDynamicRecord, isNumber } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isNumber } from "@dani-dex/contracts/runtime-values";
 import type { Rectangle } from "electron";
 
 interface WindowSize {

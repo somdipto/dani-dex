@@ -2,7 +2,7 @@ import type {
   ProviderRuntimeSnapshot,
   ProviderRuntimeStatus,
   ProviderRuntimesDesktopApi,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { afterEach, expect, it, vi } from "vitest";
 import { FALLBACK_UPDATE_STATUS } from "../../app-defaults";

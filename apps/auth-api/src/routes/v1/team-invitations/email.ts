@@ -1,6 +1,6 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { isCanonicalInviteUrl } from "@openbot/contracts/invite-links";
-import { isString } from "@openbot/contracts/runtime-values";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { isCanonicalInviteUrl } from "@dani-dex/contracts/invite-links";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { createFileRoute } from "@tanstack/solid-router";
 import { emailDeliveryFailure, isEmailDeliveryFailure, normalizeEmail } from "../../../server/auth-service";
 import { readJsonObject } from "../../../server/json-body";

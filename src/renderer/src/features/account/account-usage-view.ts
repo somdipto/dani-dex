@@ -6,7 +6,7 @@ import {
   agentProviderDescriptor,
   agentProviderName,
   isAgentProvider,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 
 export type AccountUsageTone = "neutral" | "warning" | "critical";
 

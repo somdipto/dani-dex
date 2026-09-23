@@ -1,5 +1,5 @@
-import { parseInviteUrl } from "@openbot/contracts/invite-links";
-import { userErrorMessage as errorMessage } from "@openbot/user-errors";
+import { parseInviteUrl } from "@dani-dex/contracts/invite-links";
+import { userErrorMessage as errorMessage } from "@dani-dex/user-errors";
 import { router } from "expo-router";
 import { Button, Typography } from "heroui-native";
 import { useThemeColor } from "heroui-native/hooks";

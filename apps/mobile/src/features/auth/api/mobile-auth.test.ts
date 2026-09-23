@@ -1,4 +1,4 @@
-import { createMobileConnectUrl } from "@openbot/contracts/mobile-connect";
+import { createMobileConnectUrl } from "@dani-dex/contracts/mobile-connect";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveSessionValidation } from "../context/session-validation";
 import {

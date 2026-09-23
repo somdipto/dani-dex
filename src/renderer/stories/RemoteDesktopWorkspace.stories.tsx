@@ -1,4 +1,4 @@
-import type { RemoteDesktopSession } from "@openbot/contracts/ipc";
+import type { RemoteDesktopSession } from "@dani-dex/contracts/ipc";
 import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { RemoteDesktopWorkspace } from "../src/features/remote-desktop/RemoteDesktopWorkspace";

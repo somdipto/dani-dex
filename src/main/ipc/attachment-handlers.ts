@@ -10,19 +10,19 @@ import {
   IMAGE_ATTACHMENT_EXTENSIONS,
   MEDIA_ATTACHMENT_EXTENSIONS,
   supportedAttachmentExtensions,
-} from "@openbot/contracts/attachment-files";
-import { ATTACHMENT_LIMITS, INPUT_LIMITS } from "@openbot/contracts/input-limits";
+} from "@dani-dex/contracts/attachment-files";
+import { ATTACHMENT_LIMITS, INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   type DownloadAttachmentsInput,
   type FilePreview,
   type ImportAttachmentsInput,
   LOCAL_SERVER_ID,
-} from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+} from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import {
   TEAM_EML_ATTACHMENTS_CAPABILITY,
   TEAM_MEDIA_ATTACHMENTS_CAPABILITY,
-} from "@openbot/contracts/team-protocol/current";
+} from "@dani-dex/contracts/team-protocol/current";
 import { app, type BrowserWindow, dialog, type OpenDialogOptions, shell } from "electron";
 import { type Zippable, zip } from "fflate";
 import type { AgentService } from "../../backend/agent-service";

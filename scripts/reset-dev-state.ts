@@ -2,7 +2,7 @@ import { lstat, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, parse, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import { type DevelopmentProfile, developmentUserDataName } from "../src/main/development-profile";
 import { resolveDevelopmentAppDataRoot } from "./development-state-paths";
 import { cleanupSeedOwnedTransfers } from "./seed-dev-state";

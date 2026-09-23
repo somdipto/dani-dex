@@ -1,4 +1,4 @@
-import { TEAM_AGENT_CREATE_MODEL_CAPABILITY } from "@openbot/contracts/team-protocol/current";
+import { TEAM_AGENT_CREATE_MODEL_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
 import { desktopAnalytics } from "../../analytics";
 import { toAgentProfile, withoutAgent } from "../../app-message-projection";
 import { createStoredProfile } from "../../app-stored-values";
@@ -73,7 +73,7 @@ const AgentActions = createSimpleContext({
         // work. A remote host without the capability drops the pair and starts its own default.
         const createModelSupported =
           activeServer()?.kind !== "remote" || activeServerSupportsCapability(TEAM_AGENT_CREATE_MODEL_CAPABILITY);
-        const stored = await window.openbot.agent.createAgent({
+        const stored = await window.danidex.agent.createAgent({
           name: submitted.name.trim(),
           description: submitted.purpose.trim() || "General-purpose assistant",
           avatarSeed: submitted.avatarSeed,
@@ -110,7 +110,7 @@ const AgentActions = createSimpleContext({
       const properties = analyticsAgentProperties(agentId);
       setDuplicatingAgentIds((current) => new Set(current).add(agentId));
       try {
-        const result = await window.openbot.agent.duplicateAgent(agentId);
+        const result = await window.danidex.agent.duplicateAgent(agentId);
         if (!scopeIsCurrent()) return;
         const profile = createStoredProfile(toAgentProfile(result.agent));
         setAgentList((current) => [profile, ...current.filter((candidate) => candidate.id !== profile.id)]);
@@ -144,7 +144,7 @@ const AgentActions = createSimpleContext({
       const properties = analyticsAgentProperties(agentId);
       const marketplaceAgent = Boolean(agentList().find((agent) => agent.id === agentId)?.marketplaceSource);
       try {
-        await window.openbot.agent.deleteAgent(agentId);
+        await window.danidex.agent.deleteAgent(agentId);
         const remaining = agentList().filter((agent) => agent.id !== agentId);
         setAgentList(remaining);
         setActiveAgentId((current) => (current === agentId ? (remaining[0]?.id ?? "") : current));

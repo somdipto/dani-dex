@@ -1,5 +1,5 @@
-import { createInviteUrl } from "@openbot/contracts/invite-links";
-import { createOpenBotPluginUrl, createPluginShareUrl } from "@openbot/contracts/plugin-links";
+import { createInviteUrl } from "@dani-dex/contracts/invite-links";
+import { createOpenBotPluginUrl, createPluginShareUrl } from "@dani-dex/contracts/plugin-links";
 import { describe, expect, it } from "vitest";
 import { findDeepLink, MCP_OAUTH_REDIRECT_URL, parseDeepLink } from "./deep-link-router";
 

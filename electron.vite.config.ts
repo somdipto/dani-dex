@@ -10,7 +10,7 @@ export default defineConfig({
     // Workspace sources ship as TypeScript and must be bundled for the packaged app.
     plugins: [
       externalizeDepsPlugin({
-        exclude: ["@openbot/contracts", "@openbot/i18n", "@openbot/logging", "@openbot/team-client"],
+        exclude: ["@dani-dex/contracts", "@dani-dex/i18n", "@dani-dex/logging", "@dani-dex/team-client"],
       }),
     ],
     build: {
@@ -25,7 +25,7 @@ export default defineConfig({
     },
   },
   preload: {
-    plugins: [externalizeDepsPlugin({ exclude: ["@openbot/contracts"] })],
+    plugins: [externalizeDepsPlugin({ exclude: ["@dani-dex/contracts"] })],
     build: {
       rollupOptions: {
         input: {

@@ -1,4 +1,4 @@
-import type { AccountUsage, AgentSummary, ServerSummary, UpdateStatus } from "@openbot/contracts/ipc";
+import type { AccountUsage, AgentSummary, ServerSummary, UpdateStatus } from "@dani-dex/contracts/ipc";
 import { Portal } from "@solidjs/web";
 import { createEffect, createSignal, onCleanup, onSettled, Show } from "solid-js";
 import { fn } from "storybook/test";

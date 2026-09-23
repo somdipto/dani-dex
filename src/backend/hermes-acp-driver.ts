@@ -1,6 +1,6 @@
 import type { ClientSideConnection, InitializeResponse } from "@agentclientprotocol/sdk";
-import type { AgentHarnessId } from "@openbot/contracts/agent-harnesses";
-import { type AgentProviderId, agentProviderName } from "@openbot/contracts/agent-providers";
+import type { AgentHarnessId } from "@dani-dex/contracts/agent-harnesses";
+import { type AgentProviderId, agentProviderName } from "@dani-dex/contracts/agent-providers";
 import { AcpAgentClient } from "./acp-client";
 import type { AgentCliInfo } from "./cli";
 import { resolveHermesCli } from "./hermes-cli";

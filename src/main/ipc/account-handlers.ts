@@ -1,6 +1,6 @@
 // The cloud account: email sign-in, profile, and the mobile devices connected to it.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { CentralAuthManager } from "../central-auth-manager";
 import type { HostService } from "../host-service";
 import { createHostedMobileConnect } from "../mobile-connect-host";

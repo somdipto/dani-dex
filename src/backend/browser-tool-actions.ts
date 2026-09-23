@@ -1,4 +1,4 @@
-import type { BrowserTarget } from "@openbot/contracts/ipc";
+import type { BrowserTarget } from "@dani-dex/contracts/ipc";
 import type { BrowserCdpEngine } from "./browser-cdp";
 import type { BrowserToolCall } from "./browser-tools";
 

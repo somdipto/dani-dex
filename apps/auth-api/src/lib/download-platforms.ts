@@ -1,4 +1,4 @@
-import type { PlatformLogoVariant } from "@openbot/brand";
+import type { PlatformLogoVariant } from "@dani-dex/brand";
 import { OPENBOT_DOWNLOAD_LINKS } from "./landing-links";
 
 export type DownloadPlatform = PlatformLogoVariant;

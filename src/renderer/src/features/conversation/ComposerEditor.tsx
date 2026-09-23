@@ -1,7 +1,11 @@
-import { attachmentReferenceIds, serializeAttachmentReference } from "@openbot/contracts/attachment-references";
-import { type ChatTagKind, chatTagReferences, serializeChatTagReference } from "@openbot/contracts/chat-tag-references";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { DraftAttachment, InstalledSkill, McpServerConfig } from "@openbot/contracts/ipc";
+import { attachmentReferenceIds, serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
+import {
+  type ChatTagKind,
+  chatTagReferences,
+  serializeChatTagReference,
+} from "@dani-dex/contracts/chat-tag-references";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { DraftAttachment, InstalledSkill, McpServerConfig } from "@dani-dex/contracts/ipc";
 import { Dynamic, Portal } from "@solidjs/web";
 import { createEffect, createMemo, createSignal, createUniqueId, onCleanup, Show } from "solid-js";
 import { createStaticAvatarSvg } from "../../bloub-avatar";

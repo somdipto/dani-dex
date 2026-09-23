@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { RoutineFields, RoutineRunFields, RoutineSchedule } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { RoutineFields, RoutineRunFields, RoutineSchedule } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 import { type DesktopAnalyticsScope, desktopAnalytics } from "../../analytics";
 import { createScrollFades } from "../../components/createScrollFades";

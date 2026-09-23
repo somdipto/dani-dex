@@ -3,7 +3,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { ChannelRoutine, ChannelRoutineRun, ChannelTask } from "@openbot/contracts/ipc";
+import type { ChannelRoutine, ChannelRoutineRun, ChannelTask } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stores } from "./agent-service-test-harness";
 import { ChannelRoutineScheduler, channelRunStatusForTasks } from "./channel-routine-scheduler";

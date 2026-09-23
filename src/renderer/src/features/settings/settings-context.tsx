@@ -1,4 +1,4 @@
-import { type ApprovalAutomationPreference, agentAutoApprovalEnabled } from "@openbot/contracts/ipc";
+import { type ApprovalAutomationPreference, agentAutoApprovalEnabled } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { toast } from "../../components/ui";
@@ -98,7 +98,7 @@ const Settings = createSimpleContext({
       if (previous.productAnalytics !== value.productAnalytics) {
         desktopAnalytics.setTrackingEnabled(value.productAnalytics);
         setAnalyticsPreferenceLoaded(value.productAnalytics);
-        void window.openbot
+        void window.danidex
           .setAnalyticsPreference({ enabled: value.productAnalytics })
           .then((preference) => {
             desktopAnalytics.setTrackingEnabled(preference.enabled);
@@ -114,7 +114,7 @@ const Settings = createSimpleContext({
       if (previous.turboMode !== turboMode) {
         turboModeChanged = true;
         setTurboModePending(true);
-        void window.openbot
+        void window.danidex
           .setApprovalAutomation({ turbo: turboMode })
           .then((preference) => {
             setGeneralSettings((current) => ({ ...current, turboMode: preference.turbo }));
@@ -132,7 +132,7 @@ const Settings = createSimpleContext({
       }
       if (previous.autoDownloadUpdates !== value.autoDownloadUpdates) {
         autoDownloadUpdatesChanged = true;
-        void window.openbot.update
+        void window.danidex.update
           .setPreference({ autoDownload: value.autoDownloadUpdates })
           .then((preference) =>
             setGeneralSettings((current) => ({ ...current, autoDownloadUpdates: preference.autoDownload })),
@@ -147,7 +147,7 @@ const Settings = createSimpleContext({
         previous.macBookNotchIdle !== value.macBookNotchIdle ||
         previous.macBookNotchAdditionalDisplays !== value.macBookNotchAdditionalDisplays
       ) {
-        void window.openbot.dynamicIsland
+        void window.danidex.dynamicIsland
           .setPreference({
             enabled: value.macBookNotch,
             hapticsEnabled: value.macBookNotchHaptics,
@@ -184,7 +184,7 @@ const Settings = createSimpleContext({
      * stored - accepting first would leave an agent the user believes is trusted still asking.
      */
     async function setAgentAutoApprove(agentId: string, autoApprove: boolean): Promise<void> {
-      const preference = await window.openbot.setApprovalAutomation({ agentId, autoApprove });
+      const preference = await window.danidex.setApprovalAutomation({ agentId, autoApprove });
       setApprovalAutomation(preference);
       setGeneralSettings((current) => ({ ...current, turboMode: preference.turbo }));
     }
@@ -210,7 +210,7 @@ const Settings = createSimpleContext({
         openAppSettings(event.target instanceof HTMLElement ? event.target : null);
       };
       window.addEventListener("keydown", handleSettingsShortcut);
-      const unsubscribe = window.openbot.onOpenSettings(() => openAppSettings());
+      const unsubscribe = window.danidex.onOpenSettings(() => openAppSettings());
       return () => {
         window.removeEventListener("keydown", handleSettingsShortcut);
         unsubscribe();
@@ -218,7 +218,7 @@ const Settings = createSimpleContext({
     });
 
     onSettled(() => {
-      void window.openbot
+      void window.danidex
         .getAnalyticsPreference()
         .then((preference) => {
           setAnalyticsPreferenceLoaded(preference.enabled);
@@ -228,7 +228,7 @@ const Settings = createSimpleContext({
           setAnalyticsPreferenceLoaded(false);
           setGeneralSettings((current) => ({ ...current, productAnalytics: false }));
         });
-      void window.openbot
+      void window.danidex
         .getApprovalAutomation()
         .then((preference) => {
           setApprovalAutomation(preference);
@@ -238,7 +238,7 @@ const Settings = createSimpleContext({
           setGeneralSettings((current) => ({ ...current, turboMode: preference.turbo }));
         })
         .catch(() => undefined);
-      void window.openbot.update
+      void window.danidex.update
         .getPreference()
         .then((preference) => {
           // A toggle made before this read resolves has already been persisted, so the older value
@@ -247,7 +247,7 @@ const Settings = createSimpleContext({
           setGeneralSettings((current) => ({ ...current, autoDownloadUpdates: preference.autoDownload }));
         })
         .catch(() => undefined);
-      void window.openbot.dynamicIsland
+      void window.danidex.dynamicIsland
         .getPreference()
         .then((preference) =>
           setGeneralSettings((current) => ({

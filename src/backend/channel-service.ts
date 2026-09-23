@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { realpathSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, normalize, sep } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   type AgentEvent,
   type AgentSummary,
@@ -19,8 +19,8 @@ import {
   type DeleteChannelMemoryInput,
   type QueueHold,
   type UpdateChannelMemoryInput,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { z } from "zod";
 import { ChannelHistory, type ChannelTextModel } from "./channel-history";
 import { ChannelMemoryStore } from "./channel-memory-store";

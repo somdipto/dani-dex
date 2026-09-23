@@ -5,7 +5,7 @@ import type {
   ServerSummary,
   TeamInviteSummary,
   TeamPresenceMember,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -241,7 +241,7 @@ describe("ServerSettingsModal", () => {
 
   it.each([true, false])("offers both permissions before or after a refusal: %s", async (denied) => {
     const mock = createMockOpenBot();
-    vi.stubGlobal("openbot", mock.api);
+    vi.stubGlobal("danidex", mock.api);
     const open = vi.spyOn(mock.api.remoteDesktop, "openSetup");
     render(() => (
       <ServerSettingsModal
@@ -258,7 +258,7 @@ describe("ServerSettingsModal", () => {
 
   it("reads Sunshine permissions again after the owner returns from macOS settings", async () => {
     const mock = createMockOpenBot();
-    vi.stubGlobal("openbot", mock.api);
+    vi.stubGlobal("danidex", mock.api);
     const check = vi.spyOn(mock.api.remoteDesktop, "checkSetup");
     render(() => <ServerSettingsModal {...props({ hostStatus: configuredHost })} />);
     await fireEvent.click(screen.getByRole("tab", { name: "Remote desktop" }));
@@ -284,7 +284,7 @@ describe("ServerSettingsModal", () => {
     "separates video confirmation from mouse and keyboard results and closes its test session",
     async (localTest) => {
       const mock = createMockOpenBot({ remoteDesktopSessions: [] });
-      vi.stubGlobal("openbot", mock.api);
+      vi.stubGlobal("danidex", mock.api);
       const originalCheck = mock.api.remoteDesktop.checkSetup;
       mock.api.remoteDesktop.checkSetup = async (serverId) => ({
         ...(await originalCheck(serverId)),
@@ -343,8 +343,8 @@ describe("ServerSettingsModal", () => {
 
   it("runs a local video test without native permission diagnostics", async () => {
     const mock = createMockOpenBot({ remoteDesktopSessions: [] });
-    vi.stubGlobal("openbot", mock.api);
-    window.openbot = mock.api;
+    vi.stubGlobal("danidex", mock.api);
+    window.danidex = mock.api;
     const test = vi.spyOn(mock.api.remoteDesktop, "test");
     const disconnect = vi.spyOn(mock.api.remoteDesktop, "disconnect");
     render(() => <ServerSettingsModal {...props()} />);
@@ -374,7 +374,7 @@ describe("ServerSettingsModal", () => {
 
   it("removes a previous allowed result when the next check fails", async () => {
     const mock = createMockOpenBot();
-    vi.stubGlobal("openbot", mock.api);
+    vi.stubGlobal("danidex", mock.api);
     const check = vi.spyOn(mock.api.remoteDesktop, "checkSetup");
     render(() => <ServerSettingsModal {...props({ hostStatus: configuredHost })} />);
     await fireEvent.click(screen.getByRole("tab", { name: "Remote desktop" }));

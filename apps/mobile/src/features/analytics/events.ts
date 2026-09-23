@@ -1,5 +1,5 @@
-import { AGENT_PROVIDERS, AGENT_REASONING_EFFORTS, isAgentModel } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isBoolean, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { AGENT_PROVIDERS, AGENT_REASONING_EFFORTS, isAgentModel } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isBoolean, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 
 const result = ["succeeded", "failed", "cancelled"] as const;
 const count = (value: unknown) => isNumber(value) && Number.isSafeInteger(value) && value >= 0 && value <= 1_000_000;

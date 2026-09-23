@@ -1,7 +1,7 @@
 // @vitest-environment node
 
-import type { AgentEvent, AgentSummary } from "@openbot/contracts/ipc";
-import { translateFor } from "@openbot/i18n";
+import type { AgentEvent, AgentSummary } from "@dani-dex/contracts/ipc";
+import { translateFor } from "@dani-dex/i18n";
 import { describe, expect, it } from "vitest";
 import { notificationForAgentEvent } from "./agent-notifications";
 

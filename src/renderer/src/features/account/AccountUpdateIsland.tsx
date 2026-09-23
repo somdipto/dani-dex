@@ -1,5 +1,5 @@
-import type { UpdateStatus } from "@openbot/contracts/ipc";
-import { isUpdateActivePhase, isUpdateBusyPhase } from "@openbot/contracts/ipc";
+import type { UpdateStatus } from "@dani-dex/contracts/ipc";
+import { isUpdateActivePhase, isUpdateBusyPhase } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
 import { Button, Download, RefreshCw, Spinner } from "../../components/ui";
 import { createDigitRoll } from "../../digit-roll";

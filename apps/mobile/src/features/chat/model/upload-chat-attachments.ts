@@ -1,4 +1,4 @@
-import type { RemoteFileUpload } from "@openbot/team-client/remote-peer";
+import type { RemoteFileUpload } from "@dani-dex/team-client/remote-peer";
 import type { ChatMessage } from "./chat-messages";
 
 /** Keep the ordered draft IDs together until send commits them to one message. */

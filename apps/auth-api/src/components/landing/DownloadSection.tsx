@@ -1,4 +1,4 @@
-import { PlatformLogo, type PlatformLogoVariant } from "@openbot/brand";
+import { PlatformLogo, type PlatformLogoVariant } from "@dani-dex/brand";
 import { Show } from "solid-js";
 import { DOWNLOAD_PLATFORMS } from "../../lib/download-platforms";
 import { createLandingReveal } from "./createLandingReveal";

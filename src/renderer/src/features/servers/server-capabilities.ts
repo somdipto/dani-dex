@@ -1,5 +1,5 @@
-import type { ServerSummary } from "@openbot/contracts/ipc";
-import type { TeamCurrentCapability } from "@openbot/contracts/team-protocol/current";
+import type { ServerSummary } from "@dani-dex/contracts/ipc";
+import type { TeamCurrentCapability } from "@dani-dex/contracts/team-protocol/current";
 
 /**
  * Whether a server can be asked for a capability-gated feature. A local server

@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { InstalledSkill, MarketplaceSkillDetail } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { InstalledSkill, MarketplaceSkillDetail } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, For, onSettled, Show } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { createScrollFades } from "../../components/createScrollFades";
@@ -86,8 +86,8 @@ export function AgentSkillsModal(props: AgentSkillsModalProps) {
     try {
       const next = userAssignedSkills(
         skillsMode() === "readonly"
-          ? await window.openbot.agent.listInstalledSkills(agentId)
-          : await window.openbot.skills.listInstalled(agentId),
+          ? await window.danidex.agent.listInstalledSkills(agentId)
+          : await window.danidex.skills.listInstalled(agentId),
       );
       if (request !== listRequest || agentId !== props.agentId || !props.open) return;
       setSkills(next);
@@ -124,8 +124,8 @@ export function AgentSkillsModal(props: AgentSkillsModalProps) {
   async function loadCatalog(): Promise<void> {
     try {
       const [marketplace, local] = await Promise.allSettled([
-        window.openbot.skills.list({ limit: 50 }),
-        mutable() ? window.openbot.skills.localList() : Promise.resolve([]),
+        window.danidex.skills.list({ limit: 50 }),
+        mutable() ? window.danidex.skills.localList() : Promise.resolve([]),
       ]);
       const page = {
         skills: [
@@ -162,8 +162,8 @@ export function AgentSkillsModal(props: AgentSkillsModalProps) {
     }
     try {
       const next = skill.skillId.startsWith("local-skill-")
-        ? await window.openbot.skills.localGet({ skillId: skill.skillId, revision: skill.installedVersion })
-        : await window.openbot.skills.get(skill.skillId);
+        ? await window.danidex.skills.localGet({ skillId: skill.skillId, revision: skill.installedVersion })
+        : await window.danidex.skills.get(skill.skillId);
       if (request === detailRequest) setDetail(next);
     } catch (caught) {
       if (request === detailRequest) setError(errorMessage(caught, "Could not load skill details."));
@@ -192,7 +192,7 @@ export function AgentSkillsModal(props: AgentSkillsModalProps) {
     setSavingId(skill.skillId);
     setError(null);
     try {
-      await window.openbot.skills.setEnabled({ agentId: props.agentId, skillId: skill.skillId, enabled });
+      await window.danidex.skills.setEnabled({ agentId: props.agentId, skillId: skill.skillId, enabled });
       analytics.track("marketplace_action", { entity: "skill", action, result: "succeeded" });
       operationSucceeded = true;
       await loadSkills(false);
@@ -219,7 +219,7 @@ export function AgentSkillsModal(props: AgentSkillsModalProps) {
     setSavingId(skill.skillId);
     setError(null);
     try {
-      await window.openbot.skills.uninstall({
+      await window.danidex.skills.uninstall({
         agentId: props.agentId,
         skillId: skill.skillId,
         ...(removeModified ? { removeModified: true } : {}),
@@ -250,7 +250,7 @@ export function AgentSkillsModal(props: AgentSkillsModalProps) {
     setSavingId(skill.skillId);
     setError(null);
     try {
-      await window.openbot.skills.install({
+      await window.danidex.skills.install({
         agentId: props.agentId,
         skillId: skill.skillId,
         ...(replaceModified ? { replaceModified: true } : {}),

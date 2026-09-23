@@ -1,3 +1,4 @@
+import type { AvatarHue } from "@dani-dex/contracts/ipc";
 import {
   COLOR_BY_ID,
   type ColorId,
@@ -6,7 +7,6 @@ import {
   SHAPES,
   type ShapeId,
 } from "@norbert_bodziony/bloub";
-import type { AvatarHue } from "@openbot/contracts/ipc";
 
 export type SupportedAvatarSilhouetteId = Exclude<ShapeId, "goutte">;
 

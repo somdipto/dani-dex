@@ -1,6 +1,6 @@
-import type { AgentEvent, TeamRealtimeEvent } from "@openbot/contracts/ipc";
-import { type RemoteRecoveryStatus, RemoteTeamDirectoryClient } from "@openbot/team-client";
-import type { RemoteTeamConnectionUpdate } from "@openbot/team-client/remote-peer";
+import type { AgentEvent, TeamRealtimeEvent } from "@dani-dex/contracts/ipc";
+import { type RemoteRecoveryStatus, RemoteTeamDirectoryClient } from "@dani-dex/team-client";
+import type { RemoteTeamConnectionUpdate } from "@dani-dex/team-client/remote-peer";
 import { act, useImperativeHandle, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";

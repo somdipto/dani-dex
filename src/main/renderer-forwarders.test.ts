@@ -1,7 +1,7 @@
 // @vitest-environment node
 
-import type { AgentEvent, AgentSummary, ServerSummary } from "@openbot/contracts/ipc";
-import { translateFor } from "@openbot/i18n";
+import type { AgentEvent, AgentSummary, ServerSummary } from "@dani-dex/contracts/ipc";
+import { translateFor } from "@dani-dex/i18n";
 import { BrowserWindow } from "electron";
 import { beforeEach, expect, it, vi } from "vitest";
 import type { AgentNotificationContent } from "./agent-notifications";

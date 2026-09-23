@@ -11,9 +11,9 @@ import { constants } from "node:fs";
 import { copyFile, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { promisify } from "node:util";
-import { avatarFileExtension, isAvatarMimeType, isValidAvatarImage } from "@openbot/contracts/avatar-images";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { permanentInviteExpiresAt } from "@openbot/contracts/invite-links";
+import { avatarFileExtension, isAvatarMimeType, isValidAvatarImage } from "@dani-dex/contracts/avatar-images";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { permanentInviteExpiresAt } from "@dani-dex/contracts/invite-links";
 import type {
   AvatarImageInput,
   CentralAuthUser,
@@ -21,9 +21,9 @@ import type {
   TeamMemberSummary,
   TeamRole,
   TeamSessionSummary,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import { normalizeEmailAddress, slugifyTeamServerName } from "@openbot/contracts/validation";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { normalizeEmailAddress, slugifyTeamServerName } from "@dani-dex/contracts/validation";
 
 const scrypt = promisify(scryptCallback);
 const INVITE_TTL_MS = 24 * 60 * 60 * 1_000;

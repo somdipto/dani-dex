@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { AgentSummary, McpServerConfig } from "@openbot/contracts/ipc";
-import type { DynamicRecord } from "@openbot/contracts/runtime-values";
+import type { AgentSummary, McpServerConfig } from "@dani-dex/contracts/ipc";
+import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
 import type { AgentClient, AgentProvider } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import { BROWSER_DYNAMIC_TOOLS } from "../browser-tools";

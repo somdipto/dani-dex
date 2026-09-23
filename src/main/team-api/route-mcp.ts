@@ -1,5 +1,5 @@
-import { MCP_SERVERS_CAPABILITY } from "@openbot/contracts/ipc";
-import { MCP_ROUTES, mcpRequest } from "@openbot/contracts/team-protocol/mcp-v1";
+import { MCP_SERVERS_CAPABILITY } from "@dani-dex/contracts/ipc";
+import { MCP_ROUTES, mcpRequest } from "@dani-dex/contracts/team-protocol/mcp-v1";
 import {
   parseRemoveMcpServer,
   parseSaveMcpServer,

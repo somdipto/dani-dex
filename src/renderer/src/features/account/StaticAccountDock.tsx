@@ -1,4 +1,4 @@
-import type { CentralAuthUser } from "@openbot/contracts/ipc";
+import type { CentralAuthUser } from "@dani-dex/contracts/ipc";
 import { createMemo, Show } from "solid-js";
 import { TypingDots } from "../../components/TypingDots";
 import { Gauge, UserAvatar } from "../../components/ui";

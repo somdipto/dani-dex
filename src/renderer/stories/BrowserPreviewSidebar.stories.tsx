@@ -42,15 +42,15 @@ const meta = {
   },
   decorators: [
     (Story) => {
-      const previous = window.openbot;
-      window.openbot = createMockOpenBot({
+      const previous = window.danidex;
+      window.danidex = createMockOpenBot({
         browserPreviews: {
           docs: { dataUrl: browserPreviewUrl, width: 960, height: 600 },
           settings: null,
         },
       }).api;
       onSettled(() => () => {
-        window.openbot = previous;
+        window.danidex = previous;
       });
       return (
         <div style="--browser-panel-width: 320px">

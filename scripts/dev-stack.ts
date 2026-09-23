@@ -7,7 +7,7 @@
 
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createOpenBotLogger, redactText, toLogValue } from "@openbot/logging";
+import { createOpenBotLogger, redactText, toLogValue } from "@dani-dex/logging";
 import {
   type DevInstanceRecord,
   describeDevInstance,

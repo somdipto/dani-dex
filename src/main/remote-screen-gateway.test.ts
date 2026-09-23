@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import { connect } from "node:net";
 import { dirname, join } from "node:path";
 import type { Duplex } from "node:stream";
-import type { RemoteDesktopIceServer } from "@openbot/contracts/ipc";
+import type { RemoteDesktopIceServer } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type * as Ws from "ws";
 import { z } from "zod";

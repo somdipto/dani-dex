@@ -1,4 +1,4 @@
-import { type ComputerUseState, LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
+import { type ComputerUseState, LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, waitFor, within } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-openbot";
@@ -6,12 +6,12 @@ import { ComputerUsePermissionHelp } from "./ComputerUsePermissionHelp";
 import { ComputerUseSetup } from "./ComputerUseSetup";
 
 let mock: MockOpenBotControls | undefined;
-const previousApi = window.openbot;
+const previousApi = window.danidex;
 
 afterEach(() => {
   mock?.dispose();
   mock = undefined;
-  window.openbot = previousApi;
+  window.danidex = previousApi;
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
@@ -31,7 +31,7 @@ function state(overrides: Partial<ComputerUseState>): ComputerUseState {
 describe("ComputerUseSetup", () => {
   it("opens the pane for the permission whose button was pressed", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const openPane = vi.spyOn(mock.api, "openComputerUsePermissionPane");
     const view = render(() => <ComputerUseSetup variant="settings" />);
 
@@ -53,7 +53,7 @@ describe("ComputerUseSetup", () => {
         ],
       }),
     );
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const view = render(() => <ComputerUseSetup variant="compact" />);
 
     expect(await view.findByText("Granted")).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe("ComputerUseSetup", () => {
       .mockResolvedValueOnce(state({}))
       .mockResolvedValue(state({ status: "ready", permissions: [{ id: "screen-recording", granted: true }] }));
     mock.api.getComputerUseState = read;
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const view = render(() => <ComputerUseSetup variant="compact" />);
 
     await view.findByRole("button", { name: "Check again" });
@@ -93,7 +93,7 @@ describe("ComputerUseSetup", () => {
       .mockResolvedValue(
         state({ status: "driver-missing", message: "This build of Dani-Dex carries no Computer Use driver." }),
       );
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const view = render(() => <ComputerUseSetup variant="compact" />);
 
     expect(await view.findByText("Computer Use isn’t available yet")).toBeInTheDocument();
@@ -107,7 +107,7 @@ describe("ComputerUseSetup", () => {
   it("reports ready without permission rows where the system grants none", async () => {
     mock = createMockOpenBot();
     mock.api.getComputerUseState = vi.fn().mockResolvedValue(state({ status: "ready", permissions: [] }));
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const view = render(() => <ComputerUseSetup variant="settings" />);
 
     expect(await view.findByText("Computer Use is ready")).toBeInTheDocument();
@@ -119,7 +119,7 @@ describe("ComputerUseSetup", () => {
 describe("Sunshine permission help", () => {
   it("reads Sunshine permissions and shows its bundle instead of the Computer Use application", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     mock.api.getComputerUsePermissionApp = async () => ({ name: "Sunshine", iconDataUrl: null });
     const readSunshine = vi.spyOn(mock.api.remoteDesktop, "checkSetup");
     const readComputerUse = vi.spyOn(mock.api, "getComputerUseState");

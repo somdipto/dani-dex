@@ -1,4 +1,4 @@
-import type { InstalledSkill, MarketplaceSkillDetail } from "@openbot/contracts/ipc";
+import type { InstalledSkill, MarketplaceSkillDetail } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, createStore, For, onSettled, Show } from "solid-js";
 import { SkillPreview } from "../../components/SkillPreview";
 import { Button, Switch } from "../../components/ui";
@@ -36,7 +36,7 @@ export function LocalSkillsLibrary(props: {
     () => {
       let disposed = false;
       setState((current) => ({ ...current, loading: true, error: "", selected: null }));
-      void window.openbot.skills.localList().then(
+      void window.danidex.skills.localList().then(
         (skills) => {
           if (!disposed)
             setState((current) => ({
@@ -63,9 +63,9 @@ export function LocalSkillsLibrary(props: {
     setState((current) => ({ ...current, busy: true, error: "" }));
     try {
       if (!assigned && enabled) {
-        await window.openbot.skills.localInstall({ agentId, skillId: skill.id, revision: skill.version });
+        await window.danidex.skills.localInstall({ agentId, skillId: skill.id, revision: skill.version });
       } else if (assigned) {
-        await window.openbot.skills.setEnabled({ agentId, skillId: skill.id, enabled });
+        await window.danidex.skills.setEnabled({ agentId, skillId: skill.id, enabled });
       }
       if (active && props.agentId === agentId) await props.onInstalled();
     } catch (error) {
@@ -82,7 +82,7 @@ export function LocalSkillsLibrary(props: {
     const agentId = props.agentId;
     setState((current) => ({ ...current, busy: true, error: "" }));
     try {
-      await window.openbot.skills.localInstall({ agentId, skillId: skill.id, revision: skill.version });
+      await window.danidex.skills.localInstall({ agentId, skillId: skill.id, revision: skill.version });
       if (!active || props.agentId !== agentId) return;
       await props.onInstalled();
     } catch (error) {
@@ -99,7 +99,7 @@ export function LocalSkillsLibrary(props: {
     setState((current) => ({ ...current, busy: true, error: "" }));
     try {
       if (installed()?.enabled === false)
-        await window.openbot.skills.setEnabled({ agentId, skillId: skill.id, enabled: true });
+        await window.danidex.skills.setEnabled({ agentId, skillId: skill.id, enabled: true });
       if (!active || props.agentId !== agentId) return;
       await props.onInstalled();
       if (active && props.agentId === agentId && state.selected?.id === skill.id) props.onTry?.(skill);

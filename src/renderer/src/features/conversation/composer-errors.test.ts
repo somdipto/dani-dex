@@ -1,4 +1,4 @@
-import { serializeChatTagReference } from "@openbot/contracts/chat-tag-references";
+import { serializeChatTagReference } from "@dani-dex/contracts/chat-tag-references";
 import { createRoot, createSignal } from "solid-js";
 import { describe, expect, it } from "vitest";
 import { appendPluginPrompt, appendSkillCreationRequest, appendSkillExample, EMPTY_DRAFT } from "./composer-draft";

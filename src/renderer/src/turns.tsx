@@ -1,4 +1,4 @@
-import type { AgentApproval, AgentEvent, QueueSnapshot } from "@openbot/contracts/ipc";
+import type { AgentApproval, AgentEvent, QueueSnapshot } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal } from "solid-js";
 import { desktopAnalytics } from "./analytics";
 import { useAnsweredPrompts } from "./answered-prompts";
@@ -91,7 +91,7 @@ const Turns = createSimpleContext({
       const request = (routineSnapshotRequests.get(key) ?? 0) + 1;
       routineSnapshotRequests.set(key, request);
       setRoutineIdsByConversation((current) => ({ ...current, [key]: undefined }));
-      void window.openbot.agent
+      void window.danidex.agent
         .listRoutines(agentId)
         .then((routines) => {
           if (routineSnapshotRequests.get(key) !== request) return;
@@ -113,7 +113,7 @@ const Turns = createSimpleContext({
         if (!agentId) return;
         const queueRequest = (queueSnapshotRequests.get(agentId) ?? 0) + 1;
         queueSnapshotRequests.set(agentId, queueRequest);
-        void window.openbot.agent
+        void window.danidex.agent
           .listQueue(agentId)
           .then((queue) => {
             if (!scopeIsCurrent() || queueSnapshotRequests.get(agentId) !== queueRequest) return;
@@ -144,7 +144,7 @@ const Turns = createSimpleContext({
         [agentId]: promptRequestKey(prompt.turnId, prompt.requestId) ?? undefined,
       }));
       try {
-        await window.openbot.agent.respondToPrompt({
+        await window.danidex.agent.respondToPrompt({
           requestId: prompt.requestId,
           answers,
         });
@@ -177,7 +177,7 @@ const Turns = createSimpleContext({
       if (!approval || String(approval.requestId) !== String(requestId)) return false;
       const analytics = desktopAnalytics.scope();
       try {
-        await window.openbot.agent.respondToApproval({
+        await window.danidex.agent.respondToApproval({
           requestId: approval.requestId,
           decision,
         });
@@ -209,7 +209,7 @@ const Turns = createSimpleContext({
       if (!agent || event?.type !== "browser-takeover-requested") return false;
       const serverId = activeServerId();
       try {
-        await window.openbot.agent.respondToBrowserTakeover({ requestId: event.request.requestId, decision });
+        await window.danidex.agent.respondToBrowserTakeover({ requestId: event.request.requestId, decision });
         setPendingPrompts((current) => ({ ...current, [agent.id]: undefined }));
         return true;
       } catch (error) {
@@ -223,7 +223,7 @@ const Turns = createSimpleContext({
       if (!agent) return;
       const serverId = activeServerId();
       const analytics = desktopAnalytics.scope();
-      void window.openbot.agent
+      void window.danidex.agent
         .cancelQueuedMessage({ agentId: agent.id, deliveryId })
         .then(() => analytics.track("queue_action", { action: "cancel", result: "succeeded" }))
         .catch((error) => {
@@ -238,7 +238,7 @@ const Turns = createSimpleContext({
       if (!agent || !turnId) return;
       const serverId = activeServerId();
       const analytics = desktopAnalytics.scope();
-      void window.openbot.agent
+      void window.danidex.agent
         .steerQueuedMessage({ agentId: agent.id, deliveryId, expectedTurnId: turnId })
         .then(() => analytics.track("queue_action", { action: "steer", result: "succeeded" }))
         .catch((error) => {
@@ -266,7 +266,7 @@ const Turns = createSimpleContext({
           keepAttachmentIds,
           attachmentDraftIds,
         };
-        await window.openbot.agent.updateQueuedMessage(input, serverId);
+        await window.danidex.agent.updateQueuedMessage(input, serverId);
         analytics.track("queue_action", { action: "edit", result: "succeeded" });
         return true;
       } catch (error) {
@@ -281,7 +281,7 @@ const Turns = createSimpleContext({
       if (!agent) return;
       const serverId = activeServerId();
       const analytics = desktopAnalytics.scope();
-      void window.openbot.agent
+      void window.danidex.agent
         .reorderQueue({ agentId: agent.id, deliveryIds })
         .then(() => analytics.track("queue_action", { action: "reorder", result: "succeeded" }))
         .catch((error) => {
@@ -296,7 +296,7 @@ const Turns = createSimpleContext({
       if (!agent || !turnId) return;
       const serverId = activeServerId();
       const analytics = desktopAnalytics.scope();
-      void window.openbot.agent
+      void window.danidex.agent
         .interrupt({ agentId: agent.id, turnId })
         .then(() => analytics.track("queue_action", { action: "interrupt", result: "succeeded" }))
         .catch((error) => {

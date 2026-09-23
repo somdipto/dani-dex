@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import type { AgentSummary } from "@openbot/contracts/ipc";
+import type { AgentSummary } from "@dani-dex/contracts/ipc";
 import { zipSync } from "fflate";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { CentralAuthManager } from "./central-auth-manager";

@@ -21,7 +21,7 @@ import { createMockOpenBot } from "./mock-openbot";
  *
  * The channel body is written out here rather than mounted from `ChannelEditor`, because that
  * component reads the channels context, which needs the account, server and agent contexts and a
- * channel-aware `window.openbot` behind it. What is under test here is the shared panel, and the
+ * channel-aware `window.danidex` behind it. What is under test here is the shared panel, and the
  * body below uses the same components the editor does.
  */
 
@@ -89,12 +89,12 @@ function ChannelPanelStory(props: { title: string; body: () => ReturnType<typeof
 
 /** The agent panel beside it, so the two headers and the two field stacks can be compared. */
 function AgentPanelStory() {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot({});
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   onCleanup(() => {
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
   return (
     <main class="conversation-panel agent-memories-story-stage" style="--settings-panel-width: 296px">

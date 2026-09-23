@@ -19,8 +19,8 @@
  * stays out of the store until a connection with it worked.
  */
 
-import { AppLogo } from "@openbot/brand";
-import type { McpServerConfig, McpTestResult } from "@openbot/contracts/ipc";
+import { AppLogo } from "@dani-dex/brand";
+import type { McpServerConfig, McpTestResult } from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createStore, Show } from "solid-js";
 import {

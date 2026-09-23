@@ -1,22 +1,22 @@
 import { createHash, randomBytes, verify } from "node:crypto";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { browserViewStreamSessionId } from "@openbot/contracts/team-protocol/browser-view-v1";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { browserViewStreamSessionId } from "@dani-dex/contracts/team-protocol/browser-view-v1";
 import {
   channelEvent,
   channelRequest,
   channelResponse,
   isChannelRoute,
-} from "@openbot/contracts/team-protocol/channels-v1";
+} from "@dani-dex/contracts/team-protocol/channels-v1";
 import {
   supportsTeamSemanticTags,
   TEAM_AGENT_CREATE_MODEL_CAPABILITY,
   TEAM_CURRENT_CAPABILITIES,
-} from "@openbot/contracts/team-protocol/current";
-import { isMcpRoute, mcpRequest, mcpResponse } from "@openbot/contracts/team-protocol/mcp-v1";
-import { encodeTeamProtocolV1ClientEvent } from "@openbot/contracts/team-protocol/v1";
+} from "@dani-dex/contracts/team-protocol/current";
+import { isMcpRoute, mcpRequest, mcpResponse } from "@dani-dex/contracts/team-protocol/mcp-v1";
+import { encodeTeamProtocolV1ClientEvent } from "@dani-dex/contracts/team-protocol/v1";
 import {
   decodeTeamProtocolV2AuthFrame,
   decodeTeamProtocolV2EventFrame,
@@ -26,18 +26,18 @@ import {
   type TeamProtocolV2Json,
   type TeamProtocolV2RpcFrame,
   teamProtocolV2AuthenticationTranscript,
-} from "@openbot/contracts/team-protocol/v2";
-import { createTeamProtocolV2Event } from "@openbot/contracts/team-protocol/v2-adapter";
+} from "@dani-dex/contracts/team-protocol/v2";
+import { createTeamProtocolV2Event } from "@dani-dex/contracts/team-protocol/v2-adapter";
 import {
   decodeTeamProtocolV3WebRtcHttpRequest,
   encodeTeamProtocolV3WebRtcHttpResponse,
   isTeamProtocolV3OnlyRoute,
-} from "@openbot/contracts/team-protocol/v3-webrtc-adapter";
+} from "@dani-dex/contracts/team-protocol/v3-webrtc-adapter";
 import {
   createTeamProtocolV4Event,
   decodeTeamProtocolV4WebRtcHttpRequest,
   encodeTeamProtocolV4WebRtcHttpResponse,
-} from "@openbot/contracts/team-protocol/v4-webrtc-adapter";
+} from "@dani-dex/contracts/team-protocol/v4-webrtc-adapter";
 import type * as Ws from "ws";
 import type { VerifiedRemoteSessionTicket } from "./central-auth-manager";
 import {

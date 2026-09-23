@@ -1,4 +1,4 @@
-import { isFunction } from "@openbot/contracts/runtime-values";
+import { isFunction } from "@dani-dex/contracts/runtime-values";
 import { createSignal, onSettled } from "solid-js";
 
 interface PanelResizerProps {

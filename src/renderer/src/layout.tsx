@@ -1,4 +1,4 @@
-import type { AppInfo } from "@openbot/contracts/ipc";
+import type { AppInfo } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, onSettled } from "solid-js";
 import { readPanelWidth } from "./components/PanelResizer";
 import {

@@ -1,4 +1,4 @@
-import type { AgentEvent } from "@openbot/contracts/ipc";
+import type { AgentEvent } from "@dani-dex/contracts/ipc";
 import type { QueryClient } from "@tanstack/react-query";
 
 type QueueEvent = Extract<AgentEvent, { type: "queue-changed" | "queue-invalidated" }>;

@@ -1,5 +1,5 @@
-import { isManagedRuntimeProvider, type ManagedProviderId } from "@openbot/contracts/agent-providers";
-import type { AgentProviderId, AgentStatus, AppSetupState, ProviderRuntimeStatus } from "@openbot/contracts/ipc";
+import { isManagedRuntimeProvider, type ManagedProviderId } from "@dani-dex/contracts/agent-providers";
+import type { AgentProviderId, AgentStatus, AppSetupState, ProviderRuntimeStatus } from "@dani-dex/contracts/ipc";
 import { createSignal, onCleanup } from "solid-js";
 import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -88,7 +88,7 @@ const initialRuntimeStatuses = (): Record<ManagedProviderId, ProviderRuntimeStat
 });
 
 function MockedOnboardingFlow(props: { args: Parameters<typeof OnboardingFlow>[0]; permissions?: boolean }) {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot();
   if (props.permissions) {
     mock.api.getComputerUseState = async () => ({
@@ -100,11 +100,11 @@ function MockedOnboardingFlow(props: { args: Parameters<typeof OnboardingFlow>[0
       message: null,
     });
   }
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   onCleanup(() => {
     mock.dispose();
     toast.dismiss();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
   return (
     <>

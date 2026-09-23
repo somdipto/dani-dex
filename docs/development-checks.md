@@ -14,7 +14,7 @@ this is why routine fixes target paths or use the staged-file hook.
 
 The aggregate typecheck selects `typecheck:*`. Mobile was previously named only `mobile:typecheck`
 and was omitted. It now has `typecheck:mobile`; the old name remains an alias for CI. Mobile uses
-`@openbot/brand`, `@openbot/contracts`, and `@openbot/team-client`. Its Expo and Uniwind generation
+`@dani-dex/brand`, `@dani-dex/contracts`, and `@dani-dex/team-client`. Its Expo and Uniwind generation
 writes ignored files before TypeScript runs.
 
 Signal had a similar gap: `remote:check` was its only entry point and also required Compose

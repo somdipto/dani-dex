@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, mkdtemp, readdir, readFile, readlink, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AgentStore } from "./agent-store";
 

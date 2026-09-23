@@ -7,7 +7,7 @@ vi.mock("electron-updater");
 vi.mock("node:child_process");
 vi.mock("node:fs/promises", () => ({ readFile: vi.fn() }));
 const service = new AgentService({ clock: new FakeClock() });
-vi.mocked(window.openbot.servers.list).mockResolvedValue([]);
+vi.mocked(window.danidex.servers.list).mockResolvedValue([]);
 vi.mock("./agent-service"); // flag
 vi.doMock("../backend/team-api-server", () => ({ start: vi.fn() })); // flag
 jest.mock("./agent-service"); // flag

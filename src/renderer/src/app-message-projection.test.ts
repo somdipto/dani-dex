@@ -1,11 +1,11 @@
-import type { AgentSummary, ConversationMessage } from "@openbot/contracts/ipc";
+import type { AgentSummary, ConversationMessage } from "@dani-dex/contracts/ipc";
 import {
   hostedSiteConversationEventItemType,
   hostedSiteConversationEventText,
   routineConversationEventItemType,
   routineRunConversationEventItemType,
   skillConversationEventItemType,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { agentProfilesEqual, toAgentMessage, toAgentMessages, toAgentProfile } from "./app-message-projection";
 

@@ -1,4 +1,4 @@
-import type { ChannelDraft } from "@openbot/contracts/ipc";
+import type { ChannelDraft } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, createStore, For, onSettled, Show, snapshot } from "solid-js";
 import { createScrollFades } from "../../components/createScrollFades";
 import {

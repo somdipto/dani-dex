@@ -3,9 +3,9 @@ import {
   CHANNEL_DELETE_CAPABILITY,
   parseChannelCommand,
   parseChannelRead,
-} from "@openbot/contracts/ipc";
-import type { DynamicRecord } from "@openbot/contracts/runtime-values";
-import { CHANNEL_ROUTES, channelRequest, isChannelSettingsRoute } from "@openbot/contracts/team-protocol/channels-v1";
+} from "@dani-dex/contracts/ipc";
+import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
+import { CHANNEL_ROUTES, channelRequest, isChannelSettingsRoute } from "@dani-dex/contracts/team-protocol/channels-v1";
 import type { ChannelService } from "../../backend/channel-service";
 import {
   parseCreateChannelMemory,

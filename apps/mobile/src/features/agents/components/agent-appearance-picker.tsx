@@ -1,5 +1,5 @@
-import { AVATAR_HUE_OPTIONS, avatarHueSwatch } from "@openbot/brand/bloub-avatar";
-import type { AvatarHue } from "@openbot/contracts/ipc";
+import { AVATAR_HUE_OPTIONS, avatarHueSwatch } from "@dani-dex/brand/bloub-avatar";
+import type { AvatarHue } from "@dani-dex/contracts/ipc";
 import { Button } from "heroui-native";
 import { type ReactNode, useState } from "react";
 import { View } from "react-native";

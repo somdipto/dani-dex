@@ -1,4 +1,4 @@
-import type { AgentAuthState, AgentProviderId } from "@openbot/contracts/ipc";
+import type { AgentAuthState, AgentProviderId } from "@dani-dex/contracts/ipc";
 import { AcpAgentClient } from "./acp-client";
 import type { AgentClient } from "./agent-client";
 import { CodexAppServerClient } from "./app-server-client";
@@ -115,7 +115,7 @@ export const NO_PROVIDER_CREDENTIALS: ProviderClientContext = {
 
 /**
  * What a provider *does*. What it is called, how it is described and where its sign-in help points
- * live in the provider registry in `@openbot/contracts/agent-providers`; a driver holds only the
+ * live in the provider registry in `@dani-dex/contracts/agent-providers`; a driver holds only the
  * behaviour, so a new provider is one registry row plus one driver.
  */
 export interface BuiltInProviderDriver {

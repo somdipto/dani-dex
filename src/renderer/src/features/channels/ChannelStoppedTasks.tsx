@@ -1,4 +1,4 @@
-import type { ChannelMember, ChannelTask } from "@openbot/contracts/ipc";
+import type { ChannelMember, ChannelTask } from "@dani-dex/contracts/ipc";
 import { For, Show } from "solid-js";
 import { Button, buttonVariants, DropdownMenu } from "../../components/ui";
 

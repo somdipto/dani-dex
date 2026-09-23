@@ -3,8 +3,8 @@ import { createHash } from "node:crypto";
 import { homedir } from "node:os";
 import { delimiter, isAbsolute, join } from "node:path";
 import { promisify } from "node:util";
-import { type AgentProviderId, isReservedMcpServerName, type McpServerConfig } from "@openbot/contracts/ipc";
-import type { DynamicRecord } from "@openbot/contracts/runtime-values";
+import { type AgentProviderId, isReservedMcpServerName, type McpServerConfig } from "@dani-dex/contracts/ipc";
+import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { loginShellCommand } from "./cli";
 import { getRecord } from "./protocol";
 

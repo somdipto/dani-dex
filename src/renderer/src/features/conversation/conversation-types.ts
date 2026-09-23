@@ -16,7 +16,7 @@ import type {
   ServerSummary,
   TeamPresenceSnapshot,
   UpdateAgentInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { AgentMessage, AgentProfile } from "../../data";
 
 /**

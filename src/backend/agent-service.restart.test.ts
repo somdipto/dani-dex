@@ -1,4 +1,4 @@
-import { type AgentEvent, type BrowserTab, isAgentEvent, routineRunConversationEvent } from "@openbot/contracts/ipc";
+import { type AgentEvent, type BrowserTab, isAgentEvent, routineRunConversationEvent } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProvider } from "./agent-client";
 import type { AgentService } from "./agent-service";

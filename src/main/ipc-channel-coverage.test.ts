@@ -28,7 +28,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { IPC_CHANNELS, IPC_ENDPOINTS, type IpcEndpoint, type IpcEndpointGroup } from "@openbot/contracts/ipc";
+import { IPC_CHANNELS, IPC_ENDPOINTS, type IpcEndpoint, type IpcEndpointGroup } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");

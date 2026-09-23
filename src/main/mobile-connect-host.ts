@@ -1,4 +1,4 @@
-import type { MobileConnectHostBinding, MobileConnectTicket } from "@openbot/contracts/mobile-connect";
+import type { MobileConnectHostBinding, MobileConnectTicket } from "@dani-dex/contracts/mobile-connect";
 import type { CentralAuthManager } from "./central-auth-manager";
 
 interface MobileConnectHostDependencies {

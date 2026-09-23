@@ -1,4 +1,4 @@
-import type { UsageTokens } from "@openbot/contracts/ipc";
+import type { UsageTokens } from "@dani-dex/contracts/ipc";
 
 // Standard API-equivalent rates per million tokens, verified 2026-09-07.
 // These are not subscription charges. No guessed alias or default-model prices.

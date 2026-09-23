@@ -1,8 +1,8 @@
-import type { AgentEvent, ChannelSummary, SidebarLayoutSnapshot, TeamRealtimeEvent } from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import type { TeamProtocolV2Json } from "@openbot/contracts/team-protocol/v2";
-import { remoteHostFingerprint } from "@openbot/team-client";
-import type { RemoteTeamConnectionUpdate } from "@openbot/team-client/remote-peer";
+import type { AgentEvent, ChannelSummary, SidebarLayoutSnapshot, TeamRealtimeEvent } from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import type { TeamProtocolV2Json } from "@dani-dex/contracts/team-protocol/v2";
+import { remoteHostFingerprint } from "@dani-dex/team-client";
+import type { RemoteTeamConnectionUpdate } from "@dani-dex/team-client/remote-peer";
 import { QueryClient, QueryClientProvider, QueryObserver } from "@tanstack/react-query";
 import { act, type PropsWithChildren, useImperativeHandle, useRef } from "react";
 import { createRoot } from "react-dom/client";

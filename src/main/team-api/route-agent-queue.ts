@@ -2,7 +2,7 @@ import {
   decodeQueueEditRequest,
   QueueEditRejectedError,
   TEAM_QUEUE_EDIT_CAPABILITY,
-} from "@openbot/contracts/team-protocol/queue-edit-v1";
+} from "@dani-dex/contracts/team-protocol/queue-edit-v1";
 import { HttpError } from "./http-error";
 // One agent's outgoing queue, and the ways a member can change their mind about it.
 //
@@ -10,8 +10,8 @@ import { HttpError } from "./http-error";
 // turn it expected to be running. The agent service rejects a stale expectation; these routes only
 // see that the field arrived.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { ReorderQueueInput, SteerQueuedMessageInput, UpdateQueuedMessageInput } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { ReorderQueueInput, SteerQueuedMessageInput, UpdateQueuedMessageInput } from "@dani-dex/contracts/ipc";
 import type { TeamApiAgents } from "./dependencies";
 import type { AgentRouteTarget, RouteOutcome, TeamApiRequestContext } from "./request-context";
 import { readJson, stringArray, stringField } from "./request-helpers";

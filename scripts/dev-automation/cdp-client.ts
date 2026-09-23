@@ -4,8 +4,8 @@
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import type { Logger } from "@openbot/logging";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import type { Logger } from "@dani-dex/logging";
 import { type Browser, chromium, type Page } from "playwright-core";
 import { parseProcessTable } from "./cpu-sampling";
 import { describeTarget, findMainPages } from "./page-url";
@@ -189,7 +189,7 @@ export async function verifyBrowserOwnership(browser: Browser, ownerPid: number)
 // `BrowserHost.open` accepts any http(s) address, so a visited local
 // development server can present the same loopback origin and bare path. Only
 // the app window carries the preload bridge, which `contextBridge` exposes as
-// `window.openbot` and no visited page can fake, so the bridge is the identity
+// `window.danidex` and no visited page can fake, so the bridge is the identity
 // check a click or a keystroke is gated on.
 export interface RendererCandidate {
   url: () => string;
@@ -198,7 +198,7 @@ export interface RendererCandidate {
 
 // Evaluated inside the page, so it is a string rather than a closure: this
 // file is typechecked against Node's globals and knows nothing about `window`.
-const BRIDGE_PROBE = "typeof window.openbot";
+const BRIDGE_PROBE = "typeof window.danidex";
 
 export async function findRendererPages<T extends RendererCandidate>(
   pages: T[],

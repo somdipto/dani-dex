@@ -5,7 +5,7 @@ import type {
   DirectMessageRealtimeEvent,
   DirectThreadSummary,
   DirectTypingRealtimeEvent,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, flush, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { errorMessage } from "../../error-message";
@@ -125,7 +125,7 @@ const DirectMessages = createSimpleContext({
         return;
       }
       try {
-        const threads = await window.openbot.servers.listDirectThreads();
+        const threads = await window.danidex.servers.listDirectThreads();
         if (!scopeIsCurrent() || request !== directThreadsRequest) return;
         setDirectThreads(threads);
       } catch {
@@ -154,7 +154,7 @@ const DirectMessages = createSimpleContext({
       const previousMemberId = activeDirectMemberId();
       if (previousMemberId && previousMemberId !== memberId) {
         pruneInactiveDirectHistory(previousMemberId);
-        void window.openbot.servers
+        void window.danidex.servers
           .setDirectTyping({ memberId: previousMemberId, typing: false })
           .catch(() => undefined);
       }
@@ -174,7 +174,7 @@ const DirectMessages = createSimpleContext({
       setDirectConversationError(null);
       const request = ++directConversationRequest;
       try {
-        const page = await window.openbot.servers.readDirectConversationPage({
+        const page = await window.danidex.servers.readDirectConversationPage({
           memberId,
           anchor: { type: "latest" },
           limit: 50,
@@ -208,7 +208,7 @@ const DirectMessages = createSimpleContext({
       setDirectOlderLoading((current) => ({ ...current, [memberId]: true }));
       setDirectOlderErrors((current) => ({ ...current, [memberId]: null }));
       try {
-        const page = await window.openbot.servers.readDirectConversationPage({
+        const page = await window.danidex.servers.readDirectConversationPage({
           memberId,
           anchor: { type: "before", cursor },
           limit: 50,
@@ -243,7 +243,7 @@ const DirectMessages = createSimpleContext({
     async function openDirectMessage(memberId: string, messageId: string): Promise<void> {
       const request = ++directConversationRequest;
       try {
-        const page = await window.openbot.servers.readDirectConversationPage({
+        const page = await window.danidex.servers.readDirectConversationPage({
           memberId,
           anchor: { type: "around", messageId },
           limit: 50,
@@ -270,7 +270,7 @@ const DirectMessages = createSimpleContext({
       const serverKind = activeServer()?.kind ?? "unknown";
       let message: DirectMessage;
       try {
-        message = await window.openbot.servers.sendDirectMessage({
+        message = await window.danidex.servers.sendDirectMessage({
           memberId,
           text,
           clientMessageId,
@@ -316,7 +316,7 @@ const DirectMessages = createSimpleContext({
         .catch(() => undefined)
         .then(async () => {
           if (!scopeIsCurrent()) return;
-          const readState = await window.openbot.servers.markDirectRead({
+          const readState = await window.danidex.servers.markDirectRead({
             memberId,
             throughSequence: boundary,
           });
@@ -364,7 +364,7 @@ const DirectMessages = createSimpleContext({
     function setDirectTyping(typing: boolean): void {
       const memberId = activeDirectMemberId();
       if (!memberId) return;
-      void window.openbot.servers.setDirectTyping({ memberId, typing }).catch(() => undefined);
+      void window.danidex.servers.setDirectTyping({ memberId, typing }).catch(() => undefined);
     }
 
     function mergeDirectMessage(memberId: string, message: DirectMessage): void {
@@ -489,10 +489,10 @@ const DirectMessages = createSimpleContext({
 
     onSettled(() => {
       if (!peopleEnabled) return undefined;
-      const unsubscribeMessage = window.openbot.servers.onDirectMessage((event) =>
+      const unsubscribeMessage = window.danidex.servers.onDirectMessage((event) =>
         flush(() => handleDirectMessageEvent(event)),
       );
-      const unsubscribeTyping = window.openbot.servers.onDirectTyping((event) =>
+      const unsubscribeTyping = window.danidex.servers.onDirectTyping((event) =>
         flush(() => handleDirectTypingEvent(event)),
       );
       return () => {

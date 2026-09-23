@@ -1,5 +1,5 @@
-import type { CentralAuthUser } from "@openbot/contracts/ipc";
-import { normalizeEmailAddress } from "@openbot/contracts/validation";
+import type { CentralAuthUser } from "@dani-dex/contracts/ipc";
+import { normalizeEmailAddress } from "@dani-dex/contracts/validation";
 import { type MobileEventName, type MobileEventProperties, type SafeProperties, sanitizeMobileEvent } from "./events";
 
 export interface MobileAnalyticsClient {

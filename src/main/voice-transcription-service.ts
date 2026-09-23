@@ -4,10 +4,10 @@ import { existsSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { VoiceModelStatus, VoiceTranscriptionResult } from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
-import { createOpenBotLogger } from "@openbot/logging";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { VoiceModelStatus, VoiceTranscriptionResult } from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { VoiceModelService } from "./voice-model-service";
 
 const logger = createOpenBotLogger("voice-transcription-service");

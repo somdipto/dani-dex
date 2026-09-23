@@ -1,5 +1,5 @@
 // @vitest-environment node
-import type { AgentEvent } from "@openbot/contracts/ipc";
+import type { AgentEvent } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import type { RemoteRequestFn } from "./remote-server-client";
 import { RemoteEventRefresh } from "./remote-server-event-refresh";

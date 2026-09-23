@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentApproval,
   AgentEvent,
@@ -10,7 +10,7 @@ import type {
   DynamicIslandQuestionItem,
   DynamicIslandTakeoverItem,
   QueueSnapshot,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { errorMessage } from "../../error-message";
 
 type PromptEvent = Extract<AgentEvent, { type: "prompt" }>;

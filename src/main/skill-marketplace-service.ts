@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { lstat, mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentSummary,
   InstalledSkill,
@@ -16,9 +16,9 @@ import type {
   SkillSubmission,
   SubmitSkillInput,
   UninstallSkillInput,
-} from "@openbot/contracts/ipc";
-import { isSkillCategory } from "@openbot/contracts/ipc";
-import { isBoolean, isDynamicRecord, isNumber, isOneOf, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isSkillCategory } from "@dani-dex/contracts/ipc";
+import { isBoolean, isDynamicRecord, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 import { parse as parseYaml } from "yaml";
 import type { CentralAuthManager } from "./central-auth-manager";
 import type { LocalSkillLibrary } from "./local-skill-library";

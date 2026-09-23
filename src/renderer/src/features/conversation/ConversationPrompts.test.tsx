@@ -1,4 +1,4 @@
-import type { AgentApproval, RespondToBrowserSecretInput } from "@openbot/contracts/ipc";
+import type { AgentApproval, RespondToBrowserSecretInput } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen } from "@solidjs/testing-library";
 import { describe, expect, it, vi } from "vitest";
 import { Toaster, toast } from "../../components/ui";

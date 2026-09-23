@@ -1,7 +1,7 @@
 import { lstat, readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
-import type { SkillPackagePreview } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import type { SkillPackagePreview } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { unzipSync, zipSync } from "fflate";
 import { parse as parseYaml } from "yaml";
 

@@ -5,7 +5,7 @@ import { errorMessage } from "../../../error-message";
  * closing either is then what discards what the failed attempt was saying.
  */
 
-import type { ChannelSummary, SidebarSection } from "@openbot/contracts/ipc";
+import type { ChannelSummary, SidebarSection } from "@dani-dex/contracts/ipc";
 import { createMemo, createStore } from "solid-js";
 import type { SidebarProps } from "../sidebar-types";
 

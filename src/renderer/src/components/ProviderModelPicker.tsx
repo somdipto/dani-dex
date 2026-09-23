@@ -1,4 +1,4 @@
-import { ProviderLogo } from "@openbot/brand";
+import { ProviderLogo } from "@dani-dex/brand";
 import type {
   AgentModelId,
   AgentModelOption,
@@ -8,14 +8,14 @@ import type {
   AgentStatus,
   CustomProviderSummary,
   ProviderRuntimeStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   agentProviderCliName,
   agentProviderName,
   defaultProviderModel,
   isCustomProviderModelId,
   PICKER_PROVIDERS,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, For, onSettled, Show, untrack } from "solid-js";
 import { createScrollFades } from "./createScrollFades";
 import {

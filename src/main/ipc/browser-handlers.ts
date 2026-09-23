@@ -1,9 +1,9 @@
 // The embedded browser and its picture-in-picture window.
 
-import { type BrowserDisplayState, LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { decodeBrowserViewInputValue } from "@openbot/contracts/team-protocol/browser-view-v1";
-import { TEAM_BROWSER_NAVIGATION_CAPABILITY } from "@openbot/contracts/team-protocol/current";
+import { type BrowserDisplayState, LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { decodeBrowserViewInputValue } from "@dani-dex/contracts/team-protocol/browser-view-v1";
+import { TEAM_BROWSER_NAVIGATION_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
 import type { BrowserHost } from "../../backend/browser-host";
 import type { BrowserPictureInPicture } from "../browser-picture-in-picture";
 import type { BrowserViewClient } from "../browser-view-client";

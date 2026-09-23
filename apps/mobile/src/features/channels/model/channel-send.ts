@@ -1,4 +1,4 @@
-import type { ChannelCommand, ChannelMember } from "@openbot/contracts/ipc";
+import type { ChannelCommand, ChannelMember } from "@dani-dex/contracts/ipc";
 import type { ChatAttachment } from "@/features/chat/components/use-chat-attachments";
 import type { ChatHistoryReceipt } from "../../chat/model/chat-messages";
 import { channelRecipient } from "./channel-draft";

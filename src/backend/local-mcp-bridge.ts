@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { createServer, type Server as HttpServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import {
@@ -10,7 +11,6 @@ import {
   ListToolsRequestSchema,
   type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { isString } from "@openbot/contracts/runtime-values";
 import type { DynamicToolResult } from "./protocol";
 
 export interface DynamicToolDefinition {

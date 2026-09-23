@@ -1,4 +1,4 @@
-import { type DynamicRecord, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { type DynamicRecord, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import type { Rectangle } from "electron";
 import type { ObservedAction } from "./cua-driver-action-tap";
 import { HIGHLIGHT_OWNER_SHORT_ID } from "./cua-driver-daemon-client";

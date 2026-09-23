@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { createServer, type Server, type Socket } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type DynamicRecord, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { type DynamicRecord, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { CuaDriverDaemonClient } from "./cua-driver-daemon-client";
 

@@ -16,9 +16,9 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { avatarFileExtension, isAvatarMimeType, isValidAvatarImage } from "@openbot/contracts/avatar-images";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { AgentProfileDraft } from "@openbot/contracts/ipc";
+import { avatarFileExtension, isAvatarMimeType, isValidAvatarImage } from "@dani-dex/contracts/avatar-images";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AgentProfileDraft } from "@dani-dex/contracts/ipc";
 import {
   AGENT_PROVIDERS,
   type AgentModelId,
@@ -40,10 +40,10 @@ import {
   type SaveAgentProfileResult,
   type SidebarLayoutSnapshot,
   type UpdateAgentInput,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isBoolean, isNumber, isOneOf, isString } from "@openbot/contracts/runtime-values";
-import { isGeneratedAgentId, isUuidV4, legacyAgentId } from "@openbot/contracts/validation";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isBoolean, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
+import { isGeneratedAgentId, isUuidV4, legacyAgentId } from "@dani-dex/contracts/validation";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import { ProfileCreationRecovery } from "./agent/profile-creation-recovery";
 import { OpenBotDatabase, type ProviderSession, stableThreadId } from "./openbot-database";
 import { isRecord } from "./protocol";

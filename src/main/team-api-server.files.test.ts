@@ -4,7 +4,7 @@
 
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { ATTACHMENT_LIMITS } from "@openbot/contracts/input-limits";
+import { ATTACHMENT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { afterEach, describe, expect, it } from "vitest";
 import { createAgents, createTeamApiFixture, stopTeamApiFixtures } from "./team-api-server-test-harness";
 

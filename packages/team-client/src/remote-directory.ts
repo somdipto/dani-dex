@@ -1,8 +1,8 @@
+import { createInviteUrl, parseInviteUrl } from "@dani-dex/contracts/invite-links";
+import type { MobileConnectHostBinding } from "@dani-dex/contracts/mobile-connect";
+import { decodeRemoteSession, decodeRemoteSessionTicket } from "@dani-dex/contracts/remote-control-plane";
+import { isBoolean, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { sha256 } from "@noble/hashes/sha2.js";
-import { createInviteUrl, parseInviteUrl } from "@openbot/contracts/invite-links";
-import type { MobileConnectHostBinding } from "@openbot/contracts/mobile-connect";
-import { decodeRemoteSession, decodeRemoteSessionTicket } from "@openbot/contracts/remote-control-plane";
-import { isBoolean, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
 
 import type { TeamClientFetch } from "./index";
 

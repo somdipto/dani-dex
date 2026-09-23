@@ -1,4 +1,4 @@
-import { userErrorMessage } from "@openbot/user-errors";
+import { userErrorMessage } from "@dani-dex/user-errors";
 import { router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { usePreventRemove } from "expo-router/react-navigation";
 import { Typography } from "heroui-native";

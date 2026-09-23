@@ -6,7 +6,7 @@
  * sequence numbers alone, so it is here and it is tested as data.
  */
 
-import type { ChannelMessage } from "@openbot/contracts/ipc";
+import type { ChannelMessage } from "@dani-dex/contracts/ipc";
 
 export interface ChannelPageMerge {
   /** The transcript after the refresh, oldest first. */

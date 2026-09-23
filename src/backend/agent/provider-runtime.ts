@@ -1,5 +1,5 @@
 import { type ChildProcess, spawn } from "node:child_process";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AccountUsage,
   AgentEvent,
@@ -11,14 +11,14 @@ import type {
   CapabilityState,
   CustomProviderRestart,
   ProviderCodeLoginStart,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   agentProviderDescriptor,
   isAgentProvider,
   isFreeOpencodeModel,
   isReasoningEffort,
-} from "@openbot/contracts/ipc";
-import { createOpenBotLogger, redactText } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { createOpenBotLogger, redactText } from "@dani-dex/logging";
 import type { AgentClient, AgentProvider } from "./../agent-client";
 import { CodexAppServerClient } from "./../app-server-client";
 import {

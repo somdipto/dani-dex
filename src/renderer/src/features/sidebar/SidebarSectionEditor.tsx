@@ -4,7 +4,7 @@
  * element means one `sectionNameInput` slot for `focusSectionName` to aim at.
  */
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { onCleanup, Show } from "solid-js";
 import { ChevronDown, Input } from "../../components/ui";
 import { useSidebarScope } from "./sidebar-scope";

@@ -1,11 +1,11 @@
-import type { AgentEvent, TeamRealtimeEvent } from "@openbot/contracts/ipc";
+import type { AgentEvent, TeamRealtimeEvent } from "@dani-dex/contracts/ipc";
 import {
   createRemoteConnectionRecovery,
   type RemoteConnectionStage,
   type RemoteRecoveryStatus,
   type RemoteTeamDirectoryClient,
   remoteConnectionFailure,
-} from "@openbot/team-client";
+} from "@dani-dex/team-client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MobileConnectionAnalytics } from "@/features/analytics/connection";
 import { mobileAnalytics } from "@/features/analytics/mobile-analytics";

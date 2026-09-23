@@ -1,5 +1,5 @@
+import { type AvatarMood, avatarMoodIsBusy } from "@dani-dex/brand/bloub-avatar-motion";
 import { BotEngine } from "@norbert_bodziony/bloub";
-import { type AvatarMood, avatarMoodIsBusy } from "@openbot/brand/bloub-avatar-motion";
 import { useIsFocused } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState } from "react-native";

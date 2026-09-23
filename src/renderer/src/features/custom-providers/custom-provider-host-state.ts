@@ -1,4 +1,4 @@
-import type { CustomProviderRestart, CustomProviderSummary, SaveCustomProviderInput } from "@openbot/contracts/ipc";
+import type { CustomProviderRestart, CustomProviderSummary, SaveCustomProviderInput } from "@dani-dex/contracts/ipc";
 import { createStore } from "solid-js";
 import { errorMessage } from "../../error-message";
 import { customProviderRestartMessage } from "./custom-provider-restart";

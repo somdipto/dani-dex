@@ -1,4 +1,4 @@
-import { isDynamicRecord, isOneOf, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 import { createFileRoute } from "@tanstack/solid-router";
 import { readJsonObject } from "../../../../../../server/json-body";
 import {

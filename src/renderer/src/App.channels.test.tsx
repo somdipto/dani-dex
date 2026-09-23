@@ -12,7 +12,7 @@ beforeAll(async () => {
 beforeEach(installOpenbotStub);
 
 async function openSavedChannel(onUnmount?: (unmount: () => void) => void) {
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "save",
     operationId: "create",
     channelId: "channel-test",
@@ -70,7 +70,7 @@ it("restores the selected channel after restart and clears it when returning to 
 });
 
 it("shows the channel title in the header and sidebar and refreshes it after editing", async () => {
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "save",
     operationId: "create-titled",
     channelId: "channel-titled",
@@ -111,7 +111,7 @@ it("shows the channel title in the header and sidebar and refreshes it after edi
 });
 
 it("shows the lead's routing choice as activity, not as a message from the lead", async () => {
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "save",
     operationId: "create-routed",
     channelId: "channel-routed",
@@ -153,8 +153,8 @@ it("opens the agent chat when Edit agent runs while a channel is open", async ()
 });
 
 it.each([0, 1])("opens the agent chat from author control %i", async (control) => {
-  const read = window.openbot.agent.readChannel;
-  vi.spyOn(window.openbot.agent, "readChannel").mockImplementation(async (input) => ({
+  const read = window.danidex.agent.readChannel;
+  vi.spyOn(window.danidex.agent, "readChannel").mockImplementation(async (input) => ({
     ...(await read(input)),
     messages: [
       {
@@ -182,7 +182,7 @@ it.each([0, 1])("opens the agent chat from author control %i", async (control) =
 });
 
 it.each(["owner", "admin", "member"] as const)("limits remote channel deletion for %s", async (role) => {
-  vi.mocked(window.openbot.servers.list).mockResolvedValue([
+  vi.mocked(window.danidex.servers.list).mockResolvedValue([
     {
       ...testServer("remote-1", true),
       role,
@@ -260,7 +260,7 @@ it("keeps the section editor open past menu focus restoration", async () => {
 });
 
 it("creates a channel from a searchable member dialog and keeps the chat open beside settings", async () => {
-  const save = vi.spyOn(window.openbot.agent, "channelCommand");
+  const save = vi.spyOn(window.danidex.agent, "channelCommand");
   render(() => <App />);
   await screen.findByRole("button", { name: /Open account (actions|menu)/ });
   await fireEvent.pointerDown(await screen.findByRole("button", { name: "New agent or channel" }), { button: 0 });
@@ -321,7 +321,7 @@ it("creates a channel from a searchable member dialog and keeps the chat open be
 });
 
 it("keeps the channel the reader opened while the save that creates another one is in flight", async () => {
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "save",
     operationId: "create",
     channelId: "channel-test",
@@ -344,12 +344,12 @@ it("keeps the channel the reader opened while the save that creates another one 
   await fireEvent.click(within(dialog).getByRole("checkbox", { name: /Chief/ }));
 
   // The save waits on a gate, so the reader leaves the new channel while it is in flight.
-  const original = window.openbot.agent.channelCommand;
+  const original = window.danidex.agent.channelCommand;
   let release: () => void = () => undefined;
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  vi.spyOn(window.openbot.agent, "channelCommand").mockImplementation(async (input) => {
+  vi.spyOn(window.danidex.agent, "channelCommand").mockImplementation(async (input) => {
     if (input.type === "save") await gate;
     return original(input);
   });
@@ -369,7 +369,7 @@ it("keeps the channel the reader opened while the save that creates another one 
 });
 
 it("keeps both removals when the second starts before the first save lands", async () => {
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "save",
     operationId: "create",
     channelId: "channel-test",
@@ -392,12 +392,12 @@ it("keeps both removals when the second starts before the first save lands", asy
   // Both saves wait on one gate, so the second removal is started while the first is in flight.
   // A draft carries the whole member list, so a second draft built from the state before the
   // first save would put Chief back.
-  const original = window.openbot.agent.channelCommand;
+  const original = window.danidex.agent.channelCommand;
   let release: () => void = () => undefined;
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  vi.spyOn(window.openbot.agent, "channelCommand").mockImplementation(async (input) => {
+  vi.spyOn(window.danidex.agent, "channelCommand").mockImplementation(async (input) => {
     if (input.type === "save") await gate;
     return original(input);
   });
@@ -410,7 +410,7 @@ it("keeps both removals when the second starts before the first save lands", asy
 });
 
 it("builds the second removal on a channel read that started after the first save", async () => {
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "save",
     operationId: "create",
     channelId: "channel-test",
@@ -443,8 +443,8 @@ it("builds the second removal on a channel read that started after the first sav
     releaseLaterReads = resolve;
   });
   let reads = 0;
-  const originalRead = window.openbot.agent.readChannel;
-  vi.spyOn(window.openbot.agent, "readChannel").mockImplementation(async (input) => {
+  const originalRead = window.danidex.agent.readChannel;
+  vi.spyOn(window.danidex.agent, "readChannel").mockImplementation(async (input) => {
     const first = ++reads === 1;
     // The answer holds the members this read found, not the ones the store keeps when it lands.
     const answer = structuredClone(await originalRead(input));
@@ -454,7 +454,7 @@ it("builds the second removal on a channel read that started after the first sav
   emitAgentEvent?.({ type: "channels-changed", channelId: "channel-test", revision: 1 });
   await waitFor(() => expect(reads).toBe(1));
 
-  const command = vi.spyOn(window.openbot.agent, "channelCommand");
+  const command = vi.spyOn(window.danidex.agent, "channelCommand");
   const saves = () => command.mock.calls.map(([input]) => input).filter((input) => input.type === "save");
   void fireEvent.click(within(chat).getByRole("button", { name: "Remove Chief" }));
   void fireEvent.click(within(chat).getByRole("button", { name: "Remove Sales Outbound" }));
@@ -479,7 +479,7 @@ it("keeps a queued settings save on the channel it was made in", async () => {
     ["channel-test", "Project room"],
     ["channel-other", "Release room"],
   ]) {
-    await window.openbot.agent.channelCommand({
+    await window.danidex.agent.channelCommand({
       type: "save",
       operationId: `create-${channelId}`,
       channelId,
@@ -501,12 +501,12 @@ it("keeps a queued settings save on the channel it was made in", async () => {
   await within(chat).findByRole("button", { name: "Remove Chief" });
 
   // Both removals wait on one gate, and the reader opens the other channel while they wait.
-  const original = window.openbot.agent.channelCommand;
+  const original = window.danidex.agent.channelCommand;
   let release: () => void = () => undefined;
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  const save = vi.spyOn(window.openbot.agent, "channelCommand").mockImplementation(async (input) => {
+  const save = vi.spyOn(window.danidex.agent, "channelCommand").mockImplementation(async (input) => {
     if (input.type === "save") await gate;
     return original(input);
   });
@@ -531,12 +531,12 @@ it("shows a channel read that lands while more changes are still arriving", asyn
   const chat = await openSavedChannel();
   // Hold every read open so events overtake them the way streaming does (see channels-context).
   const gates: Array<() => void> = [];
-  const originalRead = window.openbot.agent.readChannel;
-  vi.spyOn(window.openbot.agent, "readChannel").mockImplementation(async (input) => {
+  const originalRead = window.danidex.agent.readChannel;
+  vi.spyOn(window.danidex.agent, "readChannel").mockImplementation(async (input) => {
     await new Promise<void>((resolve) => gates.push(resolve));
     return originalRead(input);
   });
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "send",
     operationId: "request",
     channelId: "channel-test",
@@ -557,7 +557,7 @@ it("shows a channel read that lands while more changes are still arriving", asyn
 });
 
 async function openChannelWithStoppedTask(options: { withChild?: boolean; state?: "paused" | "failed" } = {}) {
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "save",
     operationId: "create",
     channelId: "channel-test",
@@ -569,7 +569,7 @@ async function openChannelWithStoppedTask(options: { withChild?: boolean; state?
       leadAgentId: "chief",
     },
   });
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "send",
     operationId: "request",
     channelId: "channel-test",
@@ -578,9 +578,9 @@ async function openChannelWithStoppedTask(options: { withChild?: boolean; state?
     replyToMessageId: null,
     attachmentDraftIds: [],
   });
-  const originalRead = window.openbot.agent.readChannel;
+  const originalRead = window.danidex.agent.readChannel;
   const state = { taskId: "", stopped: true };
-  const read = vi.spyOn(window.openbot.agent, "readChannel").mockImplementation(async (input) => {
+  const read = vi.spyOn(window.danidex.agent, "readChannel").mockImplementation(async (input) => {
     const page = await originalRead(input);
     state.taskId = page.tasks[0]?.id ?? "";
     if (!state.stopped) return page;
@@ -594,8 +594,8 @@ async function openChannelWithStoppedTask(options: { withChild?: boolean; state?
     const child = stopped[0] ? [{ ...stopped[0], id: `${stopped[0].id}-child`, parentTaskId: stopped[0].id }] : [];
     return { ...page, tasks: options.withChild ? [...stopped, ...child] : stopped };
   });
-  const originalCommand = window.openbot.agent.channelCommand;
-  const command = vi.spyOn(window.openbot.agent, "channelCommand").mockImplementation(async (input) => {
+  const originalCommand = window.danidex.agent.channelCommand;
+  const command = vi.spyOn(window.danidex.agent, "channelCommand").mockImplementation(async (input) => {
     const result = await originalCommand(input);
     if (input.type === "resume" || input.type === "reassign") state.stopped = false;
     return result;
@@ -663,9 +663,9 @@ it("keeps a stopped-task notice after a failed action and a refresh", async () =
 
 it("retries a lost response once and keeps a focused draft through incoming messages", async () => {
   const chat = await openSavedChannel();
-  const originalCommand = window.openbot.agent.channelCommand;
+  const originalCommand = window.danidex.agent.channelCommand;
   let loseResponse = true;
-  vi.spyOn(window.openbot.agent, "channelCommand").mockImplementation(async (input) => {
+  vi.spyOn(window.danidex.agent, "channelCommand").mockImplementation(async (input) => {
     const result = await originalCommand(input);
     if (input.type === "send" && loseResponse) {
       loseResponse = false;
@@ -678,7 +678,7 @@ it("retries a lost response once and keeps a focused draft through incoming mess
   await fireEvent.input(composer);
   await fireEvent.click(within(chat).getByRole("button", { name: "Send message" }));
   await fireEvent.click(await within(chat).findByRole("button", { name: "Retry" }));
-  expect(window.openbot.agent.channelCommand).toHaveBeenCalledWith(
+  expect(window.danidex.agent.channelCommand).toHaveBeenCalledWith(
     expect.objectContaining({ type: "send", recipientAgentId: "chief" }),
   );
   await waitFor(() => expect(composer).toHaveTextContent(""));
@@ -690,7 +690,7 @@ it("retries a lost response once and keeps a focused draft through incoming mess
   composer.textContent = "Keep this draft";
   await fireEvent.input(composer);
   composer.focus();
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "send",
     operationId: "incoming",
     channelId: "channel-test",
@@ -719,7 +719,7 @@ it("keeps deleted channel history for preview below active chats", async () => {
   await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
   expect(screen.queryByRole("button", { name: /^Project room\./ })).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /^Chief, Chief of staff/ })).toBeInTheDocument();
-  expect((await window.openbot.agent.listChannels()).find((channel) => channel.id === "channel-test")?.archived).toBe(
+  expect((await window.danidex.agent.listChannels()).find((channel) => channel.id === "channel-test")?.archived).toBe(
     true,
   );
   await within(chat).findByText("Deleted channel. Preview only.");
@@ -736,14 +736,14 @@ it("keeps deleted channel history for preview below active chats", async () => {
 
 it("closes a channel deleted from another connection", async () => {
   await openSavedChannel();
-  await window.openbot.agent.deleteChannel("channel-test");
+  await window.danidex.agent.deleteChannel("channel-test");
   await waitFor(() => expect(screen.queryByRole("main", { name: "Channel conversation" })).not.toBeInTheDocument());
   expect(screen.queryByRole("button", { name: /^Project room\./ })).not.toBeInTheDocument();
 });
 
 it("addresses a channel member only while the request names one", async () => {
   const chat = await openSavedChannel();
-  const command = vi.spyOn(window.openbot.agent, "channelCommand");
+  const command = vi.spyOn(window.danidex.agent, "channelCommand");
   const composer = within(chat).getByRole("textbox", { name: "Message to channel" });
   composer.textContent = "@[Chief](agent:chief) Prepare the report";
   await fireEvent.input(composer);
@@ -766,7 +766,7 @@ it("addresses a channel member only while the request names one", async () => {
 
 /** Routing window: a root task no member owns yet. */
 async function openChannelWhileRouting(state: "queued" | "paused") {
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "save",
     operationId: "create",
     channelId: "channel-test",
@@ -778,7 +778,7 @@ async function openChannelWhileRouting(state: "queued" | "paused") {
       leadAgentId: "chief",
     },
   });
-  await window.openbot.agent.channelCommand({
+  await window.danidex.agent.channelCommand({
     type: "send",
     operationId: "request",
     channelId: "channel-test",
@@ -787,8 +787,8 @@ async function openChannelWhileRouting(state: "queued" | "paused") {
     replyToMessageId: null,
     attachmentDraftIds: [],
   });
-  const originalRead = window.openbot.agent.readChannel;
-  vi.spyOn(window.openbot.agent, "readChannel").mockImplementation(async (input) => {
+  const originalRead = window.danidex.agent.readChannel;
+  vi.spyOn(window.danidex.agent, "readChannel").mockImplementation(async (input) => {
     const page = await originalRead(input);
     return {
       ...page,

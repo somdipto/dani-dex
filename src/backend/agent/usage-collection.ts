@@ -1,5 +1,5 @@
-import { type AgentSummary, isAgentModel, type UsageTokens } from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { type AgentSummary, isAgentModel, type UsageTokens } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import type { AgentUsage } from "../database/agent-usage";
 import type { ProviderSession } from "../database/provider-sessions";
 import { getRecord, getString } from "../protocol";

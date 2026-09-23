@@ -1,4 +1,4 @@
-import { createOpenBotPluginUrl } from "@openbot/contracts/plugin-links";
+import { createOpenBotPluginUrl } from "@dani-dex/contracts/plugin-links";
 import { cleanup, fireEvent, render, screen } from "@solidjs/testing-library";
 import type { JSX } from "@solidjs/web";
 import { createRootRoute, createRoute, createRouter, isNotFound, RouterContextProvider } from "@tanstack/solid-router";

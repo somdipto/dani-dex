@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { createOpenBotLogger } from "@openbot/logging";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { SunshineMoonlightRuntime } from "../src/main/sunshine-moonlight-runtime";
 
 const logger = createOpenBotLogger("remote-desktop-runtime-smoke");

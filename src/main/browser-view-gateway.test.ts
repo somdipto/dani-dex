@@ -5,7 +5,7 @@ import { createServer, type IncomingMessage } from "node:http";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import type { Duplex } from "node:stream";
-import { decodeBrowserViewFrame, encodeBrowserViewInput } from "@openbot/contracts/team-protocol/browser-view-v1";
+import { decodeBrowserViewFrame, encodeBrowserViewInput } from "@dani-dex/contracts/team-protocol/browser-view-v1";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type * as Ws from "ws";
 import { z } from "zod";

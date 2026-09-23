@@ -17,7 +17,7 @@ describe("AgentSettingsPanel", () => {
     vi.useFakeTimers();
     try {
       mock = createMockOpenBot();
-      window.openbot = mock.api;
+      window.danidex = mock.api;
       const onUpdateAgent = vi.fn(async () => undefined);
       render(() => (
         <AgentSettingsPanel
@@ -52,7 +52,7 @@ describe("AgentSettingsPanel", () => {
 
   it("flushes pasted instructions when the settings panel closes", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const onUpdateAgent = vi.fn(async () => undefined);
     const view = render(() => (
       <AgentSettingsPanel
@@ -84,7 +84,7 @@ describe("AgentSettingsPanel", () => {
     vi.useFakeTimers();
     try {
       mock = createMockOpenBot();
-      window.openbot = mock.api;
+      window.danidex = mock.api;
       let finishFirstSave!: () => void;
       const firstSave = new Promise<void>((resolve) => {
         finishFirstSave = resolve;
@@ -130,7 +130,7 @@ describe("AgentSettingsPanel", () => {
 
   it("opens a requested skill in the existing management modal", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     render(() => (
       <AgentSkillsModal
         open
@@ -148,7 +148,7 @@ describe("AgentSettingsPanel", () => {
   });
   it("keeps keyboard focus on the skill switch after saving", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     render(() => (
       <AgentSkillsModal open agentId="chief" agentName="Chief" onOpenChange={vi.fn()} onCountChange={vi.fn()} />
     ));
@@ -161,7 +161,7 @@ describe("AgentSettingsPanel", () => {
 
   it("enables a library skill for this agent and shares its state across filters", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const install = vi.spyOn(mock.api.skills, "localInstall");
     render(() => (
       <AgentSkillsModal open agentId="research" agentName="Research" onOpenChange={vi.fn()} onCountChange={vi.fn()} />
@@ -183,7 +183,7 @@ describe("AgentSettingsPanel", () => {
 
   it("filters enabled skills and restores disabled skills in All", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     render(() => (
       <AgentSkillsModal open agentId="chief" agentName="Chief" onOpenChange={vi.fn()} onCountChange={vi.fn()} />
     ));
@@ -197,7 +197,7 @@ describe("AgentSettingsPanel", () => {
 
   it("starts skill creation and closes the preview", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const create = vi.fn();
     const close = vi.fn();
     render(() => (
@@ -217,7 +217,7 @@ describe("AgentSettingsPanel", () => {
 
   it("adds a shared local skill to the selected agent and then tries it", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const install = vi.spyOn(mock.api.skills, "localInstall");
     const onTry = vi.fn();
     render(() => (
@@ -251,7 +251,7 @@ describe("AgentSettingsPanel", () => {
 
   it("updates a local revision explicitly and keeps the skill disabled", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const skill = (await mock.api.skills.localList())[0];
     await mock.api.skills.localInstall({ agentId: "chief", skillId: skill.id, revision: 1 });
     await mock.api.skills.setEnabled({ agentId: "chief", skillId: skill.id, enabled: false });
@@ -277,7 +277,7 @@ describe("AgentSettingsPanel", () => {
 
   it("retries a failed local library read and returns to assigned skills", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const list = mock.api.skills.localList;
     mock.api.skills.localList = vi.fn(async () => {
       throw new Error("offline");
@@ -296,7 +296,7 @@ describe("AgentSettingsPanel", () => {
 
   it.each([false, true])("enables a skill before Try and handles failure=%s", async (fails) => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const detail = await mock.api.skills.get("skill-source-check");
     vi.spyOn(mock.api.skills, "get").mockResolvedValue({ ...detail, version: 2 });
     const enable = vi.spyOn(mock.api.skills, "setEnabled");
@@ -331,7 +331,7 @@ describe("AgentSettingsPanel", () => {
 
   it("requires an update before trying a different preview version", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const onTrySkill = vi.fn();
     render(() => (
       <AgentSkillsModal
@@ -351,7 +351,7 @@ describe("AgentSettingsPanel", () => {
 
   it("updates a skill from its chip without opening the detail", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const install = vi.spyOn(mock.api.skills, "install");
     render(() => (
       <AgentSkillsModal open agentId="chief" agentName="Chief" onOpenChange={vi.fn()} onCountChange={vi.fn()} />
@@ -365,7 +365,7 @@ describe("AgentSettingsPanel", () => {
 
   it("requires confirmation before replacing a modified skill", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const installed = await mock.api.skills.listInstalled("chief");
     const original = installed.find((item) => item.skillId === "skill-release-notes");
     if (!original) throw new Error("Missing skill fixture");
@@ -387,7 +387,7 @@ describe("AgentSettingsPanel", () => {
 
   it("does not read this computer's library for a remote local skill", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     const skill = (await mock.api.skills.localList())[0];
     vi.spyOn(mock.api.agent, "listInstalledSkills").mockResolvedValue([
       {
@@ -422,7 +422,7 @@ describe("AgentSettingsPanel", () => {
 
   it("preserves settings after a failed save and a visit to Usage", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     // Sol does not run under Claude, and Claude does not offer Extra high, so a rejected save has
     // all three runtime fields to put back at once.
     const runtimeSettings: AgentRuntimeSettings = {
@@ -476,7 +476,7 @@ describe("AgentSettingsPanel", () => {
 
   it("states that Claude acts without approval prompts", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
     render(() => (
       <AgentSettingsPanel
         onOpenUsage={vi.fn()}

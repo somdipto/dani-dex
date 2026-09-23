@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createOpenBotLogger } from "@openbot/logging";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { withoutElectronRuntimeFlags } from "./electron-spawn-env";
 
 const logger = createOpenBotLogger("preview");

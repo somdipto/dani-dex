@@ -1,5 +1,5 @@
-import type { ImageGenerationInfo } from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
+import type { ImageGenerationInfo } from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { newAssistantMessage } from "../conversation-snapshots";
 import type { MailboxStore } from "../mailbox-store";
 import { getString, type ThreadItem } from "../protocol";

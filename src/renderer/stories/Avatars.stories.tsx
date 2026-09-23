@@ -1,5 +1,5 @@
+import { type AvatarMood, avatarMoodPresentation } from "@dani-dex/brand/bloub-avatar-motion";
 import { BloubBot, POSES } from "@norbert_bodziony/bloub";
-import { type AvatarMood, avatarMoodPresentation } from "@openbot/brand/bloub-avatar-motion";
 import { createStore, For, Show } from "solid-js";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { bloubAvatarProfile } from "../src/bloub-avatar";

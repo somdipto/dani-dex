@@ -1,13 +1,13 @@
-// The Signal protocol's server half: the shapes come from `@openbot/contracts/signal-protocol`, and
+// The Signal protocol's server half: the shapes come from `@dani-dex/contracts/signal-protocol`, and
 // what stays here is the validation of untrusted *client* input - byte limits, identifier patterns
 // and a closed discriminated union that a client-side decoder has no reason to carry. The other
-// direction is `@openbot/contracts/signal-protocol/decode`, which is what a peer runs over this
+// direction is `@dani-dex/contracts/signal-protocol/decode`, which is what a peer runs over this
 // service's output. One validator per trust direction, on purpose.
 //
 // The re-exports below are what the rest of this workspace imports, so moving the types out did not
 // churn `signal-service.ts` or `tokens.ts`.
 
-import type { SignalClientMessage, SignalServerMessage } from "@openbot/contracts/signal-protocol/messages";
+import type { SignalClientMessage, SignalServerMessage } from "@dani-dex/contracts/signal-protocol/messages";
 import { z } from "zod";
 
 export type {
@@ -17,18 +17,18 @@ export type {
   SignalErrorCode,
   SignalRelayMessage,
   SignalServerMessage,
-} from "@openbot/contracts/signal-protocol/messages";
+} from "@dani-dex/contracts/signal-protocol/messages";
 export {
   SIGNAL_ERROR_CODES,
   SIGNAL_MESSAGE_BYTES_LIMIT,
   SIGNAL_PROTOCOL_VERSION,
   SIGNAL_TURN_CREDENTIAL_TTL_SECONDS,
-} from "@openbot/contracts/signal-protocol/messages";
-export type { RemoteMemberRole, RemoteRole, RemoteTicketClaims } from "@openbot/contracts/signal-protocol/ticket";
+} from "@dani-dex/contracts/signal-protocol/messages";
+export type { RemoteMemberRole, RemoteRole, RemoteTicketClaims } from "@dani-dex/contracts/signal-protocol/ticket";
 export {
   REMOTE_TICKET_AUDIENCE,
   REMOTE_TICKET_PROTOCOL_VERSION,
-} from "@openbot/contracts/signal-protocol/ticket";
+} from "@dani-dex/contracts/signal-protocol/ticket";
 
 const identifierSchema = z
   .string()

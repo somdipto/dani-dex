@@ -1,7 +1,7 @@
 // An agent's long-lived memories: the notes it carries between threads.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import type { AgentService } from "../../backend/agent-service";
 import { decodeAgentMemories, decodeAgentMemory } from "../remote-agent-decoding";
 import { decodeVoid } from "../remote-host-decoding";

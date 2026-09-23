@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { SidebarLayoutAction } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { SidebarLayoutAction } from "@dani-dex/contracts/ipc";
 import { z } from "zod";
 import type { SidebarLayoutStore } from "../sidebar-layout-store";
 import { type OpenBotToolResponse, openBotToolResult } from "./routine-tools";

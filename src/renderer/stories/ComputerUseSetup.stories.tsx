@@ -1,4 +1,4 @@
-import type { ComputerUseState, MacPermissionId } from "@openbot/contracts/ipc";
+import type { ComputerUseState, MacPermissionId } from "@dani-dex/contracts/ipc";
 import { onCleanup } from "solid-js";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { ComputerUseSetup } from "../src/features/computer-use/ComputerUseSetup";
@@ -15,7 +15,7 @@ const permissionsRequired: ComputerUseState = {
 };
 
 function MockedSetup(props: { state?: ComputerUseState; error?: Error; loading?: boolean }) {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot();
   mock.api.getComputerUseState = props.loading
     ? () => new Promise(() => undefined)
@@ -24,10 +24,10 @@ function MockedSetup(props: { state?: ComputerUseState; error?: Error; loading?:
           throw props.error;
         }
       : async () => props.state ?? permissionsRequired;
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   onCleanup(() => {
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
   return (
     <main class="foundation-story foundation-interaction-stage">

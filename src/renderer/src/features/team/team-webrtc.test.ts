@@ -1,6 +1,6 @@
-import { isString } from "@openbot/contracts/runtime-values";
-import type { SignalServerMessage } from "@openbot/contracts/signal-protocol/messages";
-import { TEAM_PROTOCOL_V2_CHANNELS } from "@openbot/contracts/team-protocol/v2";
+import { isString } from "@dani-dex/contracts/runtime-values";
+import type { SignalServerMessage } from "@dani-dex/contracts/signal-protocol/messages";
+import { TEAM_PROTOCOL_V2_CHANNELS } from "@dani-dex/contracts/team-protocol/v2";
 import { afterEach, describe, expect, it, type Mock, vi } from "vitest";
 import type { BridgeCommand } from "./team-webrtc";
 import { encodeTeamWebRtcPayload, TeamWebRtcPayloadDecoder } from "./team-webrtc-framing";

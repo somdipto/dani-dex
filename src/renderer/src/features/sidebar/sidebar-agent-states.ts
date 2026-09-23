@@ -1,4 +1,4 @@
-import type { QueueSnapshot } from "@openbot/contracts/ipc";
+import type { QueueSnapshot } from "@dani-dex/contracts/ipc";
 import type { SidebarAgentState } from "./sidebar-types";
 
 export interface SidebarAgentStatesInput {

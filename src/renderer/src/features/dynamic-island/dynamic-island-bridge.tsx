@@ -1,4 +1,4 @@
-import type { DynamicIslandAction } from "@openbot/contracts/ipc";
+import type { DynamicIslandAction } from "@dani-dex/contracts/ipc";
 import { createEffect, onSettled } from "solid-js";
 import { withoutAgent } from "../../app-message-projection";
 import { toast } from "../../components/ui";
@@ -105,7 +105,7 @@ export function DynamicIslandBridge() {
 
   onSettled(() => {
     if (platform.landingPreview) return;
-    return window.openbot.dynamicIsland.onAction((action) => {
+    return window.danidex.dynamicIsland.onAction((action) => {
       void handleDynamicIslandAction(action).catch((error) => {
         toast.error("Could not open this remote item", {
           description: errorMessage(error, "Could not open this item. Try again."),
@@ -169,7 +169,7 @@ export function DynamicIslandBridge() {
     if (action.type === "open-message") await openAgentMessage(action.agentId, action.messageId);
     if (action.type === "open-failure") {
       try {
-        await window.openbot.agent.acknowledgeFailedTurn({ agentId: action.agentId, turnId: action.turnId });
+        await window.danidex.agent.acknowledgeFailedTurn({ agentId: action.agentId, turnId: action.turnId });
       } catch (error) {
         appendUiError(action.agentId, error, "Acknowledge failed", action.serverId);
         return;

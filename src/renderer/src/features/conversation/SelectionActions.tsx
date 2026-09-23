@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { Portal } from "@solidjs/web";
 import type { Element as SolidElement } from "solid-js";
 import { createEffect, createMemo, createSignal, For, onSettled, Show } from "solid-js";

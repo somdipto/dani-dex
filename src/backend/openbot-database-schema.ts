@@ -1,8 +1,8 @@
 import type { DatabaseSync } from "node:sqlite";
-import { COMPUTER_USE_MCP_SERVER_NAME } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { isGeneratedAgentId } from "@openbot/contracts/validation";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+import { COMPUTER_USE_MCP_SERVER_NAME } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { isGeneratedAgentId } from "@dani-dex/contracts/validation";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import { CHANNEL_SCHEMA_SQL, CHANNEL_SETTINGS_SCHEMA_SQL } from "./channel-schema";
 import { MCP_SERVERS_SCHEMA_SQL } from "./mcp-schema";
 

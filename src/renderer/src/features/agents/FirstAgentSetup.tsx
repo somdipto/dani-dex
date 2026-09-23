@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentModelId,
   AgentModelOption,
@@ -7,7 +7,7 @@ import type {
   AvatarHue,
   CustomProviderSummary,
   ProviderRuntimeStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createSignal, For, onSettled, Show } from "solid-js";
 import { AVATAR_HUE_OPTIONS, avatarCandidateSeeds, avatarHeadColor, avatarHueSwatch } from "../../bloub-avatar";
 import { ProviderModelPicker } from "../../components/ProviderModelPicker";

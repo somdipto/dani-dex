@@ -9,7 +9,7 @@ import type {
   MobileConnectedDevice,
   SaveCustomProviderInput,
   UpdateStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -497,7 +497,7 @@ describe("SettingsModal", () => {
       delete: vi.fn(async () => undefined),
     };
     const openUrl = vi.fn(async () => undefined);
-    vi.stubGlobal("openbot", { openUrl });
+    vi.stubGlobal("danidex", { openUrl });
     render(() => (
       <SettingsModal
         open

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   DirectConversationPage,
   DirectConversationPageAnchor,
@@ -7,8 +7,8 @@ import type {
   DirectConversationSnapshot,
   DirectMessage,
   DirectThreadSummary,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import type { OpenBotDatabase } from "./openbot-database";
 
 export class TeamChatStore {

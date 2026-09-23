@@ -1,10 +1,10 @@
-import type { AgentSummary, ConversationMessage, QueueDeliveryStatus } from "@openbot/contracts/ipc";
+import type { AgentSummary, ConversationMessage, QueueDeliveryStatus } from "@dani-dex/contracts/ipc";
 import {
   hostedSiteConversationEvent,
   routineConversationEvent,
   routineRunConversationEvent,
   skillConversationEvent,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { AgentDeliveryMarkerStatus, AgentMessage, AgentProfile, ChatActionMarkerModel } from "./data";
 import { cleanAgentMessageText } from "./features/agents/agent-message-text";
 import { formatChatTimestamp } from "./features/conversation/chat-timestamp";

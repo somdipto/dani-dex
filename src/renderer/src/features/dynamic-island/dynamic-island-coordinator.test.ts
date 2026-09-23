@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentRuntimeSnapshot, AgentSummary } from "@openbot/contracts/ipc";
+import type { AgentEvent, AgentRuntimeSnapshot, AgentSummary } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { DynamicIslandCoordinator } from "./dynamic-island-coordinator";
 import type { DynamicIslandPresentationInput } from "./dynamic-island-presentation";

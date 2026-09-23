@@ -1,7 +1,7 @@
 // @vitest-environment node
 
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { TEAM_BROWSER_NAVIGATION_CAPABILITY } from "@openbot/contracts/team-protocol/current";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { TEAM_BROWSER_NAVIGATION_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
 import { describe, expect, it, vi } from "vitest";
 import type { BrowserIpcDependencies } from "./browser-handlers";
 

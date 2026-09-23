@@ -1,4 +1,4 @@
-import { userErrorMessage } from "@openbot/user-errors";
+import { userErrorMessage } from "@dani-dex/user-errors";
 import { useQueryClient } from "@tanstack/react-query";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { router, useIsFocused } from "expo-router";

@@ -1,6 +1,6 @@
-import { isAvatarMimeType, isValidAvatarImage } from "@openbot/contracts/avatar-images";
-import type { AvatarImageInput } from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isAvatarMimeType, isValidAvatarImage } from "@dani-dex/contracts/avatar-images";
+import type { AvatarImageInput } from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { isObject } from "./validation";
 
 export function parseAvatarImage(value: unknown): AvatarImageInput | null {

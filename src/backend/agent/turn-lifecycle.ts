@@ -4,8 +4,8 @@ import type {
   BrowserControlState,
   BrowserTab,
   ConversationSnapshot,
-} from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import type { AgentClient } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import { newAssistantMessage, normalizeCompletionStatus } from "../conversation-snapshots";

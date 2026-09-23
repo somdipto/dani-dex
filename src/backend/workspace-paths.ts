@@ -1,5 +1,5 @@
 import { basename, dirname, isAbsolute, join, relative } from "node:path";
-import { legacyAgentId } from "@openbot/contracts/validation";
+import { legacyAgentId } from "@dani-dex/contracts/validation";
 
 export function sharedPathFromInput(sharedRoot: string, inputPath: string): string {
   const normalized = inputPath.replaceAll("\\", "/");

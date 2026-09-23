@@ -1,4 +1,4 @@
-import type { TeamPresenceMember } from "@openbot/contracts/ipc";
+import type { TeamPresenceMember } from "@dani-dex/contracts/ipc";
 import { Loading } from "solid-js";
 import { DirectConversation } from "../../lazy-views";
 import { useServers } from "../servers/servers-context";

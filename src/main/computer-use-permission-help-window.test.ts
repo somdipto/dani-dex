@@ -1,4 +1,4 @@
-import type { MacPermissionId } from "@openbot/contracts/ipc";
+import type { MacPermissionId } from "@dani-dex/contracts/ipc";
 import { describe, expect, it, vi } from "vitest";
 import { ComputerUsePermissionHelpWindowController } from "./computer-use-permission-help-window";
 

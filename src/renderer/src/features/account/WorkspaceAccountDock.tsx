@@ -1,4 +1,4 @@
-import type { CentralAuthUser } from "@openbot/contracts/ipc";
+import type { CentralAuthUser } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, Loading } from "solid-js";
 import { useLayout } from "../../layout";
 import { AccountDock } from "../../lazy-views";
@@ -77,7 +77,7 @@ export function WorkspaceAccountDock(props: { account: () => CentralAuthUser }) 
         }}
         onUpdateAction={updates.runAction}
         onLogout={platform.landingPreview ? undefined : auth.logoutCentralAccount}
-        onOpenExternal={(destination) => window.openbot.openExternal(destination)}
+        onOpenExternal={(destination) => window.danidex.openExternal(destination)}
         onOpenPermissions={() => setup.setPermissionsOpen(true)}
         onOpenSettings={openAppSettings}
         onOpenSkills={() => setSkillsMarketplaceOpen(true)}

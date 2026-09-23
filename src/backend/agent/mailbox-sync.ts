@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentSummary, ConversationSnapshot, QueueHold, QueueSnapshot } from "@openbot/contracts/ipc";
+import type { AgentEvent, AgentSummary, ConversationSnapshot, QueueHold, QueueSnapshot } from "@dani-dex/contracts/ipc";
 import { sortConversationMessages } from "../conversation-snapshots";
 import type { MailboxStore } from "../mailbox-store";
 import type { OpenBotDatabase } from "../openbot-database";

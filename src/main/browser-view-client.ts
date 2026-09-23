@@ -4,13 +4,13 @@
 // on the network or only through the WebRTC tunnel, and which session the frames belong to are all
 // answered here. Starting a second view replaces the first, because a user looks at one tab.
 
-import type { BrowserLiveViewEvent } from "@openbot/contracts/ipc";
+import type { BrowserLiveViewEvent } from "@dani-dex/contracts/ipc";
 import {
   type BrowserViewInput,
   decodeBrowserViewFrame,
   encodeBrowserViewInput,
   TEAM_BROWSER_VIEW_CAPABILITY,
-} from "@openbot/contracts/team-protocol/browser-view-v1";
+} from "@dani-dex/contracts/team-protocol/browser-view-v1";
 import type { RemoteServerManager } from "./remote-server-manager";
 
 export interface BrowserViewClientOptions {

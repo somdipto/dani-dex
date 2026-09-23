@@ -1,5 +1,5 @@
-import type { ProviderRuntimeSnapshot, ProviderRuntimeStatus } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isOneOf, isString } from "@openbot/contracts/runtime-values";
+import type { ProviderRuntimeSnapshot, ProviderRuntimeStatus } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 
 export function decodeProviderRuntimeSnapshot(value: unknown): ProviderRuntimeSnapshot {
   if (

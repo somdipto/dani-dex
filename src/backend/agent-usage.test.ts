@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { type AgentAnalyticsInput, parseAgentAnalyticsInput, type UsageTokens } from "@openbot/contracts/ipc";
+import { type AgentAnalyticsInput, parseAgentAnalyticsInput, type UsageTokens } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { collectProviderUsage } from "./agent/usage-collection";
 import { recordUsageMessage, type UsageSample } from "./database/agent-usage";

@@ -1,4 +1,4 @@
-import type { MobileConnectHostBinding } from "@openbot/contracts/mobile-connect";
+import type { MobileConnectHostBinding } from "@dani-dex/contracts/mobile-connect";
 import {
   isUuidV4,
   normalizeEmailAddress,
@@ -6,7 +6,7 @@ import {
   ONE_TIME_CODE_ALPHABET,
   ONE_TIME_CODE_LENGTH,
   validateProfileName,
-} from "@openbot/contracts/validation";
+} from "@dani-dex/contracts/validation";
 
 import { randomToken, sha256 } from "./crypto";
 import { PERSISTENT_SESSION_EXPIRES_AT } from "./session-policy";

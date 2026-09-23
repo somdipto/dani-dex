@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import type { ComputerUseState, MacPermissionId } from "@openbot/contracts/ipc";
+import type { ComputerUseState, MacPermissionId } from "@dani-dex/contracts/ipc";
 import { describe, expect, it, vi } from "vitest";
 
 type TrustedInvoke = (event: { senderFrame: { url: string }; sender?: { id: number } }, payload: unknown) => unknown;

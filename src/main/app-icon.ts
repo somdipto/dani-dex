@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import type { AppVariant } from "@openbot/contracts/ipc";
+import type { AppVariant } from "@dani-dex/contracts/ipc";
 
 const APP_VARIANTS = ["production", "dev", "preview"] as const satisfies readonly AppVariant[];
 

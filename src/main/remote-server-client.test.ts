@@ -8,8 +8,8 @@
 // Assertions read `stubTeamFetch(...).requests(path)` after the call. An `expect` inside a route body
 // reports the mock's source location and, worse, cannot fail at all when the route is never reached.
 
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { TEAM_CAPABILITIES_HEADER } from "@openbot/contracts/team-protocol/v1";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { TEAM_CAPABILITIES_HEADER } from "@dani-dex/contracts/team-protocol/v1";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { decodeAgentModelOptions } from "./remote-agent-decoding";
 import { RemoteServerClient } from "./remote-server-client";

@@ -1,10 +1,10 @@
 {
-  "name": "@openbot/site-router",
+  "name": "@dani-dex/site-router",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@openbot/contracts": "workspace:*"
+    "@dani-dex/contracts": "workspace:*"
   },
   "scripts": {
     "cf:typegen": "wrangler types",

@@ -1,5 +1,5 @@
-import type { RemoteDesktopSetupStatus } from "@openbot/contracts/ipc";
-import { TEAM_PROTOCOL_VERSION_HEADER } from "@openbot/contracts/team-protocol";
+import type { RemoteDesktopSetupStatus } from "@dani-dex/contracts/ipc";
+import { TEAM_PROTOCOL_VERSION_HEADER } from "@dani-dex/contracts/team-protocol";
 // @vitest-environment node
 
 // Remote control and the Remote Desktop upgrade: `src/main/team-api/route-remote-screen.ts`, plus

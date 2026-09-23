@@ -1,4 +1,4 @@
-import type { AgentProviderId, AgentSummary, ServerSummary } from "@openbot/contracts/ipc";
+import type { AgentProviderId, AgentSummary, ServerSummary } from "@dani-dex/contracts/ipc";
 import { desktopAnalytics } from "../../analytics";
 import { createSimpleContext } from "../../simple-context";
 import { useAgents } from "../agents/agents-context";
@@ -64,12 +64,12 @@ const ServerSelection = createSimpleContext({
           setDirectTyping(false);
           await disconnectRemoteDesktopWorkspace(false);
           if (!selectionIsCurrent()) return false;
-          await window.openbot.browser.setVisible({ visible: false }).catch(() => undefined);
+          await window.danidex.browser.setVisible({ visible: false }).catch(() => undefined);
           if (!selectionIsCurrent()) return false;
         }
         let nextServers: ServerSummary[];
         try {
-          nextServers = await window.openbot.servers.select(serverId);
+          nextServers = await window.danidex.servers.select(serverId);
           if (!selectionIsCurrent()) return false;
           const authoritativeServerId = nextServers.find((server) => server.active)?.id;
           if (authoritativeServerId !== serverId) {
@@ -93,7 +93,7 @@ const ServerSelection = createSimpleContext({
             });
           }
           if (recoverAuthoritativeServer) {
-            const authoritativeServers = await window.openbot.servers.list().catch(() => null);
+            const authoritativeServers = await window.danidex.servers.list().catch(() => null);
             if (!selectionIsCurrent()) return false;
             const authoritativeServerId = authoritativeServers?.find((server) => server.active)?.id;
             if (authoritativeServerId && authoritativeServerId !== previousServerId) {
@@ -122,10 +122,10 @@ const ServerSelection = createSimpleContext({
       const analytics = desktopAnalytics.scope();
       const entryPoint = pendingInviteUrl() ? "invite_deep_link" : "in_app";
       try {
-        await window.openbot.servers.join(input);
+        await window.danidex.servers.join(input);
         setPendingInviteUrl("");
         await selectServer(
-          window.openbot ? ((await window.openbot.servers.list()).find((item) => item.active)?.id ?? "local") : "local",
+          window.danidex ? ((await window.danidex.servers.list()).find((item) => item.active)?.id ?? "local") : "local",
           false,
         );
         analytics.track("team_action", { action: "server_joined", result: "succeeded", entry_point: entryPoint });

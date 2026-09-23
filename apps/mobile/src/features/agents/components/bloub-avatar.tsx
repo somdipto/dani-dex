@@ -1,7 +1,7 @@
+import { bloubAvatarProfile } from "@dani-dex/brand/bloub-avatar";
+import type { AvatarMood } from "@dani-dex/brand/bloub-avatar-motion";
+import type { AvatarHue } from "@dani-dex/contracts/ipc";
 import { BotEngine, COLOR_BY_ID } from "@norbert_bodziony/bloub";
-import { bloubAvatarProfile } from "@openbot/brand/bloub-avatar";
-import type { AvatarMood } from "@openbot/brand/bloub-avatar-motion";
-import type { AvatarHue } from "@openbot/contracts/ipc";
 import { memo, useId, useMemo } from "react";
 import Animated, { type DerivedValue, useAnimatedProps } from "react-native-reanimated";
 import Svg, { Circle, Defs, FeColorMatrix, Filter, G, Mask, Path, Rect } from "react-native-svg";

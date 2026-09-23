@@ -1,4 +1,4 @@
-import { type AgentAnalytics, agentProviderCliName, isAgentProvider } from "@openbot/contracts/ipc";
+import { type AgentAnalytics, agentProviderCliName, isAgentProvider } from "@dani-dex/contracts/ipc";
 import { Button, Typography } from "heroui-native";
 import { useState } from "react";
 import { Pressable, View } from "react-native";

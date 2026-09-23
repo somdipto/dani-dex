@@ -3,7 +3,7 @@
 // `remote/api/src/protocol.ts` as zod, with byte limits and identifier patterns this does not need.
 // One validator per trust direction; see `./messages.ts` for why they are not shared.
 //
-// Guards rather than a schema library because `@openbot/contracts` has one runtime dependency and is
+// Guards rather than a schema library because `@dani-dex/contracts` has one runtime dependency and is
 // in the graph of a Cloudflare Worker, a React Native app and an Electron renderer. Adding zod here
 // would push it into all three.
 

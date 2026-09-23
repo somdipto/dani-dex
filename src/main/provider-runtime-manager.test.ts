@@ -17,7 +17,11 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
-import { MANAGED_RUNTIME_PROVIDERS, MANAGED_TOOL_RUNTIMES, type ProviderRuntimeSnapshot } from "@openbot/contracts/ipc";
+import {
+  MANAGED_RUNTIME_PROVIDERS,
+  MANAGED_TOOL_RUNTIMES,
+  type ProviderRuntimeSnapshot,
+} from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import lockValue from "../../native-runtime.lock.json";
 import { parseAgentRuntimeLock } from "../../scripts/agent-runtime-lock";

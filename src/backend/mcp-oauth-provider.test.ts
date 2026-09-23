@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import type { McpServerConfig } from "@openbot/contracts/ipc";
+import type { McpServerConfig } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import {

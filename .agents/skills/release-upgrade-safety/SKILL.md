@@ -23,7 +23,7 @@ This runs *before* `docs/RELEASING.md`, which stays authoritative for the publis
   Run the narrowest test file named by a gate, then `bun run lint` and `bun run typecheck`.
 - **If gate C or D fired, add `bun run mobile:typecheck`.** `bun run typecheck` is `typecheck:*` and
   the mobile script is named `mobile:typecheck`, so the aggregate misses it — and `apps/mobile`
-  depends on `@openbot/contracts`, which is exactly what those two gates change. A contract export
+  depends on `@dani-dex/contracts`, which is exactly what those two gates change. A contract export
   change passes the aggregate and still breaks the mobile app.
 - It never runs `bun run dev:seed` or `dev:reset` — both destroy the developer's own profile — and
   never `pkill -f`, which kills other sessions' work mid-write.

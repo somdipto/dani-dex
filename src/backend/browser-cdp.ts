@@ -1,5 +1,5 @@
 import { stat } from "node:fs/promises";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   BrowserActionHistoryEntry,
   BrowserDiagnosticEntry,
@@ -9,8 +9,8 @@ import type {
   BrowserJsonValue,
   BrowserSnapshot,
   BrowserTarget,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import type { NativeImage, WebContents } from "electron";
 import { createFramePacer } from "./browser-screencast-pacing";
 

@@ -1,5 +1,5 @@
-import { expandChatTagReferences } from "@openbot/contracts/chat-tag-references";
-import type { InstalledSkill, QueueDelivery, QueueHold } from "@openbot/contracts/ipc";
+import { expandChatTagReferences } from "@dani-dex/contracts/chat-tag-references";
+import type { InstalledSkill, QueueDelivery, QueueHold } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, createUniqueId, For, onCleanup, Show, untrack } from "solid-js";
 import { createVerticalDragPreview } from "../../components/createVerticalDragPreview";
 import { Button, Dialog } from "../../components/ui";

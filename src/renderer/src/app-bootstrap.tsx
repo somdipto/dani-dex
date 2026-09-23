@@ -39,7 +39,7 @@ export function AppBootstrap() {
         if (setupState()?.completed === true && centralAuth().status === "signed_in") setJoinServerOpen(true);
       });
     };
-    const unsubscribeInvite = window.openbot.servers.onInvite((inviteUrl) => {
+    const unsubscribeInvite = window.danidex.servers.onInvite((inviteUrl) => {
       receiveInvite(inviteUrl);
     });
     const receivePluginSlug = (slug: string) => {
@@ -48,16 +48,16 @@ export function AppBootstrap() {
         setSkillsMarketplaceOpen(true);
       });
     };
-    const unsubscribePlugin = window.openbot.plugins.onOpenListing((slug) => {
+    const unsubscribePlugin = window.danidex.plugins.onOpenListing((slug) => {
       receivePluginSlug(slug);
     });
     // Both subscriptions are in place before either link is asked for, because the first of these
     // two requests is what tells main that a window is listening.
-    void window.openbot.servers
+    void window.danidex.servers
       .takePendingInvite()
       .then((inviteUrl) => inviteUrl && receiveInvite(inviteUrl))
       .catch(() => undefined);
-    void window.openbot.plugins
+    void window.danidex.plugins
       .takePendingListing()
       .then((slug) => slug && receivePluginSlug(slug))
       .catch(() => undefined);

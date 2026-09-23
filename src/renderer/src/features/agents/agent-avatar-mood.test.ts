@@ -1,4 +1,4 @@
-import type { AgentApproval, QueueSnapshot } from "@openbot/contracts/ipc";
+import type { AgentApproval, QueueSnapshot } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { type AgentAvatarMoodsInput, computeAgentAvatarMoods } from "./agent-avatar-mood";
 

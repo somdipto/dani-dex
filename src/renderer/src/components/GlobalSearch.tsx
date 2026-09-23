@@ -1,4 +1,4 @@
-import { expandChatTagReferences } from "@openbot/contracts/chat-tag-references";
+import { expandChatTagReferences } from "@dani-dex/contracts/chat-tag-references";
 import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
 import type { AgentMessage, AgentProfile } from "../data";
 import { AgentAvatar } from "../features/agents/AgentAvatar";

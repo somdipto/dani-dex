@@ -1,7 +1,7 @@
-import { serializeChatTagReference } from "@openbot/contracts/chat-tag-references";
-import { isAttachmentSummary, type MarketplaceSkillDetail } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import { decodeQueueEditRequest, type QueueEditRequest } from "@openbot/contracts/team-protocol/queue-edit-v1";
+import { serializeChatTagReference } from "@dani-dex/contracts/chat-tag-references";
+import { isAttachmentSummary, type MarketplaceSkillDetail } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { decodeQueueEditRequest, type QueueEditRequest } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
 import type { ComposerDraft } from "./conversation-types";
 
 export const EMPTY_DRAFT: ComposerDraft = {

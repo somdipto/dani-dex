@@ -1,5 +1,5 @@
 import { EventEmitter, once } from "node:events";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { describe, expect, it } from "vitest";
 import WebSocket from "ws";
 import {

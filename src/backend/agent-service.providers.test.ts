@@ -2,15 +2,15 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readdir, realpath, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { serializeAttachmentReference } from "@openbot/contracts/attachment-references";
-import { serializeChatTagReference } from "@openbot/contracts/chat-tag-references";
+import { serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
+import { serializeChatTagReference } from "@dani-dex/contracts/chat-tag-references";
 import {
   type AgentEvent,
   COMPUTER_USE_MCP_SERVER_ID,
   COMPUTER_USE_MCP_SERVER_NAME,
   type McpServerConfig,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProvider } from "./agent-client";
 import type { AgentService } from "./agent-service";

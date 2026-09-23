@@ -1,4 +1,4 @@
-import { isMobileConnectHostBinding } from "@openbot/contracts/mobile-connect";
+import { isMobileConnectHostBinding } from "@dani-dex/contracts/mobile-connect";
 import { createFileRoute } from "@tanstack/solid-router";
 import { readJsonObject } from "../../../server/json-body";
 import {

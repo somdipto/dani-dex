@@ -1,4 +1,4 @@
-import { AppLogo, PlatformLogo, ProviderLogo } from "@openbot/brand";
+import { AppLogo, PlatformLogo, ProviderLogo } from "@dani-dex/brand";
 import { Link } from "@tanstack/solid-router";
 import { onSettled } from "solid-js";
 import { landingAnalytics } from "../../lib/analytics";

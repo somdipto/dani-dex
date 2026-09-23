@@ -1,4 +1,4 @@
-import type { AgentStatus } from "@openbot/contracts/ipc";
+import type { AgentStatus } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { expect, it, vi } from "vitest";
 import { App } from "./App";
@@ -13,7 +13,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("shows the first-run onboarding before starting agents", async () => {
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
       preferredModel: null,
@@ -33,12 +33,12 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await fireEvent.click(screen.getByRole("button", { name: "Open Dani-Dex" }));
-    expect(window.openbot.saveSetup).toHaveBeenCalledWith({ preferredProvider: "claude", preferredModel: null });
+    expect(window.danidex.saveSetup).toHaveBeenCalledWith({ preferredProvider: "claude", preferredModel: null });
     expect(await screen.findByRole("heading", { name: "Chief" })).toBeInTheDocument();
   });
 
   it("connects each bundled provider independently and Refresh re-verifies every connection", async () => {
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
       preferredModel: null,
@@ -56,11 +56,11 @@ describe("Dani-Dex connected desktop shell", () => {
       message: null,
       fullAccess: true,
     };
-    vi.mocked(window.openbot.agent.getStatus).mockResolvedValueOnce(disconnectedStatus);
+    vi.mocked(window.danidex.agent.getStatus).mockResolvedValueOnce(disconnectedStatus);
     // One channel for all three, so the mock has to remember which providers it has already been
     // asked for: each call marks its own provider connecting and leaves the earlier ones connecting.
     const connecting = new Set<string>();
-    vi.mocked(window.openbot.connectProvider).mockImplementation(async (provider) => {
+    vi.mocked(window.danidex.connectProvider).mockImplementation(async (provider) => {
       connecting.add(provider);
       return {
         ...disconnectedStatus,
@@ -69,7 +69,7 @@ describe("Dani-Dex connected desktop shell", () => {
         ),
       };
     });
-    vi.mocked(window.openbot.refreshAgentProviders).mockResolvedValueOnce({
+    vi.mocked(window.danidex.refreshAgentProviders).mockResolvedValueOnce({
       ...disconnectedStatus,
       phase: "ready",
       providers: [
@@ -87,14 +87,14 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
 
     await fireEvent.click(await screen.findByRole("button", { name: "Connect Grok" }));
-    expect(window.openbot.connectProvider).toHaveBeenCalledWith("grok");
+    expect(window.danidex.connectProvider).toHaveBeenCalledWith("grok");
     expect(screen.getByRole("button", { name: "Restart Grok" })).toBeEnabled();
     await fireEvent.click(screen.getByRole("button", { name: "Connect ChatGPT" }));
     await fireEvent.click(screen.getByRole("button", { name: "Connect Claude" }));
     expect(screen.getByRole("button", { name: "Restart ChatGPT" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Restart Claude" })).toBeEnabled();
-    expect(window.openbot.connectProvider).toHaveBeenCalledWith("codex");
-    expect(window.openbot.connectProvider).toHaveBeenCalledWith("claude");
+    expect(window.danidex.connectProvider).toHaveBeenCalledWith("codex");
+    expect(window.danidex.connectProvider).toHaveBeenCalledWith("claude");
     expect(trackAnalytics).toHaveBeenCalledWith("provider_action", {
       provider: "codex",
       action: "connect_started",
@@ -107,7 +107,7 @@ describe("Dani-Dex connected desktop shell", () => {
     });
 
     await fireEvent.click(screen.getByRole("button", { name: "Restart ChatGPT" }));
-    expect(window.openbot.connectProvider).toHaveBeenCalledTimes(4);
+    expect(window.danidex.connectProvider).toHaveBeenCalledTimes(4);
     emitAgentEvent?.({
       type: "status",
       status: {
@@ -145,12 +145,12 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("refreshes provider detection and opens the matching sign-in guide", async () => {
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
       preferredModel: null,
     });
-    vi.mocked(window.openbot.agent.getStatus).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.getStatus).mockResolvedValueOnce({
       phase: "blocked",
       cliVersion: null,
       auth: { kind: "unknown" },
@@ -163,7 +163,7 @@ describe("Dani-Dex connected desktop shell", () => {
       fullAccess: true,
     });
     let finishRefresh: ((status: AgentStatus) => void) | undefined;
-    vi.mocked(window.openbot.refreshAgentProviders).mockReturnValueOnce(
+    vi.mocked(window.danidex.refreshAgentProviders).mockReturnValueOnce(
       new Promise((resolve) => {
         finishRefresh = resolve;
       }),
@@ -202,17 +202,17 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
     const connectChatGPT = screen.getByRole("button", { name: "Connect ChatGPT" });
     await fireEvent.click(connectChatGPT);
-    expect(window.openbot.connectProvider).toHaveBeenCalledWith("codex");
+    expect(window.danidex.connectProvider).toHaveBeenCalledWith("codex");
     expect(screen.getByRole("button", { name: "Restart ChatGPT" })).toBeEnabled();
   });
 
   it("shows a friendly inline error when a provider guide cannot open", async () => {
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
       preferredModel: null,
     });
-    vi.mocked(window.openbot.agent.getStatus).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.getStatus).mockResolvedValueOnce({
       phase: "blocked",
       cliVersion: null,
       auth: { kind: "unknown" },
@@ -224,7 +224,7 @@ describe("Dani-Dex connected desktop shell", () => {
       message: "Install a provider.",
       fullAccess: true,
     });
-    vi.mocked(window.openbot.connectProvider).mockRejectedValueOnce(new Error("Raw IPC failure"));
+    vi.mocked(window.danidex.connectProvider).mockRejectedValueOnce(new Error("Raw IPC failure"));
     render(() => <App />);
 
     await fireEvent.click(await screen.findByRole("button", { name: "Connect ChatGPT" }));
@@ -245,12 +245,12 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("shows a native ChatGPT login failure reported after the browser opens", async () => {
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
       preferredModel: null,
     });
-    vi.mocked(window.openbot.agent.getStatus).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.getStatus).mockResolvedValueOnce({
       phase: "blocked",
       cliVersion: null,
       auth: { kind: "unknown" },
@@ -294,12 +294,12 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("connects to a remote host after account sign-in", async () => {
     const inviteUrl = "https://openbot.run/join?invite=test";
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
       preferredModel: null,
     });
-    vi.mocked(window.openbot.servers.takePendingInvite).mockResolvedValueOnce(inviteUrl);
+    vi.mocked(window.danidex.servers.takePendingInvite).mockResolvedValueOnce(inviteUrl);
     render(() => <App />);
 
     expect(await screen.findByRole("dialog", { name: "Connect to a host" })).toBeInTheDocument();
@@ -307,18 +307,18 @@ describe("Dani-Dex connected desktop shell", () => {
 
     expect(screen.getAllByText(/person@example.com/).length).toBeGreaterThan(0);
     expect(await screen.findByText("Studio Mac")).toBeInTheDocument();
-    await waitFor(() => expect(window.openbot.servers.previewInvite).toHaveBeenCalledWith({ inviteUrl }));
-    expect(window.openbot.servers.join).not.toHaveBeenCalled();
+    await waitFor(() => expect(window.danidex.servers.previewInvite).toHaveBeenCalledWith({ inviteUrl }));
+    expect(window.danidex.servers.join).not.toHaveBeenCalled();
 
     await fireEvent.click(screen.getByRole("button", { name: "Connect to host" }));
 
     await waitFor(() =>
-      expect(window.openbot.servers.join).toHaveBeenCalledWith({
+      expect(window.danidex.servers.join).toHaveBeenCalledWith({
         inviteUrl,
       }),
     );
     await waitFor(() =>
-      expect(window.openbot.saveSetup).toHaveBeenCalledWith({ preferredProvider: "codex", preferredModel: null }),
+      expect(window.danidex.saveSetup).toHaveBeenCalledWith({ preferredProvider: "codex", preferredModel: null }),
     );
     expect(trackAnalytics).toHaveBeenCalledWith("team_action", {
       action: "server_joined",
@@ -339,35 +339,35 @@ describe("Dani-Dex connected desktop shell", () => {
     emitInvite?.(inviteUrl);
 
     expect(await screen.findByRole("dialog", { name: "Studio Mac" })).toBeInTheDocument();
-    await waitFor(() => expect(window.openbot.servers.previewInvite).toHaveBeenCalledWith({ inviteUrl }));
-    expect(window.openbot.servers.join).not.toHaveBeenCalled();
+    await waitFor(() => expect(window.danidex.servers.previewInvite).toHaveBeenCalledWith({ inviteUrl }));
+    expect(window.danidex.servers.join).not.toHaveBeenCalled();
   });
 
   it("lets a user request an email code from the initial screen", async () => {
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
       preferredModel: null,
     });
-    vi.mocked(window.openbot.auth.getState).mockResolvedValueOnce({ status: "signed_out" });
+    vi.mocked(window.danidex.auth.getState).mockResolvedValueOnce({ status: "signed_out" });
     render(() => <App />);
 
     expect(await screen.findByRole("heading", { name: "Sign in to Dani-Dex" })).toBeInTheDocument();
     expect(screen.queryByRole("radiogroup", { name: "Default provider" })).not.toBeInTheDocument();
-    expect(window.openbot.agent.listConversationReads).not.toHaveBeenCalled();
+    expect(window.danidex.agent.listConversationReads).not.toHaveBeenCalled();
 
     emitAgentEvent?.({ type: "conversation-invalidated", agentId: "chief", revision: 1 });
-    expect(window.openbot.agent.listConversationReads).not.toHaveBeenCalled();
+    expect(window.danidex.agent.listConversationReads).not.toHaveBeenCalled();
 
     await fireEvent.input(screen.getByRole("textbox", { name: "Email" }), {
       target: { value: "person@example.com" },
     });
     await fireEvent.click(screen.getByRole("button", { name: "Send sign-in code" }));
-    expect(window.openbot.auth.requestEmailCode).toHaveBeenCalledWith("person@example.com");
+    expect(window.danidex.auth.requestEmailCode).toHaveBeenCalledWith("person@example.com");
     await fireEvent.input(await screen.findByRole("textbox", { name: "One-time code" }), {
       target: { value: "ABCD-EFGH" },
     });
-    expect(window.openbot.auth.verifyEmailCode).toHaveBeenCalledWith("challenge-1", "ABCD-EFGH");
+    expect(window.danidex.auth.verifyEmailCode).toHaveBeenCalledWith("challenge-1", "ABCD-EFGH");
     expect(trackAnalytics).toHaveBeenCalledWith("account_sign_in_started", { result: "code_sent" });
     expect(trackAnalytics).toHaveBeenCalledWith("account_sign_in_completed", { result: "succeeded" });
     expect(await screen.findByText("Verified. Opening Dani-Dex…")).toBeInTheDocument();
@@ -376,7 +376,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("shows a soft loader until the account API becomes available", async () => {
-    vi.mocked(window.openbot.auth.getState).mockResolvedValueOnce({ status: "loading" });
+    vi.mocked(window.danidex.auth.getState).mockResolvedValueOnce({ status: "loading" });
     render(() => <App />);
 
     expect(await screen.findByRole("heading", { name: "Connecting to Dani-Dex" })).toBeInTheDocument();
@@ -390,8 +390,8 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("keeps a cold-start invitation until a signed-out user signs in", async () => {
     const inviteUrl = "https://openbot.run/join?invite=after-sign-in";
-    vi.mocked(window.openbot.auth.getState).mockResolvedValueOnce({ status: "signed_out" });
-    vi.mocked(window.openbot.servers.takePendingInvite).mockResolvedValueOnce(inviteUrl);
+    vi.mocked(window.danidex.auth.getState).mockResolvedValueOnce({ status: "signed_out" });
+    vi.mocked(window.danidex.servers.takePendingInvite).mockResolvedValueOnce(inviteUrl);
     render(() => <App />);
 
     expect(await screen.findByRole("heading", { name: "Sign in to Dani-Dex" })).toBeInTheDocument();
@@ -404,11 +404,11 @@ describe("Dani-Dex connected desktop shell", () => {
     });
 
     expect(await screen.findByRole("dialog", { name: "Studio Mac" })).toBeInTheDocument();
-    await waitFor(() => expect(window.openbot.servers.previewInvite).toHaveBeenCalledWith({ inviteUrl }));
+    await waitFor(() => expect(window.danidex.servers.previewInvite).toHaveBeenCalledWith({ inviteUrl }));
   });
 
   it("saves a different default provider from the account menu and drops its model", async () => {
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: true,
       preferredProvider: "codex",
       preferredModel: CUSTOM_ENDPOINT_MODEL,
@@ -424,12 +424,12 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(within(providers).getByRole("radio", { name: /Claude.*Connected/ }));
     await fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     // The model belongs to the provider that was replaced, so this save must clear it.
-    expect(window.openbot.saveSetup).toHaveBeenLastCalledWith({ preferredProvider: "claude", preferredModel: null });
+    expect(window.danidex.saveSetup).toHaveBeenLastCalledWith({ preferredProvider: "claude", preferredModel: null });
     expect(screen.queryByRole("dialog", { name: "Providers & permissions" })).not.toBeInTheDocument();
   });
 
   it("keeps the chosen model when the account menu review leaves the provider alone", async () => {
-    vi.mocked(window.openbot.getSetupState).mockResolvedValueOnce({
+    vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: true,
       preferredProvider: "codex",
       preferredModel: CUSTOM_ENDPOINT_MODEL,
@@ -445,23 +445,23 @@ describe("Dani-Dex connected desktop shell", () => {
 
     // The review screen names a provider alone. It must not send the agents to a hosted model when
     // the user chose a local endpoint during onboarding.
-    expect(window.openbot.saveSetup).toHaveBeenLastCalledWith({
+    expect(window.danidex.saveSetup).toHaveBeenLastCalledWith({
       preferredProvider: "codex",
       preferredModel: CUSTOM_ENDPOINT_MODEL,
     });
   });
 
   it("opens the required first-agent setup for a new user", async () => {
-    vi.mocked(window.openbot.agent.listAgents).mockResolvedValueOnce([]);
+    vi.mocked(window.danidex.agent.listAgents).mockResolvedValueOnce([]);
     render(() => <App />);
 
     expect(await screen.findByRole("heading", { name: "Create your first agent" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Create agent" })).toBeEnabled();
     expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
-    expect(window.openbot.agent.createAgent).not.toHaveBeenCalled();
+    expect(window.danidex.agent.createAgent).not.toHaveBeenCalled();
     await fireEvent.click(screen.getByRole("button", { name: "Create agent" }));
     await waitFor(() =>
-      expect(window.openbot.agent.createAgent).toHaveBeenCalledWith({
+      expect(window.danidex.agent.createAgent).toHaveBeenCalledWith({
         name: "New agent",
         description: "General-purpose assistant",
         initialMessage: "Greet me briefly.",
@@ -475,7 +475,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("blocks chat for signed-out users", async () => {
-    vi.mocked(window.openbot.agent.getStatus).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.getStatus).mockResolvedValueOnce({
       phase: "blocked",
       cliVersion: "0.144.1",
       auth: { kind: "signed-out" },

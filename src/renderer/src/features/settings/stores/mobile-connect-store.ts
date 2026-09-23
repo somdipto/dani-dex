@@ -1,4 +1,4 @@
-import type { MobileConnectedDevice, MobileConnectTicket } from "@openbot/contracts/ipc";
+import type { MobileConnectedDevice, MobileConnectTicket } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, createStore, onCleanup } from "solid-js";
 import { errorMessage } from "../../../error-message";
 

@@ -1,4 +1,4 @@
-import type { AttachmentSummary, ImageGenerationAspectRatio } from "@openbot/contracts/ipc";
+import type { AttachmentSummary, ImageGenerationAspectRatio } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, Show } from "solid-js";
 import { Button, X } from "../../components/ui";
 import { errorMessage } from "../../error-message";

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   isCompleteSectionOrder,
   SIDEBAR_PEOPLE_SECTION_ID,
@@ -10,9 +10,9 @@ import {
   type SidebarLayoutAction,
   type SidebarLayoutSnapshot,
   type SidebarSection,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { isUuidV4, legacyAgentId } from "@openbot/contracts/validation";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { isUuidV4, legacyAgentId } from "@dani-dex/contracts/validation";
 
 interface StoredSidebarLayout extends SidebarLayoutSnapshot {
   version: 2;

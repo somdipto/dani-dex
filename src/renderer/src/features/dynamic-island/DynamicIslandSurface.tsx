@@ -1,5 +1,5 @@
-import type { DynamicIslandAction, DynamicIslandPreference, DynamicIslandPresentation } from "@openbot/contracts/ipc";
-import { DEFAULT_DYNAMIC_ISLAND_PREFERENCE, IDLE_DYNAMIC_ISLAND_PRESENTATION } from "@openbot/contracts/ipc";
+import type { DynamicIslandAction, DynamicIslandPreference, DynamicIslandPresentation } from "@dani-dex/contracts/ipc";
+import { DEFAULT_DYNAMIC_ISLAND_PREFERENCE, IDLE_DYNAMIC_ISLAND_PRESENTATION } from "@dani-dex/contracts/ipc";
 import { createSignal, onSettled, Show } from "solid-js";
 import type {
   DynamicIslandNotchSize,
@@ -70,7 +70,7 @@ export function DynamicIslandSurface() {
   }
 
   function syncInteractive(): void {
-    void window.openbot.dynamicIsland.setInteractive({ interactive: pointerInside || focusInside });
+    void window.danidex.dynamicIsland.setInteractive({ interactive: pointerInside || focusInside });
   }
 
   function beginPointerInteraction(): void {
@@ -121,7 +121,7 @@ export function DynamicIslandSurface() {
   async function perform(action: DynamicIslandAction): Promise<void> {
     performHaptic();
     try {
-      await window.openbot.dynamicIsland.performAction(action);
+      await window.danidex.dynamicIsland.performAction(action);
     } catch {
       return;
     }
@@ -129,31 +129,31 @@ export function DynamicIslandSurface() {
     focusInside = false;
     setViewState("compact");
     applyQueuedPresentation();
-    await window.openbot.dynamicIsland.setInteractive({ interactive: false });
+    await window.danidex.dynamicIsland.setInteractive({ interactive: false });
   }
 
   function performHaptic(): void {
-    void window.openbot.dynamicIsland.performHaptic().catch(() => undefined);
+    void window.danidex.dynamicIsland.performHaptic().catch(() => undefined);
   }
 
   onSettled(() => {
-    void window.openbot.dynamicIsland
+    void window.danidex.dynamicIsland
       .getPresentation()
       .then(applyPresentation)
       .catch(() => undefined);
-    void window.openbot.dynamicIsland
+    void window.danidex.dynamicIsland
       .getPreference()
       .then(applyPreference)
       .catch(() => undefined);
-    const stopPreference = window.openbot.dynamicIsland.onPreference(applyPreference);
-    const stopPresentation = window.openbot.dynamicIsland.onPresentation(applyPresentation);
-    const stopGeometry = window.openbot.dynamicIsland.onGeometry((next) => setNotchSize(next ?? DEFAULT_NOTCH_SIZE));
+    const stopPreference = window.danidex.dynamicIsland.onPreference(applyPreference);
+    const stopPresentation = window.danidex.dynamicIsland.onPresentation(applyPresentation);
+    const stopGeometry = window.danidex.dynamicIsland.onGeometry((next) => setNotchSize(next ?? DEFAULT_NOTCH_SIZE));
     const close = () => {
       pointerInside = false;
       focusInside = false;
       setViewState("compact");
       applyQueuedPresentation();
-      void window.openbot.dynamicIsland.setInteractive({ interactive: false });
+      void window.danidex.dynamicIsland.setInteractive({ interactive: false });
     };
     window.addEventListener("blur", close);
     return () => {

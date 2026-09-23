@@ -2,7 +2,7 @@ import {
   decodeTeamProtocolV2FileChunk,
   decodeTeamProtocolV2FileControlFrame,
   encodeTeamProtocolV2Frame,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
 import { describe, expect, it } from "vitest";
 import { createRemoteFileSender } from "./file-upload";
 

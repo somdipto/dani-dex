@@ -1,5 +1,5 @@
-import { attachmentReferences } from "@openbot/contracts/attachment-references";
-import type { AttachmentSummary } from "@openbot/contracts/ipc";
+import { attachmentReferences } from "@dani-dex/contracts/attachment-references";
+import type { AttachmentSummary } from "@dani-dex/contracts/ipc";
 
 export type MessageFileReference =
   | {

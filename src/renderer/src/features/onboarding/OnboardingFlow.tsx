@@ -10,7 +10,7 @@ import {
   type DesktopPlatform,
   type ProviderRuntimeStatus,
   type SaveCustomProviderInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, createUniqueId, For, Match, onCleanup, Show, Switch } from "solid-js";
 import { ProviderCodeLoginDialog } from "../../components/ProviderCodeLoginDialog";
 import { ProviderPicker, type ProviderPickerOption } from "../../components/ProviderPicker";

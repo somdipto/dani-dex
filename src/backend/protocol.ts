@@ -1,5 +1,5 @@
-import { decodeRecord, requiredString } from "@openbot/contracts/ipc-decoding";
-import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { decodeRecord, requiredString } from "@dani-dex/contracts/ipc-decoding";
+import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 
 export type RequestId = string | number;
 

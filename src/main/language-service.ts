@@ -1,5 +1,5 @@
-import { type AppLanguagePreference, DEFAULT_APP_LANGUAGE } from "@openbot/contracts/ipc";
-import { type AppTranslate, resolveLocale, type TranslatedLocale, translateFor } from "@openbot/i18n";
+import { type AppLanguagePreference, DEFAULT_APP_LANGUAGE } from "@dani-dex/contracts/ipc";
+import { type AppTranslate, resolveLocale, type TranslatedLocale, translateFor } from "@dani-dex/i18n";
 import { readLanguagePreference, writeLanguagePreference } from "./language-preference-store";
 
 /**

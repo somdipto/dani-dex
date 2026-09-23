@@ -1,6 +1,6 @@
+import { bloubAvatarProfile } from "@dani-dex/brand/bloub-avatar";
+import { type AvatarMood, avatarMoodPresentation } from "@dani-dex/brand/bloub-avatar-motion";
 import { BotEngine, type BotFrame, blendExpression, EXPRESSION_BY_ID, SHAPE_BY_ID } from "@norbert_bodziony/bloub";
-import { bloubAvatarProfile } from "@openbot/brand/bloub-avatar";
-import { type AvatarMood, avatarMoodPresentation } from "@openbot/brand/bloub-avatar-motion";
 
 /**
  * The pose the working cycle holds. It is shape-safe by type, so the cycle can never hand back a

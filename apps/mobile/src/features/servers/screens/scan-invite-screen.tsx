@@ -1,4 +1,4 @@
-import { parseInviteUrl } from "@openbot/contracts/invite-links";
+import { parseInviteUrl } from "@dani-dex/contracts/invite-links";
 import { router, Stack } from "expo-router";
 import { Button } from "heroui-native";
 import { useThemeColor } from "heroui-native/hooks";

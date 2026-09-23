@@ -1,4 +1,4 @@
-import type { createWorkspacePreferences, RemoteWorkspacePreferences } from "@openbot/team-client";
+import type { createWorkspacePreferences, RemoteWorkspacePreferences } from "@dani-dex/team-client";
 
 export const MAX_PINNED_AGENTS = 16;
 

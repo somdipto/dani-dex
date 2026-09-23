@@ -2,8 +2,8 @@ import { parseDownloadAttachments } from "./agent-inputs";
 import { parseRemoteDesktopSetupAction, parseRemoteDesktopTest } from "./server-inputs";
 // @vitest-environment node
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { CUSTOM_PROVIDER_LIMITS } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { CUSTOM_PROVIDER_LIMITS } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import {
   parseAcknowledgeFailedTurn,

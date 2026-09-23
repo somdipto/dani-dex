@@ -12,7 +12,7 @@
 
 import { readFile } from "node:fs/promises";
 import { extname, isAbsolute, relative, resolve } from "node:path";
-import { LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
+import { LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
 import { app, session } from "electron";
 import type { AgentService } from "../backend/agent-service";
 import type { MailboxStore } from "../backend/mailbox-store";

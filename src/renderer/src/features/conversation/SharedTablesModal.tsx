@@ -1,4 +1,4 @@
-import type { SharedTable } from "@openbot/contracts/ipc";
+import type { SharedTable } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, For, onSettled, Show } from "solid-js";
 import { createScrollFades } from "../../components/createScrollFades";
 import { Button, Dialog, IconButton, Trash2, X } from "../../components/ui";
@@ -35,7 +35,7 @@ export function SharedTablesModal(props: SharedTablesModalProps) {
     if (showLoading) setLoading(true);
     setError(null);
     try {
-      const next = await window.openbot.agent.listTables();
+      const next = await window.danidex.agent.listTables();
       setTables(next);
       props.onCountChange(next.length);
     } catch (caught) {
@@ -58,7 +58,7 @@ export function SharedTablesModal(props: SharedTablesModalProps) {
     setDeletingName(table.name);
     setError(null);
     try {
-      await window.openbot.agent.deleteTable({ name: table.name });
+      await window.danidex.agent.deleteTable({ name: table.name });
       setConfirmName(null);
       await loadTables(false);
     } catch (caught) {

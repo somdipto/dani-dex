@@ -102,7 +102,7 @@ import {
   type SkillPackagePreview,
   type SkillSubmission,
   type UpdateStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   decodeRecord,
   emptyDecoder,
@@ -112,9 +112,9 @@ import {
   requiredBoolean,
   requiredNumber,
   requiredString,
-} from "@openbot/contracts/ipc-decoding";
-import { isPluginSlug } from "@openbot/contracts/plugin-links";
-import { isBoolean, isDynamicRecord, isNumber, isOneOf, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc-decoding";
+import { isPluginSlug } from "@dani-dex/contracts/plugin-links";
+import { isBoolean, isDynamicRecord, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 import { clipboardFiles } from "./clipboard-files";
 import { decodeProviderRuntimeSnapshot } from "./provider-runtime";
@@ -1346,7 +1346,7 @@ const openbotApi: OpenBotDesktopApi = {
   },
 };
 
-contextBridge.exposeInMainWorld("openbot", openbotApi);
+contextBridge.exposeInMainWorld("danidex", openbotApi);
 
 function decodeAgentAnalyticsFromMain(value: unknown) {
   return decodeOptionalAgentAnalytics(value);

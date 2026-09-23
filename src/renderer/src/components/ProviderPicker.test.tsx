@@ -1,4 +1,4 @@
-import type { AgentProviderId, ProviderRuntimeStatus } from "@openbot/contracts/ipc";
+import type { AgentProviderId, ProviderRuntimeStatus } from "@dani-dex/contracts/ipc";
 import { fireEvent, render } from "@solidjs/testing-library";
 import { describe, expect, it, vi } from "vitest";
 import { ProviderPicker, type ProviderPickerOption } from "./ProviderPicker";

@@ -1,14 +1,14 @@
-import type { AgentEvent, TeamRealtimeEvent } from "@openbot/contracts/ipc";
-import { isQueueEditRoute, QueueEditRejectedError } from "@openbot/contracts/team-protocol/queue-edit-v1";
-import type { TeamProtocolV2Json } from "@openbot/contracts/team-protocol/v2";
-import type { RemoteTeamDirectoryClient } from "@openbot/team-client";
+import type { AgentEvent, TeamRealtimeEvent } from "@dani-dex/contracts/ipc";
+import { isQueueEditRoute, QueueEditRejectedError } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
+import type { TeamProtocolV2Json } from "@dani-dex/contracts/team-protocol/v2";
+import type { RemoteTeamDirectoryClient } from "@dani-dex/team-client";
 import {
   createRemoteCommandMailbox,
   type RemoteFileUpload,
   type RemoteTeamCommand,
   type RemoteTeamCommandResult,
   type RemoteTeamConnectionUpdate,
-} from "@openbot/team-client/remote-peer";
+} from "@dani-dex/team-client/remote-peer";
 import * as Crypto from "expo-crypto";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useMobileSession } from "@/features/auth/context/mobile-session-context";

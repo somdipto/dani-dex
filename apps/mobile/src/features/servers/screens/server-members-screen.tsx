@@ -1,7 +1,7 @@
+import { normalizeEmailAddress } from "@dani-dex/contracts/validation";
+import type { RemoteTeamMember } from "@dani-dex/team-client";
+import { userErrorMessage as errorMessage } from "@dani-dex/user-errors";
 import { Host, Picker } from "@expo/ui";
-import { normalizeEmailAddress } from "@openbot/contracts/validation";
-import type { RemoteTeamMember } from "@openbot/team-client";
-import { userErrorMessage as errorMessage } from "@openbot/user-errors";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams } from "expo-router";

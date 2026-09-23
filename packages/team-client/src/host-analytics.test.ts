@@ -1,4 +1,4 @@
-import { emptyAnalyticsTotals } from "@openbot/contracts/ipc";
+import { emptyAnalyticsTotals } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { readHostAnalytics } from "./host-analytics";
 

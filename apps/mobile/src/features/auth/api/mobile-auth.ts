@@ -1,15 +1,15 @@
-import { type AvatarMimeType, isValidAvatarImage } from "@openbot/contracts/avatar-images";
-import { AVATAR_IMAGE_LIMITS } from "@openbot/contracts/input-limits";
-import type { CentralAuthUser } from "@openbot/contracts/ipc";
+import { type AvatarMimeType, isValidAvatarImage } from "@dani-dex/contracts/avatar-images";
+import { AVATAR_IMAGE_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { CentralAuthUser } from "@dani-dex/contracts/ipc";
 import {
   isMobileConnectDevelopmentHost,
   isMobileConnectHostBinding,
   type MobileConnectHostBinding,
   parseMobileConnectUrl,
   validateMobileConnectHostBinding,
-} from "@openbot/contracts/mobile-connect";
-import { type DynamicRecord, isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import { validateProfileName } from "@openbot/contracts/validation";
+} from "@dani-dex/contracts/mobile-connect";
+import { type DynamicRecord, isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { validateProfileName } from "@dani-dex/contracts/validation";
 import { fetch } from "expo/fetch";
 import * as Crypto from "expo-crypto";
 import * as Device from "expo-device";

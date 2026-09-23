@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   AGENT_RUNTIME_QUESTION_DESCRIPTION_LIMIT,
   AGENT_RUNTIME_TEXT_LIMIT,
@@ -7,8 +7,8 @@ import {
   type BrowserTab,
   COMPUTER_USE_MCP_SERVER_NAME,
   isAgentEvent,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProvider } from "../agent-client";
 import type { AgentService } from "../agent-service";

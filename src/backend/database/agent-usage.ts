@@ -14,8 +14,8 @@ import {
   parseAgentAnalyticsInput,
   parseHostAnalyticsInput,
   type UsageTokens,
-} from "@openbot/contracts/ipc";
-import type { DynamicRecord } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { estimateUsageCost } from "../agent/usage-pricing";
 import type { DatabaseCore } from "./database-core";
 import { databaseRow, databaseRows, requiredStringColumn } from "./database-rows";

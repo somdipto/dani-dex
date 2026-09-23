@@ -1,4 +1,4 @@
-import type { RemoteDesktopSession } from "@openbot/contracts/ipc";
+import type { RemoteDesktopSession } from "@dani-dex/contracts/ipc";
 import { describe, expect, it, vi } from "vitest";
 import { RemoteDesktopManager } from "./remote-desktop-manager";
 import { RemoteProtocolError, RemoteRequestError } from "./remote-server-errors";

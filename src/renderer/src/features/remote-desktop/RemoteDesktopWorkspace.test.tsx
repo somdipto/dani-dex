@@ -1,4 +1,4 @@
-import type { RemoteDesktopErrorCode, RemoteDesktopSession, ServerSummary } from "@openbot/contracts/ipc";
+import type { RemoteDesktopErrorCode, RemoteDesktopSession, ServerSummary } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { describe, expect, it, vi } from "vitest";

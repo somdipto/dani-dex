@@ -16,8 +16,8 @@ import {
   IPC_CHANNELS,
   LOCAL_SERVER_ID,
   type MacPermissionId,
-} from "@openbot/contracts/ipc";
-import type { AppTranslate } from "@openbot/i18n";
+} from "@dani-dex/contracts/ipc";
+import type { AppTranslate } from "@dani-dex/i18n";
 import { app, BrowserWindow, clipboard, type Display, Menu, type Rectangle, screen } from "electron";
 import type { AgentService } from "../backend/agent-service";
 import type { BrowserHost } from "../backend/browser-host";

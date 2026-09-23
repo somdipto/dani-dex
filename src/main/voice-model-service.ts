@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { createReadStream, existsSync } from "node:fs";
 import { mkdir, open, rename, rm, stat } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { VoiceModelStatus } from "@openbot/contracts/ipc";
+import type { VoiceModelStatus } from "@dani-dex/contracts/ipc";
 
 export const WHISPER_MODEL_NAME = "ggml-medium-q5_0.bin";
 export const WHISPER_MODEL_BYTES = 539_212_467;

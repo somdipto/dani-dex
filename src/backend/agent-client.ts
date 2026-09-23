@@ -1,4 +1,4 @@
-import type { AgentProviderId } from "@openbot/contracts/ipc";
+import type { AgentProviderId } from "@dani-dex/contracts/ipc";
 import type { AppServerNotification, AppServerRequest, RequestId, ResponseDecoder, RpcError } from "./protocol";
 
 export type AgentProvider = AgentProviderId;

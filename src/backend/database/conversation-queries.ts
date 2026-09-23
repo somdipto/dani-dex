@@ -4,14 +4,14 @@ import type {
   ConversationPageAnchor,
   ConversationSearchPage,
   ConversationSnapshot,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   HOSTED_SITE_EVENT_ITEM_TYPE_PREFIX,
   ROUTINE_EVENT_ITEM_TYPE_PREFIX,
   ROUTINE_RUN_EVENT_ITEM_TYPE_PREFIX,
   SKILL_EVENT_ITEM_TYPE_PREFIX,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import type { DatabaseCore } from "./database-core";
 import {
   databaseRow,

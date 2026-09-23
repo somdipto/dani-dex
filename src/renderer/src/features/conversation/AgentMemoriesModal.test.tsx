@@ -4,7 +4,7 @@ import type {
   CreateAgentMemoryInput,
   DeleteAgentMemoryInput,
   UpdateAgentMemoryInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -87,7 +87,7 @@ beforeEach(() => {
     emitAgentEvent = listener;
     return () => undefined;
   });
-  window.openbot = activeMock.api;
+  window.danidex = activeMock.api;
 });
 
 describe("AgentMemoriesModal", () => {

@@ -4,7 +4,7 @@ import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { extname, posix, resolve, win32 } from "node:path";
 import { promisify } from "node:util";
-import type { AgentProviderId } from "@openbot/contracts/ipc";
+import type { AgentProviderId } from "@dani-dex/contracts/ipc";
 
 const execFileAsync = promisify(execFile);
 const MINIMUM_CODEX_VERSION = [0, 144, 1] as const;

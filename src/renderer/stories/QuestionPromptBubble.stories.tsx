@@ -1,4 +1,4 @@
-import type { AgentPromptQuestion } from "@openbot/contracts/ipc";
+import type { AgentPromptQuestion } from "@dani-dex/contracts/ipc";
 import { expect, fn, waitFor } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { QuestionPromptBubble, type QuestionPromptBubbleProps } from "../src/components/QuestionPromptBubble";

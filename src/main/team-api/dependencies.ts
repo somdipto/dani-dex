@@ -17,8 +17,8 @@ import type {
   InviteSummary,
   SidebarLayoutSnapshot,
   TeamPresenceSnapshot,
-} from "@openbot/contracts/ipc";
-import type { Logger } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import type { Logger } from "@dani-dex/logging";
 import type { AgentService } from "../../backend/agent-service";
 import type { BrowserHost } from "../../backend/browser-host";
 import type { MailboxStore } from "../../backend/mailbox-store";

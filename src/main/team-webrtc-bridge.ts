@@ -1,8 +1,8 @@
 import { EventEmitter } from "node:events";
 import { join } from "node:path";
-import type { RemoteDesktopIceServer } from "@openbot/contracts/ipc";
-import type { IceServer } from "@openbot/contracts/signal-protocol/messages";
-import type { RemoteMemberRole } from "@openbot/contracts/signal-protocol/ticket";
+import type { RemoteDesktopIceServer } from "@dani-dex/contracts/ipc";
+import type { IceServer } from "@dani-dex/contracts/signal-protocol/messages";
+import type { RemoteMemberRole } from "@dani-dex/contracts/signal-protocol/ticket";
 import { BrowserWindow, MessageChannelMain, type MessagePortMain } from "electron";
 import { z } from "zod";
 

@@ -1,4 +1,4 @@
-import { isBoolean, isOneOf } from "@openbot/contracts/runtime-values";
+import { isBoolean, isOneOf } from "@dani-dex/contracts/runtime-values";
 import { OpenPanel, OpenPanelBase, type OpenPanelOptions, type TrackProperties } from "@openpanel/web";
 import { CONTENT_COLLECTIONS } from "./content";
 import { type CollectionId, type ContentCollection, findArticle } from "./content-collection";

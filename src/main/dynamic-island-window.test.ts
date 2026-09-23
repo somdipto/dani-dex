@@ -9,8 +9,8 @@ import {
   type DynamicIslandPreference,
   type DynamicIslandPresentation,
   IPC_CHANNELS,
-} from "@openbot/contracts/ipc";
-import { createOpenBotLogger } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import type { BrowserWindow, Display, Rectangle } from "electron";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as preferenceStore from "./dynamic-island-preference-store";

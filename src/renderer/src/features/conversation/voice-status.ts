@@ -1,4 +1,4 @@
-import type { AppInfo } from "@openbot/contracts/ipc";
+import type { AppInfo } from "@dani-dex/contracts/ipc";
 import { errorMessage } from "../../error-message";
 export type VoicePhase = "idle" | "preparing" | "requesting" | "recording" | "transcribing";
 

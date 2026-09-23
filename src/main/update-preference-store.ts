@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { readFile, rename, rm, writeFile } from "node:fs/promises";
-import type { UpdatePreference } from "@openbot/contracts/ipc";
-import { isBoolean, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import type { UpdatePreference } from "@dani-dex/contracts/ipc";
+import { isBoolean, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 
 const DEFAULT_PREFERENCE: UpdatePreference = { autoDownload: true };
 

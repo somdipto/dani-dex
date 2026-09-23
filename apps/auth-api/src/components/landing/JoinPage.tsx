@@ -1,5 +1,5 @@
-import { AppLogo } from "@openbot/brand";
-import { OPENBOT_INVITE_ORIGIN, toOpenBotInviteUrl } from "@openbot/contracts/invite-links";
+import { AppLogo } from "@dani-dex/brand";
+import { OPENBOT_INVITE_ORIGIN, toOpenBotInviteUrl } from "@dani-dex/contracts/invite-links";
 import { createSignal, onSettled, Show } from "solid-js";
 import { landingAnalytics } from "../../lib/analytics";
 import { detectDownloadPlatform } from "../../lib/download-platforms";

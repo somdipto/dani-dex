@@ -1,4 +1,4 @@
-import type { AgentSummary, MarketplaceAgentDetail } from "@openbot/contracts/ipc";
+import type { AgentSummary, MarketplaceAgentDetail } from "@dani-dex/contracts/ipc";
 import { describe, expect, it, vi } from "vitest";
 import { AgentMarketplaceService } from "./agent-marketplace-service";
 

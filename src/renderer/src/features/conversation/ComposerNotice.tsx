@@ -1,4 +1,4 @@
-import { type AgentProviderId, agentProviderName } from "@openbot/contracts/agent-providers";
+import { type AgentProviderId, agentProviderName } from "@dani-dex/contracts/agent-providers";
 import type { JSX } from "@solidjs/web";
 import { createSignal, Show } from "solid-js";
 import { Button, TriangleAlert } from "../../components/ui";

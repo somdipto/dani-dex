@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { type FileHandle, mkdir, open, readFile, rm } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import {
   decodeTeamProtocolV2FileChunk,
   decodeTeamProtocolV2FileControlFrame,
@@ -10,7 +10,7 @@ import {
   encodeTeamProtocolV2Frame,
   TEAM_PROTOCOL_V2_MAX_FILE_BYTES,
   TEAM_PROTOCOL_V2_MAX_FILE_SET_BYTES,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
 import { recordRestartActivity } from "../backend/restart-activity";
 import type { TeamWebRtcBridge } from "./team-webrtc-bridge";
 

@@ -3,8 +3,8 @@
 
 @import "heroui-native/styles";
 
-@import "@openbot/brand/tokens.css";
-@import "@openbot/brand/tokens-native.css";
+@import "@dani-dex/brand/tokens.css";
+@import "@dani-dex/brand/tokens-native.css";
 
 @theme inline {
   --color-sheet: var(--dani-dex-bg-sheet);

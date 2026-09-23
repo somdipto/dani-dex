@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { chmod, copyFile, cp, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { createOpenBotLogger } from "@openbot/logging";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { z } from "zod";
 import { type AgentRuntimeLock, loadAgentRuntimeLock } from "./agent-runtime-lock";
 import { sha256 } from "./remote-desktop-runtime-release";

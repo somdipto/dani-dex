@@ -1,4 +1,4 @@
-import type { QueueDelivery } from "@openbot/contracts/ipc";
+import type { QueueDelivery } from "@dani-dex/contracts/ipc";
 import { fireEvent, screen } from "@testing-library/dom";
 import { act, type PropsWithChildren, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";

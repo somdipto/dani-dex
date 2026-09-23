@@ -1,4 +1,4 @@
-import type { Routine, RoutineRun } from "@openbot/contracts/ipc";
+import type { Routine, RoutineRun } from "@dani-dex/contracts/ipc";
 import { onCleanup } from "solid-js";
 import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -55,13 +55,13 @@ const fullPanelRuns: RoutineRun[] = [
 ];
 
 function RoutinesStory(props: { routines?: Routine[]; runs?: RoutineRun[] }) {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot({ routines: { chief: props.routines ?? storyRoutines } });
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   if (props.runs) mock.api.agent.listRoutineRuns = async () => structuredClone(props.runs ?? []);
   onCleanup(() => {
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
   return (
     <main style={{ width: "380px", height: "720px", overflow: "auto", background: "var(--dani-dex-bg-canvas)" }}>
@@ -71,17 +71,17 @@ function RoutinesStory(props: { routines?: Routine[]; runs?: RoutineRun[] }) {
 }
 
 function FullSettingsPanelStory() {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const previousWidth = window.localStorage.getItem("openbot:settings-panel-width");
   const mock = createMockOpenBot({ routines: { chief: storyRoutines } });
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   mock.api.agent.listRoutineRuns = async (input) =>
     input.routineId === morningBrief.id ? structuredClone(fullPanelRuns) : [];
   window.localStorage.setItem("openbot:settings-panel-width", "380");
 
   onCleanup(() => {
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
     if (previousWidth === null) {
       window.localStorage.removeItem("openbot:settings-panel-width");
       return;

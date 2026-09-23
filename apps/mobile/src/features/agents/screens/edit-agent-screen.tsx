@@ -1,6 +1,6 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { UpdateAgentInput } from "@openbot/contracts/ipc";
-import { userErrorMessage as errorMessage } from "@openbot/user-errors";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { UpdateAgentInput } from "@dani-dex/contracts/ipc";
+import { userErrorMessage as errorMessage } from "@dani-dex/user-errors";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { usePreventRemove } from "expo-router/react-navigation";
 import { Typography } from "heroui-native";

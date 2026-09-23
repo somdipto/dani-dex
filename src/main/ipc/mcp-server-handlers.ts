@@ -14,9 +14,9 @@ import {
   type SaveMcpServerInput,
   type SetMcpServerEnabledInput,
   type TestMcpServerInput,
-} from "@openbot/contracts/ipc";
-import type { TeamCurrentCapability } from "@openbot/contracts/team-protocol/current";
-import { MCP_ROUTES } from "@openbot/contracts/team-protocol/mcp-v1";
+} from "@dani-dex/contracts/ipc";
+import type { TeamCurrentCapability } from "@dani-dex/contracts/team-protocol/current";
+import { MCP_ROUTES } from "@dani-dex/contracts/team-protocol/mcp-v1";
 import type { TestMcpServerOptions } from "../../backend/agent-service";
 import { MCP_PROBE_TIMEOUT_MS } from "../../backend/mcp-probe";
 import { type McpToolRuntimes, needsManagedRuntime } from "../../backend/mcp-provider-shapes";

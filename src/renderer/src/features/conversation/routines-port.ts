@@ -1,6 +1,6 @@
 // The routines twin of `memories-port.ts`: one settings panel, two owners.
 
-import type { RoutineFields, RoutineRunFields, RoutineSchedule } from "@openbot/contracts/ipc";
+import type { RoutineFields, RoutineRunFields, RoutineSchedule } from "@dani-dex/contracts/ipc";
 
 export interface RoutineSaveInput {
   routineId: string | null;
@@ -27,18 +27,18 @@ export function agentRoutinesPort(agentId: string): RoutinesPort {
   return {
     ownerId: agentId,
     ownerNoun: "agent",
-    list: () => window.openbot.agent.listRoutines(agentId),
-    listRuns: (routineId, limit) => window.openbot.agent.listRoutineRuns({ agentId, routineId, limit }),
+    list: () => window.danidex.agent.listRoutines(agentId),
+    listRuns: (routineId, limit) => window.danidex.agent.listRoutineRuns({ agentId, routineId, limit }),
     save: ({ routineId, name, instruction, active, timezone, schedule }) =>
       routineId
-        ? window.openbot.agent.updateRoutine({ agentId, routineId, name, instruction, active, schedule })
-        : window.openbot.agent.createRoutine({ agentId, name, instruction, active, timezone, schedule }),
-    remove: (routineId) => window.openbot.agent.deleteRoutine({ agentId, routineId }),
+        ? window.danidex.agent.updateRoutine({ agentId, routineId, name, instruction, active, schedule })
+        : window.danidex.agent.createRoutine({ agentId, name, instruction, active, timezone, schedule }),
+    remove: (routineId) => window.danidex.agent.deleteRoutine({ agentId, routineId }),
     test: async (routineId) => {
-      await window.openbot.agent.testRoutine({ agentId, routineId });
+      await window.danidex.agent.testRoutine({ agentId, routineId });
     },
     subscribe: (reload) =>
-      window.openbot.agent.onEvent((event) => {
+      window.danidex.agent.onEvent((event) => {
         if (event.type === "routines-changed" && event.agentId === agentId) reload();
       }),
   };
@@ -48,18 +48,18 @@ export function channelRoutinesPort(channelId: string): RoutinesPort {
   return {
     ownerId: channelId,
     ownerNoun: "channel",
-    list: () => window.openbot.agent.listChannelRoutines(channelId),
-    listRuns: (routineId, limit) => window.openbot.agent.listChannelRoutineRuns({ channelId, routineId, limit }),
+    list: () => window.danidex.agent.listChannelRoutines(channelId),
+    listRuns: (routineId, limit) => window.danidex.agent.listChannelRoutineRuns({ channelId, routineId, limit }),
     save: ({ routineId, name, instruction, active, timezone, schedule }) =>
       routineId
-        ? window.openbot.agent.updateChannelRoutine({ channelId, routineId, name, instruction, active, schedule })
-        : window.openbot.agent.createChannelRoutine({ channelId, name, instruction, active, timezone, schedule }),
-    remove: (routineId) => window.openbot.agent.deleteChannelRoutine({ channelId, routineId }),
+        ? window.danidex.agent.updateChannelRoutine({ channelId, routineId, name, instruction, active, schedule })
+        : window.danidex.agent.createChannelRoutine({ channelId, name, instruction, active, timezone, schedule }),
+    remove: (routineId) => window.danidex.agent.deleteChannelRoutine({ channelId, routineId }),
     test: async (routineId) => {
-      await window.openbot.agent.testChannelRoutine({ channelId, routineId });
+      await window.danidex.agent.testChannelRoutine({ channelId, routineId });
     },
     subscribe: (reload) =>
-      window.openbot.agent.onEvent((event) => {
+      window.danidex.agent.onEvent((event) => {
         if (event.type === "channel-routines-changed" && event.channelId === channelId) reload();
       }),
   };

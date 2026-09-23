@@ -7,7 +7,7 @@ import {
   type AgentApproval,
   type AgentPromptQuestion,
   type AgentRuntimeSnapshot,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 
 export function compactRuntimeQuestion(
   question: AgentPromptQuestion,

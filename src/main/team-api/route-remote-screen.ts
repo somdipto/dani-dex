@@ -7,7 +7,7 @@ import { parseRemoteDesktopTest } from "../ipc/server-inputs";
 // exist on every host, and answering 404 would tell a client the host is too old instead of
 // telling it remote control is switched off.
 
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import { RemoteScreenError } from "../remote-screen-gateway";
 import type { TeamStore } from "../team-store";
 import type { TeamApiRemoteScreen } from "./dependencies";

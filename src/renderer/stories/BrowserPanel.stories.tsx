@@ -1,4 +1,4 @@
-import type { BrowserControlSession, BrowserTab } from "@openbot/contracts/ipc";
+import type { BrowserControlSession, BrowserTab } from "@dani-dex/contracts/ipc";
 import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import BrowserPanel from "../src/features/conversation/BrowserPanel";

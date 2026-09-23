@@ -6,8 +6,6 @@ import { createHash, randomUUID } from "node:crypto";
 import { lstat, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { connect } from "node:net";
 import { dirname, isAbsolute, join } from "node:path";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { getDefaultEnvironment, StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import {
   COMPUTER_USE_MCP_SERVER_ID,
   COMPUTER_USE_MCP_SERVER_NAME,
@@ -15,8 +13,10 @@ import {
   type ComputerUseState,
   type MacPermissionId,
   type McpServerConfig,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { getDefaultEnvironment, StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { CuaDriverActionTap, type ObservedAction, type ObservedPointer } from "./cua-driver-action-tap";
 import { CUA_DRIVER_VENDOR_CALLS_OFF } from "./cua-driver-artifact";
 import { stopRemoteProcess } from "./remote-diagnostics";

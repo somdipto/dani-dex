@@ -1,6 +1,6 @@
+import { SIDEBAR_UNASSIGNED_SECTION_ID } from "@dani-dex/contracts/ipc";
+import { userErrorMessage } from "@dani-dex/user-errors";
 import type { MenuAction } from "@expo/ui/community/menu";
-import { SIDEBAR_UNASSIGNED_SECTION_ID } from "@openbot/contracts/ipc";
-import { userErrorMessage } from "@openbot/user-errors";
 import { Link } from "expo-router";
 import { useRef, useState } from "react";
 import { Alert } from "react-native";

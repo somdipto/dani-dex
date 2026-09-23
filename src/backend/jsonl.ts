@@ -1,5 +1,5 @@
 import { StringDecoder } from "node:string_decoder";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { isRpcMessage, type RpcMessage } from "./protocol";
 
 export class JsonLineDecoder {

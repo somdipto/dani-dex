@@ -4,9 +4,9 @@
 // a URL that is too long, a `focus` that is not a boolean - because whether a tab may be opened at
 // all is the browser host's decision, made the same way for a local caller.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { isBoolean } from "@openbot/contracts/runtime-values";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { isBoolean } from "@dani-dex/contracts/runtime-values";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import type { TeamApiBrowser, TeamApiBrowserView } from "./dependencies";
 import { HttpError } from "./http-error";
 import type { RouteOutcome, TeamApiRequestContext } from "./request-context";

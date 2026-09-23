@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { expandAttachmentReferences } from "@openbot/contracts/attachment-references";
-import { expandChatTagReferences } from "@openbot/contracts/chat-tag-references";
-import type { AgentSummary, ConversationSnapshot, QueueDeliveryStatus } from "@openbot/contracts/ipc";
+import { expandAttachmentReferences } from "@dani-dex/contracts/attachment-references";
+import { expandChatTagReferences } from "@dani-dex/contracts/chat-tag-references";
+import type { AgentSummary, ConversationSnapshot, QueueDeliveryStatus } from "@dani-dex/contracts/ipc";
 import type { DeliveryContext } from "../mailbox-store";
 
 export function responseAttachmentMessageId(threadId: string, turnId: string, callId: string): string {

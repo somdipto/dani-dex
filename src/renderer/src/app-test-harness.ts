@@ -18,7 +18,7 @@ import type {
   ServerSummary,
   TeamPresenceSnapshot,
   UpdateStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { screen } from "@solidjs/testing-library";
 import { vi } from "vitest";
 import { type AnalyticsEventName, type DesktopAnalyticsEvents, desktopAnalytics } from "./analytics";
@@ -414,7 +414,7 @@ export function installOpenbotStub(): void {
     writable: true,
     value: { getUserMedia: vi.fn().mockRejectedValue(new DOMException("Denied", "NotAllowedError")) },
   });
-  Object.defineProperty(window, "openbot", {
+  Object.defineProperty(window, "danidex", {
     configurable: true,
     writable: true,
     value: {
@@ -710,7 +710,7 @@ export function installOpenbotStub(): void {
           readState: { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
         })),
         readConversationPage: vi.fn().mockImplementation(async (input) => {
-          const snapshot = await window.openbot.agent.readConversation(input.agentId);
+          const snapshot = await window.danidex.agent.readConversation(input.agentId);
           const messages = snapshot.messages.slice(-Math.min(input.limit ?? 50, 100));
           return {
             ...snapshot,
@@ -756,7 +756,7 @@ export function installOpenbotStub(): void {
         acknowledgeFailedTurn: vi.fn().mockResolvedValue(undefined),
         cancelQueuedMessage: vi.fn().mockResolvedValue(undefined),
         steerQueuedMessage: vi.fn().mockResolvedValue(undefined),
-        editQueuedMessage: vi.fn().mockImplementation(async (input) => window.openbot.agent.listQueue(input.agentId)),
+        editQueuedMessage: vi.fn().mockImplementation(async (input) => window.danidex.agent.listQueue(input.agentId)),
         updateQueuedMessage: vi.fn().mockResolvedValue(undefined),
         reorderQueue: vi.fn().mockResolvedValue(undefined),
         interrupt: vi.fn().mockResolvedValue(undefined),
@@ -880,7 +880,7 @@ export function installOpenbotStub(): void {
         getPresence: vi.fn().mockResolvedValue({ serverId: null, members: [], updatedAt: "" }),
         getPresenceFor: vi.fn().mockResolvedValue({ serverId: null, members: [], updatedAt: "" }),
         refreshIdentity: vi.fn().mockImplementation(async (serverId) => {
-          const server = (await window.openbot.servers.list()).find((item) => item.id === serverId);
+          const server = (await window.danidex.servers.list()).find((item) => item.id === serverId);
           if (!server) throw new Error("Server not found");
           return server;
         }),
@@ -908,7 +908,7 @@ export function installOpenbotStub(): void {
           readState: { unreadCount: 0, firstUnreadMessageId: null, throughSequence: 0 },
         })),
         readDirectConversationPage: vi.fn().mockImplementation(async (input) => {
-          const snapshot = await window.openbot.servers.readDirectConversation(input.memberId);
+          const snapshot = await window.danidex.servers.readDirectConversation(input.memberId);
           const messages = snapshot.messages.slice(-Math.min(input.limit ?? 50, 100));
           return {
             ...snapshot,

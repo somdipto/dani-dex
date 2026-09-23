@@ -1,8 +1,8 @@
 import { lstat, mkdir, readdir, readFile, realpath, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import type { AgentSummary, InstalledSkill } from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+import type { AgentSummary, InstalledSkill } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import { parse as parseYaml } from "yaml";
 
 const MANAGED_SKILL_SLUG = "openbot-site-hosting";

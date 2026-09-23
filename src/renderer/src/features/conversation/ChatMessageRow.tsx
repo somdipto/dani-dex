@@ -1,4 +1,4 @@
-import type { AttachmentSummary, ConversationReaction, InstalledSkill } from "@openbot/contracts/ipc";
+import type { AttachmentSummary, ConversationReaction, InstalledSkill } from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { For, Show } from "solid-js";
 import { avatarHeadColor } from "../../bloub-avatar";

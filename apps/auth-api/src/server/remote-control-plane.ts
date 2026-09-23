@@ -1,11 +1,11 @@
-import type { MobileConnectHostBinding } from "@openbot/contracts/mobile-connect";
-import { type DynamicRecord, isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import type { MobileConnectHostBinding } from "@dani-dex/contracts/mobile-connect";
+import { type DynamicRecord, isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import {
   REMOTE_TICKET_AUDIENCE,
   REMOTE_TICKET_PROTOCOL_VERSION,
   type RemoteMemberRole,
   type RemoteTicketClaims,
-} from "@openbot/contracts/signal-protocol/ticket";
+} from "@dani-dex/contracts/signal-protocol/ticket";
 import { importJWK, type JWK, SignJWT } from "jose";
 import { hmacSha256, randomToken, sha256 } from "./crypto";
 import { PERSISTENT_SESSION_EXPIRES_AT } from "./session-policy";

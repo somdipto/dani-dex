@@ -1,8 +1,8 @@
 // What a channel remembers: the notes every member of it carries into a turn.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { decodeChannelMemories, decodeChannelMemory } from "@openbot/contracts/ipc";
-import { CHANNEL_ROUTES } from "@openbot/contracts/team-protocol/channels-v1";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { decodeChannelMemories, decodeChannelMemory } from "@dani-dex/contracts/ipc";
+import { CHANNEL_ROUTES } from "@dani-dex/contracts/team-protocol/channels-v1";
 import type { AgentService } from "../../backend/agent-service";
 import { decodeVoid } from "../remote-host-decoding";
 import type { RemoteServerManager } from "../remote-server-manager";

@@ -30,7 +30,7 @@ import type {
   TeamPresenceSnapshot,
   TeamSessionSummary,
   UpdateStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { AgentProfile } from "../data";
 import type { McpServerConfig } from "../features/servers/mcp-servers";
 import type { MarketplacePluginDetail } from "../features/settings/marketplace-plugins";

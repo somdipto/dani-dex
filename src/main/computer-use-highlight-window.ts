@@ -2,8 +2,8 @@ import type {
   ComputerUseCoveredArea,
   ComputerUseCursorPoint,
   ComputerUseHighlightPlacement,
-} from "@openbot/contracts/ipc";
-import { createOpenBotLogger, type Logger, toLogValue } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { createOpenBotLogger, type Logger, toLogValue } from "@dani-dex/logging";
 import type { BrowserWindow, Rectangle } from "electron";
 import type { ComputerUseHighlightTarget } from "./computer-use-target-window";
 

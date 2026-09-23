@@ -6,7 +6,7 @@ import type {
   DirectConversationSnapshot,
   DirectThreadSummary,
   ServerSummary,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import developmentLogoUrl from "../assets/openbot-logo-dev.png";
 import productionLogoUrl from "../assets/openbot-logo-production.png";
 import { STORY_PRESENCE } from "./fixtures";

@@ -1,4 +1,4 @@
-import type { AgentModelOption } from "@openbot/contracts/ipc";
+import type { AgentModelOption } from "@dani-dex/contracts/ipc";
 import { describe, expect, it, vi } from "vitest";
 import { resolveCreationModel } from "./agent-creation-model";
 import { readAgentSelection, writeAgentSelection } from "./agent-selection";

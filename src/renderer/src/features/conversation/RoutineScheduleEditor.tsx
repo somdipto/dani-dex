@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { ROUTINE_MINIMUM_INTERVAL_MINUTES, type RoutineSchedule } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { ROUTINE_MINIMUM_INTERVAL_MINUTES, type RoutineSchedule } from "@dani-dex/contracts/ipc";
 import { Show } from "solid-js";
 import { Button, Clock3, Input } from "../../components/ui";
 import { RoutineSelect, TimeSelect } from "./RoutineSelect";

@@ -1,4 +1,4 @@
-import type { DynamicIslandPresentation } from "@openbot/contracts/ipc";
+import type { DynamicIslandPresentation } from "@dani-dex/contracts/ipc";
 import { mix } from "../../components/ui/utils";
 
 const MODE_SWAP_EXIT_DURATION = 160;

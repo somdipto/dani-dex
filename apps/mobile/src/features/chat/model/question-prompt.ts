@@ -1,4 +1,4 @@
-import type { AgentPromptQuestion, AgentPromptResolution } from "@openbot/contracts/ipc";
+import type { AgentPromptQuestion, AgentPromptResolution } from "@dani-dex/contracts/ipc";
 
 export function nextUnansweredQuestion(
   questions: AgentPromptQuestion[],

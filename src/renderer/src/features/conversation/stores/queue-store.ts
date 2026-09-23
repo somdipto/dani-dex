@@ -1,4 +1,4 @@
-import type { QueueDelivery } from "@openbot/contracts/ipc";
+import type { QueueDelivery } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import { activeQueueDeliveries, presentQueueDeliveries, queuedDeliveriesInOrder } from "../../../queue-reconciliation";
 import { agentActivityExitDuration } from "../activity-timing";

@@ -1,4 +1,4 @@
-import type { BrowserControlState, BrowserTab, ServerSummary } from "@openbot/contracts/ipc";
+import type { BrowserControlState, BrowserTab, ServerSummary } from "@dani-dex/contracts/ipc";
 import { createSignal } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { usePlatform } from "../../platform";
@@ -68,12 +68,12 @@ const BrowserTabs = createSimpleContext({
       if (!supportsBrowser(server)) return Promise.resolve({ tabs: [], activeTabId: null });
       // Main answers this for a remote server too, and falls back to the tab list for a host
       // without `browser-navigation`, so the two server kinds read the same state here.
-      return window.openbot.browser.getDisplayState();
+      return window.danidex.browser.getDisplayState();
     }
 
     function loadControlState(server: ServerSummary | undefined): Promise<BrowserControlState> {
       if (!supportsBrowser(server)) return Promise.resolve({ sessions: [] });
-      return window.openbot.browser.getControlState();
+      return window.danidex.browser.getControlState();
     }
 
     /**
@@ -99,7 +99,7 @@ const BrowserTabs = createSimpleContext({
 
     function activateBrowserTab(tabId: string) {
       const analytics = desktopAnalytics.scope();
-      const operation = window.openbot.browser.activate(tabId);
+      const operation = window.danidex.browser.activate(tabId);
       browserTabActivationOperations.set(tabId, operation);
       void operation
         .then(() => analytics.track("browser_action", { action: "activate", result: "succeeded" }))
@@ -125,7 +125,7 @@ const BrowserTabs = createSimpleContext({
         if (browserVisibilitySuspended() || !selectionIsCurrent() || !scopeIsCurrent()) {
           return;
         }
-        await window.openbot.browser.close(tabId);
+        await window.danidex.browser.close(tabId);
         if (scopeIsCurrent()) {
           browserChangeRevision += 1;
           const next = browserTabsAfterClose(browserTabs(), tabId, activeBrowserTabId());

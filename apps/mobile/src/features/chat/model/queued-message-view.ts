@@ -1,4 +1,4 @@
-import type { QueueDelivery } from "@openbot/contracts/ipc";
+import type { QueueDelivery } from "@dani-dex/contracts/ipc";
 
 /** A queued row shows its text, or the file names when the message is attachments only. */
 export function queuedMessagePreview(delivery: QueueDelivery): string {

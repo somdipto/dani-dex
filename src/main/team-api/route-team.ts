@@ -6,10 +6,10 @@
 // first line for exactly that reason.
 
 import { readFile } from "node:fs/promises";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { CreateTeamInviteInput, InviteSummary, TeamPresenceSnapshot } from "@openbot/contracts/ipc";
-import { isBoolean } from "@openbot/contracts/runtime-values";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { CreateTeamInviteInput, InviteSummary, TeamPresenceSnapshot } from "@dani-dex/contracts/ipc";
+import { isBoolean } from "@dani-dex/contracts/runtime-values";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import type { TeamStore } from "../team-store";
 import type { TeamApiRemoteScreen } from "./dependencies";
 import { HttpError } from "./http-error";

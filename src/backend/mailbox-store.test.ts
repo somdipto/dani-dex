@@ -3,13 +3,13 @@
 import { access, mkdir, mkdtemp, open, readdir, readFile, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { serializeAttachmentReference } from "@openbot/contracts/attachment-references";
-import { ATTACHMENT_LIMITS, INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
+import { ATTACHMENT_LIMITS, INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   AGENT_RUNTIME_TEXT_LIMIT,
   AGENT_RUNTIME_WORKING_ITEMS_LIMIT,
   isAttachmentSummary,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MailboxStore } from "./mailbox-store";
 import { OpenBotDatabase } from "./openbot-database";

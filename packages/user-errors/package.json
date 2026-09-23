@@ -1,5 +1,5 @@
 {
-  "name": "@openbot/user-errors",
+  "name": "@dani-dex/user-errors",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@openbot/logging": "workspace:*"
+    "@dani-dex/logging": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

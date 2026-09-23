@@ -1,4 +1,4 @@
-import { createRemoteConnectionRecovery, REMOTE_RETRY_INTERVAL_MS } from "@openbot/team-client";
+import { createRemoteConnectionRecovery, REMOTE_RETRY_INTERVAL_MS } from "@dani-dex/team-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { applyServerFailure, applyServerRecovery, serverKind, serverStatusLabel } from "./server-status";
 import type { MobileServer } from "./workspace-types";

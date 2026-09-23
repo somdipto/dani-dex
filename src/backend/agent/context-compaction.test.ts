@@ -1,5 +1,5 @@
 // @vitest-environment node
-import type { AgentEvent } from "@openbot/contracts/ipc";
+import type { AgentEvent } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AgentService } from "../agent-service";
 import {

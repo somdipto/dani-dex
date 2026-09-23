@@ -1,4 +1,4 @@
-import type { QueueDeliveryStatus } from "@openbot/contracts/ipc";
+import type { QueueDeliveryStatus } from "@dani-dex/contracts/ipc";
 import { Dynamic } from "@solidjs/web";
 import { For, Show } from "solid-js";
 import { avatarHeadColor } from "../../bloub-avatar";

@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   type HostedSiteConversationEventAction,
   type HostedSiteConversationEventDetails,
@@ -6,7 +6,7 @@ import {
   type HostedSiteSummary,
   hostedSiteConversationEventText,
   isHostedSiteConversationEventUrl,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 
 export type HostedSiteMutationTool = "publish_site" | "replace_site" | "delete_site";
 

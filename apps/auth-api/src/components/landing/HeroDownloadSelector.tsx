@@ -1,4 +1,4 @@
-import { PlatformLogo } from "@openbot/brand";
+import { PlatformLogo } from "@dani-dex/brand";
 import { createSignal, createUniqueId, For, onSettled, Show } from "solid-js";
 import { landingAnalytics } from "../../lib/analytics";
 import {

@@ -6,7 +6,7 @@
 // and header values the host holds. `requireAdmin` is the whole gate, so these are the cases that
 // prove it is in place.
 
-import { decodeMcpServerConfigs, decodeMcpTestResult, type McpServerConfig } from "@openbot/contracts/ipc";
+import { decodeMcpServerConfigs, decodeMcpTestResult, type McpServerConfig } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { NO_MCP_TOOL_RUNTIMES } from "../backend/mcp-provider-shapes";
 import { McpServerError } from "../backend/mcp-server-store";

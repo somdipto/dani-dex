@@ -1,5 +1,5 @@
-import type { CentralAuthUser, ServerSummary } from "@openbot/contracts/ipc";
-import { MCP_SERVERS_CAPABILITY } from "@openbot/contracts/ipc";
+import type { CentralAuthUser, ServerSummary } from "@dani-dex/contracts/ipc";
+import { MCP_SERVERS_CAPABILITY } from "@dani-dex/contracts/ipc";
 import { createMemo, Loading, Show } from "solid-js";
 import { useAuth } from "./features/account/account-context";
 import { useAgents } from "./features/agents/agents-context";
@@ -36,14 +36,14 @@ interface AccountProps {
 /**
  * The four calls the OpenCode key dialog makes, bound once.
  *
- * It is a narrow object rather than `window.openbot` itself so the dialog's props say exactly what
+ * It is a narrow object rather than `window.danidex` itself so the dialog's props say exactly what
  * it reaches for, and so a test hands it four functions instead of the whole bridge.
  */
 const providerKeyApi: ProviderKeyApi = {
-  getProviderApiKeyState: (provider) => window.openbot.getProviderApiKeyState(provider),
-  setProviderApiKey: (input) => window.openbot.setProviderApiKey(input),
-  clearProviderApiKey: (provider) => window.openbot.clearProviderApiKey(provider),
-  openExternal: (destination) => window.openbot.openExternal(destination),
+  getProviderApiKeyState: (provider) => window.danidex.getProviderApiKeyState(provider),
+  setProviderApiKey: (input) => window.danidex.setProviderApiKey(input),
+  clearProviderApiKey: (provider) => window.danidex.clearProviderApiKey(provider),
+  openExternal: (destination) => window.danidex.openExternal(destination),
 };
 
 /**
@@ -262,7 +262,7 @@ function ServerSettings() {
             onUpdateMember={updateServerMember}
             onRemoveMember={removeServerMember}
             onRevokeInvite={revokeServerInvite}
-            onOpenScreenRecordingSettings={() => window.openbot.openExternal("mac-screen-recording")}
+            onOpenScreenRecordingSettings={() => window.danidex.openExternal("mac-screen-recording")}
             onRecheckScreenRecording={recheckScreenRecording}
             mcpServers={canUseMcp(server()) ? serverSettingsMcp() : undefined}
             // Only for this computer: the runtime a remote host starts its own servers with is that
@@ -356,7 +356,7 @@ function AppSettings(props: AccountProps) {
         onDeleteCustomProvider={localCustomProviders() ? deleteCustomProvider : undefined}
         providerKeys={localProviderDownloads() ? providerKeyApi : undefined}
         codeLogin={localProviderDownloads() ? codeLogin : undefined}
-        hostedSitesApi={window.openbot.hostedSites}
+        hostedSitesApi={window.danidex.hostedSites}
         turboModePending={turboModePending()}
         restoreFocusTarget={appSettingsRestoreTarget()}
       />

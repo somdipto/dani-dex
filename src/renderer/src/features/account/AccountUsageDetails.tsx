@@ -1,4 +1,4 @@
-import { ProviderLogo } from "@openbot/brand";
+import { ProviderLogo } from "@dani-dex/brand";
 import type { JSX } from "@solidjs/web";
 import { For, Show } from "solid-js";
 import { Button, Gauge, RefreshCw } from "../../components/ui";

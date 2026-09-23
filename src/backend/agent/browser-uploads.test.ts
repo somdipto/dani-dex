@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { open, readFile, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { AgentProvider } from "../agent-client";
 import type { AgentService } from "../agent-service";

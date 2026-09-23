@@ -1,4 +1,4 @@
-import { type AgentProviderId, type AgentStatus, agentProviderDescriptor } from "@openbot/contracts/ipc";
+import { type AgentProviderId, type AgentStatus, agentProviderDescriptor } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, flush, onSettled } from "solid-js";
 import { desktopAnalytics } from "./analytics";
 import type { ProviderCodeLoginState } from "./components/ProviderCodeLoginDialog";
@@ -30,7 +30,7 @@ const Providers = createSimpleContext({
       const row = agentStatus().providers?.find((candidate) => candidate.id === provider);
       return row?.cliSource === "system" ? (row.version ?? null) : null;
     }
-    const runtimes = createProviderRuntimeStore(window.openbot.providerRuntimes, {
+    const runtimes = createProviderRuntimeStore(window.danidex.providerRuntimes, {
       systemCliVersion,
       isLocalServer: () => activeServer()?.kind === "local",
     });
@@ -79,7 +79,7 @@ const Providers = createSimpleContext({
       if (descriptor.installGuideLink === null) {
         return Promise.reject(new Error(`${descriptor.displayName} is included with Dani-Dex.`));
       }
-      return window.openbot.openExternal(descriptor.installGuideLink);
+      return window.danidex.openExternal(descriptor.installGuideLink);
     }
 
     /**
@@ -92,7 +92,7 @@ const Providers = createSimpleContext({
       if (refreshingProviders()) return;
       const analytics = beginProviderConnection(provider);
       try {
-        const status = await window.openbot.connectProvider(provider);
+        const status = await window.danidex.connectProvider(provider);
         flush(() => applyAgentStatus(status));
       } catch (error) {
         endFailedProviderConnection(provider, analytics);
@@ -140,7 +140,7 @@ const Providers = createSimpleContext({
         // Cancellation emits a terminal status. Finish it before the next attempt can wait.
         await codeLoginCancellation;
         if (generation !== codeLoginGeneration) return;
-        const started = await window.openbot.startProviderCodeLogin(provider);
+        const started = await window.danidex.startProviderCodeLogin(provider);
         // A dialog the user closed while the provider was answering: the login was cancelled with
         // it, so there is nobody left to show a code to.
         if (generation !== codeLoginGeneration) return;
@@ -189,7 +189,7 @@ const Providers = createSimpleContext({
       setCodeLoginProvider(null);
       if (!provider) return;
       pendingProviderConnections.delete(provider);
-      codeLoginCancellation = window.openbot
+      codeLoginCancellation = window.danidex
         .cancelProviderCodeLogin(provider)
         .then((status) => {
           if (generation === codeLoginGeneration) flush(() => applyAgentStatus(status));
@@ -292,7 +292,7 @@ const Providers = createSimpleContext({
       const analytics = desktopAnalytics.scope();
       setRefreshingProviders(true);
       try {
-        const status = await window.openbot.refreshAgentProviders();
+        const status = await window.danidex.refreshAgentProviders();
         flush(() => applyAgentStatus(status));
         analytics.track("provider_action", { action: "refresh", result: "succeeded" });
       } catch (error) {
@@ -324,7 +324,7 @@ const Providers = createSimpleContext({
       state: codeLoginState,
       start: (provider) => void startProviderCodeLogin(provider),
       cancel: cancelProviderCodeLogin,
-      openVerificationUrl: (url) => void window.openbot.openUrl(url),
+      openVerificationUrl: (url) => void window.danidex.openUrl(url),
     };
 
     return {

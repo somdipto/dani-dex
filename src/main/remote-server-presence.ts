@@ -8,7 +8,7 @@
 // The cache is also what makes a lost connection legible. `markOffline` does not clear it, because
 // an empty roster and a roster of people who went offline look nothing alike to a user.
 
-import type { TeamPresenceSnapshot } from "@openbot/contracts/ipc";
+import type { TeamPresenceSnapshot } from "@dani-dex/contracts/ipc";
 
 export interface RemotePresenceCacheOptions {
   // How to ask a server for its current roster. Injected so this file never names a route.

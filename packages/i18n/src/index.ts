@@ -1,4 +1,4 @@
-import { type AppLanguage, DEFAULT_APP_LANGUAGE } from "@openbot/contracts/ipc";
+import { type AppLanguage, DEFAULT_APP_LANGUAGE } from "@dani-dex/contracts/ipc";
 import { createTranslate, type MessageParams, type Translate } from "./message";
 import { type AppMessages, en } from "./messages/en";
 import { fr } from "./messages/fr";

@@ -5,7 +5,7 @@ import { NO_PROVIDER_CREDENTIALS, requireProviderDriver } from "./provider-drive
 import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type DynamicRecord, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { type DynamicRecord, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GrokAgentClient } from "./grok-client";
 import {

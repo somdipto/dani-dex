@@ -5,7 +5,7 @@ import {
   type RemoteTeamCommand,
   type RemoteTeamCommandResult,
   type RemoteTeamPeerActions,
-} from "@openbot/team-client/remote-peer";
+} from "@dani-dex/team-client/remote-peer";
 import { useEffect, useRef } from "react";
 
 interface RemoteTeamBridgeProps extends RemoteTeamPeerActions {

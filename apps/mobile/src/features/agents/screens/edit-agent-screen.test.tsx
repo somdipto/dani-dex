@@ -13,9 +13,9 @@ import {
   type SidebarLayoutAction,
   type SidebarLayoutSnapshot,
   type UpdateAgentInput,
-} from "@openbot/contracts/ipc";
-import { CHANNEL_ROUTES } from "@openbot/contracts/team-protocol/channels-v1";
-import type { TeamProtocolV2Json } from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/ipc";
+import { CHANNEL_ROUTES } from "@dani-dex/contracts/team-protocol/channels-v1";
+import type { TeamProtocolV2Json } from "@dani-dex/contracts/team-protocol/v2";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, screen, waitFor } from "@testing-library/dom";
 import { act, isValidElement, type PropsWithChildren, useState } from "react";
@@ -166,7 +166,7 @@ const workspace = {
   setAgentAvatar: vi.fn(
     async (
       _id: string,
-      image: import("@openbot/team-client/remote-peer").RemoteFileUpload | null,
+      image: import("@dani-dex/team-client/remote-peer").RemoteFileUpload | null,
       _serverId: string,
     ) => {
       workspace.agents = workspace.agents.map((agent) => ({

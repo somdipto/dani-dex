@@ -1,6 +1,6 @@
-import type { AgentSummary, BrowserPreview, BrowserTab, ServerSummary } from "@openbot/contracts/ipc";
-import { TEAM_BROWSER_VIEW_CAPABILITY } from "@openbot/contracts/team-protocol/browser-view-v1";
-import { TEAM_BROWSER_NAVIGATION_CAPABILITY } from "@openbot/contracts/team-protocol/current";
+import type { AgentSummary, BrowserPreview, BrowserTab, ServerSummary } from "@dani-dex/contracts/ipc";
+import { TEAM_BROWSER_VIEW_CAPABILITY } from "@dani-dex/contracts/team-protocol/browser-view-v1";
+import { TEAM_BROWSER_NAVIGATION_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { createSignal, flush } from "solid-js";
 import { expect, it, vi } from "vitest";
@@ -73,19 +73,19 @@ describe("Dani-Dex connected desktop shell", () => {
     emitAgentEvent?.({ type: "browser-changed", tabs: [tab], activeTabId: tab.id });
     await openComputerAndCard("Notification test");
     await waitFor(() =>
-      expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith(expect.objectContaining({ visible: true })),
+      expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith(expect.objectContaining({ visible: true })),
     );
 
     toast.error("Provider error", { description: "Test notification", duration: Number.POSITIVE_INFINITY });
     const closeNotification = await screen.findByRole("button", { name: "Close notification" });
-    await waitFor(() => expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith({ visible: false }));
+    await waitFor(() => expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith({ visible: false }));
     await fireEvent.click(closeNotification);
     await waitFor(() =>
-      expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith(expect.objectContaining({ visible: true })),
+      expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith(expect.objectContaining({ visible: true })),
     );
     expect(screen.queryByRole("button", { name: "Close notification" })).not.toBeInTheDocument();
     expect(screen.getByRole("tab", { name: tab.title, selected: true })).toBeInTheDocument();
-    expect(window.openbot.browser.close).not.toHaveBeenCalled();
+    expect(window.danidex.browser.close).not.toHaveBeenCalled();
   });
 
   it("opens the selected preview and returns to the same card without losing the draft", async () => {
@@ -100,7 +100,7 @@ describe("Dani-Dex connected desktop shell", () => {
         ownerThreadId: "thread-other",
       }),
     ];
-    vi.mocked(window.openbot.browser.activate).mockImplementation(async (tabId) => {
+    vi.mocked(window.danidex.browser.activate).mockImplementation(async (tabId) => {
       emitAgentEvent?.({ type: "browser-changed", tabs, activeTabId: tabId });
     });
     emitAgentEvent?.({ type: "browser-changed", tabs, activeTabId: "one" });
@@ -110,10 +110,10 @@ describe("Dani-Dex connected desktop shell", () => {
     await openComputer();
     const card = await screen.findByRole("button", { name: "Open Second preview" });
     expect(screen.queryByRole("button", { name: "Open Other agent page" })).not.toBeInTheDocument();
-    expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
+    expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
     await fireEvent.click(card);
     await waitFor(() =>
-      expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith(
+      expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith(
         expect.objectContaining({ visible: true, target: "main" }),
       ),
     );
@@ -125,21 +125,21 @@ describe("Dani-Dex connected desktop shell", () => {
     });
     await fireEvent.click(screen.getByRole("button", { name: "Hide browser" }));
     await waitFor(() => expect(card).toHaveFocus());
-    expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
+    expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
 
     // Escape is the other way out of the expanded browser, and it has to land on the same card.
     const updatedCard = await screen.findByRole("button", { name: "Open Second preview updated" });
     await fireEvent.click(updatedCard);
     await waitFor(() =>
-      expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith(
+      expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith(
         expect.objectContaining({ visible: true, target: "main" }),
       ),
     );
     await fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => expect(updatedCard).toHaveFocus());
-    expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
+    expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
     expect(composer).toHaveTextContent("Keep this draft");
-    expect(window.openbot.browser.close).not.toHaveBeenCalled();
+    expect(window.danidex.browser.close).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -163,16 +163,16 @@ describe("Dani-Dex connected desktop shell", () => {
     const form = address.closest("form");
     if (!form) throw new Error("Browser address form was not rendered.");
     await fireEvent.submit(form);
-    expect(window.openbot.browser.navigate).toHaveBeenCalledWith({ tabId: tab.id, url });
-    expect(window.openbot.browser.open).not.toHaveBeenCalled();
+    expect(window.danidex.browser.navigate).toHaveBeenCalledWith({ tabId: tab.id, url });
+    expect(window.danidex.browser.open).not.toHaveBeenCalled();
   });
 
   it("keeps a new address draft when navigation in another tab completes", async () => {
     const first = browserTab("slow-tab", "Slow page", { url: "https://example.com/first" });
     const second = { ...first, id: "draft-tab", title: "Draft page", url: "https://example.com/second" };
     const navigation = Promise.withResolvers<void>();
-    vi.mocked(window.openbot.browser.navigate).mockReturnValueOnce(navigation.promise);
-    vi.mocked(window.openbot.browser.activate).mockImplementation(async (tabId) => {
+    vi.mocked(window.danidex.browser.navigate).mockReturnValueOnce(navigation.promise);
+    vi.mocked(window.danidex.browser.activate).mockImplementation(async (tabId) => {
       emitAgentEvent?.({ type: "browser-changed", tabs: [first, second], activeTabId: tabId });
     });
     render(() => <App />);
@@ -185,7 +185,7 @@ describe("Dani-Dex connected desktop shell", () => {
     const form = address.closest("form");
     if (!form) throw new Error("Browser address form was not rendered.");
     await fireEvent.submit(form);
-    expect(window.openbot.browser.navigate).toHaveBeenCalledWith({
+    expect(window.danidex.browser.navigate).toHaveBeenCalledWith({
       tabId: first.id,
       url: "https://example.com/loading",
     });
@@ -200,7 +200,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("opens address searches on a remote host with an existing tab", async () => {
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([
       testServer("local", false),
       testServer("remote-1", true),
     ]);
@@ -215,18 +215,18 @@ describe("Dani-Dex connected desktop shell", () => {
     const form = address.closest("form");
     if (!form) throw new Error("Browser address form was not rendered.");
     await fireEvent.submit(form);
-    expect(window.openbot.browser.open).toHaveBeenCalledWith({
+    expect(window.danidex.browser.open).toHaveBeenCalledWith({
       url: "https://www.google.com/search?q=remote%20search",
       ownerAgentId: "chief",
       ownerThreadId: "thread-chief",
       focus: true,
     });
-    expect(window.openbot.browser.navigate).not.toHaveBeenCalled();
+    expect(window.danidex.browser.navigate).not.toHaveBeenCalled();
   });
 
   it("moves the open tab to an address on a remote host that supports it", async () => {
     const studio = testServer("remote-1", true);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([
       testServer("local", false),
       {
         ...studio,
@@ -252,16 +252,16 @@ describe("Dani-Dex connected desktop shell", () => {
     if (!form) throw new Error("Browser address form was not rendered.");
     await fireEvent.submit(form);
 
-    expect(window.openbot.browser.navigate).toHaveBeenCalledWith({
+    expect(window.danidex.browser.navigate).toHaveBeenCalledWith({
       tabId: tab.id,
       url: "https://www.google.com/search?q=remote%20search",
     });
-    expect(window.openbot.browser.open).not.toHaveBeenCalled();
+    expect(window.danidex.browser.open).not.toHaveBeenCalled();
   });
 
   it("draws a remote host's page and sends a click back as a fraction of the frame", async () => {
     const studio = testServer("remote-1", true);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([
       testServer("local", false),
       {
         ...studio,
@@ -280,7 +280,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await screen.findByRole("heading", { name: "Chief" });
     emitAgentEvent?.({ type: "browser-changed", tabs: [tab], activeTabId: tab.id });
     await openComputerAndCard("Remote live page");
-    await vi.waitFor(() => expect(window.openbot.browser.startLiveView).toHaveBeenCalledWith(tab.id));
+    await vi.waitFor(() => expect(window.danidex.browser.startLiveView).toHaveBeenCalledWith(tab.id));
 
     emitBrowserLiveView?.({ type: "frame", tabId: tab.id, sequence: 1, width: 800, height: 600, image: IMAGE });
     const view = await screen.findByRole("img", { name: "Live view of the page on the host" });
@@ -300,7 +300,7 @@ describe("Dani-Dex connected desktop shell", () => {
     view.getBoundingClientRect = () => rect;
     await fireEvent.mouseDown(view, { clientX: 300, clientY: 150, button: 0, detail: 1 });
 
-    expect(window.openbot.browser.sendLiveViewInput).toHaveBeenCalledWith({
+    expect(window.danidex.browser.sendLiveViewInput).toHaveBeenCalledWith({
       type: "pointer",
       action: "down",
       x: 0.5,
@@ -314,7 +314,7 @@ describe("Dani-Dex connected desktop shell", () => {
   it("keeps existing previews when a new tab is added", async () => {
     const first = browserTab("existing", "Existing page");
     const [tabs, setTabs] = createSignal([first]);
-    const capture = vi.mocked(window.openbot.browser.capturePreview);
+    const capture = vi.mocked(window.danidex.browser.capturePreview);
     render(() => (
       <BrowserPreviewSidebar
         tabs={tabs()}
@@ -342,7 +342,7 @@ describe("Dani-Dex connected desktop shell", () => {
     vi.useFakeTimers();
     const [enabled, setEnabled] = createSignal(true);
     const [tab, setTab] = createSignal<BrowserTab>(browserTab("preview", "Preview page", { ownerThreadId: "chief" }));
-    const capture = vi.mocked(window.openbot.browser.capturePreview);
+    const capture = vi.mocked(window.danidex.browser.capturePreview);
     const view = render(() => (
       <BrowserPreviewCard
         tab={tab()}
@@ -384,7 +384,7 @@ describe("Dani-Dex connected desktop shell", () => {
     const [context, setContext] = createSignal("local:chief");
     const tab = browserTab("preview", "Preview page", { ownerThreadId: "chief" });
     let resolvePreview: ((preview: BrowserPreview) => void) | undefined;
-    const capture = vi.mocked(window.openbot.browser.capturePreview);
+    const capture = vi.mocked(window.danidex.browser.capturePreview);
     capture.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
@@ -433,7 +433,7 @@ describe("Dani-Dex connected desktop shell", () => {
       />
     ));
     await screen.findByRole("button", { name: "Open Offscreen" });
-    expect(window.openbot.browser.capturePreview).not.toHaveBeenCalled();
+    expect(window.danidex.browser.capturePreview).not.toHaveBeenCalled();
   });
 
   it("moves the live embedded browser between the sidebar and desktop Picture in Picture", async () => {
@@ -450,9 +450,9 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await fireEvent.click(screen.getByRole("button", { name: "Open browser Picture in Picture" }));
 
-    await waitFor(() => expect(window.openbot.browser.openPictureInPicture).toHaveBeenCalledWith(undefined));
+    await waitFor(() => expect(window.danidex.browser.openPictureInPicture).toHaveBeenCalledWith(undefined));
     expect(screen.queryByRole("complementary", { name: "Browser" })).not.toBeInTheDocument();
-    expect(window.openbot.browser.close).not.toHaveBeenCalled();
+    expect(window.danidex.browser.close).not.toHaveBeenCalled();
 
     emitBrowserPictureInPicture?.({
       type: "bounds-changed",
@@ -462,11 +462,11 @@ describe("Dani-Dex connected desktop shell", () => {
 
     emitBrowserPictureInPicture?.({ type: "dock" });
     expect(await screen.findByRole("complementary", { name: "Browser" })).toBeInTheDocument();
-    expect(window.openbot.browser.close).not.toHaveBeenCalled();
+    expect(window.danidex.browser.close).not.toHaveBeenCalled();
 
     await fireEvent.click(screen.getByRole("button", { name: "Open browser Picture in Picture" }));
     await waitFor(() =>
-      expect(window.openbot.browser.openPictureInPicture).toHaveBeenLastCalledWith({
+      expect(window.danidex.browser.openPictureInPicture).toHaveBeenLastCalledWith({
         x: 720,
         y: 360,
         width: 460,
@@ -475,14 +475,14 @@ describe("Dani-Dex connected desktop shell", () => {
     );
     emitBrowserPictureInPicture?.({ type: "hide" });
     expect(screen.queryByRole("complementary", { name: "Browser" })).not.toBeInTheDocument();
-    expect(window.openbot.browser.close).not.toHaveBeenCalled();
+    expect(window.danidex.browser.close).not.toHaveBeenCalled();
   });
 
   it("keeps a newly opened browser tab active when the initial tab request resolves late", async () => {
     const googleTab = browserTab("tab-google", "Google", { url: "https://www.google.com" });
     const substackTab = browserTab("tab-substack", "Substack | Chat", { url: "https://substack.com/chat" });
     let resolveInitialState: (state: { tabs: BrowserTab[]; activeTabId: string | null }) => void = () => undefined;
-    vi.mocked(window.openbot.browser.getDisplayState).mockReturnValueOnce(
+    vi.mocked(window.danidex.browser.getDisplayState).mockReturnValueOnce(
       new Promise((resolve) => {
         resolveInitialState = resolve;
       }),
@@ -490,7 +490,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    await waitFor(() => expect(window.openbot.browser.getDisplayState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(window.danidex.browser.getDisplayState).toHaveBeenCalledTimes(1));
     emitAgentEvent?.({
       type: "browser-changed",
       tabs: [googleTab, substackTab],
@@ -513,14 +513,14 @@ describe("Dani-Dex connected desktop shell", () => {
     let resolveRemoteTabs: ((state: { tabs: BrowserTab[]; activeTabId: string | null }) => void) | undefined;
     const firstTab = browserTab("tab-first", "First local tab", { url: "https://example.com/first" });
     const activeTab = browserTab("tab-active", "Active local tab", { url: "https://example.com/active" });
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (serverId) => [
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (serverId) => [
       { ...local, active: serverId === "local" },
       { ...remote, active: serverId === "remote-1" },
     ]);
     // Main answers this for a remote server too, so the held read is the remote leg's display
     // state rather than a bare tab list.
-    vi.mocked(window.openbot.browser.getDisplayState)
+    vi.mocked(window.danidex.browser.getDisplayState)
       .mockResolvedValueOnce({ tabs: [], activeTabId: null })
       .mockReturnValueOnce(
         new Promise((resolve) => {
@@ -531,9 +531,9 @@ describe("Dani-Dex connected desktop shell", () => {
 
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    await waitFor(() => expect(window.openbot.browser.getDisplayState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(window.danidex.browser.getDisplayState).toHaveBeenCalledTimes(1));
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("remote-1"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("remote-1"));
     await waitFor(() => expect(resolveRemoteTabs).toBeDefined());
     resolveRemoteTabs?.({ tabs: [], activeTabId: null });
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -541,7 +541,7 @@ describe("Dani-Dex connected desktop shell", () => {
       expect(screen.getByRole("button", { name: "Studio Mac server" })).toHaveAttribute("aria-pressed", "true"),
     );
     await fireEvent.click(screen.getByRole("button", { name: "Local server" }));
-    await waitFor(() => expect(window.openbot.browser.getDisplayState).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(window.danidex.browser.getDisplayState).toHaveBeenCalledTimes(3));
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Local server" })).toHaveAttribute("aria-pressed", "true"),
     );
@@ -565,7 +565,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await openComputerAndCard("Restored PiP");
     await fireEvent.click(screen.getByRole("button", { name: "Open browser Picture in Picture" }));
     await waitFor(() =>
-      expect(window.openbot.browser.openPictureInPicture).toHaveBeenLastCalledWith({
+      expect(window.danidex.browser.openPictureInPicture).toHaveBeenLastCalledWith({
         x: 640,
         y: 320,
         width: 460,
@@ -592,9 +592,9 @@ describe("Dani-Dex connected desktop shell", () => {
     });
     expect(screen.queryByRole("complementary", { name: "Browser" })).not.toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
-    await waitFor(() => expect(window.openbot.browser.closePictureInPicture).toHaveBeenCalled());
+    await waitFor(() => expect(window.danidex.browser.closePictureInPicture).toHaveBeenCalled());
     await fireEvent.click(screen.getByRole("button", { name: /Chief/ }));
-    await waitFor(() => expect(window.openbot.browser.openPictureInPicture).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.danidex.browser.openPictureInPicture).toHaveBeenCalledTimes(2));
   });
 
   it("shows the browser control indicator only while an agent acts", async () => {
@@ -630,7 +630,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("complementary", { name: "Browser" })).not.toBeInTheDocument();
     const browserControl = screen.getByRole("button", { name: "Chief is controlling the browser" });
     expect(browserControl).toHaveAttribute("aria-expanded", "false");
-    expect(window.openbot.browser.open).not.toHaveBeenCalled();
+    expect(window.danidex.browser.open).not.toHaveBeenCalled();
 
     await fireEvent.click(browserControl);
     await fireEvent.click(await screen.findByRole("button", { name: "Open Local smoke page" }));
@@ -639,9 +639,9 @@ describe("Dani-Dex connected desktop shell", () => {
     });
     expect(controlledTab).toHaveAttribute("aria-description", "Press Delete or Control/Command W to close");
     await fireEvent.keyDown(screen.getByRole("tab", { name: "Third page" }), { key: "Delete" });
-    expect(window.openbot.browser.close).toHaveBeenCalledWith("tab-3");
+    expect(window.danidex.browser.close).toHaveBeenCalledWith("tab-3");
     await fireEvent.click(screen.getByRole("button", { name: "New browser tab" }));
-    expect(window.openbot.browser.open).toHaveBeenCalledWith({
+    expect(window.danidex.browser.open).toHaveBeenCalledWith({
       url: "https://www.google.com",
       ownerThreadId: "thread-chief",
       ownerAgentId: "chief",
@@ -710,7 +710,7 @@ describe("Dani-Dex connected desktop shell", () => {
   it("coalesces repeated empty-browser opens and does not reopen the panel after a late response", async () => {
     const openedTab = browserTab("tab-delayed", "Delayed page", { url: "https://www.google.com" });
     let resolveOpen: ((tab: BrowserTab) => void) | undefined;
-    vi.mocked(window.openbot.browser.open).mockImplementationOnce(
+    vi.mocked(window.danidex.browser.open).mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveOpen = resolve;
@@ -722,12 +722,12 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await openComputer();
     expect(await screen.findByRole("complementary", { name: "Browser previews" })).toBeInTheDocument();
-    expect(window.openbot.browser.open).toHaveBeenCalledTimes(1);
+    expect(window.danidex.browser.open).toHaveBeenCalledTimes(1);
 
     await fireEvent.click(screen.getByRole("button", { name: "Hide computer" }));
     await openComputer();
     await fireEvent.click(screen.getByRole("button", { name: "Hide computer" }));
-    expect(window.openbot.browser.open).toHaveBeenCalledTimes(1);
+    expect(window.danidex.browser.open).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole("complementary", { name: "Browser previews" })).not.toBeInTheDocument();
 
     emitAgentEvent?.({ type: "browser-changed", tabs: [openedTab], activeTabId: openedTab.id });
@@ -736,23 +736,23 @@ describe("Dani-Dex connected desktop shell", () => {
 
     expect(screen.queryByRole("complementary", { name: "Browser previews" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Open computer" })).toHaveAttribute("aria-expanded", "false");
-    expect(window.openbot.browser.open).toHaveBeenCalledTimes(1);
+    expect(window.danidex.browser.open).toHaveBeenCalledTimes(1);
 
     await openComputerAndCard("Delayed page");
     expect(await screen.findByRole("tab", { name: "Delayed page" })).toHaveAttribute("aria-selected", "true");
     await fireEvent.click(screen.getByRole("button", { name: "Reload page" }));
-    expect(window.openbot.browser.reload).toHaveBeenCalledWith(openedTab.id);
+    expect(window.danidex.browser.reload).toHaveBeenCalledWith(openedTab.id);
 
     await fireEvent.click(screen.getByRole("button", { name: "Hide computer" }));
     await openComputerAndCard("Delayed page");
     expect(await screen.findByRole("tab", { name: "Delayed page" })).toHaveAttribute("aria-selected", "true");
-    expect(window.openbot.browser.open).toHaveBeenCalledTimes(1);
+    expect(window.danidex.browser.open).toHaveBeenCalledTimes(1);
   });
 
   it("allows a replacement when a loading browser tab is closed before its open request settles", async () => {
     const loadingTab = browserTab("tab-loading", "Loading…", { url: "https://www.google.com/", loading: true });
     let resolveFirstOpen: ((tab: BrowserTab) => void) | undefined;
-    vi.mocked(window.openbot.browser.open).mockImplementationOnce(
+    vi.mocked(window.danidex.browser.open).mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveFirstOpen = resolve;
@@ -763,19 +763,19 @@ describe("Dani-Dex connected desktop shell", () => {
     await screen.findByRole("heading", { name: "Chief" });
 
     await openComputer();
-    expect(window.openbot.browser.open).toHaveBeenCalledTimes(1);
+    expect(window.danidex.browser.open).toHaveBeenCalledTimes(1);
 
     emitAgentEvent?.({ type: "browser-changed", tabs: [loadingTab], activeTabId: loadingTab.id });
     await fireEvent.click(await screen.findByRole("button", { name: "Open Loading…" }));
     const tab = await screen.findByRole("tab", { name: "Loading…" });
     await fireEvent.keyDown(tab, { key: "Delete" });
-    expect(window.openbot.browser.close).toHaveBeenCalledWith(loadingTab.id);
+    expect(window.danidex.browser.close).toHaveBeenCalledWith(loadingTab.id);
 
     emitAgentEvent?.({ type: "browser-changed", tabs: [], activeTabId: null });
     await waitFor(() => expect(screen.queryByRole("complementary", { name: "Browser" })).not.toBeInTheDocument());
 
     await fireEvent.click(screen.getByRole("button", { name: "Open a page" }));
-    expect(window.openbot.browser.open).toHaveBeenCalledTimes(2);
+    expect(window.danidex.browser.open).toHaveBeenCalledTimes(2);
 
     resolveFirstOpen?.(loadingTab);
   });
@@ -807,20 +807,20 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("region", { name: "Browser takeover" })).toHaveTextContent("Action required");
     expect(screen.getByRole("heading", { name: "Complete the step on example.com" })).toBeVisible();
     expect(await screen.findByRole("img", { name: "Preview of Sign in" })).toBeVisible();
-    expect(window.openbot.browser.capturePreview).toHaveBeenCalledTimes(1);
-    expect(window.openbot.browser.capturePreview).toHaveBeenCalledWith("tab-login");
+    expect(window.danidex.browser.capturePreview).toHaveBeenCalledTimes(1);
+    expect(window.danidex.browser.capturePreview).toHaveBeenCalledWith("tab-login");
     expect(screen.queryByRole("textbox", { name: "Message Chief" })).not.toBeInTheDocument();
     // The request alone never takes the window: the page waits behind the preview on the card.
     expect(screen.queryByRole("complementary", { name: "Browser" })).not.toBeInTheDocument();
-    expect(window.openbot.browser.activate).not.toHaveBeenCalled();
+    expect(window.danidex.browser.activate).not.toHaveBeenCalled();
 
     await fireEvent.click(screen.getByRole("button", { name: "Open Sign in" }));
     expect(await screen.findByRole("complementary", { name: "Browser" })).toBeVisible();
-    await waitFor(() => expect(window.openbot.browser.activate).toHaveBeenCalledWith("tab-login"));
+    await waitFor(() => expect(window.danidex.browser.activate).toHaveBeenCalledWith("tab-login"));
 
     await fireEvent.click(screen.getByRole("button", { name: "I’m done" }));
     await waitFor(() =>
-      expect(window.openbot.agent.respondToBrowserTakeover).toHaveBeenCalledWith({
+      expect(window.danidex.agent.respondToBrowserTakeover).toHaveBeenCalledWith({
         requestId: "takeover-1",
         decision: "complete",
       }),
@@ -834,7 +834,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("keeps browser takeover actions available when the preview fails", async () => {
-    vi.mocked(window.openbot.browser.capturePreview).mockRejectedValueOnce(new Error("Preview unavailable"));
+    vi.mocked(window.danidex.browser.capturePreview).mockRejectedValueOnce(new Error("Preview unavailable"));
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     await confirmOnboardingModel();
@@ -859,7 +859,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await waitFor(() => expect(within(card).queryByRole("img")).not.toBeInTheDocument());
     await fireEvent.click(within(card).getByRole("button", { name: "Cancel" }));
     await waitFor(() =>
-      expect(window.openbot.agent.respondToBrowserTakeover).toHaveBeenCalledWith({
+      expect(window.danidex.agent.respondToBrowserTakeover).toHaveBeenCalledWith({
         requestId: "takeover-preview-failed",
         decision: "cancel",
       }),
@@ -871,7 +871,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("coalesces repeated tab closes and ignores navigation while a close is pending", async () => {
     let resolveClose: (() => void) | undefined;
-    vi.mocked(window.openbot.browser.close).mockImplementationOnce(
+    vi.mocked(window.danidex.browser.close).mockImplementationOnce(
       () =>
         new Promise<void>((resolve) => {
           resolveClose = resolve;
@@ -892,11 +892,11 @@ describe("Dani-Dex connected desktop shell", () => {
     const closingTab = await screen.findByRole("tab", { name: "Second page" });
     await fireEvent.pointerDown(closingTab, { button: 1 });
     await fireEvent.pointerDown(closingTab, { button: 1 });
-    expect(window.openbot.browser.close).toHaveBeenCalledWith(secondTab.id);
-    expect(window.openbot.browser.close).toHaveBeenCalledTimes(1);
+    expect(window.danidex.browser.close).toHaveBeenCalledWith(secondTab.id);
+    expect(window.danidex.browser.close).toHaveBeenCalledTimes(1);
 
     await fireEvent.click(screen.getByRole("button", { name: "Go back" }));
-    expect(window.openbot.browser.navigate).not.toHaveBeenCalled();
+    expect(window.danidex.browser.navigate).not.toHaveBeenCalled();
 
     resolveClose?.();
     await waitFor(() => expect(screen.queryByRole("tab", { name: "Second page" })).not.toBeInTheDocument());
@@ -905,7 +905,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("waits for tab activation before it closes the same tab", async () => {
     let resolveActivation: (() => void) | undefined;
-    vi.mocked(window.openbot.browser.activate).mockImplementationOnce(
+    vi.mocked(window.danidex.browser.activate).mockImplementationOnce(
       () =>
         new Promise<void>((resolve) => {
           resolveActivation = resolve;
@@ -926,12 +926,12 @@ describe("Dani-Dex connected desktop shell", () => {
     await openComputerAndCard("First activation page");
     const closingTab = await screen.findByRole("tab", { name: "Closing activation page" });
     await fireEvent.click(closingTab);
-    await waitFor(() => expect(window.openbot.browser.activate).toHaveBeenCalledWith(secondTab.id));
+    await waitFor(() => expect(window.danidex.browser.activate).toHaveBeenCalledWith(secondTab.id));
     await fireEvent.keyDown(closingTab, { key: "Delete" });
-    expect(window.openbot.browser.close).not.toHaveBeenCalled();
+    expect(window.danidex.browser.close).not.toHaveBeenCalled();
 
     resolveActivation?.();
-    await waitFor(() => expect(window.openbot.browser.close).toHaveBeenCalledWith(secondTab.id));
+    await waitFor(() => expect(window.danidex.browser.close).toHaveBeenCalledWith(secondTab.id));
   });
 
   it("drops a pending tab close when a server switch begins", async () => {
@@ -939,14 +939,14 @@ describe("Dani-Dex connected desktop shell", () => {
     const studio = testServer("remote-1", false);
     let resolveActivation: (() => void) | undefined;
     let resolveSelection: ((servers: ServerSummary[]) => void) | undefined;
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, studio]);
-    vi.mocked(window.openbot.servers.select).mockImplementationOnce(
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, studio]);
+    vi.mocked(window.danidex.servers.select).mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveSelection = resolve;
         }),
     );
-    vi.mocked(window.openbot.browser.activate).mockImplementationOnce(
+    vi.mocked(window.danidex.browser.activate).mockImplementationOnce(
       () =>
         new Promise<void>((resolve) => {
           resolveActivation = resolve;
@@ -972,7 +972,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
     resolveActivation?.();
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(window.openbot.browser.close).not.toHaveBeenCalled();
+    expect(window.danidex.browser.close).not.toHaveBeenCalled();
 
     resolveSelection?.([
       { ...local, active: false },
@@ -985,7 +985,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("keeps the browser open when a new tab replaces the last tab during its delayed close", async () => {
     let resolveClose: (() => void) | undefined;
-    vi.mocked(window.openbot.browser.close).mockImplementationOnce(
+    vi.mocked(window.danidex.browser.close).mockImplementationOnce(
       () =>
         new Promise<void>((resolve) => {
           resolveClose = resolve;
@@ -1016,8 +1016,8 @@ describe("Dani-Dex connected desktop shell", () => {
     const studio = testServer("remote-1", false);
     const office = { ...testServer("remote-2", false), name: "Office PC", apiUrl: "https://office.example.com" };
     let resolveOfficeSelection: ((servers: ServerSummary[]) => void) | undefined;
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, studio, office]);
-    vi.mocked(window.openbot.servers.select)
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, studio, office]);
+    vi.mocked(window.danidex.servers.select)
       .mockResolvedValueOnce([
         { ...local, active: false },
         { ...studio, active: true },
@@ -1032,7 +1032,7 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("remote-1"));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("remote-1"));
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Studio Mac server" })).toHaveAttribute("aria-pressed", "true"),
     );
@@ -1048,11 +1048,11 @@ describe("Dani-Dex connected desktop shell", () => {
     if (!addressForm) throw new Error("Browser address form was not rendered.");
     const backButton = screen.getByRole("button", { name: "Go back" });
     const reloadButton = screen.getByRole("button", { name: "Reload page" });
-    vi.mocked(window.openbot.browser.open).mockClear();
-    vi.mocked(window.openbot.browser.activate).mockClear();
-    vi.mocked(window.openbot.browser.close).mockClear();
-    vi.mocked(window.openbot.browser.reload).mockClear();
-    vi.mocked(window.openbot.browser.navigate).mockClear();
+    vi.mocked(window.danidex.browser.open).mockClear();
+    vi.mocked(window.danidex.browser.activate).mockClear();
+    vi.mocked(window.danidex.browser.close).mockClear();
+    vi.mocked(window.danidex.browser.reload).mockClear();
+    vi.mocked(window.danidex.browser.navigate).mockClear();
 
     await fireEvent.click(screen.getByRole("button", { name: "Office PC server" }));
     await waitFor(() => expect(resolveOfficeSelection).toBeDefined());
@@ -1067,11 +1067,11 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.submit(addressForm);
     await fireEvent.keyDown(window, { key: "w", ctrlKey: true });
 
-    expect(window.openbot.browser.open).not.toHaveBeenCalled();
-    expect(window.openbot.browser.activate).not.toHaveBeenCalled();
-    expect(window.openbot.browser.close).not.toHaveBeenCalled();
-    expect(window.openbot.browser.reload).not.toHaveBeenCalled();
-    expect(window.openbot.browser.navigate).not.toHaveBeenCalled();
+    expect(window.danidex.browser.open).not.toHaveBeenCalled();
+    expect(window.danidex.browser.activate).not.toHaveBeenCalled();
+    expect(window.danidex.browser.close).not.toHaveBeenCalled();
+    expect(window.danidex.browser.reload).not.toHaveBeenCalled();
+    expect(window.danidex.browser.navigate).not.toHaveBeenCalled();
     resolveOfficeSelection?.([
       { ...local, active: false },
       { ...studio, active: false },
@@ -1083,11 +1083,11 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("restores the visible browser after a server switch fails", async () => {
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([
       testServer("local", true),
       testServer("remote-1", false),
     ]);
-    vi.mocked(window.openbot.servers.select).mockRejectedValueOnce(new Error("Workspace refresh failed"));
+    vi.mocked(window.danidex.servers.select).mockRejectedValueOnce(new Error("Workspace refresh failed"));
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     emitAgentEvent?.({
@@ -1099,21 +1099,21 @@ describe("Dani-Dex connected desktop shell", () => {
     await openComputerAndCard("Local page");
     await screen.findByRole("complementary", { name: "Browser" });
     await waitFor(() =>
-      expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith(
+      expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith(
         expect.objectContaining({ visible: true, target: "main" }),
       ),
     );
-    vi.mocked(window.openbot.browser.setVisible).mockClear();
+    vi.mocked(window.danidex.browser.setVisible).mockClear();
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
 
     await screen.findByText("Could not select the server");
     expect(await screen.findByRole("complementary", { name: "Browser" })).toBeInTheDocument();
     window.dispatchEvent(new Event("resize"));
-    await waitFor(() => expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith({ visible: false }));
+    await waitFor(() => expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith({ visible: false }));
     await fireEvent.click(screen.getByRole("button", { name: "Close notification" }));
     await waitFor(() =>
-      expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith(
+      expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith(
         expect.objectContaining({ visible: true, target: "main" }),
       ),
     );
@@ -1123,8 +1123,8 @@ describe("Dani-Dex connected desktop shell", () => {
     const local = testServer("local", true);
     const studio = { ...testServer("remote-1", false), name: "Studio Mac" };
     const office = { ...testServer("remote-2", false), name: "Office PC", apiUrl: "https://office.example.com" };
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, studio, office]);
-    vi.mocked(window.openbot.servers.select)
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, studio, office]);
+    vi.mocked(window.danidex.servers.select)
       .mockResolvedValueOnce([
         { ...local, active: false },
         { ...studio, active: true },
@@ -1139,7 +1139,7 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     let resolveStudioAgents: ((agents: AgentSummary[]) => void) | undefined;
-    vi.mocked(window.openbot.agent.listAgents)
+    vi.mocked(window.danidex.agent.listAgents)
       .mockImplementationOnce(
         () =>
           new Promise((resolve) => {
@@ -1172,8 +1172,8 @@ describe("Dani-Dex connected desktop shell", () => {
     ];
     let resolveStudioSelection: ((servers: ServerSummary[]) => void) | undefined;
     let rejectOfficeSelection: ((error: Error) => void) | undefined;
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, studio, office]);
-    vi.mocked(window.openbot.servers.select)
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, studio, office]);
+    vi.mocked(window.danidex.servers.select)
       .mockImplementationOnce(
         () =>
           new Promise((resolve) => {
@@ -1190,20 +1190,20 @@ describe("Dani-Dex connected desktop shell", () => {
 
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    vi.mocked(window.openbot.agent.listAgents).mockResolvedValueOnce([{ ...AGENTS[0], name: "Studio Chief" }]);
+    vi.mocked(window.danidex.agent.listAgents).mockResolvedValueOnce([{ ...AGENTS[0], name: "Studio Chief" }]);
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
     await waitFor(() => expect(resolveStudioSelection).toBeDefined());
     await fireEvent.click(screen.getByRole("button", { name: "Office PC server" }));
     await waitFor(() => expect(rejectOfficeSelection).toBeDefined());
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce(studioActive);
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce(studioActive);
     resolveStudioSelection?.(studioActive);
     await new Promise((resolve) => setTimeout(resolve, 0));
     rejectOfficeSelection?.(new Error("Office unavailable"));
 
     expect(await screen.findByRole("heading", { name: "Studio Chief" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Studio Mac server" })).toHaveAttribute("aria-pressed", "true");
-    expect(window.openbot.servers.select).toHaveBeenCalledTimes(3);
+    expect(window.danidex.servers.select).toHaveBeenCalledTimes(3);
   });
 
   it("returns to browser previews when its last tab is closed from the embedded page", async () => {
@@ -1220,7 +1220,7 @@ describe("Dani-Dex connected desktop shell", () => {
     emitAgentEvent?.({ type: "browser-changed", tabs: [], activeTabId: null });
 
     await waitFor(() => expect(screen.queryByRole("complementary", { name: "Browser" })).not.toBeInTheDocument());
-    expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
+    expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
   });
 
   describe.each(["workspace", "shared"] as const)("%s file preview errors", (source) => {
@@ -1240,11 +1240,11 @@ describe("Dani-Dex connected desktop shell", () => {
     };
     const previewMock = () =>
       source === "workspace"
-        ? vi.mocked(window.openbot.agent.previewWorkspaceFile)
-        : vi.mocked(window.openbot.agent.previewSharedFile);
+        ? vi.mocked(window.danidex.agent.previewWorkspaceFile)
+        : vi.mocked(window.danidex.agent.previewSharedFile);
 
     beforeEach(() => {
-      vi.mocked(window.openbot.agent.readConversation).mockImplementation(async (agentId) => ({
+      vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) => ({
         agentId,
         threadId: agentId === "chief" ? "thread-chief" : null,
         activeTurnId: null,
@@ -1299,7 +1299,7 @@ describe("Dani-Dex connected desktop shell", () => {
   it("opens workspace Markdown in the right sidebar and keeps external opening explicit", async () => {
     const workspacePath = "/tmp/Dani-Dex/Agents/chief/recipe-tomato-basil-pasta.md";
     const sharedPath = "/tmp/Dani-Dex/Shared/menu.txt";
-    vi.mocked(window.openbot.agent.readConversation).mockImplementation(async (agentId) => ({
+    vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) => ({
       agentId,
       threadId: agentId === "chief" ? "thread-chief" : null,
       activeTurnId: null,
@@ -1318,14 +1318,14 @@ describe("Dani-Dex connected desktop shell", () => {
           : [],
       readState: { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
     }));
-    vi.mocked(window.openbot.agent.previewWorkspaceFile).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.previewWorkspaceFile).mockResolvedValueOnce({
       name: "recipe-tomato-basil-pasta.md",
       size: 41,
       mimeType: "text/plain",
       previewKind: "markdown",
       bytes: new TextEncoder().encode("# Tomato Basil Pasta\n\nUse **fresh basil**."),
     });
-    vi.mocked(window.openbot.agent.previewSharedFile).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.previewSharedFile).mockResolvedValueOnce({
       name: "menu.txt",
       size: 12,
       mimeType: "text/plain",
@@ -1341,23 +1341,23 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("complementary", { name: "File preview" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1, name: "Tomato Basil Pasta" })).toBeInTheDocument();
     expect(screen.getByText("fresh basil").tagName).toBe("STRONG");
-    expect(window.openbot.agent.previewWorkspaceFile).toHaveBeenCalledWith({ agentId: "chief", path: workspacePath });
-    expect(window.openbot.agent.openWorkspaceFile).not.toHaveBeenCalled();
-    expect(window.openbot.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
+    expect(window.danidex.agent.previewWorkspaceFile).toHaveBeenCalledWith({ agentId: "chief", path: workspacePath });
+    expect(window.danidex.agent.openWorkspaceFile).not.toHaveBeenCalled();
+    expect(window.danidex.browser.setVisible).toHaveBeenLastCalledWith({ visible: false });
 
     await fireEvent.click(screen.getByRole("button", { name: "Open file externally" }));
-    expect(window.openbot.agent.openWorkspaceFile).toHaveBeenCalledWith({ agentId: "chief", path: workspacePath });
+    expect(window.danidex.agent.openWorkspaceFile).toHaveBeenCalledWith({ agentId: "chief", path: workspacePath });
     await fireEvent.click(screen.getByRole("button", { name: "Close file preview" }));
     expect(screen.queryByRole("complementary", { name: "File preview" })).not.toBeInTheDocument();
 
     await fireEvent.click(screen.getByRole("button", { name: "Open shared file menu.txt" }));
     expect(await screen.findByText("Pasta menu")).toBeInTheDocument();
-    expect(window.openbot.agent.previewSharedFile).toHaveBeenCalledWith({ path: sharedPath });
-    expect(window.openbot.agent.openSharedFile).not.toHaveBeenCalled();
+    expect(window.danidex.agent.previewSharedFile).toHaveBeenCalledWith({ path: sharedPath });
+    expect(window.danidex.agent.openSharedFile).not.toHaveBeenCalled();
   });
   it("opens an attached file in the right sidebar rather than a modal", async () => {
     const attached = attachment("att-brief", "launch-brief.md", "pdf");
-    vi.mocked(window.openbot.agent.readConversation).mockImplementation(async (agentId) => ({
+    vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) => ({
       agentId,
       threadId: agentId === "chief" ? "thread-chief" : null,
       activeTurnId: null,
@@ -1390,7 +1390,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     await fireEvent.click(screen.getByRole("button", { name: "Download file" }));
-    expect(window.openbot.agent.openAttachment).toHaveBeenCalledWith({
+    expect(window.danidex.agent.openAttachment).toHaveBeenCalledWith({
       attachmentId: attached.id,
       action: "download",
     });

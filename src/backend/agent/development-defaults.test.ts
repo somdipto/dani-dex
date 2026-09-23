@@ -1,5 +1,5 @@
 // @vitest-environment node
-import type { AgentModelOption, AgentProviderId, AgentReasoningEffort } from "@openbot/contracts/ipc";
+import type { AgentModelOption, AgentProviderId, AgentReasoningEffort } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import {
   DEVELOPMENT_DEFAULT_MODEL,

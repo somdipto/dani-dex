@@ -1,4 +1,4 @@
-import type { AvatarMood } from "@openbot/brand/bloub-avatar-motion";
+import type { AvatarMood } from "@dani-dex/brand/bloub-avatar-motion";
 import { Typography } from "heroui-native";
 import type { ColorValue } from "react-native";
 import Animated, { Easing, ReduceMotion, withTiming } from "react-native-reanimated";

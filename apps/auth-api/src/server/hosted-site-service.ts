@@ -1,4 +1,4 @@
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { hmacSha256, sha256 } from "./crypto";
 import {
   expectedFile,

@@ -1,4 +1,4 @@
-import type { RemoteFileUpload } from "@openbot/team-client/remote-peer";
+import type { RemoteFileUpload } from "@dani-dex/team-client/remote-peer";
 import { describe, expect, it } from "vitest";
 import { type ChatMessage, type PendingChatMessage, presentChatMessages } from "./chat-messages";
 import { retainConfirmedAttachments, uploadChatAttachments } from "./upload-chat-attachments";

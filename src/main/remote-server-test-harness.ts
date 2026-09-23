@@ -24,8 +24,8 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { ServerSummary } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import type { ServerSummary } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { expect, vi } from "vitest";
 import type { RemoteHostSummary } from "./central-auth-manager";
 import { RemoteServerManager } from "./remote-server-manager";

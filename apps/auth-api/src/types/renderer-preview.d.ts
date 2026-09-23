@@ -1,4 +1,4 @@
-declare module "@openbot/renderer-preview" {
+declare module "@dani-dex/renderer-preview" {
   import type { JSX } from "@solidjs/web";
 
   export interface OpenBotPlaygroundProps {

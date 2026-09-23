@@ -1,4 +1,4 @@
-import type { ChannelSummary, SidebarLayoutAction, SidebarLayoutSnapshot } from "@openbot/contracts/ipc";
+import type { ChannelSummary, SidebarLayoutAction, SidebarLayoutSnapshot } from "@dani-dex/contracts/ipc";
 import { createSignal, untrack } from "solid-js";
 import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";

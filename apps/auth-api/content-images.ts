@@ -12,7 +12,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import type { Plugin } from "vite";
 import { articleGradient } from "./src/lib/article-gradient";
 import { CONTENT_COLLECTIONS } from "./src/lib/content";

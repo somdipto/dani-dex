@@ -1,4 +1,4 @@
-import type { AgentApproval } from "@openbot/contracts/ipc";
+import type { AgentApproval } from "@dani-dex/contracts/ipc";
 
 /**
  * Answers one question for `AttentionRegistry`: may this approval be accepted without asking?

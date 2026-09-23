@@ -8,7 +8,7 @@
  * no real code and talks to nothing.
  */
 
-import { type AgentProviderId, agentProviderDescriptor } from "@openbot/contracts/ipc";
+import { type AgentProviderId, agentProviderDescriptor } from "@dani-dex/contracts/ipc";
 import { createSignal } from "solid-js";
 import type { ProviderCodeLoginState } from "../src/components/ProviderCodeLoginDialog";
 import type { ProviderCodeLoginApi } from "../src/components/provider-code-login-api";

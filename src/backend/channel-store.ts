@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { expandChatTagReferences } from "@openbot/contracts/chat-tag-references";
+import { expandChatTagReferences } from "@dani-dex/contracts/chat-tag-references";
 import {
   CHANNEL_PREVIEW_LIMIT,
   CHANNEL_ROUTING_EVENT_ITEM_TYPE_PREFIX,
@@ -14,8 +14,8 @@ import {
   isChannelMessage,
   isChannelTask,
   SIGNED_OUT_CHANNEL_MEMBER_ID,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { databaseRow, databaseRows, requiredNumberColumn, requiredStringColumn } from "./database/database-rows";
 import type { OpenBotDatabase } from "./openbot-database";
 

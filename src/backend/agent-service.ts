@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
 import { realpath, stat } from "node:fs/promises";
 import { basename } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AccountUsage,
   AgentAnalyticsInput,
@@ -75,7 +75,7 @@ import type {
   UpdateChannelRoutineInput,
   UpdateQueuedMessageInput,
   UpdateRoutineInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   AGENT_RUNTIME_TEXT_LIMIT,
   defaultProviderModel,
@@ -83,10 +83,10 @@ import {
   mcpConfigErrors,
   normalizeMcpConfig,
   skillConversationEventItemType,
-} from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
-import { QueueEditRejectedError, type QueueEditRequest } from "@openbot/contracts/team-protocol/queue-edit-v1";
-import { createOpenBotLogger, redactText } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
+import { QueueEditRejectedError, type QueueEditRequest } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
+import { createOpenBotLogger, redactText } from "@dani-dex/logging";
 import { AgentMemories } from "./agent/agent-memories";
 import type { ApprovalAutomationPolicy } from "./agent/approval-automation";
 import { AttachmentGateway } from "./agent/attachment-gateway";

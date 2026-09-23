@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentApproval,
   AgentApprovalPermissions,
@@ -9,9 +9,9 @@ import type {
   HostedSiteConversationEventStatus,
   HostedSiteSummary,
   PublishHostedSiteInput,
-} from "@openbot/contracts/ipc";
-import { hostedSiteConversationEventItemType, hostedSiteConversationEventText } from "@openbot/contracts/ipc";
-import { isBoolean } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { hostedSiteConversationEventItemType, hostedSiteConversationEventText } from "@dani-dex/contracts/ipc";
+import { isBoolean } from "@dani-dex/contracts/runtime-values";
 import type { AgentClient } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import { sortConversationMessages } from "../conversation-snapshots";

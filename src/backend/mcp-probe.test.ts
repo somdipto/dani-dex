@@ -1,7 +1,7 @@
 import { chmod, mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { decodeMcpTestResult, type McpServerConfig } from "@openbot/contracts/ipc";
+import { decodeMcpTestResult, type McpServerConfig } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { describeMcpError, testMcpServer } from "./mcp-probe";
 

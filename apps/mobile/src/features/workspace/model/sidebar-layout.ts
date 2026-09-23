@@ -1,5 +1,5 @@
-import type { ChannelSummary, SidebarLayoutSnapshot } from "@openbot/contracts/ipc";
-import { SIDEBAR_UNASSIGNED_SECTION_ID } from "@openbot/contracts/ipc";
+import type { ChannelSummary, SidebarLayoutSnapshot } from "@dani-dex/contracts/ipc";
+import { SIDEBAR_UNASSIGNED_SECTION_ID } from "@dani-dex/contracts/ipc";
 import type { MobileAgent } from "./workspace-types";
 
 export type MobileSidebarItem =

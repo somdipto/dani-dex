@@ -2,7 +2,7 @@
 import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ATTACHMENT_LIMITS } from "@openbot/contracts/input-limits";
+import { ATTACHMENT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { strFromU8, unzipSync } from "fflate";
 import { afterEach, describe, expect, it, vi } from "vitest";
 

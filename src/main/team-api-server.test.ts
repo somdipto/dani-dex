@@ -6,15 +6,15 @@
 // preserve. The domains themselves are in the `team-api-server.<domain>.test.ts` siblings.
 
 import { join } from "node:path";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { TEAM_SEMANTIC_TAGS_CAPABILITY } from "@openbot/contracts/team-protocol/current";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { TEAM_SEMANTIC_TAGS_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
 import {
   TEAM_APP_VERSION_HEADER,
   TEAM_PROTOCOL_VERSION_HEADER,
   teamProtocolV1HttpRoute,
-} from "@openbot/contracts/team-protocol/v1";
-import { createOpenBotLogger } from "@openbot/logging";
+} from "@dani-dex/contracts/team-protocol/v1";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SidebarLayoutStore } from "../backend/sidebar-layout-store";
 import {

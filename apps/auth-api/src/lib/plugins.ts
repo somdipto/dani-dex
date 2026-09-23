@@ -8,8 +8,8 @@
 // This module holds no JSX, for the same reason `content-collection.ts` holds none: it is read by
 // the sitemap, which runs outside the renderer.
 
-import { SKILL_CATEGORY_LABELS } from "@openbot/contracts/ipc-skills";
-import { createPluginShareUrl } from "@openbot/contracts/plugin-links";
+import { SKILL_CATEGORY_LABELS } from "@dani-dex/contracts/ipc-skills";
+import { createPluginShareUrl } from "@dani-dex/contracts/plugin-links";
 import { PLUGIN_CATALOG_DETAILS, PLUGIN_CATALOG_INDEX, type PluginCatalogDetail } from "./plugin-catalog.generated";
 import { OPENBOT_SITE_URL } from "./site-metadata";
 

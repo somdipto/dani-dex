@@ -353,7 +353,7 @@ Cloudflare Workers
 
 - `src/main` owns the Electron lifecycle, window security, local protocol, and IPC registration.
 - `src/backend` owns provider adapters, persistence, message scheduling, transfers, and the browser host.
-- `src/preload` exposes only the typed `window.openbot` API.
+- `src/preload` exposes only the typed `window.danidex` API.
 - `src/renderer` contains the SolidJS interface.
 - `apps/auth-api` contains the TanStack Start account API, one-time email codes, rate limits, and D1 migrations. It also serves the public site: the landing page, `/news`, `/guides`, and the plugin pages at `/plugins` and `/plugins/<slug>`.
 - `packages/contracts` contains process-boundary contracts, shared limits, and pure validation.
@@ -405,7 +405,7 @@ without a custom native development build. The account flow connects to
 the configured HTTPS Cloudflare API. The client stores only an encrypted Dani-Dex session token. One-time codes expire after
 10 minutes and are stored only as hashes. A daily maintenance task removes expired or consumed
 authentication records from D1. The embedded browser uses a separate sandboxed Electron session and
-cannot access `window.openbot` or managed local attachments.
+cannot access `window.danidex` or managed local attachments.
 
 ## Security
 

@@ -4,8 +4,8 @@ import { EventEmitter } from "node:events";
 import { mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { UpdateBusyPhase } from "@openbot/contracts/ipc";
-import { isUpdateBusyPhase, UPDATE_BUSY_PHASES } from "@openbot/contracts/ipc";
+import type { UpdateBusyPhase } from "@dani-dex/contracts/ipc";
+import { isUpdateBusyPhase, UPDATE_BUSY_PHASES } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { UpdateCancellationToken, UpdateCheckOutcome } from "./update-service";
 import {

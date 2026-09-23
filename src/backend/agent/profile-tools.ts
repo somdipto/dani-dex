@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { AVATAR_HUES, AVATAR_SEED_PATTERN } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { AVATAR_HUES, AVATAR_SEED_PATTERN } from "@dani-dex/contracts/ipc";
 import { z } from "zod";
 
 const profileFields = {

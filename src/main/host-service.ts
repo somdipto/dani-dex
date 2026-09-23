@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import { dirname, join } from "node:path";
-import { createInviteUrl } from "@openbot/contracts/invite-links";
+import { createInviteUrl } from "@dani-dex/contracts/invite-links";
 import type {
   AvatarImageInput,
   CentralAuthUser,
@@ -35,9 +35,9 @@ import type {
   TeamSessionSummary,
   UpdateHostIdentityInput,
   UpdateTeamMemberInput,
-} from "@openbot/contracts/ipc";
-import { SIGNED_OUT_CHANNEL_MEMBER_ID } from "@openbot/contracts/ipc";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { SIGNED_OUT_CHANNEL_MEMBER_ID } from "@dani-dex/contracts/ipc";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import type { AgentService } from "../backend/agent-service";
 import type { ChannelService } from "../backend/channel-service";
 import type { TeamChatStore } from "../backend/team-chat-store";

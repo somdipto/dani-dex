@@ -1,4 +1,4 @@
-import type { CentralAuthState } from "@openbot/contracts/ipc";
+import type { CentralAuthState } from "@dani-dex/contracts/ipc";
 import { createSignal } from "solid-js";
 import { expect, fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";

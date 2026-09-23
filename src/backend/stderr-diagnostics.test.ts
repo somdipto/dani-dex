@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { redactText } from "@openbot/logging";
+import { redactText } from "@dani-dex/logging";
 import { describe, expect, it } from "vitest";
 import { createDiagnosticStream } from "./stderr-diagnostics";
 

@@ -1,5 +1,5 @@
 {
-  "name": "@openbot/i18n",
+  "name": "@dani-dex/i18n",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@openbot/contracts": "workspace:*"
+    "@dani-dex/contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

@@ -7,7 +7,7 @@
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { CentralAuthUser } from "@openbot/contracts/ipc";
+import type { CentralAuthUser } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DEVELOPMENT_REMOTE_CLIENT_USERNAME, HostService } from "./host-service";
 import { createAgents, createBrowser, createMailbox, unimplemented } from "./team-api-server-test-harness";

@@ -1,6 +1,6 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { isRoutineSchedule, ROUTINE_MINIMUM_INTERVAL_MINUTES, type RoutineSchedule } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { isRoutineSchedule, ROUTINE_MINIMUM_INTERVAL_MINUTES, type RoutineSchedule } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { isRecord } from "../protocol";
 
 export function routineToolArguments(value: unknown, allowedKeys: readonly string[]): DynamicRecord {

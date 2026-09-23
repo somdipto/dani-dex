@@ -1,7 +1,7 @@
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AVATAR_IMAGE_LIMITS } from "@openbot/contracts/input-limits";
+import { AVATAR_IMAGE_LIMITS } from "@dani-dex/contracts/input-limits";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { loadAvatarFile } from "./avatar-file";
 

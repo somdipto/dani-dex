@@ -6,7 +6,7 @@ import type {
   TeamInviteSummary,
   TeamPresenceMember,
   UpdateTeamMemberInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, flush } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { errorMessage } from "../../error-message";
@@ -60,7 +60,7 @@ const ServerSettings = createSimpleContext({
       ({ open, id }) => {
         if (!open || !id) return;
         let previous = "";
-        return window.openbot.servers.onPresence((presence) => {
+        return window.danidex.servers.onPresence((presence) => {
           // Typing updates must not read the account API again. Membership and
           // online changes are enough to refresh an accepted invitation.
           const signature = JSON.stringify(
@@ -85,7 +85,7 @@ const ServerSettings = createSimpleContext({
         let identityError: string | null = null;
         if (server.kind === "remote") {
           try {
-            const refreshed = await window.openbot.servers.refreshIdentity(serverId);
+            const refreshed = await window.danidex.servers.refreshIdentity(serverId);
             setServers((current) => current.map((item) => (item.id === serverId ? refreshed : item)));
             server = refreshed;
           } catch (error) {
@@ -96,16 +96,16 @@ const ServerSettings = createSimpleContext({
           server.kind === "local" ? hostStatus().configured : server.role === "admin" || server.role === "owner";
         const canUseNetwork = server.kind === "local" || server.state === "online";
         const [presence, members, invites] = await Promise.all([
-          server.kind === "local" ? window.openbot.host.getPresence() : window.openbot.servers.getPresenceFor(serverId),
+          server.kind === "local" ? window.danidex.host.getPresence() : window.danidex.servers.getPresenceFor(serverId),
           canManage && canUseNetwork
             ? server.kind === "local"
-              ? window.openbot.host.listMembers()
-              : window.openbot.servers.listMembers(serverId)
+              ? window.danidex.host.listMembers()
+              : window.danidex.servers.listMembers(serverId)
             : Promise.resolve(null),
           canManage && canUseNetwork
             ? server.kind === "local"
-              ? window.openbot.host.listInvites()
-              : window.openbot.servers.listInvites(serverId)
+              ? window.danidex.host.listInvites()
+              : window.danidex.servers.listInvites(serverId)
             : Promise.resolve([]),
         ]);
         if (request !== serverSettingsRequest || serverSettingsTargetId() !== serverId) return;
@@ -149,8 +149,8 @@ const ServerSettings = createSimpleContext({
       let operationSucceeded = false;
       try {
         const status = hostStatus().configured
-          ? await window.openbot.host.updateIdentity(input)
-          : await window.openbot.host.configure(input);
+          ? await window.danidex.host.updateIdentity(input)
+          : await window.danidex.host.configure(input);
         analytics.track("team_action", {
           action: "identity_saved",
           result: "succeeded",
@@ -158,7 +158,7 @@ const ServerSettings = createSimpleContext({
         });
         operationSucceeded = true;
         setHostStatus(status);
-        setServers(await window.openbot.servers.list());
+        setServers(await window.danidex.servers.list());
         await refreshServerSettings(server.id);
       } catch (error) {
         if (!operationSucceeded) {
@@ -180,7 +180,7 @@ const ServerSettings = createSimpleContext({
      * that carries the answer is the host's own.
      */
     async function recheckScreenRecording(): Promise<void> {
-      setHostStatus(await window.openbot.host.recheckScreenRecording());
+      setHostStatus(await window.danidex.host.recheckScreenRecording());
     }
 
     async function setServerPublished(published: boolean): Promise<void> {
@@ -190,12 +190,12 @@ const ServerSettings = createSimpleContext({
       const action = published ? ("published" as const) : ("unpublished" as const);
       let operationSucceeded = false;
       try {
-        const status = published ? await window.openbot.host.start() : await window.openbot.host.stop();
+        const status = published ? await window.danidex.host.start() : await window.danidex.host.stop();
         if (published && status.phase !== "online") throw new Error("publish_failed");
         analytics.track("team_action", { action, result: "succeeded", server_kind: "local" });
         operationSucceeded = true;
         setHostStatus(status);
-        setServers(await window.openbot.servers.list());
+        setServers(await window.danidex.servers.list());
         await refreshServerSettings(server.id);
       } catch (error) {
         if (!operationSucceeded) {
@@ -222,8 +222,8 @@ const ServerSettings = createSimpleContext({
       try {
         const invite =
           server.kind === "local"
-            ? await window.openbot.host.createInvite(input)
-            : await window.openbot.servers.createInvite(server.id, input);
+            ? await window.danidex.host.createInvite(input)
+            : await window.danidex.servers.createInvite(server.id, input);
         analytics.track("team_action", {
           action: "invite_created",
           result: "succeeded",
@@ -255,8 +255,8 @@ const ServerSettings = createSimpleContext({
       const analytics = desktopAnalytics.scope();
       let operationSucceeded = false;
       try {
-        if (server.kind === "local") await window.openbot.host.updateMember(input);
-        else await window.openbot.servers.updateMember(server.id, input);
+        if (server.kind === "local") await window.danidex.host.updateMember(input);
+        else await window.danidex.servers.updateMember(server.id, input);
         analytics.track("team_action", { action: "member_updated", result: "succeeded", server_kind: server.kind });
         operationSucceeded = true;
         await refreshServerSettings(server.id);
@@ -279,8 +279,8 @@ const ServerSettings = createSimpleContext({
       const analytics = desktopAnalytics.scope();
       let operationSucceeded = false;
       try {
-        if (server.kind === "local") await window.openbot.host.removeMember(memberId);
-        else await window.openbot.servers.removeMember(server.id, memberId);
+        if (server.kind === "local") await window.danidex.host.removeMember(memberId);
+        else await window.danidex.servers.removeMember(server.id, memberId);
         analytics.track("team_action", { action: "member_removed", result: "succeeded", server_kind: server.kind });
         operationSucceeded = true;
         await refreshServerSettings(server.id);
@@ -303,8 +303,8 @@ const ServerSettings = createSimpleContext({
       const analytics = desktopAnalytics.scope();
       let operationSucceeded = false;
       try {
-        if (server.kind === "local") await window.openbot.host.revokeInvite(inviteId);
-        else await window.openbot.servers.revokeInvite(server.id, inviteId);
+        if (server.kind === "local") await window.danidex.host.revokeInvite(inviteId);
+        else await window.danidex.servers.revokeInvite(server.id, inviteId);
         analytics.track("team_action", { action: "invite_revoked", result: "succeeded", server_kind: server.kind });
         operationSucceeded = true;
         await refreshServerSettings(server.id);
@@ -334,7 +334,7 @@ const ServerSettings = createSimpleContext({
       const request = ++serverSettingsMcpRequest;
       const current = (): boolean => request === serverSettingsMcpRequest && serverSettingsTargetId() === server.id;
       try {
-        const configs = await window.openbot.agent.listMcpServers(server.id);
+        const configs = await window.danidex.agent.listMcpServers(server.id);
         if (!current()) return;
         setServerSettingsMcp(configs);
         setServerSettingsMcpError(null);
@@ -355,7 +355,7 @@ const ServerSettings = createSimpleContext({
       const server = serverSettingsTarget();
       if (!server) throw new Error("This server is not available.");
       const analytics = desktopAnalytics.scope();
-      const result = await window.openbot.agent.testMcpServer({ config }, server.id);
+      const result = await window.danidex.agent.testMcpServer({ config }, server.id);
       analytics.track("team_action", {
         action: "mcp_server_tested",
         result: result.error ? "failed" : "succeeded",
@@ -367,19 +367,19 @@ const ServerSettings = createSimpleContext({
 
     async function saveMcpServer(config: McpServerConfig): Promise<void> {
       await runMcpMutation("mcp_server_saved", "mcp_server_save_failed", (serverId) =>
-        window.openbot.agent.saveMcpServer({ config }, serverId),
+        window.danidex.agent.saveMcpServer({ config }, serverId),
       );
     }
 
     async function removeMcpServer(mcpServerId: string): Promise<void> {
       await runMcpMutation("mcp_server_removed", "mcp_server_remove_failed", (serverId) =>
-        window.openbot.agent.removeMcpServer({ mcpServerId }, serverId),
+        window.danidex.agent.removeMcpServer({ mcpServerId }, serverId),
       );
     }
 
     async function setMcpServerEnabled(mcpServerId: string, enabled: boolean): Promise<void> {
       await runMcpMutation("mcp_server_toggled", "mcp_server_toggle_failed", (serverId) =>
-        window.openbot.agent.setMcpServerEnabled({ mcpServerId, enabled }, serverId),
+        window.danidex.agent.setMcpServerEnabled({ mcpServerId, enabled }, serverId),
       );
     }
 

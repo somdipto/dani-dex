@@ -3,7 +3,7 @@
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CodexAppServerClient } from "./app-server-client";
 import { decodeRecordResponse, isRecord } from "./protocol";

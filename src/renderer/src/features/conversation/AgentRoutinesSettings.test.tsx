@@ -1,4 +1,4 @@
-import type { Routine, RoutineRun } from "@openbot/contracts/ipc";
+import type { Routine, RoutineRun } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -46,7 +46,7 @@ let mock: MockOpenBotControls | undefined;
 function setupOpenBot(options?: Parameters<typeof createMockOpenBot>[0]): MockOpenBotControls {
   mock?.dispose();
   mock = createMockOpenBot(options);
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   return mock;
 }
 

@@ -1,5 +1,5 @@
-import type { AvatarMood } from "@openbot/brand/bloub-avatar-motion";
-import type { AgentEvent, TeamRealtimeEvent } from "@openbot/contracts/ipc";
+import type { AvatarMood } from "@dani-dex/brand/bloub-avatar-motion";
+import type { AgentEvent, TeamRealtimeEvent } from "@dani-dex/contracts/ipc";
 
 export interface MobileAgentActivity {
   agentId?: string;

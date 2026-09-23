@@ -4,7 +4,7 @@
  * items; what differs is the avatar, the preview line and the agent-only actions it leaves out.
  */
 
-import type { ChannelSummary } from "@openbot/contracts/ipc";
+import type { ChannelSummary } from "@dani-dex/contracts/ipc";
 import { Show } from "solid-js";
 import { Badge, buttonVariants, ContextMenu } from "../../components/ui";
 import { ChannelAvatar } from "../channels/ChannelAvatar";

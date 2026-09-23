@@ -3,14 +3,14 @@
 import { generateKeyPairSync, sign } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import {
   decodeTeamProtocolV2AuthFrame,
   decodeTeamProtocolV2RpcFrame,
   encodeTeamProtocolV2Frame,
   type TeamProtocolV2AuthFrame,
   teamProtocolV2AuthenticationTranscript,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
 import { describe, expect, it, vi } from "vitest";
 import { TeamWebRtcBridge } from "./team-webrtc-bridge";
 import { TeamWebRtcClientTransport } from "./team-webrtc-client-transport";

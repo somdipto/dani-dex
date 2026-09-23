@@ -4,7 +4,7 @@
 // Domain rules - a duplicate name, a reserved name, the count of servers - stay in `McpServerStore`,
 // stated once, so the local path and the remote path cannot disagree about them.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   McpKeyValue,
   McpServerConfig,
@@ -12,8 +12,8 @@ import type {
   SaveMcpServerInput,
   SetMcpServerEnabledInput,
   TestMcpServerInput,
-} from "@openbot/contracts/ipc";
-import { isBoolean, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isBoolean, isString } from "@dani-dex/contracts/runtime-values";
 import { isObject, requireString } from "./validation";
 
 export function parseSaveMcpServer(value: unknown): SaveMcpServerInput {

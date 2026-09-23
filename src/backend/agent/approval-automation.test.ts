@@ -1,4 +1,4 @@
-import type { AgentApproval, AgentApprovalKind } from "@openbot/contracts/ipc";
+import type { AgentApproval, AgentApprovalKind } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { NO_APPROVAL_AUTOMATION, shouldAutoApprove } from "./approval-automation";
 

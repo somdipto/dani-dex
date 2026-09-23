@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import { normalizeEmailAddress } from "@openbot/contracts/validation";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { normalizeEmailAddress } from "@dani-dex/contracts/validation";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 
 const logger = createOpenBotLogger("backfill-openpanel-identities");
 

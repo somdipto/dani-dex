@@ -1,4 +1,4 @@
-import type { ServerSummary } from "@openbot/contracts/ipc";
+import type { ServerSummary } from "@dani-dex/contracts/ipc";
 import { For, Show } from "solid-js";
 import { Alert, AlertContent, AlertDescription, Button } from "../../components/ui";
 

@@ -1,4 +1,4 @@
-import type { HostedSiteSummary, HostedSitesDesktopApi } from "@openbot/contracts/ipc";
+import type { HostedSiteSummary, HostedSitesDesktopApi } from "@dani-dex/contracts/ipc";
 import { createEffect, createStore } from "solid-js";
 import { desktopAnalytics } from "../../../analytics";
 import { errorMessage } from "../../../error-message";

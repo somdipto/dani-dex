@@ -1,4 +1,4 @@
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 
 export const MARKETPLACE_DEFAULT_PAGE_SIZE = 24;
 export const MARKETPLACE_MAX_PAGE_SIZE = 50;

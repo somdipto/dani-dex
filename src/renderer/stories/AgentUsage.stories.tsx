@@ -1,4 +1,4 @@
-import { emptyAnalyticsTotals, type HostAnalytics } from "@openbot/contracts/ipc";
+import { emptyAnalyticsTotals, type HostAnalytics } from "@dani-dex/contracts/ipc";
 import { onCleanup } from "solid-js";
 import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -11,9 +11,9 @@ function UsageStory(props: {
   narrow?: boolean;
   agentId?: string;
 }) {
-  const previous = window.openbot;
+  const previous = window.danidex;
   const mock = createMockOpenBot();
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   mock.api.agent.getHostAnalytics = async (input) => {
     if (props.state === "error") throw new Error("Host is offline.");
     if (props.state === "unsupported") return null;
@@ -50,7 +50,7 @@ function UsageStory(props: {
   };
   onCleanup(() => {
     mock.dispose();
-    window.openbot = previous;
+    window.danidex = previous;
   });
   return (
     <main

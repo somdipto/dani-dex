@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { isSkillCategory, type SkillCategory } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { isSkillCategory, type SkillCategory } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { unzipSync } from "fflate";
 import { parse as parseYaml } from "yaml";
 import {

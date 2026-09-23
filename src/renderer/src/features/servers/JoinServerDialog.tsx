@@ -1,7 +1,7 @@
-import { AppLogo } from "@openbot/brand";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { isNeverExpiringInvite } from "@openbot/contracts/invite-links";
-import type { InvitePreview, JoinServerInput } from "@openbot/contracts/ipc";
+import { AppLogo } from "@dani-dex/brand";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { isNeverExpiringInvite } from "@dani-dex/contracts/invite-links";
+import type { InvitePreview, JoinServerInput } from "@dani-dex/contracts/ipc";
 import { createSignal, onCleanup, onSettled, Show, untrack } from "solid-js";
 import {
   Alert,

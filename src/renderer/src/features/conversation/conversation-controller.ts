@@ -4,7 +4,7 @@ import type {
   AgentReasoningEffort,
   BrowserBounds,
   MarketplaceSkillDetail,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import type { AgentActivityLabel } from "./AgentActivity";
 import type { ChatSearchMatch } from "./chat-search";

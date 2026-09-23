@@ -1,4 +1,4 @@
-import type { ComputerUseHighlightPlacement } from "@openbot/contracts/ipc";
+import type { ComputerUseHighlightPlacement } from "@dani-dex/contracts/ipc";
 import { createSignal, onSettled, Show } from "solid-js";
 import { ComputerUseAgentCursor } from "./ComputerUseAgentCursor";
 import { ComputerUseWindowHighlight } from "./ComputerUseWindowHighlight";
@@ -17,7 +17,7 @@ import { ComputerUseWindowHighlight } from "./ComputerUseWindowHighlight";
  */
 export function ComputerUseHighlightSurface() {
   const [placement, setPlacement] = createSignal<ComputerUseHighlightPlacement | null>(null);
-  onSettled(() => window.openbot.onComputerUseHighlightPlacement(setPlacement));
+  onSettled(() => window.danidex.onComputerUseHighlightPlacement(setPlacement));
   return (
     <div class="computer-use-highlight-surface">
       <Show when={placement()}>

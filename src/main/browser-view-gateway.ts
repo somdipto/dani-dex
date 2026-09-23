@@ -18,7 +18,7 @@ import {
   browserViewStreamSessionId,
   decodeBrowserViewInput,
   encodeBrowserViewFrame,
-} from "@openbot/contracts/team-protocol/browser-view-v1";
+} from "@dani-dex/contracts/team-protocol/browser-view-v1";
 import type * as Ws from "ws";
 import type { BrowserHost } from "../backend/browser-host";
 

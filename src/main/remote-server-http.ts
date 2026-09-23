@@ -1,9 +1,9 @@
-import { channelRequest, channelResponse, isChannelRoute } from "@openbot/contracts/team-protocol/channels-v1";
-import { isMcpRoute, mcpRequest, mcpResponse } from "@openbot/contracts/team-protocol/mcp-v1";
+import { channelRequest, channelResponse, isChannelRoute } from "@dani-dex/contracts/team-protocol/channels-v1";
+import { isMcpRoute, mcpRequest, mcpResponse } from "@dani-dex/contracts/team-protocol/mcp-v1";
 import {
   decodeTeamProtocolV4CurrentHttpResponse,
   encodeTeamProtocolV4CurrentHttpRequest,
-} from "@openbot/contracts/team-protocol/v4-adapter";
+} from "@dani-dex/contracts/team-protocol/v4-adapter";
 // Putting one Team API call on the wire, and reading what came back off it.
 //
 // HTTP uses the adapter for the negotiated protocol: V4 adds OpenCode, V3 adds duplication,
@@ -13,23 +13,23 @@ import {
 // returns a decoded value or throws one of `remote-server-errors.ts`. Deciding what a throw means for
 // the user is `remote-server-connection-status.ts`; deciding which server to ask is the caller's.
 
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import type { TeamCurrentCapability } from "@openbot/contracts/team-protocol/current";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import type { TeamCurrentCapability } from "@dani-dex/contracts/team-protocol/current";
 import {
   TEAM_APP_VERSION_HEADER,
   TEAM_CAPABILITIES_HEADER,
   TEAM_PROTOCOL_VERSION_HEADER,
-} from "@openbot/contracts/team-protocol/v1";
+} from "@dani-dex/contracts/team-protocol/v1";
 import {
   decodeTeamProtocolV1CurrentHttpResponse,
   encodeTeamProtocolV1CurrentHttpRequest,
-} from "@openbot/contracts/team-protocol/v1-adapter";
-import { decodeTeamProtocolV2Json, type TeamProtocolV2Json } from "@openbot/contracts/team-protocol/v2";
-import { TEAM_PROTOCOL_V3 } from "@openbot/contracts/team-protocol/v3";
+} from "@dani-dex/contracts/team-protocol/v1-adapter";
+import { decodeTeamProtocolV2Json, type TeamProtocolV2Json } from "@dani-dex/contracts/team-protocol/v2";
+import { TEAM_PROTOCOL_V3 } from "@dani-dex/contracts/team-protocol/v3";
 import {
   decodeTeamProtocolV3CurrentHttpResponse,
   encodeTeamProtocolV3CurrentHttpRequest,
-} from "@openbot/contracts/team-protocol/v3-adapter";
+} from "@dani-dex/contracts/team-protocol/v3-adapter";
 import type { ResponseDecoder } from "./remote-host-decoding";
 import { RemoteProtocolError, RemoteRequestError } from "./remote-server-errors";
 

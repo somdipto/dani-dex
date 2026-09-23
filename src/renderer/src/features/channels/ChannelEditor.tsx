@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { Channel, ChannelDraft } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { Channel, ChannelDraft } from "@dani-dex/contracts/ipc";
 import { createEffect, createStore, For, Show } from "solid-js";
 import { SettingsField, SettingsLinkGroup, SettingsLinkRow } from "../../components/SettingsPanel";
 import {

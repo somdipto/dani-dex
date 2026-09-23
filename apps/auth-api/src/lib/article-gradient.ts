@@ -1,7 +1,7 @@
-export type { ArticleGradient } from "@openbot/brand/article-gradient";
+export type { ArticleGradient } from "@dani-dex/brand/article-gradient";
 export {
   ARTICLE_GRADIENT_BRAND_HEXES,
   articleGradient,
   articleGradientCss,
   articleGradientUniforms,
-} from "@openbot/brand/article-gradient";
+} from "@dani-dex/brand/article-gradient";

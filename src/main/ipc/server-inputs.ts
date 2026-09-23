@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   ConfigureHostInput,
   CreateTeamInviteInput,
@@ -14,8 +14,8 @@ import type {
   SetTeamTypingInput,
   UpdateHostIdentityInput,
   UpdateTeamMemberInput,
-} from "@openbot/contracts/ipc";
-import { isBoolean, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isBoolean, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { parseAvatarImage } from "./avatar-inputs";
 import { isObject, requireString } from "./validation";
 

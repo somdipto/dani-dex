@@ -3,7 +3,7 @@
 import { chmod, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import type { SaveCustomProviderInput } from "@openbot/contracts/ipc";
+import type { SaveCustomProviderInput } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { type CustomProviderCipher, CustomProviderStore } from "./custom-provider-store";
 

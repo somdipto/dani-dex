@@ -1,4 +1,4 @@
-import { chatTagReferences, serializeChatTagReference } from "@openbot/contracts/chat-tag-references";
+import { chatTagReferences, serializeChatTagReference } from "@dani-dex/contracts/chat-tag-references";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { markdown, parseChatMarkdown } from "./chat-markdown-parser";
 import { editMentionDraft, insertMention, mentionDraft, mentionQuery, plainMentionParts } from "./chat-mentions";

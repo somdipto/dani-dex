@@ -1,4 +1,4 @@
-import type { ConversationMessage, ConversationSnapshot } from "@openbot/contracts/ipc";
+import type { ConversationMessage, ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { mergeProviderHistory, snapshotFromThread } from "./conversation-snapshots";
 

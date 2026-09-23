@@ -1,4 +1,4 @@
-import type { CentralAuthUser } from "@openbot/contracts/ipc";
+import type { CentralAuthUser } from "@dani-dex/contracts/ipc";
 import { For, Show } from "solid-js";
 import {
   Badge,

@@ -1,4 +1,4 @@
-import type { SidebarLayoutSnapshot } from "@openbot/contracts/ipc";
+import type { SidebarLayoutSnapshot } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { applySidebarLayoutAction } from "./mock-sidebar-layout";
 

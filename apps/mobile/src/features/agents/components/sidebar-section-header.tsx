@@ -1,6 +1,6 @@
+import type { SidebarLayoutAction } from "@dani-dex/contracts/ipc";
+import { userErrorMessage } from "@dani-dex/user-errors";
 import { type MenuAction, MenuView } from "@expo/ui/community/menu";
-import type { SidebarLayoutAction } from "@openbot/contracts/ipc";
-import { userErrorMessage } from "@openbot/user-errors";
 import { router } from "expo-router";
 import { Typography } from "heroui-native";
 import { useThemeColor } from "heroui-native/hooks";

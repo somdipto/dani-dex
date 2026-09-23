@@ -1,4 +1,4 @@
-import { type DynamicRecord, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { type DynamicRecord, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 
 export const JSON_BODY_LIMIT = 16 * 1024;
 

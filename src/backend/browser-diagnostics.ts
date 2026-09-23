@@ -1,5 +1,5 @@
-import type { BrowserActionHistoryEntry, BrowserDiagnosticEntry } from "@openbot/contracts/ipc";
-import { redactText } from "@openbot/logging";
+import type { BrowserActionHistoryEntry, BrowserDiagnosticEntry } from "@dani-dex/contracts/ipc";
+import { redactText } from "@dani-dex/logging";
 
 const DIAGNOSTIC_LIMIT = 100;
 const ACTION_LIMIT = 100;

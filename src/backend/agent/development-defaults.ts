@@ -1,4 +1,4 @@
-import type { AgentModelId, AgentModelOption, AgentProviderId, AgentReasoningEffort } from "@openbot/contracts/ipc";
+import type { AgentModelId, AgentModelOption, AgentProviderId, AgentReasoningEffort } from "@dani-dex/contracts/ipc";
 
 /**
  * What a new agent starts on in a development build, in place of the built-in `codex` default.

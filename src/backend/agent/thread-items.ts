@@ -1,5 +1,5 @@
-import { agentProviderName } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { agentProviderName } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import type { AgentProvider } from "../agent-client";
 import { AppServerError } from "../app-server-client";
 import { type DynamicToolCallParams, getString, isRecord, reasoningText, type ThreadItem } from "../protocol";

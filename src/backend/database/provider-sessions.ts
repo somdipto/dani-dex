@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { type AgentProviderId, isAgentProvider } from "@openbot/contracts/ipc";
-import type { DynamicRecord } from "@openbot/contracts/runtime-values";
+import { type AgentProviderId, isAgentProvider } from "@dani-dex/contracts/ipc";
+import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
 import type { DatabaseCore } from "./database-core";
 import { databaseRow, databaseRows, optionalStringColumn, requiredStringColumn } from "./database-rows";
 

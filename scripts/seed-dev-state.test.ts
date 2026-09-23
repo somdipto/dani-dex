@@ -3,7 +3,7 @@
 import { mkdir, mkdtemp, readdir, readFile, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { attachmentReferenceIds } from "@openbot/contracts/attachment-references";
+import { attachmentReferenceIds } from "@dani-dex/contracts/attachment-references";
 import { afterEach, describe, expect, it } from "vitest";
 import { AgentMemoryStore } from "../src/backend/agent-memory-store";
 import { AgentRoutineStore } from "../src/backend/agent-routine-store";

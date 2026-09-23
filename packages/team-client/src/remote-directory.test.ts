@@ -1,4 +1,4 @@
-import { createInviteUrl } from "@openbot/contracts/invite-links";
+import { createInviteUrl } from "@dani-dex/contracts/invite-links";
 import { describe, expect, it, vi } from "vitest";
 
 import {

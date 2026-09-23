@@ -3,10 +3,10 @@
  * the dirty check, and the badge text and variant.
  *
  * The types and the rules the main process also applies - validation, normalization, the id - live
- * in `@openbot/contracts/ipc` so that a saved row can never hold something the form never previewed.
+ * in `@dani-dex/contracts/ipc` so that a saved row can never hold something the form never previewed.
  */
 
-import { type McpServerConfig, normalizeMcpConfig, type ProviderRuntimeStatus } from "@openbot/contracts/ipc";
+import { type McpServerConfig, normalizeMcpConfig, type ProviderRuntimeStatus } from "@dani-dex/contracts/ipc";
 
 export type {
   McpConfigErrors,
@@ -14,8 +14,8 @@ export type {
   McpServerConfig,
   McpTestResult,
   McpTransport,
-} from "@openbot/contracts/ipc";
-export { createMcpServerId, mcpConfigErrors, mcpConfigIsValid, normalizeMcpConfig } from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
+export { createMcpServerId, mcpConfigErrors, mcpConfigIsValid, normalizeMcpConfig } from "@dani-dex/contracts/ipc";
 
 /** The badge variants this panel uses, narrowed from the shared `Badge` set. */
 export type McpStatusVariant = "success-light" | "destructive-light" | "secondary";

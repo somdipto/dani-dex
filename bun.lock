@@ -12,12 +12,12 @@
         "@kobalte/core": "catalog:",
         "@modelcontextprotocol/sdk": "1.30.0",
         "@norbert_bodziony/bloub": "catalog:",
-        "@openbot/brand": "workspace:*",
-        "@openbot/contracts": "workspace:*",
-        "@openbot/i18n": "workspace:*",
-        "@openbot/logging": "workspace:*",
-        "@openbot/team-client": "workspace:*",
-        "@openbot/user-errors": "workspace:*",
+        "@dani-dex/brand": "workspace:*",
+        "@dani-dex/contracts": "workspace:*",
+        "@dani-dex/i18n": "workspace:*",
+        "@dani-dex/logging": "workspace:*",
+        "@dani-dex/team-client": "workspace:*",
+        "@dani-dex/user-errors": "workspace:*",
         "@openpanel/web": "catalog:",
         "@paper-design/shaders": "catalog:",
         "@solidjs/signals": "catalog:",
@@ -65,13 +65,13 @@
       },
     },
     "apps/auth-api": {
-      "name": "@openbot/auth-api",
+      "name": "@dani-dex/auth-api",
       "version": "0.0.0",
       "dependencies": {
         "@fontsource-variable/inter": "catalog:",
         "@kobalte/core": "catalog:",
-        "@openbot/brand": "workspace:*",
-        "@openbot/contracts": "workspace:*",
+        "@dani-dex/brand": "workspace:*",
+        "@dani-dex/contracts": "workspace:*",
         "@openpanel/web": "catalog:",
         "@paper-design/shaders": "catalog:",
         "@solidjs/signals": "catalog:",
@@ -100,17 +100,17 @@
       },
     },
     "apps/mobile": {
-      "name": "@openbot/mobile",
+      "name": "@dani-dex/mobile",
       "version": "1.0.0",
       "dependencies": {
         "@expo/metro-runtime": "~57.0.15",
         "@expo/ui": "~57.0.17",
         "@hookform/resolvers": "^5.9.1",
         "@norbert_bodziony/bloub": "catalog:",
-        "@openbot/brand": "workspace:*",
-        "@openbot/contracts": "workspace:*",
-        "@openbot/team-client": "workspace:*",
-        "@openbot/user-errors": "workspace:*",
+        "@dani-dex/brand": "workspace:*",
+        "@dani-dex/contracts": "workspace:*",
+        "@dani-dex/team-client": "workspace:*",
+        "@dani-dex/user-errors": "workspace:*",
         "@openpanel/react-native": "1.4.1",
         "@react-native-masked-view/masked-view": "0.3.2",
         "@shopify/react-native-skia": "2.6.2",
@@ -175,10 +175,10 @@
       },
     },
     "apps/site-router": {
-      "name": "@openbot/site-router",
+      "name": "@dani-dex/site-router",
       "version": "0.0.0",
       "dependencies": {
-        "@openbot/contracts": "workspace:*",
+        "@dani-dex/contracts": "workspace:*",
       },
       "devDependencies": {
         "@cloudflare/workers-types": "catalog:",
@@ -188,11 +188,11 @@
       },
     },
     "packages/brand": {
-      "name": "@openbot/brand",
+      "name": "@dani-dex/brand",
       "version": "0.0.0",
       "dependencies": {
         "@norbert_bodziony/bloub": "catalog:",
-        "@openbot/contracts": "workspace:*",
+        "@dani-dex/contracts": "workspace:*",
       },
       "devDependencies": {
         "@solidjs/testing-library": "catalog:",
@@ -209,7 +209,7 @@
       },
     },
     "packages/contracts": {
-      "name": "@openbot/contracts",
+      "name": "@dani-dex/contracts",
       "version": "0.0.0",
       "dependencies": {
         "emoji-regex": "10.6.0",
@@ -220,10 +220,10 @@
       },
     },
     "packages/i18n": {
-      "name": "@openbot/i18n",
+      "name": "@dani-dex/i18n",
       "version": "0.0.0",
       "dependencies": {
-        "@openbot/contracts": "workspace:*",
+        "@dani-dex/contracts": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "catalog:",
@@ -232,7 +232,7 @@
       },
     },
     "packages/logging": {
-      "name": "@openbot/logging",
+      "name": "@dani-dex/logging",
       "version": "0.0.0",
       "dependencies": {
         "ts-log": "3.0.3",
@@ -243,22 +243,22 @@
       },
     },
     "packages/team-client": {
-      "name": "@openbot/team-client",
+      "name": "@dani-dex/team-client",
       "version": "0.0.0",
       "dependencies": {
         "@noble/ed25519": "3.1.0",
         "@noble/hashes": "2.3.0",
-        "@openbot/contracts": "workspace:*",
+        "@dani-dex/contracts": "workspace:*",
       },
       "devDependencies": {
         "typescript": "catalog:",
       },
     },
     "packages/user-errors": {
-      "name": "@openbot/user-errors",
+      "name": "@dani-dex/user-errors",
       "version": "0.0.0",
       "dependencies": {
-        "@openbot/logging": "workspace:*",
+        "@dani-dex/logging": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "catalog:",
@@ -267,10 +267,10 @@
       },
     },
     "remote/api": {
-      "name": "@openbot/remote-api",
+      "name": "@dani-dex/remote-api",
       "version": "0.0.0",
       "dependencies": {
-        "@openbot/contracts": "workspace:*",
+        "@dani-dex/contracts": "workspace:*",
         "elysia": "1.4.30",
         "jose": "catalog:",
         "zod": "catalog:",
@@ -837,25 +837,25 @@
 
     "@oozcitak/util": ["@oozcitak/util@10.0.0", "", {}, "sha512-hAX0pT/73190NLqBPPWSdBVGtbY6VOhWYK3qqHqtXQ1gK7kS2yz4+ivsN07hpJ6I3aeMtKP6J6npsEKOAzuTLA=="],
 
-    "@openbot/auth-api": ["@openbot/auth-api@workspace:apps/auth-api"],
+    "@dani-dex/auth-api": ["@dani-dex/auth-api@workspace:apps/auth-api"],
 
-    "@openbot/brand": ["@openbot/brand@workspace:packages/brand"],
+    "@dani-dex/brand": ["@dani-dex/brand@workspace:packages/brand"],
 
-    "@openbot/contracts": ["@openbot/contracts@workspace:packages/contracts"],
+    "@dani-dex/contracts": ["@dani-dex/contracts@workspace:packages/contracts"],
 
-    "@openbot/i18n": ["@openbot/i18n@workspace:packages/i18n"],
+    "@dani-dex/i18n": ["@dani-dex/i18n@workspace:packages/i18n"],
 
-    "@openbot/logging": ["@openbot/logging@workspace:packages/logging"],
+    "@dani-dex/logging": ["@dani-dex/logging@workspace:packages/logging"],
 
-    "@openbot/mobile": ["@openbot/mobile@workspace:apps/mobile"],
+    "@dani-dex/mobile": ["@dani-dex/mobile@workspace:apps/mobile"],
 
-    "@openbot/remote-api": ["@openbot/remote-api@workspace:remote/api"],
+    "@dani-dex/remote-api": ["@dani-dex/remote-api@workspace:remote/api"],
 
-    "@openbot/site-router": ["@openbot/site-router@workspace:apps/site-router"],
+    "@dani-dex/site-router": ["@dani-dex/site-router@workspace:apps/site-router"],
 
-    "@openbot/team-client": ["@openbot/team-client@workspace:packages/team-client"],
+    "@dani-dex/team-client": ["@dani-dex/team-client@workspace:packages/team-client"],
 
-    "@openbot/user-errors": ["@openbot/user-errors@workspace:packages/user-errors"],
+    "@dani-dex/user-errors": ["@dani-dex/user-errors@workspace:packages/user-errors"],
 
     "@openpanel/react-native": ["@openpanel/react-native@1.4.1", "", { "dependencies": { "@openpanel/sdk": "1.3.1" }, "peerDependencies": { "expo-application": "5 - 7", "expo-constants": "14 - 18", "react-native": "*" } }, "sha512-Ix0KAlys2V8LVQIfYTQIdyk5r9xlLSUyaPA7Asf2tqjm2lBa/26JbpUslHHbVS2rk28fYcvmdgAw739pJZXatQ=="],
 

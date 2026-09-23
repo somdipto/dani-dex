@@ -3,7 +3,7 @@ import {
   type ChannelMessage,
   type ChannelTask,
   channelRoutingConversationEvent,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { ChannelMemoryStore } from "./channel-memory-store";
 import type { ChannelStore } from "./channel-store";
 

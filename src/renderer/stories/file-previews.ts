@@ -1,4 +1,4 @@
-import type { FilePreview } from "@openbot/contracts/ipc";
+import type { FilePreview } from "@dani-dex/contracts/ipc";
 import { strToU8, zipSync } from "fflate";
 
 /**

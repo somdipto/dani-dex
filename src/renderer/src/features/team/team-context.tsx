@@ -1,4 +1,4 @@
-import type { TeamPresenceSnapshot } from "@openbot/contracts/ipc";
+import type { TeamPresenceSnapshot } from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal, flush, onSettled } from "solid-js";
 import { EMPTY_TEAM_PRESENCE } from "../../app-defaults";
 import { createSimpleContext } from "../../simple-context";
@@ -44,7 +44,7 @@ const Presence = createSimpleContext({
       return teamPresence().members.filter((member) => member.id !== currentMemberId && !member.disabled);
     });
 
-    onSettled(() => window.openbot.servers.onPresence((snapshot) => flush(() => setTeamPresence(snapshot))));
+    onSettled(() => window.danidex.servers.onPresence((snapshot) => flush(() => setTeamPresence(snapshot))));
 
     return { teamPresence, setTeamPresence, currentTeamMember, directPeople };
   },

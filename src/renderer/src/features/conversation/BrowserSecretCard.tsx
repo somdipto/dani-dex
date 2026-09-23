@@ -1,4 +1,4 @@
-import type { BrowserPreview, BrowserTakeoverRequest, RespondToBrowserSecretInput } from "@openbot/contracts/ipc";
+import type { BrowserPreview, BrowserTakeoverRequest, RespondToBrowserSecretInput } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
 import { Button, Input, Maximize2, Monitor } from "../../components/ui";
 import { OtpInput } from "../../components/ui/otp-input";

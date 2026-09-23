@@ -1,4 +1,4 @@
-import type { AgentMemory } from "@openbot/contracts/ipc";
+import type { AgentMemory } from "@dani-dex/contracts/ipc";
 import { onCleanup } from "solid-js";
 import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -47,13 +47,13 @@ const fullMemoryList: AgentMemory[] = Array.from({ length: 64 }, (_, index) => (
 }));
 
 function AgentMemoriesStory(props: { memories: AgentMemory[] }) {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot({ memories: { chief: props.memories } });
-  window.openbot = mock.api;
+  window.danidex = mock.api;
 
   onCleanup(() => {
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
 
   return (

@@ -1,6 +1,6 @@
-import type { AgentProviderId, ConversationMessage, ConversationSnapshot } from "@openbot/contracts/ipc";
-import { isImageGenerationAspectRatio } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import type { AgentProviderId, ConversationMessage, ConversationSnapshot } from "@dani-dex/contracts/ipc";
+import { isImageGenerationAspectRatio } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import type { DeliveryContext } from "./mailbox-store";
 import type { ThreadItem, ThreadResponse } from "./protocol";
 

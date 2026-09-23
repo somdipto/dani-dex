@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentEvent,
   AgentSummary,
@@ -15,9 +15,9 @@ import type {
   RoutineRunConversationEventStatus,
   TestRoutineInput,
   UpdateRoutineInput,
-} from "@openbot/contracts/ipc";
-import { routineConversationEventItemType, routineRunConversationEventItemType } from "@openbot/contracts/ipc";
-import { isBoolean } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { routineConversationEventItemType, routineRunConversationEventItemType } from "@dani-dex/contracts/ipc";
+import { isBoolean } from "@dani-dex/contracts/runtime-values";
 import { AgentRoutineStore } from "../agent-routine-store";
 import type { AgentStore } from "../agent-store";
 import { sortConversationMessages } from "../conversation-snapshots";

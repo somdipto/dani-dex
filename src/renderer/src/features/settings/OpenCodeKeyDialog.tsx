@@ -12,7 +12,7 @@ import type {
   ExternalDestination,
   ProviderApiKeyState,
   ProviderApiKeyStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createSignal, onSettled, Show } from "solid-js";
 import {
   Alert,

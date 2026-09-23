@@ -4,7 +4,7 @@ import { copyFile, mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promise
 import { arch, release as osRelease, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
-import type { AgentSummary, ExportResult } from "@openbot/contracts/ipc";
+import type { AgentSummary, ExportResult } from "@dani-dex/contracts/ipc";
 import { app, type BrowserWindow, dialog } from "electron";
 import type { AgentService } from "../backend/agent-service";
 import type { BrowserHost } from "../backend/browser-host";

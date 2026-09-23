@@ -1,4 +1,4 @@
-import type { ServerSummary, SidebarLayoutAction, SidebarLayoutSnapshot } from "@openbot/contracts/ipc";
+import type { ServerSummary, SidebarLayoutAction, SidebarLayoutSnapshot } from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal } from "solid-js";
 import { createSimpleContext } from "../../simple-context";
 import { serverSupportsCapability } from "../servers/server-capabilities";
@@ -63,7 +63,7 @@ const Sidebar = createSimpleContext({
     /** The layout read for a server load, answering the default where the host has no layout to give. */
     function loadLayout(server: ServerSummary | undefined): Promise<SidebarLayoutSnapshot> {
       return serverSupportsCapability(server, "sidebar-layout")
-        ? window.openbot.agent.getSidebarLayout()
+        ? window.danidex.agent.getSidebarLayout()
         : Promise.resolve(defaultSidebarLayout());
     }
 
@@ -71,7 +71,7 @@ const Sidebar = createSimpleContext({
       if (!activeServerSupportsCapability("sidebar-layout")) {
         throw new Error("This host does not support sidebar layout changes.");
       }
-      const layout = await window.openbot.agent.mutateSidebarLayout(action);
+      const layout = await window.danidex.agent.mutateSidebarLayout(action);
       setSidebarLayout(layout);
     }
 

@@ -1,9 +1,9 @@
-import { IMAGE_ATTACHMENT_ACCEPT, supportedAttachmentExtensions } from "@openbot/contracts/attachment-files";
-import { canPreviewAttachment } from "@openbot/contracts/ipc";
+import { IMAGE_ATTACHMENT_ACCEPT, supportedAttachmentExtensions } from "@dani-dex/contracts/attachment-files";
+import { canPreviewAttachment } from "@dani-dex/contracts/ipc";
 import {
   TEAM_EML_ATTACHMENTS_CAPABILITY,
   TEAM_MEDIA_ATTACHMENTS_CAPABILITY,
-} from "@openbot/contracts/team-protocol/current";
+} from "@dani-dex/contracts/team-protocol/current";
 import { createEffect, createMemo, createSignal, For, Loading, lazy, onCleanup, Show } from "solid-js";
 import {
   ArrowUp,

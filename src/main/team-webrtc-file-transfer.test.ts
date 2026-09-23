@@ -2,13 +2,13 @@ import { createHash } from "node:crypto";
 import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import {
   decodeTeamProtocolV2FileChunk,
   decodeTeamProtocolV2FileControlFrame,
   encodeTeamProtocolV2FileChunk,
   encodeTeamProtocolV2Frame,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { restartActivityGeneration } from "../backend/restart-activity";
 import { TeamWebRtcBridge } from "./team-webrtc-bridge";

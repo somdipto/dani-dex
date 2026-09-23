@@ -1,13 +1,13 @@
-import type { AgentEvent, TeamRealtimeEvent } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { decodeSignalServerMessage } from "@openbot/contracts/signal-protocol/decode";
+import type { AgentEvent, TeamRealtimeEvent } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { decodeSignalServerMessage } from "@dani-dex/contracts/signal-protocol/decode";
 import {
   SIGNAL_PROTOCOL_VERSION,
   SIGNAL_TURN_REFRESH_INTERVAL_MS,
   type SignalClientMessage,
   type SignalServerMessage,
-} from "@openbot/contracts/signal-protocol/messages";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+} from "@dani-dex/contracts/signal-protocol/messages";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import {
   decodeTeamProtocolV2AuthFrame,
   decodeTeamProtocolV2EventFrame,
@@ -21,13 +21,13 @@ import {
   type TeamProtocolV2AuthFrame,
   type TeamProtocolV2Json,
   teamProtocolV2AuthenticationTranscript,
-} from "@openbot/contracts/team-protocol";
+} from "@dani-dex/contracts/team-protocol";
 import {
   channelEvent,
   channelRequest,
   channelResponse,
   isChannelRoute,
-} from "@openbot/contracts/team-protocol/channels-v1";
+} from "@dani-dex/contracts/team-protocol/channels-v1";
 import { createEd25519Identity, type Ed25519Identity, signEd25519, verifyEd25519Pem } from "./ed25519";
 import { createRemoteFileReceiver } from "./file-download";
 import { createRemoteFileSender, type RemoteFileUpload } from "./file-upload";

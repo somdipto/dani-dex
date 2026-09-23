@@ -4,7 +4,7 @@ import {
   type RemoteDesktopConnectInput,
   type RemoteDesktopConnectResult,
   type RemoteDesktopSession,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { RemoteRequestError } from "./remote-server-errors";
 import type { RemoteServerManager } from "./remote-server-manager";
 

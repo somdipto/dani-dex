@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { chmodSync, copyFileSync, createReadStream, existsSync } from "node:fs";
 import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { createOpenBotLogger } from "@openbot/logging";
+import { createOpenBotLogger } from "@dani-dex/logging";
 
 const logger = createOpenBotLogger("prepare-whisper");
 

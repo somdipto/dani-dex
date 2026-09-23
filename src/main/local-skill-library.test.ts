@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { AgentSummary } from "@openbot/contracts/ipc";
+import type { AgentSummary } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CentralAuthManager } from "./central-auth-manager";
 import { LocalSkillLibrary } from "./local-skill-library";

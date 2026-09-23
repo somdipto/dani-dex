@@ -1,7 +1,7 @@
 import { access, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import type { AgentClient, AgentProvider } from "../src/backend/agent-client";
 import { CodexAppServerClient } from "../src/backend/app-server-client";
 import { ClaudeAgentClient } from "../src/backend/claude-client";

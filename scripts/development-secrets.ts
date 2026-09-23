@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 // a fork run `bun run dev` without the maintainer's dotenvx keys.
 //
 // `prepare-dev-environment.ts` calls this before `bun install`, so it uses node builtins only —
-// `@openbot/logging` is not resolvable yet on a fresh clone, which is why this writes to stdout.
+// `@dani-dex/logging` is not resolvable yet on a fresh clone, which is why this writes to stdout.
 
 // `wrangler.jsonc` pins the active ticket key ID in its top-level `vars`, and `parseJwks` rejects a
 // JWKS that does not carry that `kid`, so the generated pair has to claim the same one.

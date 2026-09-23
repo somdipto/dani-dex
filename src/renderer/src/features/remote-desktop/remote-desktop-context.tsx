@@ -1,4 +1,4 @@
-import type { RemoteDesktopConnectResult, RemoteDesktopErrorCode, RemoteDesktopSession } from "@openbot/contracts/ipc";
+import type { RemoteDesktopConnectResult, RemoteDesktopErrorCode, RemoteDesktopSession } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, flush, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { errorMessage } from "../../error-message";
@@ -57,7 +57,7 @@ const RemoteDesktop = createSimpleContext({
     async function connectRemoteDesktop(serverId: string): Promise<RemoteDesktopConnectResult> {
       const analytics = desktopAnalytics.scope();
       try {
-        const result = await window.openbot.remoteDesktop.connect({ serverId });
+        const result = await window.danidex.remoteDesktop.connect({ serverId });
         if (result.status === "refused") {
           analytics.track("remote_desktop_action", {
             action: "connect",
@@ -87,7 +87,7 @@ const RemoteDesktop = createSimpleContext({
     async function disconnectRemoteDesktop(sessionId: string): Promise<void> {
       const analytics = desktopAnalytics.scope();
       try {
-        await window.openbot.remoteDesktop.disconnect(sessionId);
+        await window.danidex.remoteDesktop.disconnect(sessionId);
         setRemoteDesktopSessions((current) => current.filter((session) => session.id !== sessionId));
         analytics.track("remote_desktop_action", { action: "disconnect", result: "succeeded" });
       } catch (error) {
@@ -103,7 +103,7 @@ const RemoteDesktop = createSimpleContext({
     async function selectRemoteDesktopDisplay(serverId: string, displayId: string): Promise<void> {
       const analytics = desktopAnalytics.scope();
       try {
-        await window.openbot.remoteDesktop.selectDisplay({ serverId, displayId });
+        await window.danidex.remoteDesktop.selectDisplay({ serverId, displayId });
         setRemoteDesktopSessions((current) =>
           current.map((session) =>
             session.serverId === serverId ? { ...session, selectedDisplayId: displayId } : session,
@@ -277,10 +277,10 @@ const RemoteDesktop = createSimpleContext({
 
     onSettled(() => {
       if (platform.landingPreview) return;
-      const unsubscribe = window.openbot.remoteDesktop.onEvent((sessions) =>
+      const unsubscribe = window.danidex.remoteDesktop.onEvent((sessions) =>
         flush(() => setRemoteDesktopSessions(sessions)),
       );
-      void window.openbot.remoteDesktop
+      void window.danidex.remoteDesktop
         .list()
         .then(setRemoteDesktopSessions)
         .catch(() => undefined);

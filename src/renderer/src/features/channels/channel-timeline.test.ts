@@ -1,5 +1,5 @@
-import type { ChannelMessage, ChannelPage } from "@openbot/contracts/ipc";
-import { channelRoutingConversationEventItemType } from "@openbot/contracts/ipc";
+import type { ChannelMessage, ChannelPage } from "@dani-dex/contracts/ipc";
+import { channelRoutingConversationEventItemType } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import type { AgentProfile } from "../../data";
 import { mergeChannelPage } from "./channel-page-merge";

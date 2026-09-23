@@ -1,4 +1,4 @@
-import type { UpdateFailureCode, UpdateStatus } from "@openbot/contracts/ipc";
+import type { UpdateFailureCode, UpdateStatus } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { presentUpdateStatus } from "./update-status";
 

@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 
 const logger = createOpenBotLogger("deploy-auth-api");
 

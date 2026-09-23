@@ -1,8 +1,8 @@
 // @vitest-environment node
 
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
 import { afterEach, describe, expect, it } from "vitest";
 import { type DynamicToolNamespace, LocalMcpBridge } from "./local-mcp-bridge";
 

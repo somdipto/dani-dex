@@ -14,9 +14,9 @@ import {
   type ManagedRuntimeId,
   type ProviderRuntimeSnapshot,
   type ProviderRuntimeStatus,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { redactText } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { redactText } from "@dani-dex/logging";
 import lockValue from "../../native-runtime.lock.json";
 import { type AgentRuntimeLock, parseAgentRuntimeLock } from "../../scripts/agent-runtime-lock";
 import { type BundledProviderExecutables, configuredCliPath } from "../backend/cli";

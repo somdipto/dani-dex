@@ -1,4 +1,4 @@
-import type { ComputerUseState, MacPermissionId } from "@openbot/contracts/ipc";
+import type { ComputerUseState, MacPermissionId } from "@dani-dex/contracts/ipc";
 import { createSignal, For, onCleanup, onSettled, Show } from "solid-js";
 import {
   Alert,
@@ -56,7 +56,7 @@ const PERMISSION_DETAILS: Record<MacPermissionId, { title: string; description: 
 };
 
 export function ComputerUseSetup(props: ComputerUseSetupProps) {
-  const desktopApi = window.openbot;
+  const desktopApi = window.danidex;
   const [state, setState] = createSignal<ComputerUseState | null>(null);
   const [loading, setLoading] = createSignal(false);
   const [busyPermission, setBusyPermission] = createSignal<MacPermissionId | null>(null);

@@ -1,5 +1,5 @@
-import { ProviderLogo } from "@openbot/brand";
-import type { AgentProviderId } from "@openbot/contracts/ipc";
+import { ProviderLogo } from "@dani-dex/brand";
+import type { AgentProviderId } from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createRoot, createSignal, Show } from "solid-js";
 import { Progress, TOAST_DURATION, toast } from "../../components/ui";

@@ -5,7 +5,7 @@ import type {
   DynamicIslandPresentation,
   QueueSnapshot,
   ScopedAgentEvent,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { cleanAgentMessageText } from "../agents/agent-message-text";
 import {
   countDynamicIslandAttention,

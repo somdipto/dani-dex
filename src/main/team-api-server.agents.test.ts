@@ -1,5 +1,5 @@
-import { isAgentSummary } from "@openbot/contracts/ipc";
-import { QueueEditRejectedError } from "@openbot/contracts/team-protocol/queue-edit-v1";
+import { isAgentSummary } from "@dani-dex/contracts/ipc";
+import { QueueEditRejectedError } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
 import opencodeFixture from "../../packages/contracts/src/team-protocol/fixtures/v4/host-http-response.json";
 // @vitest-environment node
 
@@ -7,15 +7,15 @@ import opencodeFixture from "../../packages/contracts/src/team-protocol/fixtures
 // memories, routines, conversation and queue modules it dispatches to.
 
 import { join } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { AgentMemory, AgentSummary, Routine, RoutineRun } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AgentMemory, AgentSummary, Routine, RoutineRun } from "@dani-dex/contracts/ipc";
 import {
   TEAM_APP_VERSION_HEADER,
   TEAM_CAPABILITIES_HEADER,
   TEAM_PROTOCOL_VERSION_HEADER,
-} from "@openbot/contracts/team-protocol/v1";
-import { TEAM_PROTOCOL_V3 } from "@openbot/contracts/team-protocol/v3";
-import { encodeTeamProtocolV4WebRtcHttpRequest } from "@openbot/contracts/team-protocol/v4-webrtc-adapter";
+} from "@dani-dex/contracts/team-protocol/v1";
+import { TEAM_PROTOCOL_V3 } from "@dani-dex/contracts/team-protocol/v3";
+import { encodeTeamProtocolV4WebRtcHttpRequest } from "@dani-dex/contracts/team-protocol/v4-webrtc-adapter";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AgentStore } from "../backend/agent-store";
 import { SidebarLayoutStore } from "../backend/sidebar-layout-store";

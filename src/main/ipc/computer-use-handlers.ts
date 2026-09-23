@@ -1,6 +1,6 @@
 // The Computer Use driver's readiness, and the macOS permission panes it may need.
 
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import type { ComputerUsePermissionHelpWindowController } from "../computer-use-permission-help-window";
 import type { CuaDriverRuntime } from "../cua-driver-runtime";
 import { MAC_PERMISSION_URLS } from "../mac-permission-urls";

@@ -1,4 +1,4 @@
-import { AppLogo } from "@openbot/brand";
+import { AppLogo } from "@dani-dex/brand";
 import type {
   DynamicIslandAction,
   DynamicIslandAgentIdentity,
@@ -7,7 +7,7 @@ import type {
   DynamicIslandPresentation,
   DynamicIslandPromptItem,
   DynamicIslandTakeoverItem,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { Dynamic, type JSX } from "@solidjs/web";
 import {
   createEffect,

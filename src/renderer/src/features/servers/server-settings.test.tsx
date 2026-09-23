@@ -1,4 +1,4 @@
-import type { McpServerConfig, TestMcpServerInput } from "@openbot/contracts/ipc";
+import type { McpServerConfig, TestMcpServerInput } from "@dani-dex/contracts/ipc";
 import { render, waitFor } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it } from "vitest";
 import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-openbot";
@@ -67,7 +67,7 @@ describe("server settings MCP", () => {
       if (!answer) throw new Error("The test did not answer.");
       return answer;
     };
-    window.openbot = { ...mock.api, agent: { ...mock.api.agent, testMcpServer: test } };
+    window.danidex = { ...mock.api, agent: { ...mock.api.agent, testMcpServer: test } };
 
     const store = await openLocalSettings();
     await store.refreshMcpServers();
@@ -91,7 +91,7 @@ describe("server settings MCP", () => {
       if (!answer) throw new Error("The list did not answer.");
       return answer;
     };
-    window.openbot = { ...mock.api, agent: { ...mock.api.agent, listMcpServers: list } };
+    window.danidex = { ...mock.api, agent: { ...mock.api.agent, listMcpServers: list } };
 
     const store = await openLocalSettings();
     await store.refreshMcpServers();
@@ -108,7 +108,7 @@ describe("server settings MCP", () => {
   // other's reply: the MCP list would stay empty with no second request to fill it.
   it("keeps the MCP list when a settings refresh runs beside it", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
 
     const store = await openLocalSettings();
     const mcp = store.refreshMcpServers();
@@ -131,7 +131,7 @@ describe("server settings MCP", () => {
       if (gate) await gate;
       return answer;
     };
-    window.openbot = { ...mock.api, agent: { ...mock.api.agent, listMcpServers: list } };
+    window.danidex = { ...mock.api, agent: { ...mock.api.agent, listMcpServers: list } };
 
     const store = await openLocalSettings();
     await store.refreshMcpServers();
@@ -152,7 +152,7 @@ describe("server settings MCP", () => {
 
   it("takes the whole list from a save reply", async () => {
     mock = createMockOpenBot();
-    window.openbot = mock.api;
+    window.danidex = mock.api;
 
     const store = await openLocalSettings();
     await store.refreshMcpServers();

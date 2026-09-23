@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { rewriteAttachmentReferences } from "@openbot/contracts/attachment-references";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { rewriteAttachmentReferences } from "@dani-dex/contracts/attachment-references";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentRuntimeWorkItem,
   AttachmentDataInput,
@@ -17,16 +17,16 @@ import type {
   QueueDeliveryStatus,
   QueuedMessageReceipt,
   QueueSnapshot,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   AGENT_RUNTIME_ATTENTION_LIMIT,
   AGENT_RUNTIME_TEXT_LIMIT,
   AGENT_RUNTIME_WORKING_ITEMS_LIMIT,
   isMessageReaction,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { QueueEditRejectedError } from "@openbot/contracts/team-protocol/queue-edit-v1";
-import { redactText } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { QueueEditRejectedError } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
+import { redactText } from "@dani-dex/logging";
 import {
   AttachmentFiles,
   type ExportedAttachmentFile,

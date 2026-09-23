@@ -1,6 +1,6 @@
-import { serializeAttachmentReference } from "@openbot/contracts/attachment-references";
-import { serializeChatTagReference } from "@openbot/contracts/chat-tag-references";
-import type { AttachmentSummary } from "@openbot/contracts/ipc";
+import { serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
+import { serializeChatTagReference } from "@dani-dex/contracts/chat-tag-references";
+import type { AttachmentSummary } from "@dani-dex/contracts/ipc";
 import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import type { MessageCitation } from "../src/data";

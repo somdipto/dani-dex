@@ -1,4 +1,4 @@
-import { isMobileConnectDevelopmentHost } from "@openbot/contracts/mobile-connect";
+import { isMobileConnectDevelopmentHost } from "@dani-dex/contracts/mobile-connect";
 
 export function buildContentSecurityPolicy(packaged: boolean, developmentSignalUrl?: string): string {
   const developmentSources = packaged

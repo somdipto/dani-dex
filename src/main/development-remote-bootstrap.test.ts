@@ -1,4 +1,4 @@
-import type { CentralAuthState } from "@openbot/contracts/ipc";
+import type { CentralAuthState } from "@dani-dex/contracts/ipc";
 import { afterEach, expect, it, vi } from "vitest";
 import { ensureDevelopmentAccount } from "./development-remote-bootstrap";
 

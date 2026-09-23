@@ -3,7 +3,7 @@
  * see: a header on an http server, an environment value on a command, written byte for byte.
  */
 
-import type { McpServerConfig } from "@openbot/contracts/ipc";
+import type { McpServerConfig } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { applyMcpFlow, type McpKeyFlow, mcpFlowComplete } from "./mcp-connect-auth";
 

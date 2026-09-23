@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { z } from "zod";
 
 export const OPENBOT_BROWSER_NAMESPACE = "openbot_browser";

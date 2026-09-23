@@ -1,4 +1,4 @@
-import type { SharedTable } from "@openbot/contracts/ipc";
+import type { SharedTable } from "@dani-dex/contracts/ipc";
 import { onCleanup } from "solid-js";
 import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -7,13 +7,13 @@ import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_MODELS, STORY_SHARED_TABLES } f
 import { createMockOpenBot } from "./mock-openbot";
 
 function SharedTablesStory(props: { tables: SharedTable[] }) {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot({ tables: props.tables });
-  window.openbot = mock.api;
+  window.danidex = mock.api;
 
   onCleanup(() => {
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
 
   return (

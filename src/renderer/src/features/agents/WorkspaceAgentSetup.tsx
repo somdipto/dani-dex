@@ -1,4 +1,4 @@
-import { TEAM_AGENT_CREATE_MODEL_CAPABILITY } from "@openbot/contracts/team-protocol/current";
+import { TEAM_AGENT_CREATE_MODEL_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
 import { createEffect, createMemo, createSignal } from "solid-js";
 import { useProviders } from "../../providers";
 import { useCustomProviders } from "../custom-providers/custom-providers-context";

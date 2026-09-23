@@ -3,7 +3,7 @@ import {
   hostedSiteConversationEvent,
   hostedSiteConversationEventItemType,
   hostedSiteConversationEventText,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProvider } from "../agent-client";
 import type { AgentService } from "../agent-service";

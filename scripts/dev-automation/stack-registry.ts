@@ -14,7 +14,7 @@
 
 import { existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { isDynamicRecord, isNumber, isOneOf, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 import { devInstanceRegistryDirectory } from "./instance-registry";
 import {
   assertRegistryDirectoryOwnership,

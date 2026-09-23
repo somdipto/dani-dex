@@ -84,19 +84,19 @@ const ServerScope = createSimpleContext({
         return;
       }
       void Promise.all([
-        window.openbot.agent
+        window.danidex.agent
           .getStatus()
           .then((value) => {
             if (isCurrent()) setAgentStatus(value);
           })
           .catch(() => undefined),
-        window.openbot.agent
+        window.danidex.agent
           .listModels()
           .then((value) => {
             if (isCurrent()) setModelOptions(value);
           })
           .catch(() => undefined),
-        window.openbot.agent
+        window.danidex.agent
           .listAgents()
           .then((storedAgents) => {
             if (!isCurrent()) return;
@@ -116,7 +116,7 @@ const ServerScope = createSimpleContext({
           })
           .catch(() => undefined),
         centralAuth().status === "signed_in"
-          ? window.openbot.agent
+          ? window.danidex.agent
               .listConversationReads()
               .then((value) => {
                 if (isCurrent()) applyConversationReads(value);
@@ -139,7 +139,7 @@ const ServerScope = createSimpleContext({
           })
           .catch(() => undefined);
       }
-      void window.openbot.servers
+      void window.danidex.servers
         .getPresence()
         .then((value) => {
           if (isCurrent()) setTeamPresence(value);

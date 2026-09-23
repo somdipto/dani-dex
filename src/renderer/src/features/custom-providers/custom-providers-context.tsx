@@ -13,7 +13,7 @@ import { createCustomProvidersStore } from "./stores/custom-providers-store";
 const CustomProviders = createSimpleContext({
   name: "Custom providers",
   init: () => {
-    const store = createCustomProvidersStore(() => window.openbot.customProviders);
+    const store = createCustomProvidersStore(() => window.danidex.customProviders);
     onSettled(() => {
       // A failure here leaves the list empty and `loaded` false. The Settings tab reloads on the
       // next open, so there is nothing to retry from a mount nobody is looking at.

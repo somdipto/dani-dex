@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { TeamMemberSummary } from "@openbot/contracts/ipc";
+import type { TeamMemberSummary } from "@dani-dex/contracts/ipc";
 
 // What a route module says when it is asked about a request.
 //

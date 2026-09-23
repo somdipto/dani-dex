@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { AgentMemoryOrigin, MemoryEntry } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AgentMemoryOrigin, MemoryEntry } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import type { OpenBotDatabase } from "./openbot-database";
 
 /**

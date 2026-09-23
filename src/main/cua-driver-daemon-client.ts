@@ -13,7 +13,7 @@
 // other method is sent from here.
 
 import { connect, type Socket } from "node:net";
-import { type DynamicRecord, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { type DynamicRecord, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 
 /** How long one read may take before the connection is given up and the tick keeps the last answer. */
 const REQUEST_TIMEOUT_MS = 2_000;

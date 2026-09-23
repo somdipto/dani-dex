@@ -1,4 +1,4 @@
-import { analyticsRange, emptyAnalyticsTotals, type HostAnalytics } from "@openbot/contracts/ipc";
+import { analyticsRange, emptyAnalyticsTotals, type HostAnalytics } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, within } from "@solidjs/testing-library";
 import { createSignal, flush } from "solid-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -32,7 +32,7 @@ function show() {
 }
 describe("Agent usage", () => {
   it("starts with all agents and returns to combined totals after filtering", async () => {
-    vi.mocked(window.openbot.agent.getHostAnalytics).mockImplementation(async (input) => ({
+    vi.mocked(window.danidex.agent.getHostAnalytics).mockImplementation(async (input) => ({
       ...result(),
       ...input,
       totals: {
@@ -68,7 +68,7 @@ describe("Agent usage", () => {
     // turn arrives while the report is open often enough to be the common case.
     await fireEvent.click(screen.getByRole("tab", { name: "Day" }));
     const day = await screen.findByRole("table", { name: "Daily usage and cost" });
-    vi.mocked(window.openbot.agent.getHostAnalytics).mockImplementation(async (input) => ({
+    vi.mocked(window.danidex.agent.getHostAnalytics).mockImplementation(async (input) => ({
       ...result(),
       ...input,
       totals: { ...emptyAnalyticsTotals(), sessions: 4 },
@@ -85,7 +85,7 @@ describe("Agent usage", () => {
   });
   it("loads usage, switches the period, and shows empty data", async () => {
     // Electron must clone this payload before it can reach the main process.
-    vi.mocked(window.openbot.agent.getHostAnalytics).mockImplementation(async (input) => ({
+    vi.mocked(window.danidex.agent.getHostAnalytics).mockImplementation(async (input) => ({
       ...result(),
       ...structuredClone(input),
     }));
@@ -93,17 +93,17 @@ describe("Agent usage", () => {
     await vi.waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("No usage recorded"));
     await pick("Usage period", "7 days");
     await screen.findByRole("status");
-    const input = vi.mocked(window.openbot.agent.getHostAnalytics).mock.calls.at(-1);
+    const input = vi.mocked(window.danidex.agent.getHostAnalytics).mock.calls.at(-1);
     expect(input).toEqual([analyticsRange("a", 7), "host-a"]);
     // A year is the widest period, and its label carries no day count, so the request
     // has to prove the label maps to 365 days.
     await pick("Usage period", "1 year");
     await vi.waitFor(() =>
-      expect(window.openbot.agent.getHostAnalytics).toHaveBeenLastCalledWith(analyticsRange("a", 365), "host-a"),
+      expect(window.danidex.agent.getHostAnalytics).toHaveBeenLastCalledWith(analyticsRange("a", 365), "host-a"),
     );
   });
   it("shows an error and retries the request", async () => {
-    vi.mocked(window.openbot.agent.getHostAnalytics)
+    vi.mocked(window.danidex.agent.getHostAnalytics)
       .mockRejectedValueOnce(new Error("offline"))
       .mockResolvedValueOnce(null);
     show();
@@ -117,11 +117,11 @@ describe("Agent usage", () => {
     // A completed turn can refresh before the first response arrives. The refresh takes the
     // generation with it, so the first response is discarded; if the refresh then fails
     // quietly, the panel keeps Loading forever with Refresh disabled and no Retry.
-    vi.mocked(window.openbot.agent.getHostAnalytics)
+    vi.mocked(window.danidex.agent.getHostAnalytics)
       .mockReturnValueOnce(new Promise(() => {}))
       .mockRejectedValueOnce(new Error("offline"));
     show();
-    await vi.waitFor(() => expect(window.openbot.agent.getHostAnalytics).toHaveBeenCalled());
+    await vi.waitFor(() => expect(window.danidex.agent.getHostAnalytics).toHaveBeenCalled());
     emitScopedAgentEvent?.({
       serverId: "host-a",
       event: { type: "turn-completed", agentId: "a", threadId: "thread-1", turnId: "turn-1", status: "completed" },
@@ -136,12 +136,12 @@ describe("Agent usage", () => {
     const pending = new Promise<HostAnalytics>((resolve) => {
       completeOld = resolve;
     });
-    vi.mocked(window.openbot.agent.getHostAnalytics).mockReturnValueOnce(pending).mockResolvedValueOnce(null);
+    vi.mocked(window.danidex.agent.getHostAnalytics).mockReturnValueOnce(pending).mockResolvedValueOnce(null);
     const [server, setServer] = createSignal("host-a");
     render(() => (
       <AgentUsagePanel agentId="a" agentName="Research" serverId={server()} hostName={server()} onBack={() => {}} />
     ));
-    await vi.waitFor(() => expect(window.openbot.agent.getHostAnalytics).toHaveBeenCalled());
+    await vi.waitFor(() => expect(window.danidex.agent.getHostAnalytics).toHaveBeenCalled());
     setServer("host-b");
     await vi.waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("This host does not support"));
     completeOld(result());
@@ -165,7 +165,7 @@ describe("Agent usage", () => {
       { date: data.startDate, provider: "claude", processedTokens: 100, estimatedCostUsd: 0.02 },
       { date: data.endDate, provider: "codex", processedTokens: 700, estimatedCostUsd: 0.02 },
     ];
-    vi.mocked(window.openbot.agent.getHostAnalytics).mockResolvedValue(data);
+    vi.mocked(window.danidex.agent.getHostAnalytics).mockResolvedValue(data);
     show();
     await vi.waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Partial data"));
     expect(within(screen.getByRole("region", { name: "Usage summary" })).getByText("$0.00000002")).toBeInTheDocument();

@@ -1,4 +1,4 @@
-import type { AgentPromptQuestion, ConversationSnapshot } from "@openbot/contracts/ipc";
+import type { AgentPromptQuestion, ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import {
   indexChatMessages,

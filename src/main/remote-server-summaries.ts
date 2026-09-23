@@ -4,8 +4,8 @@
 // A pure function of two values, so a change to what the renderer is told can be checked against two
 // arrays rather than a manager holding a disk, a socket and a WebRTC transport.
 
-import type { ServerSummary } from "@openbot/contracts/ipc";
-import { LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
+import type { ServerSummary } from "@dani-dex/contracts/ipc";
+import { LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
 import type { RemoteServerConnectionStatus } from "./remote-server-connection-status";
 import type { StoredRemoteServerView } from "./remote-server-store";
 import { remoteServerLogoUrl } from "./remote-server-urls";

@@ -1,4 +1,4 @@
-import type { CentralAuthUser } from "@openbot/contracts/ipc";
+import type { CentralAuthUser } from "@dani-dex/contracts/ipc";
 import { createMemo, Show } from "solid-js";
 import { WorkspaceAccountDock } from "./features/account/WorkspaceAccountDock";
 import { useAgents } from "./features/agents/agents-context";

@@ -1,5 +1,5 @@
-import { ProviderLogo } from "@openbot/brand";
-import { agentProviderDescriptor } from "@openbot/contracts/agent-providers";
+import { ProviderLogo } from "@dani-dex/brand";
+import { agentProviderDescriptor } from "@dani-dex/contracts/agent-providers";
 import type {
   AgentProviderId,
   AgentProviderState,
@@ -7,8 +7,8 @@ import type {
   ProviderApiKeyStatus,
   ProviderRuntimePhase,
   ProviderRuntimeStatus,
-} from "@openbot/contracts/ipc";
-import type { AppMessages, AppTextKey, AppTranslate } from "@openbot/i18n";
+} from "@dani-dex/contracts/ipc";
+import type { AppMessages, AppTextKey, AppTranslate } from "@dani-dex/i18n";
 import { createEffect, createUniqueId, For, Show } from "solid-js";
 import { providerUpdateAvailable, providerVersionLabel } from "../features/provider-updates/provider-update";
 import { useI18n } from "../i18n-context";

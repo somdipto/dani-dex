@@ -1,12 +1,12 @@
-import { isAgentSummary } from "@openbot/contracts/ipc";
+import { isAgentSummary } from "@dani-dex/contracts/ipc";
 import {
   decodeTeamProtocolV1CurrentHttpResponse,
   encodeTeamProtocolV1CurrentHttpResponse,
-} from "@openbot/contracts/team-protocol/v1-adapter";
+} from "@dani-dex/contracts/team-protocol/v1-adapter";
 import {
   decodeTeamProtocolV3CurrentHttpResponse,
   encodeTeamProtocolV3CurrentHttpResponse,
-} from "@openbot/contracts/team-protocol/v3-adapter";
+} from "@dani-dex/contracts/team-protocol/v3-adapter";
 import opencodeFixture from "../../packages/contracts/src/team-protocol/fixtures/v4/host-http-response.json";
 import { legacyProviderView } from "./team-api/provider-visibility";
 // @vitest-environment node
@@ -16,14 +16,14 @@ import { legacyProviderView } from "./team-api/provider-visibility";
 
 import { EventEmitter } from "node:events";
 import { join } from "node:path";
-import type { AgentSummary } from "@openbot/contracts/ipc";
+import type { AgentSummary } from "@dani-dex/contracts/ipc";
 import {
   AGENT_RUNTIME_SNAPSHOT_BYTES_LIMIT,
   hostedSiteConversationEventItemType,
   hostedSiteConversationEventText,
   routineConversationEventItemType,
   routineRunConversationEventItemType,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SidebarLayoutStore } from "../backend/sidebar-layout-store";
 import {

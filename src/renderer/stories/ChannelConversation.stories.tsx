@@ -17,7 +17,7 @@ import { STORY_AGENTS } from "./fixtures";
  *
  * The rows are written out here rather than mounted from `ChannelConversation`, because that
  * component reads the channels context, which needs the account, server, turns and browser contexts
- * and a channel-aware `window.openbot` behind it. What is under test here is what the reader sees:
+ * and a channel-aware `window.danidex` behind it. What is under test here is what the reader sees:
  * the coloured author name above the bubble and the face beside its bottom edge, the run of messages that names its author once,
  * the day separator, the reader's own message on the right with neither face nor name, and one
  * activity row for every agent the channel waits on.

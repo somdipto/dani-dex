@@ -1,4 +1,9 @@
-import { type AgentSummary, analyticsRange, type HostAnalytics, type HostAnalyticsInput } from "@openbot/contracts/ipc";
+import {
+  type AgentSummary,
+  analyticsRange,
+  type HostAnalytics,
+  type HostAnalyticsInput,
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createStore, onSettled, Show } from "solid-js";
 import {
   ArrowLeft,
@@ -68,8 +73,8 @@ export function AgentUsagePanel(props: AgentUsagePanelProps) {
     try {
       const [result, agents] = await Promise.all([
         // Electron cannot clone the Solid store proxy across the context bridge.
-        window.openbot.agent.getHostAnalytics({ ...range }, serverId),
-        window.openbot.agent.listAgents(serverId),
+        window.danidex.agent.getHostAnalytics({ ...range }, serverId),
+        window.danidex.agent.listAgents(serverId),
       ]);
       if (request === generation && props.serverId === serverId && state.range.agentId === agentId)
         setState((draft) => {
@@ -108,7 +113,7 @@ export function AgentUsagePanel(props: AgentUsagePanelProps) {
     },
   );
   onSettled(() => {
-    const unsubscribe = window.openbot.agent.onScopedEvent(({ serverId, event }) => {
+    const unsubscribe = window.danidex.agent.onScopedEvent(({ serverId, event }) => {
       if (
         serverId === props.serverId &&
         event.type === "turn-completed" &&
@@ -116,7 +121,7 @@ export function AgentUsagePanel(props: AgentUsagePanelProps) {
       )
         void load(state.range, true);
     });
-    const reconnect = window.openbot.servers.onEvent((servers) => {
+    const reconnect = window.danidex.servers.onEvent((servers) => {
       if (servers.some((server) => server.id === props.serverId && server.state === "online"))
         void load(state.range, true);
     });

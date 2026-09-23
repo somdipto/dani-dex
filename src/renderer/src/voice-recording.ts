@@ -1,4 +1,4 @@
-import { VOICE_AUDIO_LIMITS } from "@openbot/contracts/ipc";
+import { VOICE_AUDIO_LIMITS } from "@dani-dex/contracts/ipc";
 
 export function appendVoiceTranscript(draft: string, transcript: string): string {
   const text = transcript.trim();

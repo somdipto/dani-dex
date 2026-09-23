@@ -1,4 +1,4 @@
-import type { UpdateStatus } from "@openbot/contracts/ipc";
+import type { UpdateStatus } from "@dani-dex/contracts/ipc";
 import { createSignal, flush, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { FALLBACK_UPDATE_STATUS } from "../../app-defaults";
@@ -18,10 +18,10 @@ const Updates = createSimpleContext({
     const [status, setStatus] = createSignal<UpdateStatus>(FALLBACK_UPDATE_STATUS);
 
     onSettled(() => {
-      const unsubscribe = window.openbot.update.onEvent((next) => {
+      const unsubscribe = window.danidex.update.onEvent((next) => {
         flush(() => setStatus(next));
       });
-      void window.openbot.update
+      void window.danidex.update
         .getStatus()
         .then(setStatus)
         .catch(() => undefined);
@@ -43,7 +43,7 @@ const Updates = createSimpleContext({
       const phase = current.phase;
       if (phase === "ready") {
         try {
-          await window.openbot.update.install();
+          await window.danidex.update.install();
           analytics.track("update_action", { action: "install", result: "succeeded", phase: "installing" });
         } catch (error) {
           analytics.track("update_action", {
@@ -61,7 +61,7 @@ const Updates = createSimpleContext({
           : ("check" as const);
       try {
         const next =
-          action === "download" ? await window.openbot.update.download() : await window.openbot.update.check();
+          action === "download" ? await window.danidex.update.download() : await window.danidex.update.check();
         setStatus(next);
         const succeeded =
           action === "download"

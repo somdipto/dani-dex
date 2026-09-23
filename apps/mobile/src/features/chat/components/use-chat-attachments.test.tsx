@@ -1,5 +1,5 @@
-import { ATTACHMENT_FILE_EXTENSIONS, attachmentMimeTypeForName } from "@openbot/contracts/attachment-files";
-import { MOBILE_ATTACHMENT_BYTES } from "@openbot/team-client/remote-peer";
+import { ATTACHMENT_FILE_EXTENSIONS, attachmentMimeTypeForName } from "@dani-dex/contracts/attachment-files";
+import { MOBILE_ATTACHMENT_BYTES } from "@dani-dex/team-client/remote-peer";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";

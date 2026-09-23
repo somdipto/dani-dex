@@ -1,4 +1,4 @@
-import type { AgentPromptQuestion } from "@openbot/contracts/ipc";
+import type { AgentPromptQuestion } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QuestionPromptBubble } from "./QuestionPromptBubble";

@@ -17,22 +17,22 @@ import {
   parseGenerateAgentProfile,
   parseHostAnalyticsInput,
   parseSaveAgentProfile,
-} from "@openbot/contracts/ipc";
-import { CHANNEL_ROUTES } from "@openbot/contracts/team-protocol/channels-v1";
+} from "@dani-dex/contracts/ipc";
+import { CHANNEL_ROUTES } from "@dani-dex/contracts/team-protocol/channels-v1";
 import { decodeAgentAnalyticsFromHost, decodeHostAnalyticsFromHost } from "../remote-agent-decoding";
 // An agent's core surface: status, agents, conversations, the queue and the prompts
 // a turn can raise. Memories, routines and attachments are their own registrars.
 // Every one of these routes to the local service or to a remote server by the
 // `serverId` in the request.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   DuplicateAgentResult,
   SendMessageInput,
   SidebarLayoutSnapshot,
   UpdateAgentInput,
-} from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+} from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import type { AgentService } from "../../backend/agent-service";
 import type { SidebarLayoutStore } from "../../backend/sidebar-layout-store";
 import type { HostService } from "../host-service";

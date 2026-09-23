@@ -1,6 +1,6 @@
-import { isAvatarMimeType, isValidAvatarImage } from "@openbot/contracts/avatar-images";
-import { AVATAR_IMAGE_LIMITS } from "@openbot/contracts/input-limits";
-import { isUuidV4 } from "@openbot/contracts/validation";
+import { isAvatarMimeType, isValidAvatarImage } from "@dani-dex/contracts/avatar-images";
+import { AVATAR_IMAGE_LIMITS } from "@dani-dex/contracts/input-limits";
+import { isUuidV4 } from "@dani-dex/contracts/validation";
 
 export interface StoredAvatarUpload {
   bytes: Uint8Array;

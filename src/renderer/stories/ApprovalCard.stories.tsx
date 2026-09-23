@@ -1,4 +1,4 @@
-import type { AgentApproval } from "@openbot/contracts/ipc";
+import type { AgentApproval } from "@dani-dex/contracts/ipc";
 import { fn, userEvent, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { ApprovalCard } from "../src/features/conversation/ConversationPrompts";

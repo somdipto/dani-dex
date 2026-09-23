@@ -1,4 +1,4 @@
-import type { ProviderRuntimeStatus } from "@openbot/contracts/ipc";
+import type { ProviderRuntimeStatus } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import {
   type ProviderUpdate,

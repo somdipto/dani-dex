@@ -15,9 +15,9 @@
 
 import { randomUUID } from "node:crypto";
 import { readFile, rename, rm, writeFile } from "node:fs/promises";
-import type { TeamRole } from "@openbot/contracts/ipc";
-import { LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
+import type { TeamRole } from "@dani-dex/contracts/ipc";
+import { LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import {
   emptyStoredRemoteServers,
   readStoredRemoteServers,

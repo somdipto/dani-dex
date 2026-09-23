@@ -110,7 +110,7 @@ Preserve the following boundaries and their tests:
 - Electron sandboxing, context isolation, navigation policy, and IPC sender validation.
 - Attachment realpath, MIME, size, quota, and managed-protocol checks.
 - Queue serialization, idempotency, crash reconciliation, and atomic persistence.
-- The remote browser session's lack of preload and `window.openbot` access.
+- The remote browser session's lack of preload and `window.danidex` access.
 - Secret redaction and agent child-process cleanup.
 
 Full agent access is intentional today, but new privileges or network surfaces still require an

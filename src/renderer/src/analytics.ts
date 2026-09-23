@@ -7,9 +7,9 @@ import {
   type AppInfo,
   type CentralAuthUser,
   isAgentModel,
-} from "@openbot/contracts/ipc";
-import { isBoolean, isDynamicRecord, isFunction, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { normalizeEmailAddress } from "@openbot/contracts/validation";
+} from "@dani-dex/contracts/ipc";
+import { isBoolean, isDynamicRecord, isFunction, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { normalizeEmailAddress } from "@dani-dex/contracts/validation";
 import { OpenPanelBase, type OpenPanelOptions } from "@openpanel/web";
 
 export const OPENPANEL_API_URL = "https://analytics.openbot.run/api";

@@ -11,7 +11,7 @@ function BrowserPictureInPictureControls() {
         class="browser-pip-hover-button"
         aria-label="Reattach browser to right sidebar"
         title="Reattach browser"
-        onClick={() => void window.openbot.browser.dockPictureInPicture()}
+        onClick={() => void window.danidex.browser.dockPictureInPicture()}
       >
         <PanelRight class="browser-toolbar-icon" />
       </Button>
@@ -21,7 +21,7 @@ function BrowserPictureInPictureControls() {
         class="browser-pip-hover-button"
         aria-label="Close browser popup"
         title="Close browser popup"
-        onClick={() => void window.openbot.browser.hidePictureInPicture()}
+        onClick={() => void window.danidex.browser.hidePictureInPicture()}
       >
         <X class="browser-toolbar-icon" />
       </Button>

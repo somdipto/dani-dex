@@ -1,5 +1,5 @@
-import type { AppInfo, UpdateStatus } from "@openbot/contracts/ipc";
-import { isUpdateActivePhase } from "@openbot/contracts/ipc";
+import type { AppInfo, UpdateStatus } from "@dani-dex/contracts/ipc";
+import { isUpdateActivePhase } from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal } from "solid-js";
 import { errorMessage } from "../../../error-message";
 import { presentUpdateStatus } from "../../updates/update-status";

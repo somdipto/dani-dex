@@ -10,7 +10,7 @@
  * to avoid. `commitSidebarDrop` is passed that source for the same reason.
  */
 
-import type { TeamPresenceMember } from "@openbot/contracts/ipc";
+import type { TeamPresenceMember } from "@dani-dex/contracts/ipc";
 import { createBoundedDragPreview } from "../../components/createBoundedDragPreview";
 import type { createScrollFades } from "../../components/createScrollFades";
 

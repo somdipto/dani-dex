@@ -10,7 +10,7 @@
  * listing installs, behind the same connect attempt, so "never answers" is what waiting looks like.
  */
 
-import type { McpServerConfig, McpTestResult } from "@openbot/contracts/ipc";
+import type { McpServerConfig, McpTestResult } from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createSignal, Show } from "solid-js";
 import { Button, Text } from "../src/components/ui";

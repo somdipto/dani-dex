@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { type FileHandle, mkdir, open, rm } from "node:fs/promises";
 import { join } from "node:path";
-import type { BrowserRecordingArtifact } from "@openbot/contracts/ipc";
+import type { BrowserRecordingArtifact } from "@dani-dex/contracts/ipc";
 import { BrowserWindow, type WebContents } from "electron";
 import { z } from "zod";
 

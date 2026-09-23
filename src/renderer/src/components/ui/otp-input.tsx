@@ -1,4 +1,4 @@
-import { ONE_TIME_CODE_ALPHABET, ONE_TIME_CODE_LENGTH } from "@openbot/contracts/validation";
+import { ONE_TIME_CODE_ALPHABET, ONE_TIME_CODE_LENGTH } from "@dani-dex/contracts/validation";
 import { createEffect, createMemo, createSignal, createUniqueId, For, Show, untrack } from "solid-js";
 import { Input } from "./form";
 import { prefersReducedMotion } from "./utils";

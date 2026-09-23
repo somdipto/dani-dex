@@ -5,7 +5,7 @@ import type {
   CentralAuthUser,
   ExternalDestination,
   UpdateStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 import { TypingDots } from "../../components/TypingDots";
 import {

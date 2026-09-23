@@ -3,7 +3,7 @@ import {
   type ChannelCommand,
   type ChannelPage,
   type ChannelSummary,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createStore, flush, onSettled, reconcile, untrack } from "solid-js";
 import { createSimpleContext } from "../../simple-context";
 import { useAuth } from "../account/account-context";
@@ -126,9 +126,9 @@ const Channels = createSimpleContext({
       const account = accountKey();
       const selected = selectedOverride === undefined ? state.selectedId : selectedOverride;
       try {
-        const channels = await window.openbot.agent.listChannels();
+        const channels = await window.danidex.agent.listChannels();
         const selectedExists = selected !== null && channels.some((channel) => channel.id === selected);
-        const page = selectedExists ? await window.openbot.agent.readChannel({ channelId: selected }) : null;
+        const page = selectedExists ? await window.danidex.agent.readChannel({ channelId: selected }) : null;
         if (disposed || account !== accountKey() || id !== refreshId || selected !== state.selectedId) return;
         setState((state) => {
           state.channels = channels;
@@ -161,7 +161,7 @@ const Channels = createSimpleContext({
         ) {
           readThrough.set(selected, page.throughSequence);
           try {
-            await window.openbot.agent.channelCommand({
+            await window.danidex.agent.channelCommand({
               type: "read",
               channelId: selected,
               throughSequence: page.throughSequence,
@@ -236,7 +236,7 @@ const Channels = createSimpleContext({
         }),
       );
       try {
-        await window.openbot.agent.channelCommand(attempt);
+        await window.danidex.agent.channelCommand(attempt);
         if (disposed || account !== accountKey()) return false;
         failedCommand = null;
         // Only creation closes the editor. Settings save on every field, so closing on a save
@@ -280,7 +280,7 @@ const Channels = createSimpleContext({
       const account = accountKey();
       if (!channelId || !beforeSequence) return;
       try {
-        const older = await window.openbot.agent.readChannel({ channelId, beforeSequence });
+        const older = await window.danidex.agent.readChannel({ channelId, beforeSequence });
         if (!disposed && account === accountKey() && state.selectedId === channelId)
           setState((state) => {
             const page = state.page;

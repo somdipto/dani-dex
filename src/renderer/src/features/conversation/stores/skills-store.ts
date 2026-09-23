@@ -1,4 +1,4 @@
-import type { InstalledSkill } from "@openbot/contracts/ipc";
+import type { InstalledSkill } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, untrack } from "solid-js";
 import type { ConversationProps } from "../conversation-types";
 import { installedSkillsRequestKey } from "../installed-skills-source";
@@ -57,7 +57,7 @@ export function createSkillsStore(deps: SkillsStoreDeps) {
     }
     const connectionSequence = untrack(() => deps.props.server?.connectionSequence) ?? 0;
     failedInstalledSkillsAttempt = undefined;
-    void window.openbot.agent
+    void window.danidex.agent
       .listInstalledSkills(agentId)
       .then((skills) => {
         if (request !== installedSkillsRequest) return;

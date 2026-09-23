@@ -1,9 +1,9 @@
 import { join, resolve } from "node:path";
-import { parseInviteUrl } from "@openbot/contracts/invite-links";
-import { type CentralAuthState, IPC_CHANNELS } from "@openbot/contracts/ipc";
-import { translateFor } from "@openbot/i18n";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
-import { createRemoteDirectoryRefresh } from "@openbot/team-client/remote-directory";
+import { parseInviteUrl } from "@dani-dex/contracts/invite-links";
+import { type CentralAuthState, IPC_CHANNELS } from "@dani-dex/contracts/ipc";
+import { translateFor } from "@dani-dex/i18n";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { createRemoteDirectoryRefresh } from "@dani-dex/team-client/remote-directory";
 import { app, BrowserWindow, dialog, powerMonitor, protocol, screen, shell } from "electron";
 import { readAppVariant, resolveAppIconPath } from "./app-icon";
 import { type ApplicationServices, createApplicationServices } from "./application-services";

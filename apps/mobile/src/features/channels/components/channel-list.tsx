@@ -1,5 +1,5 @@
+import type { ChannelSummary } from "@dani-dex/contracts/ipc";
 import { type MenuComponentRef, MenuView } from "@expo/ui/community/menu";
-import type { ChannelSummary } from "@openbot/contracts/ipc";
 import * as Clipboard from "expo-clipboard";
 import { Link, router } from "expo-router";
 import { Typography } from "heroui-native";

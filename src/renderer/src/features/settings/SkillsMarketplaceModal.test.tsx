@@ -6,7 +6,7 @@ import type {
   McpServerConfig,
   OpenBotDesktopApi,
   SkillSubmission,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { type ComponentProps, createSignal } from "solid-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -129,8 +129,8 @@ describe("SkillsMarketplaceModal", () => {
       uninstall: vi.fn(),
       setEnabled: vi.fn(),
     };
-    window.openbot = { ...window.openbot, skills };
-    window.openbot.marketplaceAgents = {
+    window.danidex = { ...window.danidex, skills };
+    window.danidex.marketplaceAgents = {
       list: vi.fn(async () => ({ agents: [], nextCursor: null })),
       get: vi.fn(),
       listMine: vi.fn(async () => []),
@@ -143,7 +143,7 @@ describe("SkillsMarketplaceModal", () => {
   it.each([1, 2])("tries only a matching installed version %s for the selected agent", async (version) => {
     const installed = installedSkill("release-notes", "Release Notes", { installedVersion: version });
     let finishResearch: ((skills: InstalledSkill[]) => void) | undefined;
-    vi.spyOn(window.openbot.skills, "listInstalled").mockImplementation((agentId) =>
+    vi.spyOn(window.danidex.skills, "listInstalled").mockImplementation((agentId) =>
       agentId === "writer"
         ? Promise.resolve([installed])
         : new Promise((resolve) => {
@@ -183,7 +183,7 @@ describe("SkillsMarketplaceModal", () => {
 
   it("names an unread skills list instead of asking for an install that may exist", async () => {
     let failRead: ((error: Error) => void) | undefined;
-    vi.spyOn(window.openbot.skills, "listInstalled").mockImplementation(
+    vi.spyOn(window.danidex.skills, "listInstalled").mockImplementation(
       () =>
         new Promise((_resolve, reject) => {
           failRead = reject;
@@ -213,14 +213,14 @@ describe("SkillsMarketplaceModal", () => {
     const installed = installedSkill("release-notes", "Release Notes");
     let failRefresh: ((error: Error) => void) | undefined;
     let reads = 0;
-    vi.spyOn(window.openbot.skills, "listInstalled").mockImplementation(() => {
+    vi.spyOn(window.danidex.skills, "listInstalled").mockImplementation(() => {
       reads += 1;
       if (reads === 1) return Promise.resolve([]);
       return new Promise((_resolve, reject) => {
         failRefresh = reject;
       });
     });
-    vi.spyOn(window.openbot.skills, "install").mockResolvedValue(installed);
+    vi.spyOn(window.danidex.skills, "install").mockResolvedValue(installed);
     renderMarketplace({
       open: true,
       agents: [{ id: "writer", name: "Writer" }],
@@ -310,12 +310,12 @@ describe("SkillsMarketplaceModal", () => {
       avatarHue: detail.avatarHue,
       avatarUrl: detail.avatarUrl,
     } satisfies AgentSummary;
-    window.openbot.marketplaceAgents.list = vi.fn(async (query) => ({
+    window.danidex.marketplaceAgents.list = vi.fn(async (query) => ({
       agents: query?.category && query.category !== "other" ? [] : [detail],
       nextCursor: null,
     }));
-    window.openbot.marketplaceAgents.get = vi.fn(async () => detail);
-    window.openbot.marketplaceAgents.install = vi.fn(async () => ({ agent: installedAgent }));
+    window.danidex.marketplaceAgents.get = vi.fn(async () => detail);
+    window.danidex.marketplaceAgents.install = vi.fn(async () => ({ agent: installedAgent }));
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     const onInstalled = vi.fn();
 
@@ -342,9 +342,9 @@ describe("SkillsMarketplaceModal", () => {
     (await screen.findByRole("button", { name: "View Research Agent details" })).click();
     (await screen.findByRole("button", { name: "Install agent" })).click();
 
-    await waitFor(() => expect(window.openbot.marketplaceAgents.install).toHaveBeenCalled());
+    await waitFor(() => expect(window.danidex.marketplaceAgents.install).toHaveBeenCalled());
     expect(confirm).not.toHaveBeenCalled();
-    expect(window.openbot.marketplaceAgents.install).toHaveBeenCalledWith(
+    expect(window.danidex.marketplaceAgents.install).toHaveBeenCalledWith(
       expect.objectContaining({ listingId: detail.id }),
     );
     await waitFor(() => expect(onInstalled).toHaveBeenCalledWith(installedAgent));
@@ -356,7 +356,7 @@ describe("SkillsMarketplaceModal", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Install agent" })).toBeEnabled());
     fireEvent.click(screen.getByRole("button", { name: "Install agent" }));
     await waitFor(() => expect(onInstalled).toHaveBeenCalledTimes(2));
-    const calls = vi.mocked(window.openbot.marketplaceAgents.install).mock.calls;
+    const calls = vi.mocked(window.danidex.marketplaceAgents.install).mock.calls;
     expect(calls.map(([input]) => input.agentId)).toEqual([undefined, undefined]);
     expect(calls[0]?.[0].receiptId).not.toBe(calls[1]?.[0].receiptId);
   });
@@ -379,7 +379,7 @@ describe("SkillsMarketplaceModal", () => {
       activeRoutineCount: 0,
       updatedAt: "2026-08-25T00:00:00.000Z",
     } as const;
-    window.openbot.marketplaceAgents.list = vi.fn(async (query) => ({
+    window.danidex.marketplaceAgents.list = vi.fn(async (query) => ({
       agents:
         query?.category && query.category !== "other"
           ? []
@@ -387,7 +387,7 @@ describe("SkillsMarketplaceModal", () => {
       nextCursor: null,
     }));
     const pending = Promise.withResolvers<MarketplaceAgentDetail>();
-    window.openbot.marketplaceAgents.get = vi
+    window.danidex.marketplaceAgents.get = vi
       .fn()
       .mockReturnValueOnce(pending.promise)
       .mockRejectedValue(new Error("private response"));
@@ -397,7 +397,7 @@ describe("SkillsMarketplaceModal", () => {
     const writer = await screen.findByRole("button", { name: "View Writer Agent details" });
     fireEvent.click(research);
     fireEvent.click(writer);
-    expect(window.openbot.marketplaceAgents.get).toHaveBeenCalledTimes(1);
+    expect(window.danidex.marketplaceAgents.get).toHaveBeenCalledTimes(1);
     pending.reject(new Error("private response"));
 
     await waitFor(() =>
@@ -408,9 +408,9 @@ describe("SkillsMarketplaceModal", () => {
         failure_code: "load_failed",
       }),
     );
-    expect(window.openbot.marketplaceAgents.install).not.toHaveBeenCalled();
+    expect(window.danidex.marketplaceAgents.install).not.toHaveBeenCalled();
     fireEvent.click(await screen.findByRole("button", { name: "View Writer Agent details" }));
-    await waitFor(() => expect(window.openbot.marketplaceAgents.get).toHaveBeenCalledWith("writer-agent"));
+    await waitFor(() => expect(window.danidex.marketplaceAgents.get).toHaveBeenCalledWith("writer-agent"));
   });
 
   it("offers updates separately and allows installing agents that are already current", async () => {
@@ -429,7 +429,7 @@ describe("SkillsMarketplaceModal", () => {
       activeRoutineCount: 0,
       updatedAt: "2026-08-25T00:00:00.000Z",
     } as const;
-    window.openbot.marketplaceAgents.list = vi.fn(async (query) => ({
+    window.danidex.marketplaceAgents.list = vi.fn(async (query) => ({
       agents:
         query?.category && query.category !== "other"
           ? []
@@ -440,7 +440,7 @@ describe("SkillsMarketplaceModal", () => {
       nextCursor: null,
     }));
 
-    window.openbot.marketplaceAgents.get = vi.fn(async (id) => ({
+    window.danidex.marketplaceAgents.get = vi.fn(async (id) => ({
       ...baseAgent,
       id,
       name: id === "research-agent" ? "Research Agent" : "Writer Agent",
@@ -517,14 +517,14 @@ describe("SkillsMarketplaceModal", () => {
       activeRoutineCount: 0,
       updatedAt: "2026-08-25T00:00:00.000Z",
     } as const;
-    window.openbot.marketplaceAgents.list = vi.fn(async () => ({
+    window.danidex.marketplaceAgents.list = vi.fn(async () => ({
       agents: [
         { ...baseAgent, id: "research-agent" },
         { ...baseAgent, id: "writer-agent", name: "Writer Agent" },
       ],
       nextCursor: null,
     }));
-    window.openbot.marketplaceAgents.get = vi.fn(async (id) => ({
+    window.danidex.marketplaceAgents.get = vi.fn(async (id) => ({
       ...baseAgent,
       id,
       name: id === "research-agent" ? "Research Agent" : "Writer Agent",
@@ -558,8 +558,8 @@ describe("SkillsMarketplaceModal", () => {
   });
 
   it("keeps loaded pages and restores the category filter and focus after details", async () => {
-    const detail = await window.openbot.skills.get("release-notes");
-    window.openbot.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => ({
+    const detail = await window.danidex.skills.get("release-notes");
+    window.danidex.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => ({
       skills:
         query?.category === "documents"
           ? [{ ...detail, id: query.cursor ? "second" : detail.id, name: query.cursor ? "Second skill" : detail.name }]
@@ -583,8 +583,8 @@ describe("SkillsMarketplaceModal", () => {
   });
 
   it("offers a category page only when the overview does not already show every listing", async () => {
-    const detail = await window.openbot.skills.get("release-notes");
-    window.openbot.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => {
+    const detail = await window.danidex.skills.get("release-notes");
+    window.danidex.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => {
       if (query?.category === "documents") return { skills: [detail], nextCursor: null };
       if (query?.category === "design")
         return {
@@ -602,12 +602,12 @@ describe("SkillsMarketplaceModal", () => {
   });
 
   it("keeps newer category results when an older request finishes last", async () => {
-    const detail = await window.openbot.skills.get("release-notes");
+    const detail = await window.danidex.skills.get("release-notes");
     let finishOld!: (page: MarketplaceSkillPage) => void;
     const oldPage = new Promise<MarketplaceSkillPage>((resolve) => {
       finishOld = resolve;
     });
-    window.openbot.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => {
+    window.danidex.skills.list = vi.fn<OpenBotDesktopApi["skills"]["list"]>(async (query) => {
       if (query?.limit === 50 && query.category === "design") return oldPage;
       return {
         skills: query?.category === "design" ? [{ ...detail, category: "design", name: "Overview design" }] : [],
@@ -632,7 +632,7 @@ describe("SkillsMarketplaceModal", () => {
     openSkillsTab();
     await Promise.resolve();
     await Promise.resolve();
-    const list = vi.mocked(window.openbot.skills.list);
+    const list = vi.mocked(window.danidex.skills.list);
     list.mockClear();
 
     const field = screen.getByLabelText("Search skills");
@@ -665,7 +665,7 @@ describe("SkillsMarketplaceModal", () => {
       skills: [listed("release-notes", "Release Notes"), listed("standup-digest", "Standup Digest")],
       nextCursor: null,
     };
-    window.openbot.skills.list = vi.fn(async (query) => {
+    window.danidex.skills.list = vi.fn(async (query) => {
       if (query?.query) return new Promise<MarketplaceSkillPage>(() => undefined);
       return query?.category === "documents" ? loaded : { skills: [], nextCursor: null };
     });
@@ -685,7 +685,7 @@ describe("SkillsMarketplaceModal", () => {
     const pendingPage = new Promise<MarketplaceSkillPage>((resolve) => {
       resolvePage = resolve;
     });
-    window.openbot.skills.list = vi.fn(() => pendingPage);
+    window.danidex.skills.list = vi.fn(() => pendingPage);
 
     renderMarketplace({
       open: true,
@@ -712,7 +712,7 @@ describe("SkillsMarketplaceModal", () => {
         state: "installed",
       },
     ];
-    window.openbot.skills.listInstalled = vi.fn(async () => installed);
+    window.danidex.skills.listInstalled = vi.fn(async () => installed);
     renderMarketplace({
       open: true,
       agents: [{ id: "writer", name: "Writer" }],
@@ -731,8 +731,8 @@ describe("SkillsMarketplaceModal", () => {
 
     expect(await screen.findByRole("region", { name: "Release Notes details" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Installed" })).toBeDisabled();
-    const detail = await window.openbot.skills.get("release-notes");
-    window.openbot.skills.get = vi.fn(async () => ({ ...detail, version: 3, versionId: "release-notes-v3" }));
+    const detail = await window.danidex.skills.get("release-notes");
+    window.danidex.skills.get = vi.fn(async () => ({ ...detail, version: 3, versionId: "release-notes-v3" }));
     fireEvent.click(screen.getByRole("button", { name: "Marketplace" }));
     fireEvent.click(await screen.findByRole("button", { name: "View Release Notes details" }));
     expect(await screen.findByRole("button", { name: "Update skill" })).toBeEnabled();
@@ -742,9 +742,9 @@ describe("SkillsMarketplaceModal", () => {
     // SkillsMarketplaceModal.tsx:1445 is a second status region named
     // "Loading skill"; the listing skeleton at :1409 is "Loading skills" and
     // is covered separately, so detail loading needs its own assertion.
-    const loadedDetail = await window.openbot.skills.get("release-notes");
+    const loadedDetail = await window.danidex.skills.get("release-notes");
     let resolveDetail!: (detail: typeof loadedDetail) => void;
-    window.openbot.skills.get = vi.fn(
+    window.danidex.skills.get = vi.fn(
       () =>
         new Promise<typeof loadedDetail>((resolve) => {
           resolveDetail = resolve;
@@ -768,7 +768,7 @@ describe("SkillsMarketplaceModal", () => {
   });
 
   it.each(["skills", "agents"] as const)("includes the account photo when submitting %s", async (kind) => {
-    window.openbot.skills.choosePackage = vi.fn(async () => ({
+    window.danidex.skills.choosePackage = vi.fn(async () => ({
       draftId: "draft",
       name: "Research",
       description: "Research sources.",
@@ -776,7 +776,7 @@ describe("SkillsMarketplaceModal", () => {
       files: ["SKILL.md"],
       size: 100,
     }));
-    window.openbot.marketplaceAgents.preview = vi.fn(async () => ({
+    window.danidex.marketplaceAgents.preview = vi.fn(async () => ({
       agentId: "research",
       name: "Research",
       title: "Research sources",
@@ -804,11 +804,11 @@ describe("SkillsMarketplaceModal", () => {
     );
     if (kind === "skills") {
       const choosePackage = await screen.findByRole("button", { name: "Choose folder or ZIP" });
-      expect(window.openbot.skills.choosePackage).not.toHaveBeenCalled();
+      expect(window.danidex.skills.choosePackage).not.toHaveBeenCalled();
       fireEvent.click(choosePackage);
     }
     fireEvent.click(await screen.findByRole("button", { name: "Submit for review" }));
-    const submit = kind === "skills" ? window.openbot.skills.submit : window.openbot.marketplaceAgents.submit;
+    const submit = kind === "skills" ? window.danidex.skills.submit : window.danidex.marketplaceAgents.submit;
     await waitFor(() => expect(submit).toHaveBeenCalledWith(expect.objectContaining({ showCreatorAvatar: true })));
   });
 
@@ -828,7 +828,7 @@ describe("SkillsMarketplaceModal", () => {
     const first = new Promise<ReturnType<typeof preview>>((resolve) => {
       resolveFirst = resolve;
     });
-    window.openbot.marketplaceAgents.preview = vi.fn((id) => (id === "first" ? first : Promise.resolve(preview(id))));
+    window.danidex.marketplaceAgents.preview = vi.fn((id) => (id === "first" ? first : Promise.resolve(preview(id))));
     renderMarketplace({
       open: true,
       agents: [
@@ -847,7 +847,7 @@ describe("SkillsMarketplaceModal", () => {
     fireEvent.change(selector, { target: { value: "second" } });
     expect(await screen.findByText("second preview")).toBeInTheDocument();
     fireEvent.change(selector, { target: { value: "first" } });
-    await waitFor(() => expect(window.openbot.marketplaceAgents.preview).toHaveBeenCalledWith("first"));
+    await waitFor(() => expect(window.danidex.marketplaceAgents.preview).toHaveBeenCalledWith("first"));
     expect(screen.getByText("second preview")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Submit for review" })).toBeDisabled();
     const category = screen.getByRole("combobox", { name: "Agent category" });
@@ -860,7 +860,7 @@ describe("SkillsMarketplaceModal", () => {
     expect(category).toHaveFocus();
     fireEvent.click(await screen.findByRole("button", { name: "Submit for review" }));
     await waitFor(() =>
-      expect(window.openbot.marketplaceAgents.submit).toHaveBeenCalledWith(
+      expect(window.danidex.marketplaceAgents.submit).toHaveBeenCalledWith(
         expect.objectContaining({ agentId: "second" }),
       ),
     );
@@ -883,7 +883,7 @@ describe("SkillsMarketplaceModal", () => {
         createdAt: "2026-08-25T00:00:00.000Z",
       },
     ];
-    window.openbot.skills.listMine = vi.fn(async () => submissions);
+    window.danidex.skills.listMine = vi.fn(async () => submissions);
     renderMarketplace();
     openSkillsTab();
 
@@ -917,7 +917,7 @@ describe("SkillsMarketplaceModal", () => {
     vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((callback) => {
       callback(new Blob([new Uint8Array([1])], { type: "image/webp" }));
     });
-    window.openbot.skills.choosePackage = vi.fn(async () => ({
+    window.danidex.skills.choosePackage = vi.fn(async () => ({
       draftId: "release-notes-draft",
       name: "Release Notes",
       description: "Turns merged work into clear release notes.",
@@ -950,7 +950,7 @@ describe("SkillsMarketplaceModal", () => {
   });
 
   it("explains how to resolve a duplicate skill name", async () => {
-    window.openbot.skills.choosePackage = vi.fn(async () => ({
+    window.danidex.skills.choosePackage = vi.fn(async () => ({
       draftId: "release-notes-draft",
       name: "Release Notes",
       description: "Turns merged work into clear release notes.",
@@ -958,7 +958,7 @@ describe("SkillsMarketplaceModal", () => {
       files: ["SKILL.md"],
       size: 1024,
     }));
-    window.openbot.skills.submit = vi.fn(async () => {
+    window.danidex.skills.submit = vi.fn(async () => {
       throw new Error("Error invoking remote method 'skills:submit': Error: A skill with this name already exists.");
     });
     renderMarketplace();
@@ -977,9 +977,9 @@ describe("SkillsMarketplaceModal", () => {
     );
   });
   it("drops a skill detail answer that arrives after the reader went back", async () => {
-    const detail = await window.openbot.skills.get("release-notes");
+    const detail = await window.danidex.skills.get("release-notes");
     const pending = Promise.withResolvers<typeof detail>();
-    window.openbot.skills.get = vi.fn(() => pending.promise);
+    window.danidex.skills.get = vi.fn(() => pending.promise);
     renderMarketplace();
     openSkillsTab();
     fireEvent.click(await screen.findByRole("button", { name: "View Release Notes details" }));
@@ -1021,11 +1021,11 @@ describe("SkillsMarketplaceModal", () => {
       skills: [],
       routines: [],
     };
-    window.openbot.marketplaceAgents.list = vi.fn(async (query) => ({
+    window.danidex.marketplaceAgents.list = vi.fn(async (query) => ({
       agents: query?.category && query.category !== "other" ? [] : [detail],
       nextCursor: null,
     }));
-    window.openbot.marketplaceAgents.get = vi.fn(async () => detail);
+    window.danidex.marketplaceAgents.get = vi.fn(async () => detail);
     renderMarketplace();
     fireEvent.click(await screen.findByRole("button", { name: "View Research Agent details" }));
     await screen.findByRole("button", { name: "Marketplace" });
@@ -1055,7 +1055,7 @@ describe("SkillsMarketplaceModal", () => {
       updatedAt: "2026-08-25T00:00:00.000Z",
     };
     const search = Promise.withResolvers<MarketplaceSkillPage>();
-    window.openbot.skills.list = vi.fn(async (query) => {
+    window.danidex.skills.list = vi.fn(async (query) => {
       if (query?.query) return search.promise;
       return query?.category === "documents"
         ? { skills: [listed], nextCursor: "next-page" }
@@ -1074,7 +1074,7 @@ describe("SkillsMarketplaceModal", () => {
     expect(await screen.findByRole("button", { name: "Load more" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Load more" }));
     await waitFor(() =>
-      expect(window.openbot.skills.list).toHaveBeenCalledWith(
+      expect(window.danidex.skills.list).toHaveBeenCalledWith(
         expect.objectContaining({ query: "release", cursor: "search-page" }),
       ),
     );
@@ -1136,7 +1136,7 @@ describe("SkillsMarketplaceModal", () => {
         saved.push(input.config);
         return saved;
       });
-      window.openbot.agent = { ...window.openbot.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
+      window.danidex.agent = { ...window.danidex.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
       renderMarketplace({
         open: true,
         agents: [{ id: "writer", name: "Writer" }],
@@ -1190,8 +1190,8 @@ describe("SkillsMarketplaceModal", () => {
         toolCount: 4,
         error: null,
       }));
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => []),
         saveMcpServer,
         testMcpServer,
@@ -1219,7 +1219,7 @@ describe("SkillsMarketplaceModal", () => {
 
     it("saves nothing when the connect dialog is closed", async () => {
       const saveMcpServer: OpenBotDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => [input.config]);
-      window.openbot.agent = { ...window.openbot.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
+      window.danidex.agent = { ...window.danidex.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
       renderMarketplace({
         open: true,
         agents: [{ id: "writer", name: "Writer" }],
@@ -1239,7 +1239,7 @@ describe("SkillsMarketplaceModal", () => {
 
     it("stops the connect step when the marketplace itself is closed", async () => {
       const saveMcpServer: OpenBotDesktopApi["agent"]["saveMcpServer"] = vi.fn(async (input) => [input.config]);
-      window.openbot.agent = { ...window.openbot.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
+      window.danidex.agent = { ...window.danidex.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
       const [open, setOpen] = createSignal(true);
       renderMarketplace(() => ({
         open: open(),
@@ -1263,7 +1263,7 @@ describe("SkillsMarketplaceModal", () => {
 
     it("sends an example question to the chosen agent", async () => {
       const onRunPluginPrompt = vi.fn();
-      window.openbot.agent = { ...window.openbot.agent, listMcpServers: vi.fn(async () => []) };
+      window.danidex.agent = { ...window.danidex.agent, listMcpServers: vi.fn(async () => []) };
       const asked = { id: "prompt-yield", text: "Where can I earn the most on stablecoins?" };
       renderMarketplace({
         open: true,
@@ -1303,8 +1303,8 @@ describe("SkillsMarketplaceModal", () => {
         order.push("app");
         return [input.config];
       });
-      window.openbot.skills = { ...window.openbot.skills, install };
-      window.openbot.agent = { ...window.openbot.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
+      window.danidex.skills = { ...window.danidex.skills, install };
+      window.danidex.agent = { ...window.danidex.agent, listMcpServers: vi.fn(async () => []), saveMcpServer };
       renderMarketplace({
         open: true,
         agents: [{ id: "writer", name: "Writer" }],
@@ -1325,9 +1325,9 @@ describe("SkillsMarketplaceModal", () => {
     it("removes the skill it installed when the app cannot be saved", async () => {
       const install = vi.fn(async () => installedYield);
       const uninstall = vi.fn(async () => undefined);
-      window.openbot.skills = { ...window.openbot.skills, install, uninstall };
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.skills = { ...window.danidex.skills, install, uninstall };
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => []),
         saveMcpServer: vi.fn(async () => {
           throw new Error("This MCP server no longer exists.");
@@ -1350,8 +1350,8 @@ describe("SkillsMarketplaceModal", () => {
     });
 
     it("reports a plugin whose app the host already holds as installed", async () => {
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => [
           {
             id: "mcp-1",
@@ -1380,7 +1380,7 @@ describe("SkillsMarketplaceModal", () => {
       await openPluginPage();
 
       expect(await screen.findByRole("button", { name: "Uninstall plugin" })).toBeInTheDocument();
-      expect(window.openbot.agent.saveMcpServer).not.toHaveBeenCalled();
+      expect(window.danidex.agent.saveMcpServer).not.toHaveBeenCalled();
     });
 
     /** The host row an installed app leaves behind, as `listMcpServers` answers it. */
@@ -1408,9 +1408,9 @@ describe("SkillsMarketplaceModal", () => {
     }
 
     it("names the app and the skill it is about to remove before removing either", async () => {
-      window.openbot.skills = { ...window.openbot.skills, listInstalled: vi.fn(async () => [installedYield]) };
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.skills = { ...window.danidex.skills, listInstalled: vi.fn(async () => [installedYield]) };
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => [hostApp()]),
         removeMcpServer: vi.fn(async () => []),
       };
@@ -1428,8 +1428,8 @@ describe("SkillsMarketplaceModal", () => {
       expect(within(confirm).getByText(app.server.name)).toBeInTheDocument();
       expect(within(confirm).getByText("yield-analysis")).toBeInTheDocument();
       // The question is asked before anything goes: nothing is removed by opening it.
-      expect(window.openbot.agent.removeMcpServer).not.toHaveBeenCalled();
-      expect(window.openbot.skills.uninstall).not.toHaveBeenCalled();
+      expect(window.danidex.agent.removeMcpServer).not.toHaveBeenCalled();
+      expect(window.danidex.skills.uninstall).not.toHaveBeenCalled();
     });
 
     it("removes the host's app row and the agent's skill when the uninstall is confirmed", async () => {
@@ -1442,10 +1442,10 @@ describe("SkillsMarketplaceModal", () => {
         order.push("skill");
       });
       let held: InstalledSkill[] = [installedYield];
-      window.openbot.skills = { ...window.openbot.skills, listInstalled: vi.fn(async () => held), uninstall };
+      window.danidex.skills = { ...window.danidex.skills, listInstalled: vi.fn(async () => held), uninstall };
       let hostRows: McpServerConfig[] = [hostApp()];
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => hostRows),
         removeMcpServer,
       };
@@ -1470,9 +1470,9 @@ describe("SkillsMarketplaceModal", () => {
     });
 
     it("removes nothing when the confirmation is cancelled", async () => {
-      window.openbot.skills = { ...window.openbot.skills, listInstalled: vi.fn(async () => [installedYield]) };
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.skills = { ...window.danidex.skills, listInstalled: vi.fn(async () => [installedYield]) };
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => [hostApp()]),
         removeMcpServer: vi.fn(async () => []),
       };
@@ -1488,8 +1488,8 @@ describe("SkillsMarketplaceModal", () => {
       fireEvent.click(within(confirm).getByRole("button", { name: "Cancel" }));
 
       await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
-      expect(window.openbot.agent.removeMcpServer).not.toHaveBeenCalled();
-      expect(window.openbot.skills.uninstall).not.toHaveBeenCalled();
+      expect(window.danidex.agent.removeMcpServer).not.toHaveBeenCalled();
+      expect(window.danidex.skills.uninstall).not.toHaveBeenCalled();
       expect(screen.getByRole("button", { name: "Uninstall plugin" })).toBeInTheDocument();
     });
 
@@ -1500,9 +1500,9 @@ describe("SkillsMarketplaceModal", () => {
     it("reports what could not be removed and still removes the rest", async () => {
       const uninstall = vi.fn(async () => undefined);
       let held: InstalledSkill[] = [installedYield];
-      window.openbot.skills = { ...window.openbot.skills, listInstalled: vi.fn(async () => held), uninstall };
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.skills = { ...window.danidex.skills, listInstalled: vi.fn(async () => held), uninstall };
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => [hostApp()]),
         removeMcpServer: vi.fn(async () => {
           throw new Error("This MCP server no longer exists.");
@@ -1532,8 +1532,8 @@ describe("SkillsMarketplaceModal", () => {
      * take it: the listing reads as not installed and there is nothing to confirm.
      */
     it("leaves a server that only shares the app's name alone", async () => {
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => [{ ...hostApp(), url: "https://mcp.example.test/mine" }]),
         removeMcpServer: vi.fn(async () => []),
       };
@@ -1556,8 +1556,8 @@ describe("SkillsMarketplaceModal", () => {
      * still asks the user to install, against an agent they pick.
      */
     it("opens the listing a link names without installing it", async () => {
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => []),
         saveMcpServer: vi.fn(),
       };
@@ -1573,7 +1573,7 @@ describe("SkillsMarketplaceModal", () => {
 
       expect(await screen.findByRole("button", { name: "Install plugin" })).toBeInTheDocument();
       expect(screen.getByText(plugin.description)).toBeInTheDocument();
-      expect(window.openbot.agent.saveMcpServer).not.toHaveBeenCalled();
+      expect(window.danidex.agent.saveMcpServer).not.toHaveBeenCalled();
     });
 
     it("says a link names no listing this catalog holds, and offers the list", async () => {
@@ -1594,8 +1594,8 @@ describe("SkillsMarketplaceModal", () => {
     });
 
     it("reopens the same listing when its link arrives again after leaving it", async () => {
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => []),
         saveMcpServer: vi.fn(),
       };
@@ -1628,8 +1628,8 @@ describe("SkillsMarketplaceModal", () => {
     });
 
     it("forgets the open page when a link names no listing, so browsing returns to the list", async () => {
-      window.openbot.agent = {
-        ...window.openbot.agent,
+      window.danidex.agent = {
+        ...window.danidex.agent,
         listMcpServers: vi.fn(async () => []),
         saveMcpServer: vi.fn(),
       };

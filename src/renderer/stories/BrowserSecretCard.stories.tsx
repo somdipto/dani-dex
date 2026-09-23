@@ -1,4 +1,4 @@
-import type { BrowserTakeoverRequest } from "@openbot/contracts/ipc";
+import type { BrowserTakeoverRequest } from "@dani-dex/contracts/ipc";
 import { userEvent, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { BrowserSecretCard } from "../src/features/conversation/BrowserSecretCard";

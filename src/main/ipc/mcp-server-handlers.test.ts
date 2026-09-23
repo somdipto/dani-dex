@@ -10,7 +10,7 @@ import {
   LOCAL_SERVER_ID,
   type McpServerConfig,
   type McpTestResult,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { describe, expect, it, vi } from "vitest";
 import { NO_MCP_TOOL_RUNTIMES } from "../../backend/mcp-provider-shapes";
 import type { ResponseDecoder } from "../remote-host-decoding";

@@ -1,24 +1,24 @@
-import { analyticsRange, emptyAnalyticsTotals } from "@openbot/contracts/ipc";
+import { analyticsRange, emptyAnalyticsTotals } from "@dani-dex/contracts/ipc";
 // @vitest-environment node
 
 // What a remote client reads back from one agent service: the agent list, the conversation and
 // its capability-filtered shape. `src/main/team-api/route-agent-conversation.ts`.
 
-import type { AccountUsage, AgentSummary, ConversationWithReadState, CreateAgentInput } from "@openbot/contracts/ipc";
+import type { AccountUsage, AgentSummary, ConversationWithReadState, CreateAgentInput } from "@dani-dex/contracts/ipc";
 import {
   hostedSiteConversationEventItemType,
   hostedSiteConversationEventText,
   routineConversationEventItemType,
   routineRunConversationEventItemType,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
-import { TEAM_CURRENT_CAPABILITIES } from "@openbot/contracts/team-protocol/current";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
+import { TEAM_CURRENT_CAPABILITIES } from "@dani-dex/contracts/team-protocol/current";
 import {
   TEAM_CAPABILITIES_HEADER,
   TEAM_PROTOCOL_V1_CAPABILITIES,
   TEAM_PROTOCOL_VERSION_HEADER,
-} from "@openbot/contracts/team-protocol/v1";
-import { TEAM_PROTOCOL_V3 } from "@openbot/contracts/team-protocol/v3";
+} from "@dani-dex/contracts/team-protocol/v1";
+import { TEAM_PROTOCOL_V3 } from "@dani-dex/contracts/team-protocol/v3";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createAgents,

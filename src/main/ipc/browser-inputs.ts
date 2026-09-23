@@ -1,11 +1,11 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   BrowserBounds,
   BrowserNavigateInput,
   BrowserOpenInput,
   BrowserVisibilityInput,
-} from "@openbot/contracts/ipc";
-import { isBoolean, isNumber } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isBoolean, isNumber } from "@dani-dex/contracts/runtime-values";
 import { isObject, requireString } from "./validation";
 
 export function parseBrowserOpen(value: unknown): BrowserOpenInput {

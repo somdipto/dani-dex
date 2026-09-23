@@ -1,4 +1,4 @@
-import { isBoolean, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { isBoolean, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 
 interface RouteFile {
   key: string;

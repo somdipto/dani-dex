@@ -1,4 +1,4 @@
-import type { QueueDelivery, QueueSnapshot } from "@openbot/contracts/ipc";
+import type { QueueDelivery, QueueSnapshot } from "@dani-dex/contracts/ipc";
 
 /**
  * Which of an agent's queue the conversation shows, and in what order.

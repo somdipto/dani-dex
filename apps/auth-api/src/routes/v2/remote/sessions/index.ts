@@ -1,4 +1,4 @@
-import { isString } from "@openbot/contracts/runtime-values";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { createFileRoute } from "@tanstack/solid-router";
 import { sha256 } from "../../../../server/crypto";
 import { readJsonObject } from "../../../../server/json-body";

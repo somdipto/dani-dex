@@ -4,12 +4,12 @@
  * A plugin is one developer's bundle: the MCP server it publishes, shown as an **app**, the skills
  * that drive that server, and the listing text. Nothing here has a wire protocol yet - there is no
  * `skills:*` or `marketplace-agents:*` equivalent to answer these, so the types stay in the renderer
- * rather than in `@openbot/contracts/ipc`, where a shape can only be added once it is the shape the
+ * rather than in `@dani-dex/contracts/ipc`, where a shape can only be added once it is the shape the
  * main process really sends. `SkillCategory` is the one borrowed type: a plugin is filed under the
  * same categories the rest of the marketplace already offers.
  */
 
-import type { McpServerConfig, McpTransport, SkillCategory } from "@openbot/contracts/ipc";
+import type { McpServerConfig, McpTransport, SkillCategory } from "@dani-dex/contracts/ipc";
 import type { McpAuth } from "./mcp-connect-auth";
 
 /**

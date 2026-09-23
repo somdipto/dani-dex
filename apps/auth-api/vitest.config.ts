@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [solidPlugin({ ssr: true })],
   resolve: {
     alias: {
-      "@openbot/renderer-preview": rendererPreviewAlias,
+      "@dani-dex/renderer-preview": rendererPreviewAlias,
     },
   },
   test: {

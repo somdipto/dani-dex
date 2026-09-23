@@ -154,7 +154,7 @@
                 "patterns": [
                   {
                     "group": ["**/main/**", "**/backend/**", "**/preload/**"],
-                    "message": "The renderer reaches main only through the IPC contract. Declare a channel in packages/contracts and go through window.openbot."
+                    "message": "The renderer reaches main only through the IPC contract. Declare a channel in packages/contracts and go through window.danidex."
                   }
                 ]
               }

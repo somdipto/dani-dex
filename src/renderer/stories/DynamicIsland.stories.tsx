@@ -3,7 +3,7 @@ import type {
   DynamicIslandAgentIdentity,
   DynamicIslandPresentation,
   DynamicIslandPromptItem,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createMemo, createSignal } from "solid-js";
 import { fn } from "storybook/test";

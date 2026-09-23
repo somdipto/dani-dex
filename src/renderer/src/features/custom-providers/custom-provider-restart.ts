@@ -1,4 +1,4 @@
-import type { CustomProviderRestart } from "@openbot/contracts/ipc";
+import type { CustomProviderRestart } from "@dani-dex/contracts/ipc";
 
 /**
  * One `opencode acp` process serves every OpenCode agent, and it reads its config only at spawn, so a

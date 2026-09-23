@@ -7,9 +7,9 @@ import {
 } from "node:http";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
-import { isString } from "@openbot/contracts/runtime-values";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { browserViewStreamSessionId } from "@openbot/contracts/team-protocol/browser-view-v1";
+import { isString } from "@dani-dex/contracts/runtime-values";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { browserViewStreamSessionId } from "@dani-dex/contracts/team-protocol/browser-view-v1";
 import type * as Ws from "ws";
 import {
   decodeRemoteDesktopSignalBinary,

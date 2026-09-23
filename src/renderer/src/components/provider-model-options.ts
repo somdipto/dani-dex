@@ -1,5 +1,5 @@
-import type { AgentModelOption, CustomProviderSummary } from "@openbot/contracts/ipc";
-import { isCustomProviderModelId, isFreeOpencodeModel } from "@openbot/contracts/ipc";
+import type { AgentModelOption, CustomProviderSummary } from "@dani-dex/contracts/ipc";
+import { isCustomProviderModelId, isFreeOpencodeModel } from "@dani-dex/contracts/ipc";
 
 export interface PickerModel {
   id: string;

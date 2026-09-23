@@ -1,4 +1,4 @@
-import { decodeChannelPage } from "@openbot/contracts/ipc";
+import { decodeChannelPage } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { stores } from "../backend/agent-service-test-harness";
 import { ChannelService } from "../backend/channel-service";

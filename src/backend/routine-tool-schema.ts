@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { z } from "zod";
 
 const ROUTINE_TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;

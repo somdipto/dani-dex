@@ -1,5 +1,4 @@
-import { Host, Picker, Switch } from "@expo/ui";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   type CreateRoutineInput,
   isRoutineSchedule,
@@ -7,8 +6,9 @@ import {
   type RoutineFields,
   type RoutineSchedule,
   type UpdateRoutineInput,
-} from "@openbot/contracts/ipc";
-import { userErrorMessage } from "@openbot/user-errors";
+} from "@dani-dex/contracts/ipc";
+import { userErrorMessage } from "@dani-dex/user-errors";
+import { Host, Picker, Switch } from "@expo/ui";
 import { type QueryKey, useQueryClient } from "@tanstack/react-query";
 import { router, useNavigation } from "expo-router";
 import { usePreventRemove } from "expo-router/react-navigation";

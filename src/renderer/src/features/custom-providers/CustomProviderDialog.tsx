@@ -1,6 +1,6 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { SaveCustomProviderInput } from "@openbot/contracts/ipc";
-import { CUSTOM_PROVIDER_LIMITS } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { SaveCustomProviderInput } from "@dani-dex/contracts/ipc";
+import { CUSTOM_PROVIDER_LIMITS } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, createStore, For, onSettled, Show, untrack } from "solid-js";
 import { createScrollFades } from "../../components/createScrollFades";
 import {

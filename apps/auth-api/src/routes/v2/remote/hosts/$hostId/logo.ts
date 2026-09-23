@@ -1,4 +1,4 @@
-import { isUuidV4 } from "@openbot/contracts/validation";
+import { isUuidV4 } from "@dani-dex/contracts/validation";
 import { createFileRoute } from "@tanstack/solid-router";
 import { AvatarUploadError, readAvatarUpload } from "../../../../../server/avatar-storage";
 import {

@@ -2,7 +2,7 @@ import {
   SIDEBAR_PEOPLE_SECTION_ID,
   SIDEBAR_UNASSIGNED_SECTION_ID,
   type SidebarLayoutSnapshot,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { z } from "zod";
 
 export type SidebarCollapsedByServer = Record<string, string[]>;

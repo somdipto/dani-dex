@@ -5,18 +5,18 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import {
   TEAM_AGENT_ACTIVITY_CAPABILITY,
   TEAM_MODEL_SCOPED_USAGE_CAPABILITY,
-} from "@openbot/contracts/team-protocol/current";
-import { decodeTeamProtocolV1ClientEvent } from "@openbot/contracts/team-protocol/v1";
+} from "@dani-dex/contracts/team-protocol/current";
+import { decodeTeamProtocolV1ClientEvent } from "@dani-dex/contracts/team-protocol/v1";
 import {
   decodeTeamProtocolV2AuthFrame,
   decodeTeamProtocolV2RpcFrame,
   encodeTeamProtocolV2Frame,
   teamProtocolV2AuthenticationTranscript,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import opencodeAgents from "../../packages/contracts/src/team-protocol/fixtures/v4/host-http-response.json";

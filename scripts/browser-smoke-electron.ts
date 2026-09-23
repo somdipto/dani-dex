@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { app, BrowserWindow, type WebContents, webContents } from "electron";
 import { BrowserHost } from "../src/backend/browser-host";
 import { type DynamicToolResult, getString } from "../src/backend/protocol";
@@ -2703,7 +2703,7 @@ async function runPopupScenario(browser: BrowserHost, origin: string): Promise<v
       const popupContents = webContents.getAllWebContents().find((item) => item.getURL().endsWith("/popup-login"));
       if (!popupContents) throw new Error("Popup contents missing.");
       const shared = await popupContents.executeJavaScript(
-        "(location.hostname === 'localhost' || document.cookie.includes('popup_session=shared')) && !!opener && typeof window.openbot === 'undefined' && typeof require === 'undefined'",
+        "(location.hostname === 'localhost' || document.cookie.includes('popup_session=shared')) && !!opener && typeof window.danidex === 'undefined' && typeof require === 'undefined'",
       );
       if (!shared) throw new Error("Popup lost session, opener, or isolation.");
       // Named-window reuse must not register another view or lose the live relationship on reload.

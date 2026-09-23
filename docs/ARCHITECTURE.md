@@ -36,7 +36,7 @@ second version source and add package-signing risk without adding a useful runti
 Dependencies point toward stable boundaries:
 
 ```text
-renderer ──► @openbot/contracts ◄── preload ◄── main ──► backend
+renderer ──► @dani-dex/contracts ◄── preload ◄── main ──► backend
                         ▲                             │
                         └──────── auth-api ──────────┘
 ```
@@ -358,7 +358,7 @@ These are manual model evaluations, separate from the fake-provider lifecycle re
    either survives a switch it should not or dies in one it should not, and no list of setters can
    fix it. A context reaches another one with `use*()` only downwards, in the nesting order of
    `app-providers.tsx`, or through a provider prop; a command that writes to several domains lives
-   in a leaf context or a bridge component mounted under all of them. `window.openbot.*` is not a
+   in a leaf context or a bridge component mounted under all of them. `window.danidex.*` is not a
    dependency. Cycles are rejected by `noImportCycles`, so an upward edge must be `import type`.
    Prefer one store per concern inside a context over a signal per field: a row of parallel signals
    is what lets a screen be loading, loaded, and errored at once.
@@ -367,7 +367,7 @@ These are manual model evaluations, separate from the fake-provider lifecycle re
    renders, and passes a value down as a prop when two of them would otherwise derive it twice. A
    component that assembles another one's props is how the god controller grew back last time.
 9. Do not add temporary compatibility paths without a removal condition and a test for that condition. Released Team API protocol adapters are permanent by default and follow the policy below.
-10. Log through `@openbot/logging` (`ts-log` Logger), never bare `console.*` - Biome's `noConsole`
+10. Log through `@dani-dex/logging` (`ts-log` Logger), never bare `console.*` - Biome's `noConsole`
     enforces this in `src`, `scripts` and `packages`. The remote-desktop build recipe files listed in
     the `Require a recipe version bump` step of `.github/workflows/remote-desktop-runtime.yml` are
     exempt: any edit to them, cosmetic or not, forces `remoteDesktop.recipeVersion` up and a full
@@ -381,7 +381,7 @@ These are manual model evaluations, separate from the fake-provider lifecycle re
     Because several worktrees run dev side by side, each instance publishes its worktree, profile,
     renderer port and debugging port to a registry in the per-user temporary directory
     (`scripts/dev-automation/instance-registry.ts`); automation resolves the record of the worktree
-    it runs in, verifies the renderer port and the `window.openbot` preload bridge before driving a
+    it runs in, verifies the renderer port and the `window.danidex` preload bridge before driving a
     page, and refuses `click` or `type` on an instance it only inferred. A second registry beside it
     (`scripts/dev-automation/stack-registry.ts`) records every port and pid a whole dev stack holds,
     Storybook included, and `scripts/dev-automation/port-allocation.ts` serializes read, choose and
@@ -764,7 +764,7 @@ install rather than reading as the managed copy. A failure keeps the reason the 
 in one error that goes to the provider row and to the caller - and on, through the Team API, to the
 team's connected clients.
 
-Every runtime the store reaches is on this computer: `window.openbot.providerRuntimes` addresses no
+Every runtime the store reaches is on this computer: `window.danidex.providerRuntimes` addresses no
 other one, while the agent status beside it describes whichever server is open. The store therefore
 takes `isLocalServer`, and a workspace on another computer announces no offer and starts no update -
 the same rule the provider row and the picker already follow. A server switch rebuilds that store,

@@ -13,8 +13,8 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { DynamicRecord } from "@openbot/contracts/runtime-values";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { describe, expect, it } from "vitest";
 
 const repositoryRoot = resolve(import.meta.dirname, "..");
@@ -127,13 +127,13 @@ describe("dependency catalog", () => {
 
 // The remote API image installs from a pruned checkout: the Dockerfile copies the
 // root manifest and lockfile, then one manifest per workspace, and runs
-// `bun install --frozen-lockfile --filter @openbot/remote-api`. Bun refuses that
+// `bun install --frozen-lockfile --filter @dani-dex/remote-api`. Bun refuses that
 // install unless every workspace the remaining ones depend on is on disk, so a new
 // `workspace:*` entry in the root manifest breaks the production image while every
 // job in CI stays green - none of them builds this image. That is not hypothetical:
-// the root package gained `@openbot/logging` and `@openbot/team-client` without the
+// the root package gained `@dani-dex/logging` and `@dani-dex/team-client` without the
 // matching COPY lines, and `bun run remote:up` had been failing on
-// `the root package depends on workspace "@openbot/logging" (packages/logging),
+// `the root package depends on workspace "@dani-dex/logging" (packages/logging),
 // which is listed in bun.lock but not on disk`.
 describe("remote API Dockerfile", () => {
   it("copies a manifest for every workspace the pruned install needs", () => {
@@ -141,7 +141,7 @@ describe("remote API Dockerfile", () => {
       workspaces.map((directory) => [readManifest(`${directory}/package.json`).name, directory]),
     );
     const required = new Set<string>();
-    const pending: unknown[] = [...workspaceDependencies("package.json"), "@openbot/remote-api"];
+    const pending: unknown[] = [...workspaceDependencies("package.json"), "@dani-dex/remote-api"];
     while (pending.length > 0) {
       const name = pending.pop();
       if (!isString(name) || required.has(name)) continue;
@@ -165,19 +165,19 @@ describe("remote API Dockerfile", () => {
 
   // A manifest is what the *install* needs. What the running container needs is the code, and these
   // packages have no build step - every `exports` entry in them points at a raw `./src/*.ts`. So the
-  // symlink `node_modules/@openbot/contracts` that carries over from the install stage resolves into
+  // symlink `node_modules/@dani-dex/contracts` that carries over from the install stage resolves into
   // a directory holding one package.json and nothing to import: the image builds, the install
   // succeeds, and the service dies on its first import at startup. The assertion above cannot see
   // that - contracts' manifest has been copied since long before anything depended on it.
   //
-  // Scoped to what `@openbot/remote-api` itself reaches, not to what the root manifest names: bun
+  // Scoped to what `@dani-dex/remote-api` itself reaches, not to what the root manifest names: bun
   // needs the others on disk to resolve the pruned install, but nothing imports them at runtime.
   it("copies the source of every workspace the running service imports", () => {
     const directoryOf = new Map(
       workspaces.map((directory) => [readManifest(`${directory}/package.json`).name, directory]),
     );
     const required = new Set<string>();
-    const pending: unknown[] = ["@openbot/remote-api"];
+    const pending: unknown[] = ["@dani-dex/remote-api"];
     while (pending.length > 0) {
       const name = pending.pop();
       if (!isString(name) || required.has(name)) continue;

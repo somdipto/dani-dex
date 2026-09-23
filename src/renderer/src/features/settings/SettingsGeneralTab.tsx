@@ -4,8 +4,8 @@ import type {
   CustomProviderRestart,
   CustomProviderSummary,
   SaveCustomProviderInput,
-} from "@openbot/contracts/ipc";
-import type { AppTextKey } from "@openbot/i18n";
+} from "@dani-dex/contracts/ipc";
+import type { AppTextKey } from "@dani-dex/i18n";
 import { createSignal, Show } from "solid-js";
 import { ProviderPicker } from "../../components/ProviderPicker";
 import {

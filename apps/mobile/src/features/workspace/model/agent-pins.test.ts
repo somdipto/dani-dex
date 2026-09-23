@@ -1,4 +1,4 @@
-import { createWorkspacePreferences } from "@openbot/team-client";
+import { createWorkspacePreferences } from "@dani-dex/team-client";
 import { describe, expect, it } from "vitest";
 import { canToggleAgentPin, reconcileAgentPins, reconcileChannelPins, setChannelHidden } from "./agent-pins";
 

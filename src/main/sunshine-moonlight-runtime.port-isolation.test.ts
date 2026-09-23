@@ -13,7 +13,7 @@ import { createServer as createTcpServer, type Server as TcpServer } from "node:
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PassThrough } from "node:stream";
-import type { RemoteDesktopDisplay, RemoteDesktopIceServer } from "@openbot/contracts/ipc";
+import type { RemoteDesktopDisplay, RemoteDesktopIceServer } from "@dani-dex/contracts/ipc";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import type { RemoteDesktopRuntimePaths } from "./remote-desktop-runtime-artifact";

@@ -1,10 +1,10 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   BrowserControlAction,
   BrowserControlDetailAction,
   BrowserControlSession,
   BrowserTab,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { Portal } from "@solidjs/web";
 import { createEffect, createSignal, For, onSettled, Show } from "solid-js";
 import {

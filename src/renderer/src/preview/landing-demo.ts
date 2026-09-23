@@ -1,4 +1,4 @@
-import type { ConversationMessage, DirectMessage, QueueDelivery } from "@openbot/contracts/ipc";
+import type { ConversationMessage, DirectMessage, QueueDelivery } from "@dani-dex/contracts/ipc";
 import {
   LANDING_DEMO_SCRIPTS,
   LANDING_DIRECT_DEMO_SCRIPTS,

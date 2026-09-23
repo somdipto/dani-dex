@@ -1,4 +1,4 @@
-import type { InstalledSkill } from "@openbot/contracts/ipc";
+import type { InstalledSkill } from "@dani-dex/contracts/ipc";
 import { onCleanup } from "solid-js";
 import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -13,7 +13,7 @@ function AgentSkillsStory(props: {
   skillsMode?: "mutable" | "readonly" | "hidden";
   onAddFromMarketplace?: (agentId: string) => void;
 }) {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot({ installedSkills: { chief: props.skills } });
   if (props.localState === "empty") mock.api.skills.localList = async () => [];
   if (props.localState === "error")
@@ -51,12 +51,12 @@ function AgentSkillsStory(props: {
   if (props.detailState === "reduced-motion")
     window.matchMedia = (query) =>
       matchMedia.call(window, query === "(prefers-reduced-motion: reduce)" ? "all" : query);
-  window.openbot = mock.api;
+  window.danidex = mock.api;
 
   onCleanup(() => {
     window.matchMedia = matchMedia;
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
 
   return (

@@ -1,4 +1,4 @@
-import type { MarketplaceSkillDetail } from "@openbot/contracts/ipc";
+import type { MarketplaceSkillDetail } from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createSignal, Show } from "solid-js";
 import { MarkdownMessageText } from "../features/conversation/MarkdownMessageText";
@@ -63,7 +63,7 @@ export function SkillPreview(props: {
   };
   const openLink = (url: string) => {
     const safe = safeBrowserUrl(url);
-    if (safe) void window.openbot.openUrl(safe).catch(() => setLinkError("Could not open the link."));
+    if (safe) void window.danidex.openUrl(safe).catch(() => setLinkError("Could not open the link."));
   };
   return (
     <section class="skill-preview t-stagger is-shown" aria-label={`${props.skill.name} preview`}>

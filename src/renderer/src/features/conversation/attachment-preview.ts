@@ -1,5 +1,5 @@
-import { attachmentMimeTypeForName } from "@openbot/contracts/attachment-files";
-import { type AttachmentSummary, type FilePreview, filePreviewKindForFile } from "@openbot/contracts/ipc";
+import { attachmentMimeTypeForName } from "@dani-dex/contracts/attachment-files";
+import { type AttachmentSummary, type FilePreview, filePreviewKindForFile } from "@dani-dex/contracts/ipc";
 
 /** Kinds the panel can render straight from `previewUrl`, without reading the bytes first. */
 const URL_PREVIEW_KINDS = new Set<FilePreview["previewKind"]>(["image", "pdf", "audio", "video"]);

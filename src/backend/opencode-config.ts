@@ -8,7 +8,7 @@
 // This lives beside `provider-drivers.ts` rather than inside it because the driver table is a table:
 // the shape of one CLI's config is a concern of its own, and it is the half worth unit testing.
 
-import type { CustomProviderHeader, CustomProviderModel } from "@openbot/contracts/ipc";
+import type { CustomProviderHeader, CustomProviderModel } from "@dani-dex/contracts/ipc";
 
 /** One endpoint, as the main process stores it. Carries the secrets, so it never crosses IPC. */
 export interface CustomProviderConfig {

@@ -1,4 +1,4 @@
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { createFileRoute } from "@tanstack/solid-router";
 
 export const Route = createFileRoute("/report-site")({

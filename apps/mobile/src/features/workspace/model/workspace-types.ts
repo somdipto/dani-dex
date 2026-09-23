@@ -20,10 +20,10 @@ import type {
   SidebarLayoutSnapshot,
   UpdateAgentInput,
   UpdateRoutineInput,
-} from "@openbot/contracts/ipc";
-import type { QueueEditRequest } from "@openbot/contracts/team-protocol/queue-edit-v1";
-import type { RemoteRecoveryStatus, RemoteTeamDirectoryClient } from "@openbot/team-client";
-import type { RemoteFileUpload } from "@openbot/team-client/remote-peer";
+} from "@dani-dex/contracts/ipc";
+import type { QueueEditRequest } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
+import type { RemoteRecoveryStatus, RemoteTeamDirectoryClient } from "@dani-dex/team-client";
+import type { RemoteFileUpload } from "@dani-dex/team-client/remote-peer";
 import type { MobileChannelStore } from "@/features/channels/model/channel-store";
 import type { MobileAgentActivities } from "./agent-activity";
 import type { MobileConversationStore } from "./conversation-store";

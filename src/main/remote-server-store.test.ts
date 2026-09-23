@@ -8,7 +8,7 @@
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
+import { LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { RemoteServerStore } from "./remote-server-store";
 import type { StoredRemoteServer } from "./remote-server-stored-shape";

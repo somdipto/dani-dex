@@ -1,4 +1,4 @@
-import type { BrowserPreview } from "@openbot/contracts/ipc";
+import type { BrowserPreview } from "@dani-dex/contracts/ipc";
 import { Show } from "solid-js";
 import { Monitor, Skeleton } from "../../components/ui";
 

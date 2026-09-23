@@ -1,4 +1,4 @@
-import { expandChatTagReferences } from "@openbot/contracts/chat-tag-references";
+import { expandChatTagReferences } from "@dani-dex/contracts/chat-tag-references";
 import type {
   AgentEvent,
   Channel,
@@ -20,8 +20,8 @@ import type {
   TestChannelRoutineInput,
   UpdateChannelMemoryInput,
   UpdateChannelRoutineInput,
-} from "@openbot/contracts/ipc";
-import { channelRoutingConversationEventItemType } from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
+import { channelRoutingConversationEventItemType } from "@dani-dex/contracts/ipc";
 
 export function createMockChannels(emit: (event: AgentEvent) => void, agentName: (agentId: string) => string) {
   const channels = new Map<string, Channel>();

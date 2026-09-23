@@ -50,7 +50,7 @@ export function SettingsHostedSitesTab(props: SettingsHostedSitesTabProps) {
                       class="hosted-sites-link"
                       title={site.hostname}
                       disabled={site.status !== "active"}
-                      onClick={() => void window.openbot.openUrl(site.url)}
+                      onClick={() => void window.danidex.openUrl(site.url)}
                     >
                       <span class="hosted-sites-link-label">{site.hostname}</span>
                     </Button>
@@ -71,7 +71,7 @@ export function SettingsHostedSitesTab(props: SettingsHostedSitesTabProps) {
                       size="sm"
                       aria-label={`Open ${site.hostname}`}
                       disabled={site.status !== "active"}
-                      onClick={() => void window.openbot.openUrl(site.url)}
+                      onClick={() => void window.danidex.openUrl(site.url)}
                     >
                       <ExternalLink size={14} aria-hidden="true" />
                       Open

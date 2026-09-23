@@ -1,5 +1,5 @@
 // Composition adapted from https://zaidan.carere.dev/r/kobalte/chart-area-interactive.json (MIT).
-import type { HostAnalytics } from "@openbot/contracts/ipc";
+import type { HostAnalytics } from "@dani-dex/contracts/ipc";
 import { createMemo, For } from "solid-js";
 import {
   Area,

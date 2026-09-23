@@ -1,4 +1,4 @@
-import { type AttachmentSummary, canPreviewAttachment } from "@openbot/contracts/ipc";
+import { type AttachmentSummary, canPreviewAttachment } from "@dani-dex/contracts/ipc";
 import { createSignal, createUniqueId, For, Show } from "solid-js";
 import { Button, Download, Spinner } from "../../components/ui";
 import { AnchoredTooltip } from "./AnchoredTooltip";

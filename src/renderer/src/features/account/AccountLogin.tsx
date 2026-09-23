@@ -1,7 +1,7 @@
-import { AppLogo } from "@openbot/brand";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { AppVariant, CentralAuthIssue, CentralAuthState } from "@openbot/contracts/ipc";
-import { normalizeEmailAddress, normalizeOneTimeCode } from "@openbot/contracts/validation";
+import { AppLogo } from "@dani-dex/brand";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AppVariant, CentralAuthIssue, CentralAuthState } from "@dani-dex/contracts/ipc";
+import { normalizeEmailAddress, normalizeOneTimeCode } from "@dani-dex/contracts/validation";
 import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
 import { ArrowLeft, Button, Input, RefreshCw } from "../../components/ui";
 import { OtpInput, type OtpInputStatus } from "../../components/ui/otp-input";

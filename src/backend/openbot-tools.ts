@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { z } from "zod";
 import { DATA_TOOL_DEFINITIONS } from "./agent/data-tools";
 import { createAgentToolSchema, updateProfileToolSchema } from "./agent/profile-tools";

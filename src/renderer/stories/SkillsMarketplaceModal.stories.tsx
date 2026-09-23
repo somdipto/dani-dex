@@ -1,4 +1,4 @@
-import type { AgentSummary } from "@openbot/contracts/ipc";
+import type { AgentSummary } from "@dani-dex/contracts/ipc";
 import { createSignal, onCleanup, untrack } from "solid-js";
 import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -18,7 +18,7 @@ function SkillsMarketplaceModalStory(props: {
   catalogState?: "empty" | "loading" | "loading-transition" | "missing-images";
 }) {
   const catalogState = untrack(() => props.catalogState);
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot();
   if (catalogState === "empty") {
     mock.api.skills.list = async () => ({ skills: [], nextCursor: null });
@@ -70,11 +70,11 @@ function SkillsMarketplaceModalStory(props: {
       };
     return detail;
   };
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   onCleanup(() => {
     mock.dispose();
     toast.dismiss();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
   const [open, setOpen] = createSignal(props.initialOpen);
 

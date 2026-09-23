@@ -5,9 +5,9 @@ import type {
   ChannelRoutingConversationEvent,
   ConversationMessage,
   ConversationQuestionPrompt,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 
-import { channelRoutingConversationEvent } from "@openbot/contracts/ipc";
+import { channelRoutingConversationEvent } from "@dani-dex/contracts/ipc";
 
 export type ChatMessage =
   | {

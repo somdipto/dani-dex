@@ -12,8 +12,8 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { DynamicRecord } from "@openbot/contracts/runtime-values";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it } from "vitest";
 import { migrateOpenBotDatabase } from "./openbot-database-schema";
 

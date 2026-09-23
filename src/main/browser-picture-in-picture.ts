@@ -1,4 +1,4 @@
-import type { BrowserBounds, BrowserPictureInPictureEvent } from "@openbot/contracts/ipc";
+import type { BrowserBounds, BrowserPictureInPictureEvent } from "@dani-dex/contracts/ipc";
 import { BrowserWindow, screen, WebContentsView } from "electron";
 import type { BrowserHost } from "../backend/browser-host";
 import {

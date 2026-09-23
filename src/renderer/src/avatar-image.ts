@@ -1,6 +1,6 @@
-import { isAvatarMimeType } from "@openbot/contracts/avatar-images";
-import { AVATAR_IMAGE_LIMITS } from "@openbot/contracts/input-limits";
-import type { AvatarImageInput } from "@openbot/contracts/ipc";
+import { isAvatarMimeType } from "@dani-dex/contracts/avatar-images";
+import { AVATAR_IMAGE_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AvatarImageInput } from "@dani-dex/contracts/ipc";
 
 const OUTPUT_SIZES = [512, 448, 384, 320] as const;
 const OUTPUT_QUALITIES = [0.88, 0.82, 0.76, 0.7] as const;

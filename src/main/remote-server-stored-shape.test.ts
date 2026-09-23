@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
+import { LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import {
   readStoredRemoteServers,

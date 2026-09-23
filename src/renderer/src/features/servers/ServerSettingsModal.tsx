@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AvatarImageInput,
   HostStatus,
@@ -8,8 +8,8 @@ import type {
   TeamPresenceMember,
   TeamRole,
   UpdateTeamMemberInput,
-} from "@openbot/contracts/ipc";
-import { normalizeEmailAddress } from "@openbot/contracts/validation";
+} from "@dani-dex/contracts/ipc";
+import { normalizeEmailAddress } from "@dani-dex/contracts/validation";
 import { createEffect, createMemo, createSignal, createStore, For, onCleanup, Show, snapshot } from "solid-js";
 import { normalizeAvatarFile } from "../../avatar-image";
 import {

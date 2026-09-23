@@ -1,4 +1,4 @@
-import type { ConversationSnapshot } from "@openbot/contracts/ipc";
+import type { ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createRemoteConnectionRecovery,

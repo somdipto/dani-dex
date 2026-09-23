@@ -1,7 +1,7 @@
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { unzipSync } from "fflate";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildProductionCatalog, validateSkillMarkdown } from "./build-production-catalog";

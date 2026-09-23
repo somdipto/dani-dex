@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import { createReadStream, existsSync } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { createOpenBotLogger } from "@openbot/logging";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { parse } from "yaml";
 
 const logger = createOpenBotLogger("verify-update-artifacts");

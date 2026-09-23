@@ -5,7 +5,7 @@ import type {
   SidebarLayoutAction,
   SidebarLayoutSnapshot,
   TeamPresenceMember,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { AvatarMood } from "../../bloub-avatar";
 import type { AgentProfile } from "../../data";
 import type { SidebarPinnedItem } from "./sidebar-pins";

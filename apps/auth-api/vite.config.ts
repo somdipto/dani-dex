@@ -13,7 +13,7 @@ export default defineConfig(({ command }) => {
   return {
     resolve: {
       alias: {
-        "@openbot/renderer-preview": rendererPreviewAlias,
+        "@dani-dex/renderer-preview": rendererPreviewAlias,
       },
     },
     build: {

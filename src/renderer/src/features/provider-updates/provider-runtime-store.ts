@@ -5,7 +5,7 @@ import {
   MANAGED_RUNTIME_PROVIDERS,
   type ProviderRuntimeSnapshot,
   type ProviderRuntimesDesktopApi,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, flush, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { FALLBACK_PROVIDER_RUNTIMES } from "../../app-defaults";
@@ -27,7 +27,7 @@ export interface ProviderCliOwners {
   /**
    * Whether the workspace on screen is this computer. Left out, it is.
    *
-   * Every runtime this store reaches is local - `window.openbot.providerRuntimes` addresses no other
+   * Every runtime this store reaches is local - `window.danidex.providerRuntimes` addresses no other
    * computer - while the agent status beside it describes whichever server is open. A remote
    * workspace therefore has no offer to make here, and an Update button it raised would change a
    * runtime the user is not looking at.

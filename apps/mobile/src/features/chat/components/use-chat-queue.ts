@@ -1,7 +1,7 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { QueueDelivery } from "@openbot/contracts/ipc";
-import { isQueueEditRejected } from "@openbot/contracts/team-protocol/queue-edit-v1";
-import { userErrorMessage } from "@openbot/user-errors";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { QueueDelivery } from "@dani-dex/contracts/ipc";
+import { isQueueEditRejected } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
+import { userErrorMessage } from "@dani-dex/user-errors";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import * as SecureStore from "expo-secure-store";

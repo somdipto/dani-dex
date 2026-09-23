@@ -24,9 +24,9 @@
 // is a re-tag. A version this build does not know is refused outright: it was written by a newer
 // Dani-Dex, and guessing at it would replace a file that build can still read.
 
-import type { TeamRole } from "@openbot/contracts/ipc";
-import { LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isBoolean, isDynamicRecord, isOneOf, isString } from "@openbot/contracts/runtime-values";
+import type { TeamRole } from "@dani-dex/contracts/ipc";
+import { LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isBoolean, isDynamicRecord, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 
 export interface StoredRemoteServer {
   id: string;

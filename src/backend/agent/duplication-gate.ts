@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { AgentEvent, AgentSummary, DuplicateAgentResult, SidebarLayoutSnapshot } from "@openbot/contracts/ipc";
+import type { AgentEvent, AgentSummary, DuplicateAgentResult, SidebarLayoutSnapshot } from "@dani-dex/contracts/ipc";
 import { type AgentStore, duplicationProfileSignature } from "../agent-store";
 import type { MailboxStore } from "../mailbox-store";
 import type { AgentMemories } from "./agent-memories";

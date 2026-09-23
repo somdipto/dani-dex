@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   CreateLocalSkillInput,
   InstalledSkill,
@@ -6,7 +6,7 @@ import type {
   MarketplaceSkillDetail,
   ReviseLocalSkillInput,
   SkillConversationEvent,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { z } from "zod";
 
 const sourcePath = z.string().min(1).max(INPUT_LIMITS.path);

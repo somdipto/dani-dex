@@ -4,7 +4,7 @@
  * layout order can place it.
  */
 
-import { SIDEBAR_PEOPLE_SECTION_ID } from "@openbot/contracts/ipc";
+import { SIDEBAR_PEOPLE_SECTION_ID } from "@dani-dex/contracts/ipc";
 import { For, Show } from "solid-js";
 import { SidebarAgentSection } from "./SidebarAgentSection";
 import { SidebarPeopleSection } from "./SidebarPeopleSection";

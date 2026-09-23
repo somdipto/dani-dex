@@ -1,4 +1,4 @@
-import { isAvatarMimeType } from "@openbot/contracts/avatar-images";
+import { isAvatarMimeType } from "@dani-dex/contracts/avatar-images";
 import {
   type AgentEvent,
   type AgentSummary,
@@ -19,14 +19,14 @@ import {
   type SidebarLayoutSnapshot,
   type TeamRealtimeEvent,
   type UpdateAgentInput,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { TEAM_CONVERSATION_UNREAD_CAPABILITY } from "@openbot/contracts/team-protocol/current";
-import { TEAM_QUEUE_EDIT_CAPABILITY } from "@openbot/contracts/team-protocol/queue-edit-v1";
-import { decodeTeamProtocolSupportV1 } from "@openbot/contracts/team-protocol/v1";
-import type { TeamProtocolV2Json } from "@openbot/contracts/team-protocol/v2";
-import { TEAM_PROTOCOL_V3 } from "@openbot/contracts/team-protocol/v3";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { TEAM_CONVERSATION_UNREAD_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
+import { TEAM_QUEUE_EDIT_CAPABILITY } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
+import { decodeTeamProtocolSupportV1 } from "@dani-dex/contracts/team-protocol/v1";
+import type { TeamProtocolV2Json } from "@dani-dex/contracts/team-protocol/v2";
+import { TEAM_PROTOCOL_V3 } from "@dani-dex/contracts/team-protocol/v3";
 import {
   createRemoteAccountRefresh,
   createRemoteReadRefresh,
@@ -37,9 +37,9 @@ import {
   type RemoteTeamHost,
   type RemoteWorkspacePreferences,
   readAgentAnalytics,
-} from "@openbot/team-client";
-import type { RemoteFileUpload } from "@openbot/team-client/remote-peer";
-import { userErrorMessage as errorMessage } from "@openbot/user-errors";
+} from "@dani-dex/team-client";
+import type { RemoteFileUpload } from "@dani-dex/team-client/remote-peer";
+import { userErrorMessage as errorMessage } from "@dani-dex/user-errors";
 import { useQueryClient } from "@tanstack/react-query";
 import { fetch } from "expo/fetch";
 import * as Crypto from "expo-crypto";
@@ -99,7 +99,7 @@ export type {
 
 // Five distinct hues for the server rail, taken from the palette's categorical set
 // (--dani-dex-file-blue/-orange/-teal/-pink and --dani-dex-success). Hardcoded because
-// @openbot/brand ships tokens as CSS only, and these are picked per index in JS.
+// @dani-dex/brand ships tokens as CSS only, and these are picked per index in JS.
 const SERVER_ACCENTS = ["#74b9ff", "#f0a06a", "#6bc7d9", "#d98ac9", "#31cf76"] as const;
 type RemoteAgent = Pick<
   AgentSummary,

@@ -1,4 +1,4 @@
-import type { BrowserBounds } from "@openbot/contracts/ipc";
+import type { BrowserBounds } from "@dani-dex/contracts/ipc";
 
 export const BROWSER_PIP_MIN_WIDTH = 300;
 export const BROWSER_PIP_MIN_HEIGHT = 220;

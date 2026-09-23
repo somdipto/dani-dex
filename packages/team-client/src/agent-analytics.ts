@@ -4,8 +4,8 @@ import {
   analyticsQuery,
   assertAnalyticsScope,
   decodeAgentAnalytics,
-} from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+} from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 
 export function readAgentAnalytics(
   request: <T>(method: "GET", path: string, decode: (value: unknown) => T) => Promise<T>,

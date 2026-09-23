@@ -1,4 +1,4 @@
-import { serializeAttachmentReference } from "@openbot/contracts/attachment-references";
+import { serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
 import type {
   AgentEvent,
   AttachmentSummary,
@@ -6,7 +6,7 @@ import type {
   DraftAttachment,
   QueueSnapshot,
   UpdateAgentInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { Portal } from "@solidjs/web";
 import { createEffect, createSignal, onCleanup, onSettled, type ParentProps, Show } from "solid-js";
 import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
@@ -834,7 +834,7 @@ const referenceQueue: QueueSnapshot = {
 
 /**
  * The domains `ConversationView` and its panels read through `use*()`, nested in the order
- * `app-providers.tsx` uses. Each one talks to the mocked `window.openbot` the story installs.
+ * `app-providers.tsx` uses. Each one talks to the mocked `window.danidex` the story installs.
  */
 function StoryAppProviders(props: ParentProps) {
   return (
@@ -860,7 +860,7 @@ function MockedConversation(props: {
   takeoverStateGallery?: boolean;
   conversationError?: string;
 }) {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot();
   const controller = createConversationController({ onTypingChange: props.args.onTypingChange });
   const previewUrls = new Set<string>();
@@ -900,7 +900,7 @@ function MockedConversation(props: {
       setFirstUnreadMessageId(messageId);
     },
   );
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   if (props.takeoverStateGallery) {
     onSettled(() => {
       const mount = storyFrameElement?.querySelector<HTMLElement>(".conversation-scroll") ?? null;
@@ -948,7 +948,7 @@ function MockedConversation(props: {
     if (takeoverGalleryScrollTimer !== undefined) window.clearTimeout(takeoverGalleryScrollTimer);
     for (const previewUrl of previewUrls) URL.revokeObjectURL(previewUrl);
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
   return (
     <div ref={setStoryFrameElement} class="conversation-story-frame">

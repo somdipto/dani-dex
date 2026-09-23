@@ -1,7 +1,7 @@
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
-import type { McpServerConfig } from "@openbot/contracts/ipc";
+import type { McpServerConfig } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   acpMcpServers,

@@ -18,8 +18,8 @@
  * front of a link kind it has never heard of.
  */
 
-import { type InviteLinkOptions, parseInviteUrl } from "@openbot/contracts/invite-links";
-import { parsePluginUrl } from "@openbot/contracts/plugin-links";
+import { type InviteLinkOptions, parseInviteUrl } from "@dani-dex/contracts/invite-links";
+import { parsePluginUrl } from "@dani-dex/contracts/plugin-links";
 
 export type DeepLink =
   | { kind: "invite"; url: string }

@@ -1,4 +1,4 @@
-import type { BrowserTakeoverRequest, RespondToBrowserSecretInput } from "@openbot/contracts/ipc";
+import type { BrowserTakeoverRequest, RespondToBrowserSecretInput } from "@dani-dex/contracts/ipc";
 import { Button, Input, Typography } from "heroui-native";
 import { useState } from "react";
 import { View } from "react-native";

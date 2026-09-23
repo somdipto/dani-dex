@@ -1,4 +1,4 @@
-import type { DraftAttachment, InstalledSkill, McpServerConfig } from "@openbot/contracts/ipc";
+import type { DraftAttachment, InstalledSkill, McpServerConfig } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";

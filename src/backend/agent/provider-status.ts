@@ -1,6 +1,6 @@
 import type { ChildProcess } from "node:child_process";
-import type { AgentProviderStatus } from "@openbot/contracts/ipc";
-import { redactText } from "@openbot/logging";
+import type { AgentProviderStatus } from "@dani-dex/contracts/ipc";
+import { redactText } from "@dani-dex/logging";
 import type { AgentProvider } from "../agent-client";
 import { CodexCliError } from "../cli";
 

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { readFile, rename, rm, writeFile } from "node:fs/promises";
-import { DEFAULT_DYNAMIC_ISLAND_PREFERENCE, type DynamicIslandPreference } from "@openbot/contracts/ipc";
-import { isBoolean, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { DEFAULT_DYNAMIC_ISLAND_PREFERENCE, type DynamicIslandPreference } from "@dani-dex/contracts/ipc";
+import { isBoolean, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 
 export async function readDynamicIslandPreference(path: string): Promise<DynamicIslandPreference> {
   try {

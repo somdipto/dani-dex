@@ -1,8 +1,8 @@
 import { EventEmitter } from "node:events";
 import { appendFile, mkdir, readdir, rename, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
-import type { UpdateBusyPhase, UpdateFailureCode, UpdateStatus } from "@openbot/contracts/ipc";
-import { isUpdateBusyPhase } from "@openbot/contracts/ipc";
+import type { UpdateBusyPhase, UpdateFailureCode, UpdateStatus } from "@dani-dex/contracts/ipc";
+import { isUpdateBusyPhase } from "@dani-dex/contracts/ipc";
 import type { ProgressInfo, UpdateInfo } from "electron-updater";
 import type { HostUpdateState } from "../../packages/contracts/src/host-manager";
 import type { OpenBotSiblingInstance } from "./update-sibling-instances";

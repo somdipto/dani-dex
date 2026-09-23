@@ -1,4 +1,4 @@
-import { skillConversationEvent } from "@openbot/contracts/ipc";
+import { skillConversationEvent } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LocalSkillTools } from "./agent/skill-tools";
 import type { AgentProvider } from "./agent-client";

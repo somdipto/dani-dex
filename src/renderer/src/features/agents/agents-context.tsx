@@ -4,7 +4,7 @@ import type {
   AgentSummary,
   AvatarImageInput,
   UpdateAgentInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal, untrack } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { FALLBACK_STATUS } from "../../app-defaults";
@@ -168,7 +168,7 @@ const Agents = createSimpleContext({
       const properties = analyticsAgentProperties(agentId);
       const changedFields = Object.keys(updates);
       try {
-        const stored = await window.openbot.agent.updateAgent({
+        const stored = await window.danidex.agent.updateAgent({
           agentId,
           ...updates,
         });
@@ -204,7 +204,7 @@ const Agents = createSimpleContext({
       const analytics = desktopAnalytics.scope();
       const properties = analyticsAgentProperties(agentId);
       try {
-        const stored = await window.openbot.agent.setAvatar({ agentId, image });
+        const stored = await window.danidex.agent.setAvatar({ agentId, image });
         const next = toAgentProfile(stored);
         setAgentList((current) => {
           const existing = current.find((agent) => agent.id === agentId);

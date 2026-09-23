@@ -5,7 +5,7 @@ import {
   parseGenerateAgentProfile,
   parseHostAnalyticsInput,
   parseSaveAgentProfile,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { hiddenProviderAgentIds } from "./provider-visibility";
 // Agents: the collection, the sidebar that arranges them, and everything under one agent's id.
 //
@@ -20,10 +20,10 @@ import { hiddenProviderAgentIds } from "./provider-visibility";
 // 400 on a malformed identifier into a 404 for some methods and not others.
 
 import { readFile } from "node:fs/promises";
-import { isAvatarMimeType } from "@openbot/contracts/avatar-images";
-import { AVATAR_IMAGE_LIMITS, INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { DuplicateAgentResult } from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+import { isAvatarMimeType } from "@dani-dex/contracts/avatar-images";
+import { AVATAR_IMAGE_LIMITS, INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { DuplicateAgentResult } from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import { parseSidebarLayoutAction } from "../ipc/agent-inputs";
 import type { TeamApiAgents, TeamApiOptions, TeamApiSidebarLayout } from "./dependencies";
 import { HttpError } from "./http-error";

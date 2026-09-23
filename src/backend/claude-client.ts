@@ -12,9 +12,9 @@ import {
   type SDKUserMessage,
   tool,
 } from "@anthropic-ai/claude-agent-sdk";
+import { defaultProviderModel } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { defaultProviderModel } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord, isNumber, isOneOf, isString } from "@openbot/contracts/runtime-values";
 import type { AgentProvider } from "./agent-client";
 import { BROWSER_TOOL_DEFINITIONS, OPENBOT_BROWSER_NAMESPACE } from "./browser-tools";
 import type { ClaudeCliInfo } from "./cli";

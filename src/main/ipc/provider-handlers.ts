@@ -1,9 +1,9 @@
 // Signing in to a provider, storing the optional provider API keys, and downloading the CLI
 // runtimes the providers need.
 
-import { isManagedRuntimeProvider } from "@openbot/contracts/agent-providers";
-import type { AgentProviderId } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { isManagedRuntimeProvider } from "@dani-dex/contracts/agent-providers";
+import type { AgentProviderId } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { shell } from "electron";
 import type { AgentService } from "../../backend/agent-service";
 import type { ProviderCredentialStore } from "../provider-credential-store";

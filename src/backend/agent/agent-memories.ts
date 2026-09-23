@@ -1,12 +1,12 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentEvent,
   AgentMemory,
   CreateAgentMemoryInput,
   DeleteAgentMemoryInput,
   UpdateAgentMemoryInput,
-} from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { AgentMemoryStore } from "../agent-memory-store";
 import type { AgentStore } from "../agent-store";
 import { type DynamicToolCallParams, isRecord } from "../protocol";

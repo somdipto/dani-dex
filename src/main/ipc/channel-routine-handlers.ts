@@ -1,13 +1,13 @@
 // Channel routines: a standing instruction that fires into the channel on a schedule.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   decodeChannelRoutine,
   decodeChannelRoutineRun,
   decodeChannelRoutineRuns,
   decodeChannelRoutines,
-} from "@openbot/contracts/ipc";
-import { CHANNEL_ROUTES } from "@openbot/contracts/team-protocol/channels-v1";
+} from "@dani-dex/contracts/ipc";
+import { CHANNEL_ROUTES } from "@dani-dex/contracts/team-protocol/channels-v1";
 import type { AgentService } from "../../backend/agent-service";
 import { decodeVoid } from "../remote-host-decoding";
 import type { RemoteServerManager } from "../remote-server-manager";

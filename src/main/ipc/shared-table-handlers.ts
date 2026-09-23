@@ -3,7 +3,7 @@
 // Neither call takes an agent: every agent shares every table, and the user's delete is not
 // owner-gated -- the owner rule binds agents, not the person whose computer holds the data.
 
-import { isDeleteSharedTableInput } from "@openbot/contracts/ipc";
+import { isDeleteSharedTableInput } from "@dani-dex/contracts/ipc";
 import type { AgentService } from "../../backend/agent-service";
 import { parseAgentRequest } from "./agent-inputs";
 import { type IpcGroupHandlers, payloadHandler } from "./define-ipc-group";

@@ -1,4 +1,4 @@
-import type { RemoteDesktopErrorCode, RemoteDesktopSession, ServerSummary } from "@openbot/contracts/ipc";
+import type { RemoteDesktopErrorCode, RemoteDesktopSession, ServerSummary } from "@dani-dex/contracts/ipc";
 import { type JSX, Portal } from "@solidjs/web";
 import { createEffect, createMemo, createSignal, onSettled, Show } from "solid-js";
 import { z } from "zod";

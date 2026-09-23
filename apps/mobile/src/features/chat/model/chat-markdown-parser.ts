@@ -1,4 +1,4 @@
-import { chatTagReferences } from "@openbot/contracts/chat-tag-references";
+import { chatTagReferences } from "@dani-dex/contracts/chat-tag-references";
 import { Marked } from "marked";
 
 export const markdown = new Marked({

@@ -1,4 +1,4 @@
-import type { ServerSummary } from "@openbot/contracts/ipc";
+import type { ServerSummary } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, createStore, For, onCleanup, Show } from "solid-js";
 import { createScrollFades } from "../../components/createScrollFades";
 import { createVerticalDragPreview } from "../../components/createVerticalDragPreview";

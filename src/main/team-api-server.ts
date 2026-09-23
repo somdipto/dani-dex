@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   AGENT_RUNTIME_SNAPSHOT_BYTES_LIMIT,
   type AgentEvent,
@@ -20,10 +20,10 @@ import {
   type TeamMemberSummary,
   type TeamPresenceSnapshot,
   type TeamRealtimeEvent,
-} from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { channelEvent, channelResponse, isChannelRoute } from "@openbot/contracts/team-protocol/channels-v1";
+} from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { channelEvent, channelResponse, isChannelRoute } from "@dani-dex/contracts/team-protocol/channels-v1";
 import {
   CHANNEL_DELETE_CAPABILITY,
   isTeamCurrentCapability,
@@ -32,8 +32,8 @@ import {
   TEAM_AGENT_ACTIVITY_CAPABILITY,
   TEAM_CURRENT_CAPABILITIES,
   type TeamCurrentCapability,
-} from "@openbot/contracts/team-protocol/current";
-import { isMcpRoute, mcpResponse } from "@openbot/contracts/team-protocol/mcp-v1";
+} from "@dani-dex/contracts/team-protocol/current";
+import { isMcpRoute, mcpResponse } from "@dani-dex/contracts/team-protocol/mcp-v1";
 import {
   TEAM_APP_VERSION_HEADER,
   TEAM_PROTOCOL_V1,
@@ -41,18 +41,18 @@ import {
   TEAM_PROTOCOL_V1_WEBSOCKET,
   TEAM_PROTOCOL_VERSION_HEADER,
   type TeamProtocolSupportV1,
-} from "@openbot/contracts/team-protocol/v1";
+} from "@dani-dex/contracts/team-protocol/v1";
 import {
   decodeTeamProtocolV1CurrentClientEvent,
   encodeTeamProtocolV1CurrentEvent,
   encodeTeamProtocolV1CurrentHttpResponse,
-} from "@openbot/contracts/team-protocol/v1-adapter";
-import { TEAM_PROTOCOL_V3 } from "@openbot/contracts/team-protocol/v3";
-import { encodeTeamProtocolV3CurrentHttpResponse } from "@openbot/contracts/team-protocol/v3-adapter";
-import { TEAM_PROTOCOL_V4 } from "@openbot/contracts/team-protocol/v4";
-import { encodeTeamProtocolV4CurrentHttpResponse } from "@openbot/contracts/team-protocol/v4-adapter";
-import { encodeTeamProtocolV4BaseCurrentEvent } from "@openbot/contracts/team-protocol/v4-base-adapter";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+} from "@dani-dex/contracts/team-protocol/v1-adapter";
+import { TEAM_PROTOCOL_V3 } from "@dani-dex/contracts/team-protocol/v3";
+import { encodeTeamProtocolV3CurrentHttpResponse } from "@dani-dex/contracts/team-protocol/v3-adapter";
+import { TEAM_PROTOCOL_V4 } from "@dani-dex/contracts/team-protocol/v4";
+import { encodeTeamProtocolV4CurrentHttpResponse } from "@dani-dex/contracts/team-protocol/v4-adapter";
+import { encodeTeamProtocolV4BaseCurrentEvent } from "@dani-dex/contracts/team-protocol/v4-base-adapter";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import type * as Ws from "ws";
 import { McpServerError } from "../backend/mcp-server-store";
 import type { TeamChatStore } from "../backend/team-chat-store";

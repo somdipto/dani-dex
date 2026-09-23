@@ -1,5 +1,5 @@
+import type { SidebarLayoutSnapshot } from "@dani-dex/contracts/ipc";
 import { type MenuAction, MenuView } from "@expo/ui/community/menu";
-import type { SidebarLayoutSnapshot } from "@openbot/contracts/ipc";
 import { router, Stack } from "expo-router";
 import { Button, Typography } from "heroui-native";
 import { useThemeColor } from "heroui-native/hooks";

@@ -17,9 +17,9 @@ import {
   type SessionConfigOption,
   type SessionNotification,
 } from "@agentclientprotocol/sdk";
-import { agentProviderName } from "@openbot/contracts/agent-providers";
-import { type DynamicRecord, isBoolean, isString } from "@openbot/contracts/runtime-values";
-import { redactText } from "@openbot/logging";
+import { agentProviderName } from "@dani-dex/contracts/agent-providers";
+import { type DynamicRecord, isBoolean, isString } from "@dani-dex/contracts/runtime-values";
+import { redactText } from "@dani-dex/logging";
 import { elicitationOptions, elicitationValue, secretElicitationField } from "./agent/prompts";
 import type { AgentProvider } from "./agent-client";
 import { type AgentCliInfo, cliSpawnTarget } from "./cli";

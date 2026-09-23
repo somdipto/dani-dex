@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { type AgentHarnessId, isAgentHarness } from "@openbot/contracts/agent-harnesses";
+import { type AgentHarnessId, isAgentHarness } from "@dani-dex/contracts/agent-harnesses";
 import {
   type AgentModelId,
   type AgentProviderId,
@@ -7,8 +7,8 @@ import {
   isAgentModel,
   isAgentProvider,
   type SaveSetupInput,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 
 interface StoredSetup {
   version: 2;

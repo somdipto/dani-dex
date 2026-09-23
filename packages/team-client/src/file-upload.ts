@@ -1,9 +1,9 @@
-import { sha256 } from "@noble/hashes/sha2.js";
 import {
   decodeTeamProtocolV2FileControlFrame,
   encodeTeamProtocolV2FileChunk,
   encodeTeamProtocolV2Frame,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
+import { sha256 } from "@noble/hashes/sha2.js";
 
 // Native/DOM bridge copies Base64 strings. Keep its working set below the host's larger file limit.
 export const MOBILE_ATTACHMENT_BYTES = 10 * 1024 * 1024;

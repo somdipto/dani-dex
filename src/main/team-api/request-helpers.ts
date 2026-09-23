@@ -1,6 +1,6 @@
-import { channelRequest, isChannelRoute } from "@openbot/contracts/team-protocol/channels-v1";
-import { isMcpRoute, mcpRequest } from "@openbot/contracts/team-protocol/mcp-v1";
-import { decodeTeamProtocolV4CurrentHttpRequest } from "@openbot/contracts/team-protocol/v4-adapter";
+import { channelRequest, isChannelRoute } from "@dani-dex/contracts/team-protocol/channels-v1";
+import { isMcpRoute, mcpRequest } from "@dani-dex/contracts/team-protocol/mcp-v1";
+import { decodeTeamProtocolV4CurrentHttpRequest } from "@dani-dex/contracts/team-protocol/v4-adapter";
 // Reading a Team API request: the parsers, the validators and the capability filters that every
 // route module needs and none of them owns.
 //
@@ -11,7 +11,7 @@ import { decodeTeamProtocolV4CurrentHttpRequest } from "@openbot/contracts/team-
 // property of the reader, not something ~50 routes each have to remember.
 
 import type { IncomingMessage } from "node:http";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   type ConversationPageAnchor,
   type ConversationSnapshot,
@@ -29,21 +29,21 @@ import {
   ROUTINE_RUN_EVENT_ITEM_TYPE_PREFIX,
   type TeamMemberSummary,
   type UpdateAgentInput,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import {
   isTeamCurrentCapability,
   supportsTeamSemanticTags,
   TEAM_AGENT_CREATE_MODEL_CAPABILITY,
-} from "@openbot/contracts/team-protocol/current";
+} from "@dani-dex/contracts/team-protocol/current";
 import {
   TEAM_CAPABILITIES_HEADER,
   TEAM_PROTOCOL_V1,
   TEAM_PROTOCOL_VERSION_HEADER,
-} from "@openbot/contracts/team-protocol/v1";
-import { decodeTeamProtocolV1CurrentHttpRequest } from "@openbot/contracts/team-protocol/v1-adapter";
-import { TEAM_PROTOCOL_V3 } from "@openbot/contracts/team-protocol/v3";
-import { decodeTeamProtocolV3CurrentHttpRequest } from "@openbot/contracts/team-protocol/v3-adapter";
+} from "@dani-dex/contracts/team-protocol/v1";
+import { decodeTeamProtocolV1CurrentHttpRequest } from "@dani-dex/contracts/team-protocol/v1-adapter";
+import { TEAM_PROTOCOL_V3 } from "@dani-dex/contracts/team-protocol/v3";
+import { decodeTeamProtocolV3CurrentHttpRequest } from "@dani-dex/contracts/team-protocol/v3-adapter";
 import { HttpError } from "./http-error";
 
 export const JSON_LIMIT = 1024 * 1024;

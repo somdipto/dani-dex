@@ -14,9 +14,9 @@ import type {
   ProviderRuntimeStatus,
   SaveCustomProviderInput,
   UpdateStatus,
-} from "@openbot/contracts/ipc";
-import { agentProviderDescriptor } from "@openbot/contracts/ipc";
-import type { AppTextKey } from "@openbot/i18n";
+} from "@dani-dex/contracts/ipc";
+import { agentProviderDescriptor } from "@dani-dex/contracts/ipc";
+import type { AppTextKey } from "@dani-dex/i18n";
 import { createEffect, createSignal, Show } from "solid-js";
 import { ProviderCodeLoginDialog } from "../../components/ProviderCodeLoginDialog";
 import type { ProviderCodeLoginApi } from "../../components/provider-code-login-api";

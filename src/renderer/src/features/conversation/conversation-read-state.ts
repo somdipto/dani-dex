@@ -3,13 +3,13 @@ import type {
   ConversationReadState,
   DirectConversationSnapshot,
   DirectMessage,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   HOSTED_SITE_EVENT_ITEM_TYPE_PREFIX,
   ROUTINE_EVENT_ITEM_TYPE_PREFIX,
   ROUTINE_RUN_EVENT_ITEM_TYPE_PREFIX,
   SKILL_EVENT_ITEM_TYPE_PREFIX,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { AgentMessage } from "../../data";
 
 /**

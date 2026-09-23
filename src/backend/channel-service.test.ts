@@ -1,16 +1,16 @@
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { serializeAttachmentReference } from "@openbot/contracts/attachment-references";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   type ChannelDraft,
   type ChannelMessage,
   type ChannelTask,
   channelRoutingConversationEvent,
   channelRoutingConversationEventItemType,
-} from "@openbot/contracts/ipc";
-import { validateProfileName } from "@openbot/contracts/validation";
+} from "@dani-dex/contracts/ipc";
+import { validateProfileName } from "@dani-dex/contracts/validation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stores } from "./agent-service-test-harness";
 import { ChannelHistory, type ChannelTextModel } from "./channel-history";

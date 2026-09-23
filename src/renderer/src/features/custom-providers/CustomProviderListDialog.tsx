@@ -1,4 +1,4 @@
-import type { CustomProviderSummary } from "@openbot/contracts/ipc";
+import type { CustomProviderSummary } from "@dani-dex/contracts/ipc";
 import { For, onSettled, Show } from "solid-js";
 import { createScrollFades } from "../../components/createScrollFades";
 import {

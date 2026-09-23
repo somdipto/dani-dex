@@ -1,4 +1,4 @@
-import type { DynamicIslandNotchSize } from "@openbot/contracts/ipc";
+import type { DynamicIslandNotchSize } from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createEffect, createSignal, createUniqueId, onCleanup, onSettled, Show, untrack } from "solid-js";
 import { cx, mix, prefersReducedMotion } from "./utils";
@@ -8,7 +8,7 @@ export type DynamicIslandHoverBehavior = "none" | "grow" | "expand";
 export type DynamicIslandDisplayMode = "notch" | "island";
 export type DynamicIslandStateChangeReason = "pointer" | "keyboard" | "hover" | "hover-exit" | "escape";
 
-export type { DynamicIslandNotchSize } from "@openbot/contracts/ipc";
+export type { DynamicIslandNotchSize } from "@dani-dex/contracts/ipc";
 
 export interface DynamicIslandHoverContentMotion {
   leadingScale: number;

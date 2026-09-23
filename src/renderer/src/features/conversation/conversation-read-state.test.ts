@@ -1,10 +1,10 @@
-import type { ConversationMessage } from "@openbot/contracts/ipc";
+import type { ConversationMessage } from "@dani-dex/contracts/ipc";
 import {
   hostedSiteConversationEventItemType,
   hostedSiteConversationEventText,
   routineConversationEventItemType,
   routineRunConversationEventItemType,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { decideAgentAutoRead, readStateForMessages } from "./conversation-read-state";
 

@@ -1,7 +1,7 @@
-import { isAvatarMimeType, isValidAvatarImage } from "@openbot/contracts/avatar-images";
-import { AVATAR_IMAGE_LIMITS } from "@openbot/contracts/input-limits";
-import type { RemoteFileUpload } from "@openbot/team-client/remote-peer";
-import { userErrorMessage } from "@openbot/user-errors";
+import { isAvatarMimeType, isValidAvatarImage } from "@dani-dex/contracts/avatar-images";
+import { AVATAR_IMAGE_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { RemoteFileUpload } from "@dani-dex/team-client/remote-peer";
+import { userErrorMessage } from "@dani-dex/user-errors";
 import { File } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { Button, Typography } from "heroui-native";

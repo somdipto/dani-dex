@@ -1,4 +1,4 @@
-import { isManagedRuntimeProvider } from "@openbot/contracts/agent-providers";
+import { isManagedRuntimeProvider } from "@dani-dex/contracts/agent-providers";
 import { AgentDatabaseSupervisor } from "../backend/agent-data/agent-database-supervisor";
 import { AgentTables } from "../backend/agent-data/agent-tables";
 import { spawnAgentDatabaseHost } from "./agent-database-host-process";
@@ -39,10 +39,10 @@ import type {
   ComputerUseState,
   ProviderRuntimeSnapshot,
   VoiceModelStatus,
-} from "@openbot/contracts/ipc";
-import { IPC_CHANNELS, isManagedToolRuntime, isUpdateBusyPhase } from "@openbot/contracts/ipc";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
-import { REMOTE_ACCOUNT_CHECK_INTERVAL_MS } from "@openbot/team-client";
+} from "@dani-dex/contracts/ipc";
+import { IPC_CHANNELS, isManagedToolRuntime, isUpdateBusyPhase } from "@dani-dex/contracts/ipc";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
+import { REMOTE_ACCOUNT_CHECK_INTERVAL_MS } from "@dani-dex/team-client";
 import { app, type BrowserWindow, nativeImage, safeStorage, screen, shell } from "electron";
 import { AgentService } from "../backend/agent-service";
 import { AgentStore } from "../backend/agent-store";

@@ -1,4 +1,4 @@
-import { userErrorMessage as errorMessage } from "@openbot/user-errors";
+import { userErrorMessage as errorMessage } from "@dani-dex/user-errors";
 import * as Clipboard from "expo-clipboard";
 import { Link, router } from "expo-router";
 import { useRef } from "react";

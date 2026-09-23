@@ -1,4 +1,4 @@
-import { isManagedRuntimeProvider, type ManagedProviderId } from "@openbot/contracts/agent-providers";
+import { isManagedRuntimeProvider, type ManagedProviderId } from "@dani-dex/contracts/agent-providers";
 import type {
   AccountSession,
   AccountUsage,
@@ -76,7 +76,7 @@ import type {
   UpdateQueuedMessageInput,
   UpdateStatus,
   UpdateTeamMemberInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   composedCustomModelId,
   createMcpServerId,
@@ -85,7 +85,7 @@ import {
   normalizeMcpConfig,
   SIDEBAR_PEOPLE_SECTION_ID,
   SIDEBAR_UNASSIGNED_SECTION_ID,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import browserTakeoverPreviewUrl from "../../stories/assets/browser-takeover-preview.svg";
 import { filePreviewForPath } from "../../stories/file-previews";
 import {

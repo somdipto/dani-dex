@@ -13,15 +13,15 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { basename, dirname, extname, isAbsolute, join, relative } from "node:path";
-import { assertSupportedAttachmentName, attachmentMimeTypeForName } from "@openbot/contracts/attachment-files";
-import { ATTACHMENT_LIMITS, INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { assertSupportedAttachmentName, attachmentMimeTypeForName } from "@dani-dex/contracts/attachment-files";
+import { ATTACHMENT_LIMITS, INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AttachmentDataInput,
   AttachmentKind,
   AttachmentPreviewKind,
   AttachmentSummary,
   QueueDelivery,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 
 const MAX_ATTACHMENTS = INPUT_LIMITS.attachments;
 const MAX_FILE_BYTES = ATTACHMENT_LIMITS.fileBytes;

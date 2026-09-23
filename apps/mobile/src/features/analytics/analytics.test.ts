@@ -1,4 +1,4 @@
-import { RemoteTeamDirectoryClient } from "@openbot/team-client";
+import { RemoteTeamDirectoryClient } from "@dani-dex/team-client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MobileChannelStore } from "../channels/model/channel-store";
 import { MobileConversationStore } from "../workspace/model/conversation-store";

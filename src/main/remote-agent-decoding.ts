@@ -1,4 +1,4 @@
-import { decodeAgentAnalytics, decodeHostAnalytics } from "@openbot/contracts/ipc";
+import { decodeAgentAnalytics, decodeHostAnalytics } from "@dani-dex/contracts/ipc";
 // Agent-shaped wire payloads: summaries, status, models, skills, memories, routines, queue.
 // See `remote-host-decoding.ts` for why the `FromHost` suffix exists and must not be merged away.
 
@@ -14,7 +14,7 @@ import type {
   QueuedMessageReceipt,
   QueueSnapshot,
   SidebarLayoutSnapshot,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   isAccountUsage,
   isAgentMemory,
@@ -27,15 +27,15 @@ import {
   isRoutine,
   isRoutineRun,
   isSidebarLayoutSnapshot,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   decodeRecord,
   guardedDecoder,
   guardedListDecoder,
   requiredNumber,
   requiredString,
-} from "@openbot/contracts/ipc-decoding";
-import { isNumber, isOneOf, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc-decoding";
+import { isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 
 export function decodeDraftAttachment(value: unknown): DraftAttachment {
   if (!isAttachmentSummary(value)) throw new Error("Invalid attachment.");

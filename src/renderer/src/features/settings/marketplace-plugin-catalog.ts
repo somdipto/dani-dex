@@ -6,7 +6,7 @@
  * bun run marketplace:build:plugins -- --check to verify.
  */
 
-import type { McpServerConfig } from "@openbot/contracts/ipc";
+import type { McpServerConfig } from "@dani-dex/contracts/ipc";
 import type { MarketplacePluginApp, MarketplacePluginDetail } from "./marketplace-plugins";
 
 /**

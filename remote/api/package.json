@@ -1,5 +1,5 @@
 {
-  "name": "@openbot/remote-api",
+  "name": "@dani-dex/remote-api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "check": "bun run typecheck && bun run test"
   },
   "dependencies": {
-    "@openbot/contracts": "workspace:*",
+    "@dani-dex/contracts": "workspace:*",
     "elysia": "1.4.30",
     "jose": "catalog:",
     "zod": "catalog:"

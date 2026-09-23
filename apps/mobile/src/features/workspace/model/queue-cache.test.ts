@@ -1,4 +1,4 @@
-import type { QueueSnapshot } from "@openbot/contracts/ipc";
+import type { QueueSnapshot } from "@dani-dex/contracts/ipc";
 import { QueryClient, QueryObserver } from "@tanstack/react-query";
 import { expect, it } from "vitest";
 import { applyMobileQueueEvent } from "./queue-cache";

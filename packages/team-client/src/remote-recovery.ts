@@ -1,4 +1,4 @@
-import type { ConversationSnapshot } from "@openbot/contracts/ipc";
+import type { ConversationSnapshot } from "@dani-dex/contracts/ipc";
 
 export const REMOTE_RETRY_INTERVAL_MS = 10_000;
 export const REMOTE_RETRY_LIMIT = 5;

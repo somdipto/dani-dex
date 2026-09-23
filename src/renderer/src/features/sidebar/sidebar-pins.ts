@@ -1,4 +1,4 @@
-import { legacyAgentId } from "@openbot/contracts/validation";
+import { legacyAgentId } from "@dani-dex/contracts/validation";
 import { z } from "zod";
 
 export type SidebarPinnedItem = Readonly<{

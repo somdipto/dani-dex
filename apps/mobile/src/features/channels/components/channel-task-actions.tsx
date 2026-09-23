@@ -1,5 +1,5 @@
+import type { ChannelTask } from "@dani-dex/contracts/ipc";
 import { MenuView } from "@expo/ui/community/menu";
-import type { ChannelTask } from "@openbot/contracts/ipc";
 import { Button, Typography } from "heroui-native";
 import { View } from "react-native";
 import { BloubAvatarThumbnail } from "@/features/agents/components/bloub-avatar";

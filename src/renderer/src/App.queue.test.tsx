@@ -1,6 +1,6 @@
-import { serializeAttachmentReference } from "@openbot/contracts/attachment-references";
-import { serializeChatTagReference } from "@openbot/contracts/chat-tag-references";
-import type { ConversationSnapshot, DirectConversationSnapshot, QueueDelivery } from "@openbot/contracts/ipc";
+import { serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
+import { serializeChatTagReference } from "@dani-dex/contracts/chat-tag-references";
+import type { ConversationSnapshot, DirectConversationSnapshot, QueueDelivery } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { expect, it, vi } from "vitest";
 import { App } from "./App";
@@ -26,14 +26,14 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("keeps a failed send in the composer and clears it only after a successful retry", async () => {
-    vi.mocked(window.openbot.agent.sendMessage).mockRejectedValueOnce(new Error("Mailbox unavailable"));
+    vi.mocked(window.danidex.agent.sendMessage).mockRejectedValueOnce(new Error("Mailbox unavailable"));
     render(() => <App />);
     await confirmOnboardingModel();
     const composer = await screen.findByRole("textbox", { name: "Message Chief" });
     composer.textContent = "Run this Monday";
     await fireEvent.input(composer);
     await waitFor(() =>
-      expect(window.openbot.servers.setTyping).toHaveBeenCalledWith({
+      expect(window.danidex.servers.setTyping).toHaveBeenCalledWith({
         agentId: "chief",
         typing: true,
       }),
@@ -44,13 +44,13 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await fireEvent.keyDown(composer, { key: "Enter" });
     await waitFor(() =>
-      expect(window.openbot.agent.sendMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.sendMessage).toHaveBeenCalledWith(
         { agentId: "chief", text: "Run this Monday", attachmentDraftIds: [] },
         "local",
       ),
     );
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         {
           agentId: "chief",
           throughMessageId: "delivery-1",
@@ -94,9 +94,9 @@ describe("Dani-Dex connected desktop shell", () => {
       },
     });
     await screen.findByText("Earlier agent reply");
-    await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalled());
+    await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalled());
     await new Promise((resolve) => setTimeout(resolve, 0));
-    vi.mocked(window.openbot.agent.markConversationRead).mockClear();
+    vi.mocked(window.danidex.agent.markConversationRead).mockClear();
 
     const composer = screen.getByRole("textbox", { name: "Message Chief" });
     composer.textContent = "Continue this work";
@@ -104,19 +104,19 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.keyDown(composer, { key: "Enter" });
 
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         { agentId: "chief", throughMessageId: "delivery-1" },
         "local",
       ),
     );
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(vi.mocked(window.openbot.agent.markConversationRead).mock.calls).toEqual([
+    expect(vi.mocked(window.danidex.agent.markConversationRead).mock.calls).toEqual([
       [{ agentId: "chief", throughMessageId: "delivery-1" }, "local"],
     ]);
   });
 
   it("opens a private person thread and receives direct messages in real time", async () => {
-    vi.mocked(window.openbot.servers.markDirectRead).mockRejectedValueOnce(new Error("Read state unavailable"));
+    vi.mocked(window.danidex.servers.markDirectRead).mockRejectedValueOnce(new Error("Read state unavailable"));
     render(() => <App peopleEnabled />);
     await screen.findByRole("heading", { name: "Chief" });
     emitPresence?.({
@@ -154,12 +154,12 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.input(input, { target: { value: "Hello Alice" } });
     await fireEvent.keyDown(input, { key: "Enter" });
     await waitFor(() =>
-      expect(window.openbot.servers.sendDirectMessage).toHaveBeenCalledWith(
+      expect(window.danidex.servers.sendDirectMessage).toHaveBeenCalledWith(
         expect.objectContaining({ memberId: "member-alice", text: "Hello Alice" }),
       ),
     );
     await waitFor(() =>
-      expect(window.openbot.servers.markDirectRead).toHaveBeenCalledWith({
+      expect(window.danidex.servers.markDirectRead).toHaveBeenCalledWith({
         memberId: "member-alice",
         throughSequence: 1,
       }),
@@ -202,7 +202,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("status", { name: "1 new message" })).not.toBeInTheDocument();
     expect(screen.queryByRole("separator", { name: "New messages" })).not.toBeInTheDocument();
     await waitFor(() =>
-      expect(window.openbot.servers.markDirectRead).toHaveBeenCalledWith({
+      expect(window.danidex.servers.markDirectRead).toHaveBeenCalledWith({
         memberId: "member-alice",
         throughSequence: 2,
       }),
@@ -221,13 +221,13 @@ describe("Dani-Dex connected desktop shell", () => {
     await waitFor(() => {
       expect(screen.queryByRole("button", { name: /codex-smoke@example\.invalid/i })).not.toBeInTheDocument();
     });
-    expect(window.openbot.servers.readDirectConversation).not.toHaveBeenCalled();
-    expect(window.openbot.servers.listDirectThreads).not.toHaveBeenCalled();
+    expect(window.danidex.servers.readDirectConversation).not.toHaveBeenCalled();
+    expect(window.danidex.servers.listDirectThreads).not.toHaveBeenCalled();
   });
 
   it("does not apply a stale direct-message load after another person is selected", async () => {
     let resolveAlice: ((snapshot: DirectConversationSnapshot) => void) | undefined;
-    vi.mocked(window.openbot.servers.readDirectConversation).mockImplementation((memberId) => {
+    vi.mocked(window.danidex.servers.readDirectConversation).mockImplementation((memberId) => {
       if (memberId === "member-alice") {
         return new Promise((resolve) => {
           resolveAlice = resolve;
@@ -310,7 +310,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.input(composer);
     await fireEvent.keyDown(composer, { key: "Enter" });
     await waitFor(() =>
-      expect(window.openbot.agent.sendMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.sendMessage).toHaveBeenCalledWith(
         {
           agentId: "chief",
           text: "Yes, today please",
@@ -343,7 +343,7 @@ describe("Dani-Dex connected desktop shell", () => {
     // The message arrives through the read the chat itself makes, not through an event. An event
     // has to reach a subscriber that is not there yet when the heading renders, and the moment it
     // subscribes is not observable from here; the read is awaited by the chat that asked for it.
-    vi.mocked(window.openbot.agent.readConversation).mockImplementation(
+    vi.mocked(window.danidex.agent.readConversation).mockImplementation(
       async (agentId): Promise<ConversationSnapshot> =>
         agentId === "chief" ? snapshot : { agentId, threadId: null, activeTurnId: null, revision: 0, messages: [] },
     );
@@ -372,7 +372,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await fireEvent.click(await screen.findByRole("button", { name: "Improve" }));
     await waitFor(() =>
-      expect(window.openbot.agent.sendMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.sendMessage).toHaveBeenCalledWith(
         {
           agentId: "chief",
           text: "Improve this selected text.\n\n> friendlier closing sentence",
@@ -391,7 +391,7 @@ describe("Dani-Dex connected desktop shell", () => {
       configurable: true,
       value: { writeText },
     });
-    vi.mocked(window.openbot.agent.listInstalledSkills).mockResolvedValue([
+    vi.mocked(window.danidex.agent.listInstalledSkills).mockResolvedValue([
       {
         skillId: "skill-1",
         slug: "release-notes",
@@ -426,7 +426,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await screen.findByRole("button", { name: "Open agent Sales Outbound" });
     await fireEvent.pointerDown(screen.getByRole("button", { name: "Add reaction" }), { button: 0 });
     await fireEvent.pointerUp(screen.getByRole("menuitemradio", { name: "React with ❤️" }), { button: 0 });
-    expect(window.openbot.agent.setMessageReaction).toHaveBeenCalledWith({
+    expect(window.danidex.agent.setMessageReaction).toHaveBeenCalledWith({
       agentId: "chief",
       messageId: "assistant-actions",
       emoji: "❤️",
@@ -445,8 +445,8 @@ describe("Dani-Dex connected desktop shell", () => {
   it("keeps an asynchronous pasted attachment on the server that received the paste", async () => {
     const local = testServer("local", true);
     const remote = testServer("remote-1", false);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (serverId) => [
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (serverId) => [
       { ...local, active: serverId === "local" },
       { ...remote, active: serverId === "remote-1" },
     ]);
@@ -469,7 +469,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(screen.getByRole("button", { name: "Local server" }));
     const removeAttachment = await screen.findByRole("button", { name: "Remove for-local.png" });
     await fireEvent.click(removeAttachment);
-    expect(window.openbot.agent.discardDraftAttachment).toHaveBeenCalledWith("pasted-local", "local");
+    expect(window.danidex.agent.discardDraftAttachment).toHaveBeenCalledWith("pasted-local", "local");
     await waitFor(() => expect(screen.queryByRole("button", { name: "Remove for-local.png" })).not.toBeInTheDocument());
   });
 
@@ -514,9 +514,9 @@ describe("Dani-Dex connected desktop shell", () => {
     );
     await fireEvent.click(screen.getByRole("button", { name: "Delete queued message 1" }));
     const confirmation = await screen.findByRole("dialog", { name: "Delete queued message?" });
-    expect(window.openbot.agent.cancelQueuedMessage).not.toHaveBeenCalled();
+    expect(window.danidex.agent.cancelQueuedMessage).not.toHaveBeenCalled();
     await fireEvent.click(within(confirmation).getByRole("button", { name: "Keep" }));
-    expect(window.openbot.agent.cancelQueuedMessage).not.toHaveBeenCalled();
+    expect(window.danidex.agent.cancelQueuedMessage).not.toHaveBeenCalled();
     await fireEvent.click(screen.getByRole("button", { name: "Delete queued message 1" }));
     await fireEvent.click(
       within(await screen.findByRole("dialog", { name: "Delete queued message?" })).getByRole("button", {
@@ -524,7 +524,7 @@ describe("Dani-Dex connected desktop shell", () => {
       }),
     );
     await waitFor(() =>
-      expect(window.openbot.agent.cancelQueuedMessage).toHaveBeenCalledWith({
+      expect(window.danidex.agent.cancelQueuedMessage).toHaveBeenCalledWith({
         agentId: "chief",
         deliveryId: "delivery-edited",
       }),
@@ -608,7 +608,7 @@ describe("Dani-Dex connected desktop shell", () => {
       channelName: "Project launch",
       agentId: "chief",
     };
-    vi.mocked(window.openbot.agent.listQueue).mockImplementation(async (agentId) =>
+    vi.mocked(window.danidex.agent.listQueue).mockImplementation(async (agentId) =>
       agentId === "chief" ? { agentId, deliveries: [waiting], hold } : { agentId, deliveries: [held], hold },
     );
 
@@ -654,7 +654,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("keeps the complete agent draft when creation fails", async () => {
-    vi.mocked(window.openbot.agent.createAgent).mockRejectedValueOnce(
+    vi.mocked(window.danidex.agent.createAgent).mockRejectedValueOnce(
       new Error("The first message could not be queued."),
     );
     render(() => <App />);
@@ -703,7 +703,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.input(composer);
     await fireEvent.keyDown(composer, { key: "Enter" });
     await waitFor(() =>
-      expect(window.openbot.agent.sendMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.sendMessage).toHaveBeenCalledWith(
         { agentId: "chief", text: "Queue this while you wait", attachmentDraftIds: [] },
         "local",
       ),
@@ -711,7 +711,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.input(answer, { target: { value: "Acme" } });
     await fireEvent.keyDown(answer, { key: "Enter" });
     await waitFor(() =>
-      expect(window.openbot.agent.respondToPrompt).toHaveBeenCalledWith({
+      expect(window.danidex.agent.respondToPrompt).toHaveBeenCalledWith({
         requestId: "prompt-1",
         answers: { account: ["Acme"] },
       }),
@@ -833,7 +833,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("keeps the prompt active and reports a delivery failure", async () => {
-    vi.mocked(window.openbot.agent.respondToPrompt).mockRejectedValueOnce(new Error("Provider is offline."));
+    vi.mocked(window.danidex.agent.respondToPrompt).mockRejectedValueOnce(new Error("Provider is offline."));
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     await confirmOnboardingModel();
@@ -1115,7 +1115,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("renders command approvals and keeps the action pending while submitting", async () => {
     let resolveApproval: (() => void) | undefined;
-    vi.mocked(window.openbot.agent.respondToApproval).mockImplementation(
+    vi.mocked(window.danidex.agent.respondToApproval).mockImplementation(
       () =>
         new Promise<void>((resolve) => {
           resolveApproval = resolve;
@@ -1145,7 +1145,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.getByText("Run the verification suite.")).toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "Allow" }));
     expect(screen.getByRole("button", { name: "Sending…" })).toBeDisabled();
-    expect(window.openbot.agent.respondToApproval).toHaveBeenCalledWith({
+    expect(window.danidex.agent.respondToApproval).toHaveBeenCalledWith({
       requestId: "approval-1",
       decision: "accept",
     });
@@ -1162,8 +1162,8 @@ describe("Dani-Dex connected desktop shell", () => {
   it("restores the queue of a server the user comes back to", async () => {
     const local = testServer("local", true);
     const remote = testServer("remote-1", false);
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (serverId) => [
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (serverId) => [
       { ...local, active: serverId === "local" },
       { ...remote, active: serverId === "remote-1" },
     ]);
@@ -1200,7 +1200,7 @@ describe("queue edit", () => {
 
   /** One running turn the edit must leave alone, plus the deliveries the case is about. */
   function queueWith(...deliveries: QueueDelivery[]): void {
-    vi.mocked(window.openbot.agent.listQueue).mockResolvedValue({
+    vi.mocked(window.danidex.agent.listQueue).mockResolvedValue({
       agentId: "chief",
       deliveries: [
         queuedDelivery("running", "Running", null, { status: "running", turnId: "turn-running" }),
@@ -1212,18 +1212,18 @@ describe("queue edit", () => {
   it("acquires a host hold before editing and uses its identity for save and cancel", async () => {
     const delivery = queuedDelivery("shared-edit", "Original queue message", 1);
     queueWith(delivery);
-    vi.mocked(window.openbot.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
+    vi.mocked(window.danidex.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
     render(() => <App />);
     const composer = await screen.findByRole("textbox", { name: "Message Chief" });
     await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
     await screen.findByRole("button", { name: "Save queued message" });
-    const begin = vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls[0][0];
+    const begin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[0][0];
     expect(begin).toMatchObject({ action: "begin", agentId: "chief", deliveryId: delivery.id });
     composer.textContent = "Changed safely";
     await fireEvent.input(composer);
     await fireEvent.click(screen.getByRole("button", { name: "Save queued message" }));
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
         {
           agentId: "chief",
           deliveryId: delivery.id,
@@ -1236,15 +1236,15 @@ describe("queue edit", () => {
         "local",
       ),
     );
-    expect(window.openbot.agent.updateQueuedMessage).not.toHaveBeenCalled();
+    expect(window.danidex.agent.updateQueuedMessage).not.toHaveBeenCalled();
     await waitFor(() => expect(screen.queryByRole("button", { name: "Save queued message" })).not.toBeInTheDocument());
     await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
     await screen.findByRole("button", { name: "Save queued message" });
     // Save confirms the hold with the same identity first, so the second hold is calls[3].
-    const secondBegin = vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls[3][0];
+    const secondBegin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[3][0];
     await fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
         { agentId: "chief", deliveryId: delivery.id, editId: secondBegin.editId, action: "cancel" },
         "local",
       ),
@@ -1254,17 +1254,17 @@ describe("queue edit", () => {
   it("reuses the durable Save request after a lost response and blocks edits until retry", async () => {
     const delivery = queuedDelivery("durable-save", "Original queue message", 1);
     queueWith(delivery);
-    vi.mocked(window.openbot.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
+    vi.mocked(window.danidex.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
     render(() => <App />);
     const composer = await screen.findByRole("textbox", { name: "Message Chief" });
     await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
     await screen.findByRole("button", { name: "Save queued message" });
-    const begin = vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls[0][0];
+    const begin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[0][0];
     composer.textContent = "First save";
     await fireEvent.input(composer);
     // The hold confirm succeeds; only the Save response is lost.
     let saveAttempts = 0;
-    vi.mocked(window.openbot.agent.editQueuedMessage).mockImplementation(async (input) => {
+    vi.mocked(window.danidex.agent.editQueuedMessage).mockImplementation(async (input) => {
       if (input.action === "save" && saveAttempts++ === 0) throw new Error("Connection lost");
       return { agentId: "chief", deliveries: [delivery] };
     });
@@ -1284,7 +1284,7 @@ describe("queue edit", () => {
     expect(window.localStorage.getItem("openbot:queue-edit")).not.toContain("Changed after lost response");
     await fireEvent.click(screen.getByRole("button", { name: "Save queued message" }));
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
         {
           agentId: "chief",
           deliveryId: delivery.id,
@@ -1298,7 +1298,7 @@ describe("queue edit", () => {
       ),
     );
     const saves = vi
-      .mocked(window.openbot.agent.editQueuedMessage)
+      .mocked(window.danidex.agent.editQueuedMessage)
       .mock.calls.filter(([input]) => input.action === "save");
     expect(saves).toHaveLength(2);
     expect(saves[0][0]).toEqual(saves[1][0]);
@@ -1311,7 +1311,7 @@ describe("queue edit", () => {
     async (state) => {
       const delivery = queuedDelivery("deleted-edit", "Queued text", 1);
       queueWith(delivery);
-      vi.mocked(window.openbot.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
+      vi.mocked(window.danidex.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
       render(() => <App />);
       const composer = await screen.findByRole("textbox", { name: "Message Chief" });
       composer.textContent = "My original draft";
@@ -1328,7 +1328,7 @@ describe("queue edit", () => {
       await screen.findByRole("button", { name: "Save queued message" });
       await waitFor(() => expect(composer).toHaveTextContent("Queued text"));
       // A deleted delivery no longer needs a host round trip, even if that host is unavailable.
-      vi.mocked(window.openbot.agent.editQueuedMessage).mockRejectedValue(new Error("Connection lost"));
+      vi.mocked(window.danidex.agent.editQueuedMessage).mockRejectedValue(new Error("Connection lost"));
       emitAgentEvent?.({
         type: "queue-changed",
         snapshot: { agentId: "chief", deliveries: state === "cancelled" ? [{ ...delivery, status: "cancelled" }] : [] },
@@ -1340,7 +1340,7 @@ describe("queue edit", () => {
       expect(composer).toHaveTextContent("My original draft");
       expect(screen.getByRole("button", { name: "Remove backup.pdf" })).toBeInTheDocument();
       expect(window.localStorage.getItem("openbot:queue-edit")).toBeNull();
-      expect(vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls.map(([input]) => input.action)).toEqual([
+      expect(vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls.map(([input]) => input.action)).toEqual([
         "begin",
         "retain-attachments",
       ]);
@@ -1351,33 +1351,33 @@ describe("queue edit", () => {
     const first = queuedDelivery("lost-edit", "First draft", 1);
     const second = queuedDelivery("next-edit", "Second draft", 2);
     queueWith(first, second);
-    vi.mocked(window.openbot.agent.editQueuedMessage).mockRejectedValue(new Error("Connection lost"));
+    vi.mocked(window.danidex.agent.editQueuedMessage).mockRejectedValue(new Error("Connection lost"));
     render(() => <App />);
     await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
     await screen.findByText("Connection lost");
-    const begin = vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls[0][0];
+    const begin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[0][0];
     expect(window.localStorage.getItem("openbot:queue-edit")).toContain(begin.editId);
     await fireEvent.click(screen.getByRole("button", { name: "Edit queued message 2" }));
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith({ ...begin, action: "cancel" }, "local"),
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith({ ...begin, action: "cancel" }, "local"),
     );
     expect(
-      vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls.filter(([input]) => input.action === "begin"),
+      vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls.filter(([input]) => input.action === "begin"),
     ).toHaveLength(1);
     expect(window.localStorage.getItem("openbot:queue-edit")).toContain(begin.editId);
     expect(screen.getByRole("textbox", { name: "Message Chief" })).toHaveTextContent("First draft");
-    vi.mocked(window.openbot.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [first] });
+    vi.mocked(window.danidex.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [first] });
     await waitFor(() => expect(screen.getByRole("button", { name: "Save queued message" })).toBeEnabled());
     await fireEvent.click(screen.getByRole("button", { name: "Save queued message" }));
     // Save confirms the lost hold with the same identity before sending the request.
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith({ ...begin, action: "begin" }, "local"),
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith({ ...begin, action: "begin" }, "local"),
     );
     expect(
-      vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls.filter(([input]) => input.action === "begin"),
+      vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls.filter(([input]) => input.action === "begin"),
     ).toHaveLength(2);
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
         expect.objectContaining({ action: "save", editId: begin.editId, deliveryId: first.id }),
         "local",
       ),
@@ -1385,7 +1385,7 @@ describe("queue edit", () => {
   });
 
   it("uses the legacy queue update on a remote host without queue-edit-v1", async () => {
-    vi.mocked(window.openbot.servers.list).mockResolvedValue([testServer("remote-1", true)]);
+    vi.mocked(window.danidex.servers.list).mockResolvedValue([testServer("remote-1", true)]);
     const delivery = queuedDelivery("legacy-edit", "Legacy draft", 1);
     queueWith(delivery);
     render(() => <App />);
@@ -1395,7 +1395,7 @@ describe("queue edit", () => {
     await fireEvent.input(composer);
     await fireEvent.click(await screen.findByRole("button", { name: "Save queued message" }));
     await waitFor(() =>
-      expect(window.openbot.agent.updateQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.updateQueuedMessage).toHaveBeenCalledWith(
         {
           agentId: "chief",
           deliveryId: delivery.id,
@@ -1406,19 +1406,19 @@ describe("queue edit", () => {
         "remote-1",
       ),
     );
-    expect(window.openbot.agent.editQueuedMessage).not.toHaveBeenCalled();
+    expect(window.danidex.agent.editQueuedMessage).not.toHaveBeenCalled();
   });
 
   it("keeps an imported edit attachment busy until the host retains it", async () => {
     const delivery = queuedDelivery("attachment-edit", "Original", 1);
     queueWith(delivery);
-    vi.mocked(window.openbot.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
+    vi.mocked(window.danidex.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
     render(() => <App />);
     await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "Save queued message" })).toBeEnabled());
-    const begin = vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls[0][0];
+    const begin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[0][0];
     let retain = () => {};
-    vi.mocked(window.openbot.agent.editQueuedMessage).mockImplementationOnce(
+    vi.mocked(window.danidex.agent.editQueuedMessage).mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           retain = () => resolve({ agentId: "chief", deliveries: [] });
@@ -1432,7 +1432,7 @@ describe("queue edit", () => {
       attachments: [attachment("pasted", "pasted.pdf", "pdf")],
     });
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
         { ...begin, action: "retain-attachments", attachmentDraftIds: ["pasted"] },
         "local",
       ),
@@ -1443,7 +1443,7 @@ describe("queue edit", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Save queued message" })).toBeEnabled());
     await fireEvent.click(screen.getByRole("button", { name: "Save queued message" }));
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
         expect.objectContaining({ action: "save", editId: begin.editId, attachmentDraftIds: ["pasted"] }),
         "local",
       ),
@@ -1453,7 +1453,7 @@ describe("queue edit", () => {
   it("retains the composer backup attachments with the queue edit", async () => {
     const delivery = queuedDelivery("backup-edit", "Original queue message", 1);
     queueWith(delivery);
-    vi.mocked(window.openbot.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
+    vi.mocked(window.danidex.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     emitAttachmentImport?.({ type: "started", requestId: "backup-paste", serverId: "local" });
@@ -1466,16 +1466,16 @@ describe("queue edit", () => {
     await screen.findByRole("button", { name: "Remove backup.pdf" });
     await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
     await screen.findByRole("button", { name: "Save queued message" });
-    const begin = vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls[0][0];
+    const begin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[0][0];
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
         { ...begin, action: "retain-attachments", attachmentDraftIds: ["backup-1"] },
         "local",
       ),
     );
     await fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() =>
-      expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith(
+      expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith(
         { agentId: "chief", deliveryId: delivery.id, editId: begin.editId, action: "cancel" },
         "local",
       ),
@@ -1488,7 +1488,7 @@ describe("queue edit", () => {
     async (action) => {
       const delivery = queuedDelivery("retain-failed", "Queued text", 1);
       queueWith(delivery);
-      vi.mocked(window.openbot.agent.editQueuedMessage).mockImplementation(async (input) => {
+      vi.mocked(window.danidex.agent.editQueuedMessage).mockImplementation(async (input) => {
         if (input.action !== "begin") throw new Error("Connection lost");
         return { agentId: "chief", deliveries: [delivery] };
       });
@@ -1506,12 +1506,12 @@ describe("queue edit", () => {
       await screen.findByRole("button", { name: "Remove backup.pdf" });
       await fireEvent.click(await screen.findByRole("button", { name: "Edit queued message 1" }));
       await screen.findByText("Connection lost");
-      const begin = vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls[0][0];
+      const begin = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls[0][0];
       expect(window.localStorage.getItem("openbot:queue-edit")).toContain(begin.editId);
       expect(composer).toHaveTextContent("Queued text");
       await fireEvent.keyDown(document, { key: "Escape" });
       await waitFor(() =>
-        expect(window.openbot.agent.editQueuedMessage).toHaveBeenCalledWith({ ...begin, action: "cancel" }, "local"),
+        expect(window.danidex.agent.editQueuedMessage).toHaveBeenCalledWith({ ...begin, action: "cancel" }, "local"),
       );
       await waitFor(() => expect(screen.getByRole("button", { name: "Save queued message" })).toBeEnabled());
       expect(window.localStorage.getItem("openbot:queue-edit")).toContain(begin.editId);
@@ -1519,7 +1519,7 @@ describe("queue edit", () => {
       composer.textContent = "Still editing after connection loss";
       await fireEvent.input(composer);
       view.unmount();
-      vi.mocked(window.openbot.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
+      vi.mocked(window.danidex.agent.editQueuedMessage).mockResolvedValue({ agentId: "chief", deliveries: [delivery] });
       render(() => <App />);
       const save = await screen.findByRole("button", { name: "Save queued message" });
       expect(screen.getByRole("textbox", { name: "Message Chief" })).toHaveTextContent(
@@ -1531,7 +1531,7 @@ describe("queue edit", () => {
         expect(screen.queryByRole("button", { name: "Save queued message" })).not.toBeInTheDocument(),
       );
       expect(window.localStorage.getItem("openbot:queue-edit")).toBeNull();
-      const calls = vi.mocked(window.openbot.agent.editQueuedMessage).mock.calls;
+      const calls = vi.mocked(window.danidex.agent.editQueuedMessage).mock.calls;
       expect(calls.every(([input]) => input.editId === begin.editId)).toBe(true);
       if (action === "cancel") {
         expect(screen.getByRole("textbox", { name: "Message Chief" })).toHaveTextContent("Backup text");
@@ -1539,7 +1539,7 @@ describe("queue edit", () => {
       } else {
         expect(calls.filter(([input]) => input.action === "retain-attachments")).toHaveLength(2);
         expect(calls.some(([input]) => input.action === "save")).toBe(true);
-        expect(window.openbot.agent.discardDraftAttachment).toHaveBeenCalledWith("backup-1", "local");
+        expect(window.danidex.agent.discardDraftAttachment).toHaveBeenCalledWith("backup-1", "local");
       }
     },
   );

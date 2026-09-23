@@ -1,4 +1,4 @@
-import { isBoolean, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { isBoolean, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 
 export const HOSTED_SITE_LIMITS = {
   activeSites: 10,

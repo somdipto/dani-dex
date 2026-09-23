@@ -1,4 +1,4 @@
-import type { CentralAuthState } from "@openbot/contracts/ipc";
+import type { CentralAuthState } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { describe, expect, it, vi } from "vitest";

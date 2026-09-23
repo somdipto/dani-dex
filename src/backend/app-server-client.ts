@@ -1,6 +1,6 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { EventEmitter } from "node:events";
-import { isNumber, isString } from "@openbot/contracts/runtime-values";
+import { isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import type { AgentProvider } from "./agent-client";
 import { JsonLineDecoder } from "./jsonl";
 import {

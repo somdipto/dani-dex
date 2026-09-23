@@ -4,11 +4,11 @@ import {
   type ChannelPage,
   type ChannelSummary,
   type ChannelTask,
-} from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { CHANNEL_ROUTES } from "@openbot/contracts/team-protocol/channels-v1";
-import type { TeamProtocolV2Json } from "@openbot/contracts/team-protocol/v2";
-import { createWorkspacePreferences } from "@openbot/team-client";
+} from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { CHANNEL_ROUTES } from "@dani-dex/contracts/team-protocol/channels-v1";
+import type { TeamProtocolV2Json } from "@dani-dex/contracts/team-protocol/v2";
+import { createWorkspacePreferences } from "@dani-dex/team-client";
 import { describe, expect, it, vi } from "vitest";
 import { projectChannelMessages } from "../../chat/model/chat-messages";
 import { reconcileChannelPins } from "../../workspace/model/agent-pins";

@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentSummary } from "@openbot/contracts/ipc";
+import type { AgentEvent, AgentSummary } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { playCompletionSoundForAgentEvent, shouldPlayCompletionSound } from "./completion-sound";
 import { appendVoiceTranscript, encodePcmWav } from "./voice-recording";

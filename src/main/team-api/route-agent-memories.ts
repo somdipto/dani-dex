@@ -4,7 +4,7 @@
 // method is matched, so a malformed id is a 400 and not a 404. That ordering is the released
 // behaviour and the status-contract test pins it.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { TeamApiAgents } from "./dependencies";
 import type { AgentRouteTarget, RouteOutcome, TeamApiRequestContext } from "./request-context";
 import { pathIdentifier, readJson, stringField } from "./request-helpers";

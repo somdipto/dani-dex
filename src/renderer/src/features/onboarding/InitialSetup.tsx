@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   AGENT_PROVIDERS,
   type AgentProviderId,
@@ -8,7 +8,7 @@ import {
   type DesktopPlatform,
   type InvitePreview,
   type JoinServerInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, onSettled, Show, untrack } from "solid-js";
 import { ProviderPicker, type ProviderPickerOption } from "../../components/ProviderPicker";
 import { Button, Dialog, Textarea } from "../../components/ui";

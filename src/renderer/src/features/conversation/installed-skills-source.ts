@@ -1,4 +1,4 @@
-import type { ServerSummary } from "@openbot/contracts/ipc";
+import type { ServerSummary } from "@dani-dex/contracts/ipc";
 
 export function installedSkillsRequestKey(
   agentId: string | undefined,

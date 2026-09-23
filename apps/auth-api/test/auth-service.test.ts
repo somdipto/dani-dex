@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { AccountSession } from "@openbot/contracts/mobile-connect";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AccountSession } from "@dani-dex/contracts/mobile-connect";
 import { describe, expect, it, vi } from "vitest";
 import {
   AuthService,

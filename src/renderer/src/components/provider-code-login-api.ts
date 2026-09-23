@@ -11,7 +11,7 @@
  * closes the dialog and becomes a notification the store raises.
  */
 
-import type { AgentProviderId } from "@openbot/contracts/ipc";
+import type { AgentProviderId } from "@dani-dex/contracts/ipc";
 import type { ProviderCodeLoginState } from "./ProviderCodeLoginDialog";
 
 export interface ProviderCodeLoginApi {

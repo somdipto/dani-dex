@@ -11,7 +11,7 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createHermesClient, hermesProviderDriver } from "./hermes-acp-driver";
 import { resolveHermesCli } from "./hermes-cli";

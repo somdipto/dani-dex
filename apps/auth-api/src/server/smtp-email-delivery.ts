@@ -1,6 +1,6 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { isCanonicalInviteUrl } from "@openbot/contracts/invite-links";
-import { isValidHostname as isSharedValidHostname } from "@openbot/contracts/validation";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { isCanonicalInviteUrl } from "@dani-dex/contracts/invite-links";
+import { isValidHostname as isSharedValidHostname } from "@dani-dex/contracts/validation";
 
 export interface SmtpEmailConfig {
   host: string;

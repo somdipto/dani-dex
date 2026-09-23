@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { attachmentMimeTypeForName } from "@openbot/contracts/attachment-files";
-import { ATTACHMENT_LIMITS } from "@openbot/contracts/input-limits";
-import { type FilePreview, filePreviewKindForFile } from "@openbot/contracts/ipc";
+import { attachmentMimeTypeForName } from "@dani-dex/contracts/attachment-files";
+import { ATTACHMENT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { type FilePreview, filePreviewKindForFile } from "@dani-dex/contracts/ipc";
 
 export function mimeTypeForName(name: string) {
   return attachmentMimeTypeForName(name);

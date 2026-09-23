@@ -1,4 +1,4 @@
-import { createRemoteAccountRefresh } from "@openbot/team-client";
+import { createRemoteAccountRefresh } from "@dani-dex/team-client";
 import {
   createContext,
   type PropsWithChildren,

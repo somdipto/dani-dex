@@ -1,4 +1,4 @@
-import type { AgentEvent } from "@openbot/contracts/ipc";
+import type { AgentEvent } from "@dani-dex/contracts/ipc";
 
 // One generation per application process. No content or identifiers are stored or exported.
 // Event sources advance it even when their work completes between host-status polls.

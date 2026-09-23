@@ -1,4 +1,4 @@
-import type { AgentEvent } from "@openbot/contracts/ipc";
+import type { AgentEvent } from "@dani-dex/contracts/ipc";
 import type { OpenBotDatabase } from "../openbot-database";
 import type { ConversationRuntime } from "./conversation-runtime";
 

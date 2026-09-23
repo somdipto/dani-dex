@@ -1,11 +1,11 @@
-import { expandAttachmentReferences } from "@openbot/contracts/attachment-references";
-import { chatTagReferences, expandChatTagReferences } from "@openbot/contracts/chat-tag-references";
+import { expandAttachmentReferences } from "@dani-dex/contracts/attachment-references";
+import { chatTagReferences, expandChatTagReferences } from "@dani-dex/contracts/chat-tag-references";
 import {
   type AttachmentSummary,
   canPreviewAttachment,
   type DraftAttachment,
   type FilePreview,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   createEffect,
   createMemo,
@@ -191,7 +191,7 @@ export function ChannelConversation() {
   const [filePreview, setFilePreview] = createSignal<ChannelFilePreview | null>(null);
   const previewChannelAttachment = async (attachment: AttachmentSummary) => {
     if (!canPreviewAttachment(attachment)) {
-      void channels.perform(() => window.openbot.agent.openAttachment({ attachmentId: attachment.id, action: "open" }));
+      void channels.perform(() => window.danidex.agent.openAttachment({ attachmentId: attachment.id, action: "open" }));
       return;
     }
     channels.closeEditor();
@@ -201,7 +201,7 @@ export function ChannelConversation() {
     });
   };
   const channelAttachmentAction = (attachment: AttachmentSummary, action: "open" | "reveal" | "download") => {
-    void channels.perform(() => window.openbot.agent.openAttachment({ attachmentId: attachment.id, action }));
+    void channels.perform(() => window.danidex.agent.openAttachment({ attachmentId: attachment.id, action }));
   };
   // The preview belongs to the channel it was opened from, and the settings panel takes the slot back.
   createEffect(
@@ -622,12 +622,12 @@ export function ChannelConversation() {
                               selectAgent(id);
                             }}
                             onOpenLink={(url) => {
-                              void window.openbot.openUrl(url);
+                              void window.danidex.openUrl(url);
                             }}
                             onPreview={(attachment) => void previewChannelAttachment(attachment)}
                             onDownloadAttachments={async (attachments) => {
                               await channels.perform(() =>
-                                window.openbot.agent.downloadAttachments({
+                                window.danidex.agent.downloadAttachments({
                                   attachments: attachments.map(({ id, name }) => ({ id, name })),
                                 }),
                               );
@@ -672,7 +672,7 @@ export function ChannelConversation() {
                                     page().channel.archived
                                       ? Promise.resolve(false)
                                       : channels.perform(() =>
-                                          window.openbot.agent.respondToPrompt({
+                                          window.danidex.agent.respondToPrompt({
                                             requestId: prompt().requestId,
                                             answers,
                                           }),
@@ -707,7 +707,7 @@ export function ChannelConversation() {
                         approval={approval()}
                         onApprove={() =>
                           channels.perform(() =>
-                            window.openbot.agent.respondToApproval({
+                            window.danidex.agent.respondToApproval({
                               requestId: approval().requestId,
                               decision: "accept",
                             }),
@@ -715,7 +715,7 @@ export function ChannelConversation() {
                         }
                         onReject={() =>
                           channels.perform(() =>
-                            window.openbot.agent.respondToApproval({
+                            window.danidex.agent.respondToApproval({
                               requestId: approval().requestId,
                               decision: "decline",
                             }),
@@ -747,7 +747,7 @@ export function ChannelConversation() {
                           previewStatus="idle"
                           onComplete={() =>
                             channels.perform(() =>
-                              window.openbot.agent.respondToBrowserTakeover({
+                              window.danidex.agent.respondToBrowserTakeover({
                                 requestId: request().requestId,
                                 decision: "complete",
                               }),
@@ -755,7 +755,7 @@ export function ChannelConversation() {
                           }
                           onCancel={() =>
                             channels.perform(() =>
-                              window.openbot.agent.respondToBrowserTakeover({
+                              window.danidex.agent.respondToBrowserTakeover({
                                 requestId: request().requestId,
                                 decision: "cancel",
                               }),
@@ -865,7 +865,7 @@ export function ChannelConversation() {
                       onClick={() =>
                         void channels.perform(async () => {
                           const selectedId = channels.state.selectedId;
-                          const attachments = await window.openbot.agent.chooseAttachments({ filter: "all" });
+                          const attachments = await window.danidex.agent.chooseAttachments({ filter: "all" });
                           if (selectedId === channels.state.selectedId)
                             setComposer((state) => {
                               state.attachments = [...state.attachments, ...attachments];
@@ -900,7 +900,7 @@ export function ChannelConversation() {
                     maxWidth={() => settingsPanelMaxWidth(conversationPanel)}
                     onWidthChange={setPanelWidth}
                     onOpenLink={(url) => {
-                      void window.openbot.openUrl(url);
+                      void window.danidex.openUrl(url);
                     }}
                     /* A channel transcript has no agent workspace of its own, so a path in a
                        previewed file cannot be resolved here. Only attachments open in this slot. */

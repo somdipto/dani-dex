@@ -1,6 +1,6 @@
 /** The search field, and the compact-mode button that expands the sidebar to reach it. */
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { Button, Input } from "../../components/ui";
 import { SearchIcon } from "./SidebarIcons";
 import { useSidebarScope } from "./sidebar-scope";

@@ -1,4 +1,4 @@
-import { chatTagReferences } from "@openbot/contracts/chat-tag-references";
+import { chatTagReferences } from "@dani-dex/contracts/chat-tag-references";
 import * as Linking from "expo-linking";
 import { Typography } from "heroui-native";
 import { useThemeColor } from "heroui-native/hooks";

@@ -10,7 +10,7 @@ const storyAgents = STORY_AGENT_SUMMARIES.map((agent) => ({ id: agent.id, name: 
 
 /**
  * The page is a plain component over its data, so the stories pass fixtures rather than a mocked
- * `window.openbot`: there is no plugin endpoint to mock yet.
+ * `window.danidex`: there is no plugin endpoint to mock yet.
  */
 function PluginDetailStory(props: {
   plugin?: PluginDetail;

@@ -21,8 +21,8 @@ const NATIVE_TOKENS = "packages/brand/src/tokens-native.css";
 // How each palette is spelled at an import site. Everything else here asserts what
 // the shared file contains; this is what ties a surface to it.
 const IMPORT_OF: Readonly<Record<string, string>> = {
-  [SHARED_TOKENS]: '@import "@openbot/brand/tokens.css";',
-  [NATIVE_TOKENS]: '@import "@openbot/brand/tokens-native.css";',
+  [SHARED_TOKENS]: '@import "@dani-dex/brand/tokens.css";',
+  [NATIVE_TOKENS]: '@import "@dani-dex/brand/tokens-native.css";',
 };
 
 // Where a surface is allowed to look for a token: the shared palette, plus files

@@ -4,13 +4,13 @@ import type {
   DynamicIslandNotchSize,
   DynamicIslandPreference,
   DynamicIslandPresentation,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   DEFAULT_DYNAMIC_ISLAND_PREFERENCE,
   IDLE_DYNAMIC_ISLAND_PRESENTATION,
   IPC_CHANNELS,
-} from "@openbot/contracts/ipc";
-import { createOpenBotLogger, type Logger, toLogValue } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { createOpenBotLogger, type Logger, toLogValue } from "@dani-dex/logging";
 import type { BrowserWindow, Display, Rectangle } from "electron";
 import { readDynamicIslandPreference, writeDynamicIslandPreference } from "./dynamic-island-preference-store";
 import { sendToRenderer } from "./renderer-ipc";

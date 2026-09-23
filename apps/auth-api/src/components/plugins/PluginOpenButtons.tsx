@@ -1,4 +1,4 @@
-import { createOpenBotPluginUrl } from "@openbot/contracts/plugin-links";
+import { createOpenBotPluginUrl } from "@dani-dex/contracts/plugin-links";
 import { Portal } from "@solidjs/web";
 import { createSignal, createUniqueId, onCleanup, Show } from "solid-js";
 import { DOWNLOAD_PLATFORMS, detectDownloadPlatform } from "../../lib/download-platforms";

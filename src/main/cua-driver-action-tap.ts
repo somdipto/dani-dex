@@ -16,7 +16,7 @@
 
 import { chmod } from "node:fs/promises";
 import { connect, createServer, type Server, type Socket } from "node:net";
-import { type DynamicRecord, isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { type DynamicRecord, isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 
 /**
  * A line longer than this is not a request the tap understands, so it stops reading that line.

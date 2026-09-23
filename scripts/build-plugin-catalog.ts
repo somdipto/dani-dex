@@ -8,9 +8,9 @@ import {
   mcpConfigErrors,
   normalizeMcpConfig,
   type SkillCategory,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 
 const logger = createOpenBotLogger("build-plugin-catalog");
 
@@ -516,7 +516,7 @@ function renderRendererModule(plugins: PluginDetail[]): string {
  * bun run marketplace:build:plugins -- --check to verify.
  */
 
-import type { McpServerConfig } from "@openbot/contracts/ipc";
+import type { McpServerConfig } from "@dani-dex/contracts/ipc";
 import type { MarketplacePluginApp, MarketplacePluginDetail } from "./marketplace-plugins";
 
 /**

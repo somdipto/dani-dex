@@ -1,5 +1,5 @@
-import type { AgentEvent, AgentRuntimeSnapshot } from "@openbot/contracts/ipc";
-import { classifyUserError } from "@openbot/user-errors";
+import type { AgentEvent, AgentRuntimeSnapshot } from "@dani-dex/contracts/ipc";
+import { classifyUserError } from "@dani-dex/user-errors";
 import { flush, onSettled } from "solid-js";
 import { withoutAgent } from "../../app-message-projection";
 import { playCompletionSoundForAgentEvent } from "../../completion-sound";
@@ -98,7 +98,7 @@ export function AgentEventBridge() {
       case "status":
         applyAgentStatus(event.status);
         if (event.status.phase === "ready") {
-          void window.openbot.agent
+          void window.danidex.agent
             .listModels()
             .then(setModelOptions)
             .catch(() => undefined);
@@ -140,7 +140,7 @@ export function AgentEventBridge() {
           if (centralAuth().status !== "signed_in") return;
           const request = ++readRefresh;
           const serverId = activeServerId();
-          void window.openbot.agent
+          void window.danidex.agent
             .listConversationReads()
             .then((reads) => {
               if (request === readRefresh && serverId === activeServerId()) applyConversationReads(reads);
@@ -320,7 +320,7 @@ export function AgentEventBridge() {
   }
 
   onSettled(() => {
-    const unsubscribe = window.openbot.agent.onEvent((event) => {
+    const unsubscribe = window.danidex.agent.onEvent((event) => {
       if (event.type === "channels-changed") {
         void channels.refresh();
         return;

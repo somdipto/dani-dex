@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
-import { createOpenBotLogger } from "@openbot/logging";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { createOpenBotLogger } from "@dani-dex/logging";
 
 const logger = createOpenBotLogger("release-preflight");
 

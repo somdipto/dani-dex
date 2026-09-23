@@ -4,8 +4,8 @@ import type {
   SaveAgentProfileInput,
   SaveAgentProfileResult,
   SidebarLayoutSnapshot,
-} from "@openbot/contracts/ipc";
-import { decodeSaveAgentProfileResult } from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
+import { decodeSaveAgentProfileResult } from "@dani-dex/contracts/ipc";
 import type { AgentStore } from "../agent-store";
 import type { SidebarLayoutStore } from "../sidebar-layout-store";
 

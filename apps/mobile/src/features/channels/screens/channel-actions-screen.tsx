@@ -1,4 +1,4 @@
-import { userErrorMessage } from "@openbot/user-errors";
+import { userErrorMessage } from "@dani-dex/user-errors";
 import * as Crypto from "expo-crypto";
 import { useLocalSearchParams } from "expo-router";
 import { Button, Typography } from "heroui-native";

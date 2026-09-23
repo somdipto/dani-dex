@@ -1,4 +1,4 @@
-import type { AgentModelId, AgentProviderId, AppSetupState } from "@openbot/contracts/ipc";
+import type { AgentModelId, AgentProviderId, AppSetupState } from "@dani-dex/contracts/ipc";
 import { createSignal, flush, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { createSimpleContext } from "../../simple-context";
@@ -36,7 +36,7 @@ const Setup = createSimpleContext({
     onSettled(() => {
       // `finally`, not `then`: a failed read still ends the loading screen, and
       // a null `setupState` is the same "not configured yet" the view handles.
-      void window.openbot
+      void window.danidex
         .getSetupState()
         .then(setSetupState)
         .finally(() => setSetupLoaded(true));
@@ -63,7 +63,7 @@ const Setup = createSimpleContext({
     async function saveSetup(preferredProvider: AgentProviderId, preferredModel?: AgentModelId | null) {
       const wasCompleted = setupState()?.completed === true;
       const analytics = desktopAnalytics.scope();
-      const state = await window.openbot.saveSetup({
+      const state = await window.danidex.saveSetup({
         preferredProvider,
         preferredModel: preferredModel === undefined ? keptModel(preferredProvider) : preferredModel,
       });
@@ -78,7 +78,7 @@ const Setup = createSimpleContext({
     }
 
     async function previewInvite(input: { inviteUrl: string }) {
-      return window.openbot.servers.previewInvite(input);
+      return window.danidex.servers.previewInvite(input);
     }
 
     return {

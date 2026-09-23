@@ -20,9 +20,9 @@ import {
   IPC_CHANNELS,
   LOCAL_SERVER_ID,
   type VoiceModelStatus,
-} from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import type { AppTranslate } from "@openbot/i18n";
+} from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import type { AppTranslate } from "@dani-dex/i18n";
 import { BrowserWindow, Notification } from "electron";
 import type { AgentService } from "../backend/agent-service";
 import { notificationForAgentEvent } from "./agent-notifications";
@@ -102,7 +102,7 @@ export function createRendererForwarders({
     }
   }
 
-  function forwardUpdateStatus(status: import("@openbot/contracts/ipc").UpdateStatus): void {
+  function forwardUpdateStatus(status: import("@dani-dex/contracts/ipc").UpdateStatus): void {
     const window = getMainWindow();
     if (!window || window.isDestroyed()) return;
     sendToRenderer(window, IPC_CHANNELS.updateEvent, status);
@@ -114,13 +114,13 @@ export function createRendererForwarders({
     sendToRenderer(window, IPC_CHANNELS.voiceModelStatus, status);
   }
 
-  function forwardProviderRuntimeStatus(snapshot: import("@openbot/contracts/ipc").ProviderRuntimeSnapshot): void {
+  function forwardProviderRuntimeStatus(snapshot: import("@dani-dex/contracts/ipc").ProviderRuntimeSnapshot): void {
     const window = getMainWindow();
     if (!window || window.isDestroyed()) return;
     sendToRenderer(window, IPC_CHANNELS.providerRuntimesEvent, snapshot);
   }
 
-  function forwardHostStatus(status: import("@openbot/contracts/ipc").HostStatus): void {
+  function forwardHostStatus(status: import("@dani-dex/contracts/ipc").HostStatus): void {
     const window = getMainWindow();
     if (!window || window.isDestroyed()) return;
     sendToRenderer(window, IPC_CHANNELS.hostEvent, status);
@@ -130,13 +130,13 @@ export function createRendererForwarders({
     }
   }
 
-  function forwardRemoteDesktopSessions(sessions: import("@openbot/contracts/ipc").RemoteDesktopSession[]): void {
+  function forwardRemoteDesktopSessions(sessions: import("@dani-dex/contracts/ipc").RemoteDesktopSession[]): void {
     const window = getMainWindow();
     if (!window || window.isDestroyed()) return;
     sendToRenderer(window, IPC_CHANNELS.remoteDesktopEvent, sessions);
   }
 
-  function forwardServers(servers: import("@openbot/contracts/ipc").ServerSummary[]): void {
+  function forwardServers(servers: import("@dani-dex/contracts/ipc").ServerSummary[]): void {
     const window = getMainWindow();
     if (!window || window.isDestroyed()) return;
     const host = getHostService();
@@ -145,7 +145,7 @@ export function createRendererForwarders({
 
   function forwardTeamPresence(
     serverId: string,
-    snapshot: import("@openbot/contracts/ipc").TeamPresenceSnapshot,
+    snapshot: import("@dani-dex/contracts/ipc").TeamPresenceSnapshot,
   ): void {
     const window = getMainWindow();
     if (!window || window.isDestroyed()) return;
@@ -154,7 +154,7 @@ export function createRendererForwarders({
 
   function forwardDirectMessage(
     serverId: string,
-    event: import("@openbot/contracts/ipc").DirectMessageRealtimeEvent,
+    event: import("@dani-dex/contracts/ipc").DirectMessageRealtimeEvent,
   ): void {
     const window = getMainWindow();
     if (!window || window.isDestroyed()) return;
@@ -163,7 +163,7 @@ export function createRendererForwarders({
 
   function forwardDirectTyping(
     serverId: string,
-    event: import("@openbot/contracts/ipc").DirectTypingRealtimeEvent,
+    event: import("@dani-dex/contracts/ipc").DirectTypingRealtimeEvent,
   ): void {
     const window = getMainWindow();
     if (!window || window.isDestroyed()) return;

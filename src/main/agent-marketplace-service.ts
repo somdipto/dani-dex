@@ -14,9 +14,9 @@ import type {
   MarketplaceAgentSummary,
   RoutineSchedule,
   SubmitMarketplaceAgentInput,
-} from "@openbot/contracts/ipc";
-import { isAvatarHue, isAvatarSeed, isRoutineSchedule, isSkillCategory } from "@openbot/contracts/ipc";
-import { isBoolean, isDynamicRecord, isNumber, isOneOf, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isAvatarHue, isAvatarSeed, isRoutineSchedule, isSkillCategory } from "@dani-dex/contracts/ipc";
+import { isBoolean, isDynamicRecord, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 
 interface AgentMarketplaceAuth {
   requestAuthorized<T>(path: string, init: RequestInit, decoder: (value: unknown) => T, timeoutMs?: number): Promise<T>;

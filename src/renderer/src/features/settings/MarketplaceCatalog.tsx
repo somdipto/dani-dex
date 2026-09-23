@@ -3,7 +3,7 @@ import {
   SKILL_CATEGORIES,
   SKILL_CATEGORY_LABELS,
   type SkillCategory,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createEffect, createStore, For, onCleanup, onSettled, Show } from "solid-js";
 import { Button, Skeleton, UserAvatar } from "../../components/ui";

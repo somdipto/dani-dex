@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentSummary, ConversationSnapshot } from "@openbot/contracts/ipc";
+import type { AgentEvent, AgentSummary, ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import type { AgentClient } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import { sortConversationMessages } from "../conversation-snapshots";

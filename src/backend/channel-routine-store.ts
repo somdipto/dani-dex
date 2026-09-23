@@ -1,11 +1,11 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   ChannelRoutine,
   ChannelRoutineRun,
   ChannelRoutineRunStatus,
   CreateChannelRoutineInput,
   UpdateChannelRoutineInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import type { OpenBotDatabase } from "./openbot-database";
 import {
   type DueRoutine,

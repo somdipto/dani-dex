@@ -1,5 +1,5 @@
-import { isSkillCategory } from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
+import { isSkillCategory } from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { createFileRoute } from "@tanstack/solid-router";
 import { readMultipartFormData } from "../../../../server/json-body";
 import { normalizeMarketplaceQuery, parseMarketplaceLimit } from "../../../../server/marketplace-pagination";

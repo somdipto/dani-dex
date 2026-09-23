@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentSummary } from "@openbot/contracts/ipc";
+import type { AgentEvent, AgentSummary } from "@dani-dex/contracts/ipc";
 
 const COMPLETION_SOUND_STORAGE_KEY = "openbot:completion-sound-enabled";
 const COMPLETION_SOUND_DURATION_SECONDS = 0.22;

@@ -1,21 +1,21 @@
 // The one renderer-to-main payload that carries a secret. No message here quotes any part of the
 // input, because the field it would name is the API key or a header value.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   CustomProviderHeader,
   CustomProviderModel,
   DeleteCustomProviderInput,
   SaveCustomProviderInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   CUSTOM_PROVIDER_LIMITS,
   composedCustomModelId,
   isAgentModel,
   isCustomProviderHeaderName,
   isCustomProviderId,
-} from "@openbot/contracts/ipc";
-import { isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isString } from "@dani-dex/contracts/runtime-values";
 import { isObject, requireString } from "./validation";
 
 function parseProviderId(value: unknown): string {

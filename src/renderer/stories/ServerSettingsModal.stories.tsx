@@ -1,4 +1,4 @@
-import type { HostStatus } from "@openbot/contracts/ipc";
+import type { HostStatus } from "@dani-dex/contracts/ipc";
 import { createSignal, onSettled } from "solid-js";
 import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -368,17 +368,17 @@ export const HostPermissionCheckFailed: Story = {
 };
 
 function RemoteSetupStory(props: { settings: ServerSettingsModalProps; permission?: "allowed" | "failed" }) {
-  const previous = window.openbot;
+  const previous = window.danidex;
   const mock = createMockOpenBot({ hostStatus: props.settings.hostStatus ?? undefined });
   const check = mock.api.remoteDesktop.checkSetup;
   mock.api.remoteDesktop.checkSetup = async (serverId) => ({
     ...(await check(serverId)),
     ...(props.permission ? { screenRecording: props.permission, accessibility: props.permission } : {}),
   });
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   onSettled(() => () => {
     mock.dispose();
-    window.openbot = previous;
+    window.danidex = previous;
   });
   return <ServerSettingsModal {...props.settings} />;
 }

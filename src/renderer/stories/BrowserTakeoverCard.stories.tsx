@@ -1,4 +1,4 @@
-import type { BrowserPreview, BrowserTab } from "@openbot/contracts/ipc";
+import type { BrowserPreview, BrowserTab } from "@dani-dex/contracts/ipc";
 import { fn, userEvent, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { BrowserTakeoverCard } from "../src/features/conversation/ConversationPrompts";

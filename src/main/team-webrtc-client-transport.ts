@@ -1,19 +1,19 @@
 import { generateKeyPairSync, randomBytes, sign, verify } from "node:crypto";
 import { EventEmitter } from "node:events";
-import type { AgentEvent, TeamRealtimeEvent } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import type { AgentEvent, TeamRealtimeEvent } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import {
   channelEvent,
   channelRequest,
   channelResponse,
   isChannelRoute,
-} from "@openbot/contracts/team-protocol/channels-v1";
-import { TEAM_CURRENT_CAPABILITIES } from "@openbot/contracts/team-protocol/current";
-import { isMcpRoute, mcpRequest, mcpResponse } from "@openbot/contracts/team-protocol/mcp-v1";
+} from "@dani-dex/contracts/team-protocol/channels-v1";
+import { TEAM_CURRENT_CAPABILITIES } from "@dani-dex/contracts/team-protocol/current";
+import { isMcpRoute, mcpRequest, mcpResponse } from "@dani-dex/contracts/team-protocol/mcp-v1";
 import {
   type TeamProtocolV1CurrentEventControl,
   toWireTeamProtocolV1ClientEvent,
-} from "@openbot/contracts/team-protocol/v1-adapter";
+} from "@dani-dex/contracts/team-protocol/v1-adapter";
 import {
   decodeTeamProtocolV2AuthFrame,
   decodeTeamProtocolV2EventFrame,
@@ -23,12 +23,12 @@ import {
   type TeamProtocolV2Json,
   type TeamProtocolV2RpcFrame,
   teamProtocolV2AuthenticationTranscript,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
 import {
   decodeTeamProtocolV4CurrentEvent,
   decodeTeamProtocolV4WebRtcHttpResponse,
   encodeTeamProtocolV4WebRtcHttpRequest,
-} from "@openbot/contracts/team-protocol/v4-webrtc-adapter";
+} from "@dani-dex/contracts/team-protocol/v4-webrtc-adapter";
 import type {
   RemoteConnectionBootstrap,
   RemoteHostSummary,

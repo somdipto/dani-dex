@@ -4,7 +4,7 @@ import type {
   DirectConversationPage,
   DirectConversationSnapshot,
   DirectThreadSummary,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { flush } from "solid-js";
 import { expect, it, vi } from "vitest";
@@ -62,7 +62,7 @@ function ChannelProbe() {
       type="button"
       onClick={() => {
         void (async () => {
-          await window.openbot.agent.channelCommand({
+          await window.danidex.agent.channelCommand({
             type: "save",
             operationId: "channel-read-op",
             channelId: "channel-read",
@@ -135,13 +135,13 @@ describe("Dani-Dex connected desktop shell", () => {
           },
         },
       ];
-      vi.mocked(window.openbot.servers.listDirectThreads).mockResolvedValueOnce(threads);
+      vi.mocked(window.danidex.servers.listDirectThreads).mockResolvedValueOnce(threads);
       await refresh();
       flush();
       expect(screen.getByLabelText("Direct unread")).toHaveTextContent("2");
       let resolvePending: ((value: DirectThreadSummary[]) => void) | undefined;
       let rejectPending: ((error: Error) => void) | undefined;
-      vi.mocked(window.openbot.servers.listDirectThreads).mockReturnValueOnce(
+      vi.mocked(window.danidex.servers.listDirectThreads).mockReturnValueOnce(
         new Promise((resolve, reject) => {
           resolvePending = resolve;
           rejectPending = reject;
@@ -149,7 +149,7 @@ describe("Dani-Dex connected desktop shell", () => {
       );
       const pending = refresh();
       if (outcome !== "latest failure") {
-        vi.mocked(window.openbot.servers.listDirectThreads).mockResolvedValueOnce(threads);
+        vi.mocked(window.danidex.servers.listDirectThreads).mockResolvedValueOnce(threads);
         await refresh();
       }
       if (outcome === "older response") resolvePending?.([]);
@@ -164,8 +164,8 @@ describe("Dani-Dex connected desktop shell", () => {
     "refreshes the open direct conversation on reconnect (%s)",
     async (outcome) => {
       const remote = { ...testServer("remote-1", true), connectionSequence: 1 };
-      vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([remote]);
-      vi.mocked(window.openbot.servers.getPresence).mockResolvedValue({
+      vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([remote]);
+      vi.mocked(window.danidex.servers.getPresence).mockResolvedValue({
         serverId: remote.id,
         updatedAt: "2026-09-08T00:00:00Z",
         members: [
@@ -191,7 +191,7 @@ describe("Dani-Dex connected desktop shell", () => {
         readState: { unreadCount: 0, firstUnreadMessageId: null, throughSequence: revision },
         pageInfo: { hasOlder: false, olderCursor: null },
       });
-      vi.mocked(window.openbot.servers.readDirectConversationPage).mockResolvedValueOnce(
+      vi.mocked(window.danidex.servers.readDirectConversationPage).mockResolvedValueOnce(
         page("Cached direct message", 1),
       );
       let loadedMessage: () => string | undefined = () => undefined;
@@ -222,12 +222,12 @@ describe("Dani-Dex connected desktop shell", () => {
         resolvePage = resolve;
         rejectPage = reject;
       });
-      vi.mocked(window.openbot.servers.readDirectConversationPage).mockReturnValueOnce(pendingPage);
+      vi.mocked(window.danidex.servers.readDirectConversationPage).mockReturnValueOnce(pendingPage);
       emitServers?.([{ ...remote, connectionSequence: 2 }]);
-      await waitFor(() => expect(window.openbot.servers.readDirectConversationPage).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(window.danidex.servers.readDirectConversationPage).toHaveBeenCalledTimes(2));
       expect(screen.getByText("Cached direct message")).toBeInTheDocument();
       if (outcome === "late response") {
-        vi.mocked(window.openbot.servers.readDirectConversationPage).mockResolvedValueOnce(
+        vi.mocked(window.danidex.servers.readDirectConversationPage).mockResolvedValueOnce(
           page("Missed direct message", 3),
         );
         emitServers?.([{ ...remote, connectionSequence: 3 }]);
@@ -252,7 +252,7 @@ describe("Dani-Dex connected desktop shell", () => {
         await screen.findByText("Received during refresh");
       }
       if (outcome === "sent message") {
-        vi.mocked(window.openbot.servers.sendDirectMessage).mockResolvedValueOnce({
+        vi.mocked(window.danidex.servers.sendDirectMessage).mockResolvedValueOnce({
           id: "sent-3",
           threadId: "direct-1",
           senderMemberId: "self",
@@ -284,13 +284,13 @@ describe("Dani-Dex connected desktop shell", () => {
   );
 
   it("clears desktop unread state when the same member reads on another device", async () => {
-    vi.mocked(window.openbot.agent.readConversationPage).mockResolvedValue(
+    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValue(
       testConversationPage("chief", [], {
         readState: { unreadCount: 1, firstUnreadMessageId: "reply", throughMessageId: null },
       }),
     );
     let unreadCount = 1;
-    vi.mocked(window.openbot.agent.listConversationReads).mockImplementation(async () => ({
+    vi.mocked(window.danidex.agent.listConversationReads).mockImplementation(async () => ({
       chief: {
         unreadCount,
         firstUnreadMessageId: unreadCount ? "reply" : null,
@@ -315,7 +315,7 @@ describe("Dani-Dex connected desktop shell", () => {
     unreadCount = 0;
     emitAgentEvent?.({ type: "conversation-invalidated", agentId: "chief", revision: 1 });
     await waitFor(() => expect(screen.getByLabelText("Unread replies")).toHaveTextContent("0"));
-    expect(window.openbot.agent.markConversationRead).not.toHaveBeenCalled();
+    expect(window.danidex.agent.markConversationRead).not.toHaveBeenCalled();
   });
 
   it.each(["commentary", "answer"])("loads past commentary-only pages after a latest %s", async (latestKind) => {
@@ -327,7 +327,7 @@ describe("Dani-Dex connected desktop shell", () => {
       createdAt: "2026-08-30T02:02:00.000Z",
       status: "completed" as const,
     });
-    vi.mocked(window.openbot.agent.readConversationPage).mockImplementation(async (input) => {
+    vi.mocked(window.danidex.agent.readConversationPage).mockImplementation(async (input) => {
       if (input.anchor?.type !== "before") {
         return testConversationPage(
           "chief",
@@ -356,7 +356,7 @@ describe("Dani-Dex connected desktop shell", () => {
     });
     const older = Promise.withResolvers<ConversationPage>();
     const readOlder = vi.fn().mockReturnValue(older.promise);
-    vi.mocked(window.openbot.agent.readConversationPage).mockImplementation(async (input) =>
+    vi.mocked(window.danidex.agent.readConversationPage).mockImplementation(async (input) =>
       input.anchor?.type === "before" ? readOlder() : page,
     );
     let conversation: ReturnType<typeof useConversation> | undefined;
@@ -393,10 +393,10 @@ describe("Dani-Dex connected desktop shell", () => {
       });
       const older = Promise.withResolvers<ConversationPage>();
       const read = Promise.withResolvers<ConversationReadState>();
-      vi.mocked(window.openbot.agent.readConversationPage).mockImplementation(async (input) =>
+      vi.mocked(window.danidex.agent.readConversationPage).mockImplementation(async (input) =>
         input.anchor?.type === "before" ? older.promise : page,
       );
-      vi.mocked(window.openbot.agent.markConversationRead).mockReturnValue(read.promise);
+      vi.mocked(window.danidex.agent.markConversationRead).mockReturnValue(read.promise);
       let conversation: ReturnType<typeof useConversation> | undefined;
       function Probe() {
         conversation = useConversation();
@@ -417,7 +417,7 @@ describe("Dani-Dex connected desktop shell", () => {
       );
       const pendingOlder = conversation?.loadOlderAgentMessages("chief");
       const pendingRead = conversation?.markAgentMessagesRead("chief", "reply");
-      await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalled());
+      await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalled());
       flush(() => conversation?.removeConversation("chief"));
       expect(screen.getByRole("status", { name: "Cached conversations" })).toHaveTextContent("Empty");
       if (outcome === "resolve") older.resolve(page);
@@ -431,10 +431,10 @@ describe("Dani-Dex connected desktop shell", () => {
 
   it("keeps a successful realtime read when a pending reload resolves later", async () => {
     let resolveInitialPage: ((page: ConversationPage) => void) | undefined;
-    vi.mocked(window.openbot.agent.listConversationReads).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.listConversationReads).mockResolvedValueOnce({
       chief: { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
     });
-    vi.mocked(window.openbot.agent.readConversationPage).mockImplementationOnce(
+    vi.mocked(window.danidex.agent.readConversationPage).mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           resolveInitialPage = resolve;
@@ -448,7 +448,7 @@ describe("Dani-Dex connected desktop shell", () => {
     ]);
 
     emitAgentEvent?.({ type: "conversation-page", page: unreadPage });
-    await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce());
     await waitFor(() => expect(screen.queryByRole("status", { name: "1 new message" })).not.toBeInTheDocument());
 
     resolveInitialPage?.(unreadPage);
@@ -460,10 +460,10 @@ describe("Dani-Dex connected desktop shell", () => {
   it("restores a newer unread reply when its queued read fails", async () => {
     let resolveFirstRead: ((state: NonNullable<ConversationPage["readState"]>) => void) | undefined;
     let rejectSecondRead: ((error: Error) => void) | undefined;
-    vi.mocked(window.openbot.agent.listConversationReads).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.listConversationReads).mockResolvedValueOnce({
       chief: { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
     });
-    vi.mocked(window.openbot.agent.markConversationRead)
+    vi.mocked(window.danidex.agent.markConversationRead)
       .mockImplementationOnce(
         () =>
           new Promise((resolve) => {
@@ -485,7 +485,7 @@ describe("Dani-Dex connected desktop shell", () => {
         agentReply("reply-read-a", "First queued reply", "2026-08-30T02:02:00.000Z"),
       ]),
     });
-    await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce());
 
     emitAgentEvent?.({
       type: "conversation-page",
@@ -502,11 +502,11 @@ describe("Dani-Dex connected desktop shell", () => {
       ),
     });
     await screen.findByText("Newer queued reply");
-    expect(window.openbot.agent.markConversationRead).toHaveBeenCalledOnce();
+    expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce();
 
     resolveFirstRead?.({ unreadCount: 0, firstUnreadMessageId: null, throughMessageId: "reply-read-a" });
-    await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalledTimes(2));
-    vi.mocked(window.openbot.agent.readConversationPage).mockResolvedValueOnce(
+    await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalledTimes(2));
+    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValueOnce(
       testConversationPage("chief", [agentReply("reply-read-b", "Newer queued reply", "2026-08-30T02:03:00.000Z")], {
         revision: 3,
         readState: { unreadCount: 1, firstUnreadMessageId: "reply-read-b", throughMessageId: "reply-read-a" },
@@ -524,8 +524,8 @@ describe("Dani-Dex connected desktop shell", () => {
     let selectedServerId = "local";
     let returningToLocal = false;
     let rejectLocalRead: ((error: Error) => void) | undefined;
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.select).mockImplementation(async (serverId) => {
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (serverId) => {
       selectedServerId = serverId;
       returningToLocal = serverId === "local";
       return [
@@ -533,7 +533,7 @@ describe("Dani-Dex connected desktop shell", () => {
         { ...remote, active: serverId === "remote-1" },
       ];
     });
-    vi.mocked(window.openbot.agent.readConversationPage).mockImplementation(async (input) => {
+    vi.mocked(window.danidex.agent.readConversationPage).mockImplementation(async (input) => {
       if (selectedServerId === "remote-1") {
         return testConversationPage(
           input.agentId,
@@ -554,7 +554,7 @@ describe("Dani-Dex connected desktop shell", () => {
       }
       return testConversationPage(input.agentId);
     });
-    vi.mocked(window.openbot.agent.listConversationReads)
+    vi.mocked(window.danidex.agent.listConversationReads)
       .mockResolvedValueOnce({})
       .mockResolvedValueOnce({
         chief: { unreadCount: 1, firstUnreadMessageId: "reply-remote", throughMessageId: null },
@@ -562,7 +562,7 @@ describe("Dani-Dex connected desktop shell", () => {
       .mockResolvedValueOnce({
         chief: { unreadCount: 1, firstUnreadMessageId: "reply-local", throughMessageId: null },
       });
-    vi.mocked(window.openbot.agent.markConversationRead).mockImplementationOnce(
+    vi.mocked(window.danidex.agent.markConversationRead).mockImplementationOnce(
       () =>
         new Promise((_, reject) => {
           rejectLocalRead = reject;
@@ -577,11 +577,11 @@ describe("Dani-Dex connected desktop shell", () => {
         agentReply("reply-local", "Local visible reply", "2026-08-30T02:02:00.000Z"),
       ]),
     });
-    await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce());
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
-    await waitFor(() => expect(window.openbot.servers.select).toHaveBeenCalledWith("remote-1"));
-    await waitFor(() => expect(window.openbot.agent.listConversationReads).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.danidex.servers.select).toHaveBeenCalledWith("remote-1"));
+    await waitFor(() => expect(window.danidex.agent.listConversationReads).toHaveBeenCalledTimes(2));
     await screen.findByText("Remote loaded reply");
     expect(screen.getByRole("status", { name: "1 new message" })).toBeInTheDocument();
     rejectLocalRead?.(new Error("Local read unavailable"));
@@ -596,15 +596,15 @@ describe("Dani-Dex connected desktop shell", () => {
     await screen.findByText("Remote unread reply");
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(window.openbot.agent.markConversationRead).toHaveBeenCalledOnce();
+    expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce();
     expect(screen.queryByText("Local read unavailable")).not.toBeInTheDocument();
     expect(screen.getByRole("status", { name: "1 new message" })).toBeInTheDocument();
 
     await fireEvent.click(screen.getByRole("button", { name: "Local server" }));
-    await waitFor(() => expect(window.openbot.agent.listConversationReads).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(window.danidex.agent.listConversationReads).toHaveBeenCalledTimes(3));
     await screen.findByText("Local reply after returning");
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenNthCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenNthCalledWith(
         2,
         { agentId: "chief", throughMessageId: "reply-local" },
         "local",
@@ -617,12 +617,12 @@ describe("Dani-Dex connected desktop shell", () => {
     const local = testServer("local", true);
     const remote = testServer("remote-1", false);
     let resolveFirstRead: ((state: NonNullable<ConversationPage["readState"]>) => void) | undefined;
-    vi.mocked(window.openbot.servers.list).mockResolvedValueOnce([local, remote]);
-    vi.mocked(window.openbot.servers.select).mockResolvedValueOnce([
+    vi.mocked(window.danidex.servers.list).mockResolvedValueOnce([local, remote]);
+    vi.mocked(window.danidex.servers.select).mockResolvedValueOnce([
       { ...local, active: false },
       { ...remote, active: true },
     ]);
-    vi.mocked(window.openbot.agent.markConversationRead)
+    vi.mocked(window.danidex.agent.markConversationRead)
       .mockImplementationOnce(
         () =>
           new Promise((resolve) => {
@@ -644,7 +644,7 @@ describe("Dani-Dex connected desktop shell", () => {
         agentReply("reply-first-local", "First local reply", "2026-08-30T02:02:00.000Z"),
       ]),
     });
-    await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce());
 
     emitAgentEvent?.({
       type: "conversation-page",
@@ -661,18 +661,18 @@ describe("Dani-Dex connected desktop shell", () => {
       ),
     });
     await screen.findByText("Second local reply");
-    expect(window.openbot.agent.markConversationRead).toHaveBeenCalledOnce();
+    expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce();
 
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
-    await waitFor(() => expect(window.openbot.agent.listConversationReads).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(window.danidex.agent.listConversationReads).toHaveBeenCalledTimes(2));
     resolveFirstRead?.({
       unreadCount: 1,
       firstUnreadMessageId: "reply-second-local",
       throughMessageId: "reply-first-local",
     });
 
-    await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalledTimes(2));
-    expect(window.openbot.agent.markConversationRead).toHaveBeenNthCalledWith(
+    await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalledTimes(2));
+    expect(window.danidex.agent.markConversationRead).toHaveBeenNthCalledWith(
       2,
       { agentId: "chief", throughMessageId: "reply-second-local" },
       "local",
@@ -690,8 +690,8 @@ describe("Dani-Dex connected desktop shell", () => {
       [agentReply("reply-current-revision", "Current revision reply", "2026-08-30T02:03:00.000Z")],
       { revision: 2, readState: unreadState },
     );
-    vi.mocked(window.openbot.agent.listConversationReads).mockResolvedValueOnce({ chief: unreadState });
-    vi.mocked(window.openbot.agent.readConversation).mockResolvedValue({
+    vi.mocked(window.danidex.agent.listConversationReads).mockResolvedValueOnce({ chief: unreadState });
+    vi.mocked(window.danidex.agent.readConversation).mockResolvedValue({
       agentId: "chief",
       threadId: currentPage.threadId,
       activeTurnId: null,
@@ -707,7 +707,7 @@ describe("Dani-Dex connected desktop shell", () => {
     // test measures microtask order instead of the revision guard.
     await screen.findByText("Current revision reply");
 
-    vi.mocked(window.openbot.agent.readConversationPage)
+    vi.mocked(window.danidex.agent.readConversationPage)
       .mockResolvedValueOnce(
         testConversationPage(
           "chief",
@@ -719,11 +719,11 @@ describe("Dani-Dex connected desktop shell", () => {
         ),
       )
       .mockResolvedValueOnce(currentPage);
-    const readsBeforeOpen = vi.mocked(window.openbot.agent.readConversationPage).mock.calls.length;
+    const readsBeforeOpen = vi.mocked(window.danidex.agent.readConversationPage).mock.calls.length;
     await fireEvent.click(screen.getByRole("button", { name: /Chief/ }));
 
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         {
           agentId: "chief",
           throughMessageId: "reply-current-revision",
@@ -731,7 +731,7 @@ describe("Dani-Dex connected desktop shell", () => {
         "local",
       ),
     );
-    expect(window.openbot.agent.markConversationRead).not.toHaveBeenCalledWith(
+    expect(window.danidex.agent.markConversationRead).not.toHaveBeenCalledWith(
       {
         agentId: "chief",
         throughMessageId: "reply-stale-revision",
@@ -741,7 +741,7 @@ describe("Dani-Dex connected desktop shell", () => {
     // Opening reads once and the stale revision costs a second read. Falling
     // back to whatever was already on screen would reach the same read state
     // with one, so the count is what says the reload was retried.
-    expect(vi.mocked(window.openbot.agent.readConversationPage).mock.calls.length - readsBeforeOpen).toBe(2);
+    expect(vi.mocked(window.danidex.agent.readConversationPage).mock.calls.length - readsBeforeOpen).toBe(2);
     await waitFor(() => expect(screen.queryByRole("status", { name: "1 new message" })).not.toBeInTheDocument());
   });
 
@@ -752,7 +752,7 @@ describe("Dani-Dex connected desktop shell", () => {
       agentReply("reply-automatic-first", "First automatic reply", "2026-08-30T02:03:00.000Z"),
     ]);
     emitAgentEvent?.({ type: "conversation-page", page: firstPage });
-    await waitFor(() => expect(window.openbot.agent.markConversationRead).toHaveBeenCalledOnce());
+    await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce());
 
     await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
     await screen.findByRole("heading", { name: "Sales Outbound" });
@@ -772,11 +772,11 @@ describe("Dani-Dex connected desktop shell", () => {
       },
     );
     emitAgentEvent?.({ type: "conversation-page", page: newerPage });
-    vi.mocked(window.openbot.agent.readConversationPage).mockResolvedValueOnce(newerPage);
+    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValueOnce(newerPage);
 
     await fireEvent.click(screen.getByRole("button", { name: /Chief/ }));
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenNthCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenNthCalledWith(
         2,
         { agentId: "chief", throughMessageId: "reply-explicit-newer" },
         "local",
@@ -791,10 +791,10 @@ describe("Dani-Dex connected desktop shell", () => {
       firstUnreadMessageId: "agent-new-1",
       throughMessageId: "agent-old",
     };
-    vi.mocked(window.openbot.agent.listConversationReads).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.listConversationReads).mockResolvedValueOnce({
       chief: readState,
     });
-    vi.mocked(window.openbot.agent.readConversation).mockResolvedValue({
+    vi.mocked(window.danidex.agent.readConversation).mockResolvedValue({
       agentId: "chief",
       threadId: "thread-chief",
       activeTurnId: null,
@@ -836,7 +836,7 @@ describe("Dani-Dex connected desktop shell", () => {
         agentReply("agent-new-2", "Second unseen answer", "2026-08-19T09:02:00.000Z"),
       ],
     });
-    vi.mocked(window.openbot.agent.markConversationRead).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.markConversationRead).mockResolvedValueOnce({
       unreadCount: 0,
       firstUnreadMessageId: null,
       throughMessageId: "agent-new-2",
@@ -850,7 +850,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(screen.getByRole("button", { name: "Jump to 2 new messages" }));
 
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         {
           agentId: "chief",
           throughMessageId: "agent-new-2",
@@ -868,17 +868,17 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     await waitFor(() => expect(emitDynamicIslandAction).toBeDefined());
-    vi.mocked(window.openbot.agent.markConversationRead).mockClear();
-    vi.mocked(window.openbot.agent.readConversationPage).mockResolvedValue(unreadPage);
+    vi.mocked(window.danidex.agent.markConversationRead).mockClear();
+    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValue(unreadPage);
 
     window.dispatchEvent(new Event("blur"));
     emitAgentEvent?.({ type: "conversation-page", page: unreadPage });
 
     expect(await screen.findByText("Ready while Dani-Dex was in the background")).toBeInTheDocument();
     expect(screen.getByRole("status", { name: "1 new message" })).toBeInTheDocument();
-    expect(window.openbot.agent.markConversationRead).not.toHaveBeenCalled();
+    expect(window.danidex.agent.markConversationRead).not.toHaveBeenCalled();
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         mode: "message",
         message: { messageId: "agent-background-answer" },
       }),
@@ -887,7 +887,7 @@ describe("Dani-Dex connected desktop shell", () => {
     window.dispatchEvent(new Event("focus"));
 
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         {
           agentId: "chief",
           throughMessageId: "agent-background-answer",
@@ -897,7 +897,7 @@ describe("Dani-Dex connected desktop shell", () => {
     );
     await waitFor(() => expect(screen.queryByRole("status", { name: "1 new message" })).not.toBeInTheDocument());
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         mode: "idle",
       }),
     );
@@ -921,8 +921,8 @@ describe("Dani-Dex connected desktop shell", () => {
     window.dispatchEvent(new Event("blur"));
     emitAgentEvent?.({ type: "conversation-page", page: oldPage });
     expect(await screen.findByRole("status", { name: "1 new message" })).toBeInTheDocument();
-    vi.mocked(window.openbot.agent.readConversationPage).mockResolvedValue(oldPage);
-    vi.mocked(window.openbot.agent.markConversationRead)
+    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValue(oldPage);
+    vi.mocked(window.danidex.agent.markConversationRead)
       .mockReset()
       .mockImplementationOnce(
         () =>
@@ -938,7 +938,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
     window.dispatchEvent(new Event("focus"));
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         { agentId: "chief", throughMessageId: "agent-focus-old" },
         "local",
       ),
@@ -952,7 +952,7 @@ describe("Dani-Dex connected desktop shell", () => {
     });
 
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         { agentId: "chief", throughMessageId: "agent-focus-new" },
         "local",
       ),
@@ -966,7 +966,7 @@ describe("Dani-Dex connected desktop shell", () => {
     ]);
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    vi.mocked(window.openbot.agent.markConversationRead).mockClear();
+    vi.mocked(window.danidex.agent.markConversationRead).mockClear();
 
     window.dispatchEvent(new Event("blur"));
     emitAgentEvent?.({ type: "conversation-page", page: unreadPage });
@@ -975,20 +975,20 @@ describe("Dani-Dex connected desktop shell", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: /Sales Outbound/ })).toHaveTextContent("1 new reply"),
     );
-    expect(window.openbot.agent.markConversationRead).not.toHaveBeenCalled();
+    expect(window.danidex.agent.markConversationRead).not.toHaveBeenCalled();
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         mode: "message",
         message: { agent: { id: "sales-outbound" }, messageId: "sales-background-answer" },
       }),
     );
 
-    vi.mocked(window.openbot.agent.readConversationPage).mockResolvedValue(unreadPage);
+    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValue(unreadPage);
     const sales = screen.getByRole("button", { name: /Sales Outbound/ });
     await fireEvent.click(sales);
 
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         {
           agentId: "sales-outbound",
           throughMessageId: "sales-background-answer",
@@ -998,7 +998,7 @@ describe("Dani-Dex connected desktop shell", () => {
     );
     await waitFor(() => expect(sales).not.toHaveTextContent("1 new reply"));
     await waitFor(() =>
-      expect(vi.mocked(window.openbot.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
+      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
         mode: "idle",
       }),
     );
@@ -1011,7 +1011,7 @@ describe("Dani-Dex connected desktop shell", () => {
     });
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    await waitFor(() => expect(window.openbot.agent.readConversation).toHaveBeenCalledWith("chief"));
+    await waitFor(() => expect(window.danidex.agent.readConversation).toHaveBeenCalledWith("chief"));
 
     emitAgentEvent?.({
       type: "conversation-delta",
@@ -1032,7 +1032,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("status", { name: "1 new message" })).not.toBeInTheDocument();
     expect(screen.queryByRole("separator", { name: "New messages" })).not.toBeInTheDocument();
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         {
           agentId: "chief",
           throughMessageId: "agent-visible-answer",
@@ -1054,8 +1054,8 @@ describe("Dani-Dex connected desktop shell", () => {
       </AppProviders>
     ));
     await screen.findByRole("heading", { name: "Chief" });
-    vi.mocked(window.openbot.agent.markConversationRead).mockClear();
-    vi.mocked(window.openbot.agent.readConversationPage).mockResolvedValue(unreadPage);
+    vi.mocked(window.danidex.agent.markConversationRead).mockClear();
+    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValue(unreadPage);
 
     fireEvent.click(screen.getByRole("button", { name: "Open usage" }));
     flush();
@@ -1064,7 +1064,7 @@ describe("Dani-Dex connected desktop shell", () => {
     // The report leaves the conversation mounted and aria-hidden, so the reply is still in the DOM
     // while it is covered - which is the same reason it must not count as seen.
     expect(await screen.findByText("Ready while the report was open")).toBeInTheDocument();
-    expect(window.openbot.agent.markConversationRead).not.toHaveBeenCalled();
+    expect(window.danidex.agent.markConversationRead).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Close usage" }));
     expect(await screen.findByRole("status", { name: "1 new message" })).toBeInTheDocument();
@@ -1083,8 +1083,8 @@ describe("Dani-Dex connected desktop shell", () => {
       </AppProviders>
     ));
     await screen.findByRole("heading", { name: "Chief" });
-    vi.mocked(window.openbot.agent.markConversationRead).mockClear();
-    vi.mocked(window.openbot.agent.readConversationPage).mockResolvedValue(unreadPage);
+    vi.mocked(window.danidex.agent.markConversationRead).mockClear();
+    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValue(unreadPage);
 
     fireEvent.click(screen.getByRole("button", { name: "Open channel" }));
     await screen.findByRole("heading", { level: 1, name: "Project" });
@@ -1094,7 +1094,7 @@ describe("Dani-Dex connected desktop shell", () => {
     // reply is not in the DOM until the channel closes. Both paths must leave it unread.
     fireEvent.click(screen.getByRole("button", { name: "Close channel" }));
     expect(await screen.findByRole("status", { name: "1 new message" })).toBeInTheDocument();
-    expect(window.openbot.agent.markConversationRead).not.toHaveBeenCalled();
+    expect(window.danidex.agent.markConversationRead).not.toHaveBeenCalled();
   });
 
   it("uncovers the conversation a global search result opens", async () => {
@@ -1106,12 +1106,12 @@ describe("Dani-Dex connected desktop shell", () => {
       createdAt: "2026-08-19T09:05:00.000Z",
       status: "completed" as const,
     };
-    vi.mocked(window.openbot.agent.searchConversationMessages).mockResolvedValue({
+    vi.mocked(window.danidex.agent.searchConversationMessages).mockResolvedValue({
       results: [{ agentId: "sales-outbound", message: result }],
       total: 1,
       nextCursor: null,
     });
-    vi.mocked(window.openbot.agent.readConversation).mockImplementation(async (agentId) => ({
+    vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) => ({
       agentId,
       threadId: null,
       activeTurnId: null,
@@ -1151,10 +1151,10 @@ describe("Dani-Dex connected desktop shell", () => {
       firstUnreadMessageId: "sales-new",
       throughMessageId: null,
     };
-    vi.mocked(window.openbot.agent.listConversationReads).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.listConversationReads).mockResolvedValueOnce({
       "sales-outbound": unreadState,
     });
-    vi.mocked(window.openbot.agent.readConversation).mockImplementation(async (agentId) =>
+    vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) =>
       agentId === "sales-outbound"
         ? {
             agentId,
@@ -1180,7 +1180,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
     expect(await screen.findByText("A new sales reply")).toBeInTheDocument();
     await waitFor(() =>
-      expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         {
           agentId: "sales-outbound",
           throughMessageId: "sales-new",
@@ -1198,10 +1198,10 @@ describe("Dani-Dex connected desktop shell", () => {
       firstUnreadMessageId: "agent-new",
       throughMessageId: null,
     };
-    vi.mocked(window.openbot.agent.listConversationReads).mockResolvedValueOnce({
+    vi.mocked(window.danidex.agent.listConversationReads).mockResolvedValueOnce({
       chief: readState,
     });
-    vi.mocked(window.openbot.agent.readConversation).mockResolvedValue({
+    vi.mocked(window.danidex.agent.readConversation).mockResolvedValue({
       agentId: "chief",
       threadId: "thread-chief",
       activeTurnId: null,
@@ -1218,7 +1218,7 @@ describe("Dani-Dex connected desktop shell", () => {
         agentReply("agent-new", "Unseen answer", "2026-08-19T09:01:00.000Z"),
       ],
     });
-    vi.mocked(window.openbot.agent.markConversationRead).mockRejectedValueOnce(new Error("Read state unavailable"));
+    vi.mocked(window.danidex.agent.markConversationRead).mockRejectedValueOnce(new Error("Read state unavailable"));
 
     render(() => <App />);
     const banner = await screen.findByRole("status", { name: "1 new message" });
@@ -1228,7 +1228,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByText("Read state unavailable")).toBeInTheDocument();
     expect(screen.getByRole("status", { name: "1 new message" })).toBeInTheDocument();
     expect(screen.getByRole("separator", { name: "New messages" })).toBeInTheDocument();
-    expect(window.openbot.agent.markConversationRead).toHaveBeenCalledWith(
+    expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
       {
         agentId: "chief",
         throughMessageId: "agent-new",

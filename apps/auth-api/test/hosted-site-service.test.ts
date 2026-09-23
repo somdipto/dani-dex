@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
-import { isNumber, isString } from "@openbot/contracts/runtime-values";
+import { isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it } from "vitest";
 import { HOSTED_SITE_LIMITS, type HostedSiteUploadRequest } from "../src/server/hosted-site-contract";
 import { HostedSiteService } from "../src/server/hosted-site-service";

@@ -1,6 +1,6 @@
 // The local Whisper model and dictation.
 
-import type { VoiceModelStatus, VoiceTranscriptionResult } from "@openbot/contracts/ipc";
+import type { VoiceModelStatus, VoiceTranscriptionResult } from "@dani-dex/contracts/ipc";
 import type { VoiceTranscriptionService } from "../voice-transcription-service";
 import { handler, type IpcGroupHandlers, payloadHandler } from "./define-ipc-group";
 import { parseVoiceTranscription } from "./voice-inputs";

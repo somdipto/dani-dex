@@ -72,4 +72,4 @@ function identifier(value: unknown): value is string {
   return isString(value) && /^[A-Za-z0-9_-]{1,64}$/u.test(value);
 }
 
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";

@@ -1,4 +1,4 @@
-import { MCP_SERVERS_CAPABILITY, type McpServerConfig } from "@openbot/contracts/ipc";
+import { MCP_SERVERS_CAPABILITY, type McpServerConfig } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal } from "solid-js";
 import type { ConversationProps } from "../conversation-types";
 
@@ -34,7 +34,7 @@ export function createMcpServersStore(deps: McpServersStoreDeps) {
       setMcpServers([]);
       return;
     }
-    void window.openbot.agent
+    void window.danidex.agent
       .listMcpServers(serverId)
       .then((servers) => {
         if (current === request) setMcpServers(servers);

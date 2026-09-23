@@ -1,4 +1,4 @@
-import { AppLogo } from "@openbot/brand";
+import { AppLogo } from "@dani-dex/brand";
 import { Link } from "@tanstack/solid-router";
 import { For } from "solid-js";
 import { CONTENT_COLLECTIONS } from "../../lib/content";

@@ -57,7 +57,7 @@ const DynamicIsland = createSimpleContext({
       queueMicrotask(() => {
         presentationScheduled = false;
         const presentation = coordinator.presentation(serverOrder());
-        void window.openbot.dynamicIsland.publishPresentation(presentation).catch(() => undefined);
+        void window.danidex.dynamicIsland.publishPresentation(presentation).catch(() => undefined);
       });
     }
 
@@ -84,7 +84,7 @@ const DynamicIsland = createSimpleContext({
     );
 
     onSettled(() =>
-      window.openbot.agent.onScopedEvent((event) => {
+      window.danidex.agent.onScopedEvent((event) => {
         flush(() => {
           const server = servers().find((candidate) => candidate.id === event.serverId);
           if (server?.kind === "remote" && server.state !== "online") return;

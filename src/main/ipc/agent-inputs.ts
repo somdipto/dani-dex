@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   type AcknowledgeFailedTurnInput,
   type AgentIpcRequest,
@@ -48,9 +48,9 @@ import {
   type UpdateChannelRoutineInput,
   type UpdateQueuedMessageInput,
   type UpdateRoutineInput,
-} from "@openbot/contracts/ipc";
-import { isBoolean, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { decodeQueueEditRequest } from "@openbot/contracts/team-protocol/queue-edit-v1";
+} from "@dani-dex/contracts/ipc";
+import { isBoolean, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { decodeQueueEditRequest } from "@dani-dex/contracts/team-protocol/queue-edit-v1";
 import { parseAvatarImage } from "./avatar-inputs";
 import { isObject, requireString } from "./validation";
 

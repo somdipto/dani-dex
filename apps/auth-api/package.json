@@ -1,5 +1,5 @@
 {
-  "name": "@openbot/auth-api",
+  "name": "@dani-dex/auth-api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -25,8 +25,8 @@
   "dependencies": {
     "@fontsource-variable/inter": "catalog:",
     "@kobalte/core": "catalog:",
-    "@openbot/brand": "workspace:*",
-    "@openbot/contracts": "workspace:*",
+    "@dani-dex/brand": "workspace:*",
+    "@dani-dex/contracts": "workspace:*",
     "@openpanel/web": "catalog:",
     "@paper-design/shaders": "catalog:",
     "@solidjs/signals": "catalog:",

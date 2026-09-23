@@ -2,9 +2,9 @@ import {
   attachmentMimeTypeForName,
   isSupportedAttachmentName,
   SUPPORTED_ATTACHMENT_DESCRIPTION,
-} from "@openbot/contracts/attachment-files";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { MOBILE_ATTACHMENT_BYTES, type RemoteFileUpload } from "@openbot/team-client/remote-peer";
+} from "@dani-dex/contracts/attachment-files";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { MOBILE_ATTACHMENT_BYTES, type RemoteFileUpload } from "@dani-dex/team-client/remote-peer";
 import type * as Clipboard from "expo-clipboard";
 import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";

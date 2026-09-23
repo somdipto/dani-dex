@@ -4,7 +4,7 @@
     "jsx": "preserve",
     "jsxImportSource": "@solidjs/web",
     "paths": {
-      "@openbot/renderer-preview": ["./src/types/renderer-preview.d.ts"]
+      "@dani-dex/renderer-preview": ["./src/types/renderer-preview.d.ts"]
     },
     "types": ["@cloudflare/workers-types", "vite/client", "@testing-library/jest-dom"]
   },

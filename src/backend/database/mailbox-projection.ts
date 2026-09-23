@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { type DatabaseCore, deleteOrphanReceipts } from "./database-core";
 import { databaseRow, databaseRows, requiredStringColumn } from "./database-rows";
 

@@ -9,7 +9,7 @@ import type {
   ConversationSearchPage,
   ConversationSnapshot,
   HostedSiteConversationEventStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { AgentRoster } from "./database/agent-roster";
 import { AgentUsage } from "./database/agent-usage";
 import { ConversationQueries } from "./database/conversation-queries";

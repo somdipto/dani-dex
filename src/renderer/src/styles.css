@@ -1,8 +1,8 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/inter/wght-italic.css";
 @import "tailwindcss";
-@import "@openbot/brand/tokens.css";
-@import "@openbot/brand/logo.css";
+@import "@dani-dex/brand/tokens.css";
+@import "@dani-dex/brand/logo.css";
 @import "./styles/primitives.css";
 @import "./styles/otp-input.css";
 @import "./styles/transitions.css";

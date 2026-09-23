@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { z } from "zod";
 import { AGENT_DATABASE_LIMITS } from "../agent-data/agent-database-protocol";
 import { checkAgentParameters } from "../agent-data/agent-database-rules";

@@ -16,7 +16,7 @@
 // already checks; the two consequences worth naming (a host older than 63b55606 omitting `avatarUrl`,
 // a browser preview that is not a bounded JPEG data URL) are covered where they are reached.
 
-import { emptyDecoder } from "@openbot/contracts/ipc-decoding";
+import { emptyDecoder } from "@dani-dex/contracts/ipc-decoding";
 
 export type ResponseDecoder<T> = (value: unknown) => T;
 

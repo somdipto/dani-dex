@@ -12,8 +12,8 @@ import type {
   RemoteDesktopSession,
   RemoteDesktopSetupStatus,
   RemoteDesktopTestStatus,
-} from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+} from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import type * as Ws from "ws";
 import { z } from "zod";
 import { recordRestartActivity } from "../backend/restart-activity";

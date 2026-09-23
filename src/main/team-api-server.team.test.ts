@@ -3,7 +3,7 @@
 // Joining, membership, invitations, sessions and passwords: `src/main/team-api/route-team.ts`.
 
 import { EventEmitter } from "node:events";
-import type { TeamPresenceSnapshot } from "@openbot/contracts/ipc";
+import type { TeamPresenceSnapshot } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { OpenBotDatabase } from "../backend/openbot-database";
 import { TeamChatStore } from "../backend/team-chat-store";

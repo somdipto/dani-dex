@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   createMcpServerId,
   isMcpKeyValue,
@@ -7,8 +7,8 @@ import {
   type McpServerConfig,
   mcpConfigErrors,
   normalizeMcpConfig,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { databaseRow, databaseRows, requiredStringColumn } from "./database/database-rows";
 import type { OpenBotDatabase } from "./openbot-database";
 

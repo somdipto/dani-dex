@@ -1,14 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { readFile, rename, rm, writeFile } from "node:fs/promises";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   type ApprovalAutomationPreference,
   agentAutoApprovalEnabled,
   DEFAULT_APPROVAL_AUTOMATION_PREFERENCE,
   isApprovalAutomationPreference,
   type SetApprovalAutomationInput,
-} from "@openbot/contracts/ipc";
-import { isBoolean, isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isBoolean, isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 
 /** Missing settings use the product default; invalid settings always require approval. */
 export async function readApprovalAutomation(

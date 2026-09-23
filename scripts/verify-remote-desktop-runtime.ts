@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { access, readdir, readFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { createOpenBotLogger } from "@openbot/logging";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { bundledLibraryLicense, isPortableLoadPath, readMachOLoadPaths } from "./mac-runtime-dylibs";
 import { createRemoteDesktopInputDigest, loadNativeRuntimeLock } from "./native-runtime-lock";
 

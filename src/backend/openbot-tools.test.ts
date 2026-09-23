@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { AVATAR_HUES, isAvatarSeed } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { AVATAR_HUES, isAvatarSeed } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { createAgentToolSchema, updateProfileToolSchema } from "./agent/profile-tools";

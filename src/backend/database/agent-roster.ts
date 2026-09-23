@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import type { AgentSummary } from "@openbot/contracts/ipc";
+import type { AgentSummary } from "@dani-dex/contracts/ipc";
 import type { DatabaseCore } from "./database-core";
 import { databaseRow, databaseRows, requiredStringColumn } from "./database-rows";
 

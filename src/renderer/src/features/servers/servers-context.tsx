@@ -1,5 +1,5 @@
-import type { HostStatus, ServerSummary } from "@openbot/contracts/ipc";
-import type { TeamCurrentCapability } from "@openbot/contracts/team-protocol/current";
+import type { HostStatus, ServerSummary } from "@dani-dex/contracts/ipc";
+import type { TeamCurrentCapability } from "@dani-dex/contracts/team-protocol/current";
 import { createMemo, createSignal, flush, onSettled } from "solid-js";
 import { FALLBACK_HOST_STATUS } from "../../app-defaults";
 import { toast } from "../../components/ui";
@@ -136,20 +136,20 @@ const Servers = createSimpleContext({
     });
 
     onSettled(() => {
-      const unsubscribeServers = window.openbot.servers.onEvent((value) => flush(() => applyServerSummaries(value)));
-      const unsubscribeHost = window.openbot.host.onEvent((status) => flush(() => setHostStatus(status)));
+      const unsubscribeServers = window.danidex.servers.onEvent((value) => flush(() => applyServerSummaries(value)));
+      const unsubscribeHost = window.danidex.host.onEvent((status) => flush(() => setHostStatus(status)));
       // One `then` rather than a `then`/`catch`/`finally` chain: every extra link
       // is another microtask between the summaries arriving and the per-server
       // bootstrap that waits on this promise, and that gap is long enough for the
       // view to paint a first pass from stale state.
-      void window.openbot.servers.list().then(
+      void window.danidex.servers.list().then(
         (value) => {
           applyServerSummaries(value);
           markServersLoaded();
         },
         () => markServersLoaded(),
       );
-      void window.openbot.host
+      void window.danidex.host
         .getStatus()
         .then(setHostStatus)
         .catch(() => undefined);
@@ -162,7 +162,7 @@ const Servers = createSimpleContext({
     async function retryServerConnection(serverId: string): Promise<void> {
       pendingCompatibilityRetryServerId = serverId;
       try {
-        await window.openbot.servers.retryConnection(serverId);
+        await window.danidex.servers.retryConnection(serverId);
       } catch (error) {
         pendingCompatibilityRetryServerId = null;
         toast.error("The connection failed", {
@@ -176,7 +176,7 @@ const Servers = createSimpleContext({
 
     async function setServerMuted(serverId: string, muted: boolean): Promise<void> {
       try {
-        applyServerSummaries(await window.openbot.servers.setMuted({ serverId, muted }));
+        applyServerSummaries(await window.danidex.servers.setMuted({ serverId, muted }));
       } catch (error) {
         toast.error("Could not change server notifications", {
           description: errorMessage(error, "Could not save the setting. Try again."),
@@ -195,7 +195,7 @@ const Servers = createSimpleContext({
         }),
       ]);
       try {
-        setServers(await window.openbot.servers.reorder({ serverIds }));
+        setServers(await window.danidex.servers.reorder({ serverIds }));
       } catch (error) {
         setServers(previous);
         throw error;

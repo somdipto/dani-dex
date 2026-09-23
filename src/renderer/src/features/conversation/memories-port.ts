@@ -3,8 +3,8 @@
 // Everything the modal renders is owner-agnostic; only the five calls, the event filter and three
 // words of copy are not. They live here, so `AgentMemoriesModal` names no owner at all.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { MemoryEntry } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { MemoryEntry } from "@dani-dex/contracts/ipc";
 
 export interface MemoriesPort {
   ownerId: string;
@@ -28,17 +28,17 @@ export function agentMemoriesPort(agentId: string, agentName: string): MemoriesP
     ownerLabel: agentName,
     ownerNoun: "agent",
     limit: INPUT_LIMITS.agentMemories,
-    list: () => window.openbot.agent.listMemories(agentId),
+    list: () => window.danidex.agent.listMemories(agentId),
     create: async (text) => {
-      await window.openbot.agent.createMemory({ agentId, text });
+      await window.danidex.agent.createMemory({ agentId, text });
     },
     update: async (memoryId, text) => {
-      await window.openbot.agent.updateMemory({ agentId, memoryId, text });
+      await window.danidex.agent.updateMemory({ agentId, memoryId, text });
     },
-    remove: (memoryId) => window.openbot.agent.deleteMemory({ agentId, memoryId }),
-    clear: () => window.openbot.agent.clearMemories(agentId),
+    remove: (memoryId) => window.danidex.agent.deleteMemory({ agentId, memoryId }),
+    clear: () => window.danidex.agent.clearMemories(agentId),
     subscribe: (reload) =>
-      window.openbot.agent.onEvent((event) => {
+      window.danidex.agent.onEvent((event) => {
         if (event.type === "memories-changed" && event.agentId === agentId) reload();
       }),
   };
@@ -50,17 +50,17 @@ export function channelMemoriesPort(channelId: string, channelName: string): Mem
     ownerLabel: channelName,
     ownerNoun: "channel",
     limit: INPUT_LIMITS.channelMemories,
-    list: () => window.openbot.agent.listChannelMemories(channelId),
+    list: () => window.danidex.agent.listChannelMemories(channelId),
     create: async (text) => {
-      await window.openbot.agent.createChannelMemory({ channelId, text });
+      await window.danidex.agent.createChannelMemory({ channelId, text });
     },
     update: async (memoryId, text) => {
-      await window.openbot.agent.updateChannelMemory({ channelId, memoryId, text });
+      await window.danidex.agent.updateChannelMemory({ channelId, memoryId, text });
     },
-    remove: (memoryId) => window.openbot.agent.deleteChannelMemory({ channelId, memoryId }),
-    clear: () => window.openbot.agent.clearChannelMemories(channelId),
+    remove: (memoryId) => window.danidex.agent.deleteChannelMemory({ channelId, memoryId }),
+    clear: () => window.danidex.agent.clearChannelMemories(channelId),
     subscribe: (reload) =>
-      window.openbot.agent.onEvent((event) => {
+      window.danidex.agent.onEvent((event) => {
         if (event.type === "channel-memories-changed" && event.channelId === channelId) reload();
       }),
   };

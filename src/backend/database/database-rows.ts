@@ -1,5 +1,5 @@
-import type { ConversationMessage } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import type { ConversationMessage } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { currentConversationMessage } from "./legacy-conversation-message";
 
 /**

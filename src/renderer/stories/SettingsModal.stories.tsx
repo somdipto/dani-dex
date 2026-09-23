@@ -7,7 +7,7 @@ import type {
   MobileConnectedDevice,
   ProviderRuntimeSnapshot,
   UpdateStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createSignal, onCleanup } from "solid-js";
 import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
@@ -142,7 +142,7 @@ function SettingsModalStory(props: {
   customProviderSaveFails?: boolean;
   codeSignIn?: boolean;
 }) {
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = createMockOpenBot({
     providerRuntimeSnapshot: props.providerUpdate
       ? {
@@ -154,11 +154,11 @@ function SettingsModalStory(props: {
     providerRuntimeFailure: props.providerUpdateFailure,
   });
   const runtimes = createProviderRuntimeStore(props.providerUpdate ? mock.api.providerRuntimes : undefined);
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   onCleanup(() => {
     mock.dispose();
     toast.dismiss();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
   const [open, setOpen] = createSignal(props.initialOpen);
   const [value, setValue] = createSignal({ ...DEFAULT_GENERAL_SETTINGS });

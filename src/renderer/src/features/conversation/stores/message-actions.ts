@@ -2,9 +2,9 @@ import {
   attachmentReferenceIds,
   expandAttachmentReferences,
   removeAttachmentReferences,
-} from "@openbot/contracts/attachment-references";
-import { expandChatTagReferences } from "@openbot/contracts/chat-tag-references";
-import type { InstalledSkill, MessageReaction } from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/attachment-references";
+import { expandChatTagReferences } from "@dani-dex/contracts/chat-tag-references";
+import type { InstalledSkill, MessageReaction } from "@dani-dex/contracts/ipc";
 import { desktopAnalytics } from "../../../analytics";
 import type { AgentMessage } from "../../../data";
 import { errorMessage } from "../../../error-message";
@@ -44,7 +44,7 @@ export function createMessageActions(deps: MessageActionsDeps) {
     deps.setOpenReactionMessageId(null);
     deps.setExpandedEmojiMessageId(null);
     try {
-      await window.openbot.agent.setMessageReaction({
+      await window.danidex.agent.setMessageReaction({
         agentId,
         messageId: message.id,
         emoji,
@@ -117,7 +117,7 @@ export function createMessageActions(deps: MessageActionsDeps) {
       attachments: deps.currentDraft().attachments.filter((attachment) => attachment.id !== id),
       text: removeAttachmentReferences(deps.currentDraft().text, id),
     });
-    void window.openbot.agent.discardDraftAttachment(id, serverId);
+    void window.danidex.agent.discardDraftAttachment(id, serverId);
   }
 
   function draftAttachmentIds(): Set<string> {

@@ -1,4 +1,4 @@
-import type { ChannelSummary } from "@openbot/contracts/ipc";
+import type { ChannelSummary } from "@dani-dex/contracts/ipc";
 import { useThemeColor } from "heroui-native/hooks";
 import { Folder } from "lucide-react-native";
 import { memo } from "react";

@@ -1,5 +1,5 @@
-import type { AttachmentSummary } from "@openbot/contracts/ipc";
-import { MOBILE_ATTACHMENT_BYTES, type RemoteFileUpload } from "@openbot/team-client/remote-peer";
+import type { AttachmentSummary } from "@dani-dex/contracts/ipc";
+import { MOBILE_ATTACHMENT_BYTES, type RemoteFileUpload } from "@dani-dex/team-client/remote-peer";
 import { useQuery } from "@tanstack/react-query";
 import { File, Paths } from "expo-file-system";
 import { Image } from "expo-image";

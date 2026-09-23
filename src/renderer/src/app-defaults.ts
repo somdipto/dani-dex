@@ -5,7 +5,7 @@ import {
   type ProviderRuntimeSnapshot,
   type TeamPresenceSnapshot,
   type UpdateStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 
 /**
  * What the renderer shows before main has answered, and what it falls back to

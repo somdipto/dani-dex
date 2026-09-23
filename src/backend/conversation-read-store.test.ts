@@ -4,7 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { ConversationSnapshot } from "@openbot/contracts/ipc";
+import type { ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { ConversationReadStore } from "./conversation-read-store";
 import { OpenBotDatabase } from "./openbot-database";

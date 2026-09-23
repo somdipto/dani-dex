@@ -7,8 +7,8 @@ import type {
   HostedSiteSummary,
   PublishHostedSiteInput,
   ReplaceHostedSiteInput,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 
 const MAX_FILES = 20;
 const MAX_TOTAL_BYTES = 2 * 1024 * 1024;

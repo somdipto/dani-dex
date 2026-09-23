@@ -3,7 +3,7 @@
 // This registrar owns the order of the two writes, so the backend never has to know that a store
 // exists: it is given a getter, and reads it again at every provider spawn.
 
-import type { CustomProviderResult } from "@openbot/contracts/ipc";
+import type { CustomProviderResult } from "@dani-dex/contracts/ipc";
 import type { AgentService } from "../../backend/agent-service";
 import type { CustomProviderStore } from "../custom-provider-store";
 import { parseDeleteCustomProvider, parseSaveCustomProvider } from "./custom-provider-inputs";

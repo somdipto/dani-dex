@@ -1,5 +1,5 @@
-import type { AccountUsage, AccountUsageLimit, AccountUsageWindow } from "@openbot/contracts/ipc";
-import { isNumber } from "@openbot/contracts/runtime-values";
+import type { AccountUsage, AccountUsageLimit, AccountUsageWindow } from "@dani-dex/contracts/ipc";
+import { isNumber } from "@dani-dex/contracts/runtime-values";
 import type { AccountRateLimitResult, AccountRateLimitsReadResult } from "../protocol";
 
 export function normalizeAccountUsage(rateLimits: AccountRateLimitsReadResult | null, model?: string): AccountUsage {

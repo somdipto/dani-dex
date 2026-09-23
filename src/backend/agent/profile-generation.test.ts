@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import { access } from "node:fs/promises";
-import { type AgentProfileDraft, AVATAR_HUES } from "@openbot/contracts/ipc";
+import { type AgentProfileDraft, AVATAR_HUES } from "@dani-dex/contracts/ipc";
 import { expect, it } from "vitest";
 import type { AgentClient } from "../agent-client";
 import { getString, type RequestId, type ResponseDecoder, type RpcError } from "../protocol";

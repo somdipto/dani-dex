@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile, rename, rm, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   BrowserBounds,
   BrowserControlAction,
@@ -20,9 +20,9 @@ import type {
   BrowserTarget,
   BrowserViewTarget,
   BrowserVisibilityInput,
-} from "@openbot/contracts/ipc";
-import { isNumber, isString } from "@openbot/contracts/runtime-values";
-import { createOpenBotLogger, redactText, toLogValue } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { createOpenBotLogger, redactText, toLogValue } from "@dani-dex/logging";
 import {
   app,
   BrowserWindow,

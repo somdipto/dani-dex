@@ -1,4 +1,4 @@
-import type { BrowserLiveViewInput } from "@openbot/contracts/ipc";
+import type { BrowserLiveViewInput } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, createStore, onCleanup, Show } from "solid-js";
 
 /** CDP's modifier bitmap, which is what the host dispatches the event with. */
@@ -42,7 +42,7 @@ export default function BrowserLiveView(props: BrowserLiveViewProps) {
     bitmap.close();
   };
 
-  const stopListening = window.openbot.browser.onLiveViewEvent((event) => {
+  const stopListening = window.danidex.browser.onLiveViewEvent((event) => {
     if (event.tabId !== props.tabId) return;
     if (event.type === "stopped") {
       setState(() => ({ live: false, message: event.reason }));
@@ -65,15 +65,15 @@ export default function BrowserLiveView(props: BrowserLiveViewProps) {
     ({ tabId, active }) => {
       if (!active) return;
       setState(() => ({ live: false, message: "Connecting to the page on the host…" }));
-      void window.openbot.browser
+      void window.danidex.browser
         .startLiveView(tabId)
         .catch((error: unknown) => setState(() => ({ live: false, message: errorMessage(error) })));
-      onCleanup(() => void window.openbot.browser.stopLiveView().catch(() => undefined));
+      onCleanup(() => void window.danidex.browser.stopLiveView().catch(() => undefined));
     },
   );
 
   const send = (input: BrowserLiveViewInput) => {
-    void window.openbot.browser.sendLiveViewInput(input).catch(() => undefined);
+    void window.danidex.browser.sendLiveViewInput(input).catch(() => undefined);
   };
 
   const point = (event: MouseEvent): { x: number; y: number } | null => {

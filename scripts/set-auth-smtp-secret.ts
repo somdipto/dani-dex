@@ -1,7 +1,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import { set } from "@dotenvx/dotenvx";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
 
 const logger = createOpenBotLogger("set-auth-smtp-secret");
 

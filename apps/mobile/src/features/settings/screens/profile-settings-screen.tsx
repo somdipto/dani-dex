@@ -1,8 +1,8 @@
+import { isAvatarMimeType } from "@dani-dex/contracts/avatar-images";
+import { AVATAR_IMAGE_LIMITS } from "@dani-dex/contracts/input-limits";
+import { validateProfileName } from "@dani-dex/contracts/validation";
+import { userErrorMessage as errorMessage } from "@dani-dex/user-errors";
 import { Host, Text as NativeText, TextInput, type TextInputRef, useNativeState } from "@expo/ui";
-import { isAvatarMimeType } from "@openbot/contracts/avatar-images";
-import { AVATAR_IMAGE_LIMITS } from "@openbot/contracts/input-limits";
-import { validateProfileName } from "@openbot/contracts/validation";
-import { userErrorMessage as errorMessage } from "@openbot/user-errors";
 import { File } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";

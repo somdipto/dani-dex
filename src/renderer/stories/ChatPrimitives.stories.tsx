@@ -1,4 +1,4 @@
-import type { AttachmentSummary, MessageReaction } from "@openbot/contracts/ipc";
+import type { AttachmentSummary, MessageReaction } from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createMemo, createSignal, Show } from "solid-js";
 import { expect, fn, waitFor, within } from "storybook/test";

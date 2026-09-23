@@ -1,7 +1,7 @@
 import { access, chmod, copyFile, link, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { ManagedRuntimeId } from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+import type { ManagedRuntimeId } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import type { AgentRuntimeLock } from "../../scripts/agent-runtime-lock";
 import {
   parseBunVersion,

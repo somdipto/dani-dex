@@ -9,7 +9,7 @@ import type {
   ListChannelRoutineRunsInput,
   TestChannelRoutineInput,
   UpdateChannelRoutineInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { ChannelRoutineStore } from "./channel-routine-store";
 import type { ChannelService } from "./channel-service";
 import { recordRestartActivity } from "./restart-activity";

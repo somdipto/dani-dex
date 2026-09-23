@@ -1,7 +1,7 @@
 // Exercises an existing local dev app. Does not create, submit, or install Agents.
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
-import { createOpenBotLogger } from "@openbot/logging";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { assertMutationAllowed, connectToDevApp } from "./dev-automation/cdp-client";
 import { readDevInstanceRecords } from "./dev-automation/instance-registry";
 

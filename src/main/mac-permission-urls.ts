@@ -1,6 +1,6 @@
 // The System Settings panes macOS opens from a URL, kept out of the renderer.
 
-import type { MacPermissionId } from "@openbot/contracts/ipc";
+import type { MacPermissionId } from "@dani-dex/contracts/ipc";
 
 /**
  * Where macOS shows the grant for each permission Computer Use needs.

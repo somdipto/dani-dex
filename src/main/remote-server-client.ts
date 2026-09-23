@@ -18,15 +18,15 @@
 // reaching in and closing a WebSocket.
 
 import { randomBytes, verify } from "node:crypto";
-import type { RemoteDesktopCapabilities, ServerCompatibility } from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+import type { RemoteDesktopCapabilities, ServerCompatibility } from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import {
   isAgentCreateRoute,
   supportsTeamSemanticTags,
   TEAM_AGENT_CREATE_MODEL_CAPABILITY,
   TEAM_CURRENT_CAPABILITIES,
   type TeamCurrentCapability,
-} from "@openbot/contracts/team-protocol/current";
+} from "@dani-dex/contracts/team-protocol/current";
 import {
   decodeTeamProtocolSupportV1,
   highestCommonTeamProtocol,
@@ -35,7 +35,7 @@ import {
   TEAM_PROTOCOL_VERSION_HEADER,
   type TeamProtocolSupportV1,
   teamProtocolUpdateDirection,
-} from "@openbot/contracts/team-protocol/v1";
+} from "@dani-dex/contracts/team-protocol/v1";
 import { decodeRemoteDesktopCapabilities } from "./remote-device-decoding";
 import type { ResponseDecoder } from "./remote-host-decoding";
 import {

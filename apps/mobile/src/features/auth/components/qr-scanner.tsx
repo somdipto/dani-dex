@@ -1,4 +1,4 @@
-import { userErrorMessage as errorMessage } from "@openbot/user-errors";
+import { userErrorMessage as errorMessage } from "@dani-dex/user-errors";
 import { CameraView, type CameraViewProps, useCameraPermissions } from "expo-camera";
 import { Stack } from "expo-router";
 import { useIsFocused } from "expo-router/react-navigation";

@@ -5,7 +5,7 @@ import {
   type AppSetupState,
   defaultProviderModel,
   PICKER_PROVIDERS,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 
 export interface CreationModelChoice {
   provider: AgentProviderId;

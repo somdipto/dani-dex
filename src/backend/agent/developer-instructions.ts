@@ -1,5 +1,5 @@
-import type { AgentMemory, AgentSummary } from "@openbot/contracts/ipc";
-import { COMPUTER_USE_MCP_SERVER_NAME } from "@openbot/contracts/ipc";
+import type { AgentMemory, AgentSummary } from "@dani-dex/contracts/ipc";
+import { COMPUTER_USE_MCP_SERVER_NAME } from "@dani-dex/contracts/ipc";
 import { OPENBOT_BROWSER_NAMESPACE } from "../browser-tools";
 
 export function developerInstructions(agent: AgentSummary, sharedRoot: string, memories: AgentMemory[]): string {

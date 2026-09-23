@@ -1,5 +1,5 @@
-import { chatTagReferences } from "@openbot/contracts/chat-tag-references";
-import type { ChannelDraft } from "@openbot/contracts/ipc";
+import { chatTagReferences } from "@dani-dex/contracts/chat-tag-references";
+import type { ChannelDraft } from "@dani-dex/contracts/ipc";
 
 export function toggleChannelMember(draft: ChannelDraft, agentId: string): ChannelDraft {
   const selected = draft.members.some((member) => member.agentId === agentId);

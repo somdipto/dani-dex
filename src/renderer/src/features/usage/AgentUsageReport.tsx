@@ -1,4 +1,4 @@
-import type { AnalyticsTotals, HostAnalytics } from "@openbot/contracts/ipc";
+import type { AnalyticsTotals, HostAnalytics } from "@dani-dex/contracts/ipc";
 import { createMemo, createStore, For, onSettled, Show } from "solid-js";
 import { Button, SlidingTabs } from "../../components/ui";
 import { UsageChart } from "./UsageChart";

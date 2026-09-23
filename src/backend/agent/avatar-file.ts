@@ -1,8 +1,8 @@
 import { open } from "node:fs/promises";
 import { resolve } from "node:path";
-import { AVATAR_MIME_TYPES, isValidAvatarImage } from "@openbot/contracts/avatar-images";
-import { AVATAR_IMAGE_LIMITS } from "@openbot/contracts/input-limits";
-import type { AvatarImageInput } from "@openbot/contracts/ipc";
+import { AVATAR_MIME_TYPES, isValidAvatarImage } from "@dani-dex/contracts/avatar-images";
+import { AVATAR_IMAGE_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AvatarImageInput } from "@dani-dex/contracts/ipc";
 
 const SIZE_ERROR =
   "The avatar exceeds 512 KB. Resize or compress a copy with your available tools, then retry with its path.";

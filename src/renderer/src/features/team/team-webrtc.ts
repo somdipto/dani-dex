@@ -1,12 +1,12 @@
-import { isString } from "@openbot/contracts/runtime-values";
-import { decodeSignalServerMessage } from "@openbot/contracts/signal-protocol/decode";
+import { isString } from "@dani-dex/contracts/runtime-values";
+import { decodeSignalServerMessage } from "@dani-dex/contracts/signal-protocol/decode";
 import {
   SIGNAL_PROTOCOL_VERSION,
   SIGNAL_TURN_REFRESH_INTERVAL_MS,
   type SignalClientMessage,
   type SignalServerMessage,
-} from "@openbot/contracts/signal-protocol/messages";
-import { TEAM_PROTOCOL_V2_CHANNELS } from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/signal-protocol/messages";
+import { TEAM_PROTOCOL_V2_CHANNELS } from "@dani-dex/contracts/team-protocol/v2";
 import { encodeTeamWebRtcPayload, TeamWebRtcPayloadDecoder } from "./team-webrtc-framing";
 
 export interface BridgeCommand {

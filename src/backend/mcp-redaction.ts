@@ -1,5 +1,5 @@
-import type { McpServerConfig } from "@openbot/contracts/ipc";
-import { redactText } from "@openbot/logging";
+import type { McpServerConfig } from "@dani-dex/contracts/ipc";
+import { redactText } from "@dani-dex/logging";
 import { mcpEnvironment } from "./mcp-provider-shapes";
 
 const MASK = "•••";

@@ -7,8 +7,8 @@ import {
   decodeAgentProfileDraft,
   type GenerateAgentProfileInput,
   type SidebarSection,
-} from "@openbot/contracts/ipc";
-import type { DynamicRecord } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
 import type { AgentClient } from "../agent-client";
 import { decodeRecordResponse, getRecord, getString } from "../protocol";
 import { extractJsonObject, StructuredOutputError } from "../structured-output";

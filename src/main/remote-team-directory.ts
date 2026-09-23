@@ -10,14 +10,14 @@
 // So the two arms stay visible. Hiding them behind one method would read as tidier and would cost
 // the next reader an hour the first time an invitation goes missing from the wrong server.
 
-import { createInviteUrl } from "@openbot/contracts/invite-links";
+import { createInviteUrl } from "@dani-dex/contracts/invite-links";
 import type {
   InviteSummary,
   TeamInviteSummary,
   TeamMemberSummary,
   UpdateTeamMemberInput,
-} from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+} from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import type { RemoteInviteRecord, RemoteMemberRecord } from "./central-auth-manager";
 import { decodeVoid } from "./remote-host-decoding";
 import type { RemoteRequestFn } from "./remote-server-client";

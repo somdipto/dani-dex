@@ -1,4 +1,4 @@
-import type { UpdateAgentInput } from "@openbot/contracts/ipc";
+import type { UpdateAgentInput } from "@dani-dex/contracts/ipc";
 import {
   createContext,
   createEffect,
@@ -522,7 +522,7 @@ export function createConversationViewScope(props: ConversationProps) {
   }
 
   onSettled(() => {
-    const unsubscribeImport = window.openbot.agent.onAttachmentImport((event) => {
+    const unsubscribeImport = window.danidex.agent.onAttachmentImport((event) => {
       if (event.type === "started") {
         const target = currentTarget();
         if (target?.serverId === event.serverId) {
@@ -551,7 +551,7 @@ export function createConversationViewScope(props: ConversationProps) {
         } else {
           setAttachmentBusy(resources.importTargetAgents.size > 0);
           for (const attachment of event.attachments) {
-            void window.openbot.agent.discardDraftAttachment(attachment.id, event.serverId);
+            void window.danidex.agent.discardDraftAttachment(attachment.id, event.serverId);
           }
         }
       }
@@ -837,7 +837,7 @@ export function createConversationViewScope(props: ConversationProps) {
       if (browserBoundsFrame !== undefined) cancelAnimationFrame(browserBoundsFrame);
       browserBoundsFrame = undefined;
       if (!visible) {
-        void window.openbot.browser.setVisible({ visible: false });
+        void window.danidex.browser.setVisible({ visible: false });
         return;
       }
       browserVisibilityFrame = requestAnimationFrame(() => {
@@ -860,7 +860,7 @@ export function createConversationViewScope(props: ConversationProps) {
             return;
           }
           const bounds = surface.getBoundingClientRect();
-          void window.openbot.browser.setVisible({
+          void window.danidex.browser.setVisible({
             visible: true,
             target: "main",
             bounds: {
@@ -893,16 +893,16 @@ export function createConversationViewScope(props: ConversationProps) {
     ({ open }) => {
       if (props.browserEnabled === false) return;
       if (!open) {
-        void window.openbot.browser.closePictureInPicture();
+        void window.danidex.browser.closePictureInPicture();
         return;
       }
-      void window.openbot.browser
+      void window.danidex.browser
         .openPictureInPicture(untrack(browserPipBounds) ?? undefined)
         .then(saveBrowserPipBounds);
     },
   );
 
-  const removeBrowserPictureInPictureListener = window.openbot.browser.onPictureInPictureEvent((event) => {
+  const removeBrowserPictureInPictureListener = window.danidex.browser.onPictureInPictureEvent((event) => {
     if (event.type === "bounds-changed") {
       saveBrowserPipBounds(event.bounds);
       return;
@@ -918,15 +918,15 @@ export function createConversationViewScope(props: ConversationProps) {
     if (browserWindowResizeHandler) window.removeEventListener("resize", browserWindowResizeHandler);
     removeBrowserPictureInPictureListener();
     if (props.browserEnabled !== false) {
-      void window.openbot.browser.setVisible({ visible: false });
-      void window.openbot.browser.closePictureInPicture();
+      void window.danidex.browser.setVisible({ visible: false });
+      void window.danidex.browser.closePictureInPicture();
     }
   });
 
   async function openExternalMessageUrl(url: string) {
     const target = currentTarget();
     try {
-      await window.openbot.openUrl(url);
+      await window.danidex.openUrl(url);
     } catch {
       setScopedComposerError("Could not open the link in the external browser.", target);
     }

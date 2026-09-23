@@ -1,11 +1,11 @@
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { McpServerConfig } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { type OAuthClientProvider, UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { getDefaultEnvironment, StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { McpServerConfig } from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
 import { type McpOAuthAuthority, type McpSignIn, secureOAuthFetch } from "./mcp-oauth-provider";
 import {
   clearMcpCommandCache,

@@ -1,5 +1,5 @@
-import { agentHarnessDescriptor, isAgentHarness } from "@openbot/contracts/agent-harnesses";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { agentHarnessDescriptor, isAgentHarness } from "@dani-dex/contracts/agent-harnesses";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentProviderId,
   DynamicIslandAction,
@@ -22,7 +22,7 @@ import type {
   SubmitSkillInput,
   UninstallSkillInput,
   UpdatePreference,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import {
   isAgentModel,
   isAgentProvider,
@@ -33,9 +33,9 @@ import {
   isDynamicIslandPresentation,
   isSetApprovalAutomationInput,
   isSkillCategory,
-} from "@openbot/contracts/ipc";
-import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { validateProfileName } from "@openbot/contracts/validation";
+} from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isBoolean, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { validateProfileName } from "@dani-dex/contracts/validation";
 import { parseAvatarImage } from "./avatar-inputs";
 import { isObject, optionalBoolean, requireString } from "./validation";
 

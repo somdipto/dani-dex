@@ -1,6 +1,6 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { AccountSession, AvatarImageInput, CentralAuthUser } from "@openbot/contracts/ipc";
-import { normalizeAccountName, validateProfileName } from "@openbot/contracts/validation";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AccountSession, AvatarImageInput, CentralAuthUser } from "@dani-dex/contracts/ipc";
+import { normalizeAccountName, validateProfileName } from "@dani-dex/contracts/validation";
 import { createEffect, createMemo, createStore } from "solid-js";
 import { normalizeAvatarFile } from "../../../avatar-image";
 import { errorMessage } from "../../../error-message";

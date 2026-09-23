@@ -2,7 +2,7 @@
 
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { AgentProviderId, ProviderApiKeyStatus } from "@openbot/contracts/ipc";
+import type { AgentProviderId, ProviderApiKeyStatus } from "@dani-dex/contracts/ipc";
 import { z } from "zod";
 
 /**

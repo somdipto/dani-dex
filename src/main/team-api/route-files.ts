@@ -13,8 +13,8 @@
 
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
-import { ATTACHMENT_LIMITS, INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+import { ATTACHMENT_LIMITS, INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import type { TeamApiAgents, TeamApiMailbox } from "./dependencies";
 import { HttpError } from "./http-error";
 import type { RouteOutcome, TeamApiRequestContext } from "./request-context";

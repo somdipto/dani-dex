@@ -1,5 +1,5 @@
-import type { AttachmentSummary, InstalledSkill, MessageReaction } from "@openbot/contracts/ipc";
-import { canPreviewAttachment, MESSAGE_REACTIONS, MORE_MESSAGE_REACTIONS } from "@openbot/contracts/ipc";
+import type { AttachmentSummary, InstalledSkill, MessageReaction } from "@dani-dex/contracts/ipc";
+import { canPreviewAttachment, MESSAGE_REACTIONS, MORE_MESSAGE_REACTIONS } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, For, onCleanup, Show, untrack } from "solid-js";
 import { type BubbleVariant, Button, DropdownMenu } from "../../components/ui";
 import { prefersReducedMotion } from "../../components/ui/utils";

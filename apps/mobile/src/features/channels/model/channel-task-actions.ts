@@ -1,4 +1,4 @@
-import type { ChannelMessage, ChannelTask } from "@openbot/contracts/ipc";
+import type { ChannelMessage, ChannelTask } from "@dani-dex/contracts/ipc";
 
 import type { MobileAgentActivity } from "../../workspace/model/agent-activity";
 

@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { isDynamicRecord, isOneOf, isString } from "@openbot/contracts/runtime-values";
-import { createOpenBotLogger } from "@openbot/logging";
+import { isDynamicRecord, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
+import { createOpenBotLogger } from "@dani-dex/logging";
 
 const logger = createOpenBotLogger("prepare-release");
 

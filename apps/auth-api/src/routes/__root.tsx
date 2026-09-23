@@ -1,7 +1,7 @@
 import interLatinFont from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import type { JSX } from "@solidjs/web";
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/solid-router";
-import "@openbot/brand/logo.css";
+import "@dani-dex/brand/logo.css";
 import "../styles.css";
 import { PageError } from "../components/landing/PageError";
 import { servingSiteUrl } from "../lib/serving-site-url";

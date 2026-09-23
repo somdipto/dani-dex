@@ -1,4 +1,4 @@
-import { isBoolean, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { isBoolean, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { createFileRoute } from "@tanstack/solid-router";
 import { readJsonObject } from "../../../../../server/json-body";
 import {

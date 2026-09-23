@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { createOpenBotLogger } from "@openbot/logging";
+import { createOpenBotLogger } from "@dani-dex/logging";
 
 const logger = createOpenBotLogger("install-git-hooks");
 

@@ -12,8 +12,8 @@ import type {
   RespondToBrowserSecretInput,
   RespondToBrowserTakeoverInput,
   RespondToPromptInput,
-} from "@openbot/contracts/ipc";
-import { AGENT_RUNTIME_ATTENTION_LIMIT } from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
+import { AGENT_RUNTIME_ATTENTION_LIMIT } from "@dani-dex/contracts/ipc";
 import type { AgentClient } from "../agent-client";
 import type { PreparedBrowserSecret } from "../browser-host";
 import {

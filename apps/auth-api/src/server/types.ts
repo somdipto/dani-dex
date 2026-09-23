@@ -1,5 +1,5 @@
-import type { AccountSession } from "@openbot/contracts/mobile-connect";
-import { isDynamicRecord, isFunction } from "@openbot/contracts/runtime-values";
+import type { AccountSession } from "@dani-dex/contracts/mobile-connect";
+import { isDynamicRecord, isFunction } from "@dani-dex/contracts/runtime-values";
 
 export interface WorkerBindings {
   DB: D1Database;
@@ -83,7 +83,7 @@ export function requireWorkerBindings(value: unknown): WorkerBindings {
 export interface MobileAuthSessionResult {
   sessionToken: string;
   user: AuthUser;
-  host?: import("@openbot/contracts/mobile-connect").MobileConnectHostBinding;
+  host?: import("@dani-dex/contracts/mobile-connect").MobileConnectHostBinding;
 }
 
 export interface AuthUser {
@@ -180,7 +180,7 @@ export interface AuthRepository {
     expiresAt: number;
   }): Promise<void>;
   replaceMobileAuthTicket(input: {
-    host?: import("@openbot/contracts/mobile-connect").MobileConnectHostBinding;
+    host?: import("@dani-dex/contracts/mobile-connect").MobileConnectHostBinding;
     ticketHash: string;
     userId: string;
     serverId: string;

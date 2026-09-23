@@ -1,4 +1,4 @@
-import { decodeTeamProtocolV1Event, encodeTeamProtocolV1Event } from "@openbot/contracts/team-protocol/v1";
+import { decodeTeamProtocolV1Event, encodeTeamProtocolV1Event } from "@dani-dex/contracts/team-protocol/v1";
 import { describe, expect, it } from "vitest";
 import { browserInputAction } from "./browser-tool-actions";
 import {

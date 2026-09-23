@@ -4,7 +4,7 @@
  * safe for the drag engine to hold - it satisfies the engine's list model and can do nothing else.
  */
 
-import { SIDEBAR_PEOPLE_SECTION_ID, SIDEBAR_UNASSIGNED_SECTION_ID } from "@openbot/contracts/ipc";
+import { SIDEBAR_PEOPLE_SECTION_ID, SIDEBAR_UNASSIGNED_SECTION_ID } from "@dani-dex/contracts/ipc";
 import { createMemo } from "solid-js";
 import { teamMemberName } from "../../team/TeamPersonAvatar";
 import { agentMatchesQuery, channelMatchesQuery, personMatchesQuery } from "../sidebar-filtering";

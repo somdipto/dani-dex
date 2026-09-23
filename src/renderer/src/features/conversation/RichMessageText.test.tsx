@@ -1,4 +1,4 @@
-import { serializeAttachmentReference } from "@openbot/contracts/attachment-references";
+import { serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
 import { fireEvent, render, screen, within } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DataTable } from "./DataTable";

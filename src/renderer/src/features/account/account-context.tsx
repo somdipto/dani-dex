@@ -1,4 +1,4 @@
-import type { AccountUsage, AvatarImageInput, CentralAuthState } from "@openbot/contracts/ipc";
+import type { AccountUsage, AvatarImageInput, CentralAuthState } from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal, createStore, flush, onCleanup, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { createSimpleContext } from "../../simple-context";
@@ -95,14 +95,14 @@ const Auth = createSimpleContext({
     }
 
     onSettled(() => {
-      const unsubscribe = window.openbot.auth.onEvent((state) => {
+      const unsubscribe = window.danidex.auth.onEvent((state) => {
         flush(() => applyCentralAuthState(state));
       });
       // The bootstrap read sets the signal directly, not through
       // `applyCentralAuthState`: there is no earlier state to have completed a
       // code challenge against, so a restart into a signed-in account must not
       // play the success hold.
-      void window.openbot.auth
+      void window.danidex.auth
         .getState()
         .then(setCentralAuth)
         .catch(() =>
@@ -120,7 +120,7 @@ const Auth = createSimpleContext({
     async function requestEmailCode(email: string): Promise<void> {
       const analytics = desktopAnalytics.anonymousScope();
       try {
-        const state = await window.openbot.auth.requestEmailCode(email);
+        const state = await window.danidex.auth.requestEmailCode(email);
         analytics.track("account_sign_in_started", {
           result: state.status === "code_sent" ? "code_sent" : "failed",
           ...(state.status === "error" ? { failure_code: authFailureCode(state.issue.code) } : {}),
@@ -137,13 +137,13 @@ const Auth = createSimpleContext({
 
     async function retryCentralAccount(): Promise<void> {
       applyCentralAuthState({ status: "loading" });
-      applyCentralAuthState(await window.openbot.auth.retry());
+      applyCentralAuthState(await window.danidex.auth.retry());
     }
 
     async function verifyEmailCode(challengeId: string, code: string): Promise<void> {
       const anonymousAnalytics = desktopAnalytics.anonymousScope();
       try {
-        const state = await window.openbot.auth.verifyEmailCode(challengeId, code);
+        const state = await window.danidex.auth.verifyEmailCode(challengeId, code);
         applyCentralAuthState(state);
         desktopAnalytics.track("account_sign_in_completed", {
           result: state.status === "signed_in" ? "succeeded" : "failed",
@@ -161,7 +161,7 @@ const Auth = createSimpleContext({
     async function logoutCentralAccount(): Promise<void> {
       const analytics = desktopAnalytics.scope();
       try {
-        const state = await window.openbot.auth.logout();
+        const state = await window.danidex.auth.logout();
         analytics.track("account_sign_out", { result: "succeeded" });
         applyCentralAuthState(state);
       } catch (error) {
@@ -174,11 +174,11 @@ const Auth = createSimpleContext({
     }
 
     async function updateAccountAvatar(image: AvatarImageInput | null): Promise<void> {
-      applyCentralAuthState(await window.openbot.auth.updateAvatar(image));
+      applyCentralAuthState(await window.danidex.auth.updateAvatar(image));
     }
 
     async function updateAccountName(name: string): Promise<void> {
-      applyCentralAuthState(await window.openbot.auth.updateName(name));
+      applyCentralAuthState(await window.danidex.auth.updateName(name));
     }
 
     const accountUsage = () => accountUsageState.data;
@@ -217,7 +217,7 @@ const Auth = createSimpleContext({
     async function refreshAccountUsage(targetKey: string): Promise<AccountUsage> {
       selectAccountUsageTarget(targetKey);
       const generation = ++accountUsageRequestGeneration;
-      const usage = await window.openbot.agent.getUsage();
+      const usage = await window.danidex.agent.getUsage();
       if (generation === accountUsageRequestGeneration && accountUsageState.targetKey === targetKey) {
         setAccountUsageState((state) => {
           state.data = usage;
@@ -227,15 +227,15 @@ const Auth = createSimpleContext({
     }
 
     function createMobileConnect() {
-      return window.openbot.auth.createMobileConnect();
+      return window.danidex.auth.createMobileConnect();
     }
 
     function listMobileConnectedDevices() {
-      return window.openbot.auth.listMobileConnectedDevices();
+      return window.danidex.auth.listMobileConnectedDevices();
     }
 
     function revokeMobileConnectedDevice(sessionId: string) {
-      return window.openbot.auth.revokeMobileConnectedDevice(sessionId);
+      return window.danidex.auth.revokeMobileConnectedDevice(sessionId);
     }
 
     const signedInAccount = createMemo(() => {
@@ -264,8 +264,8 @@ const Auth = createSimpleContext({
       createMobileConnect,
       listMobileConnectedDevices,
       revokeMobileConnectedDevice,
-      listAccountSessions: () => window.openbot.auth.listAccountSessions(),
-      revokeAccountSession: (sessionId: string) => window.openbot.auth.revokeAccountSession(sessionId),
+      listAccountSessions: () => window.danidex.auth.listAccountSessions(),
+      revokeAccountSession: (sessionId: string) => window.danidex.auth.revokeAccountSession(sessionId),
     };
   },
 });

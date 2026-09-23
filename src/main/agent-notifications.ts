@@ -1,5 +1,5 @@
-import type { AgentEvent, AgentSummary } from "@openbot/contracts/ipc";
-import type { AppTranslate } from "@openbot/i18n";
+import type { AgentEvent, AgentSummary } from "@dani-dex/contracts/ipc";
+import type { AppTranslate } from "@dani-dex/i18n";
 
 export interface AgentNotificationContent {
   title: string;

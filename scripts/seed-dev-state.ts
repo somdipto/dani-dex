@@ -4,8 +4,8 @@ import { lstat, mkdir, mkdtemp, readFile, readlink, rename, rm, writeFile } from
 import { homedir } from "node:os";
 import { dirname, join, parse, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { serializeAttachmentReference } from "@openbot/contracts/attachment-references";
-import { serializeChatTagReference } from "@openbot/contracts/chat-tag-references";
+import { serializeAttachmentReference } from "@dani-dex/contracts/attachment-references";
+import { serializeChatTagReference } from "@dani-dex/contracts/chat-tag-references";
 import type {
   AgentModelId,
   AgentProviderId,
@@ -16,9 +16,9 @@ import type {
   ChannelTask,
   ConversationMessage,
   Routine,
-} from "@openbot/contracts/ipc";
-import { channelRoutingConversationEventItemType } from "@openbot/contracts/ipc";
-import { createOpenBotLogger, toLogValue } from "@openbot/logging";
+} from "@dani-dex/contracts/ipc";
+import { channelRoutingConversationEventItemType } from "@dani-dex/contracts/ipc";
+import { createOpenBotLogger, toLogValue } from "@dani-dex/logging";
 import { strToU8, zipSync } from "fflate";
 import { z } from "zod";
 import { agentNamesById, displayMessageReferences } from "../src/backend/agent/delivery-content";

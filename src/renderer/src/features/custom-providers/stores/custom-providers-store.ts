@@ -3,7 +3,7 @@ import type {
   CustomProviderSummary,
   CustomProvidersDesktopApi,
   SaveCustomProviderInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createStore } from "solid-js";
 
 interface CustomProvidersState {
@@ -16,7 +16,7 @@ interface CustomProvidersState {
  * The endpoints the user named, as the renderer sees them: a list with no key in it.
  *
  * The API is taken as an accessor rather than as an object, because this store is built while the
- * context mounts and a test harness may install `window.openbot` around it. An absent group leaves
+ * context mounts and a test harness may install `window.danidex` around it. An absent group leaves
  * the list empty and every mutation a no-op, which is what a build without the endpoints should look
  * like rather than a crash on the Settings tab.
  *

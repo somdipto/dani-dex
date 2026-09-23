@@ -1,5 +1,5 @@
-import type { DynamicIslandAction } from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
+import type { DynamicIslandAction } from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import { routeToServer } from "./ipc/route-to-server";
 
 type CriticalAction = Extract<DynamicIslandAction, { type: "answer-prompt" | "respond-approval" }>;

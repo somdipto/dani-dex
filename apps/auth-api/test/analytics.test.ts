@@ -1,4 +1,4 @@
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { getByRole } from "@solidjs/testing-library";
 import { describe, expect, it, vi } from "vitest";
 import {

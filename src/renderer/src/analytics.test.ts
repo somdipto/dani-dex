@@ -1,5 +1,5 @@
-import type { AppInfo } from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+import type { AppInfo } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { OpenPanelBase } from "@openpanel/web";
 import { describe, expect, it, vi } from "vitest";
 import {

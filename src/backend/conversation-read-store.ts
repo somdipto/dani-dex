@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
-import type { AgentSummary, ConversationReadState, ConversationSnapshot } from "@openbot/contracts/ipc";
+import type { AgentSummary, ConversationReadState, ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import {
   HOSTED_SITE_EVENT_ITEM_TYPE_PREFIX,
   ROUTINE_EVENT_ITEM_TYPE_PREFIX,
   ROUTINE_RUN_EVENT_ITEM_TYPE_PREFIX,
   SKILL_EVENT_ITEM_TYPE_PREFIX,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import type { OpenBotDatabase } from "./openbot-database";
 
 export interface ConversationMarkerExclusions {

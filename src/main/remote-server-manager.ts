@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
-import { isValidAvatarImage } from "@openbot/contracts/avatar-images";
-import { parseInviteUrl } from "@openbot/contracts/invite-links";
+import { isValidAvatarImage } from "@dani-dex/contracts/avatar-images";
+import { parseInviteUrl } from "@dani-dex/contracts/invite-links";
 import type {
   AgentEvent,
   AgentSummary,
@@ -37,12 +37,12 @@ import type {
   TeamPresenceSnapshot,
   TeamRealtimeEvent,
   UpdateTeamMemberInput,
-} from "@openbot/contracts/ipc";
-import { LOCAL_SERVER_ID, REMOTE_DESKTOP_SETUP_CAPABILITY, type RemoteDesktopTestInput } from "@openbot/contracts/ipc";
-import { TEAM_API_ROUTES } from "@openbot/contracts/team-api-routes";
-import { decodeBrowserViewSessionResponse } from "@openbot/contracts/team-protocol/browser-view-v1";
-import type { TeamCurrentCapability } from "@openbot/contracts/team-protocol/current";
-import { decodeTeamProtocolV1CurrentHttpResponse } from "@openbot/contracts/team-protocol/v1-adapter";
+} from "@dani-dex/contracts/ipc";
+import { LOCAL_SERVER_ID, REMOTE_DESKTOP_SETUP_CAPABILITY, type RemoteDesktopTestInput } from "@dani-dex/contracts/ipc";
+import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
+import { decodeBrowserViewSessionResponse } from "@dani-dex/contracts/team-protocol/browser-view-v1";
+import type { TeamCurrentCapability } from "@dani-dex/contracts/team-protocol/current";
+import { decodeTeamProtocolV1CurrentHttpResponse } from "@dani-dex/contracts/team-protocol/v1-adapter";
 import { decodeAgentSummary, decodeDraftAttachment, decodeDuplicateAgentResultFromHost } from "./remote-agent-decoding";
 import {
   decodeConversationPageFromHost,

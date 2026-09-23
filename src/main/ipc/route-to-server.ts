@@ -7,7 +7,7 @@
 // so both are normalized with `Promise.resolve`. That is invisible at the IPC boundary, which
 // promisifies a handler's result either way.
 
-import { LOCAL_SERVER_ID } from "@openbot/contracts/ipc";
+import { LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
 
 export function routeToServer<T>(
   serverId: string,

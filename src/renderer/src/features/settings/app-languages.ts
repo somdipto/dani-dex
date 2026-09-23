@@ -1,4 +1,4 @@
-import { APP_LANGUAGES, type AppLanguage } from "@openbot/contracts/ipc";
+import { APP_LANGUAGES, type AppLanguage } from "@dani-dex/contracts/ipc";
 
 /**
  * The rows of the language selector.

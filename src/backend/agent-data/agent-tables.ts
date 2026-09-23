@@ -1,7 +1,7 @@
 import { chmod, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { SharedTable } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { SharedTable } from "@dani-dex/contracts/ipc";
 import {
   AGENT_DATABASE_LIMITS,
   AGENT_DATABASE_METADATA_TABLE,

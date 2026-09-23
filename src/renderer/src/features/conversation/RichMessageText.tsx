@@ -1,5 +1,5 @@
-import { type ChatTagKind, chatTagReferences } from "@openbot/contracts/chat-tag-references";
-import type { AttachmentSummary, InstalledSkill } from "@openbot/contracts/ipc";
+import { type ChatTagKind, chatTagReferences } from "@dani-dex/contracts/chat-tag-references";
+import type { AttachmentSummary, InstalledSkill } from "@dani-dex/contracts/ipc";
 import type { JSX } from "@solidjs/web";
 import { createMemo, createSignal, createUniqueId, For, onCleanup, Show } from "solid-js";
 import { Blocks, Button, Puzzle } from "../../components/ui";

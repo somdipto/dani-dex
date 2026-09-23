@@ -1,10 +1,10 @@
-import { Host, Picker } from "@expo/ui";
 import {
   type AgentProviderId,
   type AgentReasoningEffort,
   agentProviderName,
   type UpdateAgentInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
+import { Host, Picker } from "@expo/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Typography } from "heroui-native";
 import { useUniwind } from "uniwind";

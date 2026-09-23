@@ -1,4 +1,4 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentModelId,
   AgentModelOption,
@@ -11,7 +11,7 @@ import type {
   MarketplaceSkillDetail,
   ProviderRuntimeStatus,
   UpdateAgentInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createStore, For, onCleanup, onSettled, Show } from "solid-js";
 import { normalizeAvatarFile } from "../../avatar-image";
 import { AVATAR_HUE_OPTIONS, avatarCandidateSeeds, avatarHueSwatch } from "../../bloub-avatar";
@@ -260,7 +260,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
         }
       });
       if (agentChanged) {
-        void window.openbot.agent
+        void window.danidex.agent
           .listTables()
           .catch(() => [])
           .then((items) => {
@@ -268,7 +268,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
               state.tables.count = items.length;
             });
           });
-        void window.openbot.agent
+        void window.danidex.agent
           .listMemories(agent.id)
           .catch(() => [])
           .then((items) => {
@@ -276,7 +276,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
               state.memories.count = items.length;
             });
           });
-        void window.openbot.agent
+        void window.danidex.agent
           .listRoutines(agent.id)
           .catch(() => [])
           .then((items) => {
@@ -299,8 +299,8 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
     try {
       const items =
         skillsMode() === "readonly"
-          ? await window.openbot.agent.listInstalledSkills(agentId)
-          : await window.openbot.skills.listInstalled(agentId);
+          ? await window.danidex.agent.listInstalledSkills(agentId)
+          : await window.danidex.skills.listInstalled(agentId);
       setDraft((state) => {
         state.skills.count = userAssignedSkills(items).length;
       });

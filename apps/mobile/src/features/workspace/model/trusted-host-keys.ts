@@ -1,4 +1,4 @@
-import { type RemoteHostKeyStore, remoteHostFingerprint } from "@openbot/team-client";
+import { type RemoteHostKeyStore, remoteHostFingerprint } from "@dani-dex/team-client";
 import * as SecureStore from "expo-secure-store";
 
 export function trustedHostKeys(apiUrl: string, userId: string): RemoteHostKeyStore {

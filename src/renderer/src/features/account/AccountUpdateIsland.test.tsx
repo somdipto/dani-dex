@@ -1,4 +1,4 @@
-import type { UpdateStatus } from "@openbot/contracts/ipc";
+import type { UpdateStatus } from "@dani-dex/contracts/ipc";
 import { render, screen } from "@solidjs/testing-library";
 import { createSignal, flush } from "solid-js";
 import { describe, expect, it, vi } from "vitest";

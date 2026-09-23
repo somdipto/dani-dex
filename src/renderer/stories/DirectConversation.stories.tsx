@@ -1,4 +1,4 @@
-import type { DirectMessage } from "@openbot/contracts/ipc";
+import type { DirectMessage } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal } from "solid-js";
 import { expect, fireEvent, fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";

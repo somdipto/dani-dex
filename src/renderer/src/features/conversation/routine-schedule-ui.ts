@@ -1,4 +1,4 @@
-import type { RoutineSchedule } from "@openbot/contracts/ipc";
+import type { RoutineSchedule } from "@dani-dex/contracts/ipc";
 
 export interface RoutineSelectOption {
   value: string;

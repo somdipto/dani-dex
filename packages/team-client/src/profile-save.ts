@@ -1,4 +1,4 @@
-import type { SaveAgentProfileInput, SaveAgentProfileResult } from "@openbot/contracts/ipc";
+import type { SaveAgentProfileInput, SaveAgentProfileResult } from "@dani-dex/contracts/ipc";
 
 /** Reconcile an ambiguous save before applying later edits, retaining a single created identity. */
 export async function saveReviewedAgentProfile(

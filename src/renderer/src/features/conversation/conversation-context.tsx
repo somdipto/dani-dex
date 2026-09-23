@@ -5,7 +5,7 @@ import type {
   ConversationPageInfo,
   ConversationReadState,
   ConversationSnapshot,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createStore, onCleanup } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import {
@@ -159,7 +159,7 @@ const Conversation = createSimpleContext({
         const trackingKey = agentConversationKey(serverId, agentId);
         const pageRequest = (conversationPageRequests.get(agentId) ?? 0) + 1;
         conversationPageRequests.set(agentId, pageRequest);
-        void window.openbot.agent
+        void window.danidex.agent
           .readConversationPage({ agentId, anchor: { type: "latest" }, limit: 50 }, serverId)
           .then((page) => {
             if (!scopeIsCurrent() || conversationPageRequests.get(agentId) !== pageRequest) return;
@@ -339,7 +339,7 @@ const Conversation = createSimpleContext({
           applyConversationReadState(agentId, fallbackState);
         }
       };
-      void window.openbot.agent
+      void window.danidex.agent
         .readConversationPage({ agentId, anchor: { type: "latest" }, limit: 1 }, serverId)
         .then((page) => {
           if (
@@ -611,7 +611,7 @@ const Conversation = createSimpleContext({
         conversation.olderError = null;
       });
       try {
-        const page = await window.openbot.agent.readConversationPage({
+        const page = await window.danidex.agent.readConversationPage({
           agentId,
           anchor: { type: "before", cursor },
           limit: 50,
@@ -639,7 +639,7 @@ const Conversation = createSimpleContext({
     ): Promise<{ messageIds: string[]; total: number }> {
       const analytics = desktopAnalytics.scope();
       try {
-        const page = await window.openbot.agent.searchConversationMessages({ query, agentId, limit: 100 });
+        const page = await window.danidex.agent.searchConversationMessages({ query, agentId, limit: 100 });
         analytics.track("search_action", { scope: "agent", result: "succeeded", result_count: page.total });
         return { messageIds: page.results.map((result) => result.message.id), total: page.total };
       } catch (error) {
@@ -662,7 +662,7 @@ const Conversation = createSimpleContext({
     async function loadLatestAgentMessages(agentId: string): Promise<void> {
       const request = (conversationPageRequests.get(agentId) ?? 0) + 1;
       conversationPageRequests.set(agentId, request);
-      const page = await window.openbot.agent.readConversationPage({
+      const page = await window.danidex.agent.readConversationPage({
         agentId,
         anchor: { type: "latest" },
         limit: 50,
@@ -674,7 +674,7 @@ const Conversation = createSimpleContext({
     async function loadAgentMessagePage(agentId: string, messageId: string): Promise<ConversationPage | null> {
       const request = (conversationPageRequests.get(agentId) ?? 0) + 1;
       conversationPageRequests.set(agentId, request);
-      const page = await window.openbot.agent.readConversationPage({
+      const page = await window.danidex.agent.readConversationPage({
         agentId,
         anchor: { type: "around", messageId },
         limit: 50,
@@ -730,7 +730,7 @@ const Conversation = createSimpleContext({
           attachmentDraftIds,
           ...(replyToMessageId ? { replyToMessageId } : {}),
         };
-        const receipt = await window.openbot.agent.sendMessage(input, serverId);
+        const receipt = await window.danidex.agent.sendMessage(input, serverId);
         const errorKey = agentConversationKey(serverId, agentId);
         setUiErrors((current) => ({ ...current, [errorKey]: [] }));
         analytics.track("message_send", {
@@ -781,7 +781,7 @@ const Conversation = createSimpleContext({
       const operation: Promise<void> = previousOperation
         .catch(() => undefined)
         .then(async () => {
-          const state: ConversationReadState = await window.openbot.agent.markConversationRead(
+          const state: ConversationReadState = await window.danidex.agent.markConversationRead(
             {
               agentId,
               throughMessageId: boundary,

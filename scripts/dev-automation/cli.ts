@@ -3,7 +3,7 @@
 // copies openbot.db: it drives the instance you already have open.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { createOpenBotLogger, redactText } from "@openbot/logging";
+import { createOpenBotLogger, redactText } from "@dani-dex/logging";
 import {
   assertMutationAllowed,
   connectToDevApp,

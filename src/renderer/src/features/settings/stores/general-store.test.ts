@@ -3,7 +3,7 @@ import type {
   AgentStatus,
   ProviderApiKeyStatus,
   ProviderRuntimeStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createRoot } from "solid-js";
 import { describe, expect, it } from "vitest";
 import { createSettingsGeneralStore } from "./general-store";

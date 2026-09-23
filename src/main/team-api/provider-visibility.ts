@@ -1,5 +1,5 @@
-import type { AgentSummary } from "@openbot/contracts/ipc";
-import type { TeamProtocolV1JsonObject, TeamProtocolV1JsonValue } from "@openbot/contracts/team-protocol/v1";
+import type { AgentSummary } from "@dani-dex/contracts/ipc";
+import type { TeamProtocolV1JsonObject, TeamProtocolV1JsonValue } from "@dani-dex/contracts/team-protocol/v1";
 
 /** A protocol view never changes the host's stored agents or provider sessions. */
 export function hiddenProviderAgentIds(agents: readonly AgentSummary[]): Set<string> {

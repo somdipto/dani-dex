@@ -5,8 +5,8 @@ import {
   type ConversationMessage,
   hostedSiteConversationEventItemType,
   hostedSiteConversationEventText,
-} from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+} from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { OpenPanelBase } from "@openpanel/web";
 import { describe, expect, it, vi } from "vitest";
 import { HostAnalytics, type HostOpenPanelClient, sanitizeHostEvent } from "./analytics";

@@ -3,8 +3,8 @@
 // What the server refuses: an internal error it will not describe, a rate limit it will not let
 // grow without bound, and input sizes it rejects before a service ever sees them.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { createOpenBotLogger } from "@openbot/logging";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { createOpenBotLogger } from "@dani-dex/logging";
 import { afterEach, describe, expect, it } from "vitest";
 import { createAgents, createTeamApiFixture, stopTeamApiFixtures } from "./team-api-server-test-harness";
 

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFile, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { type AgentEvent, routineConversationEvent, routineRunConversationEvent } from "@openbot/contracts/ipc";
+import { type AgentEvent, routineConversationEvent, routineRunConversationEvent } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProvider } from "./agent-client";
 import type { AgentService } from "./agent-service";

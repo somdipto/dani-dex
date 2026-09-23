@@ -1,6 +1,6 @@
 // The window that stands beside a System Settings pane while the user grants a permission.
 
-import type { ComputerUsePermissionApp, MacPermissionId } from "@openbot/contracts/ipc";
+import type { ComputerUsePermissionApp, MacPermissionId } from "@dani-dex/contracts/ipc";
 import type { BrowserWindow, NativeImage } from "electron";
 import { applicationBundleName } from "./computer-use-permission-app";
 

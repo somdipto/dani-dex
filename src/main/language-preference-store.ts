@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { readFile, rename, rm, writeFile } from "node:fs/promises";
-import { type AppLanguagePreference, DEFAULT_APP_LANGUAGE, isAppLanguage } from "@openbot/contracts/ipc";
-import { isDynamicRecord } from "@openbot/contracts/runtime-values";
+import { type AppLanguagePreference, DEFAULT_APP_LANGUAGE, isAppLanguage } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 
 const DEFAULT_PREFERENCE: AppLanguagePreference = { language: DEFAULT_APP_LANGUAGE };
 

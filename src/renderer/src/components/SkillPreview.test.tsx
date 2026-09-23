@@ -14,7 +14,7 @@ const skill = STORY_MARKETPLACE_SKILL_DETAILS["skill-release-notes"];
 
 function installSkillMock(): void {
   mock = createMockOpenBot();
-  window.openbot = mock.api;
+  window.danidex = mock.api;
 }
 
 describe("skill preview", () => {
@@ -36,7 +36,7 @@ describe("skill preview", () => {
   });
   it("renders Markdown without executing HTML or unsafe links", () => {
     installSkillMock();
-    const openUrl = vi.spyOn(window.openbot, "openUrl");
+    const openUrl = vi.spyOn(window.danidex, "openUrl");
     render(() => (
       <SkillPreview
         skill={{

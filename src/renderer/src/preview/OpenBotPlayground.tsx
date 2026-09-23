@@ -25,9 +25,9 @@ export function OpenBotPlayground(props: OpenBotPlaygroundProps) {
     createMock: createMockOpenBot,
     renderApp: () => <App landingPreview={landingPreview} />,
   };
-  const previousApi = window.openbot;
+  const previousApi = window.danidex;
   const mock = dependencies.createMock(landingPreview ? LANDING_PREVIEW_OPTIONS : props.options);
-  window.openbot = mock.api;
+  window.danidex = mock.api;
   let landingController: { activate: () => void; dispose: () => void } | null = null;
   let controllerLoading: Promise<void> | null = null;
   let disposed = false;
@@ -83,7 +83,7 @@ export function OpenBotPlayground(props: OpenBotPlaygroundProps) {
     disposed = true;
     landingController?.dispose();
     mock.dispose();
-    window.openbot = previousApi;
+    window.danidex = previousApi;
   });
 
   return dependencies.renderApp();

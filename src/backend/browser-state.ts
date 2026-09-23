@@ -1,7 +1,7 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { BrowserEnvironment } from "@openbot/contracts/ipc";
-import { isBoolean, isNumber, isString } from "@openbot/contracts/runtime-values";
-import { legacyAgentId } from "@openbot/contracts/validation";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { BrowserEnvironment } from "@dani-dex/contracts/ipc";
+import { isBoolean, isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { legacyAgentId } from "@dani-dex/contracts/validation";
 import { isRecord } from "./protocol";
 
 export interface StoredBrowserTab {

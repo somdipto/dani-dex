@@ -3,7 +3,7 @@
  * returns a string or a boolean, so a filtering question can be answered without the component.
  */
 
-import type { ChannelSummary, DirectThreadSummary, TeamPresenceMember } from "@openbot/contracts/ipc";
+import type { ChannelSummary, DirectThreadSummary, TeamPresenceMember } from "@dani-dex/contracts/ipc";
 import type { AgentProfile } from "../../data";
 import { teamMemberName } from "../team/TeamPersonAvatar";
 import type { SidebarAgentState } from "./sidebar-types";

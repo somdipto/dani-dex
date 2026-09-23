@@ -1,4 +1,4 @@
-import type { BrowserTab } from "@openbot/contracts/ipc";
+import type { BrowserTab } from "@dani-dex/contracts/ipc";
 import { activeTabAfterLoad, browserTabsAfterClose } from "./browser-tab-reconciliation";
 
 const tab = (id: string): BrowserTab => ({

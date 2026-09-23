@@ -1,4 +1,4 @@
-import type { AgentExchangeSummary } from "@openbot/contracts/ipc";
+import type { AgentExchangeSummary } from "@dani-dex/contracts/ipc";
 import { Link, useIsFocused } from "expo-router";
 import { Button, Typography } from "heroui-native";
 import { CornerUpRight, X } from "lucide-react-native";

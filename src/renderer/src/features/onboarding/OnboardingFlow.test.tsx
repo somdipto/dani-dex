@@ -1,4 +1,4 @@
-import type { ManagedProviderId } from "@openbot/contracts/agent-providers";
+import type { ManagedProviderId } from "@dani-dex/contracts/agent-providers";
 import type {
   AgentProviderId,
   AgentStatus,
@@ -6,7 +6,7 @@ import type {
   CustomProviderSummary,
   ProviderRuntimeStatus,
   SaveCustomProviderInput,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -17,12 +17,12 @@ import { createMockOpenBot, type MockOpenBotControls } from "../../preview/mock-
 import { OnboardingFlow } from "./OnboardingFlow";
 
 let activeMock: MockOpenBotControls | undefined;
-const previousApi = window.openbot;
+const previousApi = window.danidex;
 
 afterEach(() => {
   activeMock?.dispose();
   activeMock = undefined;
-  window.openbot = previousApi;
+  window.danidex = previousApi;
   toast.dismiss();
   vi.restoreAllMocks();
 });
@@ -31,7 +31,7 @@ function renderFlow(
   options: { onSave?: (provider: AgentProviderId) => Promise<void>; platform?: "darwin" | "win32" | "linux" } = {},
 ) {
   activeMock = createMockOpenBot();
-  window.openbot = activeMock.api;
+  window.danidex = activeMock.api;
   const view = render(() => (
     <>
       <OnboardingFlow
@@ -85,7 +85,7 @@ describe("OnboardingFlow", () => {
 
   it("requests optional macOS permissions before continuing", async () => {
     const view = renderFlow();
-    const openPermission = vi.spyOn(activeMock?.api ?? window.openbot, "openComputerUsePermissionPane");
+    const openPermission = vi.spyOn(activeMock?.api ?? window.danidex, "openComputerUsePermissionPane");
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     expect(await view.findByRole("heading", { name: "Dani-Dex might control your computer" })).toBeInTheDocument();
     await waitFor(() => expect(view.getByRole("button", { name: "Grant Screen Recording" })).toBeInTheDocument());
@@ -114,7 +114,7 @@ describe("OnboardingFlow", () => {
 
   it("counts a saved endpoint in the custom row and selects that row after the save", async () => {
     activeMock = createMockOpenBot();
-    window.openbot = activeMock.api;
+    window.danidex = activeMock.api;
     const [customProviders, setCustomProviders] = createSignal<CustomProviderSummary[]>([]);
     const onAddCustomProvider = vi.fn(async (value: SaveCustomProviderInput): Promise<CustomProviderRestart> => {
       setCustomProviders((current) => [
@@ -162,7 +162,7 @@ describe("OnboardingFlow", () => {
   // on the first agent, which would start that agent on a provider that cannot answer.
   it("drops the endpoint's model from setup after the endpoint is removed", async () => {
     activeMock = createMockOpenBot();
-    window.openbot = activeMock.api;
+    window.danidex = activeMock.api;
     vi.spyOn(window, "confirm").mockReturnValue(true);
     // A second endpoint stays behind, so the custom row keeps the choice and only the model of the
     // removed endpoint can explain an empty model in setup.
@@ -229,7 +229,7 @@ describe("OnboardingFlow", () => {
   // the model has to come from the list main sends.
   it("records a model of an endpoint saved before this screen opened", async () => {
     activeMock = createMockOpenBot();
-    window.openbot = activeMock.api;
+    window.danidex = activeMock.api;
     const onSave = vi.fn(async (_provider: AgentProviderId) => undefined);
     const view = render(() => (
       <OnboardingFlow
@@ -261,7 +261,7 @@ describe("OnboardingFlow", () => {
 
   it("keeps provider downloads independent and blocks Next until the selected provider connects", async () => {
     activeMock = createMockOpenBot();
-    window.openbot = activeMock.api;
+    window.danidex = activeMock.api;
     const initialAgentStatus: AgentStatus = {
       ...STORY_AGENT_STATUS,
       providers: STORY_AGENT_STATUS.providers?.map((provider) => ({
@@ -338,7 +338,7 @@ describe("OnboardingFlow", () => {
 
   it("keeps the downloads reachable while the local providers are still being checked", async () => {
     activeMock = createMockOpenBot();
-    window.openbot = activeMock.api;
+    window.danidex = activeMock.api;
     // What a first run looks like before main answers: nothing downloaded, no provider checked yet,
     // and the agent runtime still starting. Every action on the screen used to be disabled here,
     // with nothing to press and nothing said, which is the state reported in issue #643.
@@ -387,7 +387,7 @@ describe("OnboardingFlow", () => {
 
   it("names the step Next is waiting for as the selected provider moves through it", async () => {
     activeMock = createMockOpenBot();
-    window.openbot = activeMock.api;
+    window.danidex = activeMock.api;
     const agentStatus: AgentStatus = {
       ...STORY_AGENT_STATUS,
       providers: (STORY_AGENT_STATUS.providers ?? []).map((provider) => ({
@@ -447,7 +447,7 @@ describe("OnboardingFlow", () => {
 
   it("offers no OpenCode download to a user who installed the CLI already", () => {
     activeMock = createMockOpenBot();
-    window.openbot = activeMock.api;
+    window.danidex = activeMock.api;
     // An empty managed directory is the normal state for anyone with their own OpenCode install, so
     // the row has to read the provider's answer and not the directory: the alternative offers a
     // ~46 MB download to a user whose CLI already works.

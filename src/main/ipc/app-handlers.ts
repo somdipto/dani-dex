@@ -1,8 +1,8 @@
 // App identity, first-run setup, the analytics preference, external links and the data and
 // diagnostics exports.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { AppInfo, AppSetupState, AppVariant, ExternalDestination } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AppInfo, AppSetupState, AppVariant, ExternalDestination } from "@dani-dex/contracts/ipc";
 import { app, type BrowserWindow, shell } from "electron";
 import type { AgentService } from "../../backend/agent-service";
 import type { BrowserHost } from "../../backend/browser-host";

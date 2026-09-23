@@ -1,6 +1,6 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { type AvatarHue, type ChannelDraft, type ChannelSummary, isChannelDraft } from "@openbot/contracts/ipc";
-import { userErrorMessage } from "@openbot/user-errors";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { type AvatarHue, type ChannelDraft, type ChannelSummary, isChannelDraft } from "@dani-dex/contracts/ipc";
+import { userErrorMessage } from "@dani-dex/user-errors";
 import * as Crypto from "expo-crypto";
 import { router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { usePreventRemove } from "expo-router/react-navigation";

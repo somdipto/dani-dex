@@ -1,4 +1,4 @@
-import type { AgentExchangeSummary } from "@openbot/contracts/ipc";
+import type { AgentExchangeSummary } from "@dani-dex/contracts/ipc";
 import { describe, expect, it } from "vitest";
 import type { AgentMessage } from "../../data";
 import { anchorNewMessages, countableTimelineMessage, type TimelineRow, tallyNewMessages } from "./new-message-tally";

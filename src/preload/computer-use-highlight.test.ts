@@ -1,5 +1,5 @@
-import type { OpenBotDesktopApi } from "@openbot/contracts/ipc";
-import { IPC_CHANNELS } from "@openbot/contracts/ipc";
+import type { OpenBotDesktopApi } from "@dani-dex/contracts/ipc";
+import { IPC_CHANNELS } from "@dani-dex/contracts/ipc";
 import { expect, it, vi } from "vitest";
 
 const bridge = vi.hoisted(() => {

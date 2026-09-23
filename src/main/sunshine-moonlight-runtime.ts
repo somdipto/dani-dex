@@ -12,7 +12,7 @@ import type {
   RemoteDesktopIceServer,
   RemoteDesktopSetupStatus,
   RemoteDesktopTestStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { z } from "zod";
 import type { RemoteDesktopRuntimePaths } from "./remote-desktop-runtime-artifact";
 import { stopRemoteProcess } from "./remote-diagnostics";

@@ -3,7 +3,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { afterEach, describe, expect, it } from "vitest";
 import { AgentMemoryStore } from "./agent-memory-store";
 import { AgentStore } from "./agent-store";

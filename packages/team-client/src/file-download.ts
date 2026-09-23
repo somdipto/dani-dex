@@ -1,9 +1,9 @@
-import { sha256 } from "@noble/hashes/sha2.js";
 import {
   decodeTeamProtocolV2FileChunk,
   decodeTeamProtocolV2FileControlFrame,
   encodeTeamProtocolV2Frame,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
+import { sha256 } from "@noble/hashes/sha2.js";
 import { MOBILE_ATTACHMENT_BYTES, type RemoteFileUpload } from "./file-upload";
 
 interface Download {

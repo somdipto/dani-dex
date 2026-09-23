@@ -1,4 +1,4 @@
-import { isRoutineRun, type RoutineRunFields } from "@openbot/contracts/ipc";
+import { isRoutineRun, type RoutineRunFields } from "@dani-dex/contracts/ipc";
 import { For, Show } from "solid-js";
 import { Button, Check, CirclePause, Clock3, TriangleAlert, X } from "../../components/ui";
 

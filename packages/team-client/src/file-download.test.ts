@@ -2,7 +2,7 @@ import {
   decodeTeamProtocolV2FileControlFrame,
   encodeTeamProtocolV2FileChunk,
   encodeTeamProtocolV2Frame,
-} from "@openbot/contracts/team-protocol/v2";
+} from "@dani-dex/contracts/team-protocol/v2";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createRemoteFileReceiver } from "./file-download";
 import { createRemoteFileSender, MOBILE_ATTACHMENT_BYTES } from "./file-upload";

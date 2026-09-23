@@ -8,8 +8,8 @@
  * is tested as data.
  */
 
-import type { ChannelMessage, ChannelPage } from "@openbot/contracts/ipc";
-import { channelRoutingConversationEvent, SIGNED_OUT_CHANNEL_MEMBER_ID } from "@openbot/contracts/ipc";
+import type { ChannelMessage, ChannelPage } from "@dani-dex/contracts/ipc";
+import { channelRoutingConversationEvent, SIGNED_OUT_CHANNEL_MEMBER_ID } from "@dani-dex/contracts/ipc";
 import type { AgentMessage, AgentProfile, ChatActionMarkerModel } from "../../data";
 import type { ChatMessageAuthor } from "../conversation/ChatMessageRow";
 import { type DayMarkerOptions, dayMarkerLabel } from "../conversation/chat-day-markers";

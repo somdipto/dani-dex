@@ -1,4 +1,4 @@
-import type { DeleteSharedTableInput, SharedTable } from "@openbot/contracts/ipc";
+import type { DeleteSharedTableInput, SharedTable } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -30,7 +30,7 @@ beforeEach(() => {
   activeMock = createMockOpenBot();
   activeMock.api.agent.listTables = listTables;
   activeMock.api.agent.deleteTable = deleteTable;
-  window.openbot = activeMock.api;
+  window.danidex = activeMock.api;
 });
 
 describe("SharedTablesModal", () => {

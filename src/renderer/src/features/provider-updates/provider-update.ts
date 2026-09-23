@@ -1,4 +1,4 @@
-import type { AgentProviderId, ProviderRuntimeStatus } from "@openbot/contracts/ipc";
+import type { AgentProviderId, ProviderRuntimeStatus } from "@dani-dex/contracts/ipc";
 import { errorMessage } from "../../error-message";
 
 /**

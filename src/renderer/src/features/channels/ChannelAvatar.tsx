@@ -9,7 +9,7 @@
  * as the agent rows around it, and it counts the members it cannot show.
  */
 
-import type { ChannelMember } from "@openbot/contracts/ipc";
+import type { ChannelMember } from "@dani-dex/contracts/ipc";
 import { For, Show } from "solid-js";
 import { UsersRound } from "../../components/ui";
 import type { AgentProfile } from "../../data";

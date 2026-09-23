@@ -1,4 +1,4 @@
-import type { ComputerUseCoveredArea } from "@openbot/contracts/ipc";
+import type { ComputerUseCoveredArea } from "@dani-dex/contracts/ipc";
 
 export interface ComputerUseWindowHighlightProps {
   /** Which application window the agent is working in, for the screen reader and the label. */

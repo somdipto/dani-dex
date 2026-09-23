@@ -10,7 +10,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { CustomProviderSummary, SaveCustomProviderInput } from "@openbot/contracts/ipc";
+import type { CustomProviderSummary, SaveCustomProviderInput } from "@dani-dex/contracts/ipc";
 import { z } from "zod";
 import type { CustomProviderConfig } from "../backend/opencode-config";
 

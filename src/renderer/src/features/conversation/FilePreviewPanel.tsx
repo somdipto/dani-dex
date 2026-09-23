@@ -1,4 +1,4 @@
-import type { FilePreview } from "@openbot/contracts/ipc";
+import type { FilePreview } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
 import { PanelResizer, readPanelWidth, savePanelWidth } from "../../components/PanelResizer";
 import { Button, Download, ExternalLink, File, FolderOpen, X } from "../../components/ui";

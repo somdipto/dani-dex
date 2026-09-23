@@ -5,7 +5,7 @@ import {
   agentProviderName,
   type ProviderApiKeyStatus,
   type ProviderRuntimeStatus,
-} from "@openbot/contracts/ipc";
+} from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal } from "solid-js";
 import type { ProviderPickerOption } from "../../../components/ProviderPicker";
 import { useI18n } from "../../../i18n-context";

@@ -1,4 +1,4 @@
-import type { QueueDelivery, QueueDeliveryStatus, QueueSnapshot } from "@openbot/contracts/ipc";
+import type { QueueDelivery, QueueDeliveryStatus, QueueSnapshot } from "@dani-dex/contracts/ipc";
 import { computeSidebarAgentStates, type SidebarAgentStatesInput } from "./sidebar-agent-states";
 
 function queue(agentId: string, ...statuses: QueueDeliveryStatus[]): QueueSnapshot {

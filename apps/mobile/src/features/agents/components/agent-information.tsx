@@ -1,4 +1,4 @@
-import { analyticsRange, parseAnalyticsRange } from "@openbot/contracts/ipc";
+import { analyticsRange, parseAnalyticsRange } from "@dani-dex/contracts/ipc";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Button, Typography } from "heroui-native";

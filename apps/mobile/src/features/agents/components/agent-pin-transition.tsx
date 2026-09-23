@@ -1,4 +1,4 @@
-import type { AvatarHue, ChannelSummary } from "@openbot/contracts/ipc";
+import type { AvatarHue, ChannelSummary } from "@dani-dex/contracts/ipc";
 import { router } from "expo-router";
 import {
   createContext,

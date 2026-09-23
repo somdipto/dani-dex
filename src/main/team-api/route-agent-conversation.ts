@@ -5,9 +5,9 @@
 // back to the newest message that survived the filter - otherwise the client would store a cursor
 // pointing at something it cannot render and never catch up.
 
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import { isMessageReaction } from "@openbot/contracts/ipc";
-import { TEAM_PROTOCOL_V3 } from "@openbot/contracts/team-protocol/v3";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import { isMessageReaction } from "@dani-dex/contracts/ipc";
+import { TEAM_PROTOCOL_V3 } from "@dani-dex/contracts/team-protocol/v3";
 import type { TeamApiAgents } from "./dependencies";
 import { HttpError } from "./http-error";
 import type { AgentRouteTarget, RouteOutcome, TeamApiRequestContext } from "./request-context";

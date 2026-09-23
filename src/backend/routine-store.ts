@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { RoutineFields, RoutineRunFields, RoutineRunStatus, RoutineSchedule } from "@openbot/contracts/ipc";
-import { isRoutineSchedule } from "@openbot/contracts/ipc";
-import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@openbot/contracts/runtime-values";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { RoutineFields, RoutineRunFields, RoutineRunStatus, RoutineSchedule } from "@dani-dex/contracts/ipc";
+import { isRoutineSchedule } from "@dani-dex/contracts/ipc";
+import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import type { OpenBotDatabase } from "./openbot-database";
 import { nextRoutineOccurrence, normalizeRoutineSchedule, validateRoutineSchedule } from "./routine-schedule";
 

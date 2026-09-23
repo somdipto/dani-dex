@@ -1,5 +1,5 @@
-import type { AgentEvent, TeamRealtimeEvent } from "@openbot/contracts/ipc";
-import { isDynamicRecord, isString } from "@openbot/contracts/runtime-values";
+import type { AgentEvent, TeamRealtimeEvent } from "@dani-dex/contracts/ipc";
+import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import {
   decodeTeamProtocolV2FileChunk,
   decodeTeamProtocolV2FileControlFrame,
@@ -8,8 +8,8 @@ import {
   TEAM_PROTOCOL_V2_CHANNELS,
   type TeamProtocolV2Json,
   teamProtocolV2AuthenticationTranscript,
-} from "@openbot/contracts/team-protocol";
-import { CHANNEL_ROUTES } from "@openbot/contracts/team-protocol/channels-v1";
+} from "@dani-dex/contracts/team-protocol";
+import { CHANNEL_ROUTES } from "@dani-dex/contracts/team-protocol/channels-v1";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEd25519Identity, signEd25519 } from "./ed25519";
 import {

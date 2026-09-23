@@ -1,4 +1,4 @@
-import { type HostStatus, LOCAL_SERVER_ID, type ServerSummary } from "@openbot/contracts/ipc";
+import { type HostStatus, LOCAL_SERVER_ID, type ServerSummary } from "@dani-dex/contracts/ipc";
 import type { HostService } from "../host-service";
 import type { RemoteDesktopManager } from "../remote-desktop-manager";
 import type { RemoteServerManager } from "../remote-server-manager";

@@ -1,4 +1,4 @@
-import { type AttachmentSummary, type BrowserBounds, canPreviewAttachment } from "@openbot/contracts/ipc";
+import { type AttachmentSummary, type BrowserBounds, canPreviewAttachment } from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal } from "solid-js";
 import { errorMessage } from "../../../error-message";
 import { attachmentFilePreview } from "../attachment-preview";
@@ -15,9 +15,9 @@ export interface PanelsStoreDeps {
   props: ConversationProps;
   rightPanels: () => Record<string, RightPanelMode>;
   setRightPanels: (update: (current: Record<string, RightPanelMode>) => Record<string, RightPanelMode>) => void;
-  settingsProvider: () => import("@openbot/contracts/ipc").AgentProviderId;
-  settingsModel: () => import("@openbot/contracts/ipc").AgentModelId;
-  settingsReasoning: () => import("@openbot/contracts/ipc").AgentReasoningEffort;
+  settingsProvider: () => import("@dani-dex/contracts/ipc").AgentProviderId;
+  settingsModel: () => import("@dani-dex/contracts/ipc").AgentModelId;
+  settingsReasoning: () => import("@dani-dex/contracts/ipc").AgentReasoningEffort;
   setBrowserPipBounds: (bounds: BrowserBounds | null) => void;
   sidebarFilePreview: () => SidebarFilePreview | null;
   setSidebarFilePreview: (preview: SidebarFilePreview | null) => void;
@@ -97,7 +97,7 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
 
   function hideBrowserPanel() {
     setActiveRightPanel("none");
-    if (deps.props.browserEnabled !== false) void window.openbot.browser.setVisible({ visible: false });
+    if (deps.props.browserEnabled !== false) void window.danidex.browser.setVisible({ visible: false });
   }
 
   /**
@@ -126,7 +126,7 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
     const agentId = deps.props.agent?.id;
     const target = agentId ? { agentId, serverId: deps.props.server?.id ?? "local" } : undefined;
     try {
-      await window.openbot.agent.downloadAttachments({
+      await window.danidex.agent.downloadAttachments({
         attachments: attachments.map(({ id, name }) => ({ id, name })),
       });
     } catch (error) {
@@ -137,7 +137,7 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
   function attachmentAction(attachment: AttachmentSummary, action: "open" | "reveal" | "download") {
     const agentId = deps.props.agent?.id;
     const target = agentId ? { agentId, serverId: deps.props.server?.id ?? "local" } : undefined;
-    void window.openbot.agent
+    void window.danidex.agent
       .openAttachment({ attachmentId: attachment.id, action })
       .catch((error) =>
         deps.setComposerError(errorMessage(error, "Could not open or save this attachment. Try again."), target),
@@ -151,7 +151,7 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
     const target = { agentId: ownerAgentId, serverId };
     const generation = deps.nextFilePreviewGeneration();
     deps.setComposerError(null, target);
-    void window.openbot.agent.previewSharedFile({ path }).then(
+    void window.danidex.agent.previewSharedFile({ path }).then(
       (preview) => {
         if (generation !== deps.currentFilePreviewGeneration() || deps.props.agent?.id !== ownerAgentId) return;
         deps.setSidebarFilePreview({ ownerAgentId, source: { kind: "shared", path }, preview });
@@ -171,7 +171,7 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
     const target = { agentId, serverId };
     const generation = deps.nextFilePreviewGeneration();
     deps.setComposerError(null, target);
-    void window.openbot.agent.previewWorkspaceFile({ agentId, path }).then(
+    void window.danidex.agent.previewWorkspaceFile({ agentId, path }).then(
       (preview) => {
         if (generation !== deps.currentFilePreviewGeneration() || deps.props.agent?.id !== agentId) return;
         deps.setSidebarFilePreview({ ownerAgentId: agentId, source: { kind: "workspace", path }, preview });
@@ -191,10 +191,10 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
     const source = file.source;
     const request =
       source.kind === "attachment"
-        ? window.openbot.agent.openAttachment({ attachmentId: source.attachment.id, action: "open" })
+        ? window.danidex.agent.openAttachment({ attachmentId: source.attachment.id, action: "open" })
         : source.kind === "shared"
-          ? window.openbot.agent.openSharedFile({ path: source.path })
-          : window.openbot.agent.openWorkspaceFile({ agentId: file.ownerAgentId, path: source.path });
+          ? window.danidex.agent.openSharedFile({ path: source.path })
+          : window.danidex.agent.openWorkspaceFile({ agentId: file.ownerAgentId, path: source.path });
     void request.catch((error) =>
       deps.setComposerError(errorMessage(error, "Could not open this file. Try again."), target),
     );

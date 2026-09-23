@@ -1,4 +1,4 @@
-import type { MobileConnectedDevice } from "@openbot/contracts/ipc";
+import type { MobileConnectedDevice } from "@dani-dex/contracts/ipc";
 import { For, Show } from "solid-js";
 import {
   Alert,

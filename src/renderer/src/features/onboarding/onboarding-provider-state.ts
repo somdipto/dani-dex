@@ -1,4 +1,4 @@
-import type { AgentProviderState, AgentStatus } from "@openbot/contracts/ipc";
+import type { AgentProviderState, AgentStatus } from "@dani-dex/contracts/ipc";
 
 /**
  * The provider state to show while `AgentStatus` carries no per-provider entry. Both onboarding

@@ -1,4 +1,4 @@
-import type { BrowserPreview, BrowserTab } from "@openbot/contracts/ipc";
+import type { BrowserPreview, BrowserTab } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, createStore, For, onSettled, Show } from "solid-js";
 import { PanelResizer, readPanelWidth, savePanelWidth } from "../../components/PanelResizer";
 import { Button, ChevronRight, Maximize2, Monitor, Plus, Skeleton, X } from "../../components/ui";
@@ -161,7 +161,7 @@ export function BrowserPreviewCard(props: {
         void pending.then(refresh);
         return;
       }
-      pending = window.openbot.browser
+      pending = window.danidex.browser
         .capturePreview(id)
         .then((preview) => {
           if (!disposed) setState(() => ({ preview, failed: false }));

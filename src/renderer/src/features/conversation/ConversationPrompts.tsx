@@ -1,5 +1,5 @@
-import { INPUT_LIMITS } from "@openbot/contracts/input-limits";
-import type { AgentApproval, BrowserPreview, BrowserTab, BrowserTakeoverRequest } from "@openbot/contracts/ipc";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
+import type { AgentApproval, BrowserPreview, BrowserTab, BrowserTakeoverRequest } from "@dani-dex/contracts/ipc";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { StandingApprovalConfirmation } from "../../components/StandingApprovalConfirmation";
 import {
@@ -246,8 +246,8 @@ function ConnectedBrowserSecretCard(props: { request: BrowserTakeoverRequest; on
       <BrowserSecretCard
         request={props.request}
         onOpen={props.onOpen}
-        loadPreview={(tabId) => window.openbot.browser.capturePreview(tabId)}
-        onRespond={(input) => window.openbot.agent.respondToBrowserSecret(input)}
+        loadPreview={(tabId) => window.danidex.browser.capturePreview(tabId)}
+        onRespond={(input) => window.danidex.agent.respondToBrowserSecret(input)}
       />
     </Show>
   );

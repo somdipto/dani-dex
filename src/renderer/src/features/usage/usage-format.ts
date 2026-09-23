@@ -1,5 +1,5 @@
-import type { AnalyticsDay, AnalyticsModel, AnalyticsProviderDay } from "@openbot/contracts/ipc";
-import { agentProviderCliName, isAgentProvider } from "@openbot/contracts/ipc";
+import type { AnalyticsDay, AnalyticsModel, AnalyticsProviderDay } from "@dani-dex/contracts/ipc";
+import { agentProviderCliName, isAgentProvider } from "@dani-dex/contracts/ipc";
 
 // The header filters render these lists directly, so the visible label and the
 // stored value are one string.

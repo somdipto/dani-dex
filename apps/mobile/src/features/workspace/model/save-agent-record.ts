@@ -1,4 +1,4 @@
-import type { AgentMemory, Routine } from "@openbot/contracts/ipc";
+import type { AgentMemory, Routine } from "@dani-dex/contracts/ipc";
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 
 // Cancel reads started before the write so their older results cannot replace the saved record.
