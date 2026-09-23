@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { OPENBOT_LINKS } from "../src/lib/landing-links";
+import { DANI_DEX_LINKS } from "../src/lib/landing-links";
 import { latestDownloadResponse } from "../src/server/latest-download";
 
 describe("latest download", () => {
@@ -33,6 +33,6 @@ describe("latest download", () => {
     const response = await latestDownloadResponse("macos", vi.fn<typeof fetch>().mockResolvedValue(manifestResponse));
 
     expect(response.status).toBe(302);
-    expect(response.headers.get("location")).toBe(OPENBOT_LINKS.releases);
+    expect(response.headers.get("location")).toBe(DANI_DEX_LINKS.releases);
   });
 });

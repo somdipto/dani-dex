@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/solid-router";
 import { ArticleImage } from "../../components/content/ArticleMedia";
-import { EXTERNAL_LINK_REL, OPENBOT_LINKS } from "../../lib/landing-links";
+import { DANI_DEX_LINKS, EXTERNAL_LINK_REL } from "../../lib/landing-links";
 import aChannel from "./media/openbot-101/a-channel.webp";
 import aRoutine from "./media/openbot-101/a-routine.webp";
 import aThread from "./media/openbot-101/a-thread.webp";
@@ -23,11 +23,11 @@ export function DaniDex101() {
       <p>
         Dani-Dex is a desktop workspace for AI teammates that live on your computer. It runs the coding command-line
         tools you already use as processes on that machine:{" "}
-        <a href={OPENBOT_LINKS.codex} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.codex} target="_blank" rel={EXTERNAL_LINK_REL}>
           the Codex App Server
         </a>
         ,{" "}
-        <a href={OPENBOT_LINKS.claude} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.claude} target="_blank" rel={EXTERNAL_LINK_REL}>
           Claude Code
         </a>
         , Grok CLI and OpenCode. Each agent gets a workspace, a thread and an identity around them.
@@ -78,13 +78,13 @@ export function DaniDex101() {
       <p>
         Dani-Dex runs on macOS 13 or newer on Apple silicon, Windows 10 or newer on x64, and x64 Linux as an AppImage.
         Grab the installer from{" "}
-        <a href={OPENBOT_LINKS.releases} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.releases} target="_blank" rel={EXTERNAL_LINK_REL}>
           GitHub Releases
         </a>
         . The Windows preview is not code-signed yet, so Windows may warn about an unknown publisher. Check the release
         checksum before you run it. On Ubuntu 23.10 or newer and on Debian 13, the AppImage needs an AppArmor profile
         first.{" "}
-        <a href={OPENBOT_LINKS.documentation} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.documentation} target="_blank" rel={EXTERNAL_LINK_REL}>
           The README
         </a>{" "}
         has the two commands that install it.
@@ -130,7 +130,7 @@ export function DaniDex101() {
       </p>
       <p>
         What the application sends, and what it never sends, is written down in{" "}
-        <a href={OPENBOT_LINKS.privacy} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.privacy} target="_blank" rel={EXTERNAL_LINK_REL}>
           the privacy document
         </a>
         .
@@ -187,11 +187,11 @@ export function DaniDex101() {
       <p>
         <Link to="/news">The news section</Link> is where I write about the decisions behind these parts.{" "}
         <Link to="/guides">The guides section</Link> is where the how-to pages collect. The{" "}
-        <a href={OPENBOT_LINKS.repository} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.repository} target="_blank" rel={EXTERNAL_LINK_REL}>
           repository
         </a>{" "}
         holds the code, and{" "}
-        <a href={OPENBOT_LINKS.releases} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.releases} target="_blank" rel={EXTERNAL_LINK_REL}>
           the releases page
         </a>{" "}
         holds every build.

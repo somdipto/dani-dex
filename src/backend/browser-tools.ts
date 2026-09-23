@@ -1,7 +1,7 @@
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { z } from "zod";
 
-export const OPENBOT_BROWSER_NAMESPACE = "openbot_browser";
+export const DANI_DEX_BROWSER_NAMESPACE = "openbot_browser";
 
 const identifier = z.string().min(1).max(INPUT_LIMITS.identifier);
 const requiredString = (max: number) =>
@@ -309,7 +309,7 @@ export const BROWSER_TOOL_DEFINITIONS = [
 export const BROWSER_DYNAMIC_TOOLS = [
   {
     type: "namespace" as const,
-    name: OPENBOT_BROWSER_NAMESPACE,
+    name: DANI_DEX_BROWSER_NAMESPACE,
     description: "Operate Dani-Dex's private, persistent native Electron/CDP browser.",
     tools: BROWSER_TOOL_DEFINITIONS.map((definition) => ({
       type: "function" as const,

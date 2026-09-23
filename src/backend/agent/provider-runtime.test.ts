@@ -44,7 +44,7 @@ afterEach(async () => {
 
 describe.sequential("ProviderRuntime: account checks and login", () => {
   it("reconnects OpenCode without a browser and refuses to replace an active client", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { store, mailbox } = stores(root);
     const clients: FakeAgentClient[] = [];
     service = createTestService({
@@ -74,7 +74,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it("keeps another provider's live delivery running when OpenCode reconnects", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { service: agentService } = await startService(root, {
       client: (provider) => new FakeAgentClient(provider, "", false),
       preferredProvider: "codex",
@@ -90,7 +90,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it.each([false, true])("holds queued OpenCode turns during reconnect and resumes them (failure=%s)", async (fail) => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { store, mailbox } = stores(root);
     let release: (() => void) | undefined;
     const gate = new Promise<void>((resolve) => {
@@ -139,8 +139,8 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it("checks providers concurrently and publishes each completed row", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
-    process.env.OPENBOT_GROK_PATH = await createFakeGrok(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
     const { store, mailbox } = stores(root);
     const delays: Record<AgentProvider, number> = { codex: 60, claude: 5, grok: 30, opencode: 0 };
     const availableOrder: AgentProvider[] = [];
@@ -198,7 +198,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
     ).toEqual(["gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol", "gpt-5.4", "gpt-5.3-codex-spark"]);
   });
   async function opencodeModelIds(storedKey: string | null, catalog?: string[]): Promise<string[]> {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { store, mailbox } = stores(root);
     service = createTestService({
       store,
@@ -274,7 +274,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it("keeps the CLI version with sign-in-required and no models when OpenCode reports no account", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { service: agentService } = await startService(root, {
       client: (provider) => new FakeAgentClient(provider, "DONE", false, provider !== "opencode"),
       preferredProvider: "opencode",
@@ -294,7 +294,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it("restarts OpenCode on a changed key before it reports the change", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     let storedKey: string | null = null;
     const clients: FakeAgentClient[] = [];
     const { store, mailbox } = stores(root);
@@ -341,7 +341,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it("uses startup fallbacks when provider discovery is unavailable", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
     const { store, mailbox } = stores(root);
     service = createTestService({
       store,
@@ -363,8 +363,8 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   it.each(["codex", "claude", "grok"] as const)(
     "discovers and refreshes %s models without losing the catalog on failure",
     async (provider) => {
-      process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
-      process.env.OPENBOT_GROK_PATH = await createFakeGrok(root);
+      process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
+      process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
       const { store, mailbox } = stores(root);
       const client = new FakeAgentClient(provider);
       const id = provider === "codex" ? "gpt-6-astra" : `${provider}-future-model`;
@@ -470,7 +470,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it("names a Claude model by the model, not by the pick Claude Code calls it", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
     const { store, mailbox } = stores(root);
     const client = new FakeAgentClient("claude");
     client.modelList = () => ({
@@ -601,8 +601,8 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it.each([
-    { target: "claude", pathVariable: "OPENBOT_CLAUDE_PATH", createCli: createFakeClaude },
-    { target: "grok", pathVariable: "OPENBOT_GROK_PATH", createCli: createFakeGrok },
+    { target: "claude", pathVariable: "DANI_DEX_CLAUDE_PATH", createCli: createFakeClaude },
+    { target: "grok", pathVariable: "DANI_DEX_GROK_PATH", createCli: createFakeGrok },
   ] as const)("connects $target through the bundled CLI login command", async ({ target, pathVariable, createCli }) => {
     process.env[pathVariable] = await createCli(root);
     const { store, mailbox } = stores(root);
@@ -810,8 +810,8 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
 
   it("runs provider logins independently and Refresh cancels both generations", async () => {
     const claudeLoginLog = join(root, "claude-login.log");
-    process.env.OPENBOT_FAKE_CLAUDE_LOGIN_LOG = claudeLoginLog;
-    process.env.OPENBOT_CLAUDE_PATH = await createPendingFakeClaude(root);
+    process.env.DANI_DEX_FAKE_CLAUDE_LOGIN_LOG = claudeLoginLog;
+    process.env.DANI_DEX_CLAUDE_PATH = await createPendingFakeClaude(root);
     const { store, mailbox } = stores(root);
     const codexClients: FakeAgentClient[] = [];
     service = createTestService({
@@ -916,8 +916,8 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
     async (target) => {
       const managed = target === "codex" ? await createFakeCodex(root) : await createFakeClaude(root);
       if (target === "claude") {
-        process.env.OPENBOT_FAKE_CLAUDE_LOGIN_LOG = join(root, "pending-claude-login.log");
-        process.env.OPENBOT_CLAUDE_PATH = await createPendingFakeClaude(root);
+        process.env.DANI_DEX_FAKE_CLAUDE_LOGIN_LOG = join(root, "pending-claude-login.log");
+        process.env.DANI_DEX_CLAUDE_PATH = await createPendingFakeClaude(root);
       }
       const { service: agentService } = await startService(root, {
         client: (provider) => new FakeAgentClient(provider),
@@ -937,14 +937,14 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
 
       const other = target === "codex" ? "claude" : "codex";
       const otherCli = other === "codex" ? await createFakeCodex(root) : await createFakeClaude(root);
-      process.env[`OPENBOT_${other.toUpperCase()}_PATH`] = join(root, "missing-other-override");
+      process.env[`DANI_DEX_${other.toUpperCase()}_PATH`] = join(root, "missing-other-override");
       const otherUpdated = await service.updateProviderCli(other, async () => otherCli);
       expect(otherUpdated.providers).toContainEqual(
         expect.objectContaining({ id: other, state: "available", cliSource: "managed" }),
       );
 
       await service.refreshProviders();
-      process.env[`OPENBOT_${target.toUpperCase()}_PATH`] = join(root, "missing-override");
+      process.env[`DANI_DEX_${target.toUpperCase()}_PATH`] = join(root, "missing-override");
       const updated = await service.updateProviderCli(target, install);
       expect(updated.providers).toContainEqual(
         expect.objectContaining({ id: target, state: "available", cliSource: "managed" }),
@@ -954,7 +954,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
 
   it("activates the downloaded managed CLI instead of running the user's updater", async () => {
     const system = await createUpdatableFakeClaude(root, "2.1.250");
-    process.env.OPENBOT_CLAUDE_PATH = system.executable;
+    process.env.DANI_DEX_CLAUDE_PATH = system.executable;
     const { store, mailbox } = stores(root);
     const clients: FakeAgentClient[] = [];
     service = createTestService({
@@ -971,7 +971,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
     const managed = await createFakeClaude(root);
     await writeFile(managed, (await readFile(managed, "utf8")).replaceAll("2.1.246", "2.1.263"));
     // Remove the test's explicit override to model automatic system discovery at startup.
-    process.env.OPENBOT_CLAUDE_PATH = join(root, "missing-claude");
+    process.env.DANI_DEX_CLAUDE_PATH = join(root, "missing-claude");
     const status = await service.updateProviderCli("claude", async () => managed);
     expect(await readTextOrEmpty(system.started)).toBe("");
     expect(status.providers).toContainEqual(
@@ -1261,7 +1261,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it("keeps Grok's telemetry export failure out of the chat it was switched into", async () => {
-    process.env.OPENBOT_GROK_PATH = await createFakeGrok(root);
+    process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
     const { store, mailbox } = stores(root);
     const clients = new Map<AgentProvider, FakeAgentClient>();
     service = createTestService({
@@ -1323,7 +1323,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   });
 
   it("replaces Grok's repeated exhausted-balance errors with one usage refresh", async () => {
-    process.env.OPENBOT_GROK_PATH = await createFakeGrok(root);
+    process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
     const { store, mailbox } = stores(root);
     const clients = new Map<AgentProvider, FakeAgentClient>();
     service = createTestService({
@@ -1592,7 +1592,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
       failInstall = reject;
     });
     const claude = await createUpdatableFakeClaude(root, "2.1.250");
-    process.env.OPENBOT_CLAUDE_PATH = claude.executable;
+    process.env.DANI_DEX_CLAUDE_PATH = claude.executable;
     const { store, mailbox } = stores(root);
     service = createTestService({
       store,
@@ -1638,7 +1638,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
       claudeSignedIn ? "is replaced" : "with no client is connected again"
     }`, async () => {
       const claude = await createUpdatableFakeClaude(root, "2.1.250");
-      process.env.OPENBOT_CLAUDE_PATH = claude.executable;
+      process.env.DANI_DEX_CLAUDE_PATH = claude.executable;
       const { store, mailbox } = stores(root);
       service = createTestService({
         store,
@@ -1656,7 +1656,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
 
       // Claude is idle, so its CLI is replaced. Restart recovery would settle every unresolved
       // delivery, and this one belongs to a turn Codex is still running.
-      process.env.OPENBOT_CLAUDE_PATH = join(root, "missing-claude");
+      process.env.DANI_DEX_CLAUDE_PATH = join(root, "missing-claude");
       await service.updateProviderCli("claude", async () => claude.executable);
 
       expect(running.listQueue("chief").deliveries[0]?.status).toBe("running");
@@ -1665,7 +1665,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
   }
 
   it("keeps the owner of a CLI whose provider is signed out", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
     const { service: agentService } = await startService(root, {
       client: (provider) => new FakeAgentClient(provider, undefined, true, provider !== "claude"),
       preferredProvider: "codex",
@@ -1738,7 +1738,7 @@ describe.sequential("ProviderRuntime: custom provider reload", () => {
   // rather than reconfigured. `connectProvider` cannot do it: it returns early for a provider that is
   // already connected.
   it("replaces the OpenCode process, refreshes its models and keeps the thread", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const endpoints: CustomProviderConfig[] = [];
     const clients: FakeAgentClient[] = [];
     const fixture = startWithEndpoints(endpoints, clients);
@@ -1775,7 +1775,7 @@ describe.sequential("ProviderRuntime: custom provider reload", () => {
   // A save is never refused for a busy provider - the endpoint is already stored - so the honest
   // answer is that the models arrive later. Killing the CLI here would end the user's turn.
   it("leaves a running turn alone and reports skipped-busy", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const clients: FakeAgentClient[] = [];
     const fixture = startWithEndpoints([STUDIO_LOCAL], clients, { autoComplete: false });
     service = fixture.service;
@@ -1795,7 +1795,7 @@ describe.sequential("ProviderRuntime: custom provider reload", () => {
   // for a missing account, so the default advice would send the user to `opencode auth login` for a
   // typo in their own endpoint.
   it("names the endpoint when OpenCode will not start a session, and has nothing to restart", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const clients: FakeAgentClient[] = [];
     service = startWithEndpoints([STUDIO_LOCAL], clients, { preferred: "codex", openCodeSignedIn: false }).service;
     const running = service;

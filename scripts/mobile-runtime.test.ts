@@ -16,15 +16,15 @@ describe("mobile RocketSim integration", () => {
     const app = join(directory, "RocketSim.app");
     const framework = join(app, "Contents/Frameworks/RocketSimConnectLinker.nocache.framework");
     // Replace only the external commands. No prebuild, native build, or simulator runs in this test.
-    const command = '#!/bin/sh\nprintf "%s\\n" "$OPENBOT_ROCKETSIM_FRAMEWORK" "$@"\n';
+    const command = '#!/bin/sh\nprintf "%s\\n" "$DANI_DEX_ROCKETSIM_FRAMEWORK" "$@"\n';
     writeFileSync(join(directory, "node"), command, { mode: 0o755 });
     writeFileSync(join(directory, "open"), command, { mode: 0o755 });
     const env = {
       ...process.env,
       PATH: `${directory}:${process.env.PATH}`,
       ROCKETSIM_APP_PATH: app,
-      OPENBOT_ROCKETSIM: "1",
-      OPENBOT_ROCKETSIM_FRAMEWORK: "stale-framework",
+      DANI_DEX_ROCKETSIM: "1",
+      DANI_DEX_ROCKETSIM_FRAMEWORK: "stale-framework",
     };
     const prebuild = [expo, "prebuild", "--platform", "ios", "--no-clean", "--no-install"];
     try {

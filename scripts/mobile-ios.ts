@@ -27,7 +27,7 @@ if (process.platform !== "darwin") throw new Error("The iOS simulator requires m
 
 // Expo opens a deep link with simctl openurl, which does not pass launch environment variables.
 // Supply the local framework path to prebuild; the Swift hook is simulator Debug only.
-delete process.env.OPENBOT_ROCKETSIM_FRAMEWORK;
+delete process.env.DANI_DEX_ROCKETSIM_FRAMEWORK;
 if (useRocketSim) {
   const app =
     process.env.ROCKETSIM_APP_PATH ??
@@ -39,7 +39,7 @@ if (useRocketSim) {
     );
   }
   run("open", ["-a", app]);
-  process.env.OPENBOT_ROCKETSIM_FRAMEWORK = framework;
+  process.env.DANI_DEX_ROCKETSIM_FRAMEWORK = framework;
 }
 
 // run:ios skips prebuild when ios/ exists. Apply config plugins to existing projects too.

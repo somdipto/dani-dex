@@ -22,8 +22,8 @@ const runtime = new SunshineMoonlightRuntime({
   stateDirectory,
   platform: "darwin",
   credentials: {
-    username: process.env.OPENBOT_SMOKE_USERNAME ?? `openbot-${randomBytes(8).toString("hex")}`,
-    password: process.env.OPENBOT_SMOKE_PASSWORD ?? randomBytes(24).toString("base64url"),
+    username: process.env.DANI_DEX_SMOKE_USERNAME ?? `openbot-${randomBytes(8).toString("hex")}`,
+    password: process.env.DANI_DEX_SMOKE_PASSWORD ?? randomBytes(24).toString("base64url"),
   },
   getDisplays: () => [],
   getIceServers: async () => [{ urls: "stun:127.0.0.1:3478" }],

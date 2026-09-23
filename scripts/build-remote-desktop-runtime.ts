@@ -235,7 +235,7 @@ function buildSunshine(source: string, version: string, commit: string): void {
       "-DCMAKE_BUILD_TYPE=Release",
       "-DBUILD_DOCS=OFF",
       "-DBUILD_TESTS=ON",
-      "-DOPENBOT_SECURITY_TESTS=ON",
+      "-DDANI_DEX_SECURITY_TESTS=ON",
       "-DBUILD_WERROR=OFF",
     ],
     { env: buildEnvironment, stdio: "inherit" },

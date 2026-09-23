@@ -1,7 +1,7 @@
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 
 const [command, targetId, ...rest] = process.argv.slice(2);
-const apiUrl = process.env.OPENBOT_AUTH_API_URL ?? "http://127.0.0.1:3100";
+const apiUrl = process.env.DANI_DEX_AUTH_API_URL ?? "http://127.0.0.1:3100";
 const token = process.env.SKILLS_ADMIN_TOKEN;
 
 if (!token) throw new Error("SKILLS_ADMIN_TOKEN is required.");

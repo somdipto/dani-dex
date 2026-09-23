@@ -229,7 +229,7 @@ needs. A packaged build reads the copy under `resources/cua-driver` and nothing 
 is pinned and signed against that build and an environment variable must not decide which program
 drives the user's desktop; a release without the binary reports no driver. In a checkout
 `resolveCuaDriver` also reads an override, an install directory and `PATH`, so a developer can point
-`OPENBOT_CUA_DRIVER_PATH` at another build.
+`DANI_DEX_CUA_DRIVER_PATH` at another build.
 
 Dani-Dex draws the agent cursor in its own per-display overlays for every display layout. The
 runtime starts `serve` with `--no-overlay`. The driver's overlay covers only the main display and
@@ -249,7 +249,7 @@ holds new turns while it installs and activates that managed executable. It keep
 until the candidate is ready; activation failure removes the rejected artifact and preserves the old
 runtime. Download status stays `finishing` until activation succeeds.
 
-CLI resolution prefers an explicit `OPENBOT_*_PATH`, then the installed managed copy, then an
+CLI resolution prefers an explicit `DANI_DEX_*_PATH`, then the installed managed copy, then an
 automatically discovered system CLI. Updates never run the system CLI's updater. An explicit path
 suppresses managed update offers. Startup uses the same selection and reads the executable's version.
 
@@ -373,7 +373,7 @@ These are manual model evaluations, separate from the fake-provider lifecycle re
     exempt: any edit to them, cosmetic or not, forces `remoteDesktop.recipeVersion` up and a full
     native runtime rebuild, so their logging is frozen until the recipe changes for a real reason. Every line is timestamped, prefixed and
     secret-redacted, and redaction covers a serialized payload passed as one string, not only a
-    structured param. `info` and above is written by default; `OPENBOT_LOG_LEVEL` lowers the
+    structured param. `info` and above is written by default; `DANI_DEX_LOG_LEVEL` lowers the
     threshold. Machine-readable stdout (piped JSON, tags, harness URLs) uses
     `process.stdout.write` with a `// Machine-readable:` comment instead. Dev automation
     (`scripts/dev-automation`, `bun run dev:automation`) drives the already-running dev app over its
@@ -603,7 +603,7 @@ Run the narrowest relevant test, then `bun run lint` and `bun run typecheck`; bo
 to run whole, and CI owns the minutes-long suites. See [AGENTS.md, Checks](../AGENTS.md#checks)
 for the division of labour and what each CI job covers.
 
-The Storybook CI job builds all stories with `OPENBOT_STORYBOOK_CHECK=true`. This skips Solid's
+The Storybook CI job builds all stories with `DANI_DEX_STORYBOOK_CHECK=true`. This skips Solid's
 automatic prop documentation analysis. The job checks compilation and does not publish its output.
 Local Storybook keeps this analysis. Both paths use one Solid compiler plugin.
 
@@ -757,7 +757,7 @@ the one Update button, and one entry point in the runtime store, `startProviderU
 runs behind it, whoever owns the CLI: the download installs the pinned managed copy and
 `updateProviderCli` activates it, and CLI resolution then prefers that copy to the system install,
 which is left where it is. Dani-Dex never runs the CLI's own updater, so no version it offers depends
-on another release channel. An explicit `OPENBOT_*_PATH` suppresses the offer, because that path
+on another release channel. An explicit `DANI_DEX_*_PATH` suppresses the offer, because that path
 names the binary to run and the managed copy is not it. The owner comes from the last resolution of
 the binary, not from the client that runs it, so a provider that is signed out still reports its own
 install rather than reading as the managed copy. A failure keeps the reason the CLI gave, redacted,

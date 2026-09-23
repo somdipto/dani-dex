@@ -53,7 +53,7 @@ describe("development environment preparation", () => {
     const root = createTemporaryRoot();
     const calls: Array<{ args: string[]; instanceId?: string }> = [];
     const run: DevelopmentCommandRunner = (_executable, args, options) =>
-      calls.push({ args, instanceId: options.env?.OPENBOT_DEV_INSTANCE_ID });
+      calls.push({ args, instanceId: options.env?.DANI_DEX_DEV_INSTANCE_ID });
 
     prepareDevelopmentWorktree({ projectRoot: root, executable: "bun", bunVersion: "1.4.0", run });
 

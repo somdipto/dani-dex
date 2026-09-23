@@ -359,7 +359,7 @@ function formatLine(level: string, prefix: string, message: LogValue, params: Lo
 }
 
 // `info` by default, so a `debug` call added for one investigation does not
-// keep writing on every user's machine. `OPENBOT_LOG_LEVEL` raises or lowers
+// keep writing on every user's machine. `DANI_DEX_LOG_LEVEL` raises or lowers
 // it without a rebuild; an unknown value is ignored rather than silencing the
 // log.
 export function resolveLogLevel(raw: string | undefined, fallback: LogLevel = "info"): LogLevel {
@@ -370,7 +370,7 @@ export function resolveLogLevel(raw: string | undefined, fallback: LogLevel = "i
 }
 
 export function createDaniDexLogger(prefix: string, sink?: (line: string) => void, level?: LogLevel): Logger {
-  const threshold = LEVEL_RANK[level ?? resolveLogLevel(process.env.OPENBOT_LOG_LEVEL)];
+  const threshold = LEVEL_RANK[level ?? resolveLogLevel(process.env.DANI_DEX_LOG_LEVEL)];
   const out = sink ?? ((line: string) => process.stdout.write(`${line}\n`));
   const err = sink ?? ((line: string) => process.stderr.write(`${line}\n`));
   const write = (

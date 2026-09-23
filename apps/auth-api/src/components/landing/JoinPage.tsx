@@ -1,14 +1,14 @@
 import { AppLogo } from "@dani-dex/brand";
-import { OPENBOT_INVITE_ORIGIN, toDaniDexInviteUrl } from "@dani-dex/contracts/invite-links";
+import { DANI_DEX_INVITE_ORIGIN, toDaniDexInviteUrl } from "@dani-dex/contracts/invite-links";
 import { createSignal, onSettled, Show } from "solid-js";
 import { landingAnalytics } from "../../lib/analytics";
 import { detectDownloadPlatform } from "../../lib/download-platforms";
-import { OPENBOT_DOWNLOAD_LINKS } from "../../lib/landing-links";
+import { DANI_DEX_DOWNLOAD_LINKS } from "../../lib/landing-links";
 import { Button } from "../ui/button";
 
 export function JoinPage() {
   const [openUrl, setOpenUrl] = createSignal("");
-  const [downloadUrl, setDownloadUrl] = createSignal<string>(OPENBOT_DOWNLOAD_LINKS.macos);
+  const [downloadUrl, setDownloadUrl] = createSignal<string>(DANI_DEX_DOWNLOAD_LINKS.macos);
   const [invalid, setInvalid] = createSignal(false);
 
   onSettled(() => {
@@ -16,13 +16,13 @@ export function JoinPage() {
     let validInvite = true;
     try {
       const pageUrl = new URL(window.location.href);
-      const canonicalUrl = new URL(`${pageUrl.pathname}${pageUrl.search}`, OPENBOT_INVITE_ORIGIN);
+      const canonicalUrl = new URL(`${pageUrl.pathname}${pageUrl.search}`, DANI_DEX_INVITE_ORIGIN);
       setOpenUrl(toDaniDexInviteUrl(canonicalUrl.toString()));
     } catch {
       validInvite = false;
       setInvalid(true);
     }
-    if (platform === "windows") setDownloadUrl(OPENBOT_DOWNLOAD_LINKS.windows);
+    if (platform === "windows") setDownloadUrl(DANI_DEX_DOWNLOAD_LINKS.windows);
     const cleanup = landingAnalytics.startJoin(document, window.location.hostname, { validInvite, platform });
     return cleanup;
   });

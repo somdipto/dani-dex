@@ -76,7 +76,7 @@ const QUESTION_SWAP_EXIT_DURATION = 200;
 const QUESTION_SWAP_ENTER_DURATION = 320;
 const QUESTION_SWAP_BLUR = 6;
 const QUESTION_SWAP_MIDPOINT_OPACITY = 0.55;
-const OPENBOT_COMPACT_HOVER_MOTION = {
+const DANI_DEX_COMPACT_HOVER_MOTION = {
   leadingScale: 1.22,
   trailingScale: 1.08,
   outwardTranslateX: 10,
@@ -147,7 +147,7 @@ const STATUS_SHARED_TRAILING: SharedLeadingMotion = {
   island: { x: 124, y: 51, scale: 1.08 },
 };
 
-const OPENBOT_ISLAND_MODE_CONFIG: Record<DynamicIslandPresentation["mode"], DaniDexIslandModeConfig> = {
+const DANI_DEX_ISLAND_MODE_CONFIG: Record<DynamicIslandPresentation["mode"], DaniDexIslandModeConfig> = {
   idle: {
     label: "Open Dani-Dex",
   },
@@ -244,7 +244,7 @@ function compactStatusGeometry(
     presentation.mode === "working" ? Math.min(COMPACT_INDICES.length, presentation.working.length) : 0;
   if (!agent && workingAvatarCount === 0) return undefined;
 
-  const badge = OPENBOT_ISLAND_MODE_CONFIG[mode].badge;
+  const badge = DANI_DEX_ISLAND_MODE_CONFIG[mode].badge;
   if (!badge) return undefined;
   const badgeWidth = Math.ceil(measureCompactText(badge.label, 600) + STATUS_COMPACT_BADGE_CHROME_WIDTH);
   const measuredNameWidth = agent ? measureCompactText(agent.name, 600) : 0;
@@ -325,7 +325,7 @@ function measureCompactText(text: string, weight: number): number {
 export function DaniDexDynamicIsland(props: DaniDexDynamicIslandProps): JSX.Element {
   const initialPresentation = untrack(() => props.presentation);
   const [visiblePresentation, setVisiblePresentation] = createSignal(initialPresentation);
-  const config = () => OPENBOT_ISLAND_MODE_CONFIG[visiblePresentation().mode];
+  const config = () => DANI_DEX_ISLAND_MODE_CONFIG[visiblePresentation().mode];
   const [compactLayoutPresentation, setCompactLayoutPresentation] = createSignal(initialPresentation);
   const [outgoingPresentation, setOutgoingPresentation] = createSignal<DynamicIslandPresentation>();
   const [modeTransitioning, setModeTransitioning] = createSignal(false);
@@ -483,7 +483,7 @@ export function DaniDexDynamicIsland(props: DaniDexDynamicIslandProps): JSX.Elem
           trailing: sharedTrailing()?.[props.displayMode === "island" ? "island" : "notch"],
         }}
         hoverBehavior={config().badge ? "expand" : "grow"}
-        hoverContentMotion={OPENBOT_COMPACT_HOVER_MOTION}
+        hoverContentMotion={DANI_DEX_COMPACT_HOVER_MOTION}
         pointerToggle={config().badge ? false : undefined}
         class={[
           "openbot-dynamic-island",
@@ -673,7 +673,7 @@ function CompactAgentName(props: { name: string; displayMode?: "notch" | "island
 }
 
 function CompactStatusBadge(props: { mode: StatusMode }): JSX.Element {
-  const config = () => OPENBOT_ISLAND_MODE_CONFIG[props.mode].badge;
+  const config = () => DANI_DEX_ISLAND_MODE_CONFIG[props.mode].badge;
   return (
     <Show when={config()}>
       {(badge) => (

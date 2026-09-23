@@ -26,8 +26,8 @@ afterEach(async () => {
 
 describe.sequential("ContextCompaction: pressure, threshold and failure", () => {
   it("compacts a pressured agent context before draining its next queued message", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "DONE";
-    process.env.OPENBOT_FAKE_CONTEXT_USAGE = "82000";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "DONE";
+    process.env.DANI_DEX_FAKE_CONTEXT_USAGE = "82000";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     const events: AgentEvent[] = [];
@@ -50,8 +50,8 @@ describe.sequential("ContextCompaction: pressure, threshold and failure", () => 
   });
 
   it("does not compact context below the safety threshold", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "DONE";
-    process.env.OPENBOT_FAKE_CONTEXT_USAGE = "79000";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "DONE";
+    process.env.DANI_DEX_FAKE_CONTEXT_USAGE = "79000";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     await service.initialize();
@@ -62,10 +62,10 @@ describe.sequential("ContextCompaction: pressure, threshold and failure", () => 
   });
 
   it("continues queued work when an MCP server changes while the context is compacting", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "DONE";
-    process.env.OPENBOT_FAKE_CONTEXT_USAGE = "82000";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "DONE";
+    process.env.DANI_DEX_FAKE_CONTEXT_USAGE = "82000";
     // Long enough to save a server inside the compaction, which is the window the deadlock needs.
-    process.env.OPENBOT_FAKE_COMPACTION_DELAY = "400";
+    process.env.DANI_DEX_FAKE_COMPACTION_DELAY = "400";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     await service.initialize();
@@ -102,9 +102,9 @@ describe.sequential("ContextCompaction: pressure, threshold and failure", () => 
   });
 
   it("continues queued work when context compaction is unavailable", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "DONE";
-    process.env.OPENBOT_FAKE_CONTEXT_USAGE = "82000";
-    process.env.OPENBOT_FAKE_COMPACTION_ERROR = "1";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "DONE";
+    process.env.DANI_DEX_FAKE_CONTEXT_USAGE = "82000";
+    process.env.DANI_DEX_FAKE_COMPACTION_ERROR = "1";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     const events: AgentEvent[] = [];

@@ -1,4 +1,4 @@
-import { OPENBOT_LINKS } from "../lib/landing-links";
+import { DANI_DEX_LINKS } from "../lib/landing-links";
 
 export type AvailableDownloadPlatform = "linux" | "macos" | "windows";
 
@@ -45,7 +45,7 @@ function findInstaller(manifest: string, extension: DownloadManifestConfig["exte
  */
 function fallbackToReleases(platform: AvailableDownloadPlatform, reason: string): Response {
   console.warn(`latest-download: serving the releases page for ${platform} (${reason})`);
-  return redirect(OPENBOT_LINKS.releases);
+  return redirect(DANI_DEX_LINKS.releases);
 }
 
 export async function latestDownloadResponse(

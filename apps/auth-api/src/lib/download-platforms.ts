@@ -1,5 +1,5 @@
 import type { PlatformLogoVariant } from "@dani-dex/brand";
-import { OPENBOT_DOWNLOAD_LINKS } from "./landing-links";
+import { DANI_DEX_DOWNLOAD_LINKS } from "./landing-links";
 
 export type DownloadPlatform = PlatformLogoVariant;
 
@@ -29,7 +29,7 @@ export const DOWNLOAD_PLATFORMS: Record<DownloadPlatform, DownloadPlatformDetail
     description: "macOS 13+ · Apple silicon",
     action: "Download for macOS",
     available: true,
-    href: OPENBOT_DOWNLOAD_LINKS.macos,
+    href: DANI_DEX_DOWNLOAD_LINKS.macos,
   },
   windows: {
     id: "windows",
@@ -38,7 +38,7 @@ export const DOWNLOAD_PLATFORMS: Record<DownloadPlatform, DownloadPlatformDetail
     description: "Windows 10+ · x64",
     action: "Download for Windows",
     available: true,
-    href: OPENBOT_DOWNLOAD_LINKS.windows,
+    href: DANI_DEX_DOWNLOAD_LINKS.windows,
   },
   linux: {
     id: "linux",
@@ -47,7 +47,7 @@ export const DOWNLOAD_PLATFORMS: Record<DownloadPlatform, DownloadPlatformDetail
     description: "x64 · AppImage",
     action: "Download for Linux",
     available: true,
-    href: OPENBOT_DOWNLOAD_LINKS.linux,
+    href: DANI_DEX_DOWNLOAD_LINKS.linux,
   },
 };
 

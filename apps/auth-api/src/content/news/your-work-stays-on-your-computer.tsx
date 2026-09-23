@@ -1,4 +1,4 @@
-import { EXTERNAL_LINK_REL, OPENBOT_LINKS } from "../../lib/landing-links";
+import { DANI_DEX_LINKS, EXTERNAL_LINK_REL } from "../../lib/landing-links";
 
 export function YourWorkStaysOnYourComputer() {
   return (
@@ -29,7 +29,7 @@ export function YourWorkStaysOnYourComputer() {
       <p>
         The honest version of the promise is narrower than the slogan: Dani-Dex adds no hop of its own. We wrote down
         exactly which data leaves your machine and why in the{" "}
-        <a href={OPENBOT_LINKS.privacy} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.privacy} target="_blank" rel={EXTERNAL_LINK_REL}>
           privacy notes
         </a>
         .

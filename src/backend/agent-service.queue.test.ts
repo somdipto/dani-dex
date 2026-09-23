@@ -198,7 +198,7 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("starts a new agent in a development build on the OpenCode development model", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { store, mailbox } = stores(root);
     service = createTestService({
       store,
@@ -228,8 +228,8 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("leaves a packaged build and a recorded preference on their own model", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { service: agentService } = await startService(root, {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
@@ -258,7 +258,7 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("starts a new agent on the requested provider and model before the initial message", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { store, mailbox } = stores(root);
     const clients = new Map<AgentProvider, FakeAgentClient>();
     service = createTestService({
@@ -286,7 +286,7 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("rejects creation with an unlisted model and removes the incomplete agent", async () => {
-    process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { service: agentService } = await startService(root, {
       client: (provider) => new FakeAgentClient(provider),
     });
@@ -299,7 +299,7 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("updates the active account and new-agent defaults with the preferred provider", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
     const { service: agentService } = await startService(root, { preferredProvider: "claude" });
     service = agentService;
 
@@ -365,9 +365,9 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("detects a newly installed provider without disconnecting an available one", async () => {
-    const codexPath = process.env.OPENBOT_CODEX_PATH;
+    const codexPath = process.env.DANI_DEX_CODEX_PATH;
     if (!codexPath) throw new Error("The fake Codex path is missing.");
-    process.env.OPENBOT_CODEX_PATH = join(root, "missing-codex");
+    process.env.DANI_DEX_CODEX_PATH = join(root, "missing-codex");
     const workingDirectory = process.cwd();
     process.chdir(root);
     const clients = new Map<AgentProvider, FakeAgentClient>();
@@ -394,7 +394,7 @@ describe.sequential("AgentService: queue", () => {
         ],
       });
 
-      process.env.OPENBOT_CODEX_PATH = codexPath;
+      process.env.DANI_DEX_CODEX_PATH = codexPath;
       await expect(service.refreshProviders()).resolves.toMatchObject({
         phase: "ready",
         providers: [
@@ -616,7 +616,7 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("starts the second provider when an agent selects its model", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
     const { service: agentService, store } = await startService(root);
     service = agentService;
     await store.getOrCreate("chief");
@@ -638,8 +638,8 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("hands one SQLite conversation across repeated provider switches", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
-    process.env.OPENBOT_GROK_PATH = await createFakeGrok(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
     const clients = new Map<AgentProvider, FakeAgentClient>();
     const { service: agentService, store } = await startService(root, {
       client: (provider) => {
@@ -693,7 +693,7 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("resumes and retries once when Grok loses its in-memory session", async () => {
-    process.env.OPENBOT_GROK_PATH = await createFakeGrok(root);
+    process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
     let rejectTurnStart = true;
     let grokClient: FakeAgentClient | undefined;
     const { store, mailbox } = stores(root);
@@ -739,8 +739,8 @@ describe.sequential("AgentService: queue", () => {
   it.each(["grok", "opencode"] as const)(
     "replaces a %s session that the provider can no longer resume",
     async (target) => {
-      process.env.OPENBOT_GROK_PATH = await createFakeGrok(root);
-      process.env.OPENBOT_OPENCODE_PATH = await createFakeOpencode(root);
+      process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
+      process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
       let rejectResume = false;
       let providerClient: FakeAgentClient | undefined;
       const { store, mailbox } = stores(root);
@@ -798,7 +798,7 @@ describe.sequential("AgentService: queue", () => {
   );
 
   it("stores a visible summary when a provider handoff exceeds its budget", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
     const clients = new Map<AgentProvider, FakeAgentClient>();
     const { service: agentService, store } = await startService(root, {
       client: (provider) => {
@@ -1485,7 +1485,7 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("waits for active queue drains before shutdown completes", async () => {
-    process.env.OPENBOT_FAKE_TURN_START_RESPONSE_DELAY = "100";
+    process.env.DANI_DEX_FAKE_TURN_START_RESPONSE_DELAY = "100";
     const { service: agentService } = await startService(root);
     service = agentService;
 
@@ -1497,14 +1497,14 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("fans out an idempotent agent tool message with referenced files", async () => {
-    process.env.OPENBOT_FAKE_AGENT_TOOL = "1";
+    process.env.DANI_DEX_FAKE_AGENT_TOOL = "1";
     const notePath = join(root, "generated-note.txt");
     const imagePath = join(root, "generated-image.png");
     await Promise.all([
-      writeFile(notePath, "OPENBOT_SHARED_FILE_OK\n"),
+      writeFile(notePath, "DANI_DEX_SHARED_FILE_OK\n"),
       writeFile(imagePath, Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
     ]);
-    process.env.OPENBOT_FAKE_AGENT_TOOL_PATHS = JSON.stringify([notePath, imagePath]);
+    process.env.DANI_DEX_FAKE_AGENT_TOOL_PATHS = JSON.stringify([notePath, imagePath]);
     const { service: agentService, store, mailbox } = await startService(root);
     service = agentService;
     await Promise.all([store.getOrCreate("sales-outbound"), store.getOrCreate("inbox-manager")]);
@@ -1527,7 +1527,7 @@ describe.sequential("AgentService: queue", () => {
     const managedImage = await mailbox.resolveAttachment(sales.attachments[1]?.id ?? "");
     expect(managedNote?.path).not.toBe(notePath);
     expect(managedImage?.path).not.toBe(imagePath);
-    await expect(readFile(managedNote?.path ?? "", "utf8")).resolves.toBe("OPENBOT_SHARED_FILE_OK\n");
+    await expect(readFile(managedNote?.path ?? "", "utf8")).resolves.toBe("DANI_DEX_SHARED_FILE_OK\n");
 
     const chiefMessages = (await service.readConversation("chief")).messages;
     expect(chiefMessages).toEqual(
@@ -1587,8 +1587,8 @@ describe.sequential("AgentService: queue", () => {
     { provider: "codex", context: "unavailable" },
     { provider: "codex", context: "rollback" },
   ])("preserves the caller's space for $provider with $context context", async ({ provider, context }) => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
-    process.env.OPENBOT_GROK_PATH = await createFakeGrok(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
     const { store, mailbox } = stores(root);
     const sidebarPath = join(root, "sidebar-layout.json");
     const sidebar = new SidebarLayoutStore(sidebarPath);
@@ -1832,7 +1832,7 @@ describe.sequential("AgentService: queue", () => {
   });
 
   it("lists complete local profiles and updates a selected agent profile", async () => {
-    process.env.OPENBOT_FAKE_AGENT_TOOL_CALLS = JSON.stringify([
+    process.env.DANI_DEX_FAKE_AGENT_TOOL_CALLS = JSON.stringify([
       { tool: "list_agents", arguments: {} },
       {
         tool: "update_profile",

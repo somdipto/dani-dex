@@ -12,7 +12,7 @@ import { AgentStore } from "./agent-store";
 import { ClaudeAgentClient } from "./claude-client";
 import { mergeProviderHistory, newAssistantMessage, snapshotFromThread } from "./conversation-snapshots";
 import { loginShellPath } from "./mcp-provider-shapes";
-import { OPENBOT_DYNAMIC_TOOLS } from "./openbot-tools";
+import { DANI_DEX_DYNAMIC_TOOLS } from "./openbot-tools";
 import {
   decodeAccountRateLimitsReadResult,
   decodeAccountReadResult,
@@ -229,7 +229,7 @@ fi
       const registeredTools = isDynamicRecord(serverInstance) ? serverInstance._registeredTools : null;
       // Compare the declarations passed to the providers, including schema constraints and guidance.
       // Claude uses the SDK's AskUserQuestion instead of the ask_user MCP tool.
-      const expectedTools = OPENBOT_DYNAMIC_TOOLS.tools.filter((dynamicTool) => dynamicTool.name !== "ask_user");
+      const expectedTools = DANI_DEX_DYNAMIC_TOOLS.tools.filter((dynamicTool) => dynamicTool.name !== "ask_user");
       expect((isDynamicRecord(registeredTools) ? Object.keys(registeredTools) : []).toSorted()).toEqual(
         expectedTools.map((dynamicTool) => dynamicTool.name).toSorted(),
       );

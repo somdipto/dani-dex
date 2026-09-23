@@ -59,7 +59,7 @@ then build and launch the app with Expo. Expo arguments such as `--device` and
 `--port` pass through. The RocketSim command requires the app in `/Applications`
 or `~/Applications`, or `ROCKETSIM_APP_PATH` set to its `.app` directory. If it is
 missing, the command stops with setup instructions. The standard command does not
-look for RocketSim, even if `ROCKETSIM_APP_PATH` or the old `OPENBOT_ROCKETSIM`
+look for RocketSim, even if `ROCKETSIM_APP_PATH` or the old `DANI_DEX_ROCKETSIM`
 variable is set.
 
 The local launcher enables RocketSim Connect in the local native project. The config plugin

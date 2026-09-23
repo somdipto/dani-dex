@@ -736,7 +736,7 @@ describe.sequential("AgentService: routines", () => {
   });
 
   it("sends a teammate request only to the selected profile match", async () => {
-    process.env.OPENBOT_FAKE_AGENT_TOOL_CALLS = JSON.stringify([
+    process.env.DANI_DEX_FAKE_AGENT_TOOL_CALLS = JSON.stringify([
       { tool: "list_agents", arguments: {} },
       {
         tool: "send_message",
@@ -763,7 +763,7 @@ describe.sequential("AgentService: routines", () => {
   });
 
   it("carries the sender's answer choice from the tool call onto the delivery", async () => {
-    process.env.OPENBOT_FAKE_AGENT_TOOL_CALLS = JSON.stringify([
+    process.env.DANI_DEX_FAKE_AGENT_TOOL_CALLS = JSON.stringify([
       {
         tool: "send_message",
         arguments: {
@@ -784,7 +784,7 @@ describe.sequential("AgentService: routines", () => {
   });
 
   it("reliably relays a completed teammate result back through a reply chain without loops", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "AUTO_WEATHER_RESULT";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "AUTO_WEATHER_RESULT";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     await store.initialize();
@@ -840,7 +840,7 @@ describe.sequential("AgentService: routines", () => {
   });
 
   it("sends nothing back for a teammate message that asks for no answer", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "AUTO_RESULT";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "AUTO_RESULT";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     await store.initialize();
@@ -882,7 +882,7 @@ describe.sequential("AgentService: routines", () => {
   });
 
   it("drops a placeholder answer to a teammate request instead of showing and relaying it", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "∅";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "∅";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     await store.initialize();
@@ -931,11 +931,11 @@ describe.sequential("AgentService: routines", () => {
   });
 
   it("does not fail or replay a turn whose start response times out after lifecycle events", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "Finished despite the late response";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "Finished despite the late response";
     // Auto-complete is 20ms. The RPC timeout has to land after that, and before
     // the delayed start response. 75ms vs 250ms loses that order when CI load
     // delays the fake CLI, and the wait then never sees completed.
-    process.env.OPENBOT_FAKE_TURN_START_RESPONSE_DELAY = "1500";
+    process.env.DANI_DEX_FAKE_TURN_START_RESPONSE_DELAY = "1500";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox, requestTimeoutMs: 400 });
     const events: AgentEvent[] = [];
@@ -955,8 +955,8 @@ describe.sequential("AgentService: routines", () => {
   });
 
   it("keeps a completed turn idle when its start response arrives after lifecycle events", async () => {
-    process.env.OPENBOT_FAKE_AUTO_COMPLETE = "Finished before the start response";
-    process.env.OPENBOT_FAKE_TURN_START_RESPONSE_DELAY = "100";
+    process.env.DANI_DEX_FAKE_AUTO_COMPLETE = "Finished before the start response";
+    process.env.DANI_DEX_FAKE_TURN_START_RESPONSE_DELAY = "100";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     await service.initialize();

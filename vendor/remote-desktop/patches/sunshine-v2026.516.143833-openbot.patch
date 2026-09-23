@@ -314,7 +314,7 @@ index 2f703dbc..c9fb7f58 100644
 +  void daniDexTest(const resp_https_t &response, const req_https_t &request) {
 +    if (!authenticate(response, request)) return;
 +#ifdef __APPLE__
-+    if (!std::getenv("OPENBOT_REMOTE_SETUP")) {
++    if (!std::getenv("DANI_DEX_REMOTE_SETUP")) {
 +      not_found(response, request, "Remote desktop testing is unavailable.");
 +      return;
 +    }
@@ -663,7 +663,7 @@ index 13df6784..26e77cec 100644
  
  void mainThreadLoop(const std::shared_ptr<safe::event_t<bool>> &shutdown_event) {
 +  #ifdef __APPLE__
-+  if (std::getenv("OPENBOT_REMOTE_SETUP")) {
++  if (std::getenv("DANI_DEX_REMOTE_SETUP")) {
 +    platf::openbot_main_loop([&] { return shutdown_event->peek(); });
 +    return;
 +  }
@@ -2183,7 +2183,7 @@ index 984481f6..f8118465 100644
  endif ()
  
 +# Compile only the backported security regressions for Dani-Dex's runtime build.
-+if(OPENBOT_SECURITY_TESTS)
++if(DANI_DEX_SECURITY_TESTS)
 +    set(TEST_SOURCES
 +        "${CMAKE_SOURCE_DIR}/tests/tests_main.cpp"
 +        "${CMAKE_SOURCE_DIR}/tests/unit/test_input.cpp"

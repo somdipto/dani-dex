@@ -1,8 +1,8 @@
 import { isDaniDexTeamApiHostname } from "./validation";
 
-export const OPENBOT_INVITE_ORIGIN = "https://openbot.run";
-export const OPENBOT_INVITE_PATH = "/join";
-export const OPENBOT_CONTROL_PLANE_ORIGIN = "https://api.openbot.run";
+export const DANI_DEX_INVITE_ORIGIN = "https://openbot.run";
+export const DANI_DEX_INVITE_PATH = "/join";
+export const DANI_DEX_CONTROL_PLANE_ORIGIN = "https://api.openbot.run";
 
 /**
  * The finite deadline a permanent invitation carries. Invitation expiry travels the
@@ -43,7 +43,7 @@ export interface InviteLinkOptions {
 
 export function createInviteUrl(payload: InviteLinkPayload, options: InviteLinkOptions = {}): string {
   validatePayload(payload, options);
-  const url = new URL(OPENBOT_INVITE_PATH, OPENBOT_INVITE_ORIGIN);
+  const url = new URL(DANI_DEX_INVITE_PATH, DANI_DEX_INVITE_ORIGIN);
   writePayload(url, payload);
   return url.toString();
 }
@@ -63,7 +63,7 @@ export function isCanonicalInviteUrl(value: string, options: InviteLinkOptions =
   try {
     parseInviteUrl(value, options);
     const url = new URL(value);
-    return url.origin === OPENBOT_INVITE_ORIGIN && url.pathname === OPENBOT_INVITE_PATH;
+    return url.origin === DANI_DEX_INVITE_ORIGIN && url.pathname === DANI_DEX_INVITE_PATH;
   } catch {
     return false;
   }
@@ -78,7 +78,7 @@ export function parseInviteUrl(value: string, options: InviteLinkOptions = {}): 
   }
 
   const canonical =
-    url.protocol === "https:" && url.origin === OPENBOT_INVITE_ORIGIN && url.pathname === OPENBOT_INVITE_PATH;
+    url.protocol === "https:" && url.origin === DANI_DEX_INVITE_ORIGIN && url.pathname === DANI_DEX_INVITE_PATH;
   const customScheme =
     (url.protocol === "dani-dex:" || url.protocol === "openbot:") &&
     url.hostname === "join" &&
@@ -121,7 +121,7 @@ export function isValidRemoteApiUrl(value: string, options: InviteLinkOptions = 
       (localDevelopmentApi ||
         (url.protocol === "https:" &&
           url.port === "" &&
-          (url.origin === OPENBOT_CONTROL_PLANE_ORIGIN ||
+          (url.origin === DANI_DEX_CONTROL_PLANE_ORIGIN ||
             TRY_CLOUDFLARE_HOST_PATTERN.test(url.hostname) ||
             isDaniDexTeamApiHostname(url.hostname))))
     );

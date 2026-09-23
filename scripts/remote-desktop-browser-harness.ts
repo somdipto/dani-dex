@@ -28,7 +28,7 @@ const clientCount = z.coerce
   .int()
   .min(1)
   .max(4)
-  .parse(process.env.OPENBOT_REMOTE_E2E_CLIENTS ?? "1");
+  .parse(process.env.DANI_DEX_REMOTE_E2E_CLIENTS ?? "1");
 const stateDirectory = await mkdtemp(join(tmpdir(), "openbot-remote-browser-e2e-"));
 const gateway = new RemoteScreenGateway({
   platform: process.platform === "darwin" || process.platform === "win32" ? process.platform : "linux",
@@ -39,8 +39,8 @@ const gateway = new RemoteScreenGateway({
   getDisplays: () => [{ id: "1", label: "Primary display", width: 1920, height: 1080, primary: true }],
   getIceServers: async () => [{ urls: "stun:127.0.0.1:3478" }],
   audit: (event) => {
-    // Machine-readable: the E2E runner parses OPENBOT_REMOTE_E2E_AUDIT lines.
-    process.stdout.write(`OPENBOT_REMOTE_E2E_AUDIT=${JSON.stringify(event)}\n`);
+    // Machine-readable: the E2E runner parses DANI_DEX_REMOTE_E2E_AUDIT lines.
+    process.stdout.write(`DANI_DEX_REMOTE_E2E_AUDIT=${JSON.stringify(event)}\n`);
   },
   onDiagnostic: (source, message) => process.stdout.write(`[${source}] ${message}`),
 });
@@ -75,9 +75,9 @@ for (let index = 0; index < clientCount; index += 1) {
     publicHttpBaseUrl: origin,
   });
   const viewerUrl = `${session.viewerUrl}#${session.viewerGrant}`;
-  // Machine-readable: the E2E runner parses OPENBOT_REMOTE_E2E_URL lines.
-  if (index === 0) process.stdout.write(`OPENBOT_REMOTE_E2E_URL=${viewerUrl}\n`);
-  process.stdout.write(`OPENBOT_REMOTE_E2E_URL_${index + 1}=${viewerUrl}\n`);
+  // Machine-readable: the E2E runner parses DANI_DEX_REMOTE_E2E_URL lines.
+  if (index === 0) process.stdout.write(`DANI_DEX_REMOTE_E2E_URL=${viewerUrl}\n`);
+  process.stdout.write(`DANI_DEX_REMOTE_E2E_URL_${index + 1}=${viewerUrl}\n`);
 }
 
 let stopping = false;

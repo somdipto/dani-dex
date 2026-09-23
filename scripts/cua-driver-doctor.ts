@@ -20,7 +20,7 @@ const executable = await resolveCuaDriver({
   architecture: process.arch,
   homeDirectory: homedir(),
   pathVariable: process.env.PATH ?? null,
-  overrides: [process.env.OPENBOT_CUA_DRIVER_PATH, process.env.CUA_DRIVER_PATH],
+  overrides: [process.env.DANI_DEX_CUA_DRIVER_PATH, process.env.CUA_DRIVER_PATH],
   installDirectory: process.env.CUA_DRIVER_RS_INSTALL_DIR ?? process.env.CUA_DRIVER_BIN_DIR,
   localAppDataDirectory: process.env.LOCALAPPDATA,
   applicationsDirectory: "/Applications",
@@ -32,7 +32,7 @@ if (!executable) {
     `${JSON.stringify(
       {
         ok: false,
-        error: "No Computer Use driver on this computer. Install it, or point OPENBOT_CUA_DRIVER_PATH at a build.",
+        error: "No Computer Use driver on this computer. Install it, or point DANI_DEX_CUA_DRIVER_PATH at a build.",
       },
       null,
       2,

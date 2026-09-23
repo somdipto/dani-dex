@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/solid-router";
 import { ArticleClip, ArticleGif, ArticleImage, ArticleVideo } from "../../components/content/ArticleMedia";
-import { EXTERNAL_LINK_REL, OPENBOT_LINKS } from "../../lib/landing-links";
+import { DANI_DEX_LINKS, EXTERNAL_LINK_REL } from "../../lib/landing-links";
 import aClearTask from "./media/write-a-guide-for-openbot/a-clear-task.webp";
 import aShortTour from "./media/write-a-guide-for-openbot/a-short-tour.mp4";
 import aShortTourCaptions from "./media/write-a-guide-for-openbot/a-short-tour.vtt?url";
@@ -80,9 +80,9 @@ export function WriteAGuideForDaniDex() {
 
       <h3>Linking out and linking on</h3>
       <p>
-        An external link takes its address from <code>OPENBOT_LINKS</code> and carries <code>target="_blank"</code> with{" "}
-        <code>rel={"{EXTERNAL_LINK_REL}"}</code>, like this link to{" "}
-        <a href={OPENBOT_LINKS.repository} target="_blank" rel={EXTERNAL_LINK_REL}>
+        An external link takes its address from <code>DANI_DEX_LINKS</code> and carries <code>target="_blank"</code>{" "}
+        with <code>rel={"{EXTERNAL_LINK_REL}"}</code>, like this link to{" "}
+        <a href={DANI_DEX_LINKS.repository} target="_blank" rel={EXTERNAL_LINK_REL}>
           the repository
         </a>
         . Never paste a bare URL: one constant keeps every page pointing at the same place.
@@ -239,7 +239,7 @@ export function WriteAGuideForDaniDex() {
       </p>
       <p>
         The{" "}
-        <a href={OPENBOT_LINKS.contributing} target="_blank" rel={EXTERNAL_LINK_REL}>
+        <a href={DANI_DEX_LINKS.contributing} target="_blank" rel={EXTERNAL_LINK_REL}>
           contributing notes
         </a>{" "}
         cover the rest of the checks. Start from{" "}

@@ -12,7 +12,7 @@ import {
   collectionIndexUrl,
 } from "../lib/content-collection";
 import { PLUGINS_UPDATED_AT, pluginIndexUrl, pluginUrl, SITE_PLUGINS } from "../lib/plugins";
-import { OPENBOT_SITE_TITLE, OPENBOT_SITE_URL } from "../lib/site-metadata";
+import { DANI_DEX_SITE_TITLE, DANI_DEX_SITE_URL } from "../lib/site-metadata";
 
 /**
  * The five characters XML reserves. `>` is only special after `]]`, but escaping
@@ -39,7 +39,7 @@ function latestSitePublishedAt(): string {
 
 export function contentSitemapXml(): string {
   const entries = [
-    { loc: OPENBOT_SITE_URL, lastmod: latestSitePublishedAt(), priority: "1.0" },
+    { loc: DANI_DEX_SITE_URL, lastmod: latestSitePublishedAt(), priority: "1.0" },
     ...CONTENT_COLLECTIONS.flatMap((collection) => [
       { loc: collectionIndexUrl(collection), lastmod: latestPublishedAt(collection), priority: "0.8" },
       ...collection.articles.map((article) => ({
@@ -94,7 +94,7 @@ export function contentRssXml(collection: ContentCollection): string {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">',
     "  <channel>",
-    `    <title>${escapeXml(`${collection.feedTitle} — ${OPENBOT_SITE_TITLE}`)}</title>`,
+    `    <title>${escapeXml(`${collection.feedTitle} — ${DANI_DEX_SITE_TITLE}`)}</title>`,
     `    <link>${escapeXml(collectionIndexUrl(collection))}</link>`,
     `    <description>${escapeXml(collection.indexDescription)}</description>`,
     "    <language>en-us</language>",

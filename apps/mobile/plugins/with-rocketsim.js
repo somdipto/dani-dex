@@ -33,7 +33,7 @@ module.exports = (config) =>
     if (mod.modResults.language !== "swift") {
       throw new Error("RocketSim Connect requires a Swift AppDelegate.");
     }
-    mod.modResults.contents = addRocketSim(mod.modResults.contents, process.env.OPENBOT_ROCKETSIM_FRAMEWORK);
+    mod.modResults.contents = addRocketSim(mod.modResults.contents, process.env.DANI_DEX_ROCKETSIM_FRAMEWORK);
     return mod;
   });
 

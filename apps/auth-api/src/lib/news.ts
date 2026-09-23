@@ -21,7 +21,7 @@ export const NEWS_COLLECTION: ContentCollection = {
   feedTitle: "Dani-Dex news",
   backLabel: "All news",
   moreTitle: "More from Dani-Dex",
-  imageEyebrow: "OPENBOT · NEWS",
+  imageEyebrow: "DANI_DEX · NEWS",
   articles: publishedFirst([
     {
       slug: "introducing-openbot",

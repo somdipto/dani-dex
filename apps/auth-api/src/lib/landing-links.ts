@@ -1,12 +1,12 @@
 export const EXTERNAL_LINK_REL = "noopener noreferrer";
 
-export const OPENBOT_DOWNLOAD_LINKS = {
+export const DANI_DEX_DOWNLOAD_LINKS = {
   macos: "/download/macos",
   windows: "/download/windows",
   linux: "/download/linux",
 } as const;
 
-export const OPENBOT_LINKS = {
+export const DANI_DEX_LINKS = {
   contact: "https://x.com/DaniDex_",
   download: "#download",
   /** The same anchor from a page that is not the landing page. */
@@ -54,21 +54,21 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
       { label: "News", external: false, to: "/news" },
       { label: "Guides", external: false, to: "/guides" },
       { label: "Plugins", external: false, to: "/plugins" },
-      { label: "Releases", external: true, href: OPENBOT_LINKS.releases },
-      { label: "Source code", external: true, href: OPENBOT_LINKS.repository },
-      { label: "License", external: true, href: OPENBOT_LINKS.license },
-      { label: "Privacy", external: true, href: OPENBOT_LINKS.privacy },
+      { label: "Releases", external: true, href: DANI_DEX_LINKS.releases },
+      { label: "Source code", external: true, href: DANI_DEX_LINKS.repository },
+      { label: "License", external: true, href: DANI_DEX_LINKS.license },
+      { label: "Privacy", external: true, href: DANI_DEX_LINKS.privacy },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Documentation", external: true, href: OPENBOT_LINKS.documentation },
-      { label: "Troubleshooting", external: true, href: OPENBOT_LINKS.troubleshooting },
-      { label: "Architecture", external: true, href: OPENBOT_LINKS.architecture },
-      { label: "Contributing", external: true, href: OPENBOT_LINKS.contributing },
-      { label: "Codex", external: true, href: OPENBOT_LINKS.codex },
-      { label: "Claude Code", external: true, href: OPENBOT_LINKS.claude },
+      { label: "Documentation", external: true, href: DANI_DEX_LINKS.documentation },
+      { label: "Troubleshooting", external: true, href: DANI_DEX_LINKS.troubleshooting },
+      { label: "Architecture", external: true, href: DANI_DEX_LINKS.architecture },
+      { label: "Contributing", external: true, href: DANI_DEX_LINKS.contributing },
+      { label: "Codex", external: true, href: DANI_DEX_LINKS.codex },
+      { label: "Claude Code", external: true, href: DANI_DEX_LINKS.claude },
     ],
   },
 ];

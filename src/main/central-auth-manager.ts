@@ -981,7 +981,7 @@ export function readCentralAuthApiUrl(value: string | undefined, fallback = "htt
   const url = new URL(value ?? fallback);
   const loopback = url.hostname === "127.0.0.1" || url.hostname === "localhost";
   if ((url.protocol !== "https:" && !(url.protocol === "http:" && loopback)) || url.pathname !== "/") {
-    throw new Error("OPENBOT_AUTH_API_URL must be HTTPS or an HTTP loopback origin.");
+    throw new Error("DANI_DEX_AUTH_API_URL must be HTTPS or an HTTP loopback origin.");
   }
   return url.origin;
 }

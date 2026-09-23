@@ -27,7 +27,7 @@ try {
     }
     await runImagegenSmoke();
   } else {
-    await writeFile(join(sharedRoot, "shared-seed.txt"), "OPENBOT_SHARED_SEED\n");
+    await writeFile(join(sharedRoot, "shared-seed.txt"), "DANI_DEX_SHARED_SEED\n");
     const completedProviders: AgentProvider[] = [];
     for (const provider of providers) {
       await runFilesystemSmoke(provider, completedProviders);
@@ -47,7 +47,7 @@ async function runFilesystemSmoke(provider: AgentProvider, completedProviders: A
   const persistenceResultPath = join(workspaceRoot, "persistence-result.txt");
   const sharedResultPath = join(sharedRoot, `${provider}-shared-result.txt`);
   await mkdir(workspaceRoot, { recursive: true });
-  await writeFile(workspaceSeedPath, `OPENBOT_${provider.toUpperCase()}_WORKSPACE_SEED\n`);
+  await writeFile(workspaceSeedPath, `DANI_DEX_${provider.toUpperCase()}_WORKSPACE_SEED\n`);
   await writeFile(deletePath, "DELETE_ME\n");
   await writeFile(temporaryPath, "RENAME_ME\n");
 
@@ -99,15 +99,15 @@ async function runFilesystemSmoke(provider: AgentProvider, completedProviders: A
             text: [
               "Use local system commands for every step.",
               `Run pwd and verify it prints ${workspaceRoot}.`,
-              `Run ls and grep to verify ${workspaceSeedPath} contains OPENBOT_${provider.toUpperCase()}_WORKSPACE_SEED.`,
-              `Run grep to verify ${join(sharedRoot, "shared-seed.txt")} contains OPENBOT_SHARED_SEED.`,
+              `Run ls and grep to verify ${workspaceSeedPath} contains DANI_DEX_${provider.toUpperCase()}_WORKSPACE_SEED.`,
+              `Run grep to verify ${join(sharedRoot, "shared-seed.txt")} contains DANI_DEX_SHARED_SEED.`,
               ...completedProviders.map(
                 (completedProvider) =>
-                  `Run grep to verify ${join(sharedRoot, `${completedProvider}-shared-result.txt`)} contains OPENBOT_${completedProvider.toUpperCase()}_SHARED_OK.`,
+                  `Run grep to verify ${join(sharedRoot, `${completedProvider}-shared-result.txt`)} contains DANI_DEX_${completedProvider.toUpperCase()}_SHARED_OK.`,
               ),
-              `Replace ${temporaryPath} with ${workspaceResultPath} using mv, then write exactly OPENBOT_${provider.toUpperCase()}_WORKSPACE_OK followed by one newline to it.`,
+              `Replace ${temporaryPath} with ${workspaceResultPath} using mv, then write exactly DANI_DEX_${provider.toUpperCase()}_WORKSPACE_OK followed by one newline to it.`,
               `Delete ${deletePath} using rm.`,
-              `Write exactly OPENBOT_${provider.toUpperCase()}_SHARED_OK followed by one newline to ${sharedResultPath}.`,
+              `Write exactly DANI_DEX_${provider.toUpperCase()}_SHARED_OK followed by one newline to ${sharedResultPath}.`,
               "Verify the results with local commands, then finish with a short confirmation.",
             ].join("\n"),
           },
@@ -132,9 +132,9 @@ async function runFilesystemSmoke(provider: AgentProvider, completedProviders: A
           {
             type: "text",
             text: [
-              `In this new turn, run grep to confirm ${workspaceResultPath} still contains OPENBOT_${provider.toUpperCase()}_WORKSPACE_OK.`,
-              `Run grep to confirm ${sharedResultPath} still contains OPENBOT_${provider.toUpperCase()}_SHARED_OK.`,
-              `Write exactly OPENBOT_${provider.toUpperCase()}_PERSISTENCE_OK followed by one newline to ${persistenceResultPath}.`,
+              `In this new turn, run grep to confirm ${workspaceResultPath} still contains DANI_DEX_${provider.toUpperCase()}_WORKSPACE_OK.`,
+              `Run grep to confirm ${sharedResultPath} still contains DANI_DEX_${provider.toUpperCase()}_SHARED_OK.`,
+              `Write exactly DANI_DEX_${provider.toUpperCase()}_PERSISTENCE_OK followed by one newline to ${persistenceResultPath}.`,
               "Finish with a short confirmation.",
             ].join("\n"),
           },
@@ -145,15 +145,15 @@ async function runFilesystemSmoke(provider: AgentProvider, completedProviders: A
     await persistenceCompletion;
 
     const workspaceResult = await readFile(workspaceResultPath, "utf8");
-    if (workspaceResult !== `OPENBOT_${provider.toUpperCase()}_WORKSPACE_OK\n`) {
+    if (workspaceResult !== `DANI_DEX_${provider.toUpperCase()}_WORKSPACE_OK\n`) {
       throw new Error(`${provider} wrote unexpected workspace contents.`);
     }
     const sharedResult = await readFile(sharedResultPath, "utf8");
-    if (sharedResult !== `OPENBOT_${provider.toUpperCase()}_SHARED_OK\n`) {
+    if (sharedResult !== `DANI_DEX_${provider.toUpperCase()}_SHARED_OK\n`) {
       throw new Error(`${provider} wrote unexpected shared contents.`);
     }
     const persistenceResult = await readFile(persistenceResultPath, "utf8");
-    if (persistenceResult !== `OPENBOT_${provider.toUpperCase()}_PERSISTENCE_OK\n`) {
+    if (persistenceResult !== `DANI_DEX_${provider.toUpperCase()}_PERSISTENCE_OK\n`) {
       throw new Error(`${provider} did not retain its workspace across turns.`);
     }
     await expectMissing(deletePath, `${provider} did not delete the requested workspace file.`);

@@ -214,9 +214,9 @@ describe("createDevInstanceRecord", () => {
       args: [],
       cwd: "/worktrees/two",
       env: {
-        OPENBOT_DEV_RENDERER_PORT: "5174",
-        OPENBOT_DEV_REMOTE_DEBUGGING_PORT: "9335",
-        OPENBOT_DEV_INSTANCE_ID: "5174",
+        DANI_DEX_DEV_RENDERER_PORT: "5174",
+        DANI_DEX_DEV_REMOTE_DEBUGGING_PORT: "9335",
+        DANI_DEX_DEV_INSTANCE_ID: "5174",
       },
     };
     expect(createDevInstanceRecord(spec, 77, 1_700)).toEqual({

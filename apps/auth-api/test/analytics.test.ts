@@ -13,7 +13,7 @@ import {
   shouldEnableLandingAnalytics,
 } from "../src/lib/analytics";
 import { GUIDES_COLLECTION } from "../src/lib/guides";
-import { OPENBOT_LINKS } from "../src/lib/landing-links";
+import { DANI_DEX_LINKS } from "../src/lib/landing-links";
 import { NEWS_COLLECTION } from "../src/lib/news";
 
 describe("landing analytics", () => {
@@ -25,7 +25,7 @@ describe("landing analytics", () => {
 
   it("tracks only allowlisted links and download metadata", () => {
     document.body.innerHTML = `
-      <header class="landing-header"><a id="contact" href="${OPENBOT_LINKS.contact}">Contact</a></header>
+      <header class="landing-header"><a id="contact" href="${DANI_DEX_LINKS.contact}">Contact</a></header>
       <section class="landing-download"><a id="mac" href="/download/macos">Download</a></section>
       <a id="private" href="https://private.example/secret">Private</a>
     `;

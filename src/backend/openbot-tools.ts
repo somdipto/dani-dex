@@ -19,7 +19,7 @@ interface DaniDexToolDefinition {
 }
 
 /** Shared declarations for Codex, Grok, and Claude. Service handlers enforce execution rules. */
-export const OPENBOT_TOOL_DEFINITIONS: readonly DaniDexToolDefinition[] = [
+export const DANI_DEX_TOOL_DEFINITIONS: readonly DaniDexToolDefinition[] = [
   ...CHANNEL_TOOL_DEFINITIONS,
   ...DATA_TOOL_DEFINITIONS,
   ...LOCAL_SKILL_TOOL_DEFINITIONS,
@@ -227,12 +227,12 @@ export const OPENBOT_TOOL_DEFINITIONS: readonly DaniDexToolDefinition[] = [
   },
 ];
 
-export const OPENBOT_DYNAMIC_TOOLS = {
+export const DANI_DEX_DYNAMIC_TOOLS = {
   type: "namespace",
   name: "openbot",
   description:
     "Attach files to the current response, keep structured data in the shared SQLite database, and work with persistent Dani-Dex teammates.",
-  tools: OPENBOT_TOOL_DEFINITIONS.map((definition) => ({
+  tools: DANI_DEX_TOOL_DEFINITIONS.map((definition) => ({
     type: "function" as const,
     name: definition.name,
     description: definition.description,

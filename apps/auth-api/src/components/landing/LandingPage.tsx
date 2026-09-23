@@ -2,7 +2,7 @@ import { AppLogo, PlatformLogo, ProviderLogo } from "@dani-dex/brand";
 import { Link } from "@tanstack/solid-router";
 import { onSettled } from "solid-js";
 import { landingAnalytics } from "../../lib/analytics";
-import { EXTERNAL_LINK_REL, OPENBOT_LINKS } from "../../lib/landing-links";
+import { DANI_DEX_LINKS, EXTERNAL_LINK_REL } from "../../lib/landing-links";
 import { Button } from "../ui/button";
 import { DownloadSection } from "./DownloadSection";
 import { HeroDownloadSelector } from "./HeroDownloadSelector";
@@ -44,7 +44,7 @@ export function LandingPage() {
             Plugins
           </Link>
           <Button
-            href={OPENBOT_LINKS.contact}
+            href={DANI_DEX_LINKS.contact}
             target="_blank"
             rel={EXTERNAL_LINK_REL}
             variant="secondary"
@@ -54,7 +54,7 @@ export function LandingPage() {
           >
             Contact
           </Button>
-          <Button href={OPENBOT_LINKS.download} variant="primary" size="sm" icon="download">
+          <Button href={DANI_DEX_LINKS.download} variant="primary" size="sm" icon="download">
             Download
           </Button>
         </nav>
@@ -108,7 +108,7 @@ export function LandingPage() {
             <div class="landing-actions t-stagger-line t-stagger-line--4">
               <HeroDownloadSelector />
               <Button
-                href={OPENBOT_LINKS.contact}
+                href={DANI_DEX_LINKS.contact}
                 target="_blank"
                 rel={EXTERNAL_LINK_REL}
                 variant="secondary"

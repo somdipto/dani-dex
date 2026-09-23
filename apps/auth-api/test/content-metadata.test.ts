@@ -21,7 +21,7 @@ import {
   pluginsIndexHead,
 } from "../src/lib/content-metadata";
 import { pluginIndexUrl, pluginUrl, SITE_PLUGINS } from "../src/lib/plugins";
-import { OPENBOT_SITE_URL } from "../src/lib/site-metadata";
+import { DANI_DEX_SITE_URL } from "../src/lib/site-metadata";
 import { contentRssXml, contentSitemapXml } from "../src/server/content-feed";
 
 type HeadMeta = ReturnType<typeof articleHead>["meta"][number];
@@ -59,7 +59,7 @@ const PREVIEW_SITE_URL = "https://pr-451-openbot-landing-preview.example.workers
 describe.each(COLLECTION_CASES)("%s head tags", (_name, collection) => {
   it("points each article at its own page and social card", () => {
     for (const article of collection.articles) {
-      const { meta, links } = articleHead(collection, article, OPENBOT_SITE_URL);
+      const { meta, links } = articleHead(collection, article, DANI_DEX_SITE_URL);
       const url = articleUrl(collection, article.slug);
 
       expect(links).toContainEqual({ rel: "canonical", href: url });
@@ -87,14 +87,14 @@ describe.each(COLLECTION_CASES)("%s head tags", (_name, collection) => {
 
   it("names the section the article belongs to", () => {
     const article = firstArticle(collection);
-    expect(propertyContent(articleHead(collection, article, OPENBOT_SITE_URL).meta, "article:section")).toBe(
+    expect(propertyContent(articleHead(collection, article, DANI_DEX_SITE_URL).meta, "article:section")).toBe(
       collection.name,
     );
   });
 
   it("describes the article to search engines as an Article", () => {
     const article = firstArticle(collection);
-    expect(structuredData(articleHead(collection, article, OPENBOT_SITE_URL).meta)).toMatchObject({
+    expect(structuredData(articleHead(collection, article, DANI_DEX_SITE_URL).meta)).toMatchObject({
       "@context": "https://schema.org",
       "@type": "Article",
       headline: article.title,
@@ -111,7 +111,7 @@ describe("plugin pages", () => {
   if (!plugin) throw new Error("The catalog must hold at least one plugin.");
 
   it("names its own address as the canonical one, on the site that served it", () => {
-    expect(pluginHead(plugin, OPENBOT_SITE_URL).links).toContainEqual({
+    expect(pluginHead(plugin, DANI_DEX_SITE_URL).links).toContainEqual({
       rel: "canonical",
       href: pluginUrl(plugin.slug),
     });
@@ -119,11 +119,11 @@ describe("plugin pages", () => {
       rel: "canonical",
       href: `${PREVIEW_SITE_URL}plugins/${plugin.slug}`,
     });
-    expect(pluginsIndexHead(OPENBOT_SITE_URL).links).toContainEqual({ rel: "canonical", href: pluginIndexUrl() });
+    expect(pluginsIndexHead(DANI_DEX_SITE_URL).links).toContainEqual({ rel: "canonical", href: pluginIndexUrl() });
   });
 
   it("describes the listing as the software it is", () => {
-    expect(pluginStructuredData(plugin, OPENBOT_SITE_URL)).toMatchObject({
+    expect(pluginStructuredData(plugin, DANI_DEX_SITE_URL)).toMatchObject({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       name: plugin.name,
@@ -138,7 +138,7 @@ describe("sitemap", () => {
   it("lists the home page, every index, every article and every plugin once", () => {
     const xml = contentSitemapXml();
     const urls = [
-      OPENBOT_SITE_URL,
+      DANI_DEX_SITE_URL,
       ...CONTENT_COLLECTIONS.flatMap((collection) => [
         collectionIndexUrl(collection),
         ...collection.articles.map((article) => articleUrl(collection, article.slug)),

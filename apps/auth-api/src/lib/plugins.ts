@@ -11,7 +11,7 @@
 import { SKILL_CATEGORY_LABELS } from "@dani-dex/contracts/ipc-skills";
 import { createPluginShareUrl } from "@dani-dex/contracts/plugin-links";
 import { PLUGIN_CATALOG_DETAILS, PLUGIN_CATALOG_INDEX, type PluginCatalogDetail } from "./plugin-catalog.generated";
-import { OPENBOT_SITE_URL } from "./site-metadata";
+import { DANI_DEX_SITE_URL } from "./site-metadata";
 
 /**
  * One listing as the pages read it: what the generator writes, and the two facts the index carries
@@ -99,11 +99,11 @@ export function pluginIconPath(slug: string, appId?: string): string {
   return appId ? `${path}?app=${encodeURIComponent(appId)}` : path;
 }
 
-export function pluginUrl(slug: string, siteUrl: string = OPENBOT_SITE_URL): string {
+export function pluginUrl(slug: string, siteUrl: string = DANI_DEX_SITE_URL): string {
   return new URL(pluginPath(slug), siteUrl).toString();
 }
 
-export function pluginIndexUrl(siteUrl: string = OPENBOT_SITE_URL): string {
+export function pluginIndexUrl(siteUrl: string = DANI_DEX_SITE_URL): string {
   return new URL(PLUGIN_INDEX_ROUTE, siteUrl).toString();
 }
 

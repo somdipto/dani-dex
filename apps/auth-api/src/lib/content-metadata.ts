@@ -17,10 +17,10 @@ import {
 } from "./content-collection";
 import { PLUGINS_DESCRIPTION, PLUGINS_TITLE, pluginIndexUrl, pluginUrl, type SitePlugin } from "./plugins";
 import {
-  OPENBOT_SITE_TITLE,
-  OPENBOT_SITE_URL,
-  OPENBOT_SOCIAL_IMAGE_ALT,
-  OPENBOT_SOCIAL_IMAGE_URL,
+  DANI_DEX_SITE_TITLE,
+  DANI_DEX_SITE_URL,
+  DANI_DEX_SOCIAL_IMAGE_ALT,
+  DANI_DEX_SOCIAL_IMAGE_URL,
 } from "./site-metadata";
 
 /** The generated social cards. Matches what `content-images.ts` writes. */
@@ -46,16 +46,16 @@ export function collectionIndexHead(collection: ContentCollection, siteUrl: stri
       { property: "og:url", content: url },
       { property: "og:title", content: collection.indexTitle },
       { property: "og:description", content: collection.indexDescription },
-      { property: "og:image", content: OPENBOT_SOCIAL_IMAGE_URL },
+      { property: "og:image", content: DANI_DEX_SOCIAL_IMAGE_URL },
       { property: "og:image:type", content: "image/png" },
       { property: "og:image:width", content: "1600" },
       { property: "og:image:height", content: "900" },
-      { property: "og:image:alt", content: OPENBOT_SOCIAL_IMAGE_ALT },
+      { property: "og:image:alt", content: DANI_DEX_SOCIAL_IMAGE_ALT },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: collection.indexTitle },
       { name: "twitter:description", content: collection.indexDescription },
-      { name: "twitter:image", content: OPENBOT_SOCIAL_IMAGE_URL },
-      { name: "twitter:image:alt", content: OPENBOT_SOCIAL_IMAGE_ALT },
+      { name: "twitter:image", content: DANI_DEX_SOCIAL_IMAGE_URL },
+      { name: "twitter:image:alt", content: DANI_DEX_SOCIAL_IMAGE_ALT },
     ],
     links: [
       { rel: "canonical", href: url },
@@ -142,8 +142,8 @@ export function articleStructuredData(collection: ContentCollection, article: Co
     publisher: {
       "@type": "Organization",
       name: "Dani-Dex",
-      url: OPENBOT_SITE_URL,
-      logo: { "@type": "ImageObject", url: OPENBOT_SOCIAL_IMAGE_URL },
+      url: DANI_DEX_SITE_URL,
+      logo: { "@type": "ImageObject", url: DANI_DEX_SOCIAL_IMAGE_URL },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     isAccessibleForFree: true,
@@ -155,7 +155,7 @@ export function collectionStructuredData(collection: ContentCollection, siteUrl:
   return {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: `${collection.name} — ${OPENBOT_SITE_TITLE}`,
+    name: `${collection.name} — ${DANI_DEX_SITE_TITLE}`,
     description: collection.indexDescription,
     url: collectionIndexUrl(collection, siteUrl),
     blogPost: collection.articles.map((article) => ({
@@ -187,13 +187,13 @@ export function pluginsIndexHead(siteUrl: string) {
       { property: "og:url", content: url },
       { property: "og:title", content: PLUGINS_TITLE },
       { property: "og:description", content: PLUGINS_DESCRIPTION },
-      { property: "og:image", content: OPENBOT_SOCIAL_IMAGE_URL },
-      { property: "og:image:alt", content: OPENBOT_SOCIAL_IMAGE_ALT },
+      { property: "og:image", content: DANI_DEX_SOCIAL_IMAGE_URL },
+      { property: "og:image:alt", content: DANI_DEX_SOCIAL_IMAGE_ALT },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: PLUGINS_TITLE },
       { name: "twitter:description", content: PLUGINS_DESCRIPTION },
-      { name: "twitter:image", content: OPENBOT_SOCIAL_IMAGE_URL },
-      { name: "twitter:image:alt", content: OPENBOT_SOCIAL_IMAGE_ALT },
+      { name: "twitter:image", content: DANI_DEX_SOCIAL_IMAGE_URL },
+      { name: "twitter:image:alt", content: DANI_DEX_SOCIAL_IMAGE_ALT },
     ],
     links: [{ rel: "canonical", href: url }],
   };
@@ -214,13 +214,13 @@ export function pluginHead(plugin: SitePlugin, siteUrl: string) {
       { property: "og:url", content: url },
       { property: "og:title", content: title },
       { property: "og:description", content: plugin.tagline },
-      { property: "og:image", content: OPENBOT_SOCIAL_IMAGE_URL },
-      { property: "og:image:alt", content: OPENBOT_SOCIAL_IMAGE_ALT },
+      { property: "og:image", content: DANI_DEX_SOCIAL_IMAGE_URL },
+      { property: "og:image:alt", content: DANI_DEX_SOCIAL_IMAGE_ALT },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: plugin.tagline },
-      { name: "twitter:image", content: OPENBOT_SOCIAL_IMAGE_URL },
-      { name: "twitter:image:alt", content: OPENBOT_SOCIAL_IMAGE_ALT },
+      { name: "twitter:image", content: DANI_DEX_SOCIAL_IMAGE_URL },
+      { name: "twitter:image:alt", content: DANI_DEX_SOCIAL_IMAGE_ALT },
     ],
     links: [{ rel: "canonical", href: url }],
   };
@@ -240,7 +240,7 @@ export function pluginStructuredData(plugin: SitePlugin, siteUrl: string) {
     applicationCategory: "DeveloperApplication",
     softwareVersion: plugin.version,
     author: { "@type": "Organization", name: plugin.creatorName },
-    isPartOf: { "@type": "SoftwareApplication", name: "Dani-Dex", url: OPENBOT_SITE_URL },
+    isPartOf: { "@type": "SoftwareApplication", name: "Dani-Dex", url: DANI_DEX_SITE_URL },
     mainEntityOfPage: { "@type": "WebPage", "@id": pluginUrl(plugin.slug, siteUrl) },
     url: pluginUrl(plugin.slug, siteUrl),
   };

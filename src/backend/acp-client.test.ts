@@ -42,7 +42,7 @@ afterEach(async () => {
 const FAKE_AGENT = `#!/usr/bin/env node
 const fs = require("node:fs");
 const NL = String.fromCharCode(10);
-const envLog = process.env.OPENBOT_FAKE_ACP_ENV_LOG;
+const envLog = process.env.DANI_DEX_FAKE_ACP_ENV_LOG;
 if (envLog) {
   fs.appendFileSync(
     envLog,
@@ -58,8 +58,8 @@ let buffer = "";
 // An agent of the second kind: no \`models\` in \`session/new\`, one \`model\` config option, and a
 // \`thought_level\` option that exists only while the session is on a model that reasons. OpenCode
 // works this way, and \`minimal\` next to \`low\` is its own naming.
-const FAILING_MODEL = process.env.OPENBOT_FAKE_ACP_CONFIG_FAIL ?? null;
-const HANGING_MODEL = process.env.OPENBOT_FAKE_ACP_CONFIG_HANG ?? null;
+const FAILING_MODEL = process.env.DANI_DEX_FAKE_ACP_CONFIG_FAIL ?? null;
+const HANGING_MODEL = process.env.DANI_DEX_FAKE_ACP_CONFIG_HANG ?? null;
 const CONFIG_MODELS = [
   ...(FAILING_MODEL ? [FAILING_MODEL] : []),
   "agent/thinker",
@@ -109,24 +109,24 @@ process.stdin.on("data", (chunk) => {
 function handle(message) {
   if (typeof message.id === "undefined") return;
   if (message.method === "initialize") {
-    const agentCapabilities = process.env.OPENBOT_FAKE_ACP_LOAD_SESSION === "1" ? { loadSession: true } : {};
+    const agentCapabilities = process.env.DANI_DEX_FAKE_ACP_LOAD_SESSION === "1" ? { loadSession: true } : {};
     write({ jsonrpc: "2.0", id: message.id, result: { protocolVersion: 1, agentCapabilities } });
     return;
   }
   if (message.method === "session/load") {
-    const loadLog = process.env.OPENBOT_FAKE_ACP_LOAD_LOG;
+    const loadLog = process.env.DANI_DEX_FAKE_ACP_LOAD_LOG;
     if (loadLog) fs.appendFileSync(loadLog, JSON.stringify(message.params) + NL);
     write({ jsonrpc: "2.0", id: message.id, result: {} });
     return;
   }
   if (message.method === "session/prompt") {
-    const promptLog = process.env.OPENBOT_FAKE_ACP_PROMPT_LOG;
+    const promptLog = process.env.DANI_DEX_FAKE_ACP_PROMPT_LOG;
     if (promptLog) fs.appendFileSync(promptLog, JSON.stringify(message.params) + NL);
     write({ jsonrpc: "2.0", id: message.id, result: { stopReason: "end_turn" } });
     return;
   }
   if (message.method === "session/set_config_option") {
-    const configLog = process.env.OPENBOT_FAKE_ACP_CONFIG_LOG;
+    const configLog = process.env.DANI_DEX_FAKE_ACP_CONFIG_LOG;
     if (configLog) fs.appendFileSync(configLog, JSON.stringify(message.params) + NL);
     // No answer at all, which is what a hung agent gives.
     if (message.params.value === HANGING_MODEL) return;
@@ -139,18 +139,18 @@ function handle(message) {
     return;
   }
   if (message.method === "session/new") {
-    const sessionLog = process.env.OPENBOT_FAKE_ACP_SESSION_LOG;
+    const sessionLog = process.env.DANI_DEX_FAKE_ACP_SESSION_LOG;
     if (sessionLog) fs.appendFileSync(sessionLog, JSON.stringify(message.params) + NL);
-    if (process.env.OPENBOT_FAKE_ACP_REJECT_KEY === "1") {
+    if (process.env.DANI_DEX_FAKE_ACP_REJECT_KEY === "1") {
       write({ jsonrpc: "2.0", id: message.id, error: { code: -32000, message: "Invalid api key." } });
       return;
     }
-    if (process.env.OPENBOT_FAKE_ACP_CONFIG_MODELS === "1") {
+    if (process.env.DANI_DEX_FAKE_ACP_CONFIG_MODELS === "1") {
       selected = CONFIG_MODELS[0];
       write({ jsonrpc: "2.0", id: message.id, result: { sessionId: "session-1", configOptions: configOptions() } });
       return;
     }
-    if (process.env.OPENBOT_FAKE_ACP_EMPTY_MODELS === "1") {
+    if (process.env.DANI_DEX_FAKE_ACP_EMPTY_MODELS === "1") {
       write({ jsonrpc: "2.0", id: message.id, result: { sessionId: "session-1" } });
       return;
     }
@@ -254,7 +254,7 @@ function startOpencode(
     requestTimeoutMs?: number;
   } = {},
 ): AgentClient {
-  vi.stubEnv("OPENBOT_FAKE_ACP_ENV_LOG", envLog);
+  vi.stubEnv("DANI_DEX_FAKE_ACP_ENV_LOG", envLog);
   const driver = requireProviderDriver("opencode");
   const context = {
     apiKey,
@@ -343,7 +343,7 @@ describe("OpenCode ACP environment", () => {
 
   it("reports no account when OpenCode rejects the key", async () => {
     const fake = await createFakeOpencodeAgent("system");
-    vi.stubEnv("OPENBOT_FAKE_ACP_REJECT_KEY", "1");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_REJECT_KEY", "1");
     const client = startOpencode(fake.cli, () => "not-a-key", fake.envLog);
 
     await client.request("initialize", {}, decodeRecordResponse);
@@ -411,7 +411,7 @@ describe("OpenCode ACP environment", () => {
 
   it("refuses to start on an OpenCode that lists no model at all", async () => {
     const fake = await createFakeOpencodeAgent("managed");
-    vi.stubEnv("OPENBOT_FAKE_ACP_EMPTY_MODELS", "1");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_EMPTY_MODELS", "1");
     const client = startOpencode(fake.cli, () => null, fake.envLog);
 
     // Not an authentication failure, so it is not softened into "sign in": an empty catalog is a CLI
@@ -424,7 +424,7 @@ describe("OpenCode ACP environment", () => {
 
   it("refuses the prompt when the endpoint was removed while the turn was prepared", async () => {
     const fake = await createFakeOpencodeAgent("system");
-    vi.stubEnv("OPENBOT_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
     // The endpoint is still saved while the thread is opened, and gone when the prompt would leave.
     let served = true;
     const client = startOpencode(fake.cli, () => null, fake.envLog, { servesModel: () => served });
@@ -454,8 +454,8 @@ describe("OpenCode ACP environment", () => {
 describe("OpenCode ACP reasoning efforts", () => {
   it("reports the efforts of each model, not the efforts of the model the session opened on", async () => {
     const fake = await createFakeOpencodeAgent("system");
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_MODELS", "1");
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_LOG", fake.configLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_MODELS", "1");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_LOG", fake.configLog);
     const client = startOpencode(fake.cli, () => null, fake.envLog);
 
     const models = await client.request("model/list", {}, decodeModelListResponse);
@@ -484,10 +484,10 @@ describe("OpenCode ACP reasoning efforts", () => {
 
   it("keeps reading the rest of the catalog when one model refuses to be selected", async () => {
     const fake = await createFakeOpencodeAgent("system");
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_MODELS", "1");
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_LOG", fake.configLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_MODELS", "1");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_LOG", fake.configLog);
     // The session opens on this model, and the agent rejects every attempt to select it.
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_FAIL", "agent/broken");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_FAIL", "agent/broken");
     const client = startOpencode(fake.cli, () => null, fake.envLog);
 
     const models = await client.request("model/list", {}, decodeModelListResponse);
@@ -508,10 +508,10 @@ describe("OpenCode ACP reasoning efforts", () => {
 
   it("returns the catalog when a model's probe never answers", async () => {
     const fake = await createFakeOpencodeAgent("system");
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_MODELS", "1");
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_LOG", fake.configLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_MODELS", "1");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_LOG", fake.configLog);
     // The agent accepts the selection of this model and then says nothing more about it.
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_HANG", "agent/silent");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_HANG", "agent/silent");
     const client = startOpencode(fake.cli, () => null, fake.envLog, { requestTimeoutMs: 4_000 });
 
     const models = await client.request("model/list", {}, decodeModelListResponse);
@@ -535,8 +535,8 @@ describe("OpenCode ACP reasoning efforts", () => {
 
   it("sends the agent's own low effort, not the lowest effort the model has", async () => {
     const fake = await createFakeOpencodeAgent("system");
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_MODELS", "1");
-    vi.stubEnv("OPENBOT_FAKE_ACP_CONFIG_LOG", fake.configLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_MODELS", "1");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_CONFIG_LOG", fake.configLog);
     const client = startOpencode(fake.cli, () => null, fake.envLog);
 
     await client.request(
@@ -558,7 +558,7 @@ describe("OpenCode ACP MCP servers", () => {
   it("sends the enabled servers as ACP name/value pairs", async () => {
     const fake = await createFakeOpencodeAgent("system");
     const sessionLog = join(tmpdir(), `openbot-acp-session-${Date.now()}.ndjson`);
-    vi.stubEnv("OPENBOT_FAKE_ACP_SESSION_LOG", sessionLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_SESSION_LOG", sessionLog);
     const configs: McpServerConfig[] = [
       {
         id: "mcp-1",
@@ -628,7 +628,7 @@ describe("OpenCode MCP sign-in", () => {
   it("gives the session the token Dani-Dex minted for an http server", async () => {
     const fake = await createFakeOpencodeAgent();
     const sessionLog = join(tmpdir(), `openbot-acp-signin-${Date.now()}.ndjson`);
-    vi.stubEnv("OPENBOT_FAKE_ACP_SESSION_LOG", sessionLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_SESSION_LOG", sessionLog);
     const config: McpServerConfig = {
       id: "mcp-1",
       name: "Signed in",
@@ -667,8 +667,8 @@ describe("OpenCode MCP sign-in", () => {
 describe("OpenCode ACP session loading", () => {
   it("answers a read for a session this process does not hold by loading it", async () => {
     const fake = await createFakeOpencodeAgent();
-    vi.stubEnv("OPENBOT_FAKE_ACP_LOAD_SESSION", "1");
-    vi.stubEnv("OPENBOT_FAKE_ACP_LOAD_LOG", fake.loadLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_LOAD_SESSION", "1");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_LOAD_LOG", fake.loadLog);
     const client = startOpencode(fake.cli, () => null, fake.envLog);
 
     // What boot recovery sends after a restart: a session id from the database that no turn has
@@ -685,8 +685,8 @@ describe("OpenCode ACP session loading", () => {
 
   it("loads a session once when a read and a resume ask for it together", async () => {
     const fake = await createFakeOpencodeAgent();
-    vi.stubEnv("OPENBOT_FAKE_ACP_LOAD_SESSION", "1");
-    vi.stubEnv("OPENBOT_FAKE_ACP_LOAD_LOG", fake.loadLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_LOAD_SESSION", "1");
+    vi.stubEnv("DANI_DEX_FAKE_ACP_LOAD_LOG", fake.loadLog);
     const client = startOpencode(fake.cli, () => null, fake.envLog);
     // The startup race: the history read and the first drain reach the same stored session id in
     // the same tick. Two loads would leave two threads and two MCP bridge sessions under one id.
@@ -704,7 +704,7 @@ describe("OpenCode ACP session loading", () => {
 
   it("reports a session an agent cannot load as missing instead of asking for it", async () => {
     const fake = await createFakeOpencodeAgent();
-    vi.stubEnv("OPENBOT_FAKE_ACP_LOAD_LOG", fake.loadLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_LOAD_LOG", fake.loadLog);
     const client = startOpencode(fake.cli, () => null, fake.envLog);
 
     // An agent that does not advertise `loadSession` cannot give the session back. The read answers

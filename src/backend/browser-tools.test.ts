@@ -4,7 +4,7 @@ import { browserInputAction } from "./browser-tool-actions";
 import {
   BROWSER_DYNAMIC_TOOLS,
   BROWSER_TOOL_DEFINITIONS,
-  OPENBOT_BROWSER_NAMESPACE,
+  DANI_DEX_BROWSER_NAMESPACE,
   parseBrowserToolArguments,
   parseBrowserToolCall,
 } from "./browser-tools";
@@ -14,7 +14,7 @@ describe("browser tool catalog", () => {
     const names = BROWSER_TOOL_DEFINITIONS.map((definition) => definition.name);
     const dynamicNames = BROWSER_DYNAMIC_TOOLS[0].tools.map((definition) => definition.name);
 
-    expect(BROWSER_DYNAMIC_TOOLS[0].name).toBe(OPENBOT_BROWSER_NAMESPACE);
+    expect(BROWSER_DYNAMIC_TOOLS[0].name).toBe(DANI_DEX_BROWSER_NAMESPACE);
     expect(dynamicNames).toEqual(names);
     expect(new Set(names).size).toBe(names.length);
     expect(names).toEqual(

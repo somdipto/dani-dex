@@ -58,18 +58,18 @@ import { TeardownRegistry } from "./teardown-registry";
 const logger = createDaniDexLogger("main");
 
 const commandLineUserDataDirectory = app.commandLine.getSwitchValue("user-data-dir").trim();
-const developmentProfile = !app.isPackaged ? readDevelopmentProfile(process.env.OPENBOT_DEV_PROFILE) : null;
+const developmentProfile = !app.isPackaged ? readDevelopmentProfile(process.env.DANI_DEX_DEV_PROFILE) : null;
 const developmentRemoteRole =
   !app.isPackaged &&
-  (process.env.OPENBOT_DEV_REMOTE_ROLE === "host" || process.env.OPENBOT_DEV_REMOTE_ROLE === "client")
-    ? process.env.OPENBOT_DEV_REMOTE_ROLE
+  (process.env.DANI_DEX_DEV_REMOTE_ROLE === "host" || process.env.DANI_DEX_DEV_REMOTE_ROLE === "client")
+    ? process.env.DANI_DEX_DEV_REMOTE_ROLE
     : null;
-const developmentTestClientEnabled = !app.isPackaged && process.env.OPENBOT_DEV_TEST_CLIENT_ENABLED === "1";
+const developmentTestClientEnabled = !app.isPackaged && process.env.DANI_DEX_DEV_TEST_CLIENT_ENABLED === "1";
 const developmentInviteLinkOptions = {
   allowLocalDevelopmentApiUrl: developmentRemoteRole !== null,
 };
 const developmentRemoteDebuggingPort = !app.isPackaged
-  ? readDevelopmentRemoteDebuggingPort(process.env.OPENBOT_DEV_REMOTE_DEBUGGING_PORT)
+  ? readDevelopmentRemoteDebuggingPort(process.env.DANI_DEX_DEV_REMOTE_DEBUGGING_PORT)
   : null;
 if (developmentRemoteDebuggingPort) {
   app.commandLine.appendSwitch("remote-debugging-port", developmentRemoteDebuggingPort);
@@ -84,7 +84,7 @@ if (commandLineUserDataDirectory) {
       app.getPath("appData"),
       developmentUserDataName(
         developmentProfile ?? "app",
-        readDevelopmentInstanceId(process.env.OPENBOT_DEV_INSTANCE_ID),
+        readDevelopmentInstanceId(process.env.DANI_DEX_DEV_INSTANCE_ID),
       ),
     ),
   );
@@ -93,7 +93,7 @@ app.setName("Dani-Dex");
 app.enableSandbox();
 if (process.platform === "win32") app.setAppUserModelId("app.openbot.desktop");
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
-const appVariant = readAppVariant(process.env.OPENBOT_APP_VARIANT, app.isPackaged);
+const appVariant = readAppVariant(process.env.DANI_DEX_APP_VARIANT, app.isPackaged);
 if (!app.isPackaged) guardDevelopmentOutput([process.stdout, process.stderr], () => app.quit());
 const appIconPath = resolveAppIconPath({
   variant: appVariant,

@@ -39,27 +39,27 @@ export const EMPTY_LAYOUT = {
 };
 
 const FAKE_RUNTIME_ENV_VARS = [
-  "OPENBOT_FAKE_CODEX_LOG",
-  "OPENBOT_FAKE_AGENT_TOOL",
-  "OPENBOT_FAKE_AGENT_TOOL_PATHS",
-  "OPENBOT_FAKE_AGENT_TOOL_CALLS",
-  "OPENBOT_FAKE_THREAD_READ_DELAY",
-  "OPENBOT_FAKE_AUTO_COMPLETE",
-  "OPENBOT_FAKE_CONTEXT_USAGE",
-  "OPENBOT_FAKE_COMPACTION_ERROR",
-  "OPENBOT_FAKE_COMPACTION_DELAY",
-  "OPENBOT_FAKE_ARCHIVED_THREAD",
-  "OPENBOT_FAKE_TURN_START_RESPONSE_DELAY",
-  "OPENBOT_FAKE_WARNING",
-  "OPENBOT_FAKE_CLAUDE_LOGIN_LOG",
-  "OPENBOT_FAKE_CODEX_CONFIG",
+  "DANI_DEX_FAKE_CODEX_LOG",
+  "DANI_DEX_FAKE_AGENT_TOOL",
+  "DANI_DEX_FAKE_AGENT_TOOL_PATHS",
+  "DANI_DEX_FAKE_AGENT_TOOL_CALLS",
+  "DANI_DEX_FAKE_THREAD_READ_DELAY",
+  "DANI_DEX_FAKE_AUTO_COMPLETE",
+  "DANI_DEX_FAKE_CONTEXT_USAGE",
+  "DANI_DEX_FAKE_COMPACTION_ERROR",
+  "DANI_DEX_FAKE_COMPACTION_DELAY",
+  "DANI_DEX_FAKE_ARCHIVED_THREAD",
+  "DANI_DEX_FAKE_TURN_START_RESPONSE_DELAY",
+  "DANI_DEX_FAKE_WARNING",
+  "DANI_DEX_FAKE_CLAUDE_LOGIN_LOG",
+  "DANI_DEX_FAKE_CODEX_CONFIG",
 ] as const;
 
 const PROVIDER_PATH_ENV_VARS = [
-  "OPENBOT_CODEX_PATH",
-  "OPENBOT_CLAUDE_PATH",
-  "OPENBOT_GROK_PATH",
-  "OPENBOT_OPENCODE_PATH",
+  "DANI_DEX_CODEX_PATH",
+  "DANI_DEX_CLAUDE_PATH",
+  "DANI_DEX_GROK_PATH",
+  "DANI_DEX_OPENCODE_PATH",
 ] as const;
 
 /** Provider paths as they were before any shard touched them. */
@@ -73,17 +73,17 @@ const originalProviderPaths = new Map(PROVIDER_PATH_ENV_VARS.map((name) => [name
 export async function startAgentTestFixture(): Promise<{ root: string; logPath: string }> {
   const root = await mkdtemp(join(tmpdir(), "openbot-agent-test-"));
   const logPath = join(root, "protocol.jsonl");
-  process.env.OPENBOT_FAKE_CODEX_LOG = logPath;
-  process.env.OPENBOT_CODEX_PATH = await createFakeCodex(root);
-  process.env.OPENBOT_CLAUDE_PATH = join(root, "missing-claude");
-  process.env.OPENBOT_GROK_PATH = join(root, "missing-grok");
-  process.env.OPENBOT_OPENCODE_PATH = join(root, "missing-opencode");
+  process.env.DANI_DEX_FAKE_CODEX_LOG = logPath;
+  process.env.DANI_DEX_CODEX_PATH = await createFakeCodex(root);
+  process.env.DANI_DEX_CLAUDE_PATH = join(root, "missing-claude");
+  process.env.DANI_DEX_GROK_PATH = join(root, "missing-grok");
+  process.env.DANI_DEX_OPENCODE_PATH = join(root, "missing-opencode");
   return { root, logPath };
 }
 
 /**
  * Reverses startAgentTestFixture: stops the service, restores real timers and
- * the original provider paths, clears every OPENBOT_FAKE_* variable a test may
+ * the original provider paths, clears every DANI_DEX_FAKE_* variable a test may
  * have set, and removes the temporary root.
  */
 export async function stopAgentTestFixture(root: string, service: AgentService | null): Promise<void> {
@@ -512,12 +512,12 @@ if (process.argv.includes("--version")) {
   process.stdout.write("codex-cli 0.144.1\\n");
   process.exit(0);
 }
-const log = process.env.OPENBOT_FAKE_CODEX_LOG;
+const log = process.env.DANI_DEX_FAKE_CODEX_LOG;
 let buffer = "";
 let threadCounter = 0;
 let turnCounter = 0;
 const turns = new Map();
-let archivedThread = process.env.OPENBOT_FAKE_ARCHIVED_THREAD === "1";
+let archivedThread = process.env.DANI_DEX_FAKE_ARCHIVED_THREAD === "1";
 process.stdout.on("error", (error) => {
   if (error.code === "EPIPE") process.exit(0);
   throw error;
@@ -549,7 +549,7 @@ process.stdin.on("data", (chunk) => {
       // The sweep that turns off the servers of the user's own Codex file reads this before every
       // thread starts. An unanswered request holds that start open until the request times out,
       // which is the failure this fake exists to make visible rather than hide.
-      if (message.method === "config/read") write({ id: message.id, result: JSON.parse(process.env.OPENBOT_FAKE_CODEX_CONFIG || '{"config":{}}') });
+      if (message.method === "config/read") write({ id: message.id, result: JSON.parse(process.env.DANI_DEX_FAKE_CODEX_CONFIG || '{"config":{}}') });
       if (message.method === "thread/start") {
         const threadId = "thread-" + (++threadCounter);
         write({ id: message.id, result: { thread: { id: threadId, turns: [] } } });
@@ -568,7 +568,7 @@ process.stdin.on("data", (chunk) => {
       if (message.method === "thread/read") {
         const capturedTurns = JSON.parse(JSON.stringify([...turns.values()]));
         const respond = () => write({ id: message.id, result: { thread: { id: message.params.threadId, turns: capturedTurns } } });
-        const delay = Number(process.env.OPENBOT_FAKE_THREAD_READ_DELAY || 0);
+        const delay = Number(process.env.DANI_DEX_FAKE_THREAD_READ_DELAY || 0);
         if (delay > 0) setTimeout(respond, delay);
         else respond();
       }
@@ -576,23 +576,23 @@ process.stdin.on("data", (chunk) => {
         const turnId = "turn-" + (++turnCounter);
         turns.set(turnId, { id: turnId, status: "inProgress", items: [] });
         const respondToStart = () => write({ id: message.id, result: { turn: { id: turnId, status: "inProgress", items: [] } } });
-        const startResponseDelay = Number(process.env.OPENBOT_FAKE_TURN_START_RESPONSE_DELAY || 0);
+        const startResponseDelay = Number(process.env.DANI_DEX_FAKE_TURN_START_RESPONSE_DELAY || 0);
         if (startResponseDelay > 0) setTimeout(respondToStart, startResponseDelay);
         else respondToStart();
         write({ method: "turn/started", params: { threadId: message.params.threadId, turn: { id: turnId } } });
-        if (process.env.OPENBOT_FAKE_WARNING) {
-          write({ method: "warning", params: { threadId: message.params.threadId, message: process.env.OPENBOT_FAKE_WARNING } });
+        if (process.env.DANI_DEX_FAKE_WARNING) {
+          write({ method: "warning", params: { threadId: message.params.threadId, message: process.env.DANI_DEX_FAKE_WARNING } });
         }
-        if (process.env.OPENBOT_FAKE_CONTEXT_USAGE) {
-          const totalTokens = Number(process.env.OPENBOT_FAKE_CONTEXT_USAGE);
+        if (process.env.DANI_DEX_FAKE_CONTEXT_USAGE) {
+          const totalTokens = Number(process.env.DANI_DEX_FAKE_CONTEXT_USAGE);
           write({ method: "thread/tokenUsage/updated", params: { threadId: message.params.threadId, turnId, tokenUsage: { total: { totalTokens }, last: { totalTokens }, modelContextWindow: 100000 } } });
         }
         write({ method: "item/agentMessage/delta", params: { threadId: message.params.threadId, turnId, itemId: "message-" + turnId, delta: "Streaming" } });
-        if (process.env.OPENBOT_FAKE_AGENT_TOOL === "1" && turnCounter === 1) {
-          setTimeout(() => write({ id: "agent-tool-1", method: "item/tool/call", params: { threadId: message.params.threadId, turnId, callId: "call-1", namespace: "openbot", tool: "send_message", arguments: { recipientAgentIds: ["sales-outbound", "inbox-manager"], text: "Please prepare your reports.", paths: JSON.parse(process.env.OPENBOT_FAKE_AGENT_TOOL_PATHS || "[]") } } }), 30);
+        if (process.env.DANI_DEX_FAKE_AGENT_TOOL === "1" && turnCounter === 1) {
+          setTimeout(() => write({ id: "agent-tool-1", method: "item/tool/call", params: { threadId: message.params.threadId, turnId, callId: "call-1", namespace: "openbot", tool: "send_message", arguments: { recipientAgentIds: ["sales-outbound", "inbox-manager"], text: "Please prepare your reports.", paths: JSON.parse(process.env.DANI_DEX_FAKE_AGENT_TOOL_PATHS || "[]") } } }), 30);
         }
-        if (process.env.OPENBOT_FAKE_AGENT_TOOL_CALLS && turnCounter === 1) {
-          const calls = JSON.parse(process.env.OPENBOT_FAKE_AGENT_TOOL_CALLS);
+        if (process.env.DANI_DEX_FAKE_AGENT_TOOL_CALLS && turnCounter === 1) {
+          const calls = JSON.parse(process.env.DANI_DEX_FAKE_AGENT_TOOL_CALLS);
           calls.forEach((call, index) => setTimeout(() => write({
             id: "agent-tool-configured-" + index,
             method: "item/tool/call",
@@ -606,9 +606,9 @@ process.stdin.on("data", (chunk) => {
             },
           }), 30 + index * 30));
         }
-        if (process.env.OPENBOT_FAKE_AUTO_COMPLETE) {
+        if (process.env.DANI_DEX_FAKE_AUTO_COMPLETE) {
           setTimeout(() => {
-            const text = process.env.OPENBOT_FAKE_AUTO_COMPLETE;
+            const text = process.env.DANI_DEX_FAKE_AUTO_COMPLETE;
             const item = { type: "agentMessage", id: "message-" + turnId, text, phase: "final_answer" };
             const turn = turns.get(turnId);
             if (turn) {
@@ -621,7 +621,7 @@ process.stdin.on("data", (chunk) => {
         }
       }
       if (message.method === "thread/compact/start") {
-        if (process.env.OPENBOT_FAKE_COMPACTION_ERROR === "1") {
+        if (process.env.DANI_DEX_FAKE_COMPACTION_ERROR === "1") {
           write({ id: message.id, error: { code: -32601, message: "Compaction unavailable" } });
           newline = buffer.indexOf("\\n");
           continue;
@@ -633,7 +633,7 @@ process.stdin.on("data", (chunk) => {
         write({ method: "item/started", params: { threadId: message.params.threadId, turnId, item } });
         write({ method: "item/completed", params: { threadId: message.params.threadId, turnId, item } });
         const finish = () => write({ method: "turn/completed", params: { threadId: message.params.threadId, turn: { id: turnId, status: "completed" } } });
-        const compactionDelay = Number(process.env.OPENBOT_FAKE_COMPACTION_DELAY || 0);
+        const compactionDelay = Number(process.env.DANI_DEX_FAKE_COMPACTION_DELAY || 0);
         if (compactionDelay > 0) setTimeout(finish, compactionDelay);
         else finish();
       }
@@ -723,8 +723,8 @@ export async function createPendingFakeClaude(directory: string): Promise<string
 if [ "$1" = "--version" ]; then
   printf '%s\\n' '2.1.246 (Claude Code)'
 elif [ "$1" = "auth" ] && [ "$2" = "login" ]; then
-  printf '%s\\n' 'started' >> "$OPENBOT_FAKE_CLAUDE_LOGIN_LOG"
-  trap 'printf "%s\\n" "stopped" >> "$OPENBOT_FAKE_CLAUDE_LOGIN_LOG"; exit 143' TERM INT
+  printf '%s\\n' 'started' >> "$DANI_DEX_FAKE_CLAUDE_LOGIN_LOG"
+  trap 'printf "%s\\n" "stopped" >> "$DANI_DEX_FAKE_CLAUDE_LOGIN_LOG"; exit 143' TERM INT
   while :; do sleep 0.1; done
 elif [ "$1" = "auth" ]; then
   printf '%s' '{"loggedIn":false}'

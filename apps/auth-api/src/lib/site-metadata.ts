@@ -3,16 +3,16 @@
 // resolve an `?url` specifier. That is why the font asset arrives as an argument
 // from the root route instead of as an import here.
 
-export const OPENBOT_SITE_URL = "https://openbot.run/";
-export const OPENBOT_SITE_TITLE = "Dani-Dex: AI teammates for real work";
-export const OPENBOT_SITE_DESCRIPTION =
+export const DANI_DEX_SITE_URL = "https://openbot.run/";
+export const DANI_DEX_SITE_TITLE = "Dani-Dex: AI teammates for real work";
+export const DANI_DEX_SITE_DESCRIPTION =
   "Run Codex and Claude side by side as persistent AI teammates, each with its own workspace, queue, and context.";
-export const OPENBOT_SOCIAL_IMAGE_URL = `${OPENBOT_SITE_URL}openbot-social.png`;
-export const OPENBOT_SOCIAL_IMAGE_ALT = "Meet Dani-Dex on a dark grid background";
+export const DANI_DEX_SOCIAL_IMAGE_URL = `${DANI_DEX_SITE_URL}openbot-social.png`;
+export const DANI_DEX_SOCIAL_IMAGE_ALT = "Meet Dani-Dex on a dark grid background";
 
 // The hosts production answers on. Both serve the same pages, and those pages go by
 // openbot.run.
-const OPENBOT_PRODUCTION_HOSTS = new Set(["openbot.run", "api.openbot.run"]);
+const DANI_DEX_PRODUCTION_HOSTS = new Set(["openbot.run", "api.openbot.run"]);
 
 /**
  * The site that the head tags of a page served at `pageUrl` name. Social sites fetch
@@ -22,19 +22,19 @@ const OPENBOT_PRODUCTION_HOSTS = new Set(["openbot.run", "api.openbot.run"]);
  * `noindex`, so a preview canonical does not compete with production.
  */
 export function siteUrlForPage(pageUrl: URL): string {
-  return OPENBOT_PRODUCTION_HOSTS.has(pageUrl.hostname) ? OPENBOT_SITE_URL : `${pageUrl.origin}/`;
+  return DANI_DEX_PRODUCTION_HOSTS.has(pageUrl.hostname) ? DANI_DEX_SITE_URL : `${pageUrl.origin}/`;
 }
 
-export const OPENBOT_SOFTWARE_APPLICATION = {
+export const DANI_DEX_SOFTWARE_APPLICATION = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "Dani-Dex",
-  url: OPENBOT_SITE_URL,
-  image: OPENBOT_SOCIAL_IMAGE_URL,
-  description: OPENBOT_SITE_DESCRIPTION,
+  url: DANI_DEX_SITE_URL,
+  image: DANI_DEX_SOCIAL_IMAGE_URL,
+  description: DANI_DEX_SITE_DESCRIPTION,
   applicationCategory: "DeveloperApplication",
   operatingSystem: ["macOS 13 or later", "Windows 10 or later"],
-  downloadUrl: [`${OPENBOT_SITE_URL}download/macos`, `${OPENBOT_SITE_URL}download/windows`],
+  downloadUrl: [`${DANI_DEX_SITE_URL}download/macos`, `${DANI_DEX_SITE_URL}download/windows`],
   isAccessibleForFree: true,
   offers: {
     "@type": "Offer",
@@ -44,7 +44,7 @@ export const OPENBOT_SOFTWARE_APPLICATION = {
   sameAs: ["https://github.com/nightly-labs/openbot"],
 } as const;
 
-export const OPENBOT_SECURITY_HEADERS = {
+export const DANI_DEX_SECURITY_HEADERS = {
   "Permissions-Policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -65,8 +65,8 @@ export function daniDexRootHead(interLatinFont: string) {
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: OPENBOT_SITE_TITLE },
-      { name: "description", content: OPENBOT_SITE_DESCRIPTION },
+      { title: DANI_DEX_SITE_TITLE },
+      { name: "description", content: DANI_DEX_SITE_DESCRIPTION },
       { name: "application-name", content: "Dani-Dex" },
       { name: "color-scheme", content: "dark" },
       { name: "theme-color", content: "#1a1a1a" },
@@ -90,24 +90,24 @@ export function daniDexRootHead(interLatinFont: string) {
 export function daniDexHomeHead() {
   return {
     meta: [
-      { "script:ld+json": OPENBOT_SOFTWARE_APPLICATION },
+      { "script:ld+json": DANI_DEX_SOFTWARE_APPLICATION },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Dani-Dex" },
       { property: "og:locale", content: "en_US" },
-      { property: "og:url", content: OPENBOT_SITE_URL },
-      { property: "og:title", content: OPENBOT_SITE_TITLE },
-      { property: "og:description", content: OPENBOT_SITE_DESCRIPTION },
-      { property: "og:image", content: OPENBOT_SOCIAL_IMAGE_URL },
+      { property: "og:url", content: DANI_DEX_SITE_URL },
+      { property: "og:title", content: DANI_DEX_SITE_TITLE },
+      { property: "og:description", content: DANI_DEX_SITE_DESCRIPTION },
+      { property: "og:image", content: DANI_DEX_SOCIAL_IMAGE_URL },
       { property: "og:image:type", content: "image/png" },
       { property: "og:image:width", content: "1600" },
       { property: "og:image:height", content: "900" },
-      { property: "og:image:alt", content: OPENBOT_SOCIAL_IMAGE_ALT },
+      { property: "og:image:alt", content: DANI_DEX_SOCIAL_IMAGE_ALT },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: OPENBOT_SITE_TITLE },
-      { name: "twitter:description", content: OPENBOT_SITE_DESCRIPTION },
-      { name: "twitter:image", content: OPENBOT_SOCIAL_IMAGE_URL },
-      { name: "twitter:image:alt", content: OPENBOT_SOCIAL_IMAGE_ALT },
+      { name: "twitter:title", content: DANI_DEX_SITE_TITLE },
+      { name: "twitter:description", content: DANI_DEX_SITE_DESCRIPTION },
+      { name: "twitter:image", content: DANI_DEX_SOCIAL_IMAGE_URL },
+      { name: "twitter:image:alt", content: DANI_DEX_SOCIAL_IMAGE_ALT },
     ],
-    links: [{ rel: "canonical", href: OPENBOT_SITE_URL }],
+    links: [{ rel: "canonical", href: DANI_DEX_SITE_URL }],
   };
 }

@@ -14,7 +14,7 @@ import pickAModel from "../../content/guides/media/openbot-101/pick-a-model.webp
 import { CONTENT_COLLECTIONS } from "../../lib/content";
 import { formatArticleDate } from "../../lib/content-collection";
 import { GUIDES_COLLECTION } from "../../lib/guides";
-import { EXTERNAL_LINK_REL, OPENBOT_LINKS } from "../../lib/landing-links";
+import { DANI_DEX_LINKS, EXTERNAL_LINK_REL } from "../../lib/landing-links";
 import { PLUGIN_INDEX_ROUTE } from "../../lib/plugins";
 import { Button } from "../ui/button";
 import { ArticleGradient } from "./ArticleGradient";
@@ -53,7 +53,7 @@ function StoryHeader() {
           Plugins
         </a>
         <Button
-          href={OPENBOT_LINKS.contact}
+          href={DANI_DEX_LINKS.contact}
           target="_blank"
           rel={EXTERNAL_LINK_REL}
           variant="secondary"

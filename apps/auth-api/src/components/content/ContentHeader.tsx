@@ -2,7 +2,7 @@ import { AppLogo } from "@dani-dex/brand";
 import { Link } from "@tanstack/solid-router";
 import { For } from "solid-js";
 import { CONTENT_COLLECTIONS } from "../../lib/content";
-import { EXTERNAL_LINK_REL, OPENBOT_LINKS } from "../../lib/landing-links";
+import { DANI_DEX_LINKS, EXTERNAL_LINK_REL } from "../../lib/landing-links";
 import { PLUGIN_INDEX_ROUTE } from "../../lib/plugins";
 import { Button, ButtonLink } from "../ui/button";
 
@@ -31,7 +31,7 @@ export function ContentHeader() {
           Plugins
         </Link>
         <Button
-          href={OPENBOT_LINKS.contact}
+          href={DANI_DEX_LINKS.contact}
           target="_blank"
           rel={EXTERNAL_LINK_REL}
           variant="secondary"

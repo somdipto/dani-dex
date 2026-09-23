@@ -81,7 +81,7 @@ describe.sequential("AgentService: questions", () => {
   });
 
   it("keeps prompts from a healthy provider active when another provider exits", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
     const clients = new Map<AgentProvider, FakeAgentClient>();
     const { store, mailbox } = stores(root);
     service = createTestService({

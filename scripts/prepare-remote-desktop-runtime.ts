@@ -6,10 +6,10 @@ const platform = process.argv[2] ?? process.platform;
 const architecture = process.argv[3] ?? process.arch;
 if (hasPinnedRemoteDesktopArtifacts(lock)) {
   execFileSync("bun", ["scripts/install-remote-desktop-runtime.ts", platform, architecture], { stdio: "inherit" });
-} else if (process.env.OPENBOT_ALLOW_RUNTIME_SOURCE_BUILD === "1") {
+} else if (process.env.DANI_DEX_ALLOW_RUNTIME_SOURCE_BUILD === "1") {
   execFileSync("bun", ["scripts/build-remote-desktop-runtime.ts"], { stdio: "inherit" });
 } else {
   throw new Error(
-    "No reusable remote desktop runtime is pinned. Publish and pin it, or set OPENBOT_ALLOW_RUNTIME_SOURCE_BUILD=1 for the bootstrap CI only.",
+    "No reusable remote desktop runtime is pinned. Publish and pin it, or set DANI_DEX_ALLOW_RUNTIME_SOURCE_BUILD=1 for the bootstrap CI only.",
   );
 }

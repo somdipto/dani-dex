@@ -126,7 +126,7 @@ import { type AgentBrowserHost, TurnLifecycle } from "./agent/turn-lifecycle";
 import type { AgentClient, AgentProvider } from "./agent-client";
 import type { AgentTables } from "./agent-data/agent-tables";
 import { type AgentStore, DEFAULT_AGENT_PROVIDER } from "./agent-store";
-import { OPENBOT_BROWSER_NAMESPACE } from "./browser-tools";
+import { DANI_DEX_BROWSER_NAMESPACE } from "./browser-tools";
 import { ChannelRoutineScheduler } from "./channel-routine-scheduler";
 import { ChannelService } from "./channel-service";
 import type { BundledProviderExecutables } from "./cli";
@@ -2199,7 +2199,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
           return;
         case "item/tool/call": {
           if (!isDynamicToolCall(request.params)) throw new Error("Invalid dynamic tool request.");
-          if (request.params.namespace === OPENBOT_BROWSER_NAMESPACE) {
+          if (request.params.namespace === DANI_DEX_BROWSER_NAMESPACE) {
             const agentId = this.#conversation.agentForThread(request.params.threadId);
             if (!agentId) throw new Error("The browsing Dani-Dex agent is unknown.");
             if (request.params.tool === "request_takeover" || request.params.tool === "submit_secret") {

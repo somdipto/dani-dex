@@ -4,13 +4,13 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { createAgentToolSchema, updateProfileToolSchema } from "./agent/profile-tools";
 import { AGENT_DATABASE_LIMITS } from "./agent-data/agent-database-protocol";
-import { OPENBOT_DYNAMIC_TOOLS } from "./openbot-tools";
+import { DANI_DEX_DYNAMIC_TOOLS } from "./openbot-tools";
 
 describe("Dani-Dex tool declarations", () => {
   it("requires site identity and local source details for mutations", () => {
-    const publish = OPENBOT_DYNAMIC_TOOLS.tools.find((tool) => tool.name === "publish_site");
-    const replace = OPENBOT_DYNAMIC_TOOLS.tools.find((tool) => tool.name === "replace_site");
-    const remove = OPENBOT_DYNAMIC_TOOLS.tools.find((tool) => tool.name === "delete_site");
+    const publish = DANI_DEX_DYNAMIC_TOOLS.tools.find((tool) => tool.name === "publish_site");
+    const replace = DANI_DEX_DYNAMIC_TOOLS.tools.find((tool) => tool.name === "replace_site");
+    const remove = DANI_DEX_DYNAMIC_TOOLS.tools.find((tool) => tool.name === "delete_site");
     expect(publish?.inputSchema).toMatchObject({ required: ["sourcePath", "title", "description"] });
     expect(replace?.inputSchema).toMatchObject({ required: ["siteId", "sourcePath", "title", "description"] });
     expect(remove?.inputSchema).toMatchObject({ required: ["siteId"] });
@@ -49,7 +49,7 @@ describe("Dani-Dex tool declarations", () => {
     ["delete_table", {}, false],
     ["delete_table", { name: "x".repeat(INPUT_LIMITS.sharedTableName + 1) }, false],
   ])("advertises input constraints for %s: %j", (name, input, accepted) => {
-    const definition = OPENBOT_DYNAMIC_TOOLS.tools.find((tool) => tool.name === name);
+    const definition = DANI_DEX_DYNAMIC_TOOLS.tools.find((tool) => tool.name === name);
     if (!definition) throw new Error(`Missing tool: ${name}`);
     expect(z.fromJSONSchema(definition.inputSchema).safeParse(input).success).toBe(accepted);
   });
@@ -91,7 +91,7 @@ describe("Dani-Dex tool declarations", () => {
     [{ kind: "custom", expression: "" }, false],
   ])("advertises routine schedule constraints: %j", (schedule, accepted) => {
     for (const name of ["create_routine", "update_routine"]) {
-      const definition = OPENBOT_DYNAMIC_TOOLS.tools.find((tool) => tool.name === name);
+      const definition = DANI_DEX_DYNAMIC_TOOLS.tools.find((tool) => tool.name === name);
       if (!definition) throw new Error(`Missing tool: ${name}`);
       const input =
         name === "create_routine"

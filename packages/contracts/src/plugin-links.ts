@@ -19,9 +19,9 @@
  * rule becomes weaker.
  */
 
-export const OPENBOT_PLUGIN_ORIGIN = "https://openbot.run";
-export const OPENBOT_PLUGIN_PATH_PREFIX = "/plugins/";
-export const OPENBOT_PLUGIN_HOST = "plugins";
+export const DANI_DEX_PLUGIN_ORIGIN = "https://openbot.run";
+export const DANI_DEX_PLUGIN_PATH_PREFIX = "/plugins/";
+export const DANI_DEX_PLUGIN_HOST = "plugins";
 
 /**
  * A slug cannot hold a dot, an upper-case letter or a slash. The dot is the load-bearing one: it is
@@ -36,13 +36,13 @@ export function isPluginSlug(value: string): boolean {
 /** Where a shared plugin link points. */
 export function createPluginShareUrl(slug: string): string {
   assertPluginSlug(slug);
-  return `${OPENBOT_PLUGIN_ORIGIN}${OPENBOT_PLUGIN_PATH_PREFIX}${slug}`;
+  return `${DANI_DEX_PLUGIN_ORIGIN}${DANI_DEX_PLUGIN_PATH_PREFIX}${slug}`;
 }
 
 /** The link the page's button opens, which raises the app on this listing. */
 export function createDaniDexPluginUrl(slug: string): string {
   assertPluginSlug(slug);
-  return `dani-dex://${OPENBOT_PLUGIN_HOST}/${slug}`;
+  return `dani-dex://${DANI_DEX_PLUGIN_HOST}/${slug}`;
 }
 
 /**
@@ -61,10 +61,10 @@ export function parsePluginUrl(value: string): string {
      `openbot.run.example.com` through. */
   const canonical =
     url.protocol === "https:" &&
-    url.origin === OPENBOT_PLUGIN_ORIGIN &&
-    url.pathname.startsWith(OPENBOT_PLUGIN_PATH_PREFIX);
+    url.origin === DANI_DEX_PLUGIN_ORIGIN &&
+    url.pathname.startsWith(DANI_DEX_PLUGIN_PATH_PREFIX);
   const customScheme =
-    (url.protocol === "dani-dex:" || url.protocol === "openbot:") && url.hostname === OPENBOT_PLUGIN_HOST;
+    (url.protocol === "dani-dex:" || url.protocol === "openbot:") && url.hostname === DANI_DEX_PLUGIN_HOST;
   if (
     (!canonical && !customScheme) ||
     url.username !== "" ||
@@ -78,7 +78,7 @@ export function parsePluginUrl(value: string): string {
 
   /* One segment after the prefix, and no empty one. `..` and a trailing slash both fail here before
      the pattern ever sees them. */
-  const rest = canonical ? url.pathname.slice(OPENBOT_PLUGIN_PATH_PREFIX.length) : url.pathname.replace(/^\//u, "");
+  const rest = canonical ? url.pathname.slice(DANI_DEX_PLUGIN_PATH_PREFIX.length) : url.pathname.replace(/^\//u, "");
   const segments = rest.split("/");
   if (segments.length !== 1) {
     throw new Error("The Dani-Dex plugin link is invalid.");

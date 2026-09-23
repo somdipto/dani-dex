@@ -1537,7 +1537,7 @@ async function main(): Promise<void> {
   const summary = await seedDevelopmentState({
     dryRun,
     ifMissing,
-    instanceId: readDevelopmentInstanceId(process.env.OPENBOT_DEV_INSTANCE_ID),
+    instanceId: readDevelopmentInstanceId(process.env.DANI_DEX_DEV_INSTANCE_ID),
   });
   logger.info(dryRun ? "Dani-Dex development seed dry run:" : "Dani-Dex development state seeded:");
   logger.info(`- profile: ${summary.targetProfile}`);

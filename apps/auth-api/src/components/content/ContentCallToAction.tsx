@@ -1,4 +1,4 @@
-import { EXTERNAL_LINK_REL, OPENBOT_LINKS } from "../../lib/landing-links";
+import { DANI_DEX_LINKS, EXTERNAL_LINK_REL } from "../../lib/landing-links";
 import { createLandingReveal } from "../landing/createLandingReveal";
 import { Button, ButtonLink } from "../ui/button";
 
@@ -33,7 +33,7 @@ export function ContentCallToAction() {
           Download Dani-Dex
         </ButtonLink>
         <Button
-          href={OPENBOT_LINKS.contact}
+          href={DANI_DEX_LINKS.contact}
           target="_blank"
           rel={EXTERNAL_LINK_REL}
           variant="secondary"

@@ -13,7 +13,7 @@ const config = {
     name: "storybook-solidjs-vite",
     options: {
       // CI checks compilation. Local Storybook keeps automatic prop documentation.
-      docgen: process.env.OPENBOT_STORYBOOK_CHECK === "true" ? false : undefined,
+      docgen: process.env.DANI_DEX_STORYBOOK_CHECK === "true" ? false : undefined,
     },
   },
   viteFinal: async (viteConfig) => {

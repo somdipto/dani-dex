@@ -24,10 +24,10 @@ curl -fsSL https://claude.ai/install.sh | bash
 claude auth login
 ```
 
-If Codex is installed in a non-standard location, launch Dani-Dex with `OPENBOT_CODEX_PATH` set to the
+If Codex is installed in a non-standard location, launch Dani-Dex with `DANI_DEX_CODEX_PATH` set to the
 absolute Codex executable path.
 
-For a non-standard Claude location, set `OPENBOT_CLAUDE_PATH` to the absolute Claude executable path.
+For a non-standard Claude location, set `DANI_DEX_CLAUDE_PATH` to the absolute Claude executable path.
 
 ## The Linux AppImage exits immediately
 
@@ -70,7 +70,7 @@ repair an installed release, because the application uses only its bundled drive
 
 In a development checkout, run `bun run prepare:cua-driver`, then press **Try again** in the panel.
 This command writes the same pinned build the release ships.
-`bun run cua-driver:doctor` reports which binary Dani-Dex would use, and `OPENBOT_CUA_DRIVER_PATH`
+`bun run cua-driver:doctor` reports which binary Dani-Dex would use, and `DANI_DEX_CUA_DRIVER_PATH`
 selects a different one. The installed application ignores that variable: it runs only the driver it
 was released with.
 

@@ -24,7 +24,7 @@ export interface ResolvedAutomationPort {
   explicit: boolean;
 }
 
-// An explicit `--port=` or `OPENBOT_DEV_REMOTE_DEBUGGING_PORT` names one
+// An explicit `--port=` or `DANI_DEX_DEV_REMOTE_DEBUGGING_PORT` names one
 // instance outright. A bare default is a guess: on a machine where several
 // worktrees run dev, 9333 belongs to whichever started first. The caller uses
 // `explicit` to keep such a guess read-only.
@@ -39,7 +39,7 @@ export function resolveAutomationPort(
   const port = Number(source);
   if (!Number.isInteger(port) || port < MIN_DEV_AUTOMATION_PORT || port > MAX_DEV_AUTOMATION_PORT) {
     throw new Error(
-      `OPENBOT_DEV_REMOTE_DEBUGGING_PORT must be an integer from ${MIN_DEV_AUTOMATION_PORT} to ${MAX_DEV_AUTOMATION_PORT}.`,
+      `DANI_DEX_DEV_REMOTE_DEBUGGING_PORT must be an integer from ${MIN_DEV_AUTOMATION_PORT} to ${MAX_DEV_AUTOMATION_PORT}.`,
     );
   }
   return { port, explicit: true };
@@ -74,7 +74,7 @@ export function assertMutationAllowed(gate: MutationGate): void {
       `${gate.command} changes the live dev app, and the instance was inferred${
         gate.target ? ` (${gate.target})` : ""
       }, not named. Run \`bun run dev:automation instances\` and re-run with ` +
-        "--instance=<id> or --port=<OPENBOT_DEV_REMOTE_DEBUGGING_PORT>.",
+        "--instance=<id> or --port=<DANI_DEX_DEV_REMOTE_DEBUGGING_PORT>.",
     );
   }
 }
@@ -344,7 +344,7 @@ export async function openDevBrowser(
     if (ownerPid === null || !(await verifyBrowserOwnership(browser, ownerPid))) {
       await browser.close();
       throw new ForeignBrowserError(
-        `Port ${port} does not belong to Dani-Dex. Pass --port=<OPENBOT_DEV_REMOTE_DEBUGGING_PORT> of the instance you mean to drive.`,
+        `Port ${port} does not belong to Dani-Dex. Pass --port=<DANI_DEX_DEV_REMOTE_DEBUGGING_PORT> of the instance you mean to drive.`,
       );
     }
     logger.info(`Port :${port} answers without the build token; the listener belongs to the recorded instance.`);

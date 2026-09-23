@@ -223,9 +223,9 @@ function launchEnvironment(userDataPath: string): NodeJS.ProcessEnv {
     ...process.env,
     CODEX_HOME: join(userDataPath, "codex-home"),
     CLAUDE_CONFIG_DIR: join(userDataPath, "claude-home"),
-    OPENBOT_CODEX_PATH: join(userDataPath, "missing-codex"),
-    OPENBOT_CLAUDE_PATH: join(userDataPath, "missing-claude"),
-    OPENBOT_GROK_PATH: join(userDataPath, "missing-grok"),
+    DANI_DEX_CODEX_PATH: join(userDataPath, "missing-codex"),
+    DANI_DEX_CLAUDE_PATH: join(userDataPath, "missing-claude"),
+    DANI_DEX_GROK_PATH: join(userDataPath, "missing-grok"),
   };
 }
 

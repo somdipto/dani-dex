@@ -44,7 +44,7 @@ export function parseStorybookInvocation(args: string[]): StorybookInvocation {
   if (conflicting) {
     throw new Error(
       "Storybook's port is allocated per worktree, so --port cannot be passed through. " +
-        "Set OPENBOT_STORYBOOK_PORT to change where the search starts.",
+        "Set DANI_DEX_STORYBOOK_PORT to change where the search starts.",
     );
   }
   return {
@@ -72,7 +72,7 @@ function readPreferredPort(value: string | undefined): number {
   if (value === undefined || value.trim() === "") return DEFAULT_STORYBOOK_PORT;
   const port = Number(value);
   if (!Number.isInteger(port) || port < 1_024 || port > 65_535) {
-    throw new Error("OPENBOT_STORYBOOK_PORT must be an integer from 1024 to 65535.");
+    throw new Error("DANI_DEX_STORYBOOK_PORT must be an integer from 1024 to 65535.");
   }
   return port;
 }
@@ -96,7 +96,7 @@ async function main(): Promise<void> {
       }
       logger.warn(`This worktree already runs Storybook:\n${detail}`);
     }
-    const preferred = readPreferredPort(process.env.OPENBOT_STORYBOOK_PORT);
+    const preferred = readPreferredPort(process.env.DANI_DEX_STORYBOOK_PORT);
     const allocated = await findAvailablePort(preferred, new Set(), heldDevStackPorts(records));
     if (allocated !== preferred) logger.info(`Storybook port ${preferred} is busy. Using ${allocated}.`);
     const record = createStorybookStackRecord(allocated, process.pid, Date.now());

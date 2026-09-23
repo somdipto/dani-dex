@@ -141,7 +141,7 @@ describe("ProviderRuntimeManager", () => {
 
   it("does not offer or download over an explicit CLI override", async () => {
     const root = await temporaryRoot();
-    vi.stubEnv("OPENBOT_GROK_PATH", "/custom/grok");
+    vi.stubEnv("DANI_DEX_GROK_PATH", "/custom/grok");
     const fetchImpl = vi.fn(async () => new Response());
     const manager = new ProviderRuntimeManager({ root, platform: "darwin", architecture: "arm64", fetchImpl });
     await manager.initialize();

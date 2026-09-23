@@ -74,7 +74,7 @@ export function developmentEnvironmentForTarget(
 ): NodeJS.ProcessEnv {
   return {
     ...environment,
-    OPENBOT_DEV_TEST_CLIENT_ENABLED: target === "test-client" ? "1" : "0",
+    DANI_DEX_DEV_TEST_CLIENT_ENABLED: target === "test-client" ? "1" : "0",
   };
 }
 
@@ -159,15 +159,15 @@ export function createDevelopmentServiceSpec(
     cwd: projectRoot,
     env: {
       ...childEnvironment,
-      OPENBOT_APP_VARIANT: "dev",
-      OPENBOT_DEV_PROFILE: isTestClient ? "test-client" : "app",
-      OPENBOT_DEV_RENDERER_PORT:
-        childEnvironment.OPENBOT_DEV_RENDERER_PORT ??
+      DANI_DEX_APP_VARIANT: "dev",
+      DANI_DEX_DEV_PROFILE: isTestClient ? "test-client" : "app",
+      DANI_DEX_DEV_RENDERER_PORT:
+        childEnvironment.DANI_DEX_DEV_RENDERER_PORT ??
         String(isTestClient ? DEFAULT_RENDERER_PORTS["test-client"] : DEFAULT_RENDERER_PORTS.app),
-      OPENBOT_DEV_REMOTE_DEBUGGING_PORT:
-        childEnvironment.OPENBOT_DEV_REMOTE_DEBUGGING_PORT ??
+      DANI_DEX_DEV_REMOTE_DEBUGGING_PORT:
+        childEnvironment.DANI_DEX_DEV_REMOTE_DEBUGGING_PORT ??
         String(isTestClient ? DEFAULT_REMOTE_DEBUGGING_PORTS["test-client"] : DEFAULT_REMOTE_DEBUGGING_PORTS.app),
-      OPENBOT_DEV_REMOTE_ROLE: childEnvironment.OPENBOT_DEV_REMOTE_ROLE ?? (isTestClient ? "client" : "host"),
+      DANI_DEX_DEV_REMOTE_ROLE: childEnvironment.DANI_DEX_DEV_REMOTE_ROLE ?? (isTestClient ? "client" : "host"),
     },
   };
 }
@@ -182,10 +182,10 @@ export function createDevInstanceRecord(
   startedAt: number,
 ): DevInstanceRecord | null {
   if (spec.name !== "app" && spec.name !== "test-client") return null;
-  const rendererPort = readPort(spec.env.OPENBOT_DEV_RENDERER_PORT);
-  const remoteDebuggingPort = readPort(spec.env.OPENBOT_DEV_REMOTE_DEBUGGING_PORT);
+  const rendererPort = readPort(spec.env.DANI_DEX_DEV_RENDERER_PORT);
+  const remoteDebuggingPort = readPort(spec.env.DANI_DEX_DEV_REMOTE_DEBUGGING_PORT);
   if (!rendererPort || !remoteDebuggingPort) return null;
-  const instanceId = readDevelopmentInstanceId(spec.env.OPENBOT_DEV_INSTANCE_ID);
+  const instanceId = readDevelopmentInstanceId(spec.env.DANI_DEX_DEV_INSTANCE_ID);
   const profileKind = spec.name === "test-client" ? "test-client" : "app";
   return {
     service: spec.name,
@@ -217,7 +217,7 @@ export function developmentProfileToSeed(
   // The seed writes the app profile, which every target except `api` opens.
   const app = specs.find((spec) => spec.name === "app");
   if (!app) return null;
-  const instanceId = readDevelopmentInstanceId(app.env.OPENBOT_DEV_INSTANCE_ID);
+  const instanceId = readDevelopmentInstanceId(app.env.DANI_DEX_DEV_INSTANCE_ID);
   const profile = resolve(
     resolveDevelopmentAppDataRoot(process.platform, app.env),
     developmentUserDataName("app", instanceId),
@@ -280,7 +280,7 @@ async function main(): Promise<void> {
   const services = servicesForTarget(target);
   const sharedEnvironment = developmentEnvironmentForTarget(target);
   if (isolated) {
-    sharedEnvironment.OPENBOT_DEV_INSTANCE_ID ??= developmentInstanceIdForWorktree(projectRoot);
+    sharedEnvironment.DANI_DEX_DEV_INSTANCE_ID ??= developmentInstanceIdForWorktree(projectRoot);
   }
 
   // Everything between reading the registry and publishing this stack's ports
@@ -335,14 +335,14 @@ export function createDevStackRecord(
     if (port !== undefined) ports.push({ name, port });
   };
   for (const spec of specs) {
-    if (spec.name === "api") addPort("api", spec.env.OPENBOT_API_PORT);
+    if (spec.name === "api") addPort("api", spec.env.DANI_DEX_API_PORT);
     if (spec.name === "remote") {
       addPort("signal", spec.env.REMOTE_SIGNAL_PORT);
       addPort("signal-health", spec.env.REMOTE_HEALTH_PORT);
     }
     if (spec.name === "app" || spec.name === "test-client") {
-      addPort(`${spec.name}-renderer`, spec.env.OPENBOT_DEV_RENDERER_PORT);
-      addPort(`${spec.name}-debug`, spec.env.OPENBOT_DEV_REMOTE_DEBUGGING_PORT);
+      addPort(`${spec.name}-renderer`, spec.env.DANI_DEX_DEV_RENDERER_PORT);
+      addPort(`${spec.name}-debug`, spec.env.DANI_DEX_DEV_REMOTE_DEBUGGING_PORT);
     }
   }
   return {
@@ -364,14 +364,14 @@ async function allocateDevelopmentPorts(
 
   if (services.includes("api")) {
     const apiPort = await findAvailablePort(
-      readPort(sharedEnvironment.OPENBOT_API_PORT) ?? DEFAULT_API_PORT,
+      readPort(sharedEnvironment.DANI_DEX_API_PORT) ?? DEFAULT_API_PORT,
       reservedPorts,
       heldPorts,
     );
     reservedPorts.add(apiPort);
-    sharedEnvironment.OPENBOT_API_PORT = String(apiPort);
-    if (!sharedEnvironment.OPENBOT_AUTH_API_URL) {
-      sharedEnvironment.OPENBOT_AUTH_API_URL = `http://127.0.0.1:${apiPort}`;
+    sharedEnvironment.DANI_DEX_API_PORT = String(apiPort);
+    if (!sharedEnvironment.DANI_DEX_AUTH_API_URL) {
+      sharedEnvironment.DANI_DEX_AUTH_API_URL = `http://127.0.0.1:${apiPort}`;
     }
     configureSiteHostingDevelopmentEnvironment(sharedEnvironment, apiPort);
     if (services.includes("remote")) {
@@ -400,8 +400,8 @@ async function allocateDevelopmentPorts(
       }
     }
     configureMobileConnectDevelopmentNetwork(services, sharedEnvironment, networkInterfaces());
-    if (sharedEnvironment.OPENBOT_MOBILE_AUTH_API_URL) {
-      logger.info(`Mobile Connect API: ${sharedEnvironment.OPENBOT_MOBILE_AUTH_API_URL}`);
+    if (sharedEnvironment.DANI_DEX_MOBILE_AUTH_API_URL) {
+      logger.info(`Mobile Connect API: ${sharedEnvironment.DANI_DEX_MOBILE_AUTH_API_URL}`);
     }
     if (apiPort !== DEFAULT_API_PORT) {
       logger.info(`API port ${DEFAULT_API_PORT} is busy. Using ${apiPort}.`);
@@ -414,25 +414,25 @@ async function allocateDevelopmentPorts(
     if (service === "app" || service === "test-client") {
       const defaultPort = DEFAULT_RENDERER_PORTS[service];
       const rendererPort = await findAvailablePort(
-        readPort(environment.OPENBOT_DEV_RENDERER_PORT) ?? defaultPort,
+        readPort(environment.DANI_DEX_DEV_RENDERER_PORT) ?? defaultPort,
         reservedPorts,
         heldPorts,
       );
       reservedPorts.add(rendererPort);
-      environment.OPENBOT_DEV_RENDERER_PORT = String(rendererPort);
+      environment.DANI_DEX_DEV_RENDERER_PORT = String(rendererPort);
       if (rendererPort !== defaultPort) {
-        environment.OPENBOT_DEV_INSTANCE_ID ??= String(rendererPort);
+        environment.DANI_DEX_DEV_INSTANCE_ID ??= String(rendererPort);
         logger.info(`Renderer port ${defaultPort} is busy. Using ${rendererPort} for ${service}.`);
       }
 
       const defaultRemoteDebuggingPort = DEFAULT_REMOTE_DEBUGGING_PORTS[service];
       const remoteDebuggingPort = await findAvailablePort(
-        readPort(environment.OPENBOT_DEV_REMOTE_DEBUGGING_PORT) ?? defaultRemoteDebuggingPort,
+        readPort(environment.DANI_DEX_DEV_REMOTE_DEBUGGING_PORT) ?? defaultRemoteDebuggingPort,
         reservedPorts,
         heldPorts,
       );
       reservedPorts.add(remoteDebuggingPort);
-      environment.OPENBOT_DEV_REMOTE_DEBUGGING_PORT = String(remoteDebuggingPort);
+      environment.DANI_DEX_DEV_REMOTE_DEBUGGING_PORT = String(remoteDebuggingPort);
       if (remoteDebuggingPort !== defaultRemoteDebuggingPort) {
         logger.info(
           `Electron debug port ${defaultRemoteDebuggingPort} is busy. Using ${remoteDebuggingPort} for ${service}.`,
@@ -511,7 +511,7 @@ async function runDevelopmentServices(specs: DevelopmentServiceSpec[], stack: De
           process.exitCode = code ?? 1;
         });
       });
-      if (spec.name === "api") await waitForDevelopmentApi(spec.env.OPENBOT_API_PORT, child);
+      if (spec.name === "api") await waitForDevelopmentApi(spec.env.DANI_DEX_API_PORT, child);
       if (spec.name === "remote") await waitForDevelopmentRemote(spec.env.REMOTE_HEALTH_PORT, child);
     }
   } catch (error) {
@@ -532,9 +532,9 @@ export function configureMobileConnectDevelopmentNetwork(
   interfaces: DevelopmentNetworkInterfaces,
 ): void {
   const hasMobileClient = services.some((service) => service === "app" || service === "test-client");
-  const apiPort = readPort(environment.OPENBOT_API_PORT);
+  const apiPort = readPort(environment.DANI_DEX_API_PORT);
   if (!apiPort) return;
-  const exposeToLan = hasMobileClient && environment.OPENBOT_API_HOST !== "127.0.0.1";
+  const exposeToLan = hasMobileClient && environment.DANI_DEX_API_HOST !== "127.0.0.1";
   const address = exposeToLan ? selectMobileConnectLanAddress(interfaces) : null;
 
   if (services.includes("remote")) {
@@ -549,8 +549,8 @@ export function configureMobileConnectDevelopmentNetwork(
   }
 
   if (!address) return;
-  environment.OPENBOT_API_HOST ??= "0.0.0.0";
-  environment.OPENBOT_MOBILE_AUTH_API_URL ??= `http://${address}:${apiPort}`;
+  environment.DANI_DEX_API_HOST ??= "0.0.0.0";
+  environment.DANI_DEX_MOBILE_AUTH_API_URL ??= `http://${address}:${apiPort}`;
 }
 
 export function selectMobileConnectLanAddress(interfaces: DevelopmentNetworkInterfaces): string | null {

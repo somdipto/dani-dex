@@ -2,7 +2,7 @@ import { isBoolean, isOneOf } from "@dani-dex/contracts/runtime-values";
 import { OpenPanel, OpenPanelBase, type OpenPanelOptions, type TrackProperties } from "@openpanel/web";
 import { CONTENT_COLLECTIONS } from "./content";
 import { type CollectionId, type ContentCollection, findArticle } from "./content-collection";
-import { OPENBOT_DOWNLOAD_LINKS, OPENBOT_LINKS } from "./landing-links";
+import { DANI_DEX_DOWNLOAD_LINKS, DANI_DEX_LINKS } from "./landing-links";
 
 export const OPENPANEL_API_URL = "https://analytics.openbot.run/api";
 const OPENPANEL_CLIENT_ID = "6c989975-87ef-4f0c-857e-ab449a65b5c2";
@@ -134,27 +134,27 @@ function createOpenPanelClient(options: OpenPanelOptions): OpenPanelClient {
 
 /** The download route each platform uses, reversed so a click can name the platform it asked for. */
 const DOWNLOAD_PLATFORMS_BY_HREF = new Map<string, LandingDownloadPlatform>([
-  [OPENBOT_DOWNLOAD_LINKS.macos, "macos"],
-  [OPENBOT_DOWNLOAD_LINKS.windows, "windows"],
-  [OPENBOT_DOWNLOAD_LINKS.linux, "linux"],
+  [DANI_DEX_DOWNLOAD_LINKS.macos, "macos"],
+  [DANI_DEX_DOWNLOAD_LINKS.windows, "windows"],
+  [DANI_DEX_DOWNLOAD_LINKS.linux, "linux"],
 ]);
 
 const LINK_DESTINATIONS = new Map<string, LandingDestination>([
-  [OPENBOT_LINKS.download, "download_section"],
-  [OPENBOT_LINKS.downloadFromOtherPage, "download_section"],
-  [OPENBOT_LINKS.news, "news"],
-  [OPENBOT_LINKS.guides, "guides"],
-  [OPENBOT_LINKS.contact, "contact"],
-  [OPENBOT_LINKS.repository, "repository"],
-  [OPENBOT_LINKS.releases, "releases"],
-  [OPENBOT_LINKS.license, "license"],
-  [OPENBOT_LINKS.privacy, "privacy"],
-  [OPENBOT_LINKS.documentation, "documentation"],
-  [OPENBOT_LINKS.troubleshooting, "troubleshooting"],
-  [OPENBOT_LINKS.architecture, "architecture"],
-  [OPENBOT_LINKS.contributing, "contributing"],
-  [OPENBOT_LINKS.codex, "codex"],
-  [OPENBOT_LINKS.claude, "claude"],
+  [DANI_DEX_LINKS.download, "download_section"],
+  [DANI_DEX_LINKS.downloadFromOtherPage, "download_section"],
+  [DANI_DEX_LINKS.news, "news"],
+  [DANI_DEX_LINKS.guides, "guides"],
+  [DANI_DEX_LINKS.contact, "contact"],
+  [DANI_DEX_LINKS.repository, "repository"],
+  [DANI_DEX_LINKS.releases, "releases"],
+  [DANI_DEX_LINKS.license, "license"],
+  [DANI_DEX_LINKS.privacy, "privacy"],
+  [DANI_DEX_LINKS.documentation, "documentation"],
+  [DANI_DEX_LINKS.troubleshooting, "troubleshooting"],
+  [DANI_DEX_LINKS.architecture, "architecture"],
+  [DANI_DEX_LINKS.contributing, "contributing"],
+  [DANI_DEX_LINKS.codex, "codex"],
+  [DANI_DEX_LINKS.claude, "claude"],
 ]);
 
 const EVENT_PROPERTY_ALLOWLIST = {
@@ -249,10 +249,10 @@ export class LandingAnalytics {
         return;
       }
       const href = link?.getAttribute("href");
-      if (href === OPENBOT_DOWNLOAD_LINKS.macos || href === OPENBOT_DOWNLOAD_LINKS.windows) {
+      if (href === DANI_DEX_DOWNLOAD_LINKS.macos || href === DANI_DEX_DOWNLOAD_LINKS.windows) {
         this.#track("join_page_action", {
           action: "download",
-          platform: href === OPENBOT_DOWNLOAD_LINKS.windows ? "windows" : "macos",
+          platform: href === DANI_DEX_DOWNLOAD_LINKS.windows ? "windows" : "macos",
         });
       }
     };

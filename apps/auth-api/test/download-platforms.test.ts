@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOWNLOAD_PLATFORM_ORDER, DOWNLOAD_PLATFORMS, detectDownloadPlatform } from "../src/lib/download-platforms";
-import { OPENBOT_DOWNLOAD_LINKS } from "../src/lib/landing-links";
+import { DANI_DEX_DOWNLOAD_LINKS } from "../src/lib/landing-links";
 
 describe("download platforms", () => {
   it.each([
@@ -20,7 +20,7 @@ describe("download platforms", () => {
   it("offers a download for every platform it can detect", () => {
     for (const platform of DOWNLOAD_PLATFORM_ORDER) {
       const details = DOWNLOAD_PLATFORMS[platform];
-      expect(details).toMatchObject({ available: true, status: "Available", href: OPENBOT_DOWNLOAD_LINKS[platform] });
+      expect(details).toMatchObject({ available: true, status: "Available", href: DANI_DEX_DOWNLOAD_LINKS[platform] });
     }
   });
 

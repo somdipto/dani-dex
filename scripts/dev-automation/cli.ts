@@ -140,7 +140,7 @@ interface AutomationTarget {
 function resolveTarget(records: DevInstanceRecord[], service: DevInstanceService): AutomationTarget {
   const explicitPort = resolveAutomationPort(
     flagValue("--port") ?? undefined,
-    process.env.OPENBOT_DEV_REMOTE_DEBUGGING_PORT,
+    process.env.DANI_DEX_DEV_REMOTE_DEBUGGING_PORT,
   );
   const requestedInstance = flagValue("--instance");
   if (requestedInstance !== null && flagValue("--port") !== null) {

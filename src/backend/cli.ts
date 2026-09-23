@@ -304,7 +304,7 @@ function isMinimumVersion(version: string, minimum: readonly number[]): boolean 
 
 /** An explicit path remains under the user's control, including during managed updates. */
 export function configuredCliPath(provider: AgentProviderId): string | null {
-  return process.env[`OPENBOT_${provider.toUpperCase()}_PATH`]?.trim() || null;
+  return process.env[`DANI_DEX_${provider.toUpperCase()}_PATH`]?.trim() || null;
 }
 
 async function cliCandidates(

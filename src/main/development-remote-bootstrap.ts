@@ -1,5 +1,5 @@
 /**
- * Everything `OPENBOT_DEV_REMOTE_ROLE` adds to startup: signing a throwaway account in against the
+ * Everything `DANI_DEX_DEV_REMOTE_ROLE` adds to startup: signing a throwaway account in against the
  * local account API, configuring the dev host, and handing the client the connection the host wrote
  * to a temporary file. None of it runs in a packaged build - `developmentRemoteRole` is null unless
  * the app is unpackaged and the variable is set to `host` or `client`.

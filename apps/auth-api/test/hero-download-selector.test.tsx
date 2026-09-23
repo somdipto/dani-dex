@@ -2,14 +2,14 @@ import { fireEvent, render, waitFor } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HeroDownloadSelector } from "../src/components/landing/HeroDownloadSelector";
 import { DOWNLOAD_PLATFORMS } from "../src/lib/download-platforms";
-import { OPENBOT_DOWNLOAD_LINKS } from "../src/lib/landing-links";
+import { DANI_DEX_DOWNLOAD_LINKS } from "../src/lib/landing-links";
 
 function setPlatform(platform: string): void {
   vi.stubGlobal("navigator", { platform, userAgent: "" });
 }
 
 const AVAILABLE_PLATFORM_CASES: ReadonlyArray<
-  readonly [source: string, platform: keyof typeof OPENBOT_DOWNLOAD_LINKS, label: string]
+  readonly [source: string, platform: keyof typeof DANI_DEX_DOWNLOAD_LINKS, label: string]
 > = [
   ["MacIntel", "macos", "Download for macOS"],
   ["Win32", "windows", "Download for Windows"],
@@ -29,7 +29,7 @@ describe("HeroDownloadSelector", () => {
       const view = render(() => <HeroDownloadSelector />);
 
       const download = await view.findByRole("link", { name: label });
-      expect(download).toHaveAttribute("href", OPENBOT_DOWNLOAD_LINKS[expected]);
+      expect(download).toHaveAttribute("href", DANI_DEX_DOWNLOAD_LINKS[expected]);
       expect(download).not.toHaveAttribute("target");
       expect(download).not.toHaveAttribute("rel");
     },
@@ -59,7 +59,7 @@ describe("HeroDownloadSelector", () => {
     await waitFor(() => view.getByRole("menu", { name: "Download platforms" }));
     for (const [, platform] of AVAILABLE_PLATFORM_CASES) {
       const item = view.getByRole("menuitem", { name: `${DOWNLOAD_PLATFORMS[platform].label}Available` });
-      expect(item).toHaveAttribute("href", OPENBOT_DOWNLOAD_LINKS[platform]);
+      expect(item).toHaveAttribute("href", DANI_DEX_DOWNLOAD_LINKS[platform]);
     }
   });
 });

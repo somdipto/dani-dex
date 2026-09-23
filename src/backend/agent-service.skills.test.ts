@@ -28,7 +28,7 @@ describe.sequential("local skill provider tools", () => {
   it.each(["codex", "claude"] as const)(
     "routes %s skill tools to the caller and rejects agent overrides",
     async (provider) => {
-      process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+      process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
       const { store, mailbox } = stores(root);
       const clients = new Map<AgentProvider, FakeAgentClient>();
       const create = vi.fn<LocalSkillTools["create"]>().mockRejectedValue(new Error("validation test"));

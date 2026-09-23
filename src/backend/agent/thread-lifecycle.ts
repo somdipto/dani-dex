@@ -22,7 +22,7 @@ import {
   NO_MCP_TOOL_RUNTIMES,
   usableMcpServers,
 } from "../mcp-provider-shapes";
-import { OPENBOT_DYNAMIC_TOOLS } from "../openbot-tools";
+import { DANI_DEX_DYNAMIC_TOOLS } from "../openbot-tools";
 import { decodeRecordResponse, decodeThreadResponse, getString, type ResponseDecoder } from "../protocol";
 import type { AgentMemories } from "./agent-memories";
 import type { ContextCompaction } from "./context-compaction";
@@ -280,7 +280,7 @@ export class ThreadLifecycle {
         developerInstructions: developerInstructions(agent, this.#store.sharedRoot, this.#memories.listFor(agent.id)),
         ephemeral: false,
         serviceName: "openbot",
-        dynamicTools: [...BROWSER_DYNAMIC_TOOLS, OPENBOT_DYNAMIC_TOOLS],
+        dynamicTools: [...BROWSER_DYNAMIC_TOOLS, DANI_DEX_DYNAMIC_TOOLS],
       },
       decodeThreadResponse,
     );
@@ -403,7 +403,7 @@ export class ThreadLifecycle {
     return createHash("sha256")
       .update(
         JSON.stringify([
-          [...BROWSER_DYNAMIC_TOOLS, OPENBOT_DYNAMIC_TOOLS],
+          [...BROWSER_DYNAMIC_TOOLS, DANI_DEX_DYNAMIC_TOOLS],
           mcpFingerprintValues(configs),
           Object.keys(disabled).sort(),
           [toolRuntimes.binDirectories, toolRuntimes.commandAliases],
@@ -440,7 +440,7 @@ export class ThreadLifecycle {
       approvalPolicy: "on-request",
       sandbox: "danger-full-access",
       developerInstructions: developerInstructions(agent, this.#store.sharedRoot, this.#memories.listFor(agent.id)),
-      ...(client.provider === "codex" ? {} : { dynamicTools: [...BROWSER_DYNAMIC_TOOLS, OPENBOT_DYNAMIC_TOOLS] }),
+      ...(client.provider === "codex" ? {} : { dynamicTools: [...BROWSER_DYNAMIC_TOOLS, DANI_DEX_DYNAMIC_TOOLS] }),
       ...(await this.codexConfig(client, this.#mcpServers(), await this.codexOwnServers(client), this.#toolRuntimes())),
     };
   }

@@ -79,7 +79,7 @@ Voice prompts and remote desktop are not available on Linux.
 ### Agent setup
 
 Dani-Dex can download a supported provider runtime when you select `Download` in onboarding,
-Settings, agent setup, or the model picker. Dani-Dex prefers its managed CLI. Explicit `OPENBOT_*_PATH` overrides take precedence; a compatible
+Settings, agent setup, or the model picker. Dani-Dex prefers its managed CLI. Explicit `DANI_DEX_*_PATH` overrides take precedence; a compatible
 system CLI is used when no managed copy is available. Updates install Dani-Dex’s pinned runtime
 without changing the user’s system CLI.
 
@@ -106,7 +106,7 @@ the CLI advertises. To use the paid OpenCode Go models, click Sign in on the Ope
 paste a Go key from [opencode.ai/auth](https://opencode.ai/auth). Dani-Dex encrypts the key on this
 computer and gives it only to the local CLI. Dani-Dex supports OpenCode Go only: the Zen models a
 Go key does not buy stay out of the picker. If you installed OpenCode yourself, Dani-Dex
-keeps that install and offers no download. Set `OPENBOT_OPENCODE_PATH` to select an executable
+keeps that install and offers no download. Set `DANI_DEX_OPENCODE_PATH` to select an executable
 outside your shell's search path. Remote OpenCode agents require Team API v4; older clients do not
 show these agents.
 
@@ -230,8 +230,8 @@ Optional scripts, references, and assets follow the Codex skill folder structure
 | `bun run dev:verify` | Print a stable JSON verification plan for this worktree: `ready`/`reasons` for safe checks, setup state, changed files and affected surfaces, nearby tests, runtime state, `qa.required`/`qa.ready`/`qa.reasons`, the renderer QA loop, safe `runnableCommands`, and all suggested `commands`. Add `--run` to execute only the safe non-mutating checks in the plan. Renderer QA follows `snapshot → action with --wait-for → snapshot → screenshot` when appearance matters. |
 | `bun run dev:stop` | Stop this worktree's dev stack, children included, using the pids in the registry rather than a process-name pattern. It signals only a pid whose start time still matches the record, so a recycled pid is never sent SIGTERM; anything it cannot confirm is reported, left running and kept in the registry, and the command exits non-zero. `--pid=<supervisor pid>` stops one other stack, `--all` stops every stack on the machine. |
 | `bun run dev:forget` | Drop this worktree's stack record without signalling anything, for the one case `dev:stop` refuses to resolve on its own. It is also the only command that reads a dead record: nothing else deletes one, because a reader that removes what it judged can remove a record the supervisor rewrote in between. Takes the same `--pid=` and `--all`. |
-| `bun run storybook` | Start Storybook on a port allocated through the same registry, so two worktrees never announce one port. `OPENBOT_STORYBOOK_PORT` moves where the search starts; `--port` is refused. |
-| `bun run build-storybook` | Build static Storybook. CI sets `OPENBOT_STORYBOOK_CHECK=true` to skip automatic prop documentation during its build check. |
+| `bun run storybook` | Start Storybook on a port allocated through the same registry, so two worktrees never announce one port. `DANI_DEX_STORYBOOK_PORT` moves where the search starts; `--port` is refused. |
+| `bun run build-storybook` | Build static Storybook. CI sets `DANI_DEX_STORYBOOK_CHECK=true` to skip automatic prop documentation during its build check. |
 | `bun run dev:automation` | Drive the running dev app over CDP: `instances`, `pages`, `snapshot`, `screenshot`, `click`/`type` by accessible role. `--page=<target-id\|url-substring>` aims at any window, including embedded browser views; `--wait-for=<role>,<name>` settles on an accessible target instead of polling; mutations need `--allow-mutations` and a named instance (this worktree's record, `--instance=<id>` or `--port=`). |
 | `bun run dev:cpu` | Measure idle CPU on the running dev app, per process kind and per page. `--duration=<ms>` (default 60000), `--interval=<ms>` (default 5000), `--label=<name>`, `--out=<name>.json` (always under `.openbot-build/dev-automation/cpu/`, and refused if it would leave that directory or pass through a symbolic link) and `--compare=<file>` for a before/after delta. Read-only. Take a baseline before a change and a second run after it: only the difference between two runs on the same machine is a result, because a dev build carries the Vite server and the source maps as well. |
 | `bun run check` | Run Biome, both typechecks, offline tests, the browser smoke test, and the production build. |
@@ -241,7 +241,7 @@ Optional scripts, references, and assets follow the Codex skill folder structure
 | `bun run test:browser` | Run the complete local embedded-browser smoke test, including cross-process persistence. Use `--scenario=controls`, `--scenario=tool-boundary`, `--scenario=evaluation`, `--scenario=wait-deadlines`, or `--scenario=popups` for one isolated scenario. |
 | `bun run test:codex` | Probe the real CLI handshake and account without starting a paid turn. |
 | `bun run test:durations` | Re-record how long each desktop test file takes. CI splits its shards by this table, so run it when the two shards stop finishing together. |
-| `bun run cua-driver:doctor` | Print, as JSON, which `cua-driver` binary Dani-Dex would use for Computer Use, and the driver's own `doctor` report. Read-only, and it starts no daemon. `OPENBOT_CUA_DRIVER_PATH` selects a different binary in a checkout; an installed application runs only the driver it was released with. |
+| `bun run cua-driver:doctor` | Print, as JSON, which `cua-driver` binary Dani-Dex would use for Computer Use, and the driver's own `doctor` report. Read-only, and it starts no daemon. `DANI_DEX_CUA_DRIVER_PATH` selects a different binary in a checkout; an installed application runs only the driver it was released with. |
 | `bun run prepare:cua-driver` | Write the pinned Computer Use driver to `build/cua-driver/<platform>/<arch>`, verifying every SHA-256 in `native-runtime.lock.json`. Name another target with `bun scripts/install-cua-driver.ts <platform> <arch>`. Every packaging command runs this first. |
 | `bun run pin:cua-driver <version>` | Print a new `cuaDriver` block for `native-runtime.lock.json` from a published `cua-driver` release. Downloads all three targets and hashes each shipped file. |
 | `bun run package` | Build an unpacked local ARM64 application. |
@@ -275,7 +275,7 @@ Production mobile analytics setup and required OpenPanel credentials are documen
 `mobile:go:tunnel` exposes only the Expo development server. It does not expose the local account
 API, Signal, or TURN. A phone on 5G cannot use the default LAN addresses. For a test across networks,
 use a VPN that connects both devices, or provide HTTPS and WSS endpoints that forward to this dev
-stack's account API and Signal ports. Set `OPENBOT_MOBILE_AUTH_API_URL` to the reachable account API
+stack's account API and Signal ports. Set `DANI_DEX_MOBILE_AUTH_API_URL` to the reachable account API
 origin and `REMOTE_SIGNAL_URL` to the reachable Signal URL, including `/v1/signal`, before starting
 `bun run dev`. Use the ports reported by `bun run dev:status`; they can differ between worktrees.
 If direct WebRTC cannot connect, `TURN_HOST` must name a reachable coturn service and
@@ -296,7 +296,7 @@ that terminal is gone. Never stop a dev stack with `pkill -f electron` or `pkill
 machine running several worktrees those kill the other checkouts' work mid-write, which is what
 `dev:status` and `dev:stop` exist to make unnecessary.
 
-Set `OPENBOT_DEV_ICE_TRANSPORT_POLICY=relay` before this command to force Team API traffic through
+Set `DANI_DEX_DEV_ICE_TRANSPORT_POLICY=relay` before this command to force Team API traffic through
 coturn. This test option works only with the development renderer. Production always starts with `all`.
 
 The normal `check` command is offline and uses a fake App Server. Manual smoke scripts may use the

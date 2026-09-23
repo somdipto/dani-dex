@@ -27,7 +27,7 @@ export interface CuaDriverArtifactInput {
   homeDirectory: string;
   /** `PATH` as the process received it, or `null` when it is unset. */
   pathVariable: string | null;
-  /** `OPENBOT_CUA_DRIVER_PATH`, then the driver's own `CUA_DRIVER_PATH`. */
+  /** `DANI_DEX_CUA_DRIVER_PATH`, then the driver's own `CUA_DRIVER_PATH`. */
   overrides?: readonly (string | undefined)[];
   /** `CUA_DRIVER_RS_INSTALL_DIR` and its legacy alias `CUA_DRIVER_BIN_DIR`, the installer's own override. */
   installDirectory?: string;

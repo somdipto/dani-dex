@@ -24,8 +24,8 @@ export default defineConfig(({ command }) => {
       assetsInlineLimit: (file) => (file.endsWith(".vtt") ? false : undefined),
     },
     server: {
-      host: readApiHost(process.env.OPENBOT_API_HOST),
-      port: readApiPort(process.env.OPENBOT_API_PORT),
+      host: readApiHost(process.env.DANI_DEX_API_HOST),
+      port: readApiPort(process.env.DANI_DEX_API_PORT),
       strictPort: true,
       allowedHosts: [".openbot.localhost"],
     },
@@ -52,7 +52,7 @@ function readApiPort(value: string | undefined): number {
   if (value === undefined || value.trim() === "") return 3_100;
   const port = Number(value);
   if (!Number.isInteger(port) || port < 1_024 || port > 65_535) {
-    throw new Error("OPENBOT_API_PORT must be an integer from 1024 to 65535.");
+    throw new Error("DANI_DEX_API_PORT must be an integer from 1024 to 65535.");
   }
   return port;
 }
@@ -76,5 +76,5 @@ function developmentLanGuard(): Plugin {
 function readApiHost(value: string | undefined): "127.0.0.1" | "0.0.0.0" {
   if (value === undefined || value.trim() === "") return "127.0.0.1";
   if (value === "127.0.0.1" || value === "0.0.0.0") return value;
-  throw new Error("OPENBOT_API_HOST must be 127.0.0.1 or 0.0.0.0.");
+  throw new Error("DANI_DEX_API_HOST must be 127.0.0.1 or 0.0.0.0.");
 }

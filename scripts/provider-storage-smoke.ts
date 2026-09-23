@@ -19,7 +19,7 @@ import {
   getString,
 } from "../src/backend/protocol";
 
-const EXPECTED = "OPENBOT_SQLITE_SMOKE_OK";
+const EXPECTED = "DANI_DEX_SQLITE_SMOKE_OK";
 const root = await mkdtemp(join(tmpdir(), "openbot-provider-storage-smoke-"));
 
 try {

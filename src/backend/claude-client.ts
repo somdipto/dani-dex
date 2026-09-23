@@ -16,7 +16,7 @@ import { defaultProviderModel } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { AgentProvider } from "./agent-client";
-import { BROWSER_TOOL_DEFINITIONS, OPENBOT_BROWSER_NAMESPACE } from "./browser-tools";
+import { BROWSER_TOOL_DEFINITIONS, DANI_DEX_BROWSER_NAMESPACE } from "./browser-tools";
 import type { ClaudeCliInfo } from "./cli";
 import {
   claudeMcpServers,
@@ -26,7 +26,7 @@ import {
   type McpToolRuntimeSource,
   usableMcpServers,
 } from "./mcp-provider-shapes";
-import { OPENBOT_TOOL_DEFINITIONS } from "./openbot-tools";
+import { DANI_DEX_TOOL_DEFINITIONS } from "./openbot-tools";
 import {
   type AccountRateLimitsReadResult,
   type AccountRateLimitWindowResult,
@@ -936,11 +936,11 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
       this.#callDynamicTool(threadId, namespace, name, args);
     return {
       openbot_browser: createSdkMcpServer({
-        name: OPENBOT_BROWSER_NAMESPACE,
+        name: DANI_DEX_BROWSER_NAMESPACE,
         version: "0.2.0",
         tools: BROWSER_TOOL_DEFINITIONS.map((definition) =>
           tool(definition.name, definition.description, definition.shape, (args) =>
-            call(OPENBOT_BROWSER_NAMESPACE, definition.name, args),
+            call(DANI_DEX_BROWSER_NAMESPACE, definition.name, args),
           ),
         ),
       }),
@@ -948,7 +948,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
         name: "openbot",
         version: "0.1.0",
         // Claude uses the SDK's AskUserQuestion permission flow.
-        tools: OPENBOT_TOOL_DEFINITIONS.filter((definition) => definition.name !== "ask_user").map((definition) =>
+        tools: DANI_DEX_TOOL_DEFINITIONS.filter((definition) => definition.name !== "ask_user").map((definition) =>
           tool(definition.name, definition.description, definition.shape, (args) =>
             call("openbot", definition.name, args),
           ),

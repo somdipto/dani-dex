@@ -45,7 +45,7 @@ export function prepareDevelopmentWorktree(
 
   run(executable, ["run", "dev:seed", "--if-missing"], {
     ...options,
-    env: { ...process.env, OPENBOT_DEV_INSTANCE_ID: instanceId },
+    env: { ...process.env, DANI_DEX_DEV_INSTANCE_ID: instanceId },
   });
   run(executable, ["run", "marketplace:seed:local"], options);
   return envFile;

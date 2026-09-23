@@ -180,14 +180,14 @@ describe("describeMcpError", () => {
   // `envPassthrough` names a variable this machine already holds, so an inherited credential is
   // never in `config.env` and the stored pairs alone would let it out.
   it("removes an inherited credential the configuration never stored", () => {
-    process.env.OPENBOT_TEST_MCP_TOKEN = "inherited-secret-value";
+    process.env.DANI_DEX_TEST_MCP_TOKEN = "inherited-secret-value";
     try {
-      const withPassthrough = config({ command: "node", envPassthrough: ["OPENBOT_TEST_MCP_TOKEN"] });
+      const withPassthrough = config({ command: "node", envPassthrough: ["DANI_DEX_TEST_MCP_TOKEN"] });
       const message = describeMcpError(new Error("Rejected inherited-secret-value"), withPassthrough, 10_000);
       expect(message).not.toContain("inherited-secret-value");
       expect(message).toContain("•••");
     } finally {
-      delete process.env.OPENBOT_TEST_MCP_TOKEN;
+      delete process.env.DANI_DEX_TEST_MCP_TOKEN;
     }
   });
 

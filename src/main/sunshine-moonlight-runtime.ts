@@ -579,8 +579,8 @@ export class SunshineMoonlightRuntime {
     );
     const contents =
       this.#options.platform === "win32"
-        ? "@powershell.exe -NoProfile -NonInteractive -Command \"Invoke-RestMethod -Headers @{Authorization=('Bearer ' + $env:OPENBOT_ICE_HELPER_TOKEN)} -Uri $env:OPENBOT_ICE_HELPER_URL | ConvertTo-Json -Compress\"\r\n"
-        : `#!/bin/sh\nprintf 'header = "Authorization: Bearer %s"\\nurl = "%s"\\n' "$OPENBOT_ICE_HELPER_TOKEN" "$OPENBOT_ICE_HELPER_URL" | /usr/bin/curl --fail --silent --show-error --config -\n`;
+        ? "@powershell.exe -NoProfile -NonInteractive -Command \"Invoke-RestMethod -Headers @{Authorization=('Bearer ' + $env:DANI_DEX_ICE_HELPER_TOKEN)} -Uri $env:DANI_DEX_ICE_HELPER_URL | ConvertTo-Json -Compress\"\r\n"
+        : `#!/bin/sh\nprintf 'header = "Authorization: Bearer %s"\\nurl = "%s"\\n' "$DANI_DEX_ICE_HELPER_TOKEN" "$DANI_DEX_ICE_HELPER_URL" | /usr/bin/curl --fail --silent --show-error --config -\n`;
     await writeFile(path, contents, { mode: 0o700 });
     if (this.#options.platform !== "win32") await chmod(path, 0o700);
   }
@@ -629,7 +629,7 @@ export class SunshineMoonlightRuntime {
     this.#screenCaptureDenied = false;
     this.#sunshine = this.#spawn(this.#options.paths.sunshine, [join(this.#options.stateDirectory, "sunshine.conf")], {
       cwd: dirname(this.#options.paths.sunshine),
-      env: { ...process.env, OPENBOT_REMOTE_SETUP: "1" },
+      env: { ...process.env, DANI_DEX_REMOTE_SETUP: "1" },
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
     });
@@ -657,8 +657,8 @@ export class SunshineMoonlightRuntime {
         cwd: dirname(this.#options.paths.moonlightWebServer),
         env: {
           ...process.env,
-          OPENBOT_ICE_HELPER_URL: iceEndpoint,
-          OPENBOT_ICE_HELPER_TOKEN: this.#iceToken,
+          DANI_DEX_ICE_HELPER_URL: iceEndpoint,
+          DANI_DEX_ICE_HELPER_TOKEN: this.#iceToken,
         },
         stdio: ["ignore", "pipe", "pipe"],
         windowsHide: true,

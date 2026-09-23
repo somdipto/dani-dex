@@ -278,7 +278,7 @@ export class ProviderRuntimeManager extends EventEmitter<ProviderRuntimeManagerE
   async download(runtime: ManagedRuntimeId): Promise<ProviderRuntimeSnapshot> {
     if (!this.#target) throw new Error("Provider runtimes are not available on this platform.");
     if (this.#stopping) throw new Error("Dani-Dex is closing.");
-    // Only a provider CLI has a path override; nothing points `OPENBOT_BUN_PATH` at a tool runtime.
+    // Only a provider CLI has a path override; nothing points `DANI_DEX_BUN_PATH` at a tool runtime.
     if (!isManagedToolRuntime(runtime) && configuredCliPath(runtime))
       throw new Error("Remove the explicit CLI path override before updating in Dani-Dex.");
     if (this.#statuses[runtime].phase === "ready" || this.#tasks.has(runtime)) return this.getStatus();

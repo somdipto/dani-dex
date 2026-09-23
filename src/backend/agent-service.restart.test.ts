@@ -284,7 +284,7 @@ describe.sequential("AgentService: restart", () => {
   });
 
   it("recovers an interrupted Claude answer under its saved ID after a provider switch", async () => {
-    process.env.OPENBOT_CLAUDE_PATH = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = await createFakeClaude(root);
     const { store, mailbox } = stores(root);
     await store.initialize();
     await store.getOrCreate("chief");
@@ -383,7 +383,7 @@ describe.sequential("AgentService: restart", () => {
   });
 
   it("unarchives a stored Codex thread and resumes the queued delivery", async () => {
-    process.env.OPENBOT_FAKE_ARCHIVED_THREAD = "1";
+    process.env.DANI_DEX_FAKE_ARCHIVED_THREAD = "1";
     const { store, mailbox } = stores(root);
     service = createTestService({ store, mailbox });
     const events: AgentEvent[] = [];

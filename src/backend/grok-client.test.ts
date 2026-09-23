@@ -30,15 +30,15 @@ beforeEach(async () => {
   logPath = join(root, "fake-grok.jsonl");
   await writeFile(executable, FAKE_GROK_ACP);
   await chmod(executable, 0o700);
-  process.env.OPENBOT_FAKE_GROK_LOG = logPath;
-  delete process.env.OPENBOT_FAKE_GROK_MODE;
+  process.env.DANI_DEX_FAKE_GROK_LOG = logPath;
+  delete process.env.DANI_DEX_FAKE_GROK_MODE;
 });
 
 afterEach(async () => {
   await client?.stop();
   client = null;
-  delete process.env.OPENBOT_FAKE_GROK_LOG;
-  delete process.env.OPENBOT_FAKE_GROK_MODE;
+  delete process.env.DANI_DEX_FAKE_GROK_LOG;
+  delete process.env.DANI_DEX_FAKE_GROK_MODE;
   await rm(root, { recursive: true, force: true });
 });
 
@@ -82,7 +82,7 @@ describe.sequential("GrokAgentClient", () => {
     ["answer", "completed"],
     ["cancel", "interrupted"],
   ])("handles OpenCode %s turns and allows a retry in the same session", async (mode, status) => {
-    process.env.OPENBOT_FAKE_GROK_MODE = `opencode-${mode}`;
+    process.env.DANI_DEX_FAKE_GROK_MODE = `opencode-${mode}`;
     client = new AcpAgentClient({ executable, version: "1.3.13" }, 5_000, {
       provider: "opencode",
       argv: ["acp"],
@@ -142,7 +142,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it("explains rejected OpenCode credentials and permits retry in the same session", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "opencode-auth-error";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "opencode-auth-error";
     client = new AcpAgentClient({ executable, version: "1.18.30" }, 5_000, {
       provider: "opencode",
       argv: ["acp"],
@@ -170,7 +170,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it.each(["grok", "opencode"] as const)("keeps %s tool names when completion updates omit them", async (provider) => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "end_turn";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "end_turn";
     client = new AcpAgentClient({ executable, version: "1.18.30" }, 5_000, {
       provider,
       argv: ["acp"],
@@ -234,7 +234,7 @@ describe.sequential("GrokAgentClient", () => {
   it.each(["end_turn", "cancelled", "max_tokens"])(
     "shows only the final segment in chat when Grok ends with %s",
     async (stopReason) => {
-      process.env.OPENBOT_FAKE_GROK_MODE = stopReason;
+      process.env.DANI_DEX_FAKE_GROK_MODE = stopReason;
       client = new GrokAgentClient({ executable, version: "1.0.5" }, 5_000);
       const notifications: AppServerNotification[] = [];
       client.on("notification", (notification) => notifications.push(notification));
@@ -315,7 +315,7 @@ describe.sequential("GrokAgentClient", () => {
     });
     await client.stop();
 
-    process.env.OPENBOT_FAKE_GROK_MODE = "monthly-billing";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "monthly-billing";
     client = new GrokAgentClient({ executable, version: "1.0.5" }, 5_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -329,7 +329,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it("reports unavailable usage for a unified weekly billing period without quota values", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "unified-billing";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "unified-billing";
     client = new GrokAgentClient({ executable, version: "1.0.13" }, 5_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -340,7 +340,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it("times out a billing request that stops responding", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "hung-billing";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "hung-billing";
     client = new GrokAgentClient({ executable, version: "1.0.13" }, 1_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -516,7 +516,7 @@ describe.sequential("GrokAgentClient", () => {
   );
 
   it("rediscovers Grok models without restarting and closes discovery sessions", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "refresh-models";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "refresh-models";
     client = new GrokAgentClient({ executable, version: "1.0.13" }, 5_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -530,7 +530,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it("bounds Grok model discovery by the caller timeout", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "hung-models";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "hung-models";
     client = new GrokAgentClient({ executable, version: "1.0.13" }, 5_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -540,7 +540,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it("uses one neutral effort when thought_level is not advertised", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "no-thought";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "no-thought";
     client = new GrokAgentClient({ executable, version: "1.0.5" }, 5_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -556,7 +556,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it("discovers and applies per-model reasoning efforts from Grok metadata", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "model-metadata";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "model-metadata";
     client = new GrokAgentClient({ executable, version: "1.0.13" }, 5_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -617,7 +617,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it("supports Grok's legacy ACP model catalog and session/set_model", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "legacy-models";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "legacy-models";
     client = new GrokAgentClient({ executable, version: "1.0.5" }, 5_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -638,7 +638,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it("reports auth as signed out and rejects empty model discovery without a fallback", async () => {
-    process.env.OPENBOT_FAKE_GROK_MODE = "auth-error";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "auth-error";
     client = new GrokAgentClient({ executable, version: "1.0.5" }, 5_000);
     client.start();
     await client.request("initialize", {}, decodeRecordResponse);
@@ -646,7 +646,7 @@ describe.sequential("GrokAgentClient", () => {
     expect((await readLog()).some((entry) => entry.method === "_x.ai/auth/info")).toBe(false);
     await client.stop();
 
-    process.env.OPENBOT_FAKE_GROK_MODE = "no-model";
+    process.env.DANI_DEX_FAKE_GROK_MODE = "no-model";
     client = new GrokAgentClient({ executable, version: "1.0.5" }, 5_000);
     client.start();
     await expect(client.request("initialize", {}, decodeRecordResponse)).rejects.toThrow(
@@ -657,7 +657,7 @@ describe.sequential("GrokAgentClient", () => {
   it.each(["unsupported-auth-info", "malformed-auth-info", "oversized-auth-info"])(
     "keeps Grok signed in when account identity is %s",
     async (mode) => {
-      process.env.OPENBOT_FAKE_GROK_MODE = mode;
+      process.env.DANI_DEX_FAKE_GROK_MODE = mode;
       client = new GrokAgentClient({ executable, version: "1.0.22" }, 5_000);
       client.start();
       await client.request("initialize", {}, decodeRecordResponse);
@@ -695,8 +695,8 @@ const FAKE_GROK_ACP = String.raw`#!/usr/bin/env node
 import { appendFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 
-const logPath = process.env.OPENBOT_FAKE_GROK_LOG;
-const mode = process.env.OPENBOT_FAKE_GROK_MODE || "normal";
+const logPath = process.env.DANI_DEX_FAKE_GROK_LOG;
+const mode = process.env.DANI_DEX_FAKE_GROK_MODE || "normal";
 let sessionCounter = 0;
 let promptCounter = 0;
 let pendingPrompt = null;

@@ -352,8 +352,8 @@ function createHarness(stateDirectory: string): Harness {
         return child;
       }
       if (executable === TEST_PATHS.moonlightWebServer) {
-        harness.iceUrl = options.env?.OPENBOT_ICE_HELPER_URL ?? "";
-        harness.iceToken = options.env?.OPENBOT_ICE_HELPER_TOKEN ?? "";
+        harness.iceUrl = options.env?.DANI_DEX_ICE_HELPER_URL ?? "";
+        harness.iceToken = options.env?.DANI_DEX_ICE_HELPER_TOKEN ?? "";
         const configPath = args[args.indexOf("--config-path") + 1];
         harness.pairingName = moonlightConfigFileSchema.parse(
           JSON.parse(readFileSync(configPath, "utf8")),

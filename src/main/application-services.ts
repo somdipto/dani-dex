@@ -304,12 +304,12 @@ export async function createApplicationServices({
   });
   teardown.push(TEARDOWN_ORDER.dynamicIsland, "the Dynamic Island", () => dynamicIsland.destroy());
   const centralAuthApiUrl = readCentralAuthApiUrl(
-    process.env.OPENBOT_AUTH_API_URL,
+    process.env.DANI_DEX_AUTH_API_URL,
     app.isPackaged ? "https://api.openbot.run" : "http://127.0.0.1:3100",
   );
   const centralAuth = new CentralAuthManager({
     apiUrl: centralAuthApiUrl,
-    mobileConnectApiUrl: readMobileConnectApiUrl(process.env.OPENBOT_MOBILE_AUTH_API_URL, centralAuthApiUrl),
+    mobileConnectApiUrl: readMobileConnectApiUrl(process.env.DANI_DEX_MOBILE_AUTH_API_URL, centralAuthApiUrl),
     storagePath: join(app.getPath("userData"), CENTRAL_AUTH_FILE),
     canPersist: () => safeStorage.isEncryptionAvailable(),
     encrypt: (value) => {
@@ -398,7 +398,7 @@ export async function createApplicationServices({
   const developmentUrl = process.env.ELECTRON_RENDERER_URL;
   const teamWebRtcBridge = new TeamWebRtcBridge({
     developmentUrl,
-    iceTransportPolicy: developmentUrl && process.env.OPENBOT_DEV_ICE_TRANSPORT_POLICY === "relay" ? "relay" : "all",
+    iceTransportPolicy: developmentUrl && process.env.DANI_DEX_DEV_ICE_TRANSPORT_POLICY === "relay" ? "relay" : "all",
   });
   teamWebRtcBridge.on("accountProfileChanged", refreshAccountProfile);
   teardown.push(TEARDOWN_ORDER.teamWebRtcBridge, "the team WebRTC bridge", () => teamWebRtcBridge.stop());
@@ -577,7 +577,7 @@ export async function createApplicationServices({
       architecture: process.arch,
       homeDirectory: homedir(),
       pathVariable: process.env.PATH ?? null,
-      overrides: [process.env.OPENBOT_CUA_DRIVER_PATH, process.env.CUA_DRIVER_PATH],
+      overrides: [process.env.DANI_DEX_CUA_DRIVER_PATH, process.env.CUA_DRIVER_PATH],
       installDirectory: process.env.CUA_DRIVER_RS_INSTALL_DIR ?? process.env.CUA_DRIVER_BIN_DIR,
       localAppDataDirectory: process.env.LOCALAPPDATA,
       applicationsDirectory: "/Applications",
@@ -822,7 +822,7 @@ export async function createApplicationServices({
     sourceRoot: resolve(__dirname, "../.."),
     platform: process.platform === "darwin" || process.platform === "win32" ? process.platform : "linux",
     architecture: process.arch,
-    overrideRoot: process.env.OPENBOT_REMOTE_DESKTOP_RUNTIME_PATH,
+    overrideRoot: process.env.DANI_DEX_REMOTE_DESKTOP_RUNTIME_PATH,
   });
   const host = new HostService({
     appVersion: app.getVersion(),

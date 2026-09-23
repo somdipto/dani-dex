@@ -84,7 +84,7 @@ Keep `index.ts` as the dispatcher and lifecycle module. Do not move these respon
 | `main-window.ts` | Every `BrowserWindow`, renderer URLs, menu, bounds recorder |
 | `main-window-state.ts` | Reading, resolving and debounce-writing saved window position |
 | `teardown-registry.ts` | Shutdown sequence |
-| `development-remote-bootstrap.ts` | Dev-only `OPENBOT_DEV_REMOTE_ROLE` account and connection |
+| `development-remote-bootstrap.ts` | Dev-only `DANI_DEX_DEV_REMOTE_ROLE` account and connection |
 | `session-configuration.ts` | Renderer CSP, bundle protocol, permissions, attachment/avatar/logo protocols |
 | `renderer-forwarders.ts` | Service events sent to the renderer |
 | `ipc/*-handlers.ts` | IPC endpoints by domain |
