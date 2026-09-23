@@ -261,10 +261,10 @@ function buildSunshine(source: string, version: string, commit: string): void {
     },
   );
   if (platform === "darwin") {
-    execFileSync("cmake", ["--build", build, "--config", "Release", "--target", "dani-dex-setup-test"], {
+    execFileSync("cmake", ["--build", build, "--config", "Release", "--target", "openbot-setup-test"], {
       stdio: "inherit",
     });
-    execFileSync(join(build, "dani-dex-setup-test"), [], { stdio: "inherit" });
+    execFileSync(join(build, "openbot-setup-test"), [], { stdio: "inherit" });
   }
 }
 
