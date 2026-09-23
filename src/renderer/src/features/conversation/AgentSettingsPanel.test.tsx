@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_MODELS } from "../../preview/fixtures";
-import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
 import AgentSettingsPanel, { type AgentRuntimeSettings } from "./AgentSettingsPanel";
 import { AgentSkillsModal } from "./AgentSkillsModal";
 

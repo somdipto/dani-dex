@@ -53,7 +53,7 @@ import {
   primeCompactModeLayerPositions,
   restoreModeTransitionFocus,
   waitForAnimations,
-} from "./openbot-dynamic-island-motion";
+} from "./dani-dex-dynamic-island-motion";
 
 export interface DaniDexDynamicIslandProps {
   presentation: DynamicIslandPresentation;

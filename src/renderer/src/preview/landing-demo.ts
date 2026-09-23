@@ -7,7 +7,7 @@ import {
   type LandingDemoScript,
   type LandingDirectDemoScript,
 } from "./landing-demo-scripts";
-import type { MockDaniDexControls } from "./mock-openbot";
+import type { MockDaniDexControls } from "./mock-dani-dex";
 
 interface LandingDemoControllerOptions {
   reducedMotion?: boolean;

@@ -3,7 +3,7 @@ import { expect, fireEvent, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { App } from "../src/App";
 import { DaniDexPlayground } from "../src/preview/DaniDexPlayground";
-import type { MockDaniDexOptions } from "../src/preview/mock-openbot";
+import type { MockDaniDexOptions } from "../src/preview/mock-dani-dex";
 import { STORY_AGENT_STATUS, STORY_AGENT_SUMMARIES, STORY_APP_INFO, STORY_SERVERS } from "./fixtures";
 
 const meta = {

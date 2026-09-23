@@ -98,7 +98,7 @@ Load a gate's reference when its trigger fires, not before. The trigger sets are
 a gate can be selected without opening anything:
 
 - **A. SQLite schema** → [gate-a-sqlite.md](references/gate-a-sqlite.md)
-  `src/backend/openbot-database-schema.ts`, `src/backend/database/`.
+  `src/backend/dani-dex-database-schema.ts`, `src/backend/database/`.
 - **B. On-disk state outside SQLite** → [gate-b-on-disk-state.md](references/gate-b-on-disk-state.md)
   `src/main/index.ts`, `src/backend/workspace-paths.ts`, `src/main/sunshine-moonlight-runtime.ts`,
   `electron-builder.yml`, **any file that decodes a versioned payload**, and **any file that reads
@@ -112,7 +112,7 @@ a gate can be selected without opening anything:
   audit defers its compatibility matrix to.
 - **D. IPC channels** → [gate-d-ipc.md](references/gate-d-ipc.md)
   `packages/contracts/src/ipc-channels.ts` **or any of its mirrors** — `src/main/index.ts`,
-  `src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/preview/mock-openbot.ts`. Deleting a
+  `src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/preview/mock-dani-dex.ts`. Deleting a
   handler or an `invoke` breaks a live channel without touching the list at all.
 - **E. Account Worker** → [gate-e-account-worker.md](references/gate-e-account-worker.md)
   any change under `apps/auth-api/migrations/`, any non-UI file under `apps/auth-api/src/`, and the

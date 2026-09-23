@@ -127,7 +127,7 @@ type EventBridge<Event> = {
 
 /**
  * Fans one stub event out to every subscriber, matching the real preload
- * (`ipcRenderer.on` + `removeListener`) and `preview/mock-openbot.ts`. A
+ * (`ipcRenderer.on` + `removeListener`) and `preview/mock-dani-dex.ts`. A
  * single-holder stub hides the two things that go wrong when state moves into
  * separate providers: a second subscription silently replaces the first, and a
  * missing cleanup is invisible because unsubscribing did nothing anyway.

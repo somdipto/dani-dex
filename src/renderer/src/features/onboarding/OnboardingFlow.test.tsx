@@ -13,7 +13,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ProviderCodeLoginState } from "../../components/ProviderCodeLoginDialog";
 import { Toaster, toast } from "../../components/ui";
 import { STORY_AGENT_STATUS } from "../../preview/fixtures";
-import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
 import { OnboardingFlow } from "./OnboardingFlow";
 
 let activeMock: MockDaniDexControls | undefined;

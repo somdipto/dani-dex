@@ -10,7 +10,7 @@ here registers anything: `index.ts` spreads them all into `registerIpcGroups`, w
 2. Add it to a group in `packages/contracts/src/ipc-endpoints.ts`, as `request(...)` or `event(...)`.
 3. Run `bun run typecheck`. It now names the file to change and the key to add.
 4. Add the handler here, the `invoke` in `src/preload/index.ts`, and the method in
-   `src/renderer/src/preview/mock-openbot.ts`.
+   `src/renderer/src/preview/mock-dani-dex.ts`.
 
 Step 3 is the point. Every step but the preload announces itself, and the preload is what
 `src/main/ipc-channel-coverage.test.ts` reads.

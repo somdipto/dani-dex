@@ -1,7 +1,7 @@
 import type { McpServerConfig, TestMcpServerInput } from "@dani-dex/contracts/ipc";
 import { render, waitFor } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it } from "vitest";
-import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
 import { takeMcpConfigDoorNotice } from "./mcp-servers";
 import { ServerSettingsProvider, useServerSettings } from "./server-settings";
 import { ServersProvider } from "./servers-context";

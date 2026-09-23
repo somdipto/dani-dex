@@ -2,7 +2,7 @@ import type { ComputerUseState, MacPermissionId } from "@dani-dex/contracts/ipc"
 import { onCleanup } from "solid-js";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { ComputerUseSetup } from "../src/features/computer-use/ComputerUseSetup";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 function permissions(granted: readonly MacPermissionId[]): ComputerUseState["permissions"] {
   return (["screen-recording", "accessibility"] as const).map((id) => ({ id, granted: granted.includes(id) }));

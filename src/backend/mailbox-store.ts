@@ -39,8 +39,8 @@ import {
 
 export type { ExportedAttachmentFile, GeneratedAttachmentSource } from "./attachment-files";
 
+import { DaniDexDatabase } from "./dani-dex-database";
 import { MailboxDeliveryGate } from "./mailbox-delivery-gate";
-import { DaniDexDatabase } from "./openbot-database";
 import { isRecord } from "./protocol";
 import { recordRestartActivity } from "./restart-activity";
 

@@ -11,6 +11,7 @@ import {
   readHostConfig,
   readOwnedJson,
 } from "../src/main/host-update-files";
+import { type HostAdminOperations, type HostTenant, validateHostNames } from "./dani-dex-host-service";
 import {
   HOST_AGENT_PLIST,
   HOST_DAEMON_PLIST,
@@ -31,7 +32,6 @@ import {
   verifySharedAppParent,
   verifySignature,
 } from "./host-manager-macos";
-import { type HostAdminOperations, type HostTenant, validateHostNames } from "./openbot-host-service";
 
 const exec = promisify(execFile);
 const createdSchema = z

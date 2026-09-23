@@ -22,7 +22,7 @@ Report a finding when the diff:
 - Duplicates a primitive that already exists in `src/renderer/src/components/ui`, or copies a shared
   primitive into a feature component instead of extending the shared one.
 - Changes an IPC-facing renderer surface without the matching update to
-  `src/renderer/src/preview/mock-openbot.ts`, which Storybook and the preview run against.
+  `src/renderer/src/preview/mock-dani-dex.ts`, which Storybook and the preview run against.
 - Adds a state a user can enter but not leave — a snooze with no unsnooze, a pause with no resume.
 
 Do **not** report:

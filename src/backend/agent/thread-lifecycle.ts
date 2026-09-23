@@ -7,6 +7,7 @@ import type { AgentClient, AgentProvider } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import { BROWSER_DYNAMIC_TOOLS } from "../browser-tools";
 import { mergeConversationSnapshots } from "../conversation-snapshots";
+import { DANI_DEX_DYNAMIC_TOOLS } from "../dani-dex-tools";
 import type { MailboxStore } from "../mailbox-store";
 import {
   type CodexDisabledMcpServer,
@@ -22,7 +23,6 @@ import {
   NO_MCP_TOOL_RUNTIMES,
   usableMcpServers,
 } from "../mcp-provider-shapes";
-import { DANI_DEX_DYNAMIC_TOOLS } from "../openbot-tools";
 import { decodeRecordResponse, decodeThreadResponse, getString, type ResponseDecoder } from "../protocol";
 import type { AgentMemories } from "./agent-memories";
 import type { ContextCompaction } from "./context-compaction";

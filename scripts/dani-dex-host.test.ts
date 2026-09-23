@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { validateTenantMetadata } from "./openbot-host-macos";
-import { type HostAdminOperations, parseHostSetup, setupHost, verifyHost } from "./openbot-host-service";
+import { validateTenantMetadata } from "./dani-dex-host-macos";
+import { type HostAdminOperations, parseHostSetup, setupHost, verifyHost } from "./dani-dex-host-service";
 
 function fixture() {
   const events: string[] = [];

@@ -4,7 +4,7 @@ import { expect, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import AgentSettingsPanel from "../src/features/conversation/AgentSettingsPanel";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_INSTALLED_SKILLS, STORY_MODELS } from "./fixtures";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 function AgentSkillsStory(props: {
   skills: InstalledSkill[];

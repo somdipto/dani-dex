@@ -4,7 +4,7 @@ import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { AgentUsagePanel } from "../src/features/usage/AgentUsagePanel";
 import { mockHostAnalytics } from "../src/preview/mock-agent-analytics";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 function UsageStory(props: {
   state: "ready" | "empty" | "partial" | "loading" | "error" | "unsupported" | "large" | "small" | "long";

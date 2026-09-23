@@ -4,7 +4,7 @@ import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { ServerSettingsModal, type ServerSettingsModalProps } from "../src/features/servers/ServerSettingsModal";
 import { STORY_HOST_STATUS, STORY_INVITES, STORY_PRESENCE, STORY_SERVERS } from "../src/preview/fixtures";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 const localServer = STORY_SERVERS.find((server) => server.kind === "local") ?? STORY_SERVERS[0];
 const remoteServer = STORY_SERVERS.find((server) => server.kind === "remote") ?? STORY_SERVERS[1];

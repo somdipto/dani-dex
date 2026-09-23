@@ -7,10 +7,10 @@ import type {
   DirectThreadSummary,
   ServerSummary,
 } from "@dani-dex/contracts/ipc";
-import developmentLogoUrl from "../assets/openbot-logo-dev.png";
-import productionLogoUrl from "../assets/openbot-logo-production.png";
+import developmentLogoUrl from "../assets/dani-dex-logo-dev.png";
+import productionLogoUrl from "../assets/dani-dex-logo-production.png";
 import { STORY_PRESENCE } from "./fixtures";
-import type { MockDaniDexOptions } from "./mock-openbot";
+import type { MockDaniDexOptions } from "./mock-dani-dex";
 
 const LANDING_PREVIEW_NOW = "2026-08-21T10:00:00.000Z";
 

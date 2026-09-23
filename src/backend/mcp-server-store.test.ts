@@ -6,8 +6,8 @@ import { join } from "node:path";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { McpServerConfig } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
+import { DaniDexDatabase } from "./dani-dex-database";
 import { McpServerStore } from "./mcp-server-store";
-import { DaniDexDatabase } from "./openbot-database";
 
 const roots: string[] = [];
 

@@ -60,7 +60,7 @@ State which surfaces a change touches. Check all affected consumers and reverse 
 - Desktop renderer (`src/renderer`), mobile (`apps/mobile`), public web (`apps/auth-api`; no separate
   landing app), hosted-site routing (`apps/site-router`), and Signal (`remote/api`).
 - IPC contracts (`packages/contracts`) and their preview implementation
-  (`src/renderer/src/preview/mock-openbot.ts`).
+  (`src/renderer/src/preview/mock-dani-dex.ts`).
 - Reverse actions: snooze/unsnooze, pause/resume, revoke/reconnect, mute/unmute.
 - Migrations and the separate latest schema for new databases.
 - Documentation: `README.md` commands, `docs/ARCHITECTURE.md`, and `PRIVACY.md` when outbound data

@@ -25,8 +25,8 @@ import { z } from "zod";
 import { ChannelHistory, type ChannelTextModel } from "./channel-history";
 import { ChannelMemoryStore } from "./channel-memory-store";
 import { type ChannelAssignment, ChannelStore } from "./channel-store";
+import type { DaniDexDatabase } from "./dani-dex-database";
 import type { DeliveryContext, MailboxStore } from "./mailbox-store";
-import type { DaniDexDatabase } from "./openbot-database";
 import { StructuredOutputError, structuredOutput } from "./structured-output";
 
 export interface ChannelHooks {

@@ -14,7 +14,7 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it } from "vitest";
-import { DaniDexDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./dani-dex-database";
 
 const roots: string[] = [];
 

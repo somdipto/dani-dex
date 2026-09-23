@@ -45,7 +45,7 @@ import { type DynamicRecord, isBoolean, isNumber, isOneOf, isString } from "@dan
 import { isGeneratedAgentId, isUuidV4, legacyAgentId } from "@dani-dex/contracts/validation";
 import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { ProfileCreationRecovery } from "./agent/profile-creation-recovery";
-import { DaniDexDatabase, type ProviderSession, stableThreadId } from "./openbot-database";
+import { DaniDexDatabase, type ProviderSession, stableThreadId } from "./dani-dex-database";
 import { isRecord } from "./protocol";
 
 type StoredAgent = AgentSummary;

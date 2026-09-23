@@ -1,4 +1,4 @@
-# Gate A — SQLite schema — `src/backend/openbot-database-schema.ts`
+# Gate A — SQLite schema — `src/backend/dani-dex-database-schema.ts`
 
 Triggered by any change to that file or to `src/backend/database/`.
 
@@ -6,7 +6,7 @@ Triggered by any change to that file or to `src/backend/database/`.
   tag**. Read that number, never remember it:
 
   ```bash
-  git show "<tag>:src/backend/openbot-database-schema.ts" | grep -E 'version: [0-9]+' | tail -1
+  git show "<tag>:src/backend/dani-dex-database-schema.ts" | grep -E 'version: [0-9]+' | tail -1
   ```
 
   A literal written into this file would go stale the first time a migration ships and would then
@@ -23,7 +23,7 @@ Triggered by any change to that file or to `src/backend/database/`.
   every other one. Derive the bodies from the registry instead:
 
   ```bash
-  git show "<tag>:src/backend/openbot-database-schema.ts" | grep -E '^\s+up: [a-zA-Z]' | sort -u
+  git show "<tag>:src/backend/dani-dex-database-schema.ts" | grep -E '^\s+up: [a-zA-Z]' | sort -u
   ```
 
   Read every hunk of the diff for each function it names, not the stat. A database that already
@@ -44,7 +44,7 @@ Triggered by any change to that file or to `src/backend/database/`.
   nothing. Two names against nine is the difference this makes; derive it rather than listing it:
 
   ```bash
-  schema() { git show "${1}:src/backend/openbot-database-schema.ts"; }
+  schema() { git show "${1}:src/backend/dani-dex-database-schema.ts"; }
   frozen() {
     src=$(schema "$1")
     defs=$(printf '%s\n' "$src" | grep -oE '^function [a-zA-Z0-9_]+' | awk '{print $2}' | sort -u)
@@ -75,11 +75,11 @@ Triggered by any change to that file or to `src/backend/database/`.
 - Data-preservation fixtures for every shipped source schema, plus failure, rollback, retry,
   downgrade, missing-version, foreign-key and integrity coverage, per `src/backend/AGENTS.md`.
 - Confirm the downgrade guard still names the new `LATEST_SCHEMA_VERSION` — the test is
-  "rejects a database created by a newer application" in `src/backend/openbot-database.test.ts`.
+  "rejects a database created by a newer application" in `src/backend/dani-dex-database.test.ts`.
 
 ```bash
-bun run test:desktop -- src/backend/openbot-database-schema-parity.test.ts
-bun run test:desktop -- src/backend/openbot-database.test.ts
+bun run test:desktop -- src/backend/dani-dex-database-schema-parity.test.ts
+bun run test:desktop -- src/backend/dani-dex-database.test.ts
 ```
 
 The parity test builds a database both ways and compares normalised `sqlite_master` and

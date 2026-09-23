@@ -11,8 +11,8 @@ import { z } from "zod";
 import { AgentStore } from "./agent-store";
 import { ClaudeAgentClient } from "./claude-client";
 import { mergeProviderHistory, newAssistantMessage, snapshotFromThread } from "./conversation-snapshots";
+import { DANI_DEX_DYNAMIC_TOOLS } from "./dani-dex-tools";
 import { loginShellPath } from "./mcp-provider-shapes";
-import { DANI_DEX_DYNAMIC_TOOLS } from "./openbot-tools";
 import {
   decodeAccountRateLimitsReadResult,
   decodeAccountReadResult,

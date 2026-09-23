@@ -106,7 +106,7 @@ up on `EXDEV` or a permission error while the message paths have already been re
 
 ## Migration constants
 
-All in `src/backend/openbot-database-schema.ts`:
+All in `src/backend/dani-dex-database-schema.ts`:
 
 | Constant | Value or meaning |
 | --- | --- |
@@ -118,8 +118,8 @@ All in `src/backend/openbot-database-schema.ts`:
 | `validateMigrationRegistry` | throws on a non-contiguous version |
 | `createLatestDatabase` | execs `LATEST_SCHEMA_SQL`, then stamps every `MIGRATIONS` entry as applied without running it |
 
-Tests: `src/backend/openbot-database-schema-parity.test.ts` (the two build paths must agree),
-`src/backend/openbot-database.test.ts` (including "rejects a database created by a newer
+Tests: `src/backend/dani-dex-database-schema-parity.test.ts` (the two build paths must agree),
+`src/backend/dani-dex-database.test.ts` (including "rejects a database created by a newer
 application").
 
 ## Team API protocol
@@ -152,7 +152,7 @@ untouched — they already spell the agent `agent` on both sides.
 | --- | --- |
 | `src/main/index.ts` and `src/main/ipc/` | the `handleTrusted` registrations, one file per domain |
 | `src/preload/index.ts` | the `invoke` calls the renderer reaches |
-| `src/renderer/src/preview/mock-openbot.ts` | the second implementation Storybook and the preview run against |
+| `src/renderer/src/preview/mock-dani-dex.ts` | the second implementation Storybook and the preview run against |
 
 `src/main/ipc-channel-coverage.test.ts` links main and preload statically. The mock is covered by
 `tsc` in both directions because it is annotated `: DaniDexDesktopApi`.

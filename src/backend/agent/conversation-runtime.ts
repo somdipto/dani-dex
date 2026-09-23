@@ -2,7 +2,7 @@ import type { AgentEvent, AgentSummary, ConversationSnapshot } from "@dani-dex/c
 import type { AgentClient } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import { sortConversationMessages } from "../conversation-snapshots";
-import type { DaniDexDatabase } from "../openbot-database";
+import type { DaniDexDatabase } from "../dani-dex-database";
 import { conversationContentSignature } from "./delivery-content";
 
 interface TransactionScope {

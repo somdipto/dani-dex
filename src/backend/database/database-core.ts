@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { chmod, copyFile, mkdir, readFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { migrateDaniDexDatabase } from "../openbot-database-schema";
+import { migrateDaniDexDatabase } from "../dani-dex-database-schema";
 import { databaseRow, errorCode, requiredNumberColumn, requiredStringColumn } from "./database-rows";
 
 export interface OrchestrationEventInput {

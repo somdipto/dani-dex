@@ -15,7 +15,7 @@ import { DatabaseSync } from "node:sqlite";
 import type { DynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it } from "vitest";
-import { migrateDaniDexDatabase } from "./openbot-database-schema";
+import { migrateDaniDexDatabase } from "./dani-dex-database-schema";
 
 const appliedAt = "2026-09-03T10:00:00.000Z";
 

@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { Button, Heading, Text, Toaster, toast } from "../src/components/ui";
 import { SkillsMarketplaceModal } from "../src/features/settings/SkillsMarketplaceModal";
 import { STORY_AGENT_SUMMARIES, STORY_MARKETPLACE_PLUGINS } from "../src/preview/fixtures";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 const storyAgents: Array<Pick<AgentSummary, "id" | "name" | "marketplaceSource">> = STORY_AGENT_SUMMARIES.map(
   (agent) => ({ id: agent.id, name: agent.name }),

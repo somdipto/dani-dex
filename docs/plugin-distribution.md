@@ -209,7 +209,7 @@ does over `packages/contracts/src/ipc-mcp-servers.ts`.
 
 New channels: `plugins:list`, `plugins:get`, `plugins:install-state`, `plugins:install`,
 `plugins:uninstall`. Each one gets a decoder in `src/preload/index.ts` and a mirror in
-`src/renderer/src/preview/mock-openbot.ts`. `src/main/ipc-channel-coverage.test.ts` enforces the
+`src/renderer/src/preview/mock-dani-dex.ts`. `src/main/ipc-channel-coverage.test.ts` enforces the
 mirror.
 
 ## 3. What "Install plugin" does

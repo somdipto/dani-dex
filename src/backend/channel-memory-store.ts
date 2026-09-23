@@ -1,7 +1,7 @@
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { ChannelMemory } from "@dani-dex/contracts/ipc";
+import type { DaniDexDatabase } from "./dani-dex-database";
 import { MemoryStore, type MemoryTables } from "./memory-store";
-import type { DaniDexDatabase } from "./openbot-database";
 
 const CHANNEL_MEMORY_TABLES: MemoryTables = {
   table: "projection_channel_memories",

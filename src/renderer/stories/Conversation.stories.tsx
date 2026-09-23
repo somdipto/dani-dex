@@ -35,7 +35,7 @@ import {
   STORY_REMOTE_DESKTOP_SESSION,
   STORY_SERVERS,
 } from "./fixtures";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 const messages: RendererAgentMessage[] = STORY_CONVERSATION_MESSAGES.map((message) => ({
   id: message.id,
@@ -146,8 +146,8 @@ const imageGenerationMessages: RendererAgentMessage[] = [
   },
 ];
 
-const generatedImagePreview = new URL("../src/assets/openbot-logo-production.png", import.meta.url).href;
-const generatedImagePreviewAlternate = new URL("../src/assets/openbot-logo-dev.png", import.meta.url).href;
+const generatedImagePreview = new URL("../src/assets/dani-dex-logo-production.png", import.meta.url).href;
+const generatedImagePreviewAlternate = new URL("../src/assets/dani-dex-logo-dev.png", import.meta.url).href;
 const generatedImageAttachment: AttachmentSummary = {
   id: "generated-image-in-chat",
   name: "generated-image.png",

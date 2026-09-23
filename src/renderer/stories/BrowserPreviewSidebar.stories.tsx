@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import BrowserPreviewSidebar from "../src/features/conversation/BrowserPreviewSidebar";
 import browserPreviewUrl from "./assets/browser-takeover-preview.svg";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 const tabs = [
   {

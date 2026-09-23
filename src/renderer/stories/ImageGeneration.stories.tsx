@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { ImageGeneration, type ImageGenerationProps } from "../src/features/conversation/ImageGeneration";
 
-const generatedPreview = new URL("../src/assets/openbot-logo-production.png", import.meta.url).href;
+const generatedPreview = new URL("../src/assets/dani-dex-logo-production.png", import.meta.url).href;
 
 const generatedAttachment: AttachmentSummary = {
   id: "generated-image-1",

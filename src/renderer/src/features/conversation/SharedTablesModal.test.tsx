@@ -4,7 +4,7 @@ import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentProfile } from "../../data";
 import { STORY_AGENTS } from "../../preview/fixtures";
-import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
 import { SharedTablesModal } from "./SharedTablesModal";
 
 const people: SharedTable = { name: "people", ownerAgentId: "chief", rowCount: 214 };

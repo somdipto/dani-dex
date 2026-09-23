@@ -2,7 +2,7 @@ import { render } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DaniDexPlayground } from "./DaniDexPlayground";
 import { createLandingDemoController } from "./landing-demo";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 describe("DaniDexPlayground", () => {
   let previousParent: PropertyDescriptor | undefined;

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { createAgentToolSchema, updateProfileToolSchema } from "./agent/profile-tools";
 import { AGENT_DATABASE_LIMITS } from "./agent-data/agent-database-protocol";
-import { DANI_DEX_DYNAMIC_TOOLS } from "./openbot-tools";
+import { DANI_DEX_DYNAMIC_TOOLS } from "./dani-dex-tools";
 
 describe("Dani-Dex tool declarations", () => {
   it("requires site identity and local source details for mutations", () => {

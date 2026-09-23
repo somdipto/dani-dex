@@ -9,8 +9,8 @@ import {
   normalizeMcpConfig,
 } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import type { DaniDexDatabase } from "./dani-dex-database";
 import { databaseRow, databaseRows, requiredStringColumn } from "./database/database-rows";
-import type { DaniDexDatabase } from "./openbot-database";
 
 /**
  * The MCP server configurations this machine holds.

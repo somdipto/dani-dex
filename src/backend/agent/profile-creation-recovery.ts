@@ -2,7 +2,7 @@ import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { decodeSaveAgentProfileResult } from "@dani-dex/contracts/ipc";
 import { isGeneratedAgentId, isUuidV4 } from "@dani-dex/contracts/validation";
-import type { DaniDexDatabase } from "../openbot-database";
+import type { DaniDexDatabase } from "../dani-dex-database";
 
 /** A marker precedes every profile-created row, so a crash cannot orphan an executable agent. */
 export class ProfileCreationRecovery {

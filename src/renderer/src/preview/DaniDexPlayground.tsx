@@ -3,7 +3,7 @@ import { onCleanup, onSettled } from "solid-js";
 import { App } from "../App";
 import { LANDING_PREVIEW_READY_MESSAGE, LANDING_PREVIEW_START_MESSAGE } from "./landing-demo-messages";
 import { LANDING_PREVIEW_OPTIONS } from "./landing-fixtures";
-import { createMockDaniDex, type MockDaniDexControls, type MockDaniDexOptions } from "./mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls, type MockDaniDexOptions } from "./mock-dani-dex";
 
 const LANDING_PREVIEW_READY_RETRY_MS = 250;
 

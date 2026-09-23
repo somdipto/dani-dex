@@ -5,9 +5,9 @@ import { DatabaseSync } from "node:sqlite";
 import { type AgentAnalyticsInput, parseAgentAnalyticsInput, type UsageTokens } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { collectProviderUsage } from "./agent/usage-collection";
+import { DaniDexDatabase } from "./dani-dex-database";
+import { migrateDaniDexDatabase } from "./dani-dex-database-schema";
 import { recordUsageMessage, type UsageSample } from "./database/agent-usage";
-import { DaniDexDatabase } from "./openbot-database";
-import { migrateDaniDexDatabase } from "./openbot-database-schema";
 
 const roots: string[] = [];
 const databases: DaniDexDatabase[] = [];

@@ -8,7 +8,7 @@ import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal, flush } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DynamicIslandViewState } from "../../components/ui";
-import { createMockDaniDex } from "../../preview/mock-openbot";
+import { createMockDaniDex } from "../../preview/mock-dani-dex";
 import { DaniDexDynamicIsland } from "./DaniDexDynamicIsland";
 import { DynamicIslandSurface } from "./DynamicIslandSurface";
 

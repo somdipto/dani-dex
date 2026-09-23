@@ -9,7 +9,7 @@ import { stores } from "./agent-service-test-harness";
 import { ChannelRoutineScheduler, channelRunStatusForTasks } from "./channel-routine-scheduler";
 import { ChannelRoutineStore } from "./channel-routine-store";
 import { ChannelService } from "./channel-service";
-import { DaniDexDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./dani-dex-database";
 
 let root: string;
 let data: ReturnType<typeof stores>;

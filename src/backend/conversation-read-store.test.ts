@@ -7,8 +7,8 @@ import { DatabaseSync } from "node:sqlite";
 import type { ConversationSnapshot } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
 import { ConversationReadStore } from "./conversation-read-store";
-import { DaniDexDatabase } from "./openbot-database";
-import { migrateDaniDexDatabase } from "./openbot-database-schema";
+import { DaniDexDatabase } from "./dani-dex-database";
+import { migrateDaniDexDatabase } from "./dani-dex-database-schema";
 import { directThreadId, TeamChatStore } from "./team-chat-store";
 
 const roots: string[] = [];

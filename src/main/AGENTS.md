@@ -27,7 +27,7 @@ below.
   loading windows. Its channel argument must be a direct `IPC_CHANNELS.x` reference; do not use a
   string literal or an intermediate variable. Handlers do not name channels; groups do.
 - Add a channel in one change across `ipc-channels.ts`, `ipc-endpoints.ts`, `src/main/ipc/`,
-  `src/preload/index.ts` and `src/renderer/src/preview/mock-openbot.ts`. See
+  `src/preload/index.ts` and `src/renderer/src/preview/mock-dani-dex.ts`. See
   [contract rules](../../packages/contracts/AGENTS.md) for coverage, including the untyped preload.
 
 ## Trust boundary

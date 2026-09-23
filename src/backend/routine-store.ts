@@ -3,7 +3,7 @@ import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { RoutineFields, RoutineRunFields, RoutineRunStatus, RoutineSchedule } from "@dani-dex/contracts/ipc";
 import { isRoutineSchedule } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
-import type { DaniDexDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./dani-dex-database";
 import { nextRoutineOccurrence, normalizeRoutineSchedule, validateRoutineSchedule } from "./routine-schedule";
 
 /**

@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { AgentRoutineStore } from "./agent-routine-store";
 import { AgentStore } from "./agent-store";
 import { ChannelRoutineStore } from "./channel-routine-store";
-import { DaniDexDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./dani-dex-database";
 
 const roots: string[] = [];
 

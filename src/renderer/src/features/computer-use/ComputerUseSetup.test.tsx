@@ -1,7 +1,7 @@
 import { type ComputerUseState, LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, waitFor, within } from "@solidjs/testing-library";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
 import { ComputerUsePermissionHelp } from "./ComputerUsePermissionHelp";
 import { ComputerUseSetup } from "./ComputerUseSetup";
 

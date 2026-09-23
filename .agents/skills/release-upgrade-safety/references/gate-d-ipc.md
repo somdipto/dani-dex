@@ -1,7 +1,7 @@
 # Gate D — IPC channels — `packages/contracts/src/ipc-channels.ts`
 
 Triggered by a change to the channel list **or to any of its mirrors** — `src/main/index.ts`,
-`src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/preview/mock-openbot.ts`. Deleting a
+`src/main/ipc/`, `src/preload/index.ts`, `src/renderer/src/preview/mock-dani-dex.ts`. Deleting a
 handler or an `invoke` breaks a live channel without touching the list at all, and the coverage
 test below is what catches it, so a gate that only watched the list would skip the one run that
 would have found it.
@@ -11,7 +11,7 @@ older ever calls it. The hazard is drift between the list and its hand-written m
 runtime rejection in the build you are about to sign. Confirm all of them moved together, per the
 table in `packages/contracts/AGENTS.md`: the `handleTrusted` registrations in `src/main/index.ts`
 and `src/main/ipc/`, the `invoke` calls in `src/preload/index.ts`, and
-`src/renderer/src/preview/mock-openbot.ts`, the second implementation Storybook and the preview run
+`src/renderer/src/preview/mock-dani-dex.ts`, the second implementation Storybook and the preview run
 against.
 
 ```bash

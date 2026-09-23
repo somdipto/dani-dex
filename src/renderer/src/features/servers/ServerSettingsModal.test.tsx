@@ -10,7 +10,7 @@ import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Toaster } from "../../components/ui";
-import { createMockDaniDex } from "../../preview/mock-openbot";
+import { createMockDaniDex } from "../../preview/mock-dani-dex";
 import { mcpToolRuntimeNote as note } from "./mcp-servers";
 import { ServerSettingsModal, type ServerSettingsModalProps } from "./ServerSettingsModal";
 

@@ -7,8 +7,8 @@ import type { AgentClient, AgentProvider } from "../src/backend/agent-client";
 import { CodexAppServerClient } from "../src/backend/app-server-client";
 import { ClaudeAgentClient } from "../src/backend/claude-client";
 import { type GrokCliInfo, resolveClaudeCli, resolveCodexCli, resolveGrokCli } from "../src/backend/cli";
+import { DaniDexDatabase } from "../src/backend/dani-dex-database";
 import { GrokAgentClient } from "../src/backend/grok-client";
-import { DaniDexDatabase } from "../src/backend/openbot-database";
 import {
   decodeAccountReadResult,
   decodeModelListResponse,

@@ -11,8 +11,8 @@ import {
   isAttachmentSummary,
 } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DaniDexDatabase } from "./dani-dex-database";
 import { MailboxStore } from "./mailbox-store";
-import { DaniDexDatabase } from "./openbot-database";
 
 let root: string;
 let store: MailboxStore;

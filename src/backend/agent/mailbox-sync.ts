@@ -1,7 +1,7 @@
 import type { AgentEvent, AgentSummary, ConversationSnapshot, QueueHold, QueueSnapshot } from "@dani-dex/contracts/ipc";
 import { sortConversationMessages } from "../conversation-snapshots";
+import type { DaniDexDatabase } from "../dani-dex-database";
 import type { MailboxStore } from "../mailbox-store";
-import type { DaniDexDatabase } from "../openbot-database";
 import type { ConversationRuntime } from "./conversation-runtime";
 import { conversationContentSignature } from "./delivery-content";
 import type { RoutineScheduler } from "./routine-scheduler";

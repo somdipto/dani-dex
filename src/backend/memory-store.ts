@@ -3,7 +3,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { AgentMemoryOrigin, MemoryEntry } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
-import type { DaniDexDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./dani-dex-database";
 
 /**
  * One owner column and one table name are the whole difference between an agent's memories and a

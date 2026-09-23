@@ -9,7 +9,7 @@ import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-lib
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type AnalyticsEventName, type DesktopAnalyticsEvents, desktopAnalytics } from "../../analytics";
-import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-openbot";
+import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
 import { AgentMemoriesModal } from "./AgentMemoriesModal";
 import { agentMemoriesPort } from "./memories-port";
 

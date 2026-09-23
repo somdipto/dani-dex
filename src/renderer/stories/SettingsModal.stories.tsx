@@ -16,7 +16,7 @@ import { createProviderRuntimeStore } from "../src/features/provider-updates/pro
 import { DEFAULT_GENERAL_SETTINGS } from "../src/features/settings/app-settings";
 import { SettingsModal } from "../src/features/settings/SettingsModal";
 import { createFakeCodeLogin } from "./code-login-fixture";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 const storyAppInfo = { name: "Dani-Dex", version: "0.2.1", platform: "darwin", variant: "dev" } as const;
 const storyAccount: CentralAuthUser = {

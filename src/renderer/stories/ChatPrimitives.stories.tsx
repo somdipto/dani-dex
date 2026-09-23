@@ -25,7 +25,7 @@ import { ChoiceCard } from "../src/features/conversation/ConversationPrompts";
 import { MessageActions, MessageBody } from "../src/features/conversation/MessageRendering";
 import { STORY_AGENTS, STORY_ATTACHMENTS } from "./fixtures";
 
-const previewImage = new URL("../src/assets/openbot-logo-production.png", import.meta.url).href;
+const previewImage = new URL("../src/assets/dani-dex-logo-production.png", import.meta.url).href;
 const generatedImage: AttachmentSummary = {
   id: "chat-primitives-generated-image",
   name: "observatory.png",

@@ -9,7 +9,7 @@ import type {
   DirectThreadSummary,
 } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
-import type { DaniDexDatabase } from "./openbot-database";
+import type { DaniDexDatabase } from "./dani-dex-database";
 
 export class TeamChatStore {
   constructor(readonly database: DaniDexDatabase) {}

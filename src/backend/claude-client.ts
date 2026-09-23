@@ -18,6 +18,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { AgentProvider } from "./agent-client";
 import { BROWSER_TOOL_DEFINITIONS, DANI_DEX_BROWSER_NAMESPACE } from "./browser-tools";
 import type { ClaudeCliInfo } from "./cli";
+import { DANI_DEX_TOOL_DEFINITIONS } from "./dani-dex-tools";
 import {
   claudeMcpServers,
   type McpAuthorizationSource,
@@ -26,7 +27,6 @@ import {
   type McpToolRuntimeSource,
   usableMcpServers,
 } from "./mcp-provider-shapes";
-import { DANI_DEX_TOOL_DEFINITIONS } from "./openbot-tools";
 import {
   type AccountRateLimitsReadResult,
   type AccountRateLimitWindowResult,

@@ -16,8 +16,8 @@ import {
   SIGNED_OUT_CHANNEL_MEMBER_ID,
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import type { DaniDexDatabase } from "./dani-dex-database";
 import { databaseRow, databaseRows, requiredNumberColumn, requiredStringColumn } from "./database/database-rows";
-import type { DaniDexDatabase } from "./openbot-database";
 
 export interface ChannelAssignment {
   id: string;

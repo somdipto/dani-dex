@@ -7,7 +7,7 @@ import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { afterEach, describe, expect, it } from "vitest";
 import { AgentMemoryStore } from "./agent-memory-store";
 import { AgentStore } from "./agent-store";
-import { DaniDexDatabase } from "./openbot-database";
+import { DaniDexDatabase } from "./dani-dex-database";
 
 const roots: string[] = [];
 

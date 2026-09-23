@@ -2,7 +2,7 @@ import type { ComputerUseState, MacPermissionId } from "@dani-dex/contracts/ipc"
 import { onCleanup } from "solid-js";
 import type { Meta, StoryObj } from "storybook-solidjs-vite";
 import { ComputerUsePermissionHelp } from "../src/features/computer-use/ComputerUsePermissionHelp";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 function state(granted: readonly MacPermissionId[]): ComputerUseState {
   return {

@@ -1,6 +1,6 @@
 import { open } from "node:fs/promises";
-import { macHostAdminOperations, withHostSetupLock } from "./openbot-host-macos";
-import { parseHostSetup, setupHost, verifyHost } from "./openbot-host-service";
+import { macHostAdminOperations, withHostSetupLock } from "./dani-dex-host-macos";
+import { parseHostSetup, setupHost, verifyHost } from "./dani-dex-host-service";
 
 async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2);

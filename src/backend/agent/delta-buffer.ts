@@ -1,5 +1,5 @@
 import type { AgentEvent } from "@dani-dex/contracts/ipc";
-import type { DaniDexDatabase } from "../openbot-database";
+import type { DaniDexDatabase } from "../dani-dex-database";
 import type { ConversationRuntime } from "./conversation-runtime";
 
 export interface PendingDeltaInput {

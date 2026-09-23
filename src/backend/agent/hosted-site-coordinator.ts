@@ -15,7 +15,7 @@ import { isBoolean } from "@dani-dex/contracts/runtime-values";
 import type { AgentClient } from "../agent-client";
 import type { AgentStore } from "../agent-store";
 import { sortConversationMessages } from "../conversation-snapshots";
-import type { PendingHostedSiteTerminalEvent } from "../openbot-database";
+import type { PendingHostedSiteTerminalEvent } from "../dani-dex-database";
 import { type AppServerRequest, type DynamicToolCallParams, isRecord, type RequestId } from "../protocol";
 import type { ConversationRuntime } from "./conversation-runtime";
 import {

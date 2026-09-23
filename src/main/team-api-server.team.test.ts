@@ -5,7 +5,7 @@
 import { EventEmitter } from "node:events";
 import type { TeamPresenceSnapshot } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it } from "vitest";
-import { DaniDexDatabase } from "../backend/openbot-database";
+import { DaniDexDatabase } from "../backend/dani-dex-database";
 import { TeamChatStore } from "../backend/team-chat-store";
 import {
   createAgents,

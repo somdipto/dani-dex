@@ -7,7 +7,7 @@ import { Toaster, toast } from "../src/components/ui";
 import { OnboardingFlow } from "../src/features/onboarding/OnboardingFlow";
 import { createFakeCodeLogin } from "./code-login-fixture";
 import { STORY_AGENT_STATUS } from "./fixtures";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 const setupState: AppSetupState = { completed: false, preferredProvider: null, preferredModel: null };
 

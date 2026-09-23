@@ -44,7 +44,7 @@ Two files still mirror the list by hand, and they are not enforced the same way.
 | Mirror | What it is | What holds it |
 | --- | --- | --- |
 | `src/preload/index.ts` | the `invoke` calls the renderer actually reaches | `src/main/ipc-channel-coverage.test.ts` |
-| `src/renderer/src/preview/mock-openbot.ts` | the second implementation Storybook and the preview run against | `tsc`, against `DaniDexDesktopApi` |
+| `src/renderer/src/preview/mock-dani-dex.ts` | the second implementation Storybook and the preview run against | `tsc`, against `DaniDexDesktopApi` |
 
 The main process is no longer one of them. `registerIpcGroups` in `src/main/ipc/define-ipc-group.ts`
 takes one object per group, keyed by every request endpoint in it, so a channel with no handler is

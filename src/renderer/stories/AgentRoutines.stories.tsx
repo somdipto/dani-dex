@@ -6,7 +6,7 @@ import { AgentRoutinesSettings } from "../src/features/conversation/AgentRoutine
 import AgentSettingsPanel from "../src/features/conversation/AgentSettingsPanel";
 import { agentRoutinesPort } from "../src/features/conversation/routines-port";
 import { STORY_AGENT_STATUS, STORY_AGENTS, STORY_MODELS } from "./fixtures";
-import { createMockDaniDex } from "./mock-openbot";
+import { createMockDaniDex } from "./mock-dani-dex";
 
 const morningBrief: Routine = {
   id: "routine-morning-brief",
