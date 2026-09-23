@@ -4,6 +4,7 @@ import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { posix, resolve, win32 } from "node:path";
 import { promisify } from "node:util";
+import { cliSpawnTarget } from "./cli";
 
 const execFileAsync = promisify(execFile);
 
@@ -29,10 +30,14 @@ export async function resolveHermesCli(
     if (!(await executable(candidate.executable))) continue;
     found = true;
     try {
-      const { stdout } = await execFileAsync(candidate.executable, ["--version"], {
-        timeout: 5_000,
+      // The bundled Windows launcher is a `.cmd`, which Node only runs through `cmd.exe`. The same
+      // spawn target the ACP client uses keeps the version check and the real launch in agreement.
+      const target = cliSpawnTarget(candidate.executable, ["--version"]);
+      const { stdout } = await execFileAsync(target.command, target.args, {
+        timeout: 15_000,
         maxBuffer: 64 * 1024,
         windowsHide: process.platform === "win32",
+        windowsVerbatimArguments: target.windowsVerbatimArguments,
       });
       return { ...candidate, version: parseHermesVersion(stdout) };
     } catch {
@@ -57,9 +62,11 @@ export function bundledHermesExecutable(
   architecture = process.arch,
   resourcesPath: string | null | undefined = process.resourcesPath,
 ): string | null {
-  const platformDirectory = platform === "darwin" ? "mac" : platform === "linux" ? "linux" : platform === "win32" ? "win" : null;
+  const platformDirectory =
+    platform === "darwin" ? "mac" : platform === "linux" ? "linux" : platform === "win32" ? "win" : null;
   if (!platformDirectory || !["x64", "arm64"].includes(architecture)) return null;
-  const name = platform === "win32" ? "hermes.exe" : "hermes";
+  // `install-hermes-runtime.ts` writes a `.cmd` launcher on Windows; see the note there.
+  const name = platform === "win32" ? "hermes.cmd" : "hermes";
   if (!resourcesPath) return resolve("build", "hermes", platformDirectory, architecture, "bin", name);
   const paths = platform === "win32" ? win32 : posix;
   return paths.join(resourcesPath, "hermes", platformDirectory, architecture, "bin", name);
@@ -71,7 +78,12 @@ async function discoverHermes(): Promise<string[]> {
   const candidates: string[] = [];
   try {
     const { stdout } = await execFileAsync(command, args, { timeout: 5_000, maxBuffer: 64 * 1024 });
-    candidates.push(...stdout.split(/\r?\n/u).map((value) => value.trim()).filter(Boolean));
+    candidates.push(
+      ...stdout
+        .split(/\r?\n/u)
+        .map((value) => value.trim())
+        .filter(Boolean),
+    );
   } catch {
     // Known install locations are checked below.
   }

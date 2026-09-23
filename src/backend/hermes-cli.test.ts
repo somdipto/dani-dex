@@ -21,13 +21,17 @@ describe("Hermes CLI", () => {
   it("resolves and verifies a managed executable", async () => {
     const managed = await fakeHermes("Hermes Agent v0.21.4");
     await expect(resolveHermesCli({ systemCandidates: [], bundledExecutable: managed })).resolves.toEqual({
-      executable: managed, version: "0.21.4", source: "managed",
+      executable: managed,
+      version: "0.21.4",
+      source: "managed",
     });
   });
 
   it("names macOS x64 and arm64 paths independently for universal packaging", () => {
     expect(bundledHermesExecutable("darwin", "x64", "/Resources")).toBe("/Resources/hermes/mac/x64/bin/hermes");
     expect(bundledHermesExecutable("darwin", "arm64", "/Resources")).toBe("/Resources/hermes/mac/arm64/bin/hermes");
-    expect(bundledHermesExecutable("win32", "x64", "C:\\Resources")).toBe("C:\\Resources\\hermes\\win\\x64\\bin\\hermes.exe");
+    expect(bundledHermesExecutable("win32", "x64", "C:\\Resources")).toBe(
+      "C:\\Resources\\hermes\\win\\x64\\bin\\hermes.cmd",
+    );
   });
 });

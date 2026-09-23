@@ -28,11 +28,18 @@ describe("bundled Hermes runtime", () => {
       );
       expect(bundledHermesExecutable(platform, architecture, "/resources")).toBe(staged);
     }
+    // Windows reads a `.cmd` launcher, under the same `win/x64` directory the installer stages.
+    expect(hermesRuntimePath("/resources/hermes", hermesRuntimeTarget("win32", "x64"))).toBe(
+      "/resources/hermes/win/x64",
+    );
+    expect(bundledHermesExecutable("win32", "x64", "C:\\Resources")).toBe(
+      "C:\\Resources\\hermes\\win\\x64\\bin\\hermes.cmd",
+    );
   });
 
-  it("refuses a target it cannot launch", () => {
-    // Windows needs a native launcher that does not exist yet, so it must fail loudly at build time
-    // rather than ship an app whose Hermes harness cannot start.
-    expect(() => hermesRuntimeTarget("win32", "x64")).toThrow("Unsupported bundled Hermes target: win32-x64");
+  it("refuses a target the lock has no Python for", () => {
+    // Failing at build time is the point: an app that shipped without its Hermes tree would only find
+    // out when the first agent turn could not start.
+    expect(() => hermesRuntimeTarget("linux", "arm64")).toThrow("Unsupported bundled Hermes target: linux-arm64");
   });
 });

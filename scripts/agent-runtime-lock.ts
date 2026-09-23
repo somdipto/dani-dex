@@ -64,8 +64,13 @@ const hermesPythonArtifactSchema = z.object({
   asset: z.string().regex(/^cpython-3\.11\.\d+\+\d{8}-[\w-]+-install_only_stripped\.tar\.gz$/u),
   assetSha256: sha256Schema,
   downloadBytes: z.number().int().positive(),
-  pythonPlatform: z.enum(["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu"]),
-  platformDirectory: z.enum(["linux", "mac"]),
+  pythonPlatform: z.enum([
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+    "x86_64-unknown-linux-gnu",
+    "x86_64-pc-windows-msvc",
+  ]),
+  platformDirectory: z.enum(["linux", "mac", "win"]),
 });
 
 const agentRuntimeLockSchema = z.object({
@@ -151,6 +156,7 @@ const agentRuntimeLockSchema = z.object({
         "darwin-arm64": hermesPythonArtifactSchema,
         "darwin-x64": hermesPythonArtifactSchema,
         "linux-x64": hermesPythonArtifactSchema,
+        "win32-x64": hermesPythonArtifactSchema,
       }),
     }),
   }),

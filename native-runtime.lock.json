@@ -360,6 +360,13 @@
           "downloadBytes": 30778779,
           "pythonPlatform": "x86_64-unknown-linux-gnu",
           "platformDirectory": "linux"
+        },
+        "win32-x64": {
+          "asset": "cpython-3.11.16+20260901-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+          "assetSha256": "06cbe479e039f5b9cb5640c286d790074d63f549f92a32d599a3748293bd4510",
+          "downloadBytes": 25189257,
+          "pythonPlatform": "x86_64-pc-windows-msvc",
+          "platformDirectory": "win"
         }
       }
     }
