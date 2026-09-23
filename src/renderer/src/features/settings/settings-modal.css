@@ -901,3 +901,13 @@
     transform: none;
   }
 }
+
+.settings-voice-key-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-voice-key-form input {
+  width: 14rem;
+}

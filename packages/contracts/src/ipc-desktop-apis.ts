@@ -500,6 +500,13 @@ export interface VoiceDesktopApi {
   prepareModel: () => Promise<VoiceModelStatus>;
   transcribe: (input: VoiceTranscriptionInput) => Promise<VoiceTranscriptionResult>;
   createRealtimeSession: () => Promise<RealtimeVoiceSession>;
+  /**
+   * Voice calls run on the user's own OpenAI API key (bring your own key). As with provider keys,
+   * the renderer can save or remove it and read back only whether one is stored.
+   */
+  setRealtimeApiKey: (key: string) => Promise<ProviderApiKeyStatus>;
+  clearRealtimeApiKey: () => Promise<ProviderApiKeyStatus>;
+  getRealtimeApiKeyStatus: () => Promise<ProviderApiKeyStatus>;
   onModelStatus: (listener: (status: VoiceModelStatus) => void) => () => void;
 }
 

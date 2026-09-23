@@ -79,6 +79,9 @@ export const IPC_ENDPOINTS = {
     prepareModel: request(IPC_CHANNELS.voicePrepareModel),
     transcribe: request(IPC_CHANNELS.voiceTranscribe),
     createRealtimeSession: request(IPC_CHANNELS.voiceCreateRealtimeSession),
+    setRealtimeApiKey: request(IPC_CHANNELS.voiceSetRealtimeApiKey),
+    clearRealtimeApiKey: request(IPC_CHANNELS.voiceClearRealtimeApiKey),
+    getRealtimeApiKeyStatus: request(IPC_CHANNELS.voiceGetRealtimeApiKeyStatus),
     modelStatus: event(IPC_CHANNELS.voiceModelStatus),
   },
   dynamicIsland: {

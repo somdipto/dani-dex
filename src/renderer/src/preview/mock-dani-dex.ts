@@ -751,6 +751,9 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       createRealtimeSession: async () => {
         throw new Error("Realtime voice is not available in the preview.");
       },
+      setRealtimeApiKey: async () => "saved",
+      clearRealtimeApiKey: async () => "missing",
+      getRealtimeApiKeyStatus: async () => "missing",
       onModelStatus: () => () => undefined,
     },
     auth: {

@@ -47,6 +47,7 @@ import { createSettingsHostedSitesStore } from "./stores/hosted-sites-store";
 import { createSettingsMobileConnectStore } from "./stores/mobile-connect-store";
 import { createSettingsProfileStore } from "./stores/profile-store";
 import { createSettingsUpdatesStore } from "./stores/updates-store";
+import type { VoiceKeyApi } from "./VoiceKeySettings";
 
 export interface SettingsModalProps {
   open: boolean;
@@ -95,6 +96,8 @@ export interface SettingsModalProps {
    * stories without a setup to save into.
    */
   harness?: HarnessSettingsApi;
+  /** The BYOK OpenAI key for voice calls. Local only, like the harness row. */
+  voiceKey?: VoiceKeyApi;
   restoreFocusTarget?: HTMLElement | null;
 }
 
@@ -351,6 +354,7 @@ export function SettingsModal(props: SettingsModalProps) {
             onSignInWithCodeProvider={props.codeLogin?.start}
             turboModePending={props.turboModePending}
             harness={props.harness}
+            voiceKey={props.voiceKey}
           />
         </Tabs.Content>
 

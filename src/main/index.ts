@@ -359,7 +359,11 @@ function registerIpcHandlers({
       permissionHelp: computerUsePermissionHelp,
     }),
     ...providerIpcHandlers({ service, providerRuntimes, credentials: providerCredentials }),
-    ...voiceIpcHandlers({ voice, realtime: new OpenAiRealtimeSessionService(centralAuth) }),
+    ...voiceIpcHandlers({
+      voice,
+      realtime: new OpenAiRealtimeSessionService(providerCredentials),
+      credentials: providerCredentials,
+    }),
     ...accountIpcHandlers({ centralAuth, host }),
     ...skillIpcHandlers({ skills, getMainWindow }),
     ...hostedSiteIpcHandlers({ hostedSites, getMainWindow }),

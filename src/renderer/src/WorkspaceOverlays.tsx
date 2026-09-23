@@ -371,6 +371,7 @@ function AppSettings(props: AccountProps) {
         hostedSitesApi={window.danidex.hostedSites}
         turboModePending={turboModePending()}
         harness={localCustomProviders() && setup.setupState()?.completed ? harness : undefined}
+        voiceKey={localCustomProviders() ? window.danidex.voice : undefined}
         restoreFocusTarget={appSettingsRestoreTarget()}
       />
     </Loading>

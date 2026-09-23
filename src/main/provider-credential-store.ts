@@ -20,6 +20,13 @@ const envelopeSchema = z.object({
 
 const MAX_ENVELOPE_BYTES = 64 * 1024;
 
+/**
+ * What a stored key belongs to: a provider CLI, or `openai-realtime`, the user's own OpenAI key that
+ * voice calls run on. It is kept apart from any provider so saving it never restarts a CLI.
+ */
+export type CredentialId = AgentProviderId | typeof REALTIME_CREDENTIAL_ID;
+export const REALTIME_CREDENTIAL_ID = "openai-realtime";
+
 export interface SecretCipher {
   encrypt: (value: string) => Buffer;
   decrypt: (value: Buffer) => string;
@@ -65,24 +72,24 @@ export class ProviderCredentialStore {
   }
 
   /** The stored key, or `null`. Throws when `load` has not run, rather than reporting no key. */
-  get(provider: AgentProviderId): string | null {
+  get(provider: CredentialId): string | null {
     if (!this.#loaded) throw new Error("The provider credential store is not loaded.");
     return this.#keys.get(provider) ?? null;
   }
 
   /** Whether a key is stored. This is the only fact that may cross the IPC boundary. */
-  status(provider: AgentProviderId): ProviderApiKeyStatus {
+  status(provider: CredentialId): ProviderApiKeyStatus {
     if (this.get(provider) !== null) return "saved";
     return this.#loadError ? "unreadable" : "missing";
   }
 
-  async set(provider: AgentProviderId, key: string): Promise<void> {
+  async set(provider: CredentialId, key: string): Promise<void> {
     const next = this.#editableKeys();
     next.set(provider, key);
     await this.#commit(next);
   }
 
-  async clear(provider: AgentProviderId): Promise<void> {
+  async clear(provider: CredentialId): Promise<void> {
     if (this.status(provider) === "missing") return;
     const next = this.#editableKeys();
     next.delete(provider);

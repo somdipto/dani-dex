@@ -28,6 +28,9 @@ function registerVoice(transcribe: (text: string) => unknown): void {
     prepareModel: handler(() => "prepared"),
     transcribe: payloadHandler((value) => String(value), transcribe),
     createRealtimeSession: handler(() => "session"),
+    setRealtimeApiKey: handler(() => "saved"),
+    clearRealtimeApiKey: handler(() => "missing"),
+    getRealtimeApiKeyStatus: handler(() => "missing"),
   });
 }
 

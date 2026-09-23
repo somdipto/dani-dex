@@ -34,6 +34,7 @@ import type { GeneralSettingsValue } from "./app-settings";
 import { HarnessSettings, type HarnessSettingsApi } from "./HarnessSettings";
 import { LanguageSelect } from "./LanguageSelect";
 import type { SettingsGeneralStore } from "./stores/general-store";
+import { type VoiceKeyApi, VoiceKeySettings } from "./VoiceKeySettings";
 
 const linkTargetOptions: GeneralSettingsValue["externalLinkTarget"][] = ["Default browser", "Dani-Dex"];
 
@@ -73,6 +74,7 @@ interface SettingsGeneralTabProps {
   onSignInWithCodeProvider?: (provider: AgentProviderId) => void | Promise<void>;
   turboModePending?: boolean;
   harness?: HarnessSettingsApi;
+  voiceKey?: VoiceKeyApi;
 }
 
 export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
@@ -157,6 +159,8 @@ export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
       <Show when={props.harness}>
         {(harness) => <HarnessSettings api={harness()} selectMount={props.selectMount} />}
       </Show>
+
+      <Show when={props.voiceKey}>{(voiceKey) => <VoiceKeySettings api={voiceKey()} />}</Show>
 
       <SettingsSection title={i18n.t("settings.appBehavior.title")}>
         <ItemGroup class="settings-modal-card">
