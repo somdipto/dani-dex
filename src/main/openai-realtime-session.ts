@@ -31,8 +31,15 @@ export class OpenAiRealtimeSessionService {
 
 export function decodeRealtimeSession(value: unknown): RealtimeSessionResponse {
   if (!isRecord(value)) throw new Error("The account service returned an invalid Realtime session.");
-  const secretValue = isRecord(value.client_secret) ? value.client_secret.value : value.clientSecret;
-  const expiresAt = isRecord(value.client_secret) ? value.client_secret.expires_at : value.expiresAt;
+  // POST /v1/realtime/client_secrets returns `value` and `expires_at` at the top level; the older
+  // sessions endpoint nested them under `client_secret`. Accept both, plus the desktop's own shape.
+  const nested = isRecord(value.client_secret) ? value.client_secret : null;
+  const secretValue = nested ? nested.value : typeof value.value === "string" ? value.value : value.clientSecret;
+  const expiresAt = nested
+    ? nested.expires_at
+    : typeof value.expires_at === "number"
+      ? value.expires_at
+      : value.expiresAt;
   const model = isRecord(value.session) ? value.session.model : value.model;
   if (
     typeof secretValue !== "string" ||
