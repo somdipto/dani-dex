@@ -203,7 +203,7 @@ jobs:
 
   preview:
     name: Cloudflare preview
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && vars.CLOUDFLARE_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: cloudflare-preview
@@ -269,7 +269,9 @@ jobs:
 
   deploy-production:
     name: Deploy Cloudflare production
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Off until Dani-Dex has its own Cloudflare account: the Worker config still names the
+    # inherited routes. Set the repository variable CLOUDFLARE_DEPLOY_ENABLED to "true" to turn it on.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CLOUDFLARE_DEPLOY_ENABLED == 'true'
     # `surfaces` gates the deploy even though the Worker it ships lives in
     # `apps/auth-api`, which `api` already covers: mobile, the site router, the
     # team client and the remote stack all consume the account API, so a red
