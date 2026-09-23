@@ -1,6 +1,6 @@
 # Dani-Dex
 
-[![CI](https://github.com/nightly-labs/openbot/actions/workflows/ci.yml/badge.svg)](https://github.com/nightly-labs/openbot/actions/workflows/ci.yml)
+[![CI](https://github.com/somdipto/dani-dex/actions/workflows/ci.yml/badge.svg)](https://github.com/somdipto/dani-dex/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-PolyForm_Noncommercial_1.0.0-blue.svg)](LICENSE)
 
 Dani-Dex is a local-first desktop workspace for persistent AI teammates. It supports the local
@@ -41,17 +41,22 @@ Linux as an AppImage.
 
 ### macOS
 
-1. Download the latest `Dani-Dex-*.dmg` from [GitHub Releases](https://github.com/nightly-labs/openbot/releases).
-2. Drag Dani-Dex to Applications and open it.
+1. Download the latest `Dani-Dex-*-universal.dmg` from [GitHub Releases](https://github.com/somdipto/dani-dex/releases).
+   It runs on both Apple silicon and Intel Macs.
+2. Drag Dani-Dex to Applications.
+3. The app is not signed with an Apple Developer ID yet, so the first time, Control-click Dani-Dex in
+   Applications and choose **Open**, then **Open** again. If macOS still blocks it, open **System
+   Settings > Privacy & Security** and click **Open Anyway**. Later launches open normally.
 
 ### Windows
 
-1. Download the latest `Dani-Dex-*-x64.exe` from [GitHub Releases](https://github.com/nightly-labs/openbot/releases).
-2. Run the installer and open Dani-Dex.
+1. Download the latest `Dani-Dex-*-x64.exe` from [GitHub Releases](https://github.com/somdipto/dani-dex/releases).
+2. Run the installer and open Dani-Dex. The installer is not code-signed yet, so if Windows SmartScreen
+   warns you, click **More info**, then **Run anyway**.
 
 ### Linux
 
-1. Download the latest `Dani-Dex-*-x86_64.AppImage` from [GitHub Releases](https://github.com/nightly-labs/openbot/releases).
+1. Download the latest `Dani-Dex-*-x86_64.AppImage` from [GitHub Releases](https://github.com/somdipto/dani-dex/releases).
 2. Make it executable with `chmod +x Dani-Dex-*-x86_64.AppImage`, then run it.
 
 On Ubuntu 23.10 or newer and on Debian 13, unprivileged user namespaces are restricted by AppArmor
@@ -142,7 +147,7 @@ iex "& {$(irm https://bun.com/install.ps1)} -Version 1.4.0"
 ```
 
 ```bash
-git clone https://github.com/nightly-labs/openbot.git
+git clone https://github.com/somdipto/dani-dex.git
 cd dani-dex
 bun install --frozen-lockfile
 bun run codex:doctor
