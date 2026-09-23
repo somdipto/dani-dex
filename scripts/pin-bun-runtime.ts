@@ -6,7 +6,7 @@ import { z } from "zod";
 import { type AgentRuntimeLock, loadAgentRuntimeLock } from "./agent-runtime-lock";
 import { sha256, sha256File } from "./remote-desktop-runtime-release";
 
-export type BunRuntimeTarget = "darwin-arm64" | "linux-x64" | "win32-x64";
+export type BunRuntimeTarget = "darwin-arm64" | "darwin-x64" | "linux-x64" | "win32-x64";
 
 /**
  * The npm platform package and the executable inside it, per target Dani-Dex supports.
@@ -16,12 +16,13 @@ export type BunRuntimeTarget = "darwin-arm64" | "linux-x64" | "win32-x64";
  */
 const TARGETS = {
   "darwin-arm64": { package: "@oven/bun-darwin-aarch64", executable: "bun" },
+  "darwin-x64": { package: "@oven/bun-darwin-x64-baseline", executable: "bun" },
   "linux-x64": { package: "@oven/bun-linux-x64-baseline", executable: "bun" },
   "win32-x64": { package: "@oven/bun-windows-x64-baseline", executable: "bun.exe" },
 } as const satisfies Record<BunRuntimeTarget, { package: string; executable: string }>;
 
 /** The same keys as `TARGETS`, in the order the lock file lists them. */
-const TARGET_IDS: readonly BunRuntimeTarget[] = ["darwin-arm64", "linux-x64", "win32-x64"];
+const TARGET_IDS: readonly BunRuntimeTarget[] = ["darwin-arm64", "darwin-x64", "linux-x64", "win32-x64"];
 
 const REGISTRY = "https://registry.npmjs.org";
 const REPOSITORY = "https://github.com/oven-sh/bun";
@@ -96,6 +97,7 @@ export async function pinBunRuntime(
   // registry slower, and a literal is what proves every key is present without an assertion.
   const artifacts: Record<BunRuntimeTarget, BunArtifactPin> = {
     "darwin-arm64": await pinTarget("darwin-arm64"),
+    "darwin-x64": await pinTarget("darwin-x64"),
     "linux-x64": await pinTarget("linux-x64"),
     "win32-x64": await pinTarget("win32-x64"),
   };

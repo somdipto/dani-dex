@@ -14,6 +14,13 @@
         "installedBytes": 310000000,
         "executable": "bin/codex"
       },
+      "darwin-x64": {
+        "asset": "codex-package-x86_64-apple-darwin.tar.gz",
+        "assetSha256": "3ee638d7155c856ef31f3f4a85cb2195de1939962d3924c935b24f0514564a3d",
+        "downloadBytes": 121093282,
+        "installedBytes": 310000000,
+        "executable": "bin/codex"
+      },
       "linux-x64": {
         "asset": "codex-package-x86_64-unknown-linux-musl.tar.gz",
         "assetSha256": "a822187e1a2420c61c5926721bfbd878701ed95547c9bb0d4de4498a16ba1821",
@@ -43,6 +50,16 @@
         "assetSha256": "d4abc03ae93e556996dbcefe32b01016dc2f9ae96fec2262f48d30177ce3fce4",
         "binarySha256": "ef5d2909c8af49f31ab6d5487e90316777bc2fac170adfe8160716caa8aaf4f9",
         "downloadBytes": 87267293,
+        "installedBytes": 250000000,
+        "executable": "claude",
+        "platformDirectory": "mac"
+      },
+      "darwin-x64": {
+        "package": "@anthropic-ai/claude-agent-sdk-darwin-x64",
+        "asset": "claude-agent-sdk-darwin-x64-0.3.263.tgz",
+        "assetSha256": "4dfca0f909e135d737d33c58449830205f6e23a80a1451e393cd8984e714dea7",
+        "binarySha256": "a94a8b229fa85c3a316c6b4a35e0aa22bec1aabbd3d1422826ce1d10ddc88751",
+        "downloadBytes": 91268007,
         "installedBytes": 250000000,
         "executable": "claude",
         "platformDirectory": "mac"
@@ -86,6 +103,16 @@
         "executable": "opencode",
         "platformDirectory": "mac"
       },
+      "darwin-x64": {
+        "package": "opencode-darwin-x64",
+        "asset": "opencode-darwin-x64-1.18.30.tgz",
+        "assetSha256": "d7119bd0adbacf86c1176f07b35d429909d1d702ca0c90dcd31415e66220f590",
+        "binarySha256": "a0db851dd5c9538896aeecce1cd13af510d62a6873d2eb5030955548e5779156",
+        "downloadBytes": 48153052,
+        "installedBytes": 160000000,
+        "executable": "opencode",
+        "platformDirectory": "mac"
+      },
       "linux-x64": {
         "package": "opencode-linux-x64",
         "asset": "opencode-linux-x64-1.18.30.tgz",
@@ -121,6 +148,14 @@
         "asset": "grok-1.0.22-macos-aarch64",
         "assetSha256": "f17b8369d3283bb9ef3daa53bb95f68bfff91d605376eee1769dfbc798f7a9f6",
         "downloadBytes": 137281360,
+        "installedBytes": 150000000,
+        "executable": "grok",
+        "platformDirectory": "mac"
+      },
+      "darwin-x64": {
+        "asset": "grok-1.0.22-macos-x86_64",
+        "assetSha256": "6236e8f5d973cce1ba8f1d86517913fa5df1177386a4e95fad5cf5be5b566b90",
+        "downloadBytes": 153979728,
         "installedBytes": 150000000,
         "executable": "grok",
         "platformDirectory": "mac"
@@ -302,6 +337,15 @@
         "assetSha256": "a9df486eaf7e9db9bdebb1fa425e8c9809abd783b1c518d1dbc5096a53b861ed",
         "binarySha256": "35d20dd0263e5c950194434b925454fdfa9ba6e4467da960410fa05b08a7a5b5",
         "downloadBytes": 26145119,
+        "installedBytes": 130000000,
+        "executable": "bun"
+      },
+      "darwin-x64": {
+        "package": "@oven/bun-darwin-x64-baseline",
+        "asset": "bun-darwin-x64-baseline-1.4.2.tgz",
+        "assetSha256": "625b1f4fd5460fcd62ef8e4b672f181ef22bcdf4a15275eeac790c708add4950",
+        "binarySha256": "2fa513af22ac59e03aae640cad302e73cb1ddb0f6398501e2ddccf7dcd613596",
+        "downloadBytes": 28732513,
         "installedBytes": 130000000,
         "executable": "bun"
       },
