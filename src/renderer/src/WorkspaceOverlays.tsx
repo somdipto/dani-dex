@@ -12,6 +12,7 @@ import { serverSupportsCapability } from "./features/servers/server-capabilities
 import { useServerSelection } from "./features/servers/server-selection";
 import { useServerSettings } from "./features/servers/server-settings";
 import { useServers } from "./features/servers/servers-context";
+import type { HarnessSettingsApi } from "./features/settings/HarnessSettings";
 import { MARKETPLACE_PLUGINS } from "./features/settings/marketplace-plugin-catalog";
 import type { ProviderKeyApi } from "./features/settings/OpenCodeKeyDialog";
 import { useSettings } from "./features/settings/settings-context";
@@ -324,6 +325,17 @@ function AppSettings(props: AccountProps) {
    * would hide this feature on a build without them.
    */
   const localCustomProviders = createMemo(() => activeServer()?.kind === "local");
+  const setup = useSetup();
+  /** The harness belongs to this computer's agent service, so only the local server offers it. */
+  const harness: HarnessSettingsApi = {
+    saved: () => setup.setupState()?.harness ?? null,
+    active: () => {
+      const state = setup.setupState();
+      return state?.activeHarness === undefined ? (state?.harness ?? null) : state.activeHarness;
+    },
+    onChange: setup.saveHarness,
+    onRelaunch: setup.relaunch,
+  };
 
   return (
     <Loading>
@@ -358,6 +370,7 @@ function AppSettings(props: AccountProps) {
         codeLogin={localProviderDownloads() ? codeLogin : undefined}
         hostedSitesApi={window.danidex.hostedSites}
         turboModePending={turboModePending()}
+        harness={localCustomProviders() && setup.setupState()?.completed ? harness : undefined}
         restoreFocusTarget={appSettingsRestoreTarget()}
       />
     </Loading>

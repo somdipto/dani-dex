@@ -125,6 +125,12 @@ export interface AppSetupState {
    * the turn; `hermes` runs every provider inside the Hermes harness.
    */
   harness?: AgentHarnessId | null;
+  /**
+   * The harness the running agent service was built with. It is chosen once at launch, so after a
+   * save this can differ from `harness` until Dani-Dex restarts. Absent in states that did not come
+   * from the main process, which read as "nothing pending".
+   */
+  activeHarness?: AgentHarnessId | null;
 }
 
 export interface SaveSetupInput {

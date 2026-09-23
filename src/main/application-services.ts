@@ -1,3 +1,4 @@
+import type { AgentHarnessId } from "@dani-dex/contracts/agent-harnesses";
 import { isManagedRuntimeProvider } from "@dani-dex/contracts/agent-providers";
 import { AgentDatabaseSupervisor } from "../backend/agent-data/agent-database-supervisor";
 import { AgentTables } from "../backend/agent-data/agent-tables";
@@ -228,6 +229,8 @@ export interface ApplicationServices {
   describeRestartReadiness: () => RestartReadiness;
   hostUpdateCoordinator: HostUpdateCoordinator;
   setupFile: string;
+  /** The harness the agent service was built with. Read once at launch; a change needs a relaunch. */
+  activeHarness: AgentHarnessId | null;
   analyticsPreferenceFile: string;
   updatePreferenceFile: string;
   approvalAutomation: ApprovalAutomation;
@@ -1140,6 +1143,7 @@ export async function createApplicationServices({
     browserView,
     updater,
     setupFile,
+    activeHarness: setupState.harness ?? null,
     analyticsPreferenceFile,
     updatePreferenceFile,
     approvalAutomation,

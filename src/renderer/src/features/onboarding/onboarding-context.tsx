@@ -1,4 +1,4 @@
-import type { AgentModelId, AgentProviderId, AppSetupState } from "@dani-dex/contracts/ipc";
+import type { AgentHarnessId, AgentModelId, AgentProviderId, AppSetupState } from "@dani-dex/contracts/ipc";
 import { createSignal, flush, onSettled } from "solid-js";
 import { desktopAnalytics } from "../../analytics";
 import { createSimpleContext } from "../../simple-context";
@@ -60,12 +60,21 @@ const Setup = createSimpleContext({
      * review of the permissions does not move the agents off a chosen local endpoint. A caller that
      * gives `null` clears the model on purpose.
      */
+    function keptHarness(): { harness?: AgentHarnessId } {
+      const harness = setupState()?.harness;
+      return harness ? { harness } : {};
+    }
+
     async function saveSetup(preferredProvider: AgentProviderId, preferredModel?: AgentModelId | null) {
       const wasCompleted = setupState()?.completed === true;
       const analytics = desktopAnalytics.scope();
       const state = await window.danidex.saveSetup({
         preferredProvider,
         preferredModel: preferredModel === undefined ? keptModel(preferredProvider) : preferredModel,
+        // No screen that saves a provider chooses a harness, so every save carries the stored one.
+        // Leaving it out would write the file without it and quietly drop the user back to the
+        // provider's own CLI on the next launch.
+        ...keptHarness(),
       });
       flush(() => {
         setSetupState(state);
@@ -75,6 +84,28 @@ const Setup = createSimpleContext({
       if (!wasCompleted && state.completed) {
         analytics.track("onboarding_completed", { preferred_provider: preferredProvider });
       }
+    }
+
+    /**
+     * Layer 1, saved beside the provider and model it runs. The agent service is built once at
+     * launch, so the change is stored now and `activeHarness` keeps naming the running one until
+     * `relaunch`. Only a completed setup has a provider to keep, which is why a setup still in
+     * progress refuses rather than guessing one.
+     */
+    async function saveHarness(harness: AgentHarnessId | null) {
+      const previous = setupState();
+      if (!previous?.completed || !previous.preferredProvider)
+        throw new Error("Finish setup before choosing a harness.");
+      const state = await window.danidex.saveSetup({
+        preferredProvider: previous.preferredProvider,
+        preferredModel: previous.preferredModel ?? null,
+        harness,
+      });
+      setSetupState(state);
+    }
+
+    function relaunch() {
+      return window.danidex.relaunchApp();
     }
 
     async function previewInvite(input: { inviteUrl: string }) {
@@ -89,6 +120,8 @@ const Setup = createSimpleContext({
       permissionsOpen,
       setPermissionsOpen,
       saveSetup,
+      saveHarness,
+      relaunch,
       previewInvite,
     };
   },

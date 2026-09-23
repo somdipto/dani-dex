@@ -72,6 +72,19 @@ export const fr = {
   // The two link targets. The saved value stays in English; only the label is translated.
   "settings.externalLinks.defaultBrowser": "Navigateur par défaut",
   "settings.externalLinks.danidex": "Dani-Dex",
+  "settings.harness.title": "Moteur d’agent",
+  "settings.harness.description":
+    "La boucle qui exécute chaque agent. Votre fournisseur et votre modèle restent les mêmes.",
+  "settings.harness.rowTitle": "Moteur",
+  "settings.harness.rowDescription":
+    "Hermes gère le travail général et la délégation. Le CLI du fournisseur est le fonctionnement d’avant.",
+  "settings.harness.provider": "CLI du fournisseur",
+  "settings.harness.hermes": "Hermes",
+  "settings.harness.omp": "OMP (pas encore disponible)",
+  "settings.harness.restartNote": "Redémarrez Dani-Dex pour passer au nouveau moteur.",
+  "settings.harness.restart": "Redémarrer",
+  "settings.harness.saveFailed": "Impossible d’enregistrer le moteur. Réessayez.",
+  "settings.harness.restartFailed": "Impossible de redémarrer. Quittez puis rouvrez Dani-Dex.",
   "settings.autonomy.title": "Autonomie de l’agent",
   "settings.turbo.title": "Mode Turbo",
   "settings.turbo.description":

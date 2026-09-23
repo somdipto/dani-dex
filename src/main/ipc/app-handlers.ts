@@ -2,7 +2,7 @@
 // diagnostics exports.
 
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
-import type { AppInfo, AppSetupState, AppVariant, ExternalDestination } from "@dani-dex/contracts/ipc";
+import type { AgentHarnessId, AppInfo, AppSetupState, AppVariant, ExternalDestination } from "@dani-dex/contracts/ipc";
 import { app, type BrowserWindow, shell } from "electron";
 import type { AgentService } from "../../backend/agent-service";
 import type { BrowserHost } from "../../backend/browser-host";
@@ -58,6 +58,9 @@ export interface AppIpcDependencies {
   appVariant: AppVariant;
   getMainWindow: () => BrowserWindow | null;
   setAnalyticsTrackingEnabled: (enabled: boolean) => void;
+  /** The harness the agent service was built with at launch. A saved change applies on relaunch. */
+  activeHarness: AgentHarnessId | null;
+  relaunch: () => void;
 }
 
 export function appIpcHandlers({
@@ -73,6 +76,8 @@ export function appIpcHandlers({
   appVariant,
   getMainWindow,
   setAnalyticsTrackingEnabled,
+  activeHarness,
+  relaunch,
 }: AppIpcDependencies): Pick<IpcGroupHandlers, "app" | "maintenance"> {
   return {
     app: {
@@ -83,7 +88,12 @@ export function appIpcHandlers({
         }
         return { name: app.getName(), version: app.getVersion(), platform, variant: appVariant };
       }),
-      getSetupState: handler(() => readSetupState(setupFile)),
+      getSetupState: handler(
+        async (): Promise<AppSetupState> => ({
+          ...(await readSetupState(setupFile)),
+          activeHarness,
+        }),
+      ),
       getAnalyticsPreference: handler(() => readAnalyticsPreference(analyticsPreferenceFile)),
       setAnalyticsPreference: payloadHandler(parseAnalyticsPreference, async (parsed) => {
         const preference = await writeAnalyticsPreference(analyticsPreferenceFile, parsed.enabled);
@@ -98,8 +108,9 @@ export function appIpcHandlers({
         const state = await writeSetupState(setupFile, input);
         await service.setPreferredProvider(input.preferredProvider, input.preferredModel);
         await initializeAgent();
-        return state;
+        return { ...state, activeHarness };
       }),
+      relaunchApp: handler(() => relaunch()),
       openExternal: payloadHandler(parseExternalDestination, (parsed) => {
         return shell.openExternal(EXTERNAL_DESTINATIONS[parsed]);
       }),

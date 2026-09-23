@@ -68,6 +68,18 @@ export const en = {
   // The two link targets. The saved value stays in English; only the label is translated.
   "settings.externalLinks.defaultBrowser": "Default browser",
   "settings.externalLinks.danidex": "Dani-Dex",
+  "settings.harness.title": "Agent harness",
+  "settings.harness.description": "The loop that runs every agent. Your provider and model stay the same inside it.",
+  "settings.harness.rowTitle": "Harness",
+  "settings.harness.rowDescription":
+    "Hermes runs general work and delegation. The provider's own CLI is how agents ran before.",
+  "settings.harness.provider": "Provider's own CLI",
+  "settings.harness.hermes": "Hermes",
+  "settings.harness.omp": "OMP (not available yet)",
+  "settings.harness.restartNote": "Restart Dani-Dex to switch to the new harness.",
+  "settings.harness.restart": "Restart now",
+  "settings.harness.saveFailed": "Could not save the harness. Try again.",
+  "settings.harness.restartFailed": "Could not restart. Quit and open Dani-Dex again.",
   "settings.autonomy.title": "Agent autonomy",
   "settings.turbo.title": "Turbo mode",
   "settings.turbo.description":

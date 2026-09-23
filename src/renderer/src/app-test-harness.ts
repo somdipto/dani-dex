@@ -453,6 +453,7 @@ export function installDanidexStub(): void {
         onAction: vi.fn(dynamicIslandActionBridge.subscribe),
         setInteractive: vi.fn().mockResolvedValue(undefined),
       },
+      relaunchApp: vi.fn().mockResolvedValue(undefined),
       saveSetup: vi.fn().mockImplementation(async ({ preferredProvider }) => ({
         completed: true,
         preferredProvider,

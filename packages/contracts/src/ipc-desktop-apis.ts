@@ -544,6 +544,8 @@ export interface DaniDexDesktopApi {
   getAppInfo: () => Promise<AppInfo>;
   getSetupState: () => Promise<AppSetupState>;
   saveSetup: (input: SaveSetupInput) => Promise<AppSetupState>;
+  /** Quits through the normal shutdown and starts again, which is how a harness change applies. */
+  relaunchApp: () => Promise<void>;
   getAnalyticsPreference: () => Promise<AnalyticsPreference>;
   setAnalyticsPreference: (input: SetAnalyticsPreferenceInput) => Promise<AnalyticsPreference>;
   getApprovalAutomation: () => Promise<ApprovalAutomationPreference>;

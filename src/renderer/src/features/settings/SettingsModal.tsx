@@ -34,6 +34,7 @@ import {
 import { useI18n } from "../../i18n-context";
 import { ComputerUseSetup } from "../computer-use/ComputerUseSetup";
 import type { GeneralSettingsValue } from "./app-settings";
+import type { HarnessSettingsApi } from "./HarnessSettings";
 import { OpenCodeKeyDialog, type ProviderKeyApi } from "./OpenCodeKeyDialog";
 import { SaveBarDock, SettingsDialogShell } from "./SettingsDialogShell";
 import { SettingsGeneralTab } from "./SettingsGeneralTab";
@@ -89,6 +90,11 @@ export interface SettingsModalProps {
   hostedSitesApi?: HostedSitesDesktopApi;
   /** The agents granted a standing approval, so the user can see and undo each one. */
   turboModePending?: boolean;
+  /**
+   * The harness row. Absent on a remote server, whose agents run on that host's harness, and in
+   * stories without a setup to save into.
+   */
+  harness?: HarnessSettingsApi;
   restoreFocusTarget?: HTMLElement | null;
 }
 
@@ -344,6 +350,7 @@ export function SettingsModal(props: SettingsModalProps) {
             onSignInProvider={props.providerKeys ? openProviderKeyDialog : undefined}
             onSignInWithCodeProvider={props.codeLogin?.start}
             turboModePending={props.turboModePending}
+            harness={props.harness}
           />
         </Tabs.Content>
 

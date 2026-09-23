@@ -31,6 +31,7 @@ import { CustomProviderDialog } from "../custom-providers/CustomProviderDialog";
 import { CustomProviderListDialog } from "../custom-providers/CustomProviderListDialog";
 import { createCustomProviderHostState } from "../custom-providers/custom-provider-host-state";
 import type { GeneralSettingsValue } from "./app-settings";
+import { HarnessSettings, type HarnessSettingsApi } from "./HarnessSettings";
 import { LanguageSelect } from "./LanguageSelect";
 import type { SettingsGeneralStore } from "./stores/general-store";
 
@@ -71,6 +72,7 @@ interface SettingsGeneralTabProps {
   /** Opens the code sign-in. Absent in the stories, where there is no provider to answer it. */
   onSignInWithCodeProvider?: (provider: AgentProviderId) => void | Promise<void>;
   turboModePending?: boolean;
+  harness?: HarnessSettingsApi;
 }
 
 export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
@@ -151,6 +153,10 @@ export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
           />
         </Show>
       </SettingsSection>
+
+      <Show when={props.harness}>
+        {(harness) => <HarnessSettings api={harness()} selectMount={props.selectMount} />}
+      </Show>
 
       <SettingsSection title={i18n.t("settings.appBehavior.title")}>
         <ItemGroup class="settings-modal-card">

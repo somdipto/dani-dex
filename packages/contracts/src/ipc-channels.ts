@@ -2,6 +2,7 @@ export const IPC_CHANNELS = {
   getAppInfo: "app:get-info",
   getSetupState: "app:get-setup-state",
   saveSetup: "app:save-setup",
+  relaunchApp: "app:relaunch",
   getAnalyticsPreference: "app:get-analytics-preference",
   setAnalyticsPreference: "app:set-analytics-preference",
   getApprovalAutomation: "app:get-approval-automation",

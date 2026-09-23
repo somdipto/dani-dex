@@ -867,6 +867,7 @@ const danidexApi: DaniDexDesktopApi = {
   getAppInfo: () => ipcRenderer.invoke(IPC_CHANNELS.getAppInfo),
   getSetupState: () => ipcRenderer.invoke(IPC_CHANNELS.getSetupState),
   saveSetup: (input) => ipcRenderer.invoke(IPC_CHANNELS.saveSetup, input),
+  relaunchApp: () => ipcRenderer.invoke(IPC_CHANNELS.relaunchApp),
   getAnalyticsPreference: () => ipcRenderer.invoke(IPC_CHANNELS.getAnalyticsPreference),
   setAnalyticsPreference: (input) => ipcRenderer.invoke(IPC_CHANNELS.setAnalyticsPreference, input),
   getApprovalAutomation: () => ipcRenderer.invoke(IPC_CHANNELS.getApprovalAutomation),

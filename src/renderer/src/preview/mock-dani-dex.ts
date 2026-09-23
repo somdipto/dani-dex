@@ -589,8 +589,9 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
   const api: DaniDexDesktopApi = {
     getAppInfo: async () => clone(appInfo),
     getSetupState: async () => clone(setupState),
-    saveSetup: async ({ preferredProvider, preferredModel }) => {
-      setupState = { completed: true, preferredProvider, preferredModel };
+    relaunchApp: async () => undefined,
+    saveSetup: async ({ preferredProvider, preferredModel, harness }) => {
+      setupState = { completed: true, preferredProvider, preferredModel, ...(harness ? { harness } : {}) };
       return clone(setupState);
     },
     getAnalyticsPreference: async () => clone(analyticsPreference),

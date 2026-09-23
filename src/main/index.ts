@@ -303,6 +303,7 @@ function registerIpcHandlers({
   browserView,
   updater,
   setupFile,
+  activeHarness,
   analyticsPreferenceFile,
   updatePreferenceFile,
   approvalAutomation,
@@ -344,6 +345,12 @@ function registerIpcHandlers({
       appVariant,
       getMainWindow,
       setAnalyticsTrackingEnabled: (enabled) => analytics.setTrackingEnabled(enabled),
+      activeHarness,
+      // `before-quit` runs the ordinary shutdown, so a relaunch flushes state like any other quit.
+      relaunch: () => {
+        app.relaunch();
+        app.quit();
+      },
     }),
     ...dynamicIslandIpcHandlers({ dynamicIsland }),
     ...computerUseIpcHandlers({

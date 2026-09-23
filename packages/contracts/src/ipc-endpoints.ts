@@ -36,6 +36,7 @@ export const IPC_ENDPOINTS = {
     getAppInfo: request(IPC_CHANNELS.getAppInfo),
     getSetupState: request(IPC_CHANNELS.getSetupState),
     saveSetup: request(IPC_CHANNELS.saveSetup),
+    relaunchApp: request(IPC_CHANNELS.relaunchApp),
     getAnalyticsPreference: request(IPC_CHANNELS.getAnalyticsPreference),
     setAnalyticsPreference: request(IPC_CHANNELS.setAnalyticsPreference),
     getApprovalAutomation: request(IPC_CHANNELS.getApprovalAutomation),
