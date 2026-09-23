@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { chmod, cp, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, mkdtemp, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { createDaniDexLogger } from "@dani-dex/logging";
@@ -14,7 +14,7 @@ export type HermesRuntimeTarget = "darwin-arm64" | "darwin-x64" | "linux-x64" | 
 const HERMES_TARGETS: readonly HermesRuntimeTarget[] = ["darwin-arm64", "darwin-x64", "linux-x64", "win32-x64"];
 
 const installedManifestSchema = z.object({
-  layoutVersion: z.literal(1),
+  layoutVersion: z.literal(2),
   version: z.string(),
   pythonVersion: z.string(),
   target: z.enum(["darwin-arm64", "darwin-x64", "linux-x64", "win32-x64"]),
@@ -104,6 +104,7 @@ export async function installHermesRuntime(
     await writeFile(archivePath, archive);
     // The archive's single top-level directory is `python/`, which is the layout the launcher reads.
     execFileSync("tar", ["-xzf", archivePath, "-C", staged], { stdio: "inherit" });
+    await pruneStandardLibrary(staged, target);
 
     // `--target` with an explicit platform installs the wheels for the target, not the build host, so
     // one machine can stage every target. `--require-hashes` and `--only-binary` keep it to exactly
@@ -137,7 +138,7 @@ export async function installHermesRuntime(
       join(staged, "hermes-package.json"),
       `${JSON.stringify(
         {
-          layoutVersion: 1,
+          layoutVersion: 2,
           version: hermes.version,
           pythonVersion: hermes.python.version,
           target,
@@ -148,6 +149,7 @@ export async function installHermesRuntime(
         2,
       )}\n`,
     );
+    if (target === "linux-x64" && hostTarget() === "linux-x64") await stripExtensionModules(staged, target);
     if (target === hostTarget()) {
       // Only the host can run its own interpreter. Other targets are compiled when they are verified
       // on their own runner, which every release build does before packaging.
@@ -242,6 +244,50 @@ export async function verifyHermesRuntime(
   if (!isWindows(target)) {
     // The real launcher, on the platforms where Node can run it.
     execFileSync(join(root, "bin", "hermes"), ["--version"], { encoding: "utf8" });
+  }
+}
+
+/**
+ * Parts of python-build-standalone that Hermes never loads: Tk and its Tcl libraries, IDLE, turtle,
+ * and the `idle3`, `2to3` and `pydoc3` scripts. `pip` and `ensurepip` stay because Hermes installs
+ * optional tool dependencies on first use.
+ */
+export function prunedRuntimePaths(target: HermesRuntimeTarget, entries: Record<string, readonly string[]>): string[] {
+  const windows = isWindows(target);
+  const library = windows ? "Lib" : join("lib", "python3.11");
+  const pruned = ["idlelib", "turtledemo", "tkinter", "turtle.py"].map((name) => join("python", library, name));
+  const match = (directory: string, pattern: RegExp) =>
+    (entries[directory] ?? []).filter((name) => pattern.test(name)).map((name) => join("python", directory, name));
+  if (windows) {
+    pruned.push(join("python", "tcl"));
+    pruned.push(...match("DLLs", /^(?:_tkinter\.pyd|tcl\d+t?\.dll|tk\d+t?\.dll)$/u));
+    pruned.push(...match("Scripts", /^(?:idle|2to3|pydoc)/u));
+  } else {
+    pruned.push(...match("lib", /^(?:tcl\d|tk\d|itcl\d|thread\d|tdbc|libtcl|libtk)/u));
+    pruned.push(...match(join("lib", "python3.11", "lib-dynload"), /^_tkinter\./u));
+    pruned.push(...match("bin", /^(?:idle3|2to3|pydoc3)/u));
+  }
+  return pruned;
+}
+
+async function pruneStandardLibrary(root: string, target: HermesRuntimeTarget): Promise<void> {
+  const directories = isWindows(target)
+    ? ["DLLs", "Scripts"]
+    : ["lib", join("lib", "python3.11", "lib-dynload"), "bin"];
+  const entries: Record<string, string[]> = {};
+  for (const directory of directories) {
+    entries[directory] = await readdir(join(root, "python", directory)).catch(() => []);
+  }
+  for (const path of prunedRuntimePaths(target, entries)) await rm(join(root, path), { recursive: true, force: true });
+}
+
+/** Linux wheels ship their extension modules with symbols; stripping them saves about 25 MB. */
+async function stripExtensionModules(root: string, target: HermesRuntimeTarget): Promise<void> {
+  const modules = (await readdir(sitePackages(root, target), { recursive: true }))
+    .filter((path) => /\.so(?:\.\d+)*$/u.test(path))
+    .map((path) => join(sitePackages(root, target), path));
+  for (let index = 0; index < modules.length; index += 200) {
+    execFileSync("strip", ["--strip-unneeded", ...modules.slice(index, index + 200)], { stdio: "inherit" });
   }
 }
 
