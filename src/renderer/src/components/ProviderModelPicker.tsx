@@ -603,9 +603,12 @@ function providerAvailability(status: AgentStatus, models: AgentModelOption[], r
 
 function providerSummary(provider: AgentProviderId, status: AgentProviderStatus): string {
   if (status.state === "available") {
+    // A CLI found on the user's PATH says so: it is theirs, updated by them, and it is the one this
+    // agent will run, not a copy Dani-Dex downloaded.
+    const where = status.cliSource === "system" ? ", installed on this computer" : "";
     return status.version
-      ? `${status.version} (${agentProviderCliName(provider)})`
-      : `${agentProviderCliName(provider)} ready`;
+      ? `${status.version} (${agentProviderCliName(provider)}${where})`
+      : `${agentProviderCliName(provider)} ready${where}`;
   }
   return status.message ?? providerStatusLabel(status.state);
 }

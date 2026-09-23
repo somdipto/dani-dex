@@ -38,6 +38,29 @@ const agentStatus: AgentStatus = {
 };
 
 describe("ProviderModelPicker", () => {
+  it("says when the provider CLI is the user's own install rather than a downloaded copy", async () => {
+    const status: AgentStatus = {
+      ...agentStatus,
+      providers: agentStatus.providers?.map((provider) =>
+        provider.id === "codex" ? { ...provider, cliSource: "system" as const } : provider,
+      ),
+    };
+    const view = render(() => (
+      <ProviderModelPicker
+        provider="codex"
+        value="gpt-5.6-luna"
+        reasoningEffort="medium"
+        modelOptions={STORY_MODELS}
+        agentStatus={status}
+        onChange={vi.fn()}
+        onReasoningEffortChange={vi.fn()}
+      />
+    ));
+    await fireEvent.click(view.getByRole("button", { name: "Agent model: GPT-5.6 Luna" }));
+    const dialog = view.getByRole("dialog", { name: "Choose agent model" });
+    expect(within(dialog).getByText("0.144.1 (Codex CLI, installed on this computer)")).toBeInTheDocument();
+  });
+
   it("changes model and effort without closing the combined picker", async () => {
     const onChange = vi.fn();
     const onReasoningEffortChange = vi.fn();
