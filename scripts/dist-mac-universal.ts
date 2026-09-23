@@ -40,6 +40,14 @@ export function parseBuilderConfig(text: string): UniversalMacConfig {
 }
 
 /**
+ * @electron/universal matches x64ArchFiles with minimatch and no `dot` option, so `**` stops at a
+ * dot-directory such as Pillow's `PIL/.dylibs`. The rule only sees Mach-O files, and in the packaged
+ * Hermes tree those sit under at most one dot-directory. minimatch cannot chain `**` across two
+ * dot-directories, so a deeper one would fail the universal build loudly rather than slip through.
+ */
+const ANY_DEPTH = ["**", "**/.*", "**/.*/**"].join(",");
+
+/**
  * The universal configuration is derived from `electron-builder.yml` rather than kept beside it, so
  * the arm64 release and the universal build cannot drift apart. It adds the x64 Hermes tree and the
  * pattern for resources that are the same in both slices, and changes nothing else.
@@ -52,7 +60,7 @@ export function universalMacConfig(base: UniversalMacConfig): UniversalMacConfig
   const shared = [...SINGLE_SLICE_RESOURCES, ...BOTH_ARCH_RESOURCES].join(",");
   return {
     ...base,
-    mac: { ...base.mac, extraResources, x64ArchFiles: `Contents/Resources/{${shared}}/**` },
+    mac: { ...base.mac, extraResources, x64ArchFiles: `Contents/Resources/{${shared}}/{${ANY_DEPTH}}` },
   };
 }
 
