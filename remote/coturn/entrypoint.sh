@@ -10,8 +10,8 @@ if [ -z "${TURN_PUBLIC_IP:-}" ] || [ -z "${TURN_REALM:-}" ]; then
   exit 1
 fi
 
-runtime_config="/tmp/openbot-turnserver.conf"
-cp /etc/coturn/openbot.conf "$runtime_config"
+runtime_config="/tmp/dani-dex-turnserver.conf"
+cp /etc/coturn/dani-dex.conf "$runtime_config"
 {
   echo "external-ip=${TURN_PUBLIC_IP}"
   echo "realm=${TURN_REALM}"

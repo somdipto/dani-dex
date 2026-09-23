@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch Dani-Dex Remote TLS certificate
+
+[Path]
+PathChanged=/var/lib/docker/volumes/dani-dex-remote_acme-data/_data/certificates/signal.openbot.run.crt
+Unit=dani-dex-remote-nginx-reload.service
+
+[Install]
+WantedBy=multi-user.target

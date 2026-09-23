@@ -38,11 +38,11 @@ SUID sandbox or a user namespace to the terminal.
 Install the AppArmor profile that ships with Dani-Dex, then reload AppArmor:
 
 ```bash
-sudo install -m 0644 build/linux/openbot.apparmor /etc/apparmor.d/openbot
+sudo install -m 0644 build/linux/dani-dex.apparmor /etc/apparmor.d/dani-dex
 sudo systemctl reload apparmor
 ```
 
-The same file is inside the AppImage at `resources/linux/openbot.apparmor`. The profile attaches to
+The same file is inside the AppImage at `resources/linux/dani-dex.apparmor`. The profile attaches to
 the usual places to keep an AppImage; if yours is somewhere else, edit the path in the profile before
 you install it.
 
@@ -100,7 +100,7 @@ If the chat is still missing, quit Dani-Dex and read the file directly. This rep
 agent currently claims, and the number of messages waiting in each:
 
 ```sh
-sqlite3 "$HOME/Library/Application Support/Dani-Dex/openbot.db" \
+sqlite3 "$HOME/Library/Application Support/Dani-Dex/danidex.db" \
   "SELECT t.thread_id, t.agent_id, (SELECT count(*) FROM projection_thread_messages m
      WHERE m.thread_id = t.thread_id) AS messages
    FROM projection_threads t
@@ -123,11 +123,11 @@ workspace, while a release from before that repair refuses to start over the sam
 If the current version still stops, quit Dani-Dex and read the profile it names. On macOS:
 
 ```sh
-sqlite3 "$HOME/Library/Application Support/Dani-Dex/openbot.db" \
+sqlite3 "$HOME/Library/Application Support/Dani-Dex/danidex.db" \
   "SELECT agent_json FROM projection_agents WHERE agent_id = '<id>';"
 ```
 
-On Windows, the same file is at `%APPDATA%\Dani-Dex\openbot.db`.
+On Windows, the same file is at `%APPDATA%\Dani-Dex\danidex.db`.
 
 Report the field the message names, together with the details below. The output holds your own file
 paths, so review it before you publish it.
@@ -153,8 +153,8 @@ remove `~/.codex` or `~/.claude` unless you intentionally want to manage CLI log
 ## Uninstall
 
 Quit Dani-Dex. On macOS remove `Dani-Dex.app` from Applications; on Windows use the installer's
-uninstaller; on Linux delete the AppImage, `~/.local/share/applications/openbot.desktop`,
-`~/.local/share/icons/openbot.png`, and `/etc/apparmor.d/openbot` if you installed the profile. If
+uninstaller; on Linux delete the AppImage, `~/.local/share/applications/dani-dex.desktop`,
+`~/.local/share/icons/dani-dex.png`, and `/etc/apparmor.d/dani-dex` if you installed the profile. If
 you also want to remove local Dani-Dex data, follow the reset steps above. Agent CLIs and their data
 are independent and are not removed with Dani-Dex.
 

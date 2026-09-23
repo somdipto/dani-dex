@@ -11,7 +11,7 @@ and state which default you set aside. Do not argue by citing this file.
 
 ## Non-negotiable
 
-- **Migrations are irreversible.** No backup of `openbot.db` is made before an upgrade. Preserve all
+- **Migrations are irreversible.** No backup of `danidex.db` is made before an upgrade. Preserve all
   user data and support every shipped source schema. Never assume a backup exists.
 - **Released Team API adapters are permanent.** Do not change a shipped wire protocol's meaning.
 - **Keep the renderer-to-main trust boundary:** Electron sandboxing, context isolation, navigation

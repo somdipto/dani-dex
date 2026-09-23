@@ -136,7 +136,7 @@ used through Bun's native tagged queries and transactions:
 ```ts
 interface HostTicketClaims {
   iss: "https://<production-auth-origin>";
-  aud: `urn:openbot:host:${string}`;
+  aud: `urn:danidex:host:${string}`;
   sub: string; // immutable central user UUID
   email: string; // normalized and verified
   email_verified: true;
@@ -145,7 +145,7 @@ interface HostTicketClaims {
   iat: number;
   nbf: number;
   exp: number;
-  typ: "openbot-host-access-v1";
+  typ: "dani-dex-host-access-v1";
 }
 ```
 
@@ -330,7 +330,7 @@ AUTH_PREVIOUS_PUBLIC_KEYS_JSON=[]
 EMAIL_PROVIDER=resend
 EMAIL_FROM=<verified sender>
 RESEND_API_KEY=<secret>
-APP_DEEP_LINK_ORIGIN=openbot://auth
+APP_DEEP_LINK_ORIGIN=danidex://auth
 ```
 
 In production `AUTH_ISSUER` must be one exact HTTPS address. The desktop
@@ -580,8 +580,8 @@ central API directly.
 Extend the existing single-instance and deep link handling with:
 
 ```text
-openbot://auth/verify-email?token=<one-time-token>
-openbot://auth/reset-password?token=<one-time-token>
+danidex://auth/verify-email?token=<one-time-token>
+danidex://auth/reset-password?token=<one-time-token>
 ```
 
 Handle the link on a cold start and in a running application. The parser may pass

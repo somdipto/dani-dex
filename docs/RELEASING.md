@@ -268,7 +268,7 @@ Users can verify a downloaded artifact with
 
 Installed Dani-Dex builds check for updates shortly after launch and every four minutes. New versions
 download automatically while **Automatically download updates** is on, which is the default and is
-persisted per user in `openbot-update-preference-v1.json`; with the setting off, a download starts
+persisted per user in `dani-dex-update-preference-v1.json`; with the setting off, a download starts
 only on a user action. The account popover shows the current state and lets the user download an
 available version, then restart into it. The restart action appears as
 soon as the download completes, and no platform installs without that
@@ -322,8 +322,8 @@ Before creating the first tag or any later release:
     the new version, and can run three provider downloads with restricted memory;
 12. on Windows 10 and 11 x64, confirm that normal exit, restart, and sign-out do not start NSIS, while
     `Restart and install` does start it;
-13. on Ubuntu 24.04 x64 with the AppArmor profile from `build/linux/openbot.apparmor` installed,
-    confirm the AppImage starts with the sandbox on, that `xdg-open 'openbot://join?...'` focuses the
+13. on Ubuntu 24.04 x64 with the AppArmor profile from `build/linux/dani-dex.apparmor` installed,
+    confirm the AppImage starts with the sandbox on, that `xdg-open 'danidex://join?...'` focuses the
     running application, that a provider downloads in-app, that the server rail is drawn, and that the
     microphone control is absent;
 14. confirm `CHANGELOG.md` describes the version and the working tree is clean;
@@ -371,7 +371,7 @@ After verifying Dani-Dex.app, the macOS job:
 
 1. runs native account tests without creating users;
 2. imports the application and installer certificates into a temporary, isolated keychain;
-3. compiles standalone ARM64 `host-manager` and `openbot-host` executables with Bun, and the native
+3. compiles standalone ARM64 `host-manager` and `dani-dex-host` executables with Bun, and the native
    account helper with Swift; no target-machine runtime or compiler is required;
 4. signs all executables with **Developer ID Application**, hardened runtime and timestamp, and
    checks their fixed identifiers and team `ZTRDTUL87R`;

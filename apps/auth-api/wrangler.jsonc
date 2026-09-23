@@ -39,7 +39,7 @@
     "EMAIL_SMTP_PORT": "465",
     "EMAIL_SMTP_USERNAME": "hello@openbot.run",
     "EMAIL_FROM": "hello@openbot.run",
-    "REMOTE_TICKET_KEY_ID": "openbot-remote-1",
+    "REMOTE_TICKET_KEY_ID": "dani-dex-remote-1",
     "REMOTE_SIGNAL_URL": "wss://signal.openbot.run/v1/signal",
     "REMOTE_AUTH_WEBHOOK_URL": "https://signal.openbot.run/internal/auth-events"
   },
@@ -110,7 +110,7 @@
         "EMAIL_FROM": "hello@openbot.run",
         "SITE_PUBLISH_ENABLED": "false",
         "SITE_COOKIE_ISOLATION_READY": "false",
-        "REMOTE_TICKET_KEY_ID": "openbot-remote-1",
+        "REMOTE_TICKET_KEY_ID": "dani-dex-remote-1",
         "REMOTE_SIGNAL_URL": "ws://127.0.0.1:8081/v1/signal",
         "REMOTE_AUTH_WEBHOOK_URL": "http://127.0.0.1:8081/internal/auth-events"
       },
@@ -185,7 +185,7 @@
         "EMAIL_FROM": "hello@openbot.run",
         "SITE_PUBLISH_ENABLED": "false",
         "SITE_COOKIE_ISOLATION_READY": "false",
-        "REMOTE_TICKET_KEY_ID": "openbot-remote-1",
+        "REMOTE_TICKET_KEY_ID": "dani-dex-remote-1",
         "REMOTE_SIGNAL_URL": "wss://signal.openbot.run/v1/signal",
         "REMOTE_AUTH_WEBHOOK_URL": "https://signal.openbot.run/internal/auth-events"
       },

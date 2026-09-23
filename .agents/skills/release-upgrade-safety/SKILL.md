@@ -5,7 +5,7 @@ description: Audit a pending Dani-Dex release for upgrade and data-loss hazards 
 
 # Release upgrade safety
 
-Every hazard here is one an installed user pays for and you cannot take back. `openbot.db` is
+Every hazard here is one an installed user pays for and you cannot take back. `danidex.db` is
 migrated in place with no backup, two dozen files under `userData` are rewritten by whichever build
 opens them last, a released Team API adapter is spoken by peers you will never update, and the
 account Worker's D1 migrations are applied before the Worker that needs them. A build that ships
@@ -69,8 +69,8 @@ audit delegates a check to can be dismissed by the bucket its file lives in.**
   `userData` does. Route it through gate B.
 - **The tests a gate relies on.** "Not in the shipped app" is true of every test and irrelevant for
   these, because a gate that delegates its check to a test inherits that test's weakening.
-  `openbot-database-schema-parity.test.ts` is the whole mechanical half of gate A's DDL rule;
-  `openbot-database.test.ts` carries the downgrade guard; `ipc-channel-coverage.test.ts` is gate D's
+  `dani-dex-database-schema-parity.test.ts` is the whole mechanical half of gate A's DDL rule;
+  `dani-dex-database.test.ts` carries the downgrade guard; `ipc-channel-coverage.test.ts` is gate D's
   only static link between main and preload; `electron-updater-assumptions.test.ts` pins the updater
   behaviour gate F rests on; the `v*.test.ts` files are gate C's. A change that makes one of those
   assertions vacuous passes every later gate, and once it is tagged the weakening is behind the

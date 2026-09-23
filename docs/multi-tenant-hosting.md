@@ -62,10 +62,10 @@ The helper itself is updated separately by an administrator, not by a tenant or 
   config.json       root:wheel 0644; managed flag and registered numeric UIDs
   state.json        root:wheel 0644; phase, cycle, version, timestamp, error
   host-manager      root:wheel 0755; compiled daemon
-  openbot-host      root:wheel 0755; administrator CLI
+  dani-dex-host      root:wheel 0755; administrator CLI
   create-tenants    root:wheel 0755; native account helper
   host-release.json root:wheel 0644; release version, source commit, architecture
-  openbot-relaunch.sh root:wheel 0755
+  dani-dex-relaunch.sh root:wheel 0755
   private/          root:wheel 0700; download and read-only DMG mount
   tenants/          root:wheel 0755
     <uid>/          tenant:wheel 0700; parent entry cannot be replaced by tenant
@@ -93,7 +93,7 @@ The host download does not use or change a tenant's `autoDownload` preference.
 Normal desktop users need only `Dani-Dex-<VERSION>-arm64.dmg`. Managed multi-tenant hosts also
 need `Dani-Dex-Host-<VERSION>-arm64.pkg` from the same GitHub Release. The Host package contains
 standalone ARM64 executables, the global Aqua LaunchAgent, the root LaunchDaemon, and the
-`/usr/local/bin/openbot-host` administrator command. The target Mac needs no Git checkout, Bun,
+`/usr/local/bin/dani-dex-host` administrator command. The target Mac needs no Git checkout, Bun,
 Node, Xcode, or compilation.
 
 1. Download the normal DMG and the Host PKG from the same release.
@@ -106,8 +106,8 @@ Node, Xcode, or compilation.
 
 ```sh
 sudo installer -pkg "$HOME/Downloads/Dani-Dex-Host-<VERSION>-arm64.pkg" -target /
-sudo /usr/local/bin/openbot-host setup --create-user client-acme --create-user client-bravo
-sudo /usr/local/bin/openbot-host verify
+sudo /usr/local/bin/dani-dex-host setup --create-user client-acme --create-user client-bravo
+sudo /usr/local/bin/dani-dex-host verify
 ```
 
 Replace `<VERSION>` with the downloaded release version. `/usr/local/bin` is a standard PATH
@@ -116,7 +116,7 @@ location; the absolute command also works when an administrator's PATH omits it.
 For existing Standard accounts with private homes, use:
 
 ```sh
-sudo openbot-host setup --tenant client-acme --tenant client-bravo
+sudo dani-dex-host setup --tenant client-acme --tenant client-bravo
 ```
 
 The flags may be mixed. Use distinct lowercase names, starting with a letter, with at most 31
@@ -152,7 +152,7 @@ Every registered tenant must eventually be running and healthy for automatic app
 
 ## Verification
 
-`sudo openbot-host verify` checks the application signature and permissions, all host executable
+`sudo dani-dex-host verify` checks the application signature and permissions, all host executable
 signatures, fixed launchd definitions, daemon state, root-owned config/state, and each tenant's
 Standard membership and home metadata. It also creates harmless files in a temporary host
 verification area, tests access as each tenant in both directions, and removes that area.
@@ -181,8 +181,8 @@ Production uses the release PKG and installed CLI. Release CI builds the binarie
 release commit as Dani-Dex.app. Native tests use a fake account service and temporary files:
 
 ```sh
-xcrun swiftc -parse-as-library -D TENANT_SETUP_TESTS scripts/macos-tenant-setup.swift scripts/macos-tenant-setup-tests.swift -o /tmp/openbot-tenant-setup-tests
-/tmp/openbot-tenant-setup-tests
+xcrun swiftc -parse-as-library -D TENANT_SETUP_TESTS scripts/macos-tenant-setup.swift scripts/macos-tenant-setup-tests.swift -o /tmp/dani-dex-tenant-setup-tests
+/tmp/dani-dex-tenant-setup-tests
 bun run test:desktop -- scripts/dani-dex-host.test.ts scripts/verify-host-installer.test.ts scripts/host-manager.test.ts
 ```
 

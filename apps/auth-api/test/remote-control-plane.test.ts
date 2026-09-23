@@ -156,7 +156,7 @@ describe("RemoteTicketSigner", () => {
     });
     const key = await importJWK(publicJwk, "ES256");
     const verified = await jwtVerify(result.ticket, key, {
-      audience: "openbot-remote",
+      audience: "dani-dex-remote",
       algorithms: ["ES256"],
       currentDate: new Date(1_900_000_001_000),
     });

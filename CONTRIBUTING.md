@@ -15,7 +15,7 @@ review.
 
 ```bash
 git clone https://github.com/nightly-labs/openbot.git
-cd openbot
+cd dani-dex
 bun install --frozen-lockfile
 bun run check
 bun run dev

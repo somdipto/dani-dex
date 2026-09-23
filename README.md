@@ -58,16 +58,16 @@ On Ubuntu 23.10 or newer and on Debian 13, unprivileged user namespaces are rest
 and Dani-Dex exits during launch until you install an AppArmor profile:
 
 ```bash
-sudo install -m 0644 build/linux/openbot.apparmor /etc/apparmor.d/openbot
+sudo install -m 0644 build/linux/dani-dex.apparmor /etc/apparmor.d/dani-dex
 sudo systemctl reload apparmor
 ```
 
-The same file ships inside the AppImage at `resources/linux/openbot.apparmor`. Edit the attachment
+The same file ships inside the AppImage at `resources/linux/dani-dex.apparmor`. Edit the attachment
 path in the profile if you keep the AppImage outside the usual locations. Do not start Dani-Dex with
 `--no-sandbox`: that removes the boundary between a renderer and the rest of the computer.
 
-On the first start from an AppImage, Dani-Dex writes `~/.local/share/applications/openbot.desktop`
-and `~/.local/share/icons/openbot.png`, which is what lets an `openbot://` link - an invitation, or
+On the first start from an AppImage, Dani-Dex writes `~/.local/share/applications/dani-dex.desktop`
+and `~/.local/share/icons/dani-dex.png`, which is what lets an `danidex://` link - an invitation, or
 a plugin listing - open the app and gives the launcher an icon that stays after the app exits. Delete the two files to undo it.
 
 Voice prompts and remote desktop are not available on Linux.
@@ -143,7 +143,7 @@ iex "& {$(irm https://bun.com/install.ps1)} -Version 1.4.0"
 
 ```bash
 git clone https://github.com/nightly-labs/openbot.git
-cd openbot
+cd dani-dex
 bun install --frozen-lockfile
 bun run codex:doctor
 bun run dev
@@ -155,7 +155,7 @@ model turn. `bun run cua-driver:doctor` reports the Computer Use driver separate
 To reset only the local development state, quit the dev app and test client, then run
 `bun run dev:reset`.
 The command deletes the app and test-client development profiles plus the legacy host profile,
-including `openbot.db` and its WAL files. It does not change the production profile, agent
+including `danidex.db` and its WAL files. It does not change the production profile, agent
 workspaces, `~/.codex`, or `~/.claude`.
 
 `bun run dev` seeds a development profile it creates, so a first start already shows this data.
@@ -198,7 +198,7 @@ Ask an agent to create a skill from a reusable workflow. It prepares a folder wi
 
 Agents can use `list_local_skills`, `read_local_skill`, `revise_skill`, and `install_local_skill`. Revisions require the version read by the agent and retain previous versions. Updating a library skill does not update installed copies: use the Update chip or install an exact revision. Modified installed files are protected. To publish a local skill, submit its folder separately through the marketplace.
 
-Optional scripts, references, and assets follow the Codex skill folder structure. A PNG at `assets/icon.png` supplies the local preview logo. The built-in `openbot-skill-creator` guide explains the format and validation limits. Registration does not run scripts.
+Optional scripts, references, and assets follow the Codex skill folder structure. A PNG at `assets/icon.png` supplies the local preview logo. The built-in `dani-dex-skill-creator` guide explains the format and validation limits. Registration does not run scripts.
 
 ## Commands
 
@@ -233,7 +233,7 @@ Optional scripts, references, and assets follow the Codex skill folder structure
 | `bun run storybook` | Start Storybook on a port allocated through the same registry, so two worktrees never announce one port. `DANI_DEX_STORYBOOK_PORT` moves where the search starts; `--port` is refused. |
 | `bun run build-storybook` | Build static Storybook. CI sets `DANI_DEX_STORYBOOK_CHECK=true` to skip automatic prop documentation during its build check. |
 | `bun run dev:automation` | Drive the running dev app over CDP: `instances`, `pages`, `snapshot`, `screenshot`, `click`/`type` by accessible role. `--page=<target-id\|url-substring>` aims at any window, including embedded browser views; `--wait-for=<role>,<name>` settles on an accessible target instead of polling; mutations need `--allow-mutations` and a named instance (this worktree's record, `--instance=<id>` or `--port=`). |
-| `bun run dev:cpu` | Measure idle CPU on the running dev app, per process kind and per page. `--duration=<ms>` (default 60000), `--interval=<ms>` (default 5000), `--label=<name>`, `--out=<name>.json` (always under `.openbot-build/dev-automation/cpu/`, and refused if it would leave that directory or pass through a symbolic link) and `--compare=<file>` for a before/after delta. Read-only. Take a baseline before a change and a second run after it: only the difference between two runs on the same machine is a result, because a dev build carries the Vite server and the source maps as well. |
+| `bun run dev:cpu` | Measure idle CPU on the running dev app, per process kind and per page. `--duration=<ms>` (default 60000), `--interval=<ms>` (default 5000), `--label=<name>`, `--out=<name>.json` (always under `.dani-dex-build/dev-automation/cpu/`, and refused if it would leave that directory or pass through a symbolic link) and `--compare=<file>` for a before/after delta. Read-only. Take a baseline before a change and a second run after it: only the difference between two runs on the same machine is a result, because a dev build carries the Vite server and the source maps as well. |
 | `bun run check` | Run Biome, both typechecks, offline tests, the browser smoke test, and the production build. |
 | `bun run typecheck` | Check all 11 projects in parallel with a separate incremental cache for each project in this worktree. |
 | `bun run check:ui` | Check the renderer against the design system: shared primitives, Kobalte and Lucide confined to `components/ui`, palette tokens instead of colour, size, radius and transition literals. Reads the whole renderer in 60 ms. |
@@ -377,9 +377,9 @@ video formats, export as MP3 or MOV, or attach a text transcript. Remote hosts m
   workspace whose move could not run stays readable where it is.
 - `~/Dani-Dex/Shared` — files intentionally shared between agents.
 - `~/Dani-Dex/Shared/Transfers` — managed message snapshots and generated files. Each transfer has
-  an `.openbot-transfer.json` manifest with ownership, recipients, size, and SHA-256 metadata.
+  an `.dani-dex-transfer.json` manifest with ownership, recipients, size, and SHA-256 metadata.
 - `~/Dani-Dex/Downloads` — embedded-browser downloads.
-- Electron `userData/openbot.db` — the canonical Dani-Dex event log and projections for agents,
+- Electron `userData/danidex.db` — the canonical Dani-Dex event log and projections for agents,
   conversations, provider session bindings, queues, reactions, and attachment indexes.
 - Electron `userData/legacy-backup-v1` — unchanged copies of imported `bots.json` and
   `mailbox.json` files, when these files existed before the SQLite migration.
@@ -450,7 +450,7 @@ respective products and services.
 
 For one native Standard user per tenant, install the normal Dani-Dex DMG and the optional
 `Dani-Dex-Host-<VERSION>-arm64.pkg` from the same release. The Host package provides
-`sudo openbot-host setup --create-user client-acme --create-user client-bravo` and
-`sudo openbot-host verify`. No Git checkout, Bun, or compilation is required on the host.
+`sudo dani-dex-host setup --create-user client-acme --create-user client-bravo` and
+`sudo dani-dex-host verify`. No Git checkout, Bun, or compilation is required on the host.
 Normal desktop users need only the DMG. See the [host deployment guide](docs/multi-tenant-hosting.md)
 for existing-user enrollment, password handling, package upgrades, and required target-host checks.

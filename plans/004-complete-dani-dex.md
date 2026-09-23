@@ -12,7 +12,7 @@ Dani-Dex is a separate product from Dani Bot / `dani-desktop`. It is a local-fir
 
 The following requirements supersede narrower assumptions elsewhere in this draft:
 
-- Remove every `DaniDex` / `openbot` mention from README, documentation, source, tests, package names, paths, runtime identifiers, environment variables, protocols, URLs, workflows, resources, and codebase-facing files. `LICENSE` and `NOTICE` remain unchanged. Where old identifiers must be read for upgrade compatibility, isolate them in a generated migration compatibility manifest so the ordinary codebase and documentation carry only Dani-Dex names; add tests that prove the old state migrates without loss.
+- Remove every `DaniDex` / `dani-dex` mention from README, documentation, source, tests, package names, paths, runtime identifiers, environment variables, protocols, URLs, workflows, resources, and codebase-facing files. `LICENSE` and `NOTICE` remain unchanged. Where old identifiers must be read for upgrade compatibility, isolate them in a generated migration compatibility manifest so the ordinary codebase and documentation carry only Dani-Dex names; add tests that prove the old state migrates without loss.
 - Every push to `main` triggers CI and cross-platform build validation for Windows x64, Linux x64, macOS x64 (Intel), macOS arm64 (Apple Silicon), and the universal macOS distribution.
 - The release DMG must run natively on both Intel and Apple Silicon. Build per-architecture app bundles, merge architecture-compatible native contents correctly, and verify the final universal artifact with `lipo`, codesign, notarization, package launch, and update metadata. Do not call two separate DMGs “universal.”
 - Shipped desktop builds must check GitHub Releases for updates and offer download/restart in the app. A `main` push builds test artifacts; a release promotion creates versioned signed assets and updater metadata. Do not point production clients at every unreviewed main build.
@@ -43,7 +43,7 @@ The following requirements supersede narrower assumptions elsewhere in this draf
 - Product-facing standalone `DaniDex` branding was replaced with `Dani-Dex` across 469 tracked files. Legal notices are unchanged.
 - Desktop app identity: `Dani-Dex`, `dev.danlab.danidex.desktop`, `dani-dex.desktop`.
 - Mobile product name, slug, scheme, and bundle identifiers use Dani-Dex.
-- Canonical deep links use `dani-dex://`. Old `openbot://` links remain readable for migration compatibility.
+- Canonical deep links use `dani-dex://`. Old `danidex://` links remain readable for migration compatibility.
 - Frozen dependency install, UI foundation check, five desktop typechecks, and production Electron build pass on the pinned toolchain.
 - Focused deep-link/desktop tests pass 65/65. Focused auth tests pass 104/104 across account UI, email one-time codes, MCP OAuth callbacks/storage/provider flow, and deep-link routing.
 - The built desktop app launches and renders Dani-Dex branding. Visual proof exists.
@@ -206,7 +206,7 @@ A documented baseline identifies passing gates, inherited warnings, environmenta
 - [x] Replace product-facing standalone DaniDex copy with Dani-Dex.
 - [x] Set desktop/mobile names and identifiers.
 - [x] Add canonical `dani-dex://` deep links.
-- [x] Preserve compatibility parsing for legacy `openbot://` links.
+- [x] Preserve compatibility parsing for legacy `danidex://` links.
 - [x] Preserve LICENSE/NOTICE.
 - [x] Build, typecheck, run focused link/identity tests, launch, and inspect pixels.
 - [x] Replace source history with one local root commit authored by Somdipto Nandy.

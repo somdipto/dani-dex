@@ -57,7 +57,7 @@ the `media-attachments` capability; released protocol adapters keep their existi
 
 ## State ownership
 
-- `openbot.db` is the source of truth for Dani-Dex agents, conversations, queues, reactions,
+- `danidex.db` is the source of truth for Dani-Dex agents, conversations, queues, reactions,
   attachments, and provider-session bindings.
 - `MailboxStore` owns attachment records, staged generated attachments, mailbox commits, and the
   file-deletion outbox. `AttachmentFiles` owns draft and transfer files: copying, size limits,
@@ -69,28 +69,28 @@ the `media-attachments` capability; released protocol adapters keep their existi
   conversation storage.
 - D1 is the source of truth for central accounts, remote membership, invitations, and logical sessions.
 - A local team host owns conversations, files, agents, and the local member projection used by Team API.
-- `openbot-approval-automation-v1.json` holds Turbo mode and the agents granted "Always allow". It
+- `dani-dex-approval-automation-v1.json` holds Turbo mode and the agents granted "Always allow". It
   belongs to the computer that runs the agent and never crosses the Team API, whose released
   adapters freeze an approval response to `accept` or `decline`: a remote host that has automation
   on answers its own approvals, so they never reach a client, and a client cannot grant one on a
   remote host's behalf. `AttentionRegistry` reads it at each approval, including hosted-site
   publishing, replacement and deletion. Site validation, ownership checks and activity markers
   still apply. Questions and browser takeovers remain interactive.
-- `browser-tabs.json` is the embedded browser's own durable state, outside `openbot.db` and outside the
+- `browser-tabs.json` is the embedded browser's own durable state, outside `danidex.db` and outside the
   migration runner. It is versioned in the file (`v1` predates the per-tab `BrowserEnvironment`, `v2`
   carries it) and always rewritten as the current version, so a downgrade reads a file it does not know.
   Nothing copies it first, so `src/backend/browser-state.ts` re-validates every bound it reads rather
   than trusting it: a tab whose environment fails validation is still returned, without that
   environment, because losing the user's open tab is worse than losing an emulated viewport.
 - `~/Dani-Dex/Shared/Data/agent-data.db` is one SQLite file that holds every table the agents create
-  for themselves, outside `openbot.db` and outside the migration runner. One file gives the agents
+  for themselves, outside `danidex.db` and outside the migration runner. One file gives the agents
   one namespace and lets them join across each other's tables. Every agent can read and write every
-  table; the `openbot_metadata` table records the agent that created each one, and that owner is the
+  table; the `danidex_metadata` table records the agent that created each one, and that owner is the
   only agent allowed to drop or alter it. SQLite's own authorizer refuses the other cases, so the
   rule does not depend on reading the model's SQL. The agents own these schemas, so nothing copies
   or migrates them before a release, and a table stays when the agent that made it is deleted. The
   user deletes one from agent settings, which is the only way to remove a table whose owner is gone.
-  The guidance the agents read ships as the managed skill `resources/managed-skills/openbot-data`,
+  The guidance the agents read ships as the managed skill `resources/managed-skills/dani-dex-data`,
   beside site hosting and the skill creator, so the always-on prompt only names the tools.
 - Renderer signals and stores are projections for the current screen only. They are not durable
   state, and one concern is one record - a row of parallel signals over its fields lets a screen
@@ -587,7 +587,7 @@ Tunnel transport is retired. The old public endpoints return `host_update_requir
 
 The desktop client starts each remote connection with `GET /v1/compatibility`. The response contains the host application version, the minimum and maximum Team API protocol versions, and host capabilities. The client selects the highest protocol in the shared range. Application SemVer does not select or reject a protocol.
 
-The first released Team API protocol is `1`. All later HTTP requests include `Dani-Dex-Protocol-Version` and `Dani-Dex-App-Version`. The event socket uses the `openbot-team-v1` WebSocket subprotocol. A host without the compatibility endpoint is treated as an old host and is blocked. A request without the required protocol headers is treated as an old client and is blocked.
+The first released Team API protocol is `1`. All later HTTP requests include `Dani-Dex-Protocol-Version` and `Dani-Dex-App-Version`. The event socket uses the `dani-dex-team-v1` WebSocket subprotocol. A host without the compatibility endpoint is treated as an old host and is blocked. A request without the required protocol headers is treated as an old client and is blocked.
 
 Each protocol has a frozen codec and adapter in `packages/contracts/src/team-protocol`. The v1 HTTP codec owns the fixed route registry and validates JSON requests and responses before the adapter converts current values. Uploads, downloads, and other binary routes use the same negotiated headers and error envelope. The host does not write current service or IPC values directly to the network. Breaking or semantic changes add a new protocol directory and registry entry. A released adapter keeps its original meaning.
 
@@ -624,8 +624,8 @@ data and are manual because they can require local credentials.
 ### Prompt-driven agent profiles
 
 Users create and edit agent profiles by asking an agent in the normal desktop or mobile
-conversation. `openbot.create_agent` creates a persistent teammate with instructions and a first
-task; `openbot.update_profile` changes an existing agent's name, title, instructions, or generated
+conversation. `danidex.create_agent` creates a persistent teammate with instructions and a first
+task; `danidex.update_profile` changes an existing agent's name, title, instructions, or generated
 or custom avatar. `avatarPath` accepts a local PNG, JPEG, or WebP file up to 512 KB, with relative
 paths resolved from the calling agent’s workspace. The agent uses its available tools to resize or
 compress a copy when needed. Dani-Dex validates the prepared file before profile changes and copies
@@ -675,7 +675,7 @@ first buffered event. The next account claims this buffer; identify precedes ord
 original timestamps. Reconnects do not replay it. Expiry, opt-out, and process exit discard it.
 Account changes invalidate prior operation scopes; the anonymous-to-account transition retains the
 pairing scope so its completion can be recorded. Mobile uses a write-only client in the existing
-Openbot OpenPanel project shared with desktop and the website.
+Dani-Dex OpenPanel project shared with desktop and the website.
 Workspace command wrappers record outcomes once at the mobile caller; conversation availability is measured in
 the visible chat view, including cached reads, not from background broadcasts. The host remains the only source of turn lifecycle
 events. No Team API or database schema changes are required.
@@ -1039,17 +1039,17 @@ files the message already has, and adds new ones.
 
 ## Plugin distribution
 
-A plugin is one developer's bundle: an MCP server, shown as an app, the skills that drive it, and the listing text. The catalog of available plugins is a static file set that the Account Worker serves from `openbot.run` without an account, and the main process keeps a copy in the user-data directory rather than in SQLite, because a remote catalog is a cache and not the source of truth. An install saves the app as a host-global MCP server and installs the pinned skills into the chosen agent. A share link at `openbot.run/plugins/<slug>` opens a public page, and `openbot://plugins/<slug>` opens the listing in the app; neither one installs anything.
+A plugin is one developer's bundle: an MCP server, shown as an app, the skills that drive it, and the listing text. The catalog of available plugins is a static file set that the Account Worker serves from `openbot.run` without an account, and the main process keeps a copy in the user-data directory rather than in SQLite, because a remote catalog is a cache and not the source of truth. An install saves the app as a host-global MCP server and installs the pinned skills into the chosen agent. A share link at `openbot.run/plugins/<slug>` opens a public page, and `danidex://plugins/<slug>` opens the listing in the app; neither one installs anything.
 
-See [plugin distribution and sharing](plugin-distribution.md) for the catalog shape, the fetch and cache rules, the install and uninstall order, the deep-link parser rules, and the security review. Two parts of that design run today. The Plugins tab installs the listing's pinned skills into the chosen agent and saves its app as a host-global MCP server. The links work: `openbot.run/plugins` and `openbot.run/plugins/<slug>` are pages on the public site, and `openbot://plugins/<slug>` opens that listing in the app, which is the second kind `src/main/deep-link-router.ts` recognises beside an invitation. Both sides read one catalog, the literal in `packages/contracts/src/plugin-catalog.ts`, because a listing that said one thing on the page and another in the app would be two catalogs. The catalog files, the Worker routes that serve them, the cache in the main process, and uninstall are still design.
+See [plugin distribution and sharing](plugin-distribution.md) for the catalog shape, the fetch and cache rules, the install and uninstall order, the deep-link parser rules, and the security review. Two parts of that design run today. The Plugins tab installs the listing's pinned skills into the chosen agent and saves its app as a host-global MCP server. The links work: `openbot.run/plugins` and `openbot.run/plugins/<slug>` are pages on the public site, and `danidex://plugins/<slug>` opens that listing in the app, which is the second kind `src/main/deep-link-router.ts` recognises beside an invitation. Both sides read one catalog, the literal in `packages/contracts/src/plugin-catalog.ts`, because a listing that said one thing on the page and another in the app would be two catalogs. The catalog files, the Worker routes that serve them, the cache in the main process, and uninstall are still design.
 
 ## macOS Host Manager
 
 `scripts/macos-tenant-setup.swift` is a separate administrator command for new Standard accounts.
 It uses OpenDirectory directly, creates only new empty homes, and stores generated credentials
 in a new root-only file before account creation. It is not installed or called by the daemon.
-The Host PKG installs this as `create-tenants`, alongside the standalone `openbot-host` CLI.
-`openbot-host-service.ts` owns setup/verification sequencing; `openbot-host-macos.ts` owns OS
+The Host PKG installs this as `create-tenants`, alongside the standalone `dani-dex-host` CLI.
+`dani-dex-host-service.ts` owns setup/verification sequencing; `dani-dex-host-macos.ts` owns OS
 operations. Passwords cross only the native helper's captured pipe and the administrator's tty,
 not the host protocol. The root-only recovery file is removed after successful presentation.
 `build-host-installer.ts` and `verify-host-installer.ts` own release packaging and the exact
@@ -1088,7 +1088,7 @@ A local video-only test can run without native diagnostics. Its viewer iframe is
 
 ### Secure browser authentication
 
-`openbot_browser.submit_secret` uses the existing attention/takeover lifecycle with optional public
+`danidex_browser.submit_secret` uses the existing attention/takeover lifecycle with optional public
 secret-request metadata. The attention registry creates a fresh request ID and owns the pending
 response. The secret travels through a dedicated typed IPC endpoint or the optional
 `browser-secret-handoff` Team API capability, never a prompt answer or provider tool argument.

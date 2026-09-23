@@ -4,8 +4,8 @@
 
 Checked on 2026-09-08. No production changes were made for this investigation.
 
-- SSH target: `sui-alexandria`. Compose directory: `/opt/openbot/remote`.
-- Signal container: `openbot-remote-remote-api-1`, created `2026-09-01T10:53:29.873613544Z`.
+- SSH target: `sui-alexandria`. Compose directory: `/opt/dani-dex/remote`.
+- Signal container: `dani-dex-remote-remote-api-1`, created `2026-09-01T10:53:29.873613544Z`.
 - Running image: `sha256:7f94a50aee8b89ccf16803c0b9811f6fe19a5d876d14cfeed51deb97e4eee6dd`.
 - Running `signal-service.ts` SHA-256: `b1514f74e6b2ff708c430154b793261a667b5b107c69ee6bd79e6c0fd2356efc`.
   Its client admission code rejects every different session when a host already has a connection.
@@ -15,13 +15,13 @@ Checked on 2026-09-08. No production changes were made for this investigation.
   This is version evidence, not an end-to-end compatibility result.
 - D1 records `0018_remote_device_sessions.sql` as applied at `2026-09-04 12:21:44`.
   The SELECT changed no data. Do not apply this migration again or reverse it.
-- `/opt/openbot` is not a Git checkout. The public Signal health routes do not identify the source version.
+- `/opt/dani-dex` is not a Git checkout. The public Signal health routes do not identify the source version.
 
 To repeat the read-only checks, run from this repository:
 
 ```sh
-ssh sui-alexandria 'docker inspect openbot-remote-remote-api-1 --format "{{.Image}} {{.Created}}"'
-ssh sui-alexandria 'docker exec openbot-remote-remote-api-1 sha256sum /app/remote/api/src/signal-service.ts'
+ssh sui-alexandria 'docker inspect dani-dex-remote-remote-api-1 --format "{{.Image}} {{.Created}}"'
+ssh sui-alexandria 'docker exec dani-dex-remote-remote-api-1 sha256sum /app/remote/api/src/signal-service.ts'
 bunx wrangler deployments list --cwd apps/auth-api --json
 bunx wrangler d1 execute openbot-auth --cwd apps/auth-api --remote \
   --command "SELECT name, applied_at FROM d1_migrations WHERE name = '0018_remote_device_sessions.sql'" --json
@@ -37,13 +37,13 @@ CI deployment procedure. Do not infer Worker compatibility from its date alone.
 Stage the approved source on the host without replacing its configuration or key files:
 
 ```sh
-release_dir="/opt/openbot/releases/$(git rev-parse HEAD)"
+release_dir="/opt/dani-dex/releases/$(git rev-parse HEAD)"
 ssh sui-alexandria "mkdir -p '$release_dir'"
 git archive HEAD | ssh sui-alexandria "tar --exclude='.env*' --exclude='*/.env*' -x -C '$release_dir'"
-ssh sui-alexandria "ln -s /opt/openbot/remote/.env.production '$release_dir/remote/.env.production'"
-ssh sui-alexandria "ln -s /opt/openbot/runtime '$release_dir/runtime'"
-ssh sui-alexandria "ln -s /opt/openbot/node_modules '$release_dir/node_modules'"
-ssh sui-alexandria "ln -s /opt/openbot/remote/.env.keys '$release_dir/remote/.env.keys'"
+ssh sui-alexandria "ln -s /opt/dani-dex/remote/.env.production '$release_dir/remote/.env.production'"
+ssh sui-alexandria "ln -s /opt/dani-dex/runtime '$release_dir/runtime'"
+ssh sui-alexandria "ln -s /opt/dani-dex/node_modules '$release_dir/node_modules'"
+ssh sui-alexandria "ln -s /opt/dani-dex/remote/.env.keys '$release_dir/remote/.env.keys'"
 ```
 
 The runtime and dependency links let the existing Dotenvx wrapper run. Docker installs Signal
@@ -53,13 +53,13 @@ On `sui-alexandria`, change to that release directory. Retain the running image 
 Run only these Signal commands; `remote:update` also updates coturn and is not appropriate here.
 
 ```sh
-signal_previous_image=$(docker inspect openbot-remote-remote-api-1 --format '{{.Image}}')
-docker image tag "$signal_previous_image" openbot-remote-api:before-325
+signal_previous_image=$(docker inspect dani-dex-remote-remote-api-1 --format '{{.Image}}')
+docker image tag "$signal_previous_image" dani-dex-remote-api:before-325
 remote/bin/dotenvx run --overload -f remote/.env.production -fk remote/.env.keys -- \
-  docker compose -p openbot-remote -f remote/compose.yaml build remote-api
+  docker compose -p dani-dex-remote -f remote/compose.yaml build remote-api
 remote/bin/dotenvx run --overload -f remote/.env.production -fk remote/.env.keys -- \
-  docker compose -p openbot-remote -f remote/compose.yaml up -d --no-build --no-deps remote-api
-docker inspect openbot-remote-remote-api-1 --format '{{.Image}} {{.State.Health.Status}}'
+  docker compose -p dani-dex-remote -f remote/compose.yaml up -d --no-build --no-deps remote-api
+docker inspect dani-dex-remote-remote-api-1 --format '{{.Image}} {{.State.Health.Status}}'
 curl --fail --silent --show-error https://signal.openbot.run/health/ready
 ```
 
@@ -75,9 +75,9 @@ connection; health checks alone do not prove it.
 If the new Signal fails, restore the retained image from the same release directory:
 
 ```sh
-docker image tag openbot-remote-api:before-325 openbot-remote-remote-api
+docker image tag dani-dex-remote-api:before-325 dani-dex-remote-remote-api
 remote/bin/dotenvx run --overload -f remote/.env.production -fk remote/.env.keys -- \
-  docker compose -p openbot-remote -f remote/compose.yaml up -d --no-build --no-deps --force-recreate remote-api
+  docker compose -p dani-dex-remote -f remote/compose.yaml up -d --no-build --no-deps --force-recreate remote-api
 ```
 
 Rollback restores the old one-session limit. It does not reverse D1 migrations or revoke device sessions.

@@ -126,7 +126,7 @@ All notable changes to Dani-Dex will be documented here. The project follows
 - Show a host's browser tab live to a remote member, with pointer and key input back to the page.
 - Connect an MCP server before it is installed: the install dialog tests the configuration, and
   only a configuration that answers is saved.
-- Open a Marketplace plugin from an `openbot://plugins/<slug>` link on its own detail page.
+- Open a Marketplace plugin from an `danidex://plugins/<slug>` link on its own detail page.
 - Publish plugin pages on openbot.run from the shipped catalog: fourteen listings, each with its
   own mark.
 - Give each agent one silhouette and a face that matches the work, in the sidebar and the activity

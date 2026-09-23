@@ -1,4 +1,4 @@
-name: openbot-remote-dev
+name: dani-dex-remote-dev
 
 services:
   remote-api:

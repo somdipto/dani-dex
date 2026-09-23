@@ -27,7 +27,7 @@ table, IPC channel or product string, or when a term in the code disagrees with 
 - **routine**: a scheduled instruction for one agent (`projection_agent_routines`), not Claude
   Code `/schedule`.
 - **shared table**: a table an agent created in the one file every agent shares
-  (`~/Dani-Dex/Shared/Data/agent-data.db`, `SharedTable`, `AgentTables`). `openbot.db` is the
+  (`~/Dani-Dex/Shared/Data/agent-data.db`, `SharedTable`, `AgentTables`). `danidex.db` is the
   application's database and holds none of these. **owner**: the agent whose id
-  `openbot_metadata` records for a table, and the only agent that can drop or alter it; every other
+  `danidex_metadata` records for a table, and the only agent that can drop or alter it; every other
   agent can still read and write its rows, and the user can delete any table in agent settings.

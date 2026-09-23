@@ -45,13 +45,13 @@ must terminate TLS and forward the WebSocket to `http://127.0.0.1:8081`. Also se
 `REMOTE_TRUST_PROXY=true` so the IP limits use the client address from `X-Forwarded-For`.
 
 The configuration in `nginx/signal.openbot.run.conf` uses the certificate from the ACME volume. Install
-`openbot-remote-nginx-reload.path` and `openbot-remote-nginx-reload.service` into `/etc/systemd/system/` as
+`dani-dex-remote-nginx-reload.path` and `dani-dex-remote-nginx-reload.service` into `/etc/systemd/system/` as
 well. The unit reloads Nginx after the certificate is renewed:
 
 ```sh
-sudo cp remote/nginx/openbot-remote-nginx-reload.* /etc/systemd/system/
+sudo cp remote/nginx/dani-dex-remote-nginx-reload.* /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now openbot-remote-nginx-reload.path
+sudo systemctl enable --now dani-dex-remote-nginx-reload.path
 ```
 
 Production secrets are stored in the tracked `.env.production` file as encrypted Dotenvx values.

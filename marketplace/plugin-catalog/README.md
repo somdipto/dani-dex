@@ -22,7 +22,7 @@ Rules for a new entry:
   value in the connect dialog.
 - `http` servers take a `url`. `stdio` servers take a `command` and `args`.
   No `workingDirectory`: the provider drops such servers.
-- Names must pass `mcpConfigErrors` and must not be reserved (`openbot`).
+- Names must pass `mcpConfigErrors` and must not be reserved (`dani-dex`).
 - OAuth-only vendors install as a plain `http` server with a `link` flow, the
   same shape the Canva listing uses. Dani-Dex signs in itself: the main process
   holds the MCP OAuth client, keeps the tokens in encrypted storage, and adds

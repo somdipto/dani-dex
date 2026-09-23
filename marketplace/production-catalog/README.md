@@ -66,21 +66,21 @@ Do not use the separate `skills:seed`, `agents:seed`, or `dev:seed` demo scripts
 | [distinctive-frontend-design](skills/distinctive-frontend-design/SKILL.md) | design | anthropic |
 | [internal-communications](skills/internal-communications/SKILL.md) | documents | anthropic |
 | [decision-quality-check](skills/decision-quality-check/SKILL.md) | productivity | anthropic |
-| [change-review ★](skills/change-review/SKILL.md) | coding | openbot |
-| [bug-triage](skills/bug-triage/SKILL.md) | coding | openbot |
-| [interface-critique](skills/interface-critique/SKILL.md) | design | openbot |
-| [evidence-brief ★](skills/evidence-brief/SKILL.md) | research | openbot |
-| [competitor-comparison](skills/competitor-comparison/SKILL.md) | research | openbot |
-| [launch-notes ★](skills/launch-notes/SKILL.md) | documents | openbot |
-| [meeting-actions ★](skills/meeting-actions/SKILL.md) | productivity | openbot |
-| [project-plan](skills/project-plan/SKILL.md) | productivity | openbot |
-| [support-reply](skills/support-reply/SKILL.md) | documents | openbot |
-| [account-brief](skills/account-brief/SKILL.md) | research | openbot |
-| [outreach-draft](skills/outreach-draft/SKILL.md) | documents | openbot |
-| [campaign-analysis](skills/campaign-analysis/SKILL.md) | data-analytics | openbot |
-| [data-quality-review](skills/data-quality-review/SKILL.md) | data-analytics | openbot |
-| [workflow-playbook](skills/workflow-playbook/SKILL.md) | automation | openbot |
-| [hiring-scorecard](skills/hiring-scorecard/SKILL.md) | other | openbot |
+| [change-review ★](skills/change-review/SKILL.md) | coding | dani-dex |
+| [bug-triage](skills/bug-triage/SKILL.md) | coding | dani-dex |
+| [interface-critique](skills/interface-critique/SKILL.md) | design | dani-dex |
+| [evidence-brief ★](skills/evidence-brief/SKILL.md) | research | dani-dex |
+| [competitor-comparison](skills/competitor-comparison/SKILL.md) | research | dani-dex |
+| [launch-notes ★](skills/launch-notes/SKILL.md) | documents | dani-dex |
+| [meeting-actions ★](skills/meeting-actions/SKILL.md) | productivity | dani-dex |
+| [project-plan](skills/project-plan/SKILL.md) | productivity | dani-dex |
+| [support-reply](skills/support-reply/SKILL.md) | documents | dani-dex |
+| [account-brief](skills/account-brief/SKILL.md) | research | dani-dex |
+| [outreach-draft](skills/outreach-draft/SKILL.md) | documents | dani-dex |
+| [campaign-analysis](skills/campaign-analysis/SKILL.md) | data-analytics | dani-dex |
+| [data-quality-review](skills/data-quality-review/SKILL.md) | data-analytics | dani-dex |
+| [workflow-playbook](skills/workflow-playbook/SKILL.md) | automation | dani-dex |
+| [hiring-scorecard](skills/hiring-scorecard/SKILL.md) | other | dani-dex |
 
 ★ Featured on first publication. Existing Featured settings are preserved on reruns.
 

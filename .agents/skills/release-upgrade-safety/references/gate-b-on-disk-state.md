@@ -38,7 +38,7 @@ Widen the first query's pathspec to include `'apps/mobile/src/*.ts'` and
 guard `value.version !== 1`. Then run the key inventory as a second derived list:
 
 ```bash
-keys() { git grep -hoE '"openbot[.:][a-zA-Z0-9.:_-]+"' "$1" -- \
+keys() { git grep -hoE '"dani-dex[.:][a-zA-Z0-9.:_-]+"' "$1" -- \
   'src/renderer/src/**' 'apps/mobile/src/**' 'packages/team-client/src/**' \
   ':(exclude)*.test.ts' ':(exclude)*.test.tsx' | sort -u; }
 diff <(keys <tag>) <(keys HEAD)
@@ -46,19 +46,19 @@ diff <(keys <tag>) <(keys HEAD)
 
 Process substitution rather than two files in `/tmp`: several agents work in worktrees on this
 machine at once, and a fixed temporary name lets one audit read another range's inventory and call
-a renamed key clean. **`openbot[.:]` covers both spellings** — the renderer uses colons
-(`openbot:sidebar-pins:v1`), mobile and team-client use dots (`openbot.mobile.session.v1`), and a
+a renamed key clean. **`dani-dex[.:]` covers both spellings** — the renderer uses colons
+(`danidex:sidebar-pins:v1`), mobile and team-client use dots (`danidex.mobile.session.v1`), and a
 pattern written for one silently returns half the set. It still only sees string literals, and two
 keys are built in templates and never appear at all — `workspace-preferences.ts` composes
-`openbot.workspace.v1.${scope}.${fingerprint}` and `trusted-host-keys.ts` composes
-`openbot.host-key.v1.${scope}.${fingerprint}`, the second holding per-host trust. Widen the pattern
+`danidex.workspace.v1.${scope}.${fingerprint}` and `trusted-host-keys.ts` composes
+`danidex.host-key.v1.${scope}.${fingerprint}`, the second holding per-host trust. Widen the pattern
 when you meet a third spelling rather than trusting this one, and treat the key diff as necessary
 rather than sufficient.
 
 A key that disappears from the tag side is these surfaces' version of a renamed filename constant:
 the old entry is never read again, never cleaned up, and the user's state is silently back to
-defaults. Several keys carry their own version suffix — `openbot:sidebar-pins:v1`,
-`openbot.mobile.session.v1`, `openbot.mobile.device-id.v1` — so bumping one is a deliberate reset
+defaults. Several keys carry their own version suffix — `danidex:sidebar-pins:v1`,
+`danidex.mobile.session.v1`, `danidex.mobile.device-id.v1` — so bumping one is a deliberate reset
 needing the same justification as a `userData` version bump, plus a `CHANGELOG.md` note under gate G.
 
 **An unchanged key list is not a clean result — read the owners too.** The value under a key can
@@ -67,7 +67,7 @@ an enum member renamed, an id format rewritten. Derive the owners the same way, 
 revisions, and read the hunks of any that the release touched:
 
 ```bash
-git grep -lE '"openbot[.:]|localStorage|SecureStore|AsyncStorage' <tag> HEAD -- \
+git grep -lE '"dani-dex[.:]|localStorage|SecureStore|AsyncStorage' <tag> HEAD -- \
   'src/renderer/src/**' 'apps/mobile/src/**' 'packages/team-client/src/**' \
   ':(exclude)*.test.ts' ':(exclude)*.test.tsx' | sed 's/^[^:]*://' | sort -u
 ```
@@ -82,7 +82,7 @@ is missing from all three, the patterns are what is broken.
 Expect this list to churn when files move between directories while the key list stays still — it is
 the *hunks* that matter here, not the paths. `sidebar-pins.ts` is the worked example, and it is the
 reason this paragraph exists: the release that renamed the product concept left
-`openbot:sidebar-pins:v1` and its Zod schema untouched and added `reownSidebarPinnedItems`, which
+`danidex:sidebar-pins:v1` and its Zod schema untouched and added `reownSidebarPinnedItems`, which
 rewrites every stored `bot-<uuid>` pin to the matching `agent-<uuid>`. All of the migration lived
 inside the value. Had it been forgotten, every user's pins would point at ids the app no longer
 knows and would be dropped on the next read — and the key diff above would still print nothing.
@@ -100,7 +100,7 @@ open the inventory for the file-by-file detail.
   - `src/main/remote-server-stored-shape.ts` — reads v1 and v2 as a re-tag of v3, preserves entries
     it cannot parse rather than dropping them, and **refuses an unknown version outright** so it
     never overwrites a file a newer build can still read.
-  - `src/main/team-store.ts` — keeps `openbot-team-server-v1.json` and `-v2.json` on disk together,
+  - `src/main/team-store.ts` — keeps `dani-dex-team-server-v1.json` and `-v2.json` on disk together,
     so a user who downgrades still finds their host.
   - `src/main/dynamic-island-preference-store.ts` — reads `version === 1` and `=== 2` into 3.
   - Known gap, re-check every release: `src/main/setup-store.ts` accepts only `version === 2` and
@@ -130,6 +130,6 @@ open the inventory for the file-by-file detail.
   named file, once, with `COPYFILE_EXCL`, and it is used for the two legacy JSON imports only.
   Nothing else on disk is ever copied before being rewritten.
 - **`safeStorage` files become undecryptable** if the macOS signing identity, team ID or `appId`
-  changes: `openbot-central-auth-v1.bin` and the remote-desktop secret files are encrypted against
+  changes: `dani-dex-central-auth-v1.bin` and the remote-desktop secret files are encrypted against
   the keychain entry those identify. Diff `electron-builder.yml` for `appId`, `ElectronTeamID`, and
   the `publish` block — this overlaps gate F on purpose, because one field breaks two things.

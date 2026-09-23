@@ -1,10 +1,10 @@
-name: openbot-remote
+name: dani-dex-remote
 
 services:
   acme:
     image: goacme/lego:v5.3.1
     restart: unless-stopped
-    entrypoint: ["/bin/sh", "/opt/openbot/renew.sh"]
+    entrypoint: ["/bin/sh", "/opt/dani-dex/renew.sh"]
     environment:
       ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL is required}
       SIGNAL_DOMAIN: ${SIGNAL_DOMAIN:?SIGNAL_DOMAIN is required}
@@ -13,7 +13,7 @@ services:
       ACME_CERTIFICATE_GROUP_ID: ${ACME_CERTIFICATE_GROUP_ID:-2000}
     volumes:
       - acme-data:/acme
-      - ./acme/renew.sh:/opt/openbot/renew.sh:ro
+      - ./acme/renew.sh:/opt/dani-dex/renew.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "test -s /acme/certificates/$${SIGNAL_DOMAIN}.crt && test -s /acme/certificates/$${SIGNAL_DOMAIN}.key"]
       interval: 10s
@@ -64,7 +64,7 @@ services:
     build:
       context: ..
       dockerfile: remote/coturn/Dockerfile
-    container_name: openbot-coturn
+    container_name: dani-dex-coturn
     restart: unless-stopped
     network_mode: host
     depends_on:

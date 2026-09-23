@@ -14,7 +14,7 @@ Two things are not decided:
 - where the list of available plugins comes from;
 - what a shared plugin link opens.
 
-`Copy link` also copies `https://openbot.app/plugins/<slug>`. That host does not exist. The
+`Copy link` also copies `https://danidex.app/plugins/<slug>`. That host does not exist. The
 canonical site is `https://openbot.run` (`packages/contracts/src/invite-links.ts`).
 
 This document answers three questions:
@@ -244,7 +244,7 @@ again from the store.
 `plugins:install-state` does not trust the receipt. For each plugin it tests:
 
 - the app is installed when the MCP record still exists. The user can delete it in settings;
-- a skill is installed when the agent's `<workspace>/.openbot/skills-lock.json` still lists it.
+- a skill is installed when the agent's `<workspace>/.danidex/skills-lock.json` still lists it.
 
 A newer version in the index makes the button show "Update". If the receipt is lost, the app can
 find a probable install, but it then offers "Reinstall" and not a version.
@@ -313,7 +313,7 @@ The page has one main button, `Open in Dani-Dex`, and a second button, `Download
 
 ```
 https://openbot.run/plugins/<slug>    the link a person shares and the app copies
-openbot://plugins/<slug>              the link the page button opens
+danidex://plugins/<slug>              the link the page button opens
 ```
 
 A new `packages/contracts/src/plugin-links.ts` holds these. `packages/contracts/src/invite-links.ts`
@@ -326,7 +326,7 @@ identifier, so a path segment is sufficient. A query form would invite growth, s
 
 The parser accepts a URL only when:
 
-- the protocol is `openbot:` with the host `plugins`, or the origin is exactly
+- the protocol is `danidex:` with the host `plugins`, or the origin is exactly
   `https://openbot.run` with the path prefix `/plugins/`;
 - there is exactly one path segment after the prefix;
 - the search, the hash, the port, the user name and the password are empty;
@@ -343,8 +343,8 @@ export type DeepLink = { kind: "invite"; url: string } | { kind: "plugin"; slug:
 
 | Kind | Custom scheme | Effect |
 | --- | --- | --- |
-| `invite` | `openbot://join?…` | Opens the join dialog, as today. |
-| `plugin` | `openbot://plugins/<slug>` | Opens the marketplace listing. |
+| `invite` | `danidex://join?…` | Opens the join dialog, as today. |
+| `plugin` | `danidex://plugins/<slug>` | Opens the marketplace listing. |
 | other | — | The URL is dropped without a message, as today. |
 
 The invite parser runs first, so an invite URL never reaches the plugin parser. `src/main/index.ts`
@@ -392,9 +392,9 @@ never opens a window. This design adds nothing to the navigation policy.
 | Attack | Control |
 | --- | --- |
 | A link installs a plugin without agreement | The link opens the listing only. The install is a separate press with an agent choice. A test enforces this. |
-| A path attack, such as `openbot://plugins/../join?…` | One path segment, and the slug pattern. The invite parser owns `join`. |
+| A path attack, such as `danidex://plugins/../join?…` | One path segment, and the slug pattern. The invite parser owns `join`. |
 | Extra fields in the link, such as `?install=1` | The search and the hash must be empty. |
-| A similar host, such as `openbot.app` or `openbot.run.example.com` | The origin is compared as a whole string. No `endsWith` and no expression on the host name. |
+| A similar host, such as `danidex.app` or `openbot.run.example.com` | The origin is compared as a whole string. No `endsWith` and no expression on the host name. |
 | A `javascript:` or `file:` URL in catalog data | `safeBrowserUrl` accepts `http:` and `https:` only, and the share URL is built and not read. |
 | The slug used as a file path | The slug is checked at the IPC boundary, and it never builds a path. |
 | Many links raise the window | One pending link is kept. A second link replaces the first. |
@@ -419,7 +419,7 @@ mandatory.
 | File | What it proves |
 | --- | --- |
 | `packages/contracts/src/plugin-links.test.ts` | Both forms are built and read again. A wrong origin, `http:`, a second path segment, `..`, a query, a hash, a port, a user name, an upper-case slug and a long slug are refused. An invite URL is refused. |
-| `src/main/deep-link-router.test.ts` | The kind table. An invite still reads as an invite. An unknown `openbot://` URL gives nothing. |
+| `src/main/deep-link-router.test.ts` | The kind table. An invite still reads as an invite. An unknown `danidex://` URL gives nothing. |
 | `src/main/ipc/plugin-handlers.test.ts` | The sender check runs before the payload is read. A bad slug is refused. The pending link is given one time. |
 | `src/main/plugin-catalog-service.test.ts` | A 304 answer, a wrong hash, the offline fallback, the choice between the snapshot and the cache, and a part-completed install. |
 | `src/main/ipc-channel-coverage.test.ts` | Exists. It fails until the channels are in the contracts, the preload and the mock. |
@@ -441,7 +441,7 @@ Ordered by cost.
    order, or keep the numbers by hand and say so.
 6. One index file is sufficient for now. A larger catalog needs a split by category, which the
    `schemaVersion` permits.
-7. A version in the deep link (`openbot://plugins/<slug>@1.2.0`) is deferred. It needs an answer for
+7. A version in the deep link (`danidex://plugins/<slug>@1.2.0`) is deferred. It needs an answer for
    a version that is no longer published.
 8. A social card for each plugin is deferred. Version 1 uses the site card.
 
@@ -469,7 +469,7 @@ Ordered by cost.
    Uninstall is done as well: see 3.3. The MCP settings panel and the agent's skills panel still
    remove one piece at a time, for a user who wants only one of them.
 8. ~~The deep-link router and the share link.~~ Done. `src/main/deep-link-router.ts` decides which
-   kind an `openbot://` link is, `openbot://plugins/<slug>` opens that listing in the Plugins tab
+   kind an `danidex://` link is, `danidex://plugins/<slug>` opens that listing in the Plugins tab
    and installs nothing, and `openbot.run/plugins/<slug>` now answers, so the detail page offers
    `Copy link` again. The public pages read the same catalog the tab reads, from
    `packages/contracts/src/plugin-catalog.ts`.

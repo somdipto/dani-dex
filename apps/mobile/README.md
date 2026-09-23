@@ -340,8 +340,8 @@ The endpoint is fixed to `https://analytics.openbot.run/api`. No analytics crede
 
 ### Production configuration
 
-1. In the self-hosted OpenPanel dashboard, open the existing **Openbot** project used by desktop and the website.
-   Do not create or select a separate **Openbot Mobile** project.
+1. In the self-hosted OpenPanel dashboard, open the existing **Dani-Dex** project used by desktop and the website.
+   Do not create or select a separate **Dani-Dex Mobile** project.
    Create a separate client for Dani-Dex Mobile with **write** access only. Copy its Client ID and
    Client Secret. Do not use an organization/root client or a client with read access.
 2. In the Expo dashboard, open the **danidex** project → **Environment variables**, select the
@@ -432,4 +432,4 @@ Opt-out and process exit discard the buffer. Sign-out ends the previous account'
 new signed-out activity can be claimed by the next sign-in. There is no disk queue.
 Existing anonymous events already sent by older builds are not reassigned by this fix.
 If mobile credentials belong to another project, replace both production variables with credentials
-for a write-only client in **Openbot**, then ship a build or compatible update with those values.
+for a write-only client in **Dani-Dex**, then ship a build or compatible update with those values.
