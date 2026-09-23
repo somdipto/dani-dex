@@ -10,8 +10,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { UpdateCancellationToken, UpdateCheckOutcome } from "./update-service";
 import {
   createDisabledUpdateAdapter,
+  hasDeveloperIdSignature,
   isValidSemver,
   pruneShipItLogs,
+  releasePageUrl,
   supportsInstalledUpdates,
   UpdateService,
 } from "./update-service";
@@ -62,6 +64,7 @@ function createService(
     autoDownload?: boolean;
     checkIntervalMs?: number;
     checkSiblingInstances?: () => Promise<readonly DaniDexSiblingInstance[]>;
+    openManualDownload?: (version: string) => Promise<void>;
   } = {},
 ) {
   return new UpdateService(updater, {
@@ -70,6 +73,7 @@ function createService(
     autoDownload: options.autoDownload ?? false,
     beforeInstall: options.beforeInstall ?? vi.fn(async () => undefined),
     ...(options.checkSiblingInstances ? { checkSiblingInstances: options.checkSiblingInstances } : {}),
+    ...(options.openManualDownload ? { openManualDownload: options.openManualDownload } : {}),
     platform: options.platform ?? "darwin",
     checkIntervalMs: options.checkIntervalMs ?? CHECK_INTERVAL,
     checkTimeoutMs: CHECK_TIMEOUT,
@@ -975,5 +979,44 @@ describe("supportsInstalledUpdates", () => {
   it("supports a Linux build only when it runs from an AppImage", () => {
     expect(supportsInstalledUpdates("linux", { APPIMAGE: "/tmp/Dani-Dex-0.8.0-x64.AppImage" })).toBe(true);
     expect(supportsInstalledUpdates("linux", { APPIMAGE: "  " })).toBe(false);
+  });
+});
+
+describe("builds that cannot replace themselves", () => {
+  it("finds the update but opens its release page instead of downloading, even with automatic downloads on", async () => {
+    const updater = new FakeUpdater();
+    makeUpdateAvailable(updater);
+    const openManualDownload = vi.fn(async (_version: string) => undefined);
+    const service = createService(updater, { autoDownload: true, openManualDownload });
+
+    const found = await service.checkForUpdates();
+    expect(found).toMatchObject({ phase: "available", availableVersion: "0.1.1", manualDownload: true });
+    expect(service.getAutoDownload()).toBe(false);
+
+    const afterClick = await service.downloadUpdate();
+    expect(openManualDownload).toHaveBeenCalledWith("0.1.1");
+    expect(updater.downloadUpdate).not.toHaveBeenCalled();
+    expect(afterClick.phase).toBe("available");
+    service.stop();
+  });
+});
+
+describe("hasDeveloperIdSignature", () => {
+  it("accepts only a Developer ID Application authority", async () => {
+    const signed =
+      "Executable=/A.app/Contents/MacOS/A\nAuthority=Developer ID Application: Someone (TEAM123)\nAuthority=Apple Root CA";
+    await expect(hasDeveloperIdSignature("/A.app", async () => signed)).resolves.toBe(true);
+    await expect(
+      hasDeveloperIdSignature("/A.app", async () => "Signature=adhoc\nTeamIdentifier=not set"),
+    ).resolves.toBe(false);
+    await expect(
+      hasDeveloperIdSignature("/A.app", async () => {
+        throw new Error("code object is not signed at all");
+      }),
+    ).resolves.toBe(false);
+  });
+
+  it("links the release page for the exact version", () => {
+    expect(releasePageUrl("0.18.0")).toBe("https://github.com/somdipto/dani-dex/releases/tag/v0.18.0");
   });
 });

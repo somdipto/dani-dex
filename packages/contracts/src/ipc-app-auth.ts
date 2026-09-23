@@ -70,6 +70,12 @@ export interface UpdateStatus {
    * install, download and check actions but keeps showing the status; absent means unmanaged.
    */
   managedByHost?: boolean;
+  /**
+   * True when this build cannot replace itself, as with an unsigned Mac app, which Squirrel.Mac
+   * refuses to update. The download action then opens the release page for `availableVersion`
+   * instead of downloading in the background; absent means in-place updates.
+   */
+  manualDownload?: boolean;
 }
 
 export type UpdateFailureCode = "check_failed" | "download_failed" | "install_failed";

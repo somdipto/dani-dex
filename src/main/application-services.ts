@@ -126,7 +126,9 @@ import { readUpdatePreference } from "./update-preference-store";
 import { checkRestartReadiness, type RestartReadiness } from "./update-readiness";
 import {
   createDisabledUpdateAdapter,
+  hasDeveloperIdSignature,
   isValidSemver,
+  releasePageUrl,
   supportsInstalledUpdates,
   type UpdateAdapter,
   UpdateService,
@@ -1065,6 +1067,12 @@ export async function createApplicationServices({
       logger.warn("Dani-Dex updates are disabled: electron-updater failed to load");
     }
   }
+  // An unsigned Mac build finds updates like any other but cannot install them, so it sends the user
+  // to the release page instead. Only the packaged app can answer, and only when updates are on.
+  const manualMacUpdates =
+    updaterEnabled &&
+    process.platform === "darwin" &&
+    !(await hasDeveloperIdSignature(resolve(app.getPath("exe"), "..", "..", "..")));
   const updater = new UpdateService(updateAdapter, {
     currentVersion,
     enabled: updaterEnabled,
@@ -1083,6 +1091,9 @@ export async function createApplicationServices({
           })
       : undefined,
     platform: process.platform,
+    ...(manualMacUpdates
+      ? { openManualDownload: (version: string) => shell.openExternal(releasePageUrl(version)) }
+      : {}),
     logDirectory: join(app.getPath("userData"), "logs", "update"),
     // Squirrel.Mac only. The path is meaningless under a Linux or Windows home directory.
     shipItDirectory:

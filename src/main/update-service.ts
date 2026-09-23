@@ -1,3 +1,4 @@
+import { execFile } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { appendFile, mkdir, readdir, rename, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
@@ -89,6 +90,12 @@ interface UpdateServiceOptions {
   checkTimeoutMs?: number;
   downloadStallTimeoutMs?: number;
   installTimeoutMs?: number;
+  /**
+   * Set when the installed app cannot replace itself. Updates are still found, but the download
+   * action hands the user the release page for the new version instead of a background download,
+   * and automatic downloads are off.
+   */
+  openManualDownload?: (version: string) => Promise<void>;
 }
 
 export interface UpdateDiagnosticEvent {
@@ -147,12 +154,47 @@ export function supportsInstalledUpdates(
   return platform === "darwin" || platform === "win32";
 }
 
+/** Where a build that cannot replace itself sends the user for a new version. */
+export function releasePageUrl(version: string): string {
+  return `https://github.com/somdipto/dani-dex/releases/tag/v${encodeURIComponent(version)}`;
+}
+
+/**
+ * Whether a Mac app bundle carries a Developer ID signature. Squirrel.Mac only installs an update
+ * that satisfies the running app's designated requirement, which an unsigned or ad-hoc signed build
+ * cannot state, so without one an in-place update fails at install time.
+ */
+export async function hasDeveloperIdSignature(
+  appBundlePath: string,
+  run: (file: string, args: string[]) => Promise<string> = runCodesign,
+): Promise<boolean> {
+  try {
+    const output = await run("/usr/bin/codesign", ["--display", "--verbose=2", appBundlePath]);
+    return /^Authority=Developer ID Application:/mu.test(output);
+  } catch {
+    return false;
+  }
+}
+
+function runCodesign(file: string, args: string[]): Promise<string> {
+  return new Promise((resolvePromise, reject) => {
+    // codesign writes the signature details to stderr.
+    execFile(file, args, { timeout: 10_000 }, (error, stdout, stderr) => {
+      if (error) reject(error);
+      else resolvePromise(`${stdout}${stderr}`);
+    });
+  });
+}
+
 export class UpdateService extends EventEmitter<UpdateServiceEvents> {
   readonly #updater: UpdateAdapter;
   readonly #options: Required<
     Pick<UpdateServiceOptions, "currentVersion" | "enabled" | "platform" | "initialCheckDelayMs" | "checkIntervalMs">
   > &
-    Pick<UpdateServiceOptions, "beforeInstall" | "checkSiblingInstances" | "logDirectory" | "shipItDirectory"> & {
+    Pick<
+      UpdateServiceOptions,
+      "beforeInstall" | "checkSiblingInstances" | "logDirectory" | "shipItDirectory" | "openManualDownload"
+    > & {
       phaseTimeoutsMs: Record<UpdateBusyPhase, number>;
     };
   #status: UpdateStatus;
@@ -257,6 +299,7 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
   getStatus(): UpdateStatus {
     const status = { ...this.#status };
     if (this.#managedByHost) status.managedByHost = true;
+    if (this.#options.openManualDownload) status.manualDownload = true;
     return status;
   }
 
@@ -265,11 +308,12 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
   }
 
   getAutoDownload(): boolean {
-    return this.#autoDownload;
+    return this.#autoDownload && !this.#options.openManualDownload;
   }
 
   setAutoDownload(enabled: boolean): void {
     this.#autoDownload = enabled;
+    if (this.#options.openManualDownload) return;
     if (enabled && this.#options.enabled && this.#status.phase === "available") void this.downloadUpdate();
   }
 
@@ -377,13 +421,20 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
     }
     // downloadUpdate() moves into "downloading" before its first await, so the caller and the
     // renderer see the download start rather than a stale "available".
-    if (this.#autoDownload && this.#status.phase === "available") void this.downloadUpdate();
+    if (this.getAutoDownload() && this.#status.phase === "available") void this.downloadUpdate();
     return this.getStatus();
   }
 
   async downloadUpdate(): Promise<UpdateStatus> {
     if (this.#managedByHost) return this.getStatus();
     if (!this.#options.enabled || this.#teardownCommitted || !this.#canDownload()) return this.getStatus();
+    const openManualDownload = this.#options.openManualDownload;
+    if (openManualDownload) {
+      // The page is the download: the status stays "available" so the action keeps pointing there.
+      const version = this.#status.availableVersion;
+      if (version) await openManualDownload(version);
+      return this.getStatus();
+    }
     // Same deduplication applies to downloads, and starting a second attempt while the abandoned one
     // is still unsettled is also what would let its buffered events be read as the new attempt's.
     if (this.#downloadInFlight) return this.getStatus();

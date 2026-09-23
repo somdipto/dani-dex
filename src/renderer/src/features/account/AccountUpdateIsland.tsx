@@ -93,6 +93,10 @@ export function AccountUpdateIsland(props: AccountUpdateIslandProps) {
     if (downloading() && progress() !== null) return `Downloading update, ${progress()}%`;
     if (phase() === "installing" || (actionPending() && ready())) return "Restarting to update";
     if (failed()) return `Retry update. ${errorMessage()}`;
+    if (props.updateStatus.manualDownload && !ready()) {
+      const version = props.updateStatus.availableVersion;
+      return `Download update${version ? ` ${version}` : ""}. Opens the download page.`;
+    }
     return `${ready() ? "Restart to update" : "Download update"}. ${
       ready() ? "Update ready" : "New update available"
     }.`;

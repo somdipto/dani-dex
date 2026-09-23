@@ -43,8 +43,13 @@ export function presentUpdateStatus(status: UpdateStatus): UpdateStatusPresentat
 
   let detail = "";
   if (status.phase === "downloading" && status.progress !== null) detail = `${Math.round(status.progress)}%`;
-  else if (status.availableVersion) detail = `v${status.availableVersion}`;
-  else if (status.phase === "up-to-date") detail = "Up to date";
+  else if (status.availableVersion) {
+    // A build that cannot replace itself sends the user to the download page, so it says so up front.
+    detail =
+      status.manualDownload && status.phase === "available"
+        ? `v${status.availableVersion} - opens the download page`
+        : `v${status.availableVersion}`;
+  } else if (status.phase === "up-to-date") detail = "Up to date";
   else if (status.currentVersion) detail = `v${status.currentVersion}`;
 
   return {

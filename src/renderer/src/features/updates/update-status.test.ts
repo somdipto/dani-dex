@@ -84,4 +84,12 @@ describe("presentUpdateStatus", () => {
     expect(presentUpdateStatus(status({ phase: "up-to-date" })).detail).toBe("Up to date");
     expect(presentUpdateStatus(status({ phase: "idle" })).detail).toBe("v0.4.2");
   });
+
+  it("says a build that cannot replace itself opens the download page", () => {
+    const presentation = presentUpdateStatus(
+      status({ phase: "available", availableVersion: "0.4.3", manualDownload: true }),
+    );
+    expect(presentation.actionLabel).toBe("Download update");
+    expect(presentation.detail).toBe("v0.4.3 - opens the download page");
+  });
 });
