@@ -129,11 +129,11 @@ describe("development state seed", () => {
     );
     expect(attachments.size).toBe(9);
     expect([...attachments.values()].map((attachment) => attachment.name).sort()).toEqual([
+      "dani-dex-launch-concept.png",
       "evidence-map.json",
       "invoice-2026-09.pdf",
       "launch-brief.md",
       "launch-metrics.csv",
-      "dani-dex-launch-concept.png",
       "operating-plan.xlsx",
       "provider-session.log",
       "standup-recap.mp3",
