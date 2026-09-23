@@ -6165,10 +6165,16 @@ button.chat-action-target:active,
   gap: 6px;
 }
 
-.voice-model-progress {
+.voice-model-progress,
+.voice-call-status,
+.voice-call-error {
   color: var(--dani-dex-text-muted);
   font-size: var(--dani-dex-text-sm);
   white-space: nowrap;
+}
+
+.voice-call-error {
+  color: var(--dani-dex-danger);
 }
 
 .voice-recording-status {

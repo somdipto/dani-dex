@@ -1,5 +1,6 @@
 import type { AppInfo } from "@dani-dex/contracts/ipc";
 import { errorMessage } from "../../error-message";
+import type { VoiceCallPhase } from "../voice-call/voice-call-store";
 export type VoicePhase = "idle" | "preparing" | "requesting" | "recording" | "transcribing";
 
 export function voiceButtonLabel(phase: VoicePhase) {
@@ -35,4 +36,19 @@ export function voiceCaptureError(error: unknown) {
 
 export function voiceTranscriptionError(error: unknown): string {
   return errorMessage(error, "Dani-Dex could not transcribe this recording.");
+}
+
+export function voiceCallStatusLabel(phase: VoiceCallPhase) {
+  switch (phase) {
+    case "connecting":
+      return "Connecting...";
+    case "listening":
+      return "Listening";
+    case "thinking":
+      return "Working on it";
+    case "speaking":
+      return "Speaking";
+    default:
+      return "";
+  }
 }

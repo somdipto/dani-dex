@@ -349,4 +349,16 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("textbox", { name: "Message Chief" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Create prompt with voice" })).not.toBeInTheDocument();
   });
+
+  it("starts a voice call from the composer and shows why it could not connect", async () => {
+    render(() => <App />);
+    await screen.findByRole("heading", { name: "Chief" });
+
+    await fireEvent.click(await screen.findByRole("button", { name: "Start voice call" }));
+
+    await waitFor(() => expect(window.danidex.voice.createRealtimeSession).toHaveBeenCalledOnce());
+    expect(await screen.findByRole("alert")).toHaveTextContent(/.+/u);
+    expect(screen.getByRole("button", { name: "Start voice call" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "End voice call" })).not.toBeInTheDocument();
+  });
 });

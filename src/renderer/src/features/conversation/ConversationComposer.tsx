@@ -7,6 +7,7 @@ import {
 import { createEffect, createMemo, createSignal, For, Loading, lazy, onCleanup, Show } from "solid-js";
 import {
   ArrowUp,
+  AudioLines,
   Button,
   DropdownMenu,
   File,
@@ -15,6 +16,7 @@ import {
   Input,
   LoaderCircle,
   Mic,
+  PhoneOff,
   Plus,
   Puzzle,
 } from "../../components/ui";
@@ -27,7 +29,7 @@ import { ComposerSignInNotice, ComposerUsageLimitNotice } from "./ComposerNotice
 import { CloseIcon, MoreIcon, StopIcon } from "./ConversationIcons";
 import { useConversationViewScope } from "./conversation-scope";
 import { RichMessageText } from "./RichMessageText";
-import { formatVoiceDuration, voiceButtonLabel, voiceSupported } from "./voice-status";
+import { formatVoiceDuration, voiceButtonLabel, voiceCallStatusLabel, voiceSupported } from "./voice-status";
 
 /** @internal Stable HMR boundary for conversation composer. */
 export function ConversationComposer() {
@@ -64,6 +66,10 @@ export function ConversationComposer() {
     showComposerActions,
     startVoiceRecording,
     stopVoiceRecording,
+    startCall,
+    endCall,
+    voiceCallPhase,
+    voiceCallError,
     submitComposer,
     submitting,
     unreferencedDraftAttachments,
@@ -367,6 +373,43 @@ export function ConversationComposer() {
             </DropdownMenu.Root>
             <div class="composer-primary-actions">
               <Show when={voiceAvailable()}>
+                <Show
+                  when={voiceCallPhase() !== "off"}
+                  fallback={
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      class="voice-call-button"
+                      aria-label="Start voice call"
+                      disabled={!props.agent || !agentReady() || voicePhase() !== "idle"}
+                      onClick={() => void startCall()}
+                    >
+                      <AudioLines aria-hidden="true" />
+                    </Button>
+                  }
+                >
+                  <span class="voice-call-status" role="status">
+                    {voiceCallStatusLabel(voiceCallPhase())}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    class="voice-call-end"
+                    aria-label="End voice call"
+                    onClick={endCall}
+                  >
+                    <PhoneOff aria-hidden="true" />
+                  </Button>
+                </Show>
+                <Show when={voiceCallError()}>
+                  {(message) => (
+                    <span class="voice-call-error" role="alert">
+                      {message()}
+                    </span>
+                  )}
+                </Show>
+              </Show>
+              <Show when={voiceAvailable() && voiceCallPhase() === "off"}>
                 <Show when={voicePhase() === "preparing"}>
                   <span class="voice-model-progress" role="status">
                     Downloading voice model {voiceModelProgress() ?? 0}%

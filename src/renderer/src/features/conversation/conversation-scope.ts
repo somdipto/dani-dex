@@ -10,6 +10,8 @@ import {
   useContext,
 } from "solid-js";
 import { createScopeGuard } from "../../scope-lifetime";
+import { createVoiceCallStore } from "../voice-call/voice-call-store";
+import { EMPTY_DRAFT } from "./composer-draft";
 import { useConversationController } from "./conversation-controller-context";
 import { agentConversationKey, composerDraftKey } from "./conversation-keys";
 import type { ComposerDraft, ConversationProps, ConversationTarget } from "./conversation-types";
@@ -348,6 +350,12 @@ export function createConversationViewScope(props: ConversationProps) {
     },
   });
   const { startVoiceRecording, stopVoiceRecording } = voice;
+  const voiceCall = createVoiceCallStore({
+    target: () => (props.agent ? { agentId: props.agent.id, serverId: props.server?.id ?? "local" } : undefined),
+    messages: () => props.messages,
+    activeTurnId: () => props.activeTurnId,
+    submit: (text, target) => actions.submitMessage({ ...EMPTY_DRAFT, text }, target),
+  });
   const actions = createComposerActions({
     props,
     attachmentBusy,
@@ -1128,6 +1136,7 @@ export function createConversationViewScope(props: ConversationProps) {
     showScrollToLatest,
     startVoiceRecording,
     stopVoiceRecording,
+    ...voiceCall,
     submitComposer,
     submitting,
     unreadDividerVisible,
