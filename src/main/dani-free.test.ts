@@ -128,7 +128,7 @@ describe("parseDaniFreeReadyLine", () => {
 });
 
 describe("DaniFreeSupervisor", () => {
-  it("starts the proxy, refreshes its models and names the source Dani", async () => {
+  it("starts the proxy, lists its models without forcing a refresh, and names the source Dani", async () => {
     const fake = await fakeDaniFree();
     const supervisor = new DaniFreeSupervisor({ executable: fake.executable, home: join(tmpdir(), "unused") });
     supervisors.push(supervisor);
@@ -145,9 +145,8 @@ describe("DaniFreeSupervisor", () => {
     expect(JSON.stringify(source)).not.toContain("kilo");
     const requests = await readFile(fake.log, "utf8");
     expect(requests).toContain("argv start private=0\n");
-    expect(requests.indexOf("POST /v1/models/refresh install-key")).toBeLessThan(
-      requests.indexOf("GET /v1/models install-key"),
-    );
+    expect(requests).toContain("GET /v1/models install-key");
+    expect(requests).not.toContain("/v1/models/refresh");
 
     await supervisor.stop();
     expect(await readFile(fake.log, "utf8")).toContain("SIGTERM");

@@ -121,10 +121,7 @@ export class DaniFreeSupervisor {
       await this.sweepLeftovers();
       const ready = await this.#spawn();
       const key = await readKey(ready.apiKeyFile);
-      await this.#request(ready, key, "POST", "/v1/models/refresh").catch((error) => {
-        // The proxy refreshes on its own start as well, so a failed nudge costs nothing but a log line.
-        logger.warn("Dani-Free did not refresh its models.", { error: describe(error) });
-      });
+      // No refresh nudge: the proxy probes and refreshes on its own, and a refresh can take 20s+.
       const models = await this.#request(ready, key, "GET", "/v1/models");
       const ids =
         isDynamicRecord(models) && Array.isArray(models.data)
