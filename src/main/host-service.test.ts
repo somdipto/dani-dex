@@ -391,7 +391,7 @@ describe("HostService account binding", () => {
     const emails: string[] = [];
     const { service, signIn } = await createHostService({
       registerRemoteHost: () => Promise.resolve(),
-      remoteControlPlaneUrl: "https://api.openbot.run",
+      remoteControlPlaneUrl: "https://api.dani-dex.example",
       createRemoteInvite: () => {
         creationStarted();
         return creating;

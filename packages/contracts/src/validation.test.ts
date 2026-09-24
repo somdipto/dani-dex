@@ -62,7 +62,7 @@ describe("shared boundary validation", () => {
   });
 
   it("supports public domains and local SMTP hostnames", () => {
-    expect(isValidHostname("teams.openbot.run")).toBe(true);
+    expect(isValidHostname("teams.dani-dex.example")).toBe(true);
     expect(isValidHostname("localhost")).toBe(false);
     expect(isValidHostname("localhost", false)).toBe(true);
   });
@@ -73,11 +73,11 @@ describe("shared boundary validation", () => {
   });
 
   it("accepts readable first-level team hosts", () => {
-    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2pz-host.openbot.run")).toBe(true);
-    expect(isDaniDexTeamApiHostname("vnc-studio-mac-k7m4q2pz-host.openbot.run")).toBe(false);
-    expect(isDaniDexTeamApiHostname("Studio-mac-k7m4q2pz-host.openbot.run")).toBe(false);
-    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2p-host.openbot.run")).toBe(false);
-    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2pz.teams.openbot.run")).toBe(false);
+    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2pz-host.dani-dex.example")).toBe(true);
+    expect(isDaniDexTeamApiHostname("vnc-studio-mac-k7m4q2pz-host.dani-dex.example")).toBe(false);
+    expect(isDaniDexTeamApiHostname("Studio-mac-k7m4q2pz-host.dani-dex.example")).toBe(false);
+    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2p-host.dani-dex.example")).toBe(false);
+    expect(isDaniDexTeamApiHostname("studio-mac-k7m4q2pz.teams.dani-dex.example")).toBe(false);
     expect(isDaniDexTeamApiHostname("host.example.com")).toBe(false);
   });
 

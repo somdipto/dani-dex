@@ -4,7 +4,8 @@ app.setName("Dani-Dex");
 app.exit(await main());
 
 async function main() {
-  const signalUrl = process.env.DANI_DEX_REMOTE_SIGNAL_URL ?? "wss://signal.openbot.run/v1/signal";
+  const signalUrl = process.env.DANI_DEX_REMOTE_SIGNAL_URL;
+  if (!signalUrl) throw new Error("Set DANI_DEX_REMOTE_SIGNAL_URL to the signalling endpoint.");
   const hostTicket = process.env.DANI_DEX_REMOTE_SMOKE_HOST_TICKET;
   const clientTicket = process.env.DANI_DEX_REMOTE_SMOKE_CLIENT_TICKET;
   const iceTransportPolicy = process.env.DANI_DEX_REMOTE_SMOKE_ICE_POLICY ?? "all";

@@ -37,8 +37,8 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
       const client = new FakeAgentClient("codex", "", false);
       const site = {
         id: "site-1",
-        hostname: "approval-test.openbot.site",
-        url: "https://approval-test.openbot.site/",
+        hostname: "approval-test.sites.dani-dex.example",
+        url: "https://approval-test.sites.dani-dex.example/",
         title: "Approval test",
         description: "Test content",
         framework: "vanilla" as const,
@@ -142,7 +142,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
     const { store, mailbox } = stores(root);
     const hostedSite = {
       id: "site-1",
-      hostname: "approved-public-site-for-students-k7m2q9tzab.openbot.site",
+      hostname: "approved-public-site-for-students-k7m2q9tzab.sites.dani-dex.example",
       url: "http://approved-public-site-for-students-k7m2q9tzab.danidex.localhost:3100/",
       title: "Approved public site",
       description: "A public test site.",
@@ -219,7 +219,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
     expect(events.find((event) => event.type === "approval")).toMatchObject({
       approval: {
         kind: "permissions",
-        reason: 'Publish "Approved public site" as a public site on openbot.site.',
+        reason: 'Publish "Approved public site" as a public site.',
         permissions: { fileSystem: { read: [agent.workspacePath], write: [] }, network: true },
       },
     });
@@ -299,7 +299,7 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
     });
     await waitFor(() => service?.getRuntimeSnapshot().pendingApprovals.length === 1);
     expect(events.findLast((event) => event.type === "approval")).toMatchObject({
-      approval: { reason: `Delete ${hostedSite.hostname} from openbot.site.` },
+      approval: { reason: `Delete the public site ${hostedSite.hostname}.` },
     });
     await service.respondToApproval({ requestId: "delete-site-approval", decision: "decline" });
     expect(hostedSites.delete).not.toHaveBeenCalled();
@@ -324,8 +324,8 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
     const { store, mailbox } = stores(root);
     const hostedSite = {
       id: "site-1",
-      hostname: "existing-site-23456789ab.openbot.site",
-      url: "https://existing-site-23456789ab.openbot.site",
+      hostname: "existing-site-23456789ab.sites.dani-dex.example",
+      url: "https://existing-site-23456789ab.sites.dani-dex.example",
       title: "Existing site",
       description: "A public test site.",
       framework: "vanilla" as const,
@@ -424,8 +424,8 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
     const { store, mailbox } = stores(root);
     const hostedSite = {
       id: "site-durable-result",
-      hostname: "durable-result-site-23456789ab.openbot.site",
-      url: "https://durable-result-site-23456789ab.openbot.site",
+      hostname: "durable-result-site-23456789ab.sites.dani-dex.example",
+      url: "https://durable-result-site-23456789ab.sites.dani-dex.example",
       title: "Durable result site",
       description: "A public test site.",
       framework: "vanilla" as const,
@@ -644,8 +644,8 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
     const { store, mailbox } = stores(root);
     const hostedSite = {
       id: "site-response-failure",
-      hostname: "response-failure-site-23456789ab.openbot.site",
-      url: "https://response-failure-site-23456789ab.openbot.site",
+      hostname: "response-failure-site-23456789ab.sites.dani-dex.example",
+      url: "https://response-failure-site-23456789ab.sites.dani-dex.example",
       title: "Response failure site",
       description: "A public test site.",
       framework: "vanilla" as const,

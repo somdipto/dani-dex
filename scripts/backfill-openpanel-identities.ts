@@ -6,7 +6,9 @@ import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 
 const logger = createDaniDexLogger("backfill-openpanel-identities");
 
-const DEFAULT_OPENPANEL_API_URL = "https://analytics.openbot.run/api";
+// Dan Lab runs no analytics service yet: the reserved .invalid default never resolves, so name the
+// real endpoint with OPENPANEL_API_URL or --api-url.
+const DEFAULT_OPENPANEL_API_URL = "https://analytics.dani-dex.invalid/api";
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 250;
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;

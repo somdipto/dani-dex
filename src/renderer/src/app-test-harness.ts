@@ -888,7 +888,7 @@ export function installDanidexStub(): void {
         previewInvite: vi.fn().mockResolvedValue({
           serverId: "00000000-0000-4000-8000-000000000000",
           serverName: "Studio Mac",
-          apiHostname: "studio-host.openbot.run",
+          apiHostname: "studio-host.dani-dex.example",
           role: "member",
           expiresAt: "2026-08-21T10:00:00.000Z",
           emailBound: false,

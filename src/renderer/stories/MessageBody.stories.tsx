@@ -8,7 +8,7 @@ import { STORY_AGENTS, STORY_ATTACHMENTS } from "./fixtures";
 const message: AgentMessage = {
   id: "message-body-1",
   author: "agent",
-  body: "Here is the latest brief. You can also review https://openbot.run/docs or ask @Research.",
+  body: "Here is the latest brief. You can also review https://dani-dex.example/docs or ask @Research.",
   time: "10:00",
   status: "Ready to review",
   attachments: STORY_ATTACHMENTS,

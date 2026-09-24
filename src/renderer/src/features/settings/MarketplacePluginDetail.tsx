@@ -112,8 +112,8 @@ export function MarketplacePluginDetail(props: {
    */
   onUninstall: () => void | Promise<void>;
   /**
-   * Given only where the copied address leads somewhere. `openbot.run/plugins/<slug>` is not served
-   * yet, so the app withholds the button rather than hand out a link that answers 404.
+   * Given only where the copied address leads somewhere. The copied link is whatever
+   * `createPluginShareUrl` builds, which opens the listing in Dani-Dex.
    */
   onCopyLink?: () => void | Promise<void>;
   /** Given only where a prompt can actually be sent somewhere; without it the arrows are disabled. */

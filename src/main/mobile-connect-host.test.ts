@@ -30,7 +30,7 @@ describe("createHostedMobileConnect", () => {
             return {
               serverId: binding.hostId,
               apiOnline: true,
-              apiUrl: "wss://signal.openbot.run/v1/signal",
+              apiUrl: "wss://signal.dani-dex.example/v1/signal",
               message: null,
               phase: "online" as const,
             };
@@ -63,7 +63,7 @@ describe("createHostedMobileConnect", () => {
           return {
             serverId: binding.hostId,
             apiOnline: true,
-            apiUrl: "wss://signal.openbot.run/v1/signal",
+            apiUrl: "wss://signal.dani-dex.example/v1/signal",
             message: null,
             phase: "online" as const,
           };

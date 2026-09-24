@@ -8,6 +8,7 @@ import {
   hostedSiteConversationEvent,
   isAgentModel,
 } from "@dani-dex/contracts/ipc";
+import { DANI_DEX_ANALYTICS_API_URL } from "@dani-dex/contracts/online-services";
 import {
   isBoolean,
   isDynamicRecord,
@@ -19,7 +20,8 @@ import {
 import { normalizeEmailAddress } from "@dani-dex/contracts/validation";
 import { OpenPanelBase, type OpenPanelOptions } from "@openpanel/web";
 
-export const OPENPANEL_API_URL = "https://analytics.openbot.run/api";
+/** Null while Dan Lab runs no analytics endpoint; the host then sends nothing. */
+export const OPENPANEL_API_URL: string | null = DANI_DEX_ANALYTICS_API_URL;
 export const OPENPANEL_CLIENT_ID = "6c989975-87ef-4f0c-857e-ab449a65b5c2";
 // Provider CLI events are named `<provider>_diagnostic`, `_exited` and `_start_failed`. The list
 // comes from the registry so a new provider's events keep their own name instead of collapsing to
@@ -101,7 +103,7 @@ export class HostAnalytics {
     this.#resolveOwner = options.resolveOwner;
     this.#resolveAgent = options.resolveAgent;
     this.#trackingEnabled = options.trackingEnabled ?? true;
-    if (!options.enabled) {
+    if (!options.enabled || OPENPANEL_API_URL === null) {
       this.#client = null;
       return;
     }

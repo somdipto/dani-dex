@@ -44,7 +44,7 @@ describe("TeamApiServer team", () => {
             id: "alice-account",
             email: "alice@example.com",
             name: "Alice",
-            avatarUrl: "https://api.openbot.run/v1/avatars/alice-account?v=image-1",
+            avatarUrl: "https://api.dani-dex.example/v1/avatars/alice-account?v=image-1",
           };
         }
         return ticket === "owner-team-ticket"
@@ -91,7 +91,7 @@ describe("TeamApiServer team", () => {
       expect(joined.member).toMatchObject({
         email: "alice@example.com",
         role: "member",
-        avatarUrl: "https://api.openbot.run/v1/avatars/alice-account?v=image-1",
+        avatarUrl: "https://api.dani-dex.example/v1/avatars/alice-account?v=image-1",
       });
       expect(store.authenticate(joined.sessionToken)?.email).toBe("alice@example.com");
 
@@ -141,7 +141,7 @@ describe("TeamApiServer team", () => {
             expect.objectContaining({
               email: "alice@example.com",
               online: true,
-              avatarUrl: "https://api.openbot.run/v1/avatars/alice-account?v=image-1",
+              avatarUrl: "https://api.dani-dex.example/v1/avatars/alice-account?v=image-1",
             }),
           ]),
         },
@@ -244,7 +244,7 @@ describe("TeamApiServer team", () => {
           role: created.role,
           expiresAt: created.expiresAt,
           usedAt: null,
-          inviteUrl: `https://openbot.run/join?token=${created.token}`,
+          inviteUrl: `https://dani-dex.example/join?token=${created.token}`,
           email: created.email,
           permanent: created.permanent,
           useCount: created.useCount,

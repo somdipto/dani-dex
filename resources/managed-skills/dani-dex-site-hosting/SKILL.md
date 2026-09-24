@@ -1,6 +1,6 @@
 ---
 name: dani-dex-site-hosting
-description: Build, publish, replace, list, and delete small static websites hosted by Dani-Dex. Use when the user asks to host or manage a site on openbot.site.
+description: Build, publish, replace, list, and delete small static websites hosted by Dani-Dex. Use when the user asks to host or manage a public site.
 ---
 
 # Dani-Dex site hosting

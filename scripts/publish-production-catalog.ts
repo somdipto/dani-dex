@@ -13,15 +13,18 @@ const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const authApiRoot = join(projectRoot, "apps", "auth-api");
 const executableSuffix = process.platform === "win32" ? ".exe" : "";
 const wrangler = join(projectRoot, "node_modules", ".bin", `wrangler${executableSuffix}`);
-const productionApiUrl = "https://api.openbot.run";
+// Dan Lab runs no production account API yet; name it explicitly to publish.
+// Dan Lab runs no production account API yet; the reserved .invalid default never resolves, so name
+// the real one with DANI_DEX_PRODUCTION_API_URL.
+const productionApiUrl = process.env.DANI_DEX_PRODUCTION_API_URL ?? "https://api.dani-dex.invalid";
 const productionDatabase = "dani-dex-auth";
 const productionBucket = "dani-dex-skills";
 const owner = {
   id: "dani-dex-production-catalog",
   identityKey: "dani-dex-production-catalog",
-  email: "catalog@openbot.run",
+  email: "catalog@danlab.dev",
   name: "Dani-Dex",
-  avatarUrl: "https://openbot.run/icon-192x192.png",
+  avatarUrl: new URL("/icon-192x192.png", productionApiUrl).toString(),
 } as const;
 
 interface PublishedSkill {

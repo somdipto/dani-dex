@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { findDeepLink, MCP_OAUTH_REDIRECT_URL, parseDeepLink } from "./deep-link-router";
 
 const invitePayload = {
-  apiUrl: "https://studio-mac-k7m4q2pz-host.openbot.run/",
+  apiUrl: "https://studio-mac-k7m4q2pz-host.dani-dex.example/",
   serverId: "00000000-0000-4000-8000-000000000000",
   fingerprint: "a".repeat(43),
   token: "b".repeat(43),
@@ -24,7 +24,7 @@ describe("the deep link router", () => {
   it.each([
     ["an unknown dani-dex:// host", "dani-dex://something-else/aave"],
     ["a bare scheme", "dani-dex://"],
-    ["an ordinary web page", "https://openbot.run/news"],
+    ["an ordinary web page", "https://dani-dex.example/news"],
     ["a command-line argument", "--enable-logging"],
     ["an empty string", ""],
   ])("gives nothing for %s", (_reason, value) => {
@@ -64,7 +64,7 @@ describe("the deep link router", () => {
       ["no state", `${MCP_OAUTH_REDIRECT_URL}?code=grant-abc`],
       ["an error instead of a grant", `${MCP_OAUTH_REDIRECT_URL}?error=access_denied&state=run-xyz`],
       ["nothing at all", MCP_OAUTH_REDIRECT_URL],
-      ["another scheme", "https://openbot.run/mcp-auth?code=grant-abc&state=run-xyz"],
+      ["another scheme", "https://dani-dex.example/mcp-auth?code=grant-abc&state=run-xyz"],
     ])("gives nothing for %s", (_reason, value) => {
       expect(parseDeepLink(value)).toBeNull();
     });

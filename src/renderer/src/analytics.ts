@@ -8,11 +8,13 @@ import {
   type CentralAuthUser,
   isAgentModel,
 } from "@dani-dex/contracts/ipc";
+import { DANI_DEX_ANALYTICS_API_URL } from "@dani-dex/contracts/online-services";
 import { isBoolean, isDynamicRecord, isFunction, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { normalizeEmailAddress } from "@dani-dex/contracts/validation";
 import { OpenPanelBase, type OpenPanelOptions } from "@openpanel/web";
 
-export const OPENPANEL_API_URL = "https://analytics.openbot.run/api";
+/** Null while Dan Lab runs no analytics endpoint; the app then sends nothing. */
+export const OPENPANEL_API_URL: string | null = DANI_DEX_ANALYTICS_API_URL;
 export const OPENPANEL_CLIENT_ID = "6c989975-87ef-4f0c-857e-ab449a65b5c2";
 const MAX_PENDING_EVENTS = 100;
 export const ANALYTICS_SCHEMA_VERSION = 5;
@@ -478,7 +480,7 @@ export class DesktopAnalytics {
 
   configure(appInfo: AppInfo): boolean {
     if (this.#client) return true;
-    if (!shouldEnableDesktopAnalytics(appInfo, this.#productionBuild)) {
+    if (OPENPANEL_API_URL === null || !shouldEnableDesktopAnalytics(appInfo, this.#productionBuild)) {
       this.#disabled = true;
       this.#pending = [];
       return false;

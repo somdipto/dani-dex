@@ -39,10 +39,14 @@ export function filterMobilePayload(event: TrackHandlerPayload): boolean {
   return true;
 }
 
+/** Null while Dan Lab runs no analytics endpoint; the app then sends nothing. */
+const MOBILE_ANALYTICS_API_URL: string | null = null;
+
 export const mobileAnalytics = new MobileAnalytics(() => {
   const clientId = process.env.EXPO_PUBLIC_OPENPANEL_CLIENT_ID;
   const clientSecret = process.env.EXPO_PUBLIC_OPENPANEL_CLIENT_SECRET;
   if (
+    MOBILE_ANALYTICS_API_URL === null ||
     __DEV__ ||
     process.env.EXPO_PUBLIC_APP_ENV !== "production" ||
     !clientId ||
@@ -51,7 +55,7 @@ export const mobileAnalytics = new MobileAnalytics(() => {
   )
     return null;
   const client = new OpenPanel({
-    apiUrl: "https://analytics.openbot.run/api",
+    apiUrl: MOBILE_ANALYTICS_API_URL,
     clientId,
     clientSecret,
     filter: filterMobilePayload,

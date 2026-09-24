@@ -388,7 +388,7 @@ class McpOAuthClientProvider implements OAuthClientProvider {
   get clientMetadata(): OAuthClientMetadata {
     return {
       client_name: "Dani-Dex",
-      client_uri: "https://openbot.run",
+      client_uri: "https://github.com/somdipto/dani-dex",
       redirect_uris: [this.#options.redirectUrl],
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],

@@ -1100,7 +1100,7 @@ describe("SkillsMarketplaceModal", () => {
       installs: 0,
       featured: true,
       updatedAt: "2026-09-18T00:00:00.000Z",
-      shareUrl: "https://openbot.run/plugins/aave",
+      shareUrl: "https://dani-dex.example/plugins/aave",
       prompts: [],
       apps: [
         {
@@ -1670,7 +1670,7 @@ describe("SkillsMarketplaceModal", () => {
       await openPluginPage();
       fireEvent.click(await screen.findByRole("button", { name: "Copy link" }));
 
-      await waitFor(() => expect(writeText).toHaveBeenCalledWith("https://openbot.run/plugins/aave"));
+      await waitFor(() => expect(writeText).toHaveBeenCalledWith("https://dani-dex.example/plugins/aave"));
     });
   });
 });

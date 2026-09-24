@@ -826,7 +826,7 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       },
       createMobileConnect: async () => ({
         qrData:
-          "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=preview-mobile-ticket_1234567890abcdef",
+          "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.dani-dex.example&ticket=preview-mobile-ticket_1234567890abcdef",
         expiresAt: Date.now() + 120_000,
       }),
       listMobileConnectedDevices: async () =>
@@ -1022,7 +1022,7 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       list: async () => clone(hostedSites),
       chooseDirectory: async () => "/mock/Dani-Dex/Sites/launch-notes",
       publish: async (input) => {
-        const hostname = `${input.title.toLowerCase().replaceAll(/[^a-z0-9]+/gu, "-")}.openbot.site`;
+        const hostname = `${input.title.toLowerCase().replaceAll(/[^a-z0-9]+/gu, "-")}.sites.dani-dex.example`;
         const site: HostedSiteSummary = {
           id: `site-${hostedSites.length + 1}`,
           hostname,
@@ -1988,7 +1988,7 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       previewInvite: async () => ({
         serverId: "00000000-0000-4000-8000-000000000000",
         serverName: "Joined workspace",
-        apiHostname: "story-host.openbot.run",
+        apiHostname: "story-host.dani-dex.example",
         role: "member",
         expiresAt: "2026-09-19T10:00:00.000Z",
         emailBound: false,
@@ -2203,7 +2203,7 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
         role: input.role,
         expiresAt: "2026-09-19T10:00:00.000Z",
         usedAt: null,
-        inviteUrl: "https://openbot.run/join?invite=mock-invite",
+        inviteUrl: "https://dani-dex.example/join?invite=mock-invite",
         email: input.email ?? null,
         permanent: input.permanent ?? false,
         useCount: 0,

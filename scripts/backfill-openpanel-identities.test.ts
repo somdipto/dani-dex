@@ -102,7 +102,7 @@ describe("OpenPanel identity backfill", () => {
 
     expect(
       await applyBackfill([{ profileId: "account-1", email: "person@example.com" }], {
-        apiUrl: "https://analytics.openbot.run/api",
+        apiUrl: "https://analytics.dani-dex.example/api",
         clientId: "client-id",
         clientSecret: "client-secret",
         fetcher,

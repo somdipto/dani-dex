@@ -34,7 +34,7 @@ vi.mock("expo-secure-store", () => ({
 
 const key = "danidex.mobile.session.v1";
 const session: MobileSession = {
-  apiUrl: "https://api.openbot.run",
+  apiUrl: "https://api.dani-dex.example",
   sessionToken: "test-session-token",
   user: { id: "user", email: "user@example.com", name: null, avatarUrl: null },
   host: { hostId: "desktop-host", fingerprint: "a".repeat(43) },
@@ -144,7 +144,7 @@ describe("mobile session revocation", () => {
     expect(native.storage.has(key)).toBe(false);
     expect(native.storage.has("danidex.mobile.pending-revocations.v1")).toBe(false);
     expect(native.fetch).toHaveBeenLastCalledWith(
-      "https://api.openbot.run/v1/mobile-auth/session",
+      "https://api.dani-dex.example/v1/mobile-auth/session",
       expect.objectContaining({ headers: { Authorization: "Bearer test-session-token" } }),
     );
   });
@@ -255,7 +255,7 @@ describe("stored mobile desktop binding", () => {
   });
 
   it("revokes at the old API before redeeming a QR for another service and restoring its bound session", async () => {
-    const oldApi = "https://previous.openbot.run";
+    const oldApi = "https://previous.dani-dex.example";
     native.storage.set(key, JSON.stringify({ ...session, apiUrl: oldApi, host: undefined }));
     native.storage.set("danidex.mobile.device-id.v1", "existing-device");
     native.fetch.mockResolvedValueOnce(new Response(null, { status: 204 }));
@@ -326,7 +326,7 @@ describe("mobile profile updates", () => {
     expect(updated.user).toEqual(user);
     expect((await readMobileSession())?.user).toEqual(user);
     expect(native.fetch).toHaveBeenCalledWith(
-      "https://api.openbot.run/v1/me/profile",
+      "https://api.dani-dex.example/v1/me/profile",
       expect.objectContaining({ method: "PATCH", body: JSON.stringify({ name: "New name" }) }),
     );
   });
@@ -356,7 +356,7 @@ describe("mobile profile updates", () => {
     await updateMobileProfile(session, { avatar });
     expect((await readMobileSession())?.user.avatarUrl).toBe(user.avatarUrl);
     expect(native.fetch).toHaveBeenLastCalledWith(
-      "https://api.openbot.run/v1/me/avatar",
+      "https://api.dani-dex.example/v1/me/avatar",
       expect.objectContaining({
         method: "PUT",
         body: avatar.bytes.buffer,
@@ -367,7 +367,7 @@ describe("mobile profile updates", () => {
     await updateMobileProfile(session, { avatar: null });
     expect((await readMobileSession())?.user.avatarUrl).toBeNull();
     expect(native.fetch).toHaveBeenLastCalledWith(
-      "https://api.openbot.run/v1/me/avatar",
+      "https://api.dani-dex.example/v1/me/avatar",
       expect.objectContaining({ method: "DELETE" }),
     );
   });
@@ -394,7 +394,7 @@ it("lists account sessions and only disconnects other devices", async () => {
   native.fetch.mockResolvedValueOnce(new Response(null, { status: 204 }));
   await revokeMobileAccountSession(session, { ...item, current: false });
   expect(native.fetch).toHaveBeenLastCalledWith(
-    `https://api.openbot.run/v1/mobile-auth/devices/${current.sessionId}?includeDesktop=true`,
+    `https://api.dani-dex.example/v1/mobile-auth/devices/${current.sessionId}?includeDesktop=true`,
     expect.objectContaining({ method: "DELETE", headers: { Authorization: "Bearer test-session-token" } }),
   );
 });

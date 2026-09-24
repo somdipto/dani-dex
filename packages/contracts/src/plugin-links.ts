@@ -1,10 +1,12 @@
+import { DANI_DEX_WEB_ORIGIN } from "./online-services";
+
 /**
  * The two addresses one plugin listing has: the page a person shares, and the link that opens that
  * listing in the app.
  *
  * ```
- * https://openbot.run/plugins/<slug>    the link a person shares and the app copies
- * dani-dex://plugins/<slug>              the link the page button opens
+ * <web origin>/plugins/<slug>    the link a person shares, once Dan Lab serves plugin pages
+ * dani-dex://plugins/<slug>       the link the page button opens, and what is shared until then
  * ```
  *
  * The host gives the kind and the path gives the argument, which is the rule `parseInviteUrl`
@@ -19,7 +21,8 @@
  * rule becomes weaker.
  */
 
-export const DANI_DEX_PLUGIN_ORIGIN = "https://openbot.run";
+/** Null while Dan Lab serves no plugin pages; shared links then use `dani-dex://plugins/<slug>`. */
+export const DANI_DEX_PLUGIN_ORIGIN: string | null = DANI_DEX_WEB_ORIGIN;
 export const DANI_DEX_PLUGIN_PATH_PREFIX = "/plugins/";
 export const DANI_DEX_PLUGIN_HOST = "plugins";
 
@@ -36,6 +39,7 @@ export function isPluginSlug(value: string): boolean {
 /** Where a shared plugin link points. */
 export function createPluginShareUrl(slug: string): string {
   assertPluginSlug(slug);
+  if (DANI_DEX_PLUGIN_ORIGIN === null) return createDaniDexPluginUrl(slug);
   return `${DANI_DEX_PLUGIN_ORIGIN}${DANI_DEX_PLUGIN_PATH_PREFIX}${slug}`;
 }
 
@@ -58,8 +62,9 @@ export function parsePluginUrl(value: string): string {
   }
 
   /* The origin is compared as one string. An `endsWith` or a host expression here is what lets
-     `openbot.run.example.com` through. */
+     `<origin>.example.com` through. */
   const canonical =
+    DANI_DEX_PLUGIN_ORIGIN !== null &&
     url.protocol === "https:" &&
     url.origin === DANI_DEX_PLUGIN_ORIGIN &&
     url.pathname.startsWith(DANI_DEX_PLUGIN_PATH_PREFIX);

@@ -424,17 +424,19 @@ describe("TeamStore", () => {
         id: "owner-account",
         email: "owner@example.com",
         name: "Owner Name",
-        avatarUrl: "https://api.openbot.run/v1/avatars/owner-account?v=image-1",
+        avatarUrl: "https://api.dani-dex.example/v1/avatars/owner-account?v=image-1",
       }),
     ).resolves.toBe(true);
     expect(store.listMembers()[0]).toMatchObject({
       name: "Owner Name",
-      avatarUrl: "https://api.openbot.run/v1/avatars/owner-account?v=image-1",
+      avatarUrl: "https://api.dani-dex.example/v1/avatars/owner-account?v=image-1",
     });
 
     const restored = new TeamStore(path);
     await restored.initialize();
-    expect(restored.listMembers()[0]?.avatarUrl).toBe("https://api.openbot.run/v1/avatars/owner-account?v=image-1");
+    expect(restored.listMembers()[0]?.avatarUrl).toBe(
+      "https://api.dani-dex.example/v1/avatars/owner-account?v=image-1",
+    );
   });
 
   it("reads an old team file and backfills the private owner account ID on the next account sync", async () => {

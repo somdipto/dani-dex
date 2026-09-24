@@ -263,7 +263,7 @@ export const STORY_CONVERSATION_MESSAGES: ConversationMessage[] = [
     id: "message-agent-1",
     author: "assistant",
     source: "assistant",
-    text: "Absolutely. I’ll structure the plan around the launch milestones and ask @Research to verify the supporting sources.\n\nThe first draft is ready here: https://openbot.run/docs",
+    text: "Absolutely. I’ll structure the plan around the launch milestones and ask @Research to verify the supporting sources.\n\nThe first draft is ready here: https://dani-dex.example/docs",
     createdAt: "2026-08-19T09:43:00.000Z",
     status: "completed",
     attachments: STORY_ATTACHMENTS,
@@ -448,7 +448,7 @@ export const STORY_BROWSER_TABS: BrowserTab[] = [
   {
     id: "browser-tab-docs",
     title: "Dani-Dex documentation",
-    url: "https://openbot.run/docs",
+    url: "https://dani-dex.example/docs",
     loading: false,
     ownerThreadId: "thread-chief",
     ownerAgentId: "chief",
@@ -1316,7 +1316,7 @@ export const STORY_MARKETPLACE_PLUGIN_AAVE: MarketplacePluginDetail = {
   installs: 2_410,
   featured: true,
   updatedAt: "2026-09-02T11:30:00.000Z",
-  shareUrl: "https://openbot.run/plugins/aave",
+  shareUrl: "dani-dex://plugins/aave",
   prompts: [
     { id: "prompt-stablecoin-yield", text: "Where can I earn the most on stablecoins across Aave right now?" },
     { id: "prompt-usdc-rates", text: "Which pays more for USDC right now, Aave V3 or V4 on Ethereum?" },
@@ -1399,7 +1399,7 @@ export const STORY_MARKETPLACE_PLUGINS: MarketplacePluginDetail[] = [
     installs: 5_180,
     featured: true,
     updatedAt: "2026-08-28T09:10:00.000Z",
-    shareUrl: "https://openbot.run/plugins/linear",
+    shareUrl: "dani-dex://plugins/linear",
     prompts: [
       { id: "prompt-linear-cycle", text: "What is still open in the current cycle, and who is it on?" },
       { id: "prompt-linear-file", text: "File a bug for the crash I just described, on the Desktop team." },
@@ -1472,7 +1472,7 @@ export const STORY_MARKETPLACE_PLUGINS: MarketplacePluginDetail[] = [
     installs: 3_060,
     featured: false,
     updatedAt: "2026-09-08T16:45:00.000Z",
-    shareUrl: "https://openbot.run/plugins/figma",
+    shareUrl: "dani-dex://plugins/figma",
     prompts: [
       { id: "prompt-figma-frames", text: "What frames are on the Settings page of this file?" },
       { id: "prompt-figma-tokens", text: "Which colour variables does the button component bind to?" },
@@ -1536,7 +1536,7 @@ export const STORY_MARKETPLACE_PLUGINS: MarketplacePluginDetail[] = [
     installs: 640,
     featured: false,
     updatedAt: "2026-07-19T08:00:00.000Z",
-    shareUrl: "https://openbot.run/plugins/changelog-writer",
+    shareUrl: "dani-dex://plugins/changelog-writer",
     prompts: [{ id: "prompt-changelog", text: "Write the release notes for everything merged since the last tag." }],
     apps: [],
     skills: [
@@ -1599,8 +1599,8 @@ export const STORY_AGENT_SUBMISSIONS: AgentSubmission[] = [
 export const STORY_HOSTED_SITES: HostedSiteSummary[] = [
   {
     id: "site-launch-notes",
-    hostname: "launch-notes.openbot.site",
-    url: "https://launch-notes.openbot.site",
+    hostname: "launch-notes.sites.dani-dex.example",
+    url: "https://launch-notes.sites.dani-dex.example",
     title: "Launch notes",
     description: "The public changelog for the 0.2 release.",
     framework: "astro",
@@ -1612,8 +1612,8 @@ export const STORY_HOSTED_SITES: HostedSiteSummary[] = [
   },
   {
     id: "site-design-review",
-    hostname: "design-review.openbot.site",
-    url: "https://design-review.openbot.site",
+    hostname: "design-review.sites.dani-dex.example",
+    url: "https://design-review.sites.dani-dex.example",
     title: "Design review",
     description: "A one-page mockup shared with the design studio.",
     framework: "vanilla",

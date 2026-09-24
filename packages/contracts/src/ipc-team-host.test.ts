@@ -16,7 +16,7 @@ describe("isTeamRealtimeEvent", () => {
               username: "person@example.com",
               email: "person@example.com",
               name: "Person",
-              avatarUrl: "https://api.openbot.run/v1/avatars/member-1?v=image-1",
+              avatarUrl: "https://api.dani-dex.example/v1/avatars/member-1?v=image-1",
               role: "member",
               createdAt: "2026-08-19T08:00:00.000Z",
               disabled: false,

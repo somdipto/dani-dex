@@ -365,34 +365,39 @@ jobs:
         run: rm -f "${{ steps.runtime-secrets.outputs.path }}"
 
       - name: Verify production deployment
+        # Dan Lab's production origins come from repository variables; nothing upstream is probed.
+        if: vars.DANI_DEX_WEB_ORIGIN != '' && vars.DANI_DEX_API_ORIGIN != '' && vars.DANI_DEX_HOSTED_SITE_SUFFIX != ''
         shell: bash
         env:
           SITE_HOSTING_EXPECTED_ENABLED: ${{ vars.SITE_HOSTING_EXPECTED_ENABLED }}
+          WEB_ORIGIN: ${{ vars.DANI_DEX_WEB_ORIGIN }}
+          API_ORIGIN: ${{ vars.DANI_DEX_API_ORIGIN }}
+          SITE_SUFFIX: ${{ vars.DANI_DEX_HOSTED_SITE_SUFFIX }}
         run: |
           verification_dir="$(mktemp -d)"
           trap 'rm -rf "$verification_dir"' EXIT
-          curl --fail --silent --show-error --retry 5 --retry-all-errors https://openbot.run/ >/dev/null
+          curl --fail --silent --show-error --retry 5 --retry-all-errors "$WEB_ORIGIN/" >/dev/null
           join_status="$(curl --silent --show-error --retry 5 --retry-all-errors \
             --max-redirs 0 --dump-header "$verification_dir/join.headers" \
             --output "$verification_dir/join.html" --write-out '%{http_code}' \
-            https://openbot.run/join)"
+            "$WEB_ORIGIN/join")"
           test "$join_status" = "200"
           tr -d '\r' < "$verification_dir/join.headers" | grep -Eiq '^cache-control:.*no-store'
           tr -d '\r' < "$verification_dir/join.headers" | grep -Eiq '^referrer-policy:.*no-referrer'
           association_status="$(curl --silent --show-error --retry 5 --retry-all-errors \
             --max-redirs 0 --dump-header "$verification_dir/association.headers" \
             --output "$verification_dir/association.json" --write-out '%{http_code}' \
-            https://openbot.run/.well-known/apple-app-site-association)"
+            "$WEB_ORIGIN/.well-known/apple-app-site-association")"
           test "$association_status" = "200"
           tr -d '\r' < "$verification_dir/association.headers" | grep -Eiq '^content-type: application/json'
           jq -e '.applinks.details == [{"appID":"ZTRDTUL87R.dev.danlab.danidex.desktop","paths":["/join"]}]' \
             "$verification_dir/association.json" >/dev/null
-          curl --fail --silent --show-error --retry 5 --retry-all-errors https://api.openbot.run/health/live >/dev/null
-          curl --fail --silent --show-error --retry 5 --retry-all-errors https://api.openbot.run/health/ready >/dev/null
+          curl --fail --silent --show-error --retry 5 --retry-all-errors "$API_ORIGIN/health/live" >/dev/null
+          curl --fail --silent --show-error --retry 5 --retry-all-errors "$API_ORIGIN/health/ready" >/dev/null
           site_status="$(curl --silent --show-error --retry 5 --retry-all-errors \
             --max-redirs 0 --dump-header "$verification_dir/site-router.headers" \
             --output "$verification_dir/site-router.txt" --write-out '%{http_code}' \
-            https://deployment-smoke-check.openbot.site/)"
+            "https://deployment-smoke-check${SITE_SUFFIX}/")"
           case "$SITE_HOSTING_EXPECTED_ENABLED" in
             true) test "$site_status" = "404" ;;
             false) test "$site_status" = "503" ;;

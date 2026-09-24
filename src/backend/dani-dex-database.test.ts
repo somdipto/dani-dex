@@ -176,8 +176,8 @@ describe("DaniDexDatabase", () => {
       details: {
         siteId: "site-1",
         title: "Launch page",
-        hostname: "launch-page-23456789ab.openbot.site",
-        url: "https://launch-page-23456789ab.openbot.site",
+        hostname: "launch-page-23456789ab.sites.dani-dex.example",
+        url: "https://launch-page-23456789ab.sites.dani-dex.example",
       },
       markerCommandId: "hosted-site-event:chief:operation-1:succeeded",
       createdAt: "2026-09-01T12:00:00.000Z",
@@ -221,8 +221,8 @@ describe("DaniDexDatabase", () => {
     const details = {
       siteId: "site-1",
       title: "Launch page",
-      hostname: "launch-page-23456789ab.openbot.site",
-      url: "https://launch-page-23456789ab.openbot.site",
+      hostname: "launch-page-23456789ab.sites.dani-dex.example",
+      url: "https://launch-page-23456789ab.sites.dani-dex.example",
     };
     const recordActive = (operationId: string, createdAt: string) => {
       database.recordActiveHostedSiteConversationEvent({
@@ -2186,8 +2186,8 @@ function seedLegacyAgent(database: DatabaseSync, legacyId: string, workspacePath
     details: {
       siteId: "site-1",
       title: "Launch page",
-      hostname: "launch-page-23456789ab.openbot.site",
-      url: "https://launch-page-23456789ab.openbot.site",
+      hostname: "launch-page-23456789ab.sites.dani-dex.example",
+      url: "https://launch-page-23456789ab.sites.dani-dex.example",
     },
     markerCommandId: `hosted-site-event:${legacyId}:operation-1:succeeded`,
     createdAt: "2026-09-01T12:00:00.000Z",

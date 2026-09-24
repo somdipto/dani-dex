@@ -67,15 +67,15 @@ platform name (or unknown), and the referring domain when available. A recognize
 takes precedence over the referring domain for platform classification; unrecognized tags are not
 sent. Attribution excludes referrer paths, query parameters, fragments, credentials, ports, and
 campaign URLs other than the allowlisted tags described above. Website page and article events carry
-the path of a news article or guide published on openbot.run, together with the collection name, the
+the path of a news article or guide published on the Dani-Dex website, together with the collection name, the
 reading position reached (start, half, or end), and the section of the page a link was clicked in.
 That path is a published article address and nothing else: it is matched against the site's own list
 of articles, so no other part of a visited URL can be reported through it. Reading position is taken
-from where the article sits on screen, never from how long it was open. Referrals from openbot.run and its subdomains are omitted. OpenPanel can also derive
+from where the article sits on screen, never from how long it was open. Referrals from the Dani-Dex website and its subdomains are omitted. OpenPanel can also derive
 session, device, browser, operating-system, network, and approximate geographic metadata from a
-request. The analytics service runs on Dani-Dex's self-hosted infrastructure and receives events
-through `analytics.openbot.run`.
-Analytics is enabled in production by default. Desktop users can disable it under **Settings →
+request. The analytics service will run on Dan Lab's own infrastructure. Current builds name no analytics
+endpoint, so they send no product analytics at all; the description above applies once one is set.
+Once enabled, analytics is on in production by default. Desktop users can disable it under **Settings →
 General → Privacy → Share product analytics**. The preference is stored locally and disables both UI
 analytics and lifecycle analytics emitted by the local host. Website analytics does not use the
 desktop preference. Mobile has its own phone-wide **Settings → General → Privacy → Share product
@@ -251,8 +251,8 @@ Network traffic can also occur when:
 - an installed build checks GitHub Releases for updates;
 - a user opens an explicitly labeled external support or setup link.
 
-Plugin pages on openbot.run show each listing's own icon. The page asks `openbot.run` for that
-picture, and the website fetches it there from the address the plugin catalog holds, so reading a
+Plugin pages on the Dani-Dex website show each listing's own icon. The page asks the website for
+that picture, and the website fetches it from the address the plugin catalog holds, so reading a
 plugin page does not connect your browser to the plugin developer's servers.
 
 Account usage shown in Dani-Dex is requested through the local Codex App Server. Dani-Dex does not send
@@ -315,7 +315,7 @@ Review folders before deleting them and keep a backup of anything you need.
 
 ## Questions
 
-Use [GitHub Discussions](https://github.com/nightly-labs/openbot/discussions) for privacy questions.
+Use [GitHub Issues](https://github.com/somdipto/dani-dex/issues) for privacy questions.
 Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md), without attaching
 credentials, conversations, or unrelated private files.
 

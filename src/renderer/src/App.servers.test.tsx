@@ -805,7 +805,7 @@ describe("Dani-Dex connected desktop shell", () => {
           notificationsMuted: false,
           kind: "remote",
           state: "online",
-          apiUrl: "https://studio-mac-k7m4q2pz-host.openbot.run",
+          apiUrl: "https://studio-mac-k7m4q2pz-host.dani-dex.example",
           remoteDesktopAvailable,
           role: "owner",
           active: true,
@@ -824,7 +824,7 @@ describe("Dani-Dex connected desktop shell", () => {
         session: {
           id: "desktop-1",
           serverId: "remote-1",
-          viewerUrl: "https://studio-mac-k7m4q2pz-host.openbot.run/v1/remote-screen/sessions/desktop-1/viewer",
+          viewerUrl: "https://studio-mac-k7m4q2pz-host.dani-dex.example/v1/remote-screen/sessions/desktop-1/viewer",
           viewerGrant: "viewer-grant",
           displays: [],
           selectedDisplayId: null,

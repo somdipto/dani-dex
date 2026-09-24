@@ -504,7 +504,7 @@ function renderRendererModule(plugins: PluginDetail[]): string {
       installs: 0,
       featured: plugin.featured,
       updatedAt: plugin.updatedAt,
-      shareUrl: `https://openbot.run/plugins/${plugin.slug}`,
+      shareUrl: `dani-dex://plugins/${plugin.slug}`,
     })};`;
   });
   const list = plugins.map((plugin) => constName(plugin.slug)).join(",\n  ");

@@ -14,6 +14,7 @@
     "./full-duplex-voice": "./src/full-duplex-voice.ts",
     "./input-limits": "./src/input-limits.ts",
     "./invite-links": "./src/invite-links.ts",
+    "./online-services": "./src/online-services.ts",
     "./ipc": "./src/ipc.ts",
     "./ipc-skills": "./src/ipc-skills.ts",
     "./mobile-connect": "./src/mobile-connect.ts",

@@ -1,8 +1,13 @@
+import { DANI_DEX_API_ORIGIN, DANI_DEX_WEB_ORIGIN } from "./online-services";
 import { isDaniDexTeamApiHostname } from "./validation";
 
-export const DANI_DEX_INVITE_ORIGIN = "https://openbot.run";
+/**
+ * The https origin of the invitation page, or null while Dan Lab serves none. With no page, an
+ * invitation is the `dani-dex://join` link, which the app opens and the join field accepts.
+ */
+export const DANI_DEX_INVITE_ORIGIN: string | null = DANI_DEX_WEB_ORIGIN;
 export const DANI_DEX_INVITE_PATH = "/join";
-export const DANI_DEX_CONTROL_PLANE_ORIGIN = "https://api.openbot.run";
+export const DANI_DEX_CONTROL_PLANE_ORIGIN: string | null = DANI_DEX_API_ORIGIN;
 
 /**
  * The finite deadline a permanent invitation carries. Invitation expiry travels the
@@ -42,6 +47,7 @@ export interface InviteLinkOptions {
 }
 
 export function createInviteUrl(payload: InviteLinkPayload, options: InviteLinkOptions = {}): string {
+  if (DANI_DEX_INVITE_ORIGIN === null) return createDaniDexInviteUrl(payload, options);
   validatePayload(payload, options);
   const url = new URL(DANI_DEX_INVITE_PATH, DANI_DEX_INVITE_ORIGIN);
   writePayload(url, payload);
@@ -63,6 +69,7 @@ export function isCanonicalInviteUrl(value: string, options: InviteLinkOptions =
   try {
     parseInviteUrl(value, options);
     const url = new URL(value);
+    if (DANI_DEX_INVITE_ORIGIN === null) return url.protocol === "dani-dex:" && url.hostname === "join";
     return url.origin === DANI_DEX_INVITE_ORIGIN && url.pathname === DANI_DEX_INVITE_PATH;
   } catch {
     return false;
@@ -78,7 +85,10 @@ export function parseInviteUrl(value: string, options: InviteLinkOptions = {}): 
   }
 
   const canonical =
-    url.protocol === "https:" && url.origin === DANI_DEX_INVITE_ORIGIN && url.pathname === DANI_DEX_INVITE_PATH;
+    DANI_DEX_INVITE_ORIGIN !== null &&
+    url.protocol === "https:" &&
+    url.origin === DANI_DEX_INVITE_ORIGIN &&
+    url.pathname === DANI_DEX_INVITE_PATH;
   const customScheme =
     url.protocol === "dani-dex:" && url.hostname === "join" && (url.pathname === "" || url.pathname === "/");
   if (
@@ -119,7 +129,7 @@ export function isValidRemoteApiUrl(value: string, options: InviteLinkOptions = 
       (localDevelopmentApi ||
         (url.protocol === "https:" &&
           url.port === "" &&
-          (url.origin === DANI_DEX_CONTROL_PLANE_ORIGIN ||
+          ((DANI_DEX_CONTROL_PLANE_ORIGIN !== null && url.origin === DANI_DEX_CONTROL_PLANE_ORIGIN) ||
             TRY_CLOUDFLARE_HOST_PATTERN.test(url.hostname) ||
             isDaniDexTeamApiHostname(url.hostname))))
     );

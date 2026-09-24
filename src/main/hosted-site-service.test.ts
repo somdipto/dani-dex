@@ -202,8 +202,8 @@ function uploadSession(): { uploadId: string; expiresAt: string } {
 function hostedSite() {
   return {
     id: "site-1",
-    hostname: "recovery-page-for-upload-tests-23456789ab.openbot.site",
-    url: "https://recovery-page-for-upload-tests-23456789ab.openbot.site",
+    hostname: "recovery-page-for-upload-tests-23456789ab.sites.dani-dex.example",
+    url: "https://recovery-page-for-upload-tests-23456789ab.sites.dani-dex.example",
     title: "Recovery page",
     description: "Recover a publication response.",
     framework: "vanilla",

@@ -28,7 +28,7 @@ import {
 } from "./hosted-site-events";
 import { type DaniDexToolResponse, daniDexToolResult, siteToolString } from "./routine-tools";
 
-/** The openbot.site host, injected so the backend never depends on the account Worker directly. */
+/** The hosted-site service, injected so the backend never depends on the account Worker directly. */
 export interface AgentHostedSites {
   list(): Promise<HostedSiteSummary[]>;
   publish(input: PublishHostedSiteInput, allowedRoots: readonly string[]): Promise<HostedSiteSummary>;
@@ -81,7 +81,7 @@ interface HostedSiteMutationResult {
 export const HOSTED_SITE_APPROVAL_METHOD = "danidex/hosted-site-mutation";
 
 /**
- * Owns publishing to openbot.site: the approval a mutation needs, the mutation itself, and the
+ * Owns publishing hosted sites: the approval a mutation needs, the mutation itself, and the
  * conversation markers that record it.
  *
  * The markers are the reason this is a class rather than a set of functions. A terminal marker
@@ -239,7 +239,7 @@ export class HostedSiteCoordinator {
       const siteId = siteToolString(args.siteId, "siteId", INPUT_LIMITS.identifier);
       const site = await this.#ownedSite(siteId);
       return {
-        reason: `Delete ${site.hostname} from openbot.site.`,
+        reason: `Delete the public site ${site.hostname}.`,
         permissions: { fileSystem: { read: [], write: [] }, network: true },
         eventDetails: hostedSiteEventDetails(site, siteId),
       };
@@ -254,7 +254,7 @@ export class HostedSiteCoordinator {
     const permissions = { fileSystem: { read: [sourcePath], write: [] }, network: true };
     if (tool === "publish_site") {
       return {
-        reason: `Publish ${JSON.stringify(title)} as a public site on openbot.site.`,
+        reason: `Publish ${JSON.stringify(title)} as a public site.`,
         permissions,
         eventDetails: { siteId: null, title, hostname: null, url: null },
       };

@@ -5,7 +5,7 @@ import { JoinServerDialog } from "../src/features/servers/JoinServerDialog";
 const preview = {
   serverId: "00000000-0000-4000-8000-000000000000",
   serverName: "Studio host",
-  apiHostname: "story-host.openbot.run",
+  apiHostname: "story-host.dani-dex.example",
   role: "member" as const,
   expiresAt: "2026-08-21T10:00:00.000Z",
   emailBound: false,
@@ -14,7 +14,7 @@ const preview = {
 
 const args: Parameters<typeof JoinServerDialog>[0] = {
   inviteUrl:
-    "https://openbot.run/join?api=https%3A%2F%2Fstory-host.openbot.run%2F&server=00000000-0000-4000-8000-000000000000&fingerprint=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&invite=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "https://dani-dex.example/join?api=https%3A%2F%2Fstory-host.dani-dex.example%2F&server=00000000-0000-4000-8000-000000000000&fingerprint=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&invite=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   accountEmail: "person@example.com",
   onClose: fn(),
   onPreview: fn(async () => preview),
@@ -72,7 +72,7 @@ export const ErrorState: Story = {
   },
   play: async ({ userEvent }) => {
     const body = within(document.body);
-    await userEvent.type(body.getByRole("textbox", { name: "Invite link" }), "https://openbot.run/join?bad");
+    await userEvent.type(body.getByRole("textbox", { name: "Invite link" }), "https://dani-dex.example/join?bad");
     await userEvent.click(body.getByRole("button", { name: "Review invite" }));
     await expect(body.getByRole("alert")).toHaveTextContent("The Dani-Dex invitation link is invalid.");
   },
@@ -110,7 +110,7 @@ export const LongIdentity: Story = {
     onPreview: fn(async () => ({
       ...preview,
       serverName: "Product design and research studio host",
-      apiHostname: "product-design-research-studio.openbot.run",
+      apiHostname: "product-design-research-studio.dani-dex.example",
     })),
   },
 };

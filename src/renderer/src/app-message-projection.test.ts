@@ -140,7 +140,7 @@ describe("toAgentMessage", () => {
         action: "publish",
         status: "succeeded",
         siteId: "site-1",
-        hostname: "launch-page-23456789ab.openbot.site",
+        hostname: "launch-page-23456789ab.sites.dani-dex.example",
       },
     });
     expect(toAgentMessage({ ...published, text: "{" }, "chief").actionMarker).toEqual({
@@ -183,8 +183,8 @@ function hostedSiteMessage(status: "succeeded"): ConversationMessage {
     text: hostedSiteConversationEventText({
       siteId: "site-1",
       title: "Launch page",
-      hostname: "launch-page-23456789ab.openbot.site",
-      url: "https://launch-page-23456789ab.openbot.site",
+      hostname: "launch-page-23456789ab.sites.dani-dex.example",
+      url: "https://launch-page-23456789ab.sites.dani-dex.example",
     }),
     createdAt: "2026-09-01T08:00:00.000Z",
     status: "completed",

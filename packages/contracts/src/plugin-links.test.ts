@@ -3,7 +3,7 @@ import { createInviteUrl } from "./invite-links";
 import { createDaniDexPluginUrl, createPluginShareUrl, isPluginUrl, parsePluginUrl } from "./plugin-links";
 
 const invitePayload = {
-  apiUrl: "https://studio-mac-k7m4q2pz-host.openbot.run/",
+  apiUrl: "https://studio-mac-k7m4q2pz-host.dani-dex.example/",
   serverId: "00000000-0000-4000-8000-000000000000",
   fingerprint: "a".repeat(43),
   token: "b".repeat(43),
@@ -11,7 +11,7 @@ const invitePayload = {
 
 describe("Dani-Dex plugin links", () => {
   it("builds both forms from a slug", () => {
-    expect(createPluginShareUrl("aave")).toBe("https://openbot.run/plugins/aave");
+    expect(createPluginShareUrl("aave")).toBe("https://dani-dex.example/plugins/aave");
     expect(createDaniDexPluginUrl("aave")).toBe("dani-dex://plugins/aave");
   });
 
@@ -27,20 +27,20 @@ describe("Dani-Dex plugin links", () => {
 
   it.each([
     ["a foreign origin", "https://evil.example/plugins/aave"],
-    ["a host that only ends in the real one", "https://openbot.run.example.com/plugins/aave"],
+    ["a host that only ends in the real one", "https://dani-dex.example.example.com/plugins/aave"],
     ["the lookalike host the app once used", "https://danidex.app/plugins/aave"],
-    ["http", "http://openbot.run/plugins/aave"],
-    ["another path", "https://openbot.run/other/aave"],
-    ["no slug", "https://openbot.run/plugins/"],
-    ["a second path segment", "https://openbot.run/plugins/aave/install"],
-    ["a trailing slash", "https://openbot.run/plugins/aave/"],
-    ["a query", "https://openbot.run/plugins/aave?install=1"],
-    ["a hash", "https://openbot.run/plugins/aave#install"],
-    ["a port", "https://openbot.run:444/plugins/aave"],
-    ["a user name", "https://user@openbot.run/plugins/aave"],
-    ["an upper-case slug", "https://openbot.run/plugins/Aave"],
-    ["a slug with a dot", "https://openbot.run/plugins/catalog.json"],
-    ["an over-long slug", `https://openbot.run/plugins/${"a".repeat(64)}`],
+    ["http", "http://dani-dex.example/plugins/aave"],
+    ["another path", "https://dani-dex.example/other/aave"],
+    ["no slug", "https://dani-dex.example/plugins/"],
+    ["a second path segment", "https://dani-dex.example/plugins/aave/install"],
+    ["a trailing slash", "https://dani-dex.example/plugins/aave/"],
+    ["a query", "https://dani-dex.example/plugins/aave?install=1"],
+    ["a hash", "https://dani-dex.example/plugins/aave#install"],
+    ["a port", "https://dani-dex.example:444/plugins/aave"],
+    ["a user name", "https://user@dani-dex.example/plugins/aave"],
+    ["an upper-case slug", "https://dani-dex.example/plugins/Aave"],
+    ["a slug with a dot", "https://dani-dex.example/plugins/catalog.json"],
+    ["an over-long slug", `https://dani-dex.example/plugins/${"a".repeat(64)}`],
     ["another custom-scheme host", "dani-dex://plugin/aave"],
     ["a custom-scheme link with a query", "dani-dex://plugins/aave?install=1"],
     ["a custom-scheme link with no slug", "dani-dex://plugins"],

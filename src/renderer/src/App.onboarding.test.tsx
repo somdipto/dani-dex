@@ -302,7 +302,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("connects to a remote host after account sign-in", async () => {
-    const inviteUrl = "https://openbot.run/join?invite=test";
+    const inviteUrl = "https://dani-dex.example/join?invite=test";
     vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
@@ -341,7 +341,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("opens a verified invitation received while the configured app is running", async () => {
-    const inviteUrl = "https://openbot.run/join?invite=second-instance";
+    const inviteUrl = "https://dani-dex.example/join?invite=second-instance";
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
 
@@ -398,7 +398,7 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("keeps a cold-start invitation until a signed-out user signs in", async () => {
-    const inviteUrl = "https://openbot.run/join?invite=after-sign-in";
+    const inviteUrl = "https://dani-dex.example/join?invite=after-sign-in";
     vi.mocked(window.danidex.auth.getState).mockResolvedValueOnce({ status: "signed_out" });
     vi.mocked(window.danidex.servers.takePendingInvite).mockResolvedValueOnce(inviteUrl);
     render(() => <App />);

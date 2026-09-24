@@ -478,8 +478,8 @@ describe("SettingsModal", () => {
   it("lists an agent-published site with only Open and Delete actions", async () => {
     const site = {
       id: "site-1",
-      hostname: "interactive-budget-planner-students-23456789ab.openbot.site",
-      url: "https://interactive-budget-planner-students-23456789ab.openbot.site",
+      hostname: "interactive-budget-planner-students-23456789ab.sites.dani-dex.example",
+      url: "https://interactive-budget-planner-students-23456789ab.sites.dani-dex.example",
       title: "Student budget planner",
       description: "Plan a student budget.",
       framework: "vanilla" as const,
@@ -533,8 +533,8 @@ describe("SettingsModal", () => {
   it("confirms a hosted-site deletion and reloads the list", async () => {
     const site = {
       id: "site-to-delete",
-      hostname: "temporary-project-site-23456789ab.openbot.site",
-      url: "https://temporary-project-site-23456789ab.openbot.site",
+      hostname: "temporary-project-site-23456789ab.sites.dani-dex.example",
+      url: "https://temporary-project-site-23456789ab.sites.dani-dex.example",
       title: "Temporary project site",
       description: "Verify deletion and list refresh.",
       framework: "vanilla" as const,
@@ -591,8 +591,8 @@ describe("SettingsModal", () => {
   it("shows a blocked hosted site and disables Open", async () => {
     const site = {
       id: "blocked-site",
-      hostname: "blocked-project-site-23456789ab.openbot.site",
-      url: "https://blocked-project-site-23456789ab.openbot.site",
+      hostname: "blocked-project-site-23456789ab.sites.dani-dex.example",
+      url: "https://blocked-project-site-23456789ab.sites.dani-dex.example",
       title: "Blocked project site",
       description: "A blocked hosted site.",
       framework: "vanilla" as const,
@@ -647,7 +647,8 @@ describe("SettingsModal", () => {
         onUpdateAccountName={vi.fn(async () => undefined)}
         onUpdateAccountAvatar={vi.fn(async () => undefined)}
         onCreateMobileConnect={async () => ({
-          qrData: "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=mobile-ticket_success_1234567890",
+          qrData:
+            "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.dani-dex.example&ticket=mobile-ticket_success_1234567890",
           expiresAt: Date.now() + 120_000,
         })}
         onListMobileConnectedDevices={onListMobileConnectedDevices}
@@ -708,7 +709,8 @@ describe("SettingsModal", () => {
       .mockImplementationOnce(() => initialDevices)
       .mockResolvedValue([existingDevice]);
     const onCreateMobileConnect = vi.fn(async () => ({
-      qrData: "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.openbot.run&ticket=mobile-ticket_baseline_1234567890",
+      qrData:
+        "dani-dex://mobile-connect?api=https%3A%2F%2Fapi.dani-dex.example&ticket=mobile-ticket_baseline_1234567890",
       expiresAt: Date.now() + 120_000,
     }));
     const view = render(() => (

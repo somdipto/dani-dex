@@ -73,7 +73,7 @@ const AAVE: MarketplacePluginDetail = {
   installs: 0,
   featured: true,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/aave",
+  shareUrl: "dani-dex://plugins/aave",
 };
 
 const CANVA: MarketplacePluginDetail = {
@@ -114,7 +114,7 @@ const CANVA: MarketplacePluginDetail = {
   installs: 0,
   featured: true,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/canva",
+  shareUrl: "dani-dex://plugins/canva",
 };
 
 const GITHUB: MarketplacePluginDetail = {
@@ -173,7 +173,7 @@ const GITHUB: MarketplacePluginDetail = {
   installs: 0,
   featured: true,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/github",
+  shareUrl: "dani-dex://plugins/github",
 };
 
 const LINEAR: MarketplacePluginDetail = {
@@ -214,7 +214,7 @@ const LINEAR: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/linear",
+  shareUrl: "dani-dex://plugins/linear",
 };
 
 const NOTION: MarketplacePluginDetail = {
@@ -255,7 +255,7 @@ const NOTION: MarketplacePluginDetail = {
   installs: 0,
   featured: true,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/notion",
+  shareUrl: "dani-dex://plugins/notion",
 };
 
 const FIGMA: MarketplacePluginDetail = {
@@ -296,7 +296,7 @@ const FIGMA: MarketplacePluginDetail = {
   installs: 0,
   featured: true,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/figma",
+  shareUrl: "dani-dex://plugins/figma",
 };
 
 const SENTRY: MarketplacePluginDetail = {
@@ -336,7 +336,7 @@ const SENTRY: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/sentry",
+  shareUrl: "dani-dex://plugins/sentry",
 };
 
 const CONTEXT7: MarketplacePluginDetail = {
@@ -371,7 +371,7 @@ const CONTEXT7: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/context7",
+  shareUrl: "dani-dex://plugins/context7",
 };
 
 const STRIPE: MarketplacePluginDetail = {
@@ -411,7 +411,7 @@ const STRIPE: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/stripe",
+  shareUrl: "dani-dex://plugins/stripe",
 };
 
 const POSTHOG: MarketplacePluginDetail = {
@@ -469,7 +469,7 @@ const POSTHOG: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/posthog",
+  shareUrl: "dani-dex://plugins/posthog",
 };
 
 const AIRTABLE: MarketplacePluginDetail = {
@@ -519,7 +519,7 @@ const AIRTABLE: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/airtable",
+  shareUrl: "dani-dex://plugins/airtable",
 };
 
 const FIRECRAWL: MarketplacePluginDetail = {
@@ -577,7 +577,7 @@ const FIRECRAWL: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/firecrawl",
+  shareUrl: "dani-dex://plugins/firecrawl",
 };
 
 const BRAVE_SEARCH: MarketplacePluginDetail = {
@@ -629,7 +629,7 @@ const BRAVE_SEARCH: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/brave-search",
+  shareUrl: "dani-dex://plugins/brave-search",
 };
 
 const RESEND: MarketplacePluginDetail = {
@@ -681,7 +681,7 @@ const RESEND: MarketplacePluginDetail = {
   installs: 0,
   featured: false,
   updatedAt: "2026-09-19T00:00:00.000Z",
-  shareUrl: "https://openbot.run/plugins/resend",
+  shareUrl: "dani-dex://plugins/resend",
 };
 
 export const MARKETPLACE_PLUGINS: MarketplacePluginDetail[] = [

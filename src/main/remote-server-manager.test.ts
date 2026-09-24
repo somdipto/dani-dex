@@ -84,7 +84,7 @@ describe("remote server links", () => {
       issueTicket: async () => ({
         ticket: "ticket",
         expiresAt: Date.now() + 60_000,
-        signalUrl: "wss://signal.openbot.run/v1/signal",
+        signalUrl: "wss://signal.dani-dex.example/v1/signal",
       }),
       endSession: async () => undefined,
       createInvite: async () => ({
@@ -111,7 +111,7 @@ describe("remote server links", () => {
       updateMember: async () => undefined,
       removeMember: async () => undefined,
       getPrincipalId: () => "person-1",
-      controlPlaneUrl: "https://api.openbot.run",
+      controlPlaneUrl: "https://api.dani-dex.example",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
       transferDirectory: join(directory, "transfers"),
     });
@@ -121,8 +121,8 @@ describe("remote server links", () => {
       { createTeamAuthTicket: async () => "ticket", getEmail: () => "person@example.com" },
       { webrtcTransport: transport },
     );
-    const inviteUrl = new URL("https://openbot.run/join");
-    inviteUrl.searchParams.set("api", "https://api.openbot.run");
+    const inviteUrl = new URL("https://dani-dex.example/join");
+    inviteUrl.searchParams.set("api", "https://api.dani-dex.example");
     inviteUrl.searchParams.set("server", hostId);
     inviteUrl.searchParams.set("fingerprint", fingerprint("attacker-public-key"));
     inviteUrl.searchParams.set("invite", "b".repeat(43));
@@ -171,7 +171,7 @@ describe("remote server links", () => {
       issueTicket: async () => ({
         ticket: "ticket",
         expiresAt: Date.now() + 60_000,
-        signalUrl: "wss://signal.openbot.run/v1/signal",
+        signalUrl: "wss://signal.dani-dex.example/v1/signal",
       }),
       endSession: async () => undefined,
       createInvite: async () => ({
@@ -198,7 +198,7 @@ describe("remote server links", () => {
       updateMember: async () => undefined,
       removeMember: async () => undefined,
       getPrincipalId: () => "person-1",
-      controlPlaneUrl: "https://api.openbot.run",
+      controlPlaneUrl: "https://api.dani-dex.example",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
       transferDirectory: join(directory, "transfers"),
     });
@@ -316,7 +316,7 @@ describe("remote server links", () => {
       updateMember: async () => undefined,
       removeMember,
       getPrincipalId: () => "person-1",
-      controlPlaneUrl: "https://api.openbot.run",
+      controlPlaneUrl: "https://api.dani-dex.example",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
       transferDirectory: join(directory, "transfers"),
     });
@@ -462,7 +462,7 @@ describe("remote server links", () => {
       issueTicket: async () => ({
         ticket: "ticket",
         expiresAt: Date.now() + 60_000,
-        signalUrl: "wss://signal.openbot.run/v1/signal",
+        signalUrl: "wss://signal.dani-dex.example/v1/signal",
       }),
       endSession: async () => undefined,
       createInvite: async () => ({
@@ -484,7 +484,7 @@ describe("remote server links", () => {
       updateMember: async () => undefined,
       removeMember: async () => undefined,
       getPrincipalId: () => "person-1",
-      controlPlaneUrl: "https://api.openbot.run",
+      controlPlaneUrl: "https://api.dani-dex.example",
       downloadHostLogo: async () => ({ bytes: new Uint8Array(), mimeType: "image/png" }),
       transferDirectory: join(directory, "transfers"),
     });

@@ -996,10 +996,10 @@ describe("the address a returning grant is sent to", () => {
   it("refuses an address no MCP authorization server would send a grant to", () => {
     const storage = memoryStorage();
     const openExternal = async () => undefined;
-    expect(() => new McpOAuth({ storage, openExternal, redirectUrl: "https://openbot.run/mcp-auth" })).toThrow(
+    expect(() => new McpOAuth({ storage, openExternal, redirectUrl: "https://dani-dex.example/mcp-auth" })).toThrow(
       /web address/,
     );
-    expect(() => new McpOAuth({ storage, openExternal, redirectUrl: "http://openbot.run/mcp-auth" })).toThrow(
+    expect(() => new McpOAuth({ storage, openExternal, redirectUrl: "http://dani-dex.example/mcp-auth" })).toThrow(
       /clear text/,
     );
     expect(() => new McpOAuth({ storage, openExternal, redirectUrl: "mcp-auth" })).toThrow(/complete address/);

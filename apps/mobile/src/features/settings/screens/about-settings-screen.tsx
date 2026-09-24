@@ -27,10 +27,10 @@ export function AboutSettingsScreen() {
   return (
     <SettingsContent>
       <SettingsSection title="Resources">
-        <SettingsRow onPress={() => open("https://openbot.run")}>
+        <SettingsRow onPress={() => open("https://www.danlab.dev")}>
           <Typography.Paragraph type="body-sm">Website</Typography.Paragraph>
         </SettingsRow>
-        <SettingsRow onPress={() => open("https://github.com/nightly-labs/openbot/blob/main/PRIVACY.md")}>
+        <SettingsRow onPress={() => open("https://github.com/somdipto/dani-dex/blob/main/PRIVACY.md")}>
           <Typography.Paragraph type="body-sm">Privacy policy</Typography.Paragraph>
         </SettingsRow>
         {error ? <SettingsNote>{error}</SettingsNote> : null}

@@ -489,8 +489,8 @@ describe("hosted site conversation events", () => {
   const publishedSite = {
     siteId: "site-1",
     title: "Launch page",
-    hostname: "launch-page-23456789ab.openbot.site",
-    url: "https://launch-page-23456789ab.openbot.site",
+    hostname: "launch-page-23456789ab.sites.dani-dex.example",
+    url: "https://launch-page-23456789ab.sites.dani-dex.example",
   } as const;
 
   it.each(["running", "succeeded", "failed", "interrupted", "cancelled"] as const)(

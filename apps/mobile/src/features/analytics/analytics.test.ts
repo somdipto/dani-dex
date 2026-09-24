@@ -250,8 +250,8 @@ describe("installed React Native SDK", () => {
     mobileAnalytics.track("message_send", { result: "succeeded", channel: "agent", attachment_count: 1 });
     await mobileAnalytics.settled();
     expect(requests.map((request) => request.url)).toEqual([
-      "https://analytics.openbot.run/api/track",
-      "https://analytics.openbot.run/api/track",
+      "https://analytics.dani-dex.example/api/track",
+      "https://analytics.dani-dex.example/api/track",
     ]);
     const bodies = requests.map((request) => JSON.parse(request.body));
     expect(bodies[0]).toEqual({

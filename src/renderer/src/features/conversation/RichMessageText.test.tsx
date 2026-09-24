@@ -216,7 +216,7 @@ describe("MarkdownFilePreview", () => {
         "| --- | --- |",
         "| Preview | Ready |",
         "",
-        "[Dani-Dex](https://openbot.run)",
+        "[Dani-Dex](https://dani-dex.example)",
       ].join("\n"),
     );
 

@@ -6,7 +6,7 @@ import BrowserPanel from "../src/features/conversation/BrowserPanel";
 const tab: BrowserTab = {
   id: "tab-docs",
   title: "Dani-Dex documentation",
-  url: "https://openbot.run/docs",
+  url: "https://dani-dex.example/docs",
   loading: false,
   ownerThreadId: "thread-chief",
   ownerAgentId: "chief",
@@ -72,7 +72,7 @@ export const Idle: Story = {
 export const MacWindowControls: Story = {
   args: {
     macWindowControls: true,
-    tabs: [tab, { ...tab, id: "tab-changelog", title: "Changelog", url: "https://openbot.run/changelog" }],
+    tabs: [tab, { ...tab, id: "tab-changelog", title: "Changelog", url: "https://dani-dex.example/changelog" }],
   },
 };
 

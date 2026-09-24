@@ -704,7 +704,7 @@ async function seedConversations(
             `| Evidence | ${mention("research")} | In review |`,
             `| Release | ${mention("launch")} | Ready |`,
             "",
-            "Next: review the [Dani-Dex documentation](https://openbot.run/docs), then run:",
+            "Next: review the [Dani-Dex documentation](https://github.com/somdipto/dani-dex#readme), then run:",
             "",
             "```bash",
             "bun run check",

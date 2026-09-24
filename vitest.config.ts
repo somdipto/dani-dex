@@ -34,13 +34,14 @@ export default defineConfig({
           pool: "vmThreads",
           include: ["apps/mobile/src/**/*.test.tsx"],
           restoreMocks: true,
-          setupFiles: ["./apps/mobile/src/test-setup.ts"],
+          setupFiles: ["./test/online-services-mock.ts", "./apps/mobile/src/test-setup.ts"],
         },
       },
       {
         extends: true,
         test: {
           name: "node",
+          setupFiles: ["./test/online-services-mock.ts"],
           server: { deps: { inline: ["@openpanel/react-native"] } },
           environment: "node",
           // Strictly longer than the harness deadline, so a stalled wait fails
@@ -89,7 +90,7 @@ export default defineConfig({
           // pattern, so a DOM test lands here wherever it lives: a page script the main process
           // injects needs a document as much as a renderer module does.
           include: ["src/renderer/**/*.test.tsx", "**/*.dom.test.ts"],
-          setupFiles: ["./src/renderer/src/setupTests.ts"],
+          setupFiles: ["./test/online-services-mock.ts", "./src/renderer/src/setupTests.ts"],
         },
       },
     ],

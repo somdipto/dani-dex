@@ -7,6 +7,7 @@ import {
   hostedSiteConversationEventText,
   isHostedSiteConversationEventUrl,
 } from "@dani-dex/contracts/ipc";
+import { DANI_DEX_HOSTED_SITE_SUFFIX } from "@dani-dex/contracts/online-services";
 
 export type HostedSiteMutationTool = "publish_site" | "replace_site" | "delete_site";
 
@@ -57,7 +58,12 @@ export function hostedSiteMarkerHostname(value: string): string | null {
   if (!value || value.length > INPUT_LIMITS.hostname || value !== value.toLowerCase()) return null;
   try {
     const parsed = new URL(`https://${value}`);
-    return parsed.hostname === value && parsed.port === "" && value.endsWith(".openbot.site") ? value : null;
+    return parsed.hostname === value &&
+      parsed.port === "" &&
+      DANI_DEX_HOSTED_SITE_SUFFIX !== null &&
+      value.endsWith(DANI_DEX_HOSTED_SITE_SUFFIX)
+      ? value
+      : null;
   } catch {
     return null;
   }

@@ -2,6 +2,7 @@ import { INPUT_LIMITS } from "./input-limits";
 import { isBoundedString, isIdentifier } from "./ipc-bounded-values";
 import type { ConversationMessage } from "./ipc-conversation-messages";
 import type { RoutineRunStatus } from "./ipc-routines";
+import { DANI_DEX_HOSTED_SITE_SUFFIX } from "./online-services";
 import { isDynamicRecord, isString } from "./runtime-values";
 
 export const ROUTINE_EVENT_ITEM_TYPE_PREFIX = "routine-event:";
@@ -214,7 +215,8 @@ function isHostedSiteHostname(value: string): boolean {
       parsed.pathname === "/" &&
       parsed.search === "" &&
       parsed.hash === "" &&
-      value.endsWith(".openbot.site")
+      DANI_DEX_HOSTED_SITE_SUFFIX !== null &&
+      value.endsWith(DANI_DEX_HOSTED_SITE_SUFFIX)
     );
   } catch {
     return false;
@@ -239,7 +241,8 @@ export function isHostedSiteConversationEventUrl(value: unknown, hostname: unkno
     if (parsed.protocol === "https:") return parsed.hostname === hostname && parsed.port === "";
     if (parsed.protocol !== "http:" || !parsed.port) return false;
     const port = Number(parsed.port);
-    const label = hostname.slice(0, -".openbot.site".length);
+    if (DANI_DEX_HOSTED_SITE_SUFFIX === null) return false;
+    const label = hostname.slice(0, -DANI_DEX_HOSTED_SITE_SUFFIX.length);
     return (
       Number.isInteger(port) && port >= 1_024 && port <= 65_535 && parsed.hostname === `${label}.danidex.localhost`
     );

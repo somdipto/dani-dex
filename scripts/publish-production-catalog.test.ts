@@ -84,7 +84,7 @@ describe("production catalog publication", () => {
     expect(JSON.parse(verification.stdout)).toEqual([
       {
         owner: "Dani-Dex",
-        owner_avatar: "https://openbot.run/icon-192x192.png",
+        owner_avatar: "https://api.dani-dex.invalid/icon-192x192.png",
         skill_creator_avatar: 1,
         agent_creator_avatar: 1,
         skill_installs: 8,

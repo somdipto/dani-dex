@@ -159,7 +159,7 @@ export function AddServerScreen({
             inputMode="url"
             label="Invite link"
             maxLength={500}
-            placeholder="https://openbot.run/join?…"
+            placeholder="dani-dex://join?…"
             returnKeyType="go"
             value={inviteLink}
             onChangeText={(value) => {

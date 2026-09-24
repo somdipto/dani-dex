@@ -8,7 +8,7 @@ import {
   watchRemoteDirectory,
 } from "./remote-directory";
 
-const API_URL = "https://api.openbot.run";
+const API_URL = "https://api.dani-dex.example";
 const HOST_ID = "11111111-1111-4111-8111-111111111111";
 const HOST_KEY = "desktop-public-key";
 const HOST_FINGERPRINT = "AqBeU6SSjNMMzQkof9ad85KzSTI7kiNWQtfzR-sbXsU";
@@ -165,7 +165,7 @@ describe("RemoteTeamDirectoryClient", () => {
       },
     ]);
     expect(requests).toEqual([
-      { authorization: "Bearer mobile-session", url: "https://api.openbot.run/v2/remote/hosts/" },
+      { authorization: "Bearer mobile-session", url: "https://api.dani-dex.example/v2/remote/hosts/" },
     ]);
   });
 

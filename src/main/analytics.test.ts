@@ -47,8 +47,8 @@ function hostedSiteMessage(
   const terminalSite = {
     siteId: "site-1",
     title: "Hosted site",
-    hostname: "hosted-site-23456789ab.openbot.site",
-    url: "https://hosted-site-23456789ab.openbot.site",
+    hostname: "hosted-site-23456789ab.sites.dani-dex.example",
+    url: "https://hosted-site-23456789ab.sites.dani-dex.example",
   };
   const details =
     action === "publish" && status !== "succeeded"
@@ -358,7 +358,9 @@ describe("host analytics", () => {
       failure_code: "interrupted",
       profileId: "owner-1",
     });
-    expect(JSON.stringify(vi.mocked(client.track).mock.calls)).not.toContain("hosted-site-23456789ab.openbot.site");
+    expect(JSON.stringify(vi.mocked(client.track).mock.calls)).not.toContain(
+      "hosted-site-23456789ab.sites.dani-dex.example",
+    );
   });
 
   it("ignores hosted-site history even when it contains running and terminal markers", () => {

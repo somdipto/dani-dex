@@ -254,8 +254,8 @@ export function SkillsMarketplaceModal(props: SkillsMarketplaceModalProps) {
     },
   );
 
-  /* `openbot.run/plugins/<slug>` is served now, so the page offers Copy link. The address is built
-     from the slug rather than read from `shareUrl`, so what is copied is what the route answers. */
+  /* Copy link hands out `createPluginShareUrl(slug)`: the `dani-dex://plugins/<slug>` link until Dan
+     Lab serves plugin pages. It is built from the slug rather than read from `shareUrl`. */
   function openPluginUrl(url: string) {
     const safe = safeBrowserUrl(url);
     if (!safe) return;

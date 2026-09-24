@@ -8,7 +8,7 @@ import { RichMessageText } from "../src/features/conversation/RichMessageText";
 import { STORY_AGENTS, STORY_ATTACHMENTS, STORY_INSTALLED_SKILLS } from "./fixtures";
 
 const args: Parameters<typeof RichMessageText>[0] = {
-  body: "Ask @Research to review https://openbot.run/docs before the launch.",
+  body: "Ask @Research to review https://dani-dex.example/docs before the launch.",
   agents: STORY_AGENTS,
   attachments: [],
   onSelectAgent: fn(),
@@ -305,7 +305,7 @@ export const FileReferenceTypes: Story = {
 export const MixedReferencesStress: Story = {
   name: "Mixed references stress",
   args: {
-    body: `Ask @Research to compare ${serializeAttachmentReference(longAttachment.name, longAttachment.id)} with ${serializeAttachmentReference(fileTypeAttachments[1].name, fileTypeAttachments[1].id)} and https://openbot.run/docs. Keep the decision traceable to the primary paper [1], then verify the compressed handoff in ${serializeAttachmentReference(fileTypeAttachments[3].name, fileTypeAttachments[3].id)} before shipping [2].`,
+    body: `Ask @Research to compare ${serializeAttachmentReference(longAttachment.name, longAttachment.id)} with ${serializeAttachmentReference(fileTypeAttachments[1].name, fileTypeAttachments[1].id)} and https://dani-dex.example/docs. Keep the decision traceable to the primary paper [1], then verify the compressed handoff in ${serializeAttachmentReference(fileTypeAttachments[3].name, fileTypeAttachments[3].id)} before shipping [2].`,
     attachments: [longAttachment, fileTypeAttachments[1], fileTypeAttachments[3]],
     citations,
     onOpenAttachment: fn(),

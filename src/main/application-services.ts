@@ -1,5 +1,6 @@
 import { isManagedRuntimeProvider } from "@dani-dex/contracts/agent-providers";
 import { AGENT_HARNESS_DESCRIPTORS, type AgentHarnessSetting, fixedHarness } from "@dani-dex/contracts/ipc";
+import { DANI_DEX_API_ORIGIN } from "@dani-dex/contracts/online-services";
 import { AgentDatabaseSupervisor } from "../backend/agent-data/agent-database-supervisor";
 import { AgentTables } from "../backend/agent-data/agent-tables";
 import { spawnAgentDatabaseHost } from "./agent-database-host-process";
@@ -310,9 +311,12 @@ export async function createApplicationServices({
     },
   });
   teardown.push(TEARDOWN_ORDER.dynamicIsland, "the Dynamic Island", () => dynamicIsland.destroy());
+  // Dan Lab runs no account API yet, so a packaged app names none: accounts go through Supabase with
+  // online services off, and the loopback fallback is never reached from there. Set
+  // DANI_DEX_API_ORIGIN in @dani-dex/contracts/online-services once one exists.
   const centralAuthApiUrl = readCentralAuthApiUrl(
     process.env.DANI_DEX_AUTH_API_URL,
-    app.isPackaged ? "https://api.openbot.run" : "http://127.0.0.1:3100",
+    app.isPackaged && DANI_DEX_API_ORIGIN !== null ? DANI_DEX_API_ORIGIN : "http://127.0.0.1:3100",
   );
   // Accounts live in Dani-Dex's Supabase project. Naming an account API explicitly (the local
   // development server, say) is the one way back to the account-API sign-in and its online features;

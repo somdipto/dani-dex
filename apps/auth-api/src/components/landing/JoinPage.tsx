@@ -16,6 +16,8 @@ export function JoinPage() {
     let validInvite = true;
     try {
       const pageUrl = new URL(window.location.href);
+      // No Dan Lab invite origin is set yet, so no web page is a canonical invitation.
+      if (DANI_DEX_INVITE_ORIGIN === null) throw new Error("No invitation origin is configured.");
       const canonicalUrl = new URL(`${pageUrl.pathname}${pageUrl.search}`, DANI_DEX_INVITE_ORIGIN);
       setOpenUrl(toDaniDexInviteUrl(canonicalUrl.toString()));
     } catch {

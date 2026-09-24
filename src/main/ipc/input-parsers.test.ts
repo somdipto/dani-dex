@@ -363,8 +363,8 @@ function voiceWav(sampleBytes: number): Uint8Array {
 describe("server IPC input parsing", () => {
   it("parses host and connection values", () => {
     expect(parseHostConfig({ serverName: "My server" })).toEqual({ serverName: "My server" });
-    expect(parseJoinServer({ inviteUrl: "https://openbot.run/invite" })).toEqual({
-      inviteUrl: "https://openbot.run/invite",
+    expect(parseJoinServer({ inviteUrl: "https://dani-dex.example/invite" })).toEqual({
+      inviteUrl: "https://dani-dex.example/invite",
     });
     expect(parseLoginServer({ serverId: "server-1" })).toEqual({ serverId: "server-1" });
     expect(parseReorderServers({ serverIds: ["server-2", "server-1"] })).toEqual({

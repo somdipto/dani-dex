@@ -285,7 +285,7 @@ describe("CentralAuthManager", () => {
       email: "alice@example.com",
       serverName: "Studio Mac",
       inviteUrl:
-        "https://openbot.run/join?api=https%3A%2F%2Fstudio-mac-k7m4q2pz-host.openbot.run%2F&server=00000000-0000-4000-8000-000000000000&fingerprint=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&invite=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "https://dani-dex.example/join?api=https%3A%2F%2Fstudio-mac-k7m4q2pz-host.dani-dex.example%2F&server=00000000-0000-4000-8000-000000000000&fingerprint=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&invite=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       role: "member",
     });
     expect(requests[0]).toMatchObject({ path: "/health/live", authorization: null });
@@ -828,7 +828,7 @@ describe("CentralAuthManager", () => {
     const root = await createRoot();
     const requests: Request[] = [];
     const manager = new CentralAuthManager({
-      apiUrl: "https://api.openbot.run",
+      apiUrl: "https://api.dani-dex.example",
       storagePath: join(root, "session.bin"),
       encrypt: (value) => Buffer.from(value),
       decrypt: (value) => value.toString(),
@@ -862,7 +862,7 @@ describe("CentralAuthManager", () => {
       }),
     ).resolves.toMatchObject({
       status: "signed_in",
-      user: { avatarUrl: "https://api.openbot.run/v1/avatars/user-1?v=image-1" },
+      user: { avatarUrl: "https://api.dani-dex.example/v1/avatars/user-1?v=image-1" },
     });
     expect(requests.at(-1)?.method).toBe("PUT");
     expect(requests.at(-1)?.headers.get("Content-Type")).toBe("image/png");
@@ -888,7 +888,7 @@ describe("CentralAuthManager", () => {
     });
     let verifications = 0;
     const manager = new CentralAuthManager({
-      apiUrl: "https://api.openbot.run",
+      apiUrl: "https://api.dani-dex.example",
       storagePath,
       encrypt: (value) => Buffer.from(value),
       decrypt: (value) => value.toString(),
@@ -946,7 +946,7 @@ describe("CentralAuthManager", () => {
     const storagePath = join(root, "session.bin");
     let verifications = 0;
     const manager = new CentralAuthManager({
-      apiUrl: "https://api.openbot.run",
+      apiUrl: "https://api.dani-dex.example",
       storagePath,
       encrypt: (value) => Buffer.from(value),
       decrypt: (value) => value.toString(),
@@ -997,7 +997,7 @@ describe("CentralAuthManager", () => {
     const root = await createRoot();
     const requests: Request[] = [];
     const manager = new CentralAuthManager({
-      apiUrl: "https://api.openbot.run",
+      apiUrl: "https://api.dani-dex.example",
       storagePath: join(root, "session.bin"),
       encrypt: (value) => Buffer.from(value),
       decrypt: (value) => value.toString(),
@@ -1046,7 +1046,7 @@ describe("CentralAuthManager", () => {
       finishName = resolve;
     });
     const manager = new CentralAuthManager({
-      apiUrl: "https://api.openbot.run",
+      apiUrl: "https://api.dani-dex.example",
       storagePath: join(root, "session.bin"),
       encrypt: (value) => Buffer.from(value),
       decrypt: (value) => value.toString(),
@@ -1104,7 +1104,7 @@ describe("CentralAuthManager", () => {
       status: "signed_in",
       user: {
         name: "New name",
-        avatarUrl: "https://api.openbot.run/v1/avatars/user-1?v=new",
+        avatarUrl: "https://api.dani-dex.example/v1/avatars/user-1?v=new",
       },
     });
   });
@@ -1120,7 +1120,7 @@ describe("CentralAuthManager", () => {
       finishLogout = resolve;
     });
     const manager = new CentralAuthManager({
-      apiUrl: "https://api.openbot.run",
+      apiUrl: "https://api.dani-dex.example",
       storagePath: join(root, "session.bin"),
       encrypt: (value) => Buffer.from(value),
       decrypt: (value) => value.toString(),
@@ -1169,13 +1169,13 @@ describe("CentralAuthManager", () => {
 
   it("accepts only HTTPS and local HTTP API origins", () => {
     expect(readCentralAuthApiUrl(undefined)).toBe("http://127.0.0.1:3100");
-    expect(readCentralAuthApiUrl(undefined, "https://api.openbot.run")).toBe("https://api.openbot.run");
+    expect(readCentralAuthApiUrl(undefined, "https://api.dani-dex.example")).toBe("https://api.dani-dex.example");
     expect(readCentralAuthApiUrl("https://auth.example.com")).toBe("https://auth.example.com");
     expect(() => readCentralAuthApiUrl("http://auth.example.com")).toThrow("HTTPS");
-    expect(readMobileConnectApiUrl("http://192.168.1.143:3100", "https://api.openbot.run")).toBe(
+    expect(readMobileConnectApiUrl("http://192.168.1.143:3100", "https://api.dani-dex.example")).toBe(
       "http://192.168.1.143:3100",
     );
-    expect(() => readMobileConnectApiUrl("http://203.0.113.10:3100", "https://api.openbot.run")).toThrow(
+    expect(() => readMobileConnectApiUrl("http://203.0.113.10:3100", "https://api.dani-dex.example")).toThrow(
       "Invalid Mobile Connect payload",
     );
   });

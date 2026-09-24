@@ -290,7 +290,7 @@ export function InitialSetup(props: InitialSetupProps) {
                         setInvitePreview(null);
                         setError("");
                       }}
-                      placeholder="Paste an https://openbot.run/join invitation link"
+                      placeholder="Paste a dani-dex://join invitation link"
                       spellcheck={false}
                       autofocus
                       required

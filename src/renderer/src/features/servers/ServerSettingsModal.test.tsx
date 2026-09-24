@@ -817,7 +817,7 @@ describe("ServerSettingsModal", () => {
       email: null,
       permanent: false,
       useCount: 0,
-      inviteUrl: "https://openbot.run/join?invite=live",
+      inviteUrl: "https://dani-dex.example/join?invite=live",
     };
     const [invites, setInvites] = createSignal<TeamInviteSummary[]>([invite]);
     render(() => (

@@ -240,7 +240,7 @@ export function JoinServerDialog(props: JoinServerDialogProps) {
                       type="text"
                       inputmode="url"
                       autocomplete="off"
-                      placeholder="https://openbot.run/join?…"
+                      placeholder="dani-dex://join?…"
                       value={inviteUrl()}
                       onValueChange={(value) => {
                         clearInputMotion();

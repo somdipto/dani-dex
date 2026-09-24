@@ -11,7 +11,7 @@ import {
 } from "./invite-links";
 
 const payload = {
-  apiUrl: "https://studio-mac-k7m4q2pz-host.openbot.run/",
+  apiUrl: "https://studio-mac-k7m4q2pz-host.dani-dex.example/",
   serverId: "00000000-0000-4000-8000-000000000000",
   fingerprint: "a".repeat(43),
   token: "b".repeat(43),
@@ -27,7 +27,7 @@ const localDevelopmentOptions = { allowLocalDevelopmentApiUrl: true };
 describe("Dani-Dex invite links", () => {
   it("creates and parses the canonical HTTPS invitation", () => {
     const url = createInviteUrl(payload);
-    expect(url).toMatch(/^https:\/\/openbot\.run\/join\?/u);
+    expect(url).toMatch(/^https:\/\/dani-dex\.example\/join\?/u);
     expect(parseInviteUrl(url)).toEqual(payload);
     expect(isCanonicalInviteUrl(url)).toBe(true);
     expect(isCanonicalInviteUrl(createDaniDexInviteUrl(payload))).toBe(false);
@@ -39,7 +39,7 @@ describe("Dani-Dex invite links", () => {
   });
 
   it("accepts approved root tunnel URLs only", () => {
-    expect(isValidRemoteApiUrl("https://api.openbot.run/")).toBe(true);
+    expect(isValidRemoteApiUrl("https://api.dani-dex.example/")).toBe(true);
     expect(isValidRemoteApiUrl("https://team-host.trycloudflare.com/")).toBe(true);
     expect(isValidRemoteApiUrl(payload.apiUrl)).toBe(true);
     expect(isValidRemoteApiUrl("http://team-host.trycloudflare.com/")).toBe(false);
@@ -67,10 +67,10 @@ describe("Dani-Dex invite links", () => {
 
   it.each([
     "https://evil.example/join",
-    "https://openbot.run/other",
-    "https://openbot.run/join/",
-    "https://openbot.run:444/join",
-    "https://user@openbot.run/join",
+    "https://dani-dex.example/other",
+    "https://dani-dex.example/join/",
+    "https://dani-dex.example:444/join",
+    "https://user@dani-dex.example/join",
     missingTokenUrl.toString(),
     `${createInviteUrl(payload)}#fragment`,
     `${createInviteUrl(payload)}&extra=value`,
