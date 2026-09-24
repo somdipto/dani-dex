@@ -132,6 +132,11 @@ jobs:
           grep -Fq "v$version" <<<"$output"
           test "$(plutil -extract CFBundleShortVersionString raw "$app/Contents/Info.plist")" = "$RELEASE_VERSION"
 
+      - name: Verify the packaged Computer Use driver
+        # Present, pinned, universal (Intel Macs run it too), vendor signature intact, and `serve`
+        # answers with its tools. A release never ships a missing or broken driver again.
+        run: bun scripts/verify-cua-driver-package.ts dist/mac-universal/Dani-Dex.app/Contents/Resources darwin-arm64
+
       - name: Verify updater metadata
         run: |
           set -euo pipefail
@@ -227,6 +232,9 @@ jobs:
 
       - name: Verify packaged application metadata and launch
         run: bun run verify:package:win --require-update-metadata
+
+      - name: Verify the packaged Computer Use driver
+        run: bun scripts/verify-cua-driver-package.ts dist/win-unpacked/resources win32-x64
 
       - name: Verify installer and updater metadata
         shell: pwsh

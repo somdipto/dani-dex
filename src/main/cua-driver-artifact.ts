@@ -90,6 +90,16 @@ export const CUA_DRIVER_VENDOR_CALLS_OFF: Readonly<Record<string, string>> = {
   CUA_DRIVER_RS_UPDATE_CHECK: "0",
 };
 
+/**
+ * The architecture directory a driver lives in. Upstream publishes one universal Mach-O (arm64 +
+ * x86_64) for macOS and the app ships it once, under `darwin/arm64` (the directory the installer and
+ * electron-builder have always used), so an Intel Mac reads that same file. Elsewhere the directory
+ * is the architecture itself. Reading `darwin/x64` on Intel is what left Intel Macs with no driver.
+ */
+export function driverDirectoryArchitecture(platform: NodeJS.Platform, architecture: string): string {
+  return platform === "darwin" ? "arm64" : architecture;
+}
+
 /** The file name, which carries an extension only where the operating system needs one. */
 function executableName(platform: NodeJS.Platform): "cua-driver" | "cua-driver.exe" {
   return platform === "win32" ? "cua-driver.exe" : "cua-driver";
@@ -103,7 +113,13 @@ function* candidatePaths(input: CuaDriverArtifactInput): Generator<string> {
   // drives their desktop, and Dani-Dex would have no way to say which build it spawned. A release
   // that shipped without the binary is a broken build, and reporting no driver says so.
   if (input.isPackaged) {
-    yield join(input.resourcesPath, "cua-driver", input.platform, input.architecture, name);
+    yield join(
+      input.resourcesPath,
+      "cua-driver",
+      input.platform,
+      driverDirectoryArchitecture(input.platform, input.architecture),
+      name,
+    );
     return;
   }
 
@@ -112,7 +128,14 @@ function* candidatePaths(input: CuaDriverArtifactInput): Generator<string> {
     if (trimmed && isAbsolute(trimmed)) yield trimmed;
   }
 
-  yield join(input.sourceRoot, "build", "cua-driver", input.platform, input.architecture, name);
+  yield join(
+    input.sourceRoot,
+    "build",
+    "cua-driver",
+    input.platform,
+    driverDirectoryArchitecture(input.platform, input.architecture),
+    name,
+  );
 
   const installDirectory = input.installDirectory?.trim();
   if (installDirectory) yield join(installDirectory, name);

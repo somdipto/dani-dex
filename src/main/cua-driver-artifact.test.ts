@@ -1,8 +1,14 @@
-import { chmod, mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
-import { type CuaDriverArtifactInput, isSupportedCuaDriverTarget, resolveCuaDriver } from "./cua-driver-artifact";
+import { parse } from "yaml";
+import {
+  type CuaDriverArtifactInput,
+  driverDirectoryArchitecture,
+  isSupportedCuaDriverTarget,
+  resolveCuaDriver,
+} from "./cua-driver-artifact";
 
 let root: string;
 
@@ -40,6 +46,33 @@ describe("resolveCuaDriver", () => {
     const built = await writeExecutable("source", "build", "cua-driver", "darwin", "arm64", "cua-driver");
     await writeExecutable("home", ".local", "bin", "cua-driver");
     await expect(resolveCuaDriver(input())).resolves.toBe(built);
+  });
+
+  it("runs an Intel Mac from the universal driver the app ships under darwin/arm64", async () => {
+    const packaged = await writeExecutable("resources", "cua-driver", "darwin", "arm64", "cua-driver");
+    await expect(resolveCuaDriver(input({ isPackaged: true, architecture: "x64" }))).resolves.toBe(packaged);
+    const built = await writeExecutable("source", "build", "cua-driver", "darwin", "arm64", "cua-driver");
+    await expect(resolveCuaDriver(input({ architecture: "x64" }))).resolves.toBe(built);
+  });
+
+  it("reads the driver from a directory electron-builder.yml packs, on every shipped target", async () => {
+    const config = parse(await readFile(join(import.meta.dirname, "../../electron-builder.yml"), "utf8"));
+    const packed = new Set<string>();
+    for (const section of ["mac", "win", "linux"]) {
+      for (const resource of config[section]?.extraResources ?? []) {
+        const to = typeof resource === "string" ? resource : resource.to;
+        const match = /^cua-driver\/([^/]+\/[^/]+)$/u.exec(to ?? "");
+        if (match?.[1]) packed.add(match[1]);
+      }
+    }
+    for (const [platform, architecture] of [
+      ["darwin", "arm64"],
+      ["darwin", "x64"],
+      ["win32", "x64"],
+      ["linux", "x64"],
+    ] as const) {
+      expect(packed).toContain(`${platform}/${driverDirectoryArchitecture(platform, architecture)}`);
+    }
   });
 
   it("finds the packaged resources copy", async () => {
@@ -110,7 +143,6 @@ describe("resolveCuaDriver", () => {
   // on a computer that has one.
   it.each([
     { platform: "darwin", architecture: "arm64", name: "cua-driver" },
-    { platform: "darwin", architecture: "x64", name: "cua-driver" },
     { platform: "linux", architecture: "x64", name: "cua-driver" },
     { platform: "linux", architecture: "arm64", name: "cua-driver" },
     { platform: "win32", architecture: "x64", name: "cua-driver.exe" },
@@ -119,6 +151,7 @@ describe("resolveCuaDriver", () => {
     const built = await writeExecutable("source", "build", "cua-driver", platform, architecture, name);
     await expect(resolveCuaDriver(input({ platform, architecture }))).resolves.toBe(built);
   });
+  // (darwin x64 reads the universal binary under darwin/arm64; tested above.)
 
   it("reads the per-user program directory the Windows installer writes to", async () => {
     const installed = await writeExecutable("local", "Programs", "Cua", "cua-driver", "bin", "cua-driver.exe");
