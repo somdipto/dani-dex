@@ -2,12 +2,12 @@ import { delimiter, dirname } from "node:path";
 import type { ClientSideConnection, InitializeResponse } from "@agentclientprotocol/sdk";
 import type { AgentHarnessId } from "@dani-dex/contracts/agent-harnesses";
 import { type AgentProviderId, agentProviderName } from "@dani-dex/contracts/agent-providers";
-import { DANI_DEX_MODEL_SOURCE, type DaniDexModelSource } from "@dani-dex/contracts/online-services";
+import type { DaniDexModelSource } from "@dani-dex/contracts/online-services";
 import { AcpAgentClient } from "./acp-client";
 import type { AgentCliInfo } from "./cli";
 import { resolveHermesCli } from "./hermes-cli";
 import { repairHermesHome } from "./hermes-repair";
-import { hasModelSource } from "./model-source";
+import { currentModelSource, hasModelSource } from "./model-source";
 import { type BuiltInProviderDriver, type ProviderClientContext, requireProviderDriver } from "./provider-drivers";
 
 /**
@@ -174,7 +174,7 @@ async function repairOnce(cli: AgentCliInfo, options: HermesHarnessOptions): Pro
 export function hermesServesProvider(
   provider: AgentProviderId,
   apiKey: (provider: AgentProviderId) => string | null,
-  modelSource: DaniDexModelSource | null = DANI_DEX_MODEL_SOURCE,
+  modelSource: DaniDexModelSource | null = currentModelSource(),
 ): boolean {
   if (provider === "claude") return true;
   // A configured model source is served by OpenCode itself (see `model-source.ts`), so the endpoint

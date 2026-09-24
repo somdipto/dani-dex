@@ -52,6 +52,7 @@ import { BrowserHost } from "../backend/browser-host";
 import { harnessDriverResolver } from "../backend/hermes-acp-driver";
 import { MailboxStore } from "../backend/mailbox-store";
 import { McpOAuth } from "../backend/mcp-oauth-provider";
+import { setRuntimeModelSource } from "../backend/model-source";
 import { SidebarLayoutStore } from "../backend/sidebar-layout-store";
 import { TeamChatStore } from "../backend/team-chat-store";
 import { AgentInitializationGate } from "./agent-initialization";
@@ -80,6 +81,7 @@ import {
   resolveCuaDriverEndpoint,
 } from "./cua-driver-runtime";
 import { CustomProviderStore } from "./custom-provider-store";
+import { bundledDaniFreeExecutable, DaniFreeSupervisor } from "./dani-free";
 import { MCP_OAUTH_REDIRECT_URL } from "./deep-link-router";
 import {
   applyDevelopmentRemoteAccount,
@@ -193,6 +195,7 @@ const TEARDOWN_ORDER = {
   browserPictureInPicture: 40,
   browserView: 45,
   providerRuntimes: 50,
+  daniFree: 52,
   cuaDriver: 55,
   remoteServers: 60,
   voice: 70,
@@ -1194,6 +1197,28 @@ export async function createApplicationServices({
     await computerUseWarmUp.catch(() => undefined);
     await service.initialize();
   });
+  // Dani's free models: the bundled proxy starts beside the app and stops with it. It never holds up
+  // the launch - OpenCode keeps its own catalog until the proxy reports ready, and then moves to it
+  // through the same endpoint change a saved custom provider makes.
+  const daniFreeExecutable = app.isPackaged
+    ? bundledDaniFreeExecutable(process.resourcesPath)
+    : process.env.DANI_DEX_DANI_FREE_PATH?.trim() || null;
+  if (daniFreeExecutable) {
+    const daniFree = new DaniFreeSupervisor({
+      executable: daniFreeExecutable,
+      home: join(app.getPath("userData"), "dani-free"),
+      privateMode: process.env.DANI_FREE_PRIVATE_MODE === "1",
+    });
+    teardown.push(TEARDOWN_ORDER.daniFree, "the Dani-Free proxy", () => daniFree.stop());
+    void daniFree
+      .start()
+      .then(async (source) => {
+        if (!source) return;
+        await service.saveCustomProvider(source.id, async () => setRuntimeModelSource(source));
+        await service.reloadOpenCodeConfig();
+      })
+      .catch((error) => logger.warn("Dani-Free could not be connected.", { error: String(error) }));
+  }
   const describeRestartReadiness = (): RestartReadiness =>
     checkRestartReadiness({
       agentWork: service.hasActiveWork(),

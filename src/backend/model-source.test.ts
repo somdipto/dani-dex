@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { hermesServesProvider } from "./hermes-acp-driver";
-import { hasModelSource, modelSourceProviders, withModelSource } from "./model-source";
+import {
+  currentModelSource,
+  hasModelSource,
+  modelSourceProviders,
+  setRuntimeModelSource,
+  withModelSource,
+} from "./model-source";
 import { mergeOpenCodeConfig } from "./opencode-config";
 
 const PROXY = {
@@ -52,5 +58,40 @@ describe("model source seam", () => {
     expect(hermesServesProvider("opencode", () => "go-key", null)).toBe(true);
     expect(hermesServesProvider("opencode", () => "go-key", PROXY)).toBe(false);
     expect(hermesServesProvider("opencode", () => null, null)).toBe(false);
+  });
+});
+
+describe("runtime model source", () => {
+  const dani = {
+    id: "dani",
+    name: "Dani",
+    baseUrl: "http://127.0.0.1:4410/v1",
+    models: [{ id: "auto", name: "Dani" }],
+    headers: [{ name: "x-api-key", value: "install-key" }],
+    apiKey: "install-key",
+  };
+
+  it("replaces the build-time source for every spawn until it is cleared", () => {
+    try {
+      expect(currentModelSource()).toBeNull();
+      setRuntimeModelSource(dani);
+      expect(currentModelSource()).toBe(dani);
+      expect(hasModelSource()).toBe(true);
+      // OpenCode moves to its own CLI so the proxy is the one in use.
+      expect(hermesServesProvider("opencode", () => "go-key")).toBe(false);
+      // The proxy's own key wins over a saved OpenCode Go key.
+      expect(
+        withModelSource(
+          () => [],
+          () => "go-key",
+        )(),
+      ).toEqual([
+        expect.objectContaining({ id: "dani", apiKey: "install-key", models: [{ id: "auto", name: "Dani" }] }),
+      ]);
+    } finally {
+      setRuntimeModelSource(null);
+    }
+    expect(currentModelSource()).toBeNull();
+    expect(hermesServesProvider("opencode", () => "go-key")).toBe(true);
   });
 });
