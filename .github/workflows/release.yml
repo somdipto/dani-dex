@@ -125,11 +125,11 @@ jobs:
           echo "Main executable: $archs"
           grep -qw arm64 <<<"$archs"
           grep -qw x86_64 <<<"$archs"
-          test -x "$app/Contents/Resources/hermes/mac/x64/bin/hermes"
-          version=$(jq -r .hermes.version native-runtime.lock.json)
-          output=$("$app/Contents/Resources/hermes/mac/arm64/bin/hermes" --version)
-          echo "$output"
-          grep -Fq "v$version" <<<"$output"
+          # Both Hermes trees are started, the Intel one under Rosetta: `--version` and an ACP
+          # handshake, each in a time budget, on the tree exactly as packaged.
+          /usr/bin/pgrep -q oahd || softwareupdate --install-rosetta --agree-to-license
+          bun scripts/verify-packaged-hermes.ts "$app/Contents/Resources/hermes/mac/arm64" arm64
+          bun scripts/verify-packaged-hermes.ts "$app/Contents/Resources/hermes/mac/x64" x86_64
           test "$(plutil -extract CFBundleShortVersionString raw "$app/Contents/Info.plist")" = "$RELEASE_VERSION"
 
       - name: Verify the packaged Computer Use driver
@@ -235,6 +235,9 @@ jobs:
 
       - name: Verify the packaged Computer Use driver
         run: bun scripts/verify-cua-driver-package.ts dist/win-unpacked/resources win32-x64
+
+      - name: Verify packaged Hermes starts
+        run: bun scripts/verify-packaged-hermes.ts dist/win-unpacked/resources/hermes/win/x64
 
       - name: Verify installer and updater metadata
         shell: pwsh

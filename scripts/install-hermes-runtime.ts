@@ -150,13 +150,7 @@ export async function installHermesRuntime(
       )}\n`,
     );
     if (target === "linux-x64" && hostTarget() === "linux-x64") await stripExtensionModules(staged, target);
-    if (target === hostTarget()) {
-      // Only the host can run its own interpreter. Other targets are compiled when they are verified
-      // on their own runner, which every release build does before packaging.
-      execFileSync(pythonExecutable(staged, target), ["-m", "compileall", "-q", sitePackages(staged, target)], {
-        stdio: "inherit",
-      });
-    }
+    precompileBytecode(staged, target, hermes.python.version, uv);
     await verifyHermesRuntime(staged, target, lock);
     await installValidatedTree(staged, targetRoot);
     await verifyHermesRuntime(targetRoot, target, lock);
@@ -224,6 +218,10 @@ export async function verifyHermesRuntime(
     "utf8",
   );
   if (!license.startsWith("MIT License")) throw new Error("The bundled Hermes license is missing.");
+  const compiled = await countCompiledModules(root);
+  if (compiled < MINIMUM_COMPILED_MODULES) {
+    throw new Error(`The bundled Hermes tree for ${target} has ${compiled} compiled modules; it must be precompiled.`);
+  }
   if (target !== hostTarget()) return;
 
   // The version goes through the interpreter the launcher runs, because Node cannot execute a `.cmd`
@@ -245,6 +243,43 @@ export async function verifyHermesRuntime(
     // The real launcher, on the platforms where Node can run it.
     execFileSync(join(root, "bin", "hermes"), ["--version"], { encoding: "utf8" });
   }
+}
+
+/**
+ * Compiles every module of the tree to bytecode, for every target, on the machine that stages it.
+ *
+ * The launcher sets `PYTHONDONTWRITEBYTECODE`, because the app bundle must never be written to. A
+ * tree without `.pyc` files therefore recompiles every module it imports on every launch. That is
+ * what the Intel Mac tree shipped as: it is staged on an arm64 runner that cannot start it, so only
+ * the arm64 tree was ever compiled, and on an older Intel MacBook `hermes --version` ran past the
+ * app's start limit ("Hermes was found but could not start").
+ *
+ * Bytecode depends on the Python version and nothing else, so the host's own interpreter can compile
+ * a tree of another architecture: the target's when the host can run it, otherwise uv's managed copy
+ * of the same minor version (every 3.11.x writes the same bytecode magic, and uv may not carry the
+ * exact patch release the lock pins). `unchecked-hash` makes Python trust the file without comparing source
+ * timestamps, so an installer or archive that rewrites modification times cannot invalidate it.
+ */
+export function precompileBytecode(root: string, target: HermesRuntimeTarget, pythonVersion: string, uv: string): void {
+  const directories = [standardLibrary(root, target), sitePackages(root, target)];
+  const compile = ["-m", "compileall", "-q", "-j", "0", "--invalidation-mode", "unchecked-hash", ...directories];
+  if (target === hostTarget()) {
+    execFileSync(pythonExecutable(root, target), compile, { stdio: "inherit", windowsHide: true });
+    return;
+  }
+  const minor = pythonVersion.split(".").slice(0, 2).join(".");
+  execFileSync(uv, ["run", "--no-project", "--isolated", "--python", minor, "--", "python", ...compile], {
+    stdio: "inherit",
+    windowsHide: true,
+  });
+}
+
+/** The minimum count of compiled modules a verified tree carries; a staged 0.19 tree has about 4,900. */
+export const MINIMUM_COMPILED_MODULES = 3_000;
+
+async function countCompiledModules(root: string): Promise<number> {
+  const entries = await readdir(join(root, "python"), { recursive: true });
+  return entries.filter((path) => path.endsWith(".pyc")).length;
 }
 
 /**
@@ -289,6 +324,10 @@ async function stripExtensionModules(root: string, target: HermesRuntimeTarget):
   for (let index = 0; index < modules.length; index += 200) {
     execFileSync("strip", ["--strip-unneeded", ...modules.slice(index, index + 200)], { stdio: "inherit" });
   }
+}
+
+function standardLibrary(root: string, target: HermesRuntimeTarget): string {
+  return isWindows(target) ? join(root, "python", "Lib") : join(root, "python", "lib", "python3.11");
 }
 
 function sitePackages(root: string, target: HermesRuntimeTarget): string {
