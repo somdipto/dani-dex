@@ -365,8 +365,9 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("radiogroup", { name: "Default provider" })).not.toBeInTheDocument();
     expect(window.danidex.agent.listConversationReads).not.toHaveBeenCalled();
 
+    // Read state belongs to this computer, not a Dani-Dex account, so it refreshes while signed out.
     emitAgentEvent?.({ type: "conversation-invalidated", agentId: "chief", revision: 1 });
-    expect(window.danidex.agent.listConversationReads).not.toHaveBeenCalled();
+    await waitFor(() => expect(window.danidex.agent.listConversationReads).toHaveBeenCalledTimes(1));
 
     await fireEvent.input(screen.getByRole("textbox", { name: "Email" }), {
       target: { value: "person@example.com" },
