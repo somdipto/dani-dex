@@ -73,3 +73,16 @@ export function customProviderIds(providers: readonly CustomProviderSummary[]): 
 export function isCustomModel(model: AgentModelOption, customIds: ReadonlySet<string>): boolean {
   return model.provider === "opencode" && isCustomProviderModelId(model.id, customIds);
 }
+
+/** The id prefix of the models Dani's bundled free-models proxy serves. */
+export const DANI_MODEL_PREFIX = "dani/";
+/** What the product calls its one model, whatever name the agent reports for it. */
+export const DANI_MODEL_NAME = "Dani Free Auto";
+
+/**
+ * Whether Dani's free models are the product's only model. The app then offers nothing else, so the
+ * picker shows one choice, named Dani, with no provider, CLI or model behind it.
+ */
+export function isDaniOnly(options: readonly AgentModelOption[]): boolean {
+  return options.length > 0 && options.every((option) => option.id.startsWith(DANI_MODEL_PREFIX));
+}

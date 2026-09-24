@@ -38,6 +38,36 @@ const agentStatus: AgentStatus = {
 };
 
 describe("ProviderModelPicker", () => {
+  it("shows Dani Free Auto as the one choice, with nothing naming what serves it", async () => {
+    const dani: AgentModelOption = {
+      provider: "opencode",
+      id: "dani/dani-free-auto",
+      name: "Dani/Dani Free Auto",
+      description: "via opencode",
+      defaultReasoningEffort: "medium",
+      supportedReasoningEfforts: ["medium"],
+    };
+    const status: AgentStatus = {
+      ...agentStatus,
+      providers: [{ id: "opencode", state: "available", version: "1.18.30", message: null, email: null }],
+    };
+    const view = render(() => (
+      <ProviderModelPicker
+        provider="opencode"
+        value="dani/dani-free-auto"
+        modelOptions={[dani]}
+        agentStatus={status}
+        onChange={vi.fn()}
+      />
+    ));
+    await fireEvent.click(view.getByRole("button", { name: "Agent model: Dani Free Auto" }));
+    const dialog = view.getByRole("dialog", { name: "Choose agent model" });
+    expect(within(dialog).getAllByRole("tab")).toHaveLength(1);
+    expect(within(dialog).getAllByText("Dani Free Auto").length).toBeGreaterThan(0);
+    expect(within(dialog).getByText("Free models, picked for you")).toBeInTheDocument();
+    expect(document.body.textContent ?? "").not.toMatch(/opencode|1\.18|Dani\/Dani|Codex|Claude|Grok/i);
+  });
+
   it("says when the provider CLI is the user's own install rather than a downloaded copy", async () => {
     const status: AgentStatus = {
       ...agentStatus,
