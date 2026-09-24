@@ -5,6 +5,14 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-09-24
+
+### Changed
+
+- Open Dani-Dex without signing in. The app starts straight in first-run setup or your
+  workspace, and everything that runs on your computer works without an account.
+  Features that need a Dani-Dex account stay unavailable until sign-in returns.
+
 ## [0.17.0] - 2026-09-21
 
 ### Added
