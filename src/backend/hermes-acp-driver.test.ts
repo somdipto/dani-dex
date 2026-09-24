@@ -31,7 +31,8 @@ describe("Hermes harness drivers", () => {
   });
 
   it("tells the user which sign-in Hermes borrows", () => {
-    expect(hermesSignInMessage("codex")).toBe("Connect ChatGPT first. Hermes uses that sign-in.");
+    expect(hermesSignInMessage("codex")).toBe("Sign in to ChatGPT to continue.");
+    expect(hermesSignInMessage("claude")).not.toMatch(/hermes/iu);
     expect(hermesSignInMessage("opencode")).toContain("OpenCode Go key");
   });
 });

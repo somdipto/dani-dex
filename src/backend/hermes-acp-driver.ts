@@ -47,9 +47,10 @@ export function hermesEnvironment(
 }
 
 export function hermesSignInMessage(provider: AgentProviderId): string {
+  // Users never meet the engine by name, so this speaks of the provider only.
   return provider === "opencode"
-    ? "Hermes needs an OpenCode Go key to use OpenCode. Add it in Settings."
-    : `Connect ${agentProviderName(provider)} first. Hermes uses that sign-in.`;
+    ? "OpenCode needs an OpenCode Go key here. Add it in Settings."
+    : `Sign in to ${agentProviderName(provider)} to continue.`;
 }
 
 /** Picks the Hermes auth method that names the configured provider, never the terminal setup. */
@@ -59,7 +60,7 @@ export async function authenticateHermes(
   signInMessage: string,
 ): Promise<void> {
   const runtime = (initialization.authMethods ?? []).find((method) => method.id !== "hermes-setup");
-  if (!runtime) throw new Error(`Hermes found no credentials. ${signInMessage}`);
+  if (!runtime) throw new Error(`No saved login found. ${signInMessage}`);
   await connection.authenticate({ methodId: runtime.id });
 }
 

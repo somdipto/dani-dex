@@ -13,6 +13,7 @@ import { useServerSelection } from "./features/servers/server-selection";
 import { useServerSettings } from "./features/servers/server-settings";
 import { useServers } from "./features/servers/servers-context";
 import type { HarnessSettingsApi } from "./features/settings/HarnessSettings";
+import { harnessPickerVisible } from "./features/settings/harness-visibility";
 import { MARKETPLACE_PLUGINS } from "./features/settings/marketplace-plugin-catalog";
 import type { ProviderKeyApi } from "./features/settings/OpenCodeKeyDialog";
 import { useSettings } from "./features/settings/settings-context";
@@ -371,7 +372,9 @@ function AppSettings(props: AccountProps) {
         codeLogin={localProviderDownloads() ? codeLogin : undefined}
         hostedSitesApi={window.danidex.hostedSites}
         turboModePending={turboModePending()}
-        harness={localCustomProviders() && setup.setupState()?.completed ? harness : undefined}
+        harness={
+          harnessPickerVisible() && localCustomProviders() && setup.setupState()?.completed ? harness : undefined
+        }
         voiceKey={localCustomProviders() ? window.danidex.voice : undefined}
         restoreFocusTarget={appSettingsRestoreTarget()}
       />

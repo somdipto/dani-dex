@@ -1,6 +1,6 @@
 import type { SaveSetupInput } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor } from "@solidjs/testing-library";
-import { expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { installDanidexStub } from "./app-test-harness";
 
@@ -27,6 +27,11 @@ async function openHarnessMenu() {
 describe("agent harness picker", () => {
   beforeEach(() => {
     installDanidexStub();
+    // Developer builds only; a shipped build never shows it (see the test below).
+    vi.stubEnv("VITE_DANI_DEX_SHOW_HARNESS", "1");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("saves Hermes beside the provider and model, then restarts on request", async () => {
@@ -121,5 +126,27 @@ describe("agent harness picker", () => {
         harness: "hermes",
       }),
     );
+  });
+});
+
+describe("shipped build", () => {
+  beforeEach(() => {
+    installDanidexStub();
+  });
+
+  it("never offers a harness choice", async () => {
+    vi.mocked(window.danidex.getSetupState).mockResolvedValue({
+      completed: true,
+      preferredProvider: "claude",
+      preferredModel: null,
+      harness: "automatic",
+      activeHarness: "hermes",
+    });
+    render(() => <App />);
+    await screen.findByRole("heading", { name: "Chief" });
+    await fireEvent.click(await screen.findByRole("button", { name: "Settings" }));
+    await screen.findByRole("dialog");
+    expect(screen.queryByRole("button", { name: /^Harness/ })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Hermes/)).not.toBeInTheDocument();
   });
 });
