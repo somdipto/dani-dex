@@ -150,6 +150,7 @@ import {
 } from "./mcp-provider-shapes";
 import { mcpSecretValues, redactMcpValues } from "./mcp-redaction";
 import { McpServerStore } from "./mcp-server-store";
+import { modelSourceChoices } from "./model-source";
 import { type AppServerRequest, type DynamicToolCallParams, decodeRecordResponse, isRecord } from "./protocol";
 import { type BuiltInProviderDriver, NO_PROVIDER_CREDENTIALS, type ProviderClientContext } from "./provider-drivers";
 import { recordAgentRestartActivity } from "./restart-activity";
@@ -1144,8 +1145,9 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
    * and therefore not recorded yet.
    */
   #availableModels(): AgentModelOption[] {
-    if (this.#releasedCustomProviders.size === 0) return this.#providers.listModels();
-    return this.#providers.listModels().filter((option) => this.#servesModel(option.id));
+    const listed = modelSourceChoices(this.#providers.listModels());
+    if (this.#releasedCustomProviders.size === 0) return listed;
+    return listed.filter((option) => this.#servesModel(option.id));
   }
 
   /**

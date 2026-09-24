@@ -3,6 +3,7 @@ import { hermesServesProvider } from "./hermes-acp-driver";
 import {
   currentModelSource,
   hasModelSource,
+  modelSourceChoices,
   modelSourceProviders,
   setRuntimeModelSource,
   withModelSource,
@@ -93,5 +94,28 @@ describe("runtime model source", () => {
     }
     expect(currentModelSource()).toBeNull();
     expect(hermesServesProvider("opencode", () => "go-key")).toBe(true);
+  });
+});
+
+describe("model source choices", () => {
+  const dani = {
+    id: "dani",
+    name: "Dani",
+    baseUrl: "http://127.0.0.1:4410/v1",
+    models: [{ id: "auto", name: "Dani Free Auto" }],
+  };
+  const listed = [
+    { id: "opencode/big-pickle", provider: "opencode" },
+    { id: "claude-sonnet", provider: "claude" },
+    { id: "dani/auto", provider: "opencode" },
+  ];
+
+  it("offers only the source's model once it is listed", () => {
+    expect(modelSourceChoices(listed, dani)).toEqual([{ id: "dani/auto", provider: "opencode" }]);
+  });
+
+  it("keeps the list while the source's model is not listed yet, and with no source", () => {
+    expect(modelSourceChoices(listed.slice(0, 2), dani)).toEqual(listed.slice(0, 2));
+    expect(modelSourceChoices(listed, null)).toEqual(listed);
   });
 });

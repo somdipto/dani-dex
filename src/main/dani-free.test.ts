@@ -89,7 +89,7 @@ describe("DaniFreeSupervisor", () => {
     expect(source).toMatchObject({
       id: "dani",
       name: "Dani",
-      models: [{ id: "auto", name: "Dani" }],
+      models: [{ id: "auto", name: "Dani Free Auto" }],
       headers: [{ name: "x-api-key", value: "install-key" }],
       apiKey: "install-key",
     });
@@ -161,7 +161,7 @@ describe.skipIf(!realBinary)("DaniFreeSupervisor with the real proxy", () => {
     const supervisor = new DaniFreeSupervisor({ executable: realBinary ?? "", home });
     supervisors.push(supervisor);
     const source = await supervisor.start();
-    expect(source).toMatchObject({ id: "dani", name: "Dani", models: [{ id: "auto", name: "Dani" }] });
+    expect(source).toMatchObject({ id: "dani", name: "Dani", models: [{ id: "auto", name: "Dani Free Auto" }] });
     expect(source?.baseUrl).toMatch(/^http:\/\/127\.0\.0\.1:\d+\/v1$/);
     const response = await fetch(`${source?.baseUrl}/models`, {
       headers: { authorization: `Bearer ${source?.apiKey}` },

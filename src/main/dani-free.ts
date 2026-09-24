@@ -23,6 +23,8 @@ export const DANI_MODEL_SOURCE_ID = "dani";
 export const DANI_MODEL_SOURCE_NAME = "Dani";
 /** The model the proxy routes itself, and the only one the interface shows. */
 export const DANI_AUTO_MODEL = "auto";
+/** What the user sees for it, the only model name in the product. */
+export const DANI_AUTO_MODEL_NAME = "Dani Free Auto";
 
 export interface DaniFreeReady {
   readonly baseUrl: string;
@@ -69,7 +71,7 @@ export function bundledDaniFreeExecutable(
 }
 
 /**
- * The model source for OpenCode. Only the proxy's own routing model is listed, as "Dani": the models
+ * The model source for OpenCode. Only the proxy's own routing model is listed, as "Dani Free Auto": the models
  * behind it change with the free services the proxy finds, and their names are not the product.
  */
 export function buildDaniModelSource(
@@ -82,7 +84,7 @@ export function buildDaniModelSource(
     id: DANI_MODEL_SOURCE_ID,
     name: DANI_MODEL_SOURCE_NAME,
     baseUrl: `${ready.baseUrl}/v1`,
-    models: [{ id, name: DANI_MODEL_SOURCE_NAME }],
+    models: [{ id, name: DANI_AUTO_MODEL_NAME }],
     headers: [{ name: "x-api-key", value: key }],
     apiKey: key,
   };

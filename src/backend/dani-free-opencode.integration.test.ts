@@ -62,6 +62,7 @@ describe.skipIf(!proxyPath || !opencodePath)("Dani's free models through OpenCod
     const models = await client.request("model/list", {}, decodeModelListResponse, 90_000);
     const dani = models.data.filter((model) => model.model?.startsWith("dani/"));
     expect(dani.map((model) => model.model)).toEqual(["dani/auto"]);
+    expect(dani[0]?.displayName).toMatch(/Dani Free Auto$/);
     expect(JSON.stringify(dani)).not.toMatch(/kilo|nex|free\)/i);
 
     const thread = await client.request(

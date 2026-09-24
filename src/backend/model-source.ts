@@ -60,3 +60,19 @@ export function withModelSource(
 export function hasModelSource(source: DaniDexModelSource | null = currentModelSource()): boolean {
   return modelSourceProviders(source).length > 0;
 }
+
+/**
+ * The model choices the interface offers. A model source is the product's only model: once its models
+ * are listed, every other model - OpenCode's own catalog and every other provider's - is left out, so
+ * the picker shows the source's models alone. Until the source's models are listed (the proxy is
+ * still starting, or OpenCode has not restarted onto it yet) the list is left as it is, so there is
+ * always something to start on.
+ */
+export function modelSourceChoices<T extends { id: string }>(
+  models: readonly T[],
+  source: DaniDexModelSource | null = currentModelSource(),
+): T[] {
+  if (!source || !hasModelSource(source)) return [...models];
+  const own = models.filter((model) => model.id.startsWith(`${source.id}/`));
+  return own.length > 0 ? own : [...models];
+}
