@@ -1,3 +1,4 @@
+import { delimiter, dirname } from "node:path";
 import type { ClientSideConnection, InitializeResponse } from "@agentclientprotocol/sdk";
 import type { AgentHarnessId } from "@dani-dex/contracts/agent-harnesses";
 import { type AgentProviderId, agentProviderName } from "@dani-dex/contracts/agent-providers";
@@ -5,6 +6,7 @@ import { DANI_DEX_MODEL_SOURCE, type DaniDexModelSource } from "@dani-dex/contra
 import { AcpAgentClient } from "./acp-client";
 import type { AgentCliInfo } from "./cli";
 import { resolveHermesCli } from "./hermes-cli";
+import { repairHermesHome } from "./hermes-repair";
 import { hasModelSource } from "./model-source";
 import { type BuiltInProviderDriver, type ProviderClientContext, requireProviderDriver } from "./provider-drivers";
 
@@ -32,6 +34,14 @@ export interface HermesHarnessOptions {
   readonly extraEnv?: () => Record<string, string>;
   /** Overrides the Layer 2 mapping, for custom OpenAI-compatible endpoints. */
   readonly inferenceProvider?: (provider: AgentProviderId) => string;
+  /**
+   * The Computer Use driver Dani-Dex ships, read at each spawn, with the environment every run of
+   * it gets. Hermes' own computer-use tool looks for `cua-driver` on its PATH and reports the tool
+   * unavailable otherwise, so the shipped binary is put there and named directly.
+   */
+  readonly computerUse?: () => { readonly executable: string; readonly env: Readonly<Record<string, string>> } | null;
+  /** Injected by tests. Defaults to `repairHermesHome`. */
+  readonly repair?: typeof repairHermesHome;
 }
 
 export function hermesEnvironment(
@@ -40,7 +50,15 @@ export function hermesEnvironment(
   options: HermesHarnessOptions,
 ): Record<string, string> {
   const opencodeKey = provider === "opencode" ? context.apiKey("opencode") : null;
+  const computerUse = options.computerUse?.() ?? null;
   return {
+    ...(computerUse
+      ? {
+          ...computerUse.env,
+          HERMES_CUA_DRIVER_CMD: computerUse.executable,
+          PATH: [dirname(computerUse.executable), process.env.PATH].filter(Boolean).join(delimiter),
+        }
+      : {}),
     HERMES_HOME: options.hermesHome,
     HERMES_INFERENCE_PROVIDER: options.inferenceProvider?.(provider) ?? HERMES_INFERENCE_PROVIDERS[provider],
     ...(opencodeKey ? { OPENCODE_GO_API_KEY: opencodeKey } : {}),
@@ -101,13 +119,40 @@ export function hermesProviderDriver(provider: AgentProviderId, options: HermesH
   return {
     id: provider,
     signIn: { kind: "external" },
-    resolveCli: () =>
-      resolveHermesCli(options.bundledExecutable === undefined ? {} : { bundledExecutable: options.bundledExecutable }),
+    resolveCli: async () => {
+      const cli = await resolveHermesCli(
+        options.bundledExecutable === undefined ? {} : { bundledExecutable: options.bundledExecutable },
+      );
+      await repairOnce(cli, options);
+      return cli;
+    },
     createClient: (cli, timeout, context) => createHermesClient(provider, cli, timeout, context, options),
     createProfileClient: (cli, timeout, context) => createHermesClient(provider, cli, timeout, context, options, true),
     authState: native.authState,
     validateAccount: () => undefined,
   };
+}
+
+/**
+ * One repair per state directory and Hermes version in a run, shared by every provider Hermes
+ * serves: they start together, and two doctors must not write the same files at once. A repair that
+ * did not leave the state healthy is tried again at the next start.
+ */
+const repairs = new Map<string, Promise<unknown>>();
+async function repairOnce(cli: AgentCliInfo, options: HermesHarnessOptions): Promise<void> {
+  const key = `${options.hermesHome}\0${cli.executable}\0${cli.version}`;
+  let repair = repairs.get(key);
+  if (!repair) {
+    repair = (options.repair ?? repairHermesHome)({
+      executable: cli.executable,
+      version: cli.version,
+      hermesHome: options.hermesHome,
+    }).then((result) => {
+      if (result === "failed") repairs.delete(key);
+    });
+    repairs.set(key, repair);
+  }
+  await repair;
 }
 
 /**

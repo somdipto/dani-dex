@@ -1,6 +1,13 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest";
-import { harnessDriverResolver, hermesEnvironment, hermesSignInMessage } from "./hermes-acp-driver";
+import { delimiter } from "node:path";
+import { describe, expect, it, vi } from "vitest";
+import {
+  harnessDriverResolver,
+  hermesEnvironment,
+  hermesProviderDriver,
+  hermesSignInMessage,
+} from "./hermes-acp-driver";
+import type { repairHermesHome } from "./hermes-repair";
 import { NO_PROVIDER_CREDENTIALS, requireProviderDriver } from "./provider-drivers";
 
 describe("Hermes harness drivers", () => {
@@ -50,4 +57,38 @@ describe("Hermes harness drivers", () => {
     expect(hermesSignInMessage("claude")).not.toMatch(/hermes/iu);
     expect(hermesSignInMessage("opencode")).toContain("OpenCode Go key");
   });
+
+  // Hermes' computer-use tool looks for `cua-driver` on its PATH and reads as unavailable otherwise.
+  it("puts the shipped Computer Use driver on Hermes' PATH, with the vendor calls off", () => {
+    const env = hermesEnvironment("claude", NO_PROVIDER_CREDENTIALS, {
+      hermesHome: "/h",
+      computerUse: () => ({
+        executable: "/App/Resources/cua-driver/darwin/arm64/cua-driver",
+        env: { CUA_DRIVER_RS_TELEMETRY_ENABLED: "0" },
+      }),
+    });
+    expect(env.HERMES_CUA_DRIVER_CMD).toBe("/App/Resources/cua-driver/darwin/arm64/cua-driver");
+    expect(env.PATH?.split(delimiter)[0]).toBe("/App/Resources/cua-driver/darwin/arm64");
+    expect(env.CUA_DRIVER_RS_TELEMETRY_ENABLED).toBe("0");
+    expect(env.HERMES_HOME).toBe("/h");
+    // No driver on this computer: nothing is added, and Hermes keeps the PATH it inherits.
+    const without = hermesEnvironment("claude", NO_PROVIDER_CREDENTIALS, { hermesHome: "/h", computerUse: () => null });
+    expect(without).not.toHaveProperty("PATH");
+    expect(without).not.toHaveProperty("HERMES_CUA_DRIVER_CMD");
+  });
+
+  it("repairs Hermes' state once before the providers it serves start, and again after a failed repair", async () => {
+    const hermes = process.env.DANI_DEX_HERMES_TEST_PATH?.trim();
+    if (!hermes) return;
+    const repair = vi.fn<typeof repairHermesHome>(async () => "failed");
+    const options = { hermesHome: `/tmp/dani-dex-repair-${Date.now()}`, bundledExecutable: hermes, repair };
+    await hermesProviderDriver("claude", options).resolveCli({});
+    expect(repair).toHaveBeenCalledOnce();
+    await hermesProviderDriver("opencode", options).resolveCli({});
+    expect(repair).toHaveBeenCalledTimes(2);
+    repair.mockResolvedValue("healthy");
+    await hermesProviderDriver("claude", options).resolveCli({});
+    await hermesProviderDriver("opencode", options).resolveCli({});
+    expect(repair).toHaveBeenCalledTimes(3);
+  }, 60_000);
 });

@@ -11,6 +11,7 @@ import { join, resolve } from "node:path";
 import { createDaniDexLogger } from "@dani-dex/logging";
 import { cliSpawnTarget } from "../src/backend/cli";
 import { MINIMUM_COMPILED_MODULES } from "./install-hermes-runtime";
+import { unsignedMachOFiles } from "./mac-adhoc-sign";
 
 const logger = createDaniDexLogger("verify-packaged-hermes");
 
@@ -94,6 +95,13 @@ export async function verifyPackagedHermes(
   const compiled = (await readdir(join(root, "python"), { recursive: true })).filter((path) => path.endsWith(".pyc"));
   if (compiled.length < MINIMUM_COMPILED_MODULES) {
     throw new Error(`${root} carries ${compiled.length} compiled modules; the packaged tree must be precompiled.`);
+  }
+  // Every shipped binary carries at least an ad-hoc signature; see `mac-adhoc-sign.ts`.
+  if (platform === "darwin") {
+    const unsigned = await unsignedMachOFiles(root);
+    if (unsigned.length > 0) {
+      throw new Error(`${root} ships ${unsigned.length} unsigned binaries, first ${unsigned.slice(0, 5).join(", ")}.`);
+    }
   }
   const output = await run(
     hermesLaunch(root, platform, macArchitecture, ["--version"]),

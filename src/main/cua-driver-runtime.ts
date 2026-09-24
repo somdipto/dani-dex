@@ -262,7 +262,43 @@ export interface CuaDriverRuntimeOptions {
   waitForSocket?: (path: string) => Promise<void>;
   /** Injected by the test, which listens on no address of its own. */
   actionTap?: CuaDriverActionTap;
+  /**
+   * Whether this computer had every permission granted once before. macOS drops the grants of an
+   * app whose code signature changed, which an unsigned or ad-hoc signed build does at each update:
+   * System Settings may still show Dani-Dex switched on while the driver is refused. Remembering a
+   * past grant is how Dani-Dex tells that reset apart from a user who never granted anything.
+   */
+  grantMemory?: ComputerUseGrantMemory;
+  /** Told once per run when a grant this computer had is gone. */
+  onPermissionsReset?: () => void;
 }
+
+export interface ComputerUseGrantMemory {
+  read(): Promise<boolean>;
+  write(granted: boolean): Promise<void>;
+}
+
+/** A small file in the profile. A missing or unreadable file reads as "never granted". */
+export function fileGrantMemory(path: string): ComputerUseGrantMemory {
+  return {
+    read: async () => {
+      try {
+        const value = JSON.parse(await readFile(path, "utf8"));
+        return isDynamicRecord(value) && value.granted === true;
+      } catch {
+        return false;
+      }
+    },
+    write: async (granted) => {
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, `${JSON.stringify({ granted })}\n`, "utf8");
+    },
+  };
+}
+
+/** What the user reads when macOS dropped grants they had given. Only System Settings, never a terminal. */
+export const COMPUTER_USE_PERMISSIONS_RESET_MESSAGE =
+  "macOS turned off Dani-Dex's permissions, which can happen after an update. In System Settings > Privacy & Security, remove Dani-Dex from Accessibility and Screen Recording, add it again, then press Check again.";
 
 export class CuaDriverRuntime {
   readonly #options: CuaDriverRuntimeOptions;
@@ -282,6 +318,7 @@ export class CuaDriverRuntime {
   /** Mutable, because a user may install the driver while Dani-Dex runs. */
   #executable: string | null;
   readonly #tap: CuaDriverActionTap;
+  #resetReported = false;
 
   constructor(options: CuaDriverRuntimeOptions) {
     this.#options = options;
@@ -289,6 +326,11 @@ export class CuaDriverRuntime {
     this.#executable = options.executable;
     this.#tap = options.actionTap ?? new CuaDriverActionTap();
     this.#state = initialState(options.platform, options.supported, options.executable);
+  }
+
+  /** The driver binary this run uses, or `null` while this computer has none. */
+  get executable(): string | null {
+    return this.#executable;
   }
 
   get lastState(): ComputerUseState {
@@ -471,10 +513,11 @@ export class CuaDriverRuntime {
         this.#options.platform,
       );
       const granted = required.every((id) => permissions.some((p) => p.id === id && p.granted));
+      const reset = await this.#recordGrant(granted, required.length > 0);
       return this.#publish({
         status: granted ? "ready" : "permissions-required",
         permissions,
-        message: null,
+        message: reset ? COMPUTER_USE_PERMISSIONS_RESET_MESSAGE : null,
       });
     } catch (error) {
       return this.#publish({
@@ -483,6 +526,31 @@ export class CuaDriverRuntime {
         message: `The Computer Use driver did not answer. ${describe(error)}`,
       });
     }
+  }
+
+  /**
+   * Remembers a full grant, and reports whether a grant this computer had is gone. A system with no
+   * permissions to grant has nothing to reset. Memory failures never reach the panel.
+   */
+  async #recordGrant(granted: boolean, hasPermissions: boolean): Promise<boolean> {
+    const memory = this.#options.grantMemory;
+    if (!memory || !hasPermissions) return false;
+    try {
+      if (granted) {
+        if (!(await memory.read())) await memory.write(true);
+        this.#resetReported = false;
+        return false;
+      }
+      if (!(await memory.read())) return false;
+    } catch {
+      return false;
+    }
+    if (!this.#resetReported) {
+      this.#resetReported = true;
+      this.#options.onDiagnostic?.("Computer Use permissions granted earlier are no longer granted.");
+      this.#options.onPermissionsReset?.();
+    }
+    return true;
   }
 
   /**

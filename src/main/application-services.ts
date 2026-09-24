@@ -45,7 +45,7 @@ import type {
 import { IPC_CHANNELS, isManagedToolRuntime, isUpdateBusyPhase } from "@dani-dex/contracts/ipc";
 import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import { REMOTE_ACCOUNT_CHECK_INTERVAL_MS } from "@dani-dex/team-client";
-import { app, type BrowserWindow, nativeImage, safeStorage, screen, shell } from "electron";
+import { app, type BrowserWindow, Notification, nativeImage, safeStorage, screen, shell } from "electron";
 import { AgentService } from "../backend/agent-service";
 import { AgentStore } from "../backend/agent-store";
 import { BrowserHost } from "../backend/browser-host";
@@ -71,9 +71,14 @@ import {
   chooseTarget,
   liveSession,
 } from "./computer-use-target-window";
-import { isSupportedCuaDriverTarget, resolveCuaDriver } from "./cua-driver-artifact";
+import { CUA_DRIVER_VENDOR_CALLS_OFF, isSupportedCuaDriverTarget, resolveCuaDriver } from "./cua-driver-artifact";
 import { CuaDriverDaemonClient } from "./cua-driver-daemon-client";
-import { CuaDriverRuntime, cuaDriverCommandAlias, resolveCuaDriverEndpoint } from "./cua-driver-runtime";
+import {
+  CuaDriverRuntime,
+  cuaDriverCommandAlias,
+  fileGrantMemory,
+  resolveCuaDriverEndpoint,
+} from "./cua-driver-runtime";
 import { CustomProviderStore } from "./custom-provider-store";
 import { MCP_OAUTH_REDIRECT_URL } from "./deep-link-router";
 import {
@@ -616,6 +621,22 @@ export async function createApplicationServices({
       localAppDataDirectory: process.env.LOCALAPPDATA,
       applicationsDirectory: "/Applications",
     });
+  // A system notification, because the grants are usually lost at an update, before any window
+  // the user would look at. The click brings Dani-Dex forward; Settings > Computer Use says the rest.
+  const notifyComputerUsePermissionsReset = (): void => {
+    if (!Notification.isSupported()) return;
+    const notification = new Notification({
+      title: "Computer Use needs permission again",
+      body: "macOS turned off Dani-Dex's permissions. Open Settings > Computer Use to turn them back on.",
+    });
+    notification.on("click", () => {
+      void windows
+        .ensureMainWindow()
+        .then(showMainWindow)
+        .catch(() => undefined);
+    });
+    notification.show();
+  };
   const cuaDriver = new CuaDriverRuntime({
     executable: await resolveCuaDriverExecutable(),
     resolveExecutable: resolveCuaDriverExecutable,
@@ -636,6 +657,10 @@ export async function createApplicationServices({
     supported: isSupportedCuaDriverTarget(process.platform, process.arch),
     hostBundleId: app.isPackaged ? PACKAGED_BUNDLE_IDENTIFIER : DEVELOPMENT_BUNDLE_IDENTIFIER,
     platform: process.platform,
+    grantMemory: fileGrantMemory(join(app.getPath("userData"), "computer-use", "grant.json")),
+    // macOS dropped grants the user had given, usually at an update of this unsigned build. The
+    // tools are gone until they are given again, so the user is told once, not left to find out.
+    onPermissionsReset: () => notifyComputerUsePermissionsReset(),
     onDiagnostic: (message) => {
       void appendRemoteDiagnosticLog(join(app.getPath("userData"), "logs", "remote"), "cua-driver", message);
     },
@@ -732,6 +757,9 @@ export async function createApplicationServices({
           providerDriver: harnessDriverResolver(runningHarness, {
             hermesHome: join(app.getPath("userData"), "hermes"),
             apiKey: (provider) => providerCredentials.get(provider),
+            // The driver Dani-Dex ships, read at each spawn: a driver found later is used next time.
+            computerUse: () =>
+              cuaDriver.executable ? { executable: cuaDriver.executable, env: CUA_DRIVER_VENDOR_CALLS_OFF } : null,
           }),
         }
       : {}),

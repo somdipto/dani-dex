@@ -7,10 +7,12 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CuaDriverActionTap } from "./cua-driver-action-tap";
 import {
+  COMPUTER_USE_PERMISSIONS_RESET_MESSAGE,
   type CuaDriverCommandAliasInput,
   CuaDriverRuntime,
   type CuaDriverRuntimeOptions,
   cuaDriverCommandAlias,
+  fileGrantMemory,
   readPermissionResult,
   resolveCuaDriverEndpoint,
   type SpawnDriverOptions,
@@ -335,6 +337,61 @@ describe("CuaDriverRuntime", () => {
     await driver.state();
 
     expect(seen).toEqual(["ready"]);
+  });
+
+  // An update of an unsigned or ad-hoc signed build changes its code signature, and macOS drops the
+  // grants while System Settings can still show Dani-Dex switched on. That must read as a reset,
+  // with the way back through System Settings, and never as a first-time setup.
+  it("tells a dropped grant apart from one never given, once per run", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "cua-grant-"));
+    directories.push(directory);
+    const memory = fileGrantMemory(join(directory, "computer-use", "grant.json"));
+    let granted = false;
+    const resets = vi.fn();
+    const options: Partial<CuaDriverRuntimeOptions> = {
+      grantMemory: memory,
+      onPermissionsReset: resets,
+      readPermissions: async () => [
+        { id: "screen-recording", granted },
+        { id: "accessibility", granted },
+      ],
+    };
+    const first = (await runtime(options)).driver;
+    await expect(first.state()).resolves.toMatchObject({ status: "permissions-required", message: null });
+    granted = true;
+    await expect(first.state()).resolves.toMatchObject({ status: "ready", message: null });
+    await first.stop();
+    expect(await memory.read()).toBe(true);
+
+    // The next run, after an update: the same computer, and macOS no longer grants anything.
+    granted = false;
+    const updated = (await runtime(options)).driver;
+    await expect(updated.state()).resolves.toMatchObject({
+      status: "permissions-required",
+      message: COMPUTER_USE_PERMISSIONS_RESET_MESSAGE,
+    });
+    await updated.state();
+    expect(resets).toHaveBeenCalledOnce();
+    expect(COMPUTER_USE_PERMISSIONS_RESET_MESSAGE).not.toMatch(/terminal|tccutil|sudo/iu);
+
+    granted = true;
+    await expect(updated.state()).resolves.toMatchObject({ status: "ready", message: null });
+    await updated.stop();
+  });
+
+  it("has nothing to reset where the system grants no permission", async () => {
+    const resets = vi.fn();
+    const memory = { read: vi.fn(async () => true), write: vi.fn(async () => undefined) };
+    const { driver } = await runtime({
+      platform: "linux",
+      grantMemory: memory,
+      onPermissionsReset: resets,
+      readPermissions: async () => [],
+    });
+    await expect(driver.state()).resolves.toMatchObject({ status: "ready", message: null });
+    expect(resets).not.toHaveBeenCalled();
+    expect(memory.read).not.toHaveBeenCalled();
+    await driver.stop();
   });
 
   // Opening the panel starts the daemon before any grant exists, and the warm-up stops an ungranted

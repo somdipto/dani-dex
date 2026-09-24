@@ -5,6 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { createDaniDexLogger } from "@dani-dex/logging";
 import { z } from "zod";
 import { type AgentRuntimeLock, loadAgentRuntimeLock } from "./agent-runtime-lock";
+import { adHocSignTree } from "./mac-adhoc-sign";
 import { sha256 } from "./remote-desktop-runtime-release";
 
 const logger = createDaniDexLogger("install-hermes-runtime");
@@ -88,6 +89,7 @@ export async function installHermesRuntime(
   verifyRequirements(requirements, lock);
 
   if (await isCurrentInstallation(targetRoot, target, lock)) {
+    await signMacTree(targetRoot, target);
     logger.info(`Using verified bundled Hermes ${hermes.version} for ${target}.`);
     return "current";
   }
@@ -151,6 +153,7 @@ export async function installHermesRuntime(
     );
     if (target === "linux-x64" && hostTarget() === "linux-x64") await stripExtensionModules(staged, target);
     precompileBytecode(staged, target, hermes.python.version, uv);
+    await signMacTree(staged, target);
     await verifyHermesRuntime(staged, target, lock);
     await installValidatedTree(staged, targetRoot);
     await verifyHermesRuntime(targetRoot, target, lock);
@@ -164,6 +167,21 @@ export async function installHermesRuntime(
   );
   logger.info(`Installed bundled Hermes ${hermes.version} for ${target}.`);
   return "installed";
+}
+
+/**
+ * Ad-hoc signs the binaries of a Mac tree that arrive unsigned (the x86_64 interpreter and wheels),
+ * so no shipped Mach-O is unsigned. Only a Mac has `codesign`; a Mac tree staged elsewhere is left
+ * as it is and the release check (`verify-packaged-hermes.ts`) refuses it.
+ */
+async function signMacTree(root: string, target: HermesRuntimeTarget): Promise<void> {
+  if (!target.startsWith("darwin-")) return;
+  if (process.platform !== "darwin") {
+    logger.warn(`The ${target} Hermes tree was staged off a Mac and is not signed.`);
+    return;
+  }
+  const signed = await adHocSignTree(root);
+  logger.info(`Ad-hoc signed ${signed.length} unsigned binaries in the ${target} Hermes tree.`);
 }
 
 export function hermesRuntimeTarget(

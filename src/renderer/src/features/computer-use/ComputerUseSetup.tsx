@@ -185,6 +185,22 @@ export function ComputerUseSetup(props: ComputerUseSetupProps) {
         </Alert>
       </Show>
 
+      {/* macOS dropped grants the user had given, usually at an update. Said plainly, so the list
+          below does not read as a first-time setup. */}
+      <Show when={state()?.status === "permissions-required" && state()?.message}>
+        {(message) => (
+          <Alert tone="warning" class="computer-use-alert" role="status">
+            <AlertIcon>
+              <TriangleAlert />
+            </AlertIcon>
+            <AlertContent>
+              <AlertTitle>Computer Use needs permission again</AlertTitle>
+              <AlertDescription>{message()}</AlertDescription>
+            </AlertContent>
+          </Alert>
+        )}
+      </Show>
+
       <Show when={showPermissions()}>
         <Show
           when={props.variant === "settings"}

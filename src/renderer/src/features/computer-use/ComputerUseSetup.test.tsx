@@ -43,6 +43,31 @@ describe("ComputerUseSetup", () => {
     await waitFor(() => expect(openPane).toHaveBeenCalledWith("screen-recording"));
   });
 
+  it("says a permission macOS dropped needs granting again, above the list", async () => {
+    mock = createMockDaniDex();
+    mock.api.getComputerUseState = vi
+      .fn()
+      .mockResolvedValue(
+        state({ message: "macOS turned off Dani-Dex's permissions, which can happen after an update." }),
+      );
+    window.danidex = mock.api;
+    const view = render(() => <ComputerUseSetup variant="compact" />);
+
+    expect(await view.findByText("Computer Use needs permission again")).toBeInTheDocument();
+    expect(view.getByText(/which can happen after an update/u)).toBeInTheDocument();
+    expect(view.getByRole("button", { name: "Grant Screen Recording" })).toBeInTheDocument();
+  });
+
+  it("shows no reset notice on a first-time setup", async () => {
+    mock = createMockDaniDex();
+    mock.api.getComputerUseState = vi.fn().mockResolvedValue(state({}));
+    window.danidex = mock.api;
+    const view = render(() => <ComputerUseSetup variant="compact" />);
+
+    expect(await view.findByRole("button", { name: "Grant Screen Recording" })).toBeInTheDocument();
+    expect(view.queryByText("Computer Use needs permission again")).toBeNull();
+  });
+
   it("keeps the way back to System Settings on a permission already granted", async () => {
     mock = createMockDaniDex();
     mock.api.getComputerUseState = vi.fn().mockResolvedValue(
