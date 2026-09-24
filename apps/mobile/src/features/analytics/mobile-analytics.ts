@@ -1,3 +1,4 @@
+import { DANI_DEX_ANALYTICS_API_URL } from "@dani-dex/contracts/online-services";
 import { OpenPanel, type TrackHandlerPayload } from "@openpanel/react-native";
 import * as Application from "expo-application";
 import { Platform } from "react-native";
@@ -40,7 +41,7 @@ export function filterMobilePayload(event: TrackHandlerPayload): boolean {
 }
 
 /** Null while Dan Lab runs no analytics endpoint; the app then sends nothing. */
-const MOBILE_ANALYTICS_API_URL: string | null = null;
+const MOBILE_ANALYTICS_API_URL: string | null = DANI_DEX_ANALYTICS_API_URL;
 
 export const mobileAnalytics = new MobileAnalytics(() => {
   const clientId = process.env.EXPO_PUBLIC_OPENPANEL_CLIENT_ID;

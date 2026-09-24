@@ -48,7 +48,7 @@ describe("Private Email SMTP delivery", () => {
         inviterEmail: "owner@example.com",
         serverName: "Studio Mac",
         inviteUrl:
-          "https://openbot.run/join?api=https%3A%2F%2Fstudio-mac-k7m4q2pz-host.openbot.run%2F&server=00000000-0000-4000-8000-000000000000&fingerprint=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&invite=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "dani-dex://join?api=https%3A%2F%2Fquiet-fox-1.trycloudflare.com%2F&server=00000000-0000-4000-8000-000000000000&fingerprint=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&invite=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         role: "member",
       },
       connector,
@@ -57,7 +57,7 @@ describe("Private Email SMTP delivery", () => {
     expect(writes).toContain("RCPT TO:<alice@example.com>\r\n");
     expect(writes[7]).toContain("Subject: Join Studio Mac on Dani-Dex");
     expect(writes[7]).toContain("owner@example.com invited you");
-    expect(writes[7]).toContain("https://openbot.run/join?");
+    expect(writes[7]).toContain("dani-dex://join?");
   });
 
   it("uses TLS on port 465 and sends the code without SMTP injection", async () => {
