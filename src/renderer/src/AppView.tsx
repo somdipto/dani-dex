@@ -1,5 +1,6 @@
 import { Loading, Show } from "solid-js";
 import { useAuth } from "./features/account/account-context";
+import { accountForWindow, signInRequired } from "./features/account/sign-in-gate";
 import { useAgents } from "./features/agents/agents-context";
 import { useCustomProviders } from "./features/custom-providers/custom-providers-context";
 import { useSetup } from "./features/onboarding/onboarding-context";
@@ -17,7 +18,8 @@ function LoadingScreen() {
 /**
  * Which of four things the window shows: a placeholder until the build and the
  * saved setup are known, the sign-in screen, one of the two first-run flows, or
- * the workspace.
+ * the workspace. The sign-in screen only appears while `SIGN_IN_REQUIRED` is on;
+ * otherwise a signed-out window opens with the local account.
  *
  * The ladder is written as nested `<Show>` rather than pushed into the providers
  * as readiness gates. A gated provider withholds its subtree, and the only
@@ -54,7 +56,7 @@ export function AppAccessGate() {
   return (
     <Show when={setup.setupLoaded() && platform.appInfo() !== null} fallback={<LoadingScreen />}>
       <Show
-        when={auth.visibleSignedInAccount()}
+        when={accountForWindow(auth.visibleSignedInAccount(), signInRequired())}
         fallback={
           <Loading fallback={<LoadingScreen />}>
             <AccountLogin

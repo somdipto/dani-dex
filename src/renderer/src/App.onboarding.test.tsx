@@ -3,6 +3,10 @@ import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-lib
 import { expect, it, vi } from "vitest";
 import { App } from "./App";
 import { emitAgentEvent, emitAuth, emitInvite, installDanidexStub, trackAnalytics } from "./app-test-harness";
+import { setSignInRequiredForTesting } from "./features/account/sign-in-gate";
+
+// Sign-in is switched off in the product for now. These tests switch it back on so the sign-in screen
+// stays covered until it returns. `App.sign-in-off.test.tsx` covers the app as shipped.
 
 /** A model of a custom endpoint, which only the first-run flow can choose. */
 const CUSTOM_ENDPOINT_MODEL = "opencode/local-studio/qwen3-coder";
@@ -10,6 +14,11 @@ const CUSTOM_ENDPOINT_MODEL = "opencode/local-studio/qwen3-coder";
 describe("Dani-Dex connected desktop shell", () => {
   beforeEach(() => {
     installDanidexStub();
+    setSignInRequiredForTesting(true);
+  });
+
+  afterEach(() => {
+    setSignInRequiredForTesting(null);
   });
 
   it("shows the first-run onboarding before starting agents", async () => {

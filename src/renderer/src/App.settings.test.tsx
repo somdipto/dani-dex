@@ -460,7 +460,10 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await waitFor(() => expect(window.danidex.auth.logout).toHaveBeenCalledOnce());
     expect(trackAnalytics).toHaveBeenCalledWith("account_sign_out", { result: "succeeded" });
-    expect(await screen.findByRole("heading", { name: "Sign in to Dani-Dex" })).toBeInTheDocument();
+    // Sign-in is off for now, so signing out leaves the workspace open on the local account.
+    expect(await screen.findByText("On this computer")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Sign in to Dani-Dex" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
     expect(window.danidex.agent.deleteAgent).not.toHaveBeenCalled();
   });
 

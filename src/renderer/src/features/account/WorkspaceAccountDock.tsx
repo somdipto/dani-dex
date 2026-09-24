@@ -76,7 +76,8 @@ export function WorkspaceAccountDock(props: { account: () => CentralAuthUser }) 
           return targetKey ? auth.refreshAccountUsage(targetKey) : Promise.resolve({ limits: [] });
         }}
         onUpdateAction={updates.runAction}
-        onLogout={platform.landingPreview ? undefined : auth.logoutCentralAccount}
+        // The local account has nothing to sign out of.
+        onLogout={platform.landingPreview || !auth.signedInAccount() ? undefined : auth.logoutCentralAccount}
         onOpenExternal={(destination) => window.danidex.openExternal(destination)}
         onOpenPermissions={() => setup.setPermissionsOpen(true)}
         onOpenSettings={openAppSettings}
