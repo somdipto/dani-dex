@@ -5,6 +5,9 @@ import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import { basename, join, resolve } from "node:path";
 import { createDaniDexLogger } from "@dani-dex/logging";
 
+/** The slices the universal whisper-cli carries. Declared before the build below runs at load. */
+const MAC_ARCHITECTURES = ["arm64", "x86_64"] as const;
+
 const logger = createDaniDexLogger("prepare-whisper");
 
 const WHISPER_CPP_COMMIT = "86c40c3bd6fc86f1187fb751d111b49e0fc18e84";
@@ -110,8 +113,6 @@ function buildExecutable(): void {
   }
   copyBuiltExecutable(universal);
 }
-
-const MAC_ARCHITECTURES = ["arm64", "x86_64"] as const;
 
 /** Configures and builds one whisper-cli into `buildDirectory` and returns its path. */
 function buildSlice(buildDirectory: string, extraArguments: string[]): string {
