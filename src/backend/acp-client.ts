@@ -1254,7 +1254,9 @@ function isDynamicToolResult(value: unknown): value is DynamicToolResult {
 }
 
 function isAuthenticationError(error: unknown): boolean {
-  return /auth|login|credential|token|unauthori[sz]ed|api key/i.test(
+  // "No LLM provider configured" is Hermes finding no sign-in for the provider. Read as a failure it
+  // reached the user with Hermes' own advice to run `hermes model` in a terminal; it is a sign-in.
+  return /auth|login|credential|token|unauthori[sz]ed|api key|no llm provider configured/i.test(
     error instanceof Error ? error.message : String(error),
   );
 }

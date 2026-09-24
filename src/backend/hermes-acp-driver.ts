@@ -8,8 +8,8 @@ import { type BuiltInProviderDriver, type ProviderClientContext, requireProvider
 
 /**
  * Layer 2 inside the Hermes harness. The Dani-Dex provider the user signed in to picks the
- * Hermes inference provider. Hermes adopts the Codex CLI and Claude Code sign-ins by default
- * (`auth.adopt_external_logins`), so a sign-in made in Dani-Dex carries straight into the harness.
+ * Hermes inference provider. Hermes adopts the Claude Code sign-in; it does not adopt the Codex CLI
+ * one, which is why `hermesServesProvider` keeps ChatGPT on its own CLI.
  *
  * OpenCode differs from the native driver: Hermes removed the keyless free tier, so OpenCode
  * under Hermes needs the OpenCode Go key.
@@ -108,15 +108,52 @@ export function hermesProviderDriver(provider: AgentProviderId, options: HermesH
   };
 }
 
-/** Layer 1: which loop runs every provider. `null` keeps each provider's own CLI. */
+/**
+ * Whether Hermes can run this provider on the sign-in the user already has, with nothing more to set
+ * up. Checked against the pinned Hermes 0.19, not assumed:
+ *
+ * - Claude: Hermes reads Claude Code's own login (`~/.claude/.credentials.json`, or the macOS
+ *   Keychain entry "Claude Code-credentials"), so a user signed in to Claude Code is signed in here.
+ * - OpenCode: Hermes dropped the keyless free tier and needs an OpenCode Go key. Without one, the
+ *   native OpenCode driver lists the free models with no account at all.
+ * - ChatGPT (Codex): Hermes deliberately does not import `~/.codex/auth.json` (single-use refresh
+ *   tokens would race the Codex CLI), so a Codex login never reached it and the provider showed no
+ *   models. The native driver runs Codex on its own login.
+ * - Grok: Hermes only knows its own `hermes model` OAuth, which a user cannot run from the app.
+ *
+ * A provider Hermes cannot serve this way runs on its own CLI. That is what "connects without any
+ * issue" means for the user; the harness is still what runs every provider it can.
+ */
+export function hermesServesProvider(
+  provider: AgentProviderId,
+  apiKey: (provider: AgentProviderId) => string | null,
+): boolean {
+  if (provider === "claude") return true;
+  if (provider === "opencode") return Boolean(apiKey("opencode"));
+  return false;
+}
+
+export interface HarnessResolverOptions extends HermesHarnessOptions {
+  /** The stored provider keys, read on every resolve: saving an OpenCode Go key moves OpenCode to Hermes. */
+  readonly apiKey?: (provider: AgentProviderId) => string | null;
+}
+
+/**
+ * Layer 1: which loop runs each provider. `null` keeps each provider's own CLI. Under Hermes, a
+ * provider Hermes cannot serve on the user's existing sign-in keeps its own CLI (see
+ * `hermesServesProvider`). The answer is read on every call, because a provider re-resolves its
+ * driver when its key changes.
+ */
 export function harnessDriverResolver(
   harness: AgentHarnessId | null,
-  options: HermesHarnessOptions,
+  options: HarnessResolverOptions,
 ): (provider: AgentProviderId) => BuiltInProviderDriver {
   if (harness === null) return requireProviderDriver;
   if (harness === "omp") throw new Error("OMP is not available until its upstream runtime is selected and verified.");
+  const apiKey = options.apiKey ?? (() => null);
   const drivers = new Map<AgentProviderId, BuiltInProviderDriver>();
   return (provider) => {
+    if (!hermesServesProvider(provider, apiKey)) return requireProviderDriver(provider);
     let driver = drivers.get(provider);
     if (!driver) {
       driver = hermesProviderDriver(provider, options);

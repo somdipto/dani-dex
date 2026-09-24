@@ -731,6 +731,7 @@ export async function createApplicationServices({
       ? {
           providerDriver: harnessDriverResolver(runningHarness, {
             hermesHome: join(app.getPath("userData"), "hermes"),
+            apiKey: (provider) => providerCredentials.get(provider),
           }),
         }
       : {}),

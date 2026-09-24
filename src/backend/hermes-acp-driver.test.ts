@@ -30,6 +30,21 @@ describe("Hermes harness drivers", () => {
     expect(() => harnessDriverResolver("omp", { hermesHome: "/h" })).toThrow("OMP is not available");
   });
 
+  it("runs a provider on its own CLI when Hermes cannot use the sign-in the user already has", () => {
+    let key: string | null = null;
+    const hermes = harnessDriverResolver("hermes", { hermesHome: "/h", apiKey: () => key });
+    // Codex and Grok logins never reach Hermes, so those providers keep their own CLI.
+    expect(hermes("codex")).toBe(requireProviderDriver("codex"));
+    expect(hermes("grok")).toBe(requireProviderDriver("grok"));
+    // OpenCode without a Go key lists its free models natively; with one, Hermes runs it.
+    expect(hermes("opencode")).toBe(requireProviderDriver("opencode"));
+    key = "go-key";
+    expect(hermes("opencode")).not.toBe(requireProviderDriver("opencode"));
+    expect(hermes("opencode").id).toBe("opencode");
+    // Claude runs under Hermes on the Claude Code login.
+    expect(hermes("claude")).not.toBe(requireProviderDriver("claude"));
+  });
+
   it("tells the user which sign-in Hermes borrows", () => {
     expect(hermesSignInMessage("codex")).toBe("Sign in to ChatGPT to continue.");
     expect(hermesSignInMessage("claude")).not.toMatch(/hermes/iu);

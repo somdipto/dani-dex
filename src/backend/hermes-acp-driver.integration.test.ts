@@ -7,7 +7,7 @@
  * at a Hermes install, because CI has none yet.
  */
 
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -68,6 +68,53 @@ function modelServer(requests: unknown[]): Promise<Server> {
 }
 
 describe.skipIf(!hermesPath)("Hermes harness over ACP", () => {
+  it("reads a computer with no Claude login as signed out, never as an error with terminal advice", async () => {
+    const home = await mkdtemp(join(tmpdir(), "dani-dex-empty-home-"));
+    const hermesHome = await mkdtemp(join(tmpdir(), "dani-dex-hermes-home-"));
+    const cli = await resolveHermesCli({ systemCandidates: [hermesPath ?? ""], bundledExecutable: null });
+    const client = createHermesClient("claude", cli, 60_000, NO_PROVIDER_CREDENTIALS, {
+      hermesHome,
+      extraEnv: () => ({ HOME: home, USERPROFILE: home }),
+    });
+    client.start();
+    cleanups.push(() => client.stop());
+    await client.request("initialize", {}, decodeRecordResponse);
+    const account = await client.request("account/read", {}, decodeRecordResponse);
+    expect(account.account).toBeNull();
+  });
+
+  it("signs Claude in from the user's existing Claude Code login and lists Claude models, with no setup", async () => {
+    // A computer where the user already ran `claude` and signed in: Claude Code's own credentials
+    // file, and a Dani-Dex Hermes home that has never been configured.
+    const home = await mkdtemp(join(tmpdir(), "dani-dex-claude-home-"));
+    await mkdir(join(home, ".claude"), { recursive: true });
+    await writeFile(
+      join(home, ".claude", ".credentials.json"),
+      JSON.stringify({
+        claudeAiOauth: {
+          accessToken: "sk-ant-oat01-test",
+          refreshToken: "sk-ant-ort01-test",
+          expiresAt: Date.now() + 3_600_000,
+          scopes: ["user:inference"],
+        },
+      }),
+    );
+    const hermesHome = await mkdtemp(join(tmpdir(), "dani-dex-hermes-home-"));
+    const cli = await resolveHermesCli({ systemCandidates: [hermesPath ?? ""], bundledExecutable: null });
+    const client = createHermesClient("claude", cli, 60_000, NO_PROVIDER_CREDENTIALS, {
+      hermesHome,
+      extraEnv: () => ({ HOME: home, USERPROFILE: home }),
+    });
+    client.start();
+    cleanups.push(() => client.stop());
+
+    await client.request("initialize", {}, decodeRecordResponse);
+    const account = await client.request("account/read", {}, decodeRecordResponse);
+    expect(account.account).not.toBeNull();
+    const models = await client.request("model/list", {}, decodeModelListResponse);
+    expect(models.data.some((model) => /claude/iu.test(model.model ?? ""))).toBe(true);
+  });
+
   it("runs an ordinary Dani-Dex turn through real Hermes and streams the reply back", async () => {
     const requests: unknown[] = [];
     const server = await modelServer(requests);
