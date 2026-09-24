@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { parseBuilderConfig, universalMacConfig, universalMacOverrides } from "./dist-mac-universal";
 
 describe("universal macOS configuration", () => {
-  it("adds the x64 Hermes tree and the shared-resource pattern without touching the arm64 config", async () => {
+  it("adds the x64 Hermes and Dani-Free trees and the shared-resource pattern without touching the arm64 config", async () => {
     const base = parseBuilderConfig(await readFile("electron-builder.yml", "utf8"));
     const before = structuredClone(base);
     const config = universalMacConfig(base);
@@ -13,8 +13,18 @@ describe("universal macOS configuration", () => {
     expect(base).toEqual(before);
     expect(config.mac.extraResources).toContainEqual({ from: "build/hermes/mac/arm64", to: "hermes/mac/arm64" });
     expect(config.mac.extraResources).toContainEqual({ from: "build/hermes/mac/x64", to: "hermes/mac/x64" });
+    expect(config.mac.extraResources).toContainEqual({
+      from: "build/dani-free/darwin/arm64",
+      to: "dani-free/darwin/arm64",
+    });
+    expect(config.mac.extraResources).toContainEqual({
+      from: "build/dani-free/darwin/x64",
+      to: "dani-free/darwin/x64",
+    });
     const rule = config.mac.x64ArchFiles ?? "";
-    expect(rule.startsWith("Contents/Resources/{cua-driver,remote-desktop-runtime,whisper,hermes}/")).toBe(true);
+    expect(rule.startsWith("Contents/Resources/{cua-driver,remote-desktop-runtime,whisper,hermes,dani-free}/")).toBe(
+      true,
+    );
     const covered = (file: string) => minimatch(file, rule, { matchBase: true });
     // The file the first universal build with Hermes rejected.
     expect(
@@ -22,6 +32,7 @@ describe("universal macOS configuration", () => {
     ).toBe(true);
     expect(covered("Contents/Resources/hermes/a/.hidden.so")).toBe(true);
     expect(covered("Contents/Resources/whisper/bin/whisper-cli")).toBe(true);
+    expect(covered("Contents/Resources/dani-free/darwin/x64/dani-free")).toBe(true);
     expect(covered("Contents/Frameworks/Electron Framework.framework/Electron Framework")).toBe(false);
     expect(covered("Contents/MacOS/Dani-Dex")).toBe(false);
     // Every other mac key is carried over as is, so signing and notarization settings match the release.
@@ -40,6 +51,7 @@ describe("universal macOS configuration", () => {
     expect(new Set(destinations).size).toBe(destinations.length);
     expect(destinations).toContain("hermes/mac/arm64");
     expect(destinations).toContain("hermes/mac/x64");
+    expect(destinations).toContain("dani-free/darwin/x64");
     expect(merged.mac).toMatchObject({ identity: null, notarize: false });
     expect(universalMacOverrides(parseBuilderConfig(text), true).mac).not.toHaveProperty("identity");
   });

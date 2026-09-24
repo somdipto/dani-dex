@@ -82,6 +82,7 @@ import {
 } from "./cua-driver-runtime";
 import { CustomProviderStore } from "./custom-provider-store";
 import { bundledDaniFreeExecutable, DaniFreeSupervisor } from "./dani-free";
+import { DANI_FREE_PREFERENCE_FILE, readDaniFreePreference } from "./dani-free-preference-store";
 import { MCP_OAUTH_REDIRECT_URL } from "./deep-link-router";
 import {
   applyDevelopmentRemoteAccount,
@@ -1204,10 +1205,12 @@ export async function createApplicationServices({
     ? bundledDaniFreeExecutable(process.resourcesPath)
     : process.env.DANI_DEX_DANI_FREE_PATH?.trim() || null;
   if (daniFreeExecutable) {
+    // The Settings switch is stored beside the other preferences; DANI_FREE_PRIVATE_MODE=1 forces it on.
+    const daniFreePreference = await readDaniFreePreference(join(app.getPath("userData"), DANI_FREE_PREFERENCE_FILE));
     const daniFree = new DaniFreeSupervisor({
       executable: daniFreeExecutable,
       home: join(app.getPath("userData"), "dani-free"),
-      privateMode: process.env.DANI_FREE_PRIVATE_MODE === "1",
+      privateMode: daniFreePreference.privateMode || process.env.DANI_FREE_PRIVATE_MODE === "1",
     });
     teardown.push(TEARDOWN_ORDER.daniFree, "the Dani-Free proxy", () => daniFree.stop());
     void daniFree

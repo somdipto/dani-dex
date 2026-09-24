@@ -3,18 +3,20 @@
 /*
  * Dani's free models end to end: the real Dani-Free proxy starts under a Dani-Dex folder, its model
  * source is set the way the app sets it, and the real OpenCode CLI - through the driver chain the app
- * uses - lists the Dani model from the proxy and nothing behind it. Runs when both
+ * uses - lists the Dani model from the proxy and nothing behind it, and answers a prompt through it.
+ * The prompt goes to the free services on the internet, so this needs a network. Runs when both
  * DANI_DEX_DANI_FREE_TEST_PATH and DANI_DEX_OPENCODE_TEST_PATH point at real executables.
  */
 
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { DaniFreeSupervisor } from "../main/dani-free";
 import { harnessDriverResolver } from "./hermes-acp-driver";
 import { setRuntimeModelSource } from "./model-source";
-import { decodeModelListResponse, decodeRecordResponse } from "./protocol";
+import { type AppServerNotification, decodeModelListResponse, decodeRecordResponse } from "./protocol";
 import { NO_PROVIDER_CREDENTIALS, requireProviderDriver } from "./provider-drivers";
 
 const proxyPath = process.env.DANI_DEX_DANI_FREE_TEST_PATH?.trim();
@@ -31,7 +33,7 @@ afterEach(async () => {
 });
 
 describe.skipIf(!proxyPath || !opencodePath)("Dani's free models through OpenCode", () => {
-  it("lists only Dani, served by the bundled proxy, with no account", async () => {
+  it("lists only Dani and answers through the bundled proxy, with no account", async () => {
     const home = await mkdtemp(join(tmpdir(), "dani-dex-dani-free-"));
     cleanups.push(() => rm(home, { recursive: true, force: true }));
     process.env.HOME = home;
@@ -51,6 +53,8 @@ describe.skipIf(!proxyPath || !opencodePath)("Dani's free models through OpenCod
     expect(driver).toBe(requireProviderDriver("opencode"));
     const cli = await driver.resolveCli({ bundledExecutable: opencodePath });
     const client = driver.createClient(cli, 120_000, NO_PROVIDER_CREDENTIALS);
+    const notifications: AppServerNotification[] = [];
+    client.on("notification", (notification) => notifications.push(notification));
     client.start();
     cleanups.push(() => client.stop());
 
@@ -59,5 +63,32 @@ describe.skipIf(!proxyPath || !opencodePath)("Dani's free models through OpenCod
     const dani = models.data.filter((model) => model.model?.startsWith("dani/"));
     expect(dani.map((model) => model.model)).toEqual(["dani/auto"]);
     expect(JSON.stringify(dani)).not.toMatch(/kilo|nex|free\)/i);
+
+    const thread = await client.request(
+      "thread/start",
+      { cwd: home, runtimeWorkspaceRoots: [home], model: "dani/auto" },
+      decodeRecordResponse,
+    );
+    const threadId = isDynamicRecord(thread.thread) ? thread.thread.id : null;
+    if (typeof threadId !== "string") throw new Error(`OpenCode opened no thread: ${JSON.stringify(thread)}`);
+    await client.request(
+      "turn/start",
+      {
+        threadId,
+        clientUserMessageId: "dani-free-1",
+        input: [{ type: "text", text: "Reply with just the word pong, lowercase, nothing else." }],
+      },
+      decodeRecordResponse,
+    );
+    await vi.waitFor(
+      () => {
+        if (!notifications.some((n) => n.method === "turn/completed")) throw new Error("turn still running");
+      },
+      { timeout: 120_000, interval: 200 },
+    );
+    const said = JSON.stringify(notifications.filter((n) => n.method !== "turn/completed"));
+    expect(said.toLowerCase()).toContain("pong");
+    // The upstream service behind "auto" never shows in what the app receives.
+    expect(said).not.toMatch(/kilo|nex-agi|openrouter/i);
   }, 180_000);
 });

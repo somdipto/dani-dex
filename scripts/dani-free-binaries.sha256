@@ -1,0 +1,2 @@
+# SHA-256 of each dani-free executable, copied from the SHA256SUMS of the Dani-Free CI run that
+# built it. install-dani-free.ts refuses any binary not listed here. Empty until a run is pinned.

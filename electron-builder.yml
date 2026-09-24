@@ -82,6 +82,10 @@ mac:
     # `install:hermes-runtime`. `bundledHermesExecutable` reads this exact layout.
     - from: build/hermes/mac/arm64
       to: hermes/mac/arm64
+    # The Dani-Free proxy, one unsigned executable per platform, staged by
+    # `scripts/install-dani-free.ts`. `bundledDaniFreeExecutable` reads this exact layout.
+    - from: build/dani-free/darwin/arm64
+      to: dani-free/darwin/arm64
   # The Computer Use driver arrives signed by Cua AI with the hardened runtime, a secure timestamp
   # and `com.apple.security.automation.apple-events`. Re-signing it with Dani-Dex's inherited
   # entitlements would drop that entitlement and break the driver's Automation route, so its own
@@ -118,6 +122,8 @@ win:
       to: cua-driver/win32/x64
     - from: build/hermes/win/x64
       to: hermes/win/x64
+    - from: build/dani-free/win32/x64
+      to: dani-free/win32/x64
   target:
     - target: nsis
       arch:
@@ -133,6 +139,8 @@ linux:
       to: cua-driver/linux/x64
     - from: build/hermes/linux/x64
       to: hermes/linux/x64
+    - from: build/dani-free/linux/x64
+      to: dani-free/linux/x64
   # Electron takes its Linux app id from `desktopName` in package.json, and the window manager
   # matches a running window to the launcher through `StartupWMClass`. Syncing the two from one
   # value is what makes the taskbar icon group with the window it belongs to.

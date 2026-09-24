@@ -16,11 +16,18 @@ const logger = createDaniDexLogger("dist-mac-universal");
 const SINGLE_SLICE_RESOURCES = ["cua-driver", "remote-desktop-runtime", "whisper"];
 
 /**
- * Hermes ships both architectures side by side (`hermes/mac/arm64` and `hermes/mac/x64`), and
- * `bundledHermesExecutable` picks by `process.arch`, which is the running slice. Both trees are the
- * same in the two slices, so they are listed with the single-slice resources.
+ * Hermes and Dani-Free ship both architectures side by side (`hermes/mac/arm64` and
+ * `hermes/mac/x64`, `dani-free/darwin/arm64` and `dani-free/darwin/x64`), and the app picks by
+ * `process.arch`, which is the running slice. Both trees are the same in the two slices, so they are
+ * listed with the single-slice resources.
  */
-const BOTH_ARCH_RESOURCES = ["hermes"];
+const BOTH_ARCH_RESOURCES = ["hermes", "dani-free"];
+
+/** The x64 trees the arm64 release leaves out and the universal build adds. */
+const X64_ONLY_RESOURCES = [
+  { from: "build/hermes/mac/x64", to: "hermes/mac/x64" },
+  { from: "build/dani-free/darwin/x64", to: "dani-free/darwin/x64" },
+];
 
 const builderConfigSchema = z
   .object({
@@ -50,13 +57,13 @@ const ANY_DEPTH = ["**", "**/.*", "**/.*/**"].join(",");
 
 /**
  * The universal configuration is derived from `electron-builder.yml` rather than kept beside it, so
- * the arm64 release and the universal build cannot drift apart. It adds the x64 Hermes tree and the
+ * the arm64 release and the universal build cannot drift apart. It adds the x64 Hermes and Dani-Free trees and the
  * pattern for resources that are the same in both slices, and changes nothing else.
  */
 export function universalMacConfig(base: UniversalMacConfig): UniversalMacConfig {
   const extraResources = [...base.mac.extraResources];
-  if (!extraResources.some((resource) => resource.to === "hermes/mac/x64")) {
-    extraResources.push({ from: "build/hermes/mac/x64", to: "hermes/mac/x64" });
+  for (const x64 of X64_ONLY_RESOURCES) {
+    if (!extraResources.some((resource) => resource.to === x64.to)) extraResources.push(x64);
   }
   const shared = [...SINGLE_SLICE_RESOURCES, ...BOTH_ARCH_RESOURCES].join(",");
   return {
