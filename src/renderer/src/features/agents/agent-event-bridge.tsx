@@ -137,7 +137,9 @@ export function AgentEventBridge() {
         return;
       case "conversation-invalidated":
         {
-          if (centralAuth().status !== "signed_in") return;
+          // Reads are kept for the local reader too: no Dani-Dex account is needed on this computer.
+          const status = centralAuth().status;
+          if (status !== "signed_in" && status !== "signed_out") return;
           const request = ++readRefresh;
           const serverId = activeServerId();
           void window.danidex.agent

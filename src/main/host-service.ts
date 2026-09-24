@@ -1053,13 +1053,19 @@ export class HostService extends EventEmitter<HostEvents> {
   }
 
   #currentAgentReaderId(): string {
-    const accountReaderId = `local-user:${this.#options.getSignedInUser().id}`;
+    // Everything on this computer works without a Dani-Dex account. Signed out, the reader is the
+    // same local member the channels already use, and a later sign-in adopts its reads below.
+    const accountId = this.#signedInAccountId();
+    if (!accountId) return SIGNED_OUT_CHANNEL_MEMBER_ID;
+    const accountReaderId = `local-user:${accountId}`;
     const memberId = this.#findCurrentMemberId();
     // Channel reads are keyed by the reader id this method answers, so they adopt with it.
     if (!memberId) {
+      this.#options.agents.adoptConversationReads(SIGNED_OUT_CHANNEL_MEMBER_ID, accountReaderId);
       this.#options.channels?.store.adoptReads(SIGNED_OUT_CHANNEL_MEMBER_ID, accountReaderId);
       return accountReaderId;
     }
+    this.#options.agents.adoptConversationReads(SIGNED_OUT_CHANNEL_MEMBER_ID, memberId);
     this.#options.agents.adoptConversationReads(accountReaderId, memberId);
     this.#options.channels?.store.adoptReads(accountReaderId, memberId);
     this.#options.channels?.store.adoptReads(SIGNED_OUT_CHANNEL_MEMBER_ID, memberId);

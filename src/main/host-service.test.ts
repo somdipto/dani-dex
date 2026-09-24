@@ -59,7 +59,16 @@ async function createHostService(
   const options: HostOptions = {
     appVersion: "0.4.0",
     store,
-    agents: { ...createAgents(), adoptConversationReads: unimplemented },
+    agents: {
+      ...createAgents(),
+      adoptConversationReads: (source, target) => {
+        readActivity.push(`adopt ${source} -> ${target}`);
+      },
+      listConversationReads: (reader) => {
+        readActivity.push(`list ${reader}`);
+        return {};
+      },
+    },
     skills: { listInstalledForChatTags: unimplemented },
     sidebarLayout: {
       getSnapshot: unimplemented,
@@ -119,7 +128,11 @@ async function createHostService(
   };
 }
 
+/** What the host asked of the conversation reads, in order. */
+const readActivity: string[] = [];
+
 afterEach(async () => {
+  readActivity.splice(0);
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
 
@@ -171,6 +184,18 @@ describe("HostService account binding", () => {
     expect(service.channelActor()).toEqual({ id: "local-user:account-a", name: "A" });
     announce(second);
     expect(service.channelActor()).toEqual({ id: "local-user:account-b", name: "B" });
+  });
+
+  // v0.17.1 threw "Sign in to Dani-Dex first." on every chat opened while signed out, whichever
+  // provider the user had connected. Nothing on this computer needs a Dani-Dex account.
+  it("reads conversations with no Dani-Dex account, and carries those reads to a later sign-in", async () => {
+    const { service, announce } = await createHostService();
+    expect(() => service.listAgentConversationReads()).not.toThrow();
+    expect(readActivity).toEqual(["list local"]);
+
+    announce(first);
+    service.listAgentConversationReads();
+    expect(readActivity.slice(1)).toEqual(["adopt local -> local-user:account-a", "list local-user:account-a"]);
   });
 
   it("stops reporting the previous account's server when the account changes", async () => {

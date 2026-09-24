@@ -156,7 +156,7 @@ const ServerScope = createSimpleContext({
           (!event.metaKey && !event.ctrlKey) ||
           event.altKey ||
           event.shiftKey ||
-          centralAuth().status !== "signed_in" ||
+          (centralAuth().status !== "signed_in" && centralAuth().status !== "signed_out") ||
           setupState()?.completed !== true
         ) {
           return;
