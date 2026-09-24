@@ -81,7 +81,7 @@ State which surfaces a change touches. Check all affected consumers and reverse 
 - Reuse a running dev instance, or use `bun run dev --isolated` for a profile tied to this worktree.
   Use the ports the stack reports rather than a fixed port.
 
-See [README.md — Commands](README.md#commands) for the flags these commands take, and
+See [Development guide: Commands](docs/DEVELOPMENT.md#commands) for the flags these commands take, and
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for why the registry works this way, when a dev command
 does not behave as expected.
 
