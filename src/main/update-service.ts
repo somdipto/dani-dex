@@ -154,6 +154,9 @@ export function supportsInstalledUpdates(
   return platform === "darwin" || platform === "win32";
 }
 
+/** Where the release assets live; `latest-mac.yml` names files relative to a tag here. */
+export const RELEASE_DOWNLOAD_BASE = "https://github.com/somdipto/dani-dex/releases/download";
+
 /** Where a build that cannot replace itself sends the user for a new version. */
 export function releasePageUrl(version: string): string {
   return `https://github.com/somdipto/dani-dex/releases/tag/v${encodeURIComponent(version)}`;
