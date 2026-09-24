@@ -1,0 +1,52 @@
+name: Add fixed download names
+
+# The release workflow adds these copies itself. This covers a release published before it did, or
+# one where the copies need replacing, without rebuilding anything: it downloads the release's own
+# versioned installers and uploads them again under the names the README's buttons link to.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, for example v0.17.1
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  add-fixed-names:
+    name: Add fixed download names
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Copy the installers under fixed names
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Not a release tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+          mkdir -p assets
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir assets \
+            --pattern "*-universal.dmg" --pattern "*-x64.exe" --pattern "*-x86_64.AppImage"
+          copy() {
+            local pattern="$1" name="$2"
+            local matches=(assets/$pattern)
+            if [ "${#matches[@]}" -lt 1 ] || [ ! -f "${matches[0]}" ]; then
+              echo "No $pattern in $RELEASE_TAG." >&2
+              exit 1
+            fi
+            cp "${matches[0]}" "$name"
+          }
+          copy "Dani-Dex-[0-9]*-universal.dmg" Dani-Dex-mac-universal.dmg
+          copy "Dani-Dex-[0-9]*-x64.exe" Dani-Dex-windows-x64.exe
+          copy "Dani-Dex-[0-9]*-x86_64.AppImage" Dani-Dex-linux-x86_64.AppImage
+          chmod +x Dani-Dex-linux-x86_64.AppImage
+          gh release upload "$RELEASE_TAG" Dani-Dex-mac-universal.dmg Dani-Dex-windows-x64.exe \
+            Dani-Dex-linux-x86_64.AppImage --clobber --repo "$GITHUB_REPOSITORY"

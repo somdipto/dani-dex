@@ -1,14 +1,40 @@
 # Dani-Dex
 
+**A desktop app where AI agents work as your team.** Give each agent a job, and it works in its own
+workspace on your computer: it runs the tools, uses the browser, talks to the other agents, and
+comes back with finished work.
+
+<p align="center">
+  <a href="https://github.com/somdipto/dani-dex/releases/latest/download/Dani-Dex-mac-universal.dmg"><img alt="Download for macOS" src="https://img.shields.io/badge/Download_for-macOS-111111?style=for-the-badge&amp;logo=apple&amp;logoColor=white"></a>
+  <a href="https://github.com/somdipto/dani-dex/releases/latest/download/Dani-Dex-windows-x64.exe"><img alt="Download for Windows" src="https://img.shields.io/badge/Download_for-Windows-0078D4?style=for-the-badge&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDBoMTEuNHYxMS40SDB6TTEyLjYgMEgyNHYxMS40SDEyLjZ6TTAgMTIuNmgxMS40VjI0SDB6TTEyLjYgMTIuNkgyNFYyNEgxMi42eiIvPjwvc3ZnPg%3D%3D"></a>
+  <a href="https://github.com/somdipto/dani-dex/releases/latest/download/Dani-Dex-linux-x86_64.AppImage"><img alt="Download for Linux" src="https://img.shields.io/badge/Download_for-Linux-E95420?style=for-the-badge&amp;logo=linux&amp;logoColor=white"></a>
+</p>
+
+<p align="center">
+Click your platform and the installer downloads right away, always the newest release.
+<br>
+<a href="https://github.com/somdipto/dani-dex/releases/latest">All downloads and checksums</a>
+</p>
+
 [![CI](https://github.com/somdipto/dani-dex/actions/workflows/ci.yml/badge.svg)](https://github.com/somdipto/dani-dex/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/somdipto/dani-dex?label=latest)](https://github.com/somdipto/dani-dex/releases/latest)
 [![License](https://img.shields.io/badge/license-PolyForm_Noncommercial_1.0.0-blue.svg)](LICENSE)
 
-Dani-Dex is a local-first desktop workspace for persistent AI teammates. It supports the local
-[Codex App Server](https://learn.chatgpt.com/docs/app-server) and
-[Claude Code](https://code.claude.com/docs/en/overview), plus [Grok CLI](https://docs.x.ai/build/overview)
-through ACP. It gives every agent its own workspace and
-conversation, and provides local queues, file transfers, an embedded browser, and agent-to-agent
-messaging in one desktop app.
+Dani-Dex runs agents on the local [Codex App Server](https://learn.chatgpt.com/docs/app-server),
+[Claude Code](https://code.claude.com/docs/en/overview), [Grok CLI](https://docs.x.ai/build/overview)
+through ACP, or OpenCode's free models, which need no account. Every agent gets its own workspace
+and conversation, with local queues, file transfers, an embedded browser and agent-to-agent
+messaging in one app.
+
+## Quickstart
+
+1. Download Dani-Dex for your computer with a button above, and install it (details for each
+   platform are under [Install](#install)).
+2. Open Dani-Dex. No account or sign-in is needed.
+3. Pick a model provider. OpenCode's free models work right away; Codex, Claude and Grok use the
+   login of their own CLI, which Dani-Dex can download for you.
+4. Message the Chief agent with a goal, like "Turn these release notes into a launch plan". It
+   plans the work, brings in other agents when the job needs them, and hands back the result.
 
 > [!WARNING]
 > Dani-Dex is a development preview. Agents currently run with `danger-full-access` and
@@ -28,7 +54,7 @@ messaging in one desktop app.
 - Optional Computer Use on macOS, Windows and Linux through the `cua-driver` binary in the release, which Dani-Dex starts as its own child process and gives to every provider.
 - Per-agent model, reasoning, profile, notification, browser, and panel state.
 - Local data and privacy-safe diagnostics exports from the account menu.
-- Optional Dani-Dex accounts through one-time email codes. The account API runs on Cloudflare Workers and D1.
+- No account needed: the app opens straight into your workspace. Sign-in with email codes, GitHub or Google is built but switched off for now.
 
 Dani-Dex is local-first, not offline-only. Codex connects to OpenAI, Claude connects to Anthropic,
 Grok connects to xAI,
@@ -36,13 +62,14 @@ visited pages use the network, and installed plugins may connect to their own se
 
 ## Install
 
-Dani-Dex supports macOS 13 or newer on Apple Silicon, Windows 10 or newer on x64 systems, and x64
-Linux as an AppImage.
+Dani-Dex supports macOS 13 or newer on Apple silicon and Intel Macs, Windows 10 or newer on x64
+systems, and x64 Linux as an AppImage. Unsigned builds for now, so each platform shows a one-time
+warning on first launch; the steps below get past it.
 
 ### macOS
 
-1. Download the latest `Dani-Dex-*-universal.dmg` from [GitHub Releases](https://github.com/somdipto/dani-dex/releases).
-   It runs on both Apple silicon and Intel Macs.
+1. [Download Dani-Dex for macOS](https://github.com/somdipto/dani-dex/releases/latest/download/Dani-Dex-mac-universal.dmg). The one DMG runs on both
+   Apple silicon and Intel Macs.
 2. Drag Dani-Dex to Applications.
 3. The app is not signed with an Apple Developer ID yet, so the first time, Control-click Dani-Dex in
    Applications and choose **Open**, then **Open** again. If macOS still blocks it, open **System
@@ -50,14 +77,14 @@ Linux as an AppImage.
 
 ### Windows
 
-1. Download the latest `Dani-Dex-*-x64.exe` from [GitHub Releases](https://github.com/somdipto/dani-dex/releases).
+1. [Download Dani-Dex for Windows](https://github.com/somdipto/dani-dex/releases/latest/download/Dani-Dex-windows-x64.exe).
 2. Run the installer and open Dani-Dex. The installer is not code-signed yet, so if Windows SmartScreen
    warns you, click **More info**, then **Run anyway**.
 
 ### Linux
 
-1. Download the latest `Dani-Dex-*-x86_64.AppImage` from [GitHub Releases](https://github.com/somdipto/dani-dex/releases).
-2. Make it executable with `chmod +x Dani-Dex-*-x86_64.AppImage`, then run it.
+1. [Download Dani-Dex for Linux](https://github.com/somdipto/dani-dex/releases/latest/download/Dani-Dex-linux-x86_64.AppImage).
+2. Make it executable with `chmod +x Dani-Dex-linux-x86_64.AppImage`, then run it.
 
 On Ubuntu 23.10 or newer and on Debian 13, unprivileged user namespaces are restricted by AppArmor
 and Dani-Dex exits during launch until you install an AppArmor profile:
@@ -425,9 +452,13 @@ described above.
 ## Releases
 
 Releases are tag-driven. `bun run release:patch`, `release:minor`, or `release:major` prepares the
-version and changelog. After review, commit, preflight, and tag the release; pushing the tag builds a
-signed and notarized macOS ARM64 release, an unsigned Windows x64 release, and an unsigned Linux x64
-AppImage in GitHub Actions.
+version and changelog. After review, commit, preflight, and tag the release; pushing the tag builds an
+unsigned universal macOS DMG and ZIP, an unsigned Windows x64 installer, and an unsigned Linux x64
+AppImage in GitHub Actions. Each release also carries copies of the three installers under fixed
+names (`Dani-Dex-mac-universal.dmg`, `Dani-Dex-windows-x64.exe`, `Dani-Dex-linux-x86_64.AppImage`),
+which is what the download buttons at the top point at through `releases/latest/download/`. To add
+those copies to a release that was published without them, run the **Add fixed download names**
+workflow with the release tag.
 Installed builds check GitHub Releases for updates and expose download/restart controls in the account
 popover. Release signing secrets and the complete procedure are documented in
 [docs/RELEASING.md](docs/RELEASING.md).

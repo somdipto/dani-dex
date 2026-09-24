@@ -474,11 +474,32 @@ jobs:
             release-assets/linux/SHA256SUMS-linux.txt \
             > release-assets/SHA256SUMS.txt
 
+      # The README's download buttons link to releases/latest/download/<name>, which only keeps
+      # working across versions if the name has no version in it. These are byte-for-byte copies of
+      # the versioned installers; the updater keeps reading the versioned files through latest*.yml.
+      - name: Add fixed download names
+        shell: bash
+        run: |
+          set -euo pipefail
+          add_copy() {
+            local pattern="$1" name="$2"
+            local matches=($pattern)
+            if [ "${#matches[@]}" -ne 1 ] || [ ! -f "${matches[0]}" ]; then
+              echo "Expected exactly one file for $pattern." >&2
+              exit 1
+            fi
+            cp "${matches[0]}" "release-assets/$name"
+          }
+          add_copy "release-assets/macos/*-universal.dmg" Dani-Dex-mac-universal.dmg
+          add_copy "release-assets/windows/*-x64.exe" Dani-Dex-windows-x64.exe
+          add_copy "release-assets/linux/*-x86_64.AppImage" Dani-Dex-linux-x86_64.AppImage
+          chmod +x release-assets/Dani-Dex-linux-x86_64.AppImage
+
       - name: Publish GitHub Release
         shell: bash
         run: |
           shopt -s nullglob
-          artifacts=(release-assets/macos/* release-assets/windows/* release-assets/linux/* release-assets/SHA256SUMS.txt)
+          artifacts=(release-assets/macos/* release-assets/windows/* release-assets/linux/* release-assets/SHA256SUMS.txt release-assets/Dani-Dex-*)
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "${artifacts[@]}" --clobber --repo "$GITHUB_REPOSITORY"
             gh release edit "$RELEASE_TAG" --draft=false --latest --repo "$GITHUB_REPOSITORY"
