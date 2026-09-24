@@ -110,8 +110,9 @@ if (/from "(?!node:)/.test(databaseHost)) {
 const architecture = run("file", [executablePath]);
 if (!architecture.includes("arm64")) throw new Error(`Expected an ARM64 executable: ${architecture}`);
 const whisperArchitecture = run("file", [whisperExecutablePath]);
-if (!whisperArchitecture.includes("arm64")) {
-  throw new Error(`Expected an ARM64 Whisper executable: ${whisperArchitecture}`);
+// Universal, so local voice runs on Intel Macs too.
+if (!whisperArchitecture.includes("arm64") || !whisperArchitecture.includes("x86_64")) {
+  throw new Error(`Expected a universal (arm64 + x86_64) Whisper executable: ${whisperArchitecture}`);
 }
 if (existsSync(whisperModelPath)) throw new Error("The on-demand Whisper model must not be in the application.");
 

@@ -86,29 +86,66 @@ async function prepareSource(): Promise<void> {
   await Promise.all([writeFile(marker, `${WHISPER_CPP_COMMIT}\n`), rm(archivePath, { force: true })]);
 }
 
+/**
+ * On macOS the executable is universal: one arm64 build and one x86_64 build joined with `lipo`, so
+ * local voice works on Intel Macs as well as Apple Silicon. Each slice is its own CMake build rather
+ * than one `CMAKE_OSX_ARCHITECTURES="arm64;x86_64"` build, because ggml picks CPU features per
+ * architecture at configure time.
+ */
 function buildExecutable(): void {
+  if (process.platform !== "darwin") {
+    copyBuiltExecutable(buildSlice(cmakeRoot, []));
+    return;
+  }
+  const slices = MAC_ARCHITECTURES.map((architecture) =>
+    buildSlice(`${cmakeRoot}-${architecture}`, [`-DCMAKE_OSX_ARCHITECTURES=${architecture}`]),
+  );
+  const universal = join(buildRoot, `${executableName}-universal`);
+  execFileSync("lipo", ["-create", ...slices, "-output", universal], { stdio: "inherit" });
+  const architectures = execFileSync("lipo", ["-archs", universal], { encoding: "utf8" }).trim().split(/\s+/u);
+  for (const architecture of MAC_ARCHITECTURES) {
+    if (!architectures.includes(architecture)) {
+      throw new Error(`The universal whisper-cli is missing its ${architecture} slice (${architectures.join(", ")}).`);
+    }
+  }
+  copyBuiltExecutable(universal);
+}
+
+const MAC_ARCHITECTURES = ["arm64", "x86_64"] as const;
+
+/** Configures and builds one whisper-cli into `buildDirectory` and returns its path. */
+function buildSlice(buildDirectory: string, extraArguments: string[]): string {
   execFileSync(
     "cmake",
     [
       "-S",
       sourceRoot,
       "-B",
-      cmakeRoot,
+      buildDirectory,
       "-DCMAKE_BUILD_TYPE=Release",
       "-DBUILD_SHARED_LIBS=OFF",
       "-DGGML_NATIVE=OFF",
       "-DWHISPER_BUILD_TESTS=OFF",
       "-DWHISPER_BUILD_SERVER=OFF",
       ...(process.platform === "win32" ? ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"] : []),
+      ...extraArguments,
     ],
     { stdio: "inherit" },
   );
-  execFileSync("cmake", ["--build", cmakeRoot, "--config", "Release", "--target", "whisper-cli", "-j", "4"], {
+  execFileSync("cmake", ["--build", buildDirectory, "--config", "Release", "--target", "whisper-cli", "-j", "4"], {
     stdio: "inherit",
   });
-  const candidates = [join(cmakeRoot, "bin", executableName), join(cmakeRoot, "bin", "Release", executableName)];
+  const candidates = [
+    join(buildDirectory, "bin", executableName),
+    join(buildDirectory, "bin", "Release", executableName),
+  ];
   const builtExecutable = candidates.find(existsSync);
   if (!builtExecutable) throw new Error(`The whisper.cpp build did not produce ${executableName}.`);
+  return builtExecutable;
+}
+
+function copyBuiltExecutable(builtExecutable: string): void {
+  // Runs the slice this machine can run natively; the other slice is checked by `lipo -archs`.
   execFileSync(builtExecutable, ["--help"], { stdio: "ignore" });
   copyFileSync(builtExecutable, outputExecutable);
   if (process.platform !== "win32") chmodSync(outputExecutable, 0o755);

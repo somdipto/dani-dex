@@ -8,9 +8,10 @@ import { z } from "zod";
 const logger = createDaniDexLogger("dist-mac-universal");
 
 /**
- * Resources that carry only arm64 binaries today. A universal build packs the same file into both
+ * Resources whose files are the same in both slices. A universal build packs the same file into both
  * slices, and @electron/universal refuses an identical Mach-O it was not told about, so these are
- * named here. On an Intel Mac the features behind them stay unavailable until x64 builds exist.
+ * named here. whisper-cli is itself a universal binary. cua-driver and the remote-desktop runtime
+ * are arm64-only, and the app keeps the features behind them off on an Intel Mac.
  */
 const SINGLE_SLICE_RESOURCES = ["cua-driver", "remote-desktop-runtime", "whisper"];
 
