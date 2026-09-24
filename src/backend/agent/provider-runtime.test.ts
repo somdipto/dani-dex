@@ -29,7 +29,7 @@ import { getString } from "../protocol";
 import { requireProviderDriver } from "../provider-drivers";
 import { DIAGNOSTIC_TEXT_LIMIT } from "../stderr-diagnostics";
 import { DrainScheduler } from "./drain-scheduler";
-import { isUsageLimitDiagnostic } from "./provider-runtime";
+import { isEngineLogDiagnostic, isUsageLimitDiagnostic } from "./provider-runtime";
 
 let root: string;
 let service: AgentService | null = null;
@@ -42,6 +42,15 @@ afterEach(async () => {
   await stopAgentTestFixture(root, service);
   service = null;
 });
+
+const ENGINE_SESSION_START_STDERR = [
+  "2026-09-25 00:44:56 [WARNING] agent.auxiliary_client: Auxiliary Nous client unavailable: no Nous authentication found (run: hermes auth).",
+  "2026-09-25 03:28:39 [WARNING] agent.auxiliary_client: Auxiliary: marking openrouter unhealthy for 60s (payment / credit error). Subsequent auxiliary calls will skip it until 03:29:39.",
+  "2026-09-25 03:28:39 [WARNING] tools.registry: check_fn check_vision_requirements returned False; dependent tools will be unavailable this turn",
+  "2026-09-25 03:28:39 [WARNING] tools.registry: check_fn _browser_cdp_check returned False; dependent tools will be unavailable this turn",
+  "2026-09-25 03:28:39 [INFO] run_agent: No .env file found. Using system environment variables.",
+  "2026-09-25 03:28:39 [ERROR] agent.auxiliary_client: Auxiliary auto-detect failed",
+];
 
 describe.sequential("ProviderRuntime: account checks and login", () => {
   it("reconnects OpenCode without a browser and refuses to replace an active client", async () => {
@@ -1332,6 +1341,55 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
     await service.sendMessage({ agentId: "chief", text: "Continue on Grok." });
     await waitFor(() => service?.listQueue("chief").deliveries.every((delivery) => delivery.status === "completed"));
     expect(service.listAgents().find((agent) => agent.id === "chief")?.provider).toBe("grok");
+  });
+
+  it("keeps the agent engine's side-task warnings out of a chat that works", async () => {
+    process.env.DANI_DEX_GROK_PATH = await createFakeGrok(root);
+    const { store, mailbox } = stores(root);
+    const clients = new Map<AgentProvider, FakeAgentClient>();
+    service = createTestService({
+      store,
+      mailbox,
+      preferredProvider: "codex",
+      clientFactory: (provider) => {
+        const client = new FakeAgentClient(provider);
+        clients.set(provider, client);
+        return client;
+      },
+    });
+    const events: AgentEvent[] = [];
+    service.on("event", (event) => events.push(event));
+    await service.initialize();
+    await store.getOrCreate("chief");
+    await service.updateAgent({ agentId: "chief", provider: "grok", model: "grok-4.5" });
+    const client = clients.get("grok");
+    if (!client) throw new Error("Grok did not start.");
+
+    // Verbatim from the bundled engine's stderr on session/new; the first line is the one the user
+    // met as a "Provider error" toast in v0.17.2.
+    for (const line of ENGINE_SESSION_START_STDERR) client.emit("diagnostic", line);
+    client.emit("diagnostic", "2026-09-25 03:28:40 [ERROR] run_agent: the model endpoint could not be reached");
+
+    await waitFor(() => events.some((event) => event.type === "error"));
+    expect(events.filter((event) => event.type === "error")).toEqual([
+      expect.objectContaining({
+        message: "2026-09-25 03:28:40 [ERROR] run_agent: the model endpoint could not be reached",
+      }),
+    ]);
+  });
+
+  it.each(ENGINE_SESSION_START_STDERR)("treats an engine side-task log line as routine: %s", (line) => {
+    expect(isEngineLogDiagnostic(line)).toBe(true);
+  });
+
+  it.each([
+    "2026-09-25 03:28:40 [ERROR] run_agent: the model endpoint could not be reached",
+    "2026-09-25 03:28:40 [CRITICAL] acp_adapter.server: session crashed",
+    "2026-09-25 03:28:40 [WARNING] dani-dex bridge: tool server did not start",
+    "ERROR grok: the model endpoint could not be reached",
+    "Authentication failed [WARNING] agent.auxiliary_client: quoted",
+  ])("keeps a real failure visible: %s", (line) => {
+    expect(isEngineLogDiagnostic(line)).toBe(false);
   });
 
   it.each([

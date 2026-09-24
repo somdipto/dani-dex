@@ -123,6 +123,34 @@ export function isTelemetryExportDiagnostic(message: string): boolean {
 }
 
 /**
+ * Whether a diagnostic is one of the agent engine's own routine log lines rather than a failure of
+ * the user's work.
+ *
+ * The engine logs with Python's `YYYY-MM-DD HH:MM:SS [LEVEL] logger: message` format on the same
+ * stderr as the agent. When a session starts it checks which optional tools it can offer - vision,
+ * browser vision, title generation - before the chat's model is known, so its side-task client
+ * walks a list of other services and logs `[WARNING] agent.auxiliary_client: Auxiliary Nous client
+ * unavailable: no Nous authentication found (run: hermes auth).` for one the user never set up. The
+ * user met that as a "Provider error" toast in a chat that worked. Turns report their own failures
+ * through the protocol, so these lines belong in the log.
+ *
+ * INFO, DEBUG and WARNING lines count. So does any level from the side-task client and the tool
+ * registry, because a side task or an optional tool that cannot start never fails a turn. An ERROR
+ * from anywhere else stays visible, and so does a line that names Dani-Dex.
+ */
+export function isEngineLogDiagnostic(message: string): boolean {
+  if (/danidex|dani-dex/i.test(message)) return false;
+  const line =
+    /^(?:\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?\s+)?\[(DEBUG|INFO|WARNING|ERROR|CRITICAL)\]\s+([\w.]+):/.exec(
+      message,
+    );
+  if (!line) return false;
+  const [, level, source] = line;
+  if (level === "DEBUG" || level === "INFO" || level === "WARNING") return true;
+  return /^(?:agent\.auxiliary_client|tools\.registry)$/.test(source ?? "");
+}
+
+/**
  * Whether a provider says that the account's paid usage is exhausted.
  *
  * This is narrower than an HTTP status check. A 429 can be a short request-rate throttle, and a
@@ -1686,6 +1714,10 @@ export class ProviderRuntime implements ProviderPort {
       const message = shortenDiagnostic(this.#redactMcp(raw));
       if (isMcpSubsystemDiagnostic(message, [...names])) {
         logger.warn("A provider reported an MCP server failure.", { provider: client.provider, message });
+        return;
+      }
+      if (isEngineLogDiagnostic(message)) {
+        logger.info("The agent engine logged a routine message.", { provider: client.provider, message });
         return;
       }
       if (isTelemetryExportDiagnostic(message)) {
