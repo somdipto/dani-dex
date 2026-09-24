@@ -2,7 +2,8 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { HERMES_DOCTOR_MARKER, repairHermesHome } from "./hermes-repair";
+import { parse } from "yaml";
+import { HERMES_DOCTOR_MARKER, HERMES_SIDE_TASK_PROVIDER, repairHermesHome } from "./hermes-repair";
 
 const directories: string[] = [];
 afterEach(async () => {
@@ -51,7 +52,7 @@ describe("repairHermesHome", () => {
     await expect(
       repairHermesHome({ executable: "/app/hermes", version: "0.19.0", hermesHome, runDoctor }),
     ).resolves.toBe("repaired");
-    expect(await readFile(join(hermesHome, "config.yaml"), "utf8")).toBe("_config_version: 33\n");
+    expect(await readFile(join(hermesHome, "config.yaml"), "utf8")).toMatch(/^_config_version: 33\n/);
     expect((await readdir(hermesHome)).some((name) => name.startsWith("config.yaml.dani-dex-reset-"))).toBe(true);
   });
 
@@ -76,6 +77,32 @@ describe("repairHermesHome", () => {
  * cannot parse. Runs when DANI_DEX_HERMES_TEST_PATH points at the bundled `hermes`.
  */
 const hermesPath = process.env.DANI_DEX_HERMES_TEST_PATH?.trim();
+describe("side-task provider", () => {
+  it("names the chat's provider for side tasks and keeps everything else in the config", async () => {
+    const hermesHome = await home();
+    await writeFile(join(hermesHome, ".env"), "");
+    await writeFile(join(hermesHome, "config.yaml"), "_config_version: 33\n\n# Security notes stay.\n");
+    await expect(
+      repairHermesHome({ executable: "hermes", version: "0.19.0", hermesHome, runDoctor: fakeDoctor() }),
+    ).resolves.toBe("healthy");
+    const config = await readFile(join(hermesHome, "config.yaml"), "utf8");
+    expect(config).toContain("_config_version: 33");
+    expect(config).toContain("# Security notes stay.");
+    expect(parse(config).model).toEqual({ provider: HERMES_SIDE_TASK_PROVIDER });
+    expect(config).not.toContain("default:");
+  });
+
+  it("leaves a provider the config already names", async () => {
+    const hermesHome = await home();
+    await writeFile(join(hermesHome, ".env"), "");
+    await writeFile(join(hermesHome, "config.yaml"), "model:\n  provider: anthropic\n  default: claude-sonnet-5\n");
+    await repairHermesHome({ executable: "hermes", version: "0.19.0", hermesHome, runDoctor: fakeDoctor() });
+    expect(await readFile(join(hermesHome, "config.yaml"), "utf8")).toBe(
+      "model:\n  provider: anthropic\n  default: claude-sonnet-5\n",
+    );
+  });
+});
+
 describe.skipIf(!hermesPath)("repairHermesHome with the bundled Hermes", () => {
   it("leaves an empty or corrupted state directory in a shape Hermes starts from", async () => {
     const hermesHome = await home();

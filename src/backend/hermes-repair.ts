@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { createDaniDexLogger, redactText } from "@dani-dex/logging";
-import { parse } from "yaml";
+import { parse, parseDocument } from "yaml";
 import { cliSpawnTarget } from "./cli";
 
 const execFileAsync = promisify(execFile);
@@ -39,6 +39,46 @@ export type HermesRepairResult = "healthy" | "repaired" | "failed";
  * broken. Never throws: a failed repair is logged, and the start goes on to report its own error.
  */
 export async function repairHermesHome(input: HermesRepairInput): Promise<HermesRepairResult> {
+  const result = await repairState(input);
+  if (result !== "failed") await pointSideTasksAtMainProvider(input.hermesHome);
+  return result;
+}
+
+/**
+ * The provider Hermes' side tasks (image understanding, titles, summaries) use, read from the
+ * spawn's own environment. Each provider Hermes serves runs in its own process with its own
+ * `HERMES_INFERENCE_PROVIDER`, so one shared config names each process's provider.
+ */
+// biome-ignore lint/suspicious/noTemplateCurlyInString: Hermes expands `${VAR}` in its own config.
+export const HERMES_SIDE_TASK_PROVIDER = "${HERMES_INFERENCE_PROVIDER}";
+
+/**
+ * Hermes picks the provider for side tasks from `model.provider` in its config. The chat provider
+ * comes from the environment, so the config names none, and when a session starts Hermes checks
+ * its optional tools before the chat's model is known: with no provider it walked OpenRouter and
+ * Nous, logged a warning for each, and left image understanding off for the session. Naming the
+ * process's provider (with no model, so the chat's default model does not change) lets the side
+ * tasks use the sign-in the chat already has. A provider the config already names is left alone.
+ * Never throws.
+ */
+export async function pointSideTasksAtMainProvider(hermesHome: string): Promise<void> {
+  const path = join(hermesHome, "config.yaml");
+  try {
+    const document = parseDocument(await readFile(path, "utf8"));
+    if (document.errors.length > 0) return;
+    const current = document.getIn(["model", "provider"]);
+    if (typeof current === "string" && current.trim()) return;
+    if (document.get("model") !== undefined && !isDynamicRecord(document.toJS()?.model)) return;
+    document.setIn(["model", "provider"], HERMES_SIDE_TASK_PROVIDER);
+    await writeFile(path, document.toString(), "utf8");
+  } catch (error) {
+    logger.warn("Could not point Hermes side tasks at the chat provider.", {
+      error: redactText(error instanceof Error ? error.message : String(error)),
+    });
+  }
+}
+
+async function repairState(input: HermesRepairInput): Promise<HermesRepairResult> {
   const broken = await brokenState(input.hermesHome);
   if (!broken && (await markerVersion(input.hermesHome)) === input.version) return "healthy";
   const runDoctor = input.runDoctor ?? runHermesDoctor;
