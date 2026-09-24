@@ -5,6 +5,38 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.2] - 2026-09-25
+
+### Added
+
+- Update Dani-Dex from inside the app. Starting with this version, when a new release is
+  out, Dani-Dex offers to download it and restart into it. On a Mac, keep Dani-Dex in
+  Applications so it can replace itself. You never have to delete it and download it
+  again. This version is the last one you install by hand.
+- Use OpenCode with no setup. Free OpenCode models show up right away, with no key or
+  account needed.
+
+### Changed
+
+- No Dani-Dex sign-in anywhere. Opening a chat no longer stops at "Sign in to Dani-Dex
+  first", and Codex, Claude, Grok, and OpenCode never ask for a Dani-Dex account.
+- Connect each provider with the login you already have. Dani-Dex picks up your
+  existing Codex, Claude, Grok, and OpenCode sign-ins, and each one signs in through its
+  own login when needed.
+- Keep the agent engine out of sight. Dani-Dex chooses and repairs it on its own, and
+  messages no longer mention it.
+- Tell you when macOS resets the Screen Recording or Accessibility permissions that
+  Computer Use needs.
+
+### Fixed
+
+- Start agents on Intel Macs. The built-in agent engine now runs on Intel as well as
+  Apple silicon, and Dani-Dex never sends you to a terminal to fix it.
+- Local voice input works on Intel Macs. The Mac app now includes the Intel build of
+  the speech model runner.
+- Computer Use works on Intel Macs.
+- Fix a damaged agent engine setup in the background.
+
 ## [0.17.1] - 2026-09-24
 
 ### Changed
