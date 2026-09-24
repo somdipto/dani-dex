@@ -15,7 +15,9 @@ afterEach(async () => {
  * A stand-in for `dani-free start` that keeps its contract: it listens on 127.0.0.1, writes a 600
  * key file, prints the ready line, checks the key on every request and logs what it was asked.
  */
-async function fakeDaniFree(options: { failBeforeReady?: boolean } = {}): Promise<{ executable: string; log: string }> {
+async function fakeDaniFree(
+  options: { failBeforeReady?: boolean; leaveChild?: boolean } = {},
+): Promise<{ executable: string; log: string; root: string }> {
   const root = await mkdtemp(join(tmpdir(), "dani-free-"));
   directories.push(root);
   const log = join(root, "requests.log");
@@ -29,6 +31,11 @@ const path = require("node:path");
 const root = ${JSON.stringify(root)};
 if (${options.failBeforeReady === true}) { process.stderr.write("port in use\\n"); process.exit(3); }
 fs.appendFileSync(${JSON.stringify(log)}, "argv " + process.argv.slice(2).join(" ") + " private=" + (process.env.DANI_FREE_PRIVATE_MODE || "") + "\\n");
+if (${options.leaveChild === true}) {
+  // Like the OpenCode the real proxy runs: a child in its group that it does not stop on the way out.
+  const child = require("node:child_process").spawn("sleep", ["120"], { stdio: "ignore" });
+  fs.writeFileSync(path.join(root, "child.pid"), String(child.pid));
+}
 const keyFile = path.join(root, "key");
 fs.writeFileSync(keyFile, "install-key\\n", { mode: 0o600 });
 const server = http.createServer((req, res) => {
@@ -37,7 +44,7 @@ const server = http.createServer((req, res) => {
   if (req.url === "/v1/models/refresh") { res.writeHead(200, { "content-type": "application/json" }); return res.end("{}"); }
   if (req.url === "/v1/models") {
     res.writeHead(200, { "content-type": "application/json" });
-    return res.end(JSON.stringify({ object: "list", data: [{ id: "kilo/some-upstream-model" }, { id: "auto" }] }));
+    return res.end(JSON.stringify({ object: "list", data: [{ id: "kilo/some-upstream-model" }, { id: "dani-free-auto", name: "Dani Free Auto" }] }));
   }
   res.writeHead(404); res.end();
 });
@@ -50,8 +57,48 @@ process.on("SIGTERM", () => { fs.appendFileSync(${JSON.stringify(log)}, "SIGTERM
 `,
   );
   await chmod(executable, 0o755);
-  return { executable, log };
+  return { executable, log, root };
 }
+
+function alive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+describe.skipIf(process.platform === "win32")("Dani-Free leftovers", () => {
+  it("stops what the proxy started when the app stops it", async () => {
+    const fake = await fakeDaniFree({ leaveChild: true });
+    const supervisor = new DaniFreeSupervisor({ executable: fake.executable, home: join(fake.root, "home") });
+    supervisors.push(supervisor);
+    expect(await supervisor.start()).not.toBeNull();
+    const child = Number(await readFile(join(fake.root, "child.pid"), "utf8"));
+    expect(alive(child)).toBe(true);
+    await supervisor.stop();
+    await expect.poll(() => alive(child), { timeout: 3_000 }).toBe(false);
+  });
+
+  it("ends a group a force-killed run left behind before starting again", async () => {
+    const fake = await fakeDaniFree({ leaveChild: true });
+    const home = join(fake.root, "home");
+    const first = new DaniFreeSupervisor({ executable: fake.executable, home });
+    expect(await first.start()).not.toBeNull();
+    const child = Number(await readFile(join(fake.root, "child.pid"), "utf8"));
+    // A force-kill: the proxy dies without a word and nothing tells the supervisor.
+    const group = Number((await readFile(join(home, "dani-dex-process-group"), "utf8")).trim());
+    process.kill(group, "SIGKILL");
+    await expect.poll(() => alive(group), { timeout: 3_000 }).toBe(false);
+    expect(alive(child)).toBe(true);
+
+    const next = new DaniFreeSupervisor({ executable: fake.executable, home });
+    supervisors.push(next);
+    await next.sweepLeftovers();
+    await expect.poll(() => alive(child), { timeout: 3_000 }).toBe(false);
+  });
+});
 
 describe("parseDaniFreeReadyLine", () => {
   it("reads the ready line", () => {
@@ -89,7 +136,7 @@ describe("DaniFreeSupervisor", () => {
     expect(source).toMatchObject({
       id: "dani",
       name: "Dani",
-      models: [{ id: "auto", name: "Dani Free Auto" }],
+      models: [{ id: "dani-free-auto", name: "Dani Free Auto" }],
       headers: [{ name: "x-api-key", value: "install-key" }],
       apiKey: "install-key",
     });
@@ -161,7 +208,11 @@ describe.skipIf(!realBinary)("DaniFreeSupervisor with the real proxy", () => {
     const supervisor = new DaniFreeSupervisor({ executable: realBinary ?? "", home });
     supervisors.push(supervisor);
     const source = await supervisor.start();
-    expect(source).toMatchObject({ id: "dani", name: "Dani", models: [{ id: "auto", name: "Dani Free Auto" }] });
+    expect(source).toMatchObject({
+      id: "dani",
+      name: "Dani",
+      models: [{ id: "dani-free-auto", name: "Dani Free Auto" }],
+    });
     expect(source?.baseUrl).toMatch(/^http:\/\/127\.0\.0\.1:\d+\/v1$/);
     const response = await fetch(`${source?.baseUrl}/models`, {
       headers: { authorization: `Bearer ${source?.apiKey}` },

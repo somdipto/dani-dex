@@ -61,13 +61,13 @@ describe.skipIf(!proxyPath || !opencodePath)("Dani's free models through OpenCod
     await client.request("initialize", {}, decodeRecordResponse);
     const models = await client.request("model/list", {}, decodeModelListResponse, 90_000);
     const dani = models.data.filter((model) => model.model?.startsWith("dani/"));
-    expect(dani.map((model) => model.model)).toEqual(["dani/auto"]);
+    expect(dani.map((model) => model.model)).toEqual(["dani/dani-free-auto"]);
     expect(dani[0]?.displayName).toMatch(/Dani Free Auto$/);
     expect(JSON.stringify(dani)).not.toMatch(/kilo|nex|free\)/i);
 
     const thread = await client.request(
       "thread/start",
-      { cwd: home, runtimeWorkspaceRoots: [home], model: "dani/auto" },
+      { cwd: home, runtimeWorkspaceRoots: [home], model: "dani/dani-free-auto" },
       decodeRecordResponse,
     );
     const threadId = isDynamicRecord(thread.thread) ? thread.thread.id : null;

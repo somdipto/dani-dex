@@ -8,7 +8,7 @@
 
 import { type ChildProcess, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { readFile, stat } from "node:fs/promises";
+import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { DaniDexModelSource } from "@dani-dex/contracts/online-services";
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
@@ -22,7 +22,7 @@ export const DANI_FREE_REQUEST_TIMEOUT_MS = 20_000;
 export const DANI_MODEL_SOURCE_ID = "dani";
 export const DANI_MODEL_SOURCE_NAME = "Dani";
 /** The model the proxy routes itself, and the only one the interface shows. */
-export const DANI_AUTO_MODEL = "auto";
+export const DANI_AUTO_MODEL = "dani-free-auto";
 /** What the user sees for it, the only model name in the product. */
 export const DANI_AUTO_MODEL_NAME = "Dani Free Auto";
 
@@ -118,6 +118,7 @@ export class DaniFreeSupervisor {
 
   async start(): Promise<DaniDexModelSource | null> {
     try {
+      await this.sweepLeftovers();
       const ready = await this.#spawn();
       const key = await readKey(ready.apiKeyFile);
       await this.#request(ready, key, "POST", "/v1/models/refresh").catch((error) => {
@@ -141,13 +142,60 @@ export class DaniFreeSupervisor {
   async stop(): Promise<void> {
     const child = this.#child;
     this.#child = null;
-    if (!child || child.exitCode !== null || child.signalCode !== null) return;
+    if (!child || child.exitCode !== null || child.signalCode !== null) {
+      if (child?.pid) this.#signalGroup(child.pid, "SIGTERM");
+      return;
+    }
     this.#stopping = true;
     const exited = new Promise<void>((resolve) => child.once("exit", () => resolve()));
-    child.kill(process.platform === "win32" ? undefined : "SIGTERM");
-    const timer = setTimeout(() => child.kill("SIGKILL"), 3_000);
+    if (process.platform === "win32") child.kill();
+    else this.#signalGroup(child.pid, "SIGTERM");
+    const timer = setTimeout(() => {
+      if (process.platform === "win32") child.kill("SIGKILL");
+      else this.#signalGroup(child.pid, "SIGKILL");
+    }, 3_000);
     await exited;
     clearTimeout(timer);
+    // Whatever the proxy started and left behind in its group goes with it.
+    if (child.pid) this.#signalGroup(child.pid, "SIGTERM");
+    await rm(this.#groupFile(), { force: true }).catch(() => undefined);
+  }
+
+  /**
+   * Stops what a previous run left behind. If Dani-Dex and the proxy are both force-killed, the
+   * OpenCode the proxy ran can outlive them in the proxy's process group. The group id is recorded
+   * at spawn, and the next launch ends that group before starting a new proxy. A process group id is
+   * not handed out again while any member of the group is alive, so a group that still exists under
+   * that id is the one left behind.
+   */
+  async sweepLeftovers(): Promise<void> {
+    if (process.platform === "win32") return;
+    const recorded = await readFile(this.#groupFile(), "utf8").catch(() => "");
+    const group = Number.parseInt(recorded.trim(), 10);
+    if (Number.isInteger(group) && group > 1 && group !== process.pid) {
+      if (this.#signalGroup(group, "SIGTERM")) logger.info("Stopped what the last Dani-Free run left running.");
+    }
+    await rm(this.#groupFile(), { force: true }).catch(() => undefined);
+  }
+
+  #groupFile(): string {
+    return join(this.#options.home, "dani-dex-process-group");
+  }
+
+  async #recordGroup(group: number): Promise<void> {
+    await mkdir(this.#options.home, { recursive: true });
+    await writeFile(this.#groupFile(), `${group}\n`, { mode: 0o600 }).catch(() => undefined);
+  }
+
+  /** Signals a whole process group; false when there is none. */
+  #signalGroup(group: number | undefined, signal: NodeJS.Signals): boolean {
+    if (!group || process.platform === "win32") return false;
+    try {
+      process.kill(-group, signal);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   #spawn(): Promise<DaniFreeReady> {
@@ -166,8 +214,11 @@ export class DaniFreeSupervisor {
       },
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
+      // Its own process group on macOS and Linux, so the OpenCode it runs can be stopped with it.
+      detached: process.platform !== "win32",
     });
     this.#child = child;
+    if (child.pid && process.platform !== "win32") void this.#recordGroup(child.pid);
     this.#stopping = false;
     let stderr = "";
     child.stderr?.setEncoding("utf8");
