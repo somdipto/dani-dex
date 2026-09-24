@@ -67,9 +67,33 @@ jobs:
           echo "version=$package_version" >> "$GITHUB_OUTPUT"
           echo "tag=v$package_version" >> "$GITHUB_OUTPUT"
 
+      # The release page shows the plain-language changelog entry, not a list of commit titles.
+      - name: Extract release notes
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          awk -v heading="## [$RELEASE_VERSION]" '
+            index($0, heading) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "CHANGELOG.md has no notes under ## [$RELEASE_VERSION]." >&2
+            exit 1
+          fi
+
+      - name: Upload release notes
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-notes
+          path: release-notes.md
+          if-no-files-found: error
+
   # Dani-Dex ships one unsigned universal Mac app, so an Intel Mac and an Apple silicon Mac download
   # the same DMG and read the same latest-mac.yml. Without a Developer ID signature Squirrel.Mac
-  # cannot install in place, so the app finds the update and opens this release's page instead.
+  # cannot install in place, so the app installs this release's ZIP itself (mac-bundle-updater.ts).
   macos:
     name: Build unsigned universal macOS release
     needs: validate
@@ -477,6 +501,12 @@ jobs:
           name: release-linux
           path: release-assets/linux
 
+      - name: Download release notes
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-notes
+          path: release-notes
+
       - name: Generate combined checksums
         shell: bash
         run: |
@@ -513,11 +543,11 @@ jobs:
           artifacts=(release-assets/macos/* release-assets/windows/* release-assets/linux/* release-assets/SHA256SUMS.txt release-assets/Dani-Dex-*)
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "${artifacts[@]}" --clobber --repo "$GITHUB_REPOSITORY"
-            gh release edit "$RELEASE_TAG" --draft=false --latest --repo "$GITHUB_REPOSITORY"
+            gh release edit "$RELEASE_TAG" --draft=false --latest --notes-file release-notes/release-notes.md --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$RELEASE_TAG" \
               "${artifacts[@]}" \
-              --generate-notes \
+              --notes-file release-notes/release-notes.md \
               --latest \
               --repo "$GITHUB_REPOSITORY" \
               --title "Dani-Dex $RELEASE_TAG"
