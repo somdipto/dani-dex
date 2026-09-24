@@ -24,3 +24,25 @@ export const DANI_DEX_ANALYTICS_API_URL: string | null = null;
 
 /** The DNS suffix published sites live under, such as `.example.site`. Null publishes nowhere. */
 export const DANI_DEX_HOSTED_SITE_SUFFIX: string | null = null;
+
+/**
+ * Where OpenCode's models come from: the one switch for the model source.
+ *
+ * Null means OpenCode's own catalog, which lists its free models with no account. Set it to an
+ * OpenAI-compatible endpoint (`<baseUrl>/chat/completions`) and every OpenCode agent uses it
+ * instead, with no other change: `src/backend/model-source.ts` hands it to the OpenCode process as
+ * one provider, and the harness keeps OpenCode on its own CLI so the endpoint is always the one in
+ * use. This is where Dan Lab's own proxy goes when it runs.
+ */
+export interface DaniDexModelSource {
+  /** The provider id model ids are prefixed with, such as `danlab` for `danlab/<model>`. */
+  readonly id: string;
+  readonly name: string;
+  readonly baseUrl: string;
+  /** The models the endpoint serves. OpenCode lists only the ones named here. */
+  readonly models: readonly { readonly id: string; readonly name: string }[];
+  /** Sent with every request, for a proxy that authenticates by header instead of a key. */
+  readonly headers?: readonly { readonly name: string; readonly value: string }[];
+}
+
+export const DANI_DEX_MODEL_SOURCE: DaniDexModelSource | null = null;

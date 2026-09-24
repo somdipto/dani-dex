@@ -815,7 +815,11 @@ export class ProviderRuntime implements ProviderPort {
         const executable = await install();
         this.#bundledExecutables[provider] = executable;
         const cli = await this.#resolveProviderCli(provider);
-        if (cli.source !== "managed" || cli.executable !== executable) {
+        // A provider the harness runs resolves the harness binary, not the runtime just installed:
+        // the install still succeeded, and the provider restarts on the harness. Only a provider on
+        // its own CLI must now be running exactly the copy that was installed.
+        const ownCli = this.#driverFor(provider) === requireProviderDriver(provider);
+        if (ownCli && (cli.source !== "managed" || cli.executable !== executable)) {
           throw new Error("Dani-Dex could not select the installed managed CLI.");
         }
         await this.#reloadProviderCli(provider, cli);

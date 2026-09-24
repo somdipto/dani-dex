@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { readFile, writeFile } from "node:fs/promises";
+import { chmod, copyFile, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AgentEvent } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -26,6 +26,7 @@ import type { AgentStore } from "../agent-store";
 
 import type { CustomProviderConfig } from "../opencode-config";
 import { getString } from "../protocol";
+import { requireProviderDriver } from "../provider-drivers";
 import { DIAGNOSTIC_TEXT_LIMIT } from "../stderr-diagnostics";
 import { DrainScheduler } from "./drain-scheduler";
 import { isUsageLimitDiagnostic } from "./provider-runtime";
@@ -979,6 +980,36 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
     );
     expect(clients[0]?.running).toBe(false);
     expect(clients[1]?.running).toBe(true);
+  });
+
+  // The default harness runs OpenCode once a Go key is saved, so the provider resolves the harness
+  // binary rather than the runtime just downloaded. The download must still land and the provider
+  // come back up; refusing it left the picker on "Connect" with no models after a fresh install.
+  it("finishes a runtime download for a provider the harness runs", async () => {
+    const harness = join(root, "harness-bin");
+    await copyFile(await createFakeClaude(root), harness);
+    await chmod(harness, 0o755);
+    const own = requireProviderDriver("claude");
+    const harnessDriver = {
+      ...own,
+      resolveCli: () => own.resolveCli({ bundledExecutable: harness }),
+    };
+    const { store, mailbox } = stores(root);
+    service = createTestService({
+      store,
+      mailbox,
+      preferredProvider: "claude",
+      clientFactory: (provider) => new FakeAgentClient(provider),
+      providerDriver: (provider) => (provider === "claude" ? harnessDriver : requireProviderDriver(provider)),
+    });
+    await service.initialize();
+    const managed = await createFakeClaude(root);
+    process.env.DANI_DEX_CLAUDE_PATH = join(root, "missing-claude");
+    const install = vi.fn(async () => managed);
+
+    const status = await service.updateProviderCli("claude", install);
+    expect(install).toHaveBeenCalledOnce();
+    expect(status.providers).toContainEqual(expect.objectContaining({ id: "claude", state: "available" }));
   });
 
   it("keeps the previous client when the replacement cannot authenticate", async () => {

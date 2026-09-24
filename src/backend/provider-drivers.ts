@@ -12,6 +12,7 @@ import type {
   McpServerSource,
   McpToolRuntimeSource,
 } from "./mcp-provider-shapes";
+import { withModelSource } from "./model-source";
 import {
   type CustomProviderSource,
   OPENCODE_PROFILE_CONFIG,
@@ -211,7 +212,13 @@ export const BUILT_IN_PROVIDER_DRIVERS: readonly BuiltInProviderDriver[] = [
         provider: "opencode",
         argv: ["acp"],
         env: {},
-        extraEnv: () => ({ ...opencodeEnv(cli, context), ...openCodeConfigEnv({}, context.customProviders) }),
+        extraEnv: () => ({
+          ...opencodeEnv(cli, context),
+          ...openCodeConfigEnv(
+            {},
+            withModelSource(context.customProviders, () => context.apiKey("opencode")),
+          ),
+        }),
         signInMessage: openCodeSignInMessage(context.customProviders().length),
         servesModel: context.servesModel,
         mcpServers: context.mcpServers,
@@ -227,7 +234,10 @@ export const BUILT_IN_PROVIDER_DRIVERS: readonly BuiltInProviderDriver[] = [
         env: {},
         extraEnv: () => ({
           ...opencodeEnv(cli, context),
-          ...openCodeConfigEnv(OPENCODE_PROFILE_CONFIG, context.customProviders),
+          ...openCodeConfigEnv(
+            OPENCODE_PROFILE_CONFIG,
+            withModelSource(context.customProviders, () => context.apiKey("opencode")),
+          ),
         }),
         signInMessage: openCodeSignInMessage(context.customProviders().length),
         servesModel: context.servesModel,
