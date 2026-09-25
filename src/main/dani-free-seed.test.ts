@@ -67,10 +67,18 @@ describe("packaged Dani Free release validation", () => {
     await writeFile(join(root, "engine-pins"), `${engineDigest}  linux-x64\n`);
     await installDaniFree(root, target, join(root, "proxy-pins"), join(resources, "dani-free"));
     const stagedEngine = await installDaniFreeEngineSeed(
-      join(root, "source-engine"), "linux", "x64", join(root, "engine-pins"), join(resources, "dani-free-engine"),
+      join(root, "source-engine"),
+      "linux",
+      "x64",
+      join(root, "engine-pins"),
+      join(resources, "dani-free-engine"),
     );
-    await expect(verifyPackagedDaniFree(resources, "linux", "x64", join(root, "proxy-pins"), join(root, "engine-pins"))).resolves.toBeUndefined();
+    await expect(
+      verifyPackagedDaniFree(resources, "linux", "x64", join(root, "proxy-pins"), join(root, "engine-pins")),
+    ).resolves.toBeUndefined();
     await writeFile(stagedEngine, "tampered");
-    await expect(verifyPackagedDaniFree(resources, "linux", "x64", join(root, "proxy-pins"), join(root, "engine-pins"))).rejects.toThrow("does not match");
+    await expect(
+      verifyPackagedDaniFree(resources, "linux", "x64", join(root, "proxy-pins"), join(root, "engine-pins")),
+    ).rejects.toThrow("does not match");
   });
 });

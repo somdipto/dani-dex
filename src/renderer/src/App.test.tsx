@@ -559,8 +559,8 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.pointerDown(screen.getByRole("button", { name: "New agent or channel" }), { button: 0 });
     await fireEvent.pointerUp(await screen.findByRole("menuitem", { name: "New agent" }), { button: 0 });
     const heading = await screen.findByRole("heading", { name: "Create a new agent" });
-    const main = heading.closest("main") ?? heading.parentElement?.parentElement;
-    expect(main).toBeTruthy();
+    expect(heading).toBeInTheDocument();
+    const main = screen.getByRole("main", { name: "Create a new agent" });
     expect(main).not.toHaveTextContent(/upstream|dani free|model/i);
     expect(screen.getByRole("button", { name: "Create agent" })).toBeDisabled();
     expect(window.danidex.agent.createAgent).not.toHaveBeenCalled();
