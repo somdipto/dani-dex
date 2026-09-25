@@ -466,8 +466,8 @@ describe("Dani-Dex connected desktop shell", () => {
         initialMessage: "Greet me briefly.",
         avatarSeed: expect.any(String),
         avatarHue: null,
-        provider: "codex",
-        model: "gpt-5.6-luna",
+        provider: "opencode",
+        model: "dani/dani-free-auto",
       }),
     );
     expect(await screen.findByRole("heading", { name: "Helper" })).toBeInTheDocument();
@@ -501,8 +501,8 @@ describe("Dani-Dex connected desktop shell", () => {
       description: draft.purpose,
       avatarSeed: expect.any(String),
       avatarHue: 215,
-      provider: "codex",
-      model: "gpt-5.6-luna",
+      provider: "opencode",
+      model: "dani/dani-free-auto",
       initialMessage:
         "Your ongoing role is: Compare travel options and turn my rough ideas into practical, day-by-day itineraries. There is no task yet - just greet me briefly and confirm what you will help with.",
     });
@@ -519,9 +519,9 @@ describe("Dani-Dex connected desktop shell", () => {
     vi.mocked(window.danidex.agent.listModels).mockResolvedValue([
       {
         provider: "opencode",
-        id: "opencode/example-free",
-        name: "Example Free",
-        description: "Free OpenCode model.",
+        id: "dani/dani-free-auto",
+        name: "Dani Free Auto",
+        description: "",
         defaultReasoningEffort: "medium",
         supportedReasoningEfforts: ["medium"],
       },
@@ -533,14 +533,37 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.pointerUp(await screen.findByRole("menuitem", { name: "New agent" }), { button: 0 });
     expect(await screen.findByRole("heading", { name: "Create a new agent" })).toBeInTheDocument();
     // The hard-coded codex default would fail against this catalog; the saved choice stands instead.
-    expect(await screen.findByRole("button", { name: "Agent model: Example Free" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Agent model/ })).not.toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "Create agent" }));
 
     await waitFor(() =>
       expect(window.danidex.agent.createAgent).toHaveBeenCalledWith(
-        expect.objectContaining({ provider: "opencode", model: "opencode/example-free" }),
+        expect.objectContaining({ provider: "opencode", model: "dani/dani-free-auto" }),
       ),
     );
+  });
+
+  it("hides every model identity on new-agent setup and refuses an upstream fallback", async () => {
+    vi.mocked(window.danidex.agent.listModels).mockResolvedValue([
+      {
+        provider: "opencode",
+        id: "opencode/upstream-free",
+        name: "Upstream Free Model",
+        description: "",
+        defaultReasoningEffort: "medium",
+        supportedReasoningEfforts: ["medium"],
+      },
+    ]);
+    render(() => <App />);
+    await screen.findByRole("heading", { name: "Chief" });
+    await fireEvent.pointerDown(screen.getByRole("button", { name: "New agent or channel" }), { button: 0 });
+    await fireEvent.pointerUp(await screen.findByRole("menuitem", { name: "New agent" }), { button: 0 });
+    const heading = await screen.findByRole("heading", { name: "Create a new agent" });
+    const main = heading.closest("main") ?? heading.parentElement?.parentElement;
+    expect(main).toBeTruthy();
+    expect(main).not.toHaveTextContent(/upstream|dani free|model/i);
+    expect(screen.getByRole("button", { name: "Create agent" })).toBeDisabled();
+    expect(window.danidex.agent.createAgent).not.toHaveBeenCalled();
   });
 
   it("opens and cancels agent creation from a private conversation", async () => {

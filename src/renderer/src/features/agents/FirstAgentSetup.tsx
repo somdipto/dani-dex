@@ -1,16 +1,7 @@
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
-import type {
-  AgentModelId,
-  AgentModelOption,
-  AgentProviderId,
-  AgentStatus,
-  AvatarHue,
-  CustomProviderSummary,
-  ProviderRuntimeStatus,
-} from "@dani-dex/contracts/ipc";
+import type { AgentModelId, AgentProviderId, AvatarHue } from "@dani-dex/contracts/ipc";
 import { createSignal, For, onSettled, Show } from "solid-js";
 import { AVATAR_HUE_OPTIONS, avatarCandidateSeeds, avatarHeadColor, avatarHueSwatch } from "../../bloub-avatar";
-import { ProviderModelPicker } from "../../components/ProviderModelPicker";
 import { Button, Field, Input, Textarea } from "../../components/ui";
 import { AgentAvatar } from "./AgentAvatar";
 
@@ -41,14 +32,8 @@ export interface FirstAgentSetupProps {
   mode?: "first" | "additional";
   submitting?: boolean;
   error?: string | null;
-  /** The live catalog behind the model picker. Absent, the form keeps no model choice. */
-  modelOptions?: AgentModelOption[];
-  agentStatus?: AgentStatus;
-  runtimeStatuses?: Partial<Record<AgentProviderId, ProviderRuntimeStatus>>;
-  customProviders?: readonly CustomProviderSummary[];
-  onDownloadProvider?: (provider: AgentProviderId) => void | Promise<void>;
-  onCancelProviderDownload?: (provider: AgentProviderId) => void | Promise<void>;
-  onConnectProvider?: (provider: AgentProviderId) => void | Promise<void>;
+  /** A real Dani Free Auto model must be listed before this form can create an agent. */
+  modelReady?: boolean;
   onChange: (value: FirstAgentDraft) => void;
   onSubmit: (value: FirstAgentDraft) => void | Promise<void>;
   onCancel?: () => void;
@@ -167,7 +152,7 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
   const [canScrollSuggestionsBack, setCanScrollSuggestionsBack] = createSignal(false);
   const [canScrollSuggestionsForward, setCanScrollSuggestionsForward] = createSignal(false);
   const [draggingSuggestions, setDraggingSuggestions] = createSignal(false);
-  const canSubmit = () => Boolean(props.value.name.trim()) && !props.submitting;
+  const canSubmit = () => Boolean(props.value.name.trim()) && props.modelReady === true && !props.submitting;
   const displayName = () => props.value.name.trim() || "New agent";
 
   function updateSuggestionFades(): void {
@@ -432,28 +417,8 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
                 onValueChange={(purpose) => updateDraft({ purpose })}
               />
             </Field>
-            <Show when={props.modelOptions}>
-              {(options) => (
-                <Show when={props.agentStatus}>
-                  {(status) => (
-                    <ProviderModelPicker
-                      variant="field"
-                      ariaLabel="Agent model"
-                      provider={props.value.provider}
-                      value={props.value.model}
-                      modelOptions={options()}
-                      agentStatus={status()}
-                      runtimeStatuses={props.runtimeStatuses}
-                      customProviders={props.customProviders}
-                      onDownloadProvider={props.onDownloadProvider}
-                      onCancelProviderDownload={props.onCancelProviderDownload}
-                      onConnectProvider={props.onConnectProvider}
-                      disabled={props.submitting}
-                      onChange={(model, provider) => updateDraft({ model, provider })}
-                    />
-                  )}
-                </Show>
-              )}
+            <Show when={!props.modelReady}>
+              <p role="status">Your assistant is unavailable. Try again later.</p>
             </Show>
           </div>
 

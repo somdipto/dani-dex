@@ -477,8 +477,8 @@ describe("Dani-Dex connected desktop shell", () => {
         initialMessage: "Greet me briefly.",
         avatarSeed: expect.any(String),
         avatarHue: null,
-        provider: "codex",
-        model: "gpt-5.6-luna",
+        provider: "opencode",
+        model: "dani/dani-free-auto",
       }),
     );
     expect(await screen.findByRole("heading", { name: "New agent" })).toBeInTheDocument();

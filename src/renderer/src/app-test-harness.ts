@@ -585,6 +585,14 @@ export function installDanidexStub(): void {
         }),
         listModels: vi.fn().mockResolvedValue([
           {
+            provider: "opencode",
+            id: "dani/dani-free-auto",
+            name: "Dani Free Auto",
+            description: "",
+            defaultReasoningEffort: "medium",
+            supportedReasoningEfforts: ["medium"],
+          },
+          {
             provider: "codex",
             id: "gpt-5.6-luna",
             name: "GPT-5.6 Luna",

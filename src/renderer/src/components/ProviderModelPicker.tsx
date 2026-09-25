@@ -113,14 +113,11 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
 
   /** OpenCode and Custom tabs split one wire provider so each model appears once. */
   function railModelOptions(rail: RailId): AgentModelOption[] {
-    if (isDaniOnly(props.modelOptions)) {
-      return props.modelOptions.map((option) => ({ ...option, name: DANI_MODEL_NAME, description: "" }));
-    }
     if (rail === CUSTOM_RAIL) return props.modelOptions.filter((option) => isCustomModel(option, customIds()));
     if (rail === "opencode") {
-      return props.modelOptions.filter(
-        (option) => option.provider === "opencode" && !isCustomModel(option, customIds()),
-      );
+      return props.modelOptions
+        .filter((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto")
+        .map((option) => ({ ...option, name: DANI_MODEL_NAME, description: "" }));
     }
     return props.modelOptions.filter((option) => option.provider === rail);
   }
@@ -131,7 +128,8 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
    */
   const daniOnly = createMemo(() => isDaniOnly(props.modelOptions));
   const rails = (): readonly RailId[] => (daniOnly() ? ["opencode"] : PROVIDERS);
-  const nameOf = (rail: RailId): string => (daniOnly() ? "Dani" : railName(rail));
+  const nameOf = (rail: RailId): string =>
+    rail === "opencode" ? "Dani Free" : daniOnly() ? "Dani Free" : railName(rail);
   const summaryOf = (rail: RailId, status: AgentProviderStatus): string =>
     daniOnly() ? DANI_SUMMARY : railSummary(rail, status);
   const headingSummaryOf = (rail: RailId, status: AgentProviderStatus): string =>
@@ -147,8 +145,9 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
     return count === 1 ? "1 endpoint" : `${count} endpoints`;
   };
   const railSummary = (rail: RailId, status: AgentProviderStatus): string =>
-    rail === CUSTOM_RAIL ? customSummary() : providerSummary(rail, status);
+    rail === CUSTOM_RAIL ? customSummary() : rail === "opencode" ? DANI_SUMMARY : providerSummary(rail, status);
   const railHeadingSummary = (rail: RailId, status: AgentProviderStatus): string => {
+    if (rail === "opencode") return status.state === "available" ? DANI_SUMMARY : providerStatusLabel(status.state);
     if (rail !== CUSTOM_RAIL) return providerHeadingSummary(rail, status);
     // OpenCode is what serves a custom endpoint, so its trouble is this tab's trouble.
     return status.state === "available" ? customSummary() : providerStatusLabel(status.state);
@@ -196,6 +195,7 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
   function selectModel(model: AgentModelId, rail: RailId): void {
     if (props.disabled || props.modelChangesDisabled) return;
     if (providerAvailability(props.agentStatus, props.modelOptions, rail).state !== "available") return;
+    if (rail === "opencode" && model !== "dani/dani-free-auto") return;
     if (
       !showsReasoningEffort() &&
       !pickerModels(railModelOptions(rail)).find((option) => option.id === model)?.variants.length
@@ -209,7 +209,8 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
     setSearch("");
   }
 
-  const triggerModelName = () => (daniOnly() ? DANI_MODEL_NAME : displayModelName(selectedModel()?.name, props.value));
+  const daniRoute = () => props.provider === "opencode" && activeProvider() !== CUSTOM_RAIL;
+  const triggerModelName = () => (daniRoute() ? DANI_MODEL_NAME : displayModelName(selectedModel()?.name, props.value));
   const field = () => props.variant === "field";
   const showsReasoningEffort = () => props.reasoningEffort !== undefined && props.onReasoningEffortChange !== undefined;
 
@@ -328,7 +329,16 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
 
             <For each={rails()}>
               {(provider) => {
-                const status = () => providerAvailability(props.agentStatus, props.modelOptions, provider);
+                const status = () => {
+                  const base = providerAvailability(props.agentStatus, props.modelOptions, provider);
+                  if (
+                    provider === "opencode" &&
+                    !railModelOptions(provider).some((model) => model.id.startsWith("dani/"))
+                  ) {
+                    return { ...base, state: "error" as const, message: "Dani Free is unavailable. Try again later." };
+                  }
+                  return base;
+                };
                 const models = createMemo(() => pickerModels(railModelOptions(provider)));
                 const groups = createMemo(() => groupPickerModels(models(), search()));
                 const selected = createMemo(() =>

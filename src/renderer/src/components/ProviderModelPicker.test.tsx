@@ -271,11 +271,8 @@ describe("ProviderModelPicker", () => {
   });
 });
 
-const openCodeModels: AgentModelOption[] = [
-  ["openai/gpt", "OpenAI/GPT"],
+const upstreamModels: AgentModelOption[] = [
   ["opencode/free", "OpenCode Zen/Example Free"],
-  ["opencode/free/low", "OpenCode Zen/Example Free (low)"],
-  ["opencode/free/high", "OpenCode Zen/Example Free (high)"],
   ["opencode/unknown", "OpenCode Zen/Unknown price"],
 ].map(([id, name]) => ({
   provider: "opencode",
@@ -285,6 +282,28 @@ const openCodeModels: AgentModelOption[] = [
   defaultReasoningEffort: "medium",
   supportedReasoningEfforts: ["medium"],
 }));
+
+it("shows Dani Free as unavailable instead of an upstream fallback model", async () => {
+  const status: AgentStatus = {
+    ...agentStatus,
+    providers: [{ id: "opencode", state: "available", version: "1.18.30", message: null, email: null }],
+  };
+  const view = render(() => (
+    <ProviderModelPicker
+      provider="opencode"
+      value="opencode/free"
+      modelOptions={upstreamModels}
+      agentStatus={status}
+      onChange={vi.fn()}
+    />
+  ));
+  expect(view.getByRole("button", { name: "Agent model: Dani Free Auto" })).toBeInTheDocument();
+  await fireEvent.click(view.getByRole("button", { name: "Agent model: Dani Free Auto" }));
+  const dialog = within(view.getByRole("dialog", { name: "Choose agent model" }));
+  expect(dialog.getByRole("status")).toHaveTextContent("Dani Free is unavailable");
+  expect(dialog.queryByRole("option")).not.toBeInTheDocument();
+  expect(dialog.queryByText(/OpenCode Zen|Example Free|Unknown price/)).not.toBeInTheDocument();
+});
 
 const openCodeBase: AgentProviderStatus = {
   id: "opencode",
@@ -298,61 +317,7 @@ function withOpenCodeProvider(overrides: Partial<AgentProviderStatus>): AgentPro
   return [...(agentStatus.providers ?? []), { ...openCodeBase, ...overrides }];
 }
 
-async function openOpenCodePicker() {
-  const onChange = vi.fn();
-  const [model, setModel] = createSignal("opencode/free/low");
-  const view = render(() => (
-    <ProviderModelPicker
-      provider="opencode"
-      value={model()}
-      modelOptions={openCodeModels}
-      agentStatus={agentStatus}
-      onChange={(id, provider) => {
-        setModel(id);
-        onChange(id, provider);
-      }}
-    />
-  ));
-  await fireEvent.click(view.getByRole("button", { name: /Agent model:/ }));
-  return { view, onChange, dialog: within(view.getByRole("dialog", { name: "Choose agent model" })) };
-}
-
-it("puts the service that holds a free model first and keeps one selected row per model", async () => {
-  const { dialog } = await openOpenCodePicker();
-  expect(dialog.getAllByRole("option").map((option) => option.getAttribute("aria-label"))).toEqual([
-    "Example Free",
-    "Unknown price",
-    "GPT",
-  ]);
-  expect(dialog.getByRole("option", { name: "Example Free" })).toHaveAttribute("aria-selected", "true");
-});
-
-it("searches by service or model and restores the list when search is cleared", async () => {
-  const { dialog } = await openOpenCodePicker();
-  const search = dialog.getByRole("textbox", { name: "Search models" });
-  await fireEvent.input(search, { target: { value: "openai" } });
-  expect(dialog.getAllByRole("option").map((option) => option.textContent)).toEqual(["GPT"]);
-  await fireEvent.input(search, { target: { value: "unknown price" } });
-  expect(dialog.getAllByRole("option").map((option) => option.textContent)).toEqual(["Unknown price"]);
-  await fireEvent.input(search, { target: { value: "missing" } });
-  expect(dialog.getByRole("status")).toHaveTextContent("No models match your search.");
-  await fireEvent.input(search, { target: { value: "" } });
-  expect(dialog.getAllByRole("option")).toHaveLength(3);
-});
-
-it("selects OpenCode reasoning model IDs and can return to the default model", async () => {
-  const { dialog, onChange } = await openOpenCodePicker();
-  const effort = dialog.getByRole("button", { name: /Agent reasoning effort/ });
-  expect(effort).toHaveTextContent("Low");
-  await fireEvent.pointerDown(effort, { pointerType: "mouse", button: 0 });
-  await fireEvent.click(await within(document.body).findByRole("option", { name: "High" }));
-  expect(onChange).toHaveBeenLastCalledWith("opencode/free/high", "opencode");
-  await fireEvent.pointerDown(effort, { pointerType: "mouse", button: 0 });
-  await fireEvent.click(await within(document.body).findByRole("option", { name: "Default" }));
-  expect(onChange).toHaveBeenLastCalledWith("opencode/free", "opencode");
-});
-
-it("shows the sign-in message and a Connect action when OpenCode lists no models", async () => {
+it("shows Dani Free unavailable and offers a retry when no model is listed", async () => {
   const onConnect = vi.fn();
   const status: AgentStatus = {
     ...agentStatus,
@@ -373,7 +338,7 @@ it("shows the sign-in message and a Connect action when OpenCode lists no models
   ));
   await fireEvent.click(view.getByRole("button", { name: /Agent model:/ }));
   const dialog = within(view.getByRole("dialog", { name: "Choose agent model" }));
-  expect(dialog.getByRole("status")).toHaveTextContent("OpenCode listed no model.");
+  expect(dialog.getByRole("status")).toHaveTextContent("Dani Free is unavailable.");
   await fireEvent.click(dialog.getByRole("button", { name: "Connect" }));
   expect(onConnect).toHaveBeenCalledWith("opencode");
 });

@@ -1,11 +1,7 @@
 import { TEAM_AGENT_CREATE_MODEL_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
-import { createEffect, createMemo, createSignal } from "solid-js";
-import { useProviders } from "../../providers";
-import { useCustomProviders } from "../custom-providers/custom-providers-context";
-import { useSetup } from "../onboarding/onboarding-context";
+import { createEffect, createMemo } from "solid-js";
 import { useServers } from "../servers/servers-context";
 import { useAgentActions } from "./agent-actions";
-import { resolveCreationModel } from "./agent-creation-model";
 import { useAgents } from "./agents-context";
 import { FIRST_AGENT_SUGGESTIONS, FirstAgentSetup } from "./FirstAgentSetup";
 
@@ -23,46 +19,25 @@ export function WorkspaceAgentSetup() {
     creatingAgent,
     cancelAgentSetup,
     modelOptions,
-    agentStatus,
   } = useAgents();
   const { createAgent } = useAgentActions();
-  const { setupState } = useSetup();
-  // Not gated on the server: the picker needs these IDs to label a model it is already showing,
-  // and a remote server's OpenCode has its own catalogue. Only the write paths are local-only.
-  const { customProviders } = useCustomProviders();
   const { activeServer, activeServerSupportsCapability } = useServers();
-  const {
-    providerRuntimeStatuses,
-    providerRuntimeDownloadsAvailable,
-    downloadProviderRuntime,
-    cancelProviderRuntimeDownload,
-    connectProvider,
-  } = useProviders();
-  /** Provider downloads are the local machine's business, never a remote host's. */
-  const localProviderDownloads = createMemo(
-    () => activeServer()?.kind === "local" && providerRuntimeDownloadsAvailable(),
-  );
-  /**
-   * A remote host without the capability drops the pair in its frozen projection and starts the
-   * agent on its own default, so the form offers no choice there: the backend default stands.
-   */
-  const createModelSupported = createMemo(
-    () => activeServer()?.kind !== "remote" || activeServerSupportsCapability(TEAM_AGENT_CREATE_MODEL_CAPABILITY),
-  );
-  /**
-   * The draft opens on the hard-coded default, which would bypass the saved setup choice and fail
-   * outright after onboarding with a provider the default does not cover. Resolve it from the
-   * saved choice and the live catalog until the user picks a model themselves.
-   */
-  const [modelTouched, setModelTouched] = createSignal(false);
+  // The home creation flow uses only the proxy-verified Dani Free Auto choice. No model name,
+  // upstream catalog or fallback selection is shown or submitted here.
+  const daniModel = createMemo(() => {
+    if (activeServer()?.kind === "remote" && !activeServerSupportsCapability(TEAM_AGENT_CREATE_MODEL_CAPABILITY)) {
+      return undefined;
+    }
+    return modelOptions().find((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto");
+  });
   createEffect(
-    () => ({ touched: modelTouched(), setup: setupState(), options: modelOptions(), draft: agentSetupDraft() }),
-    ({ touched, setup, options, draft }) => {
-      if (touched) return;
-      const resolved = resolveCreationModel(setup, options);
-      if (!resolved) return;
-      if (draft.provider === resolved.provider && draft.model === resolved.model) return;
-      setAgentSetupDraft({ ...draft, provider: resolved.provider, model: resolved.model });
+    () => daniModel(),
+    (model) => {
+      if (!model) return;
+      const draft = agentSetupDraft();
+      if (draft.provider !== "opencode" || draft.model !== model.id) {
+        setAgentSetupDraft({ ...draft, provider: "opencode", model: model.id });
+      }
     },
   );
 
@@ -73,19 +48,13 @@ export function WorkspaceAgentSetup() {
       mode={agentList().length === 0 ? "first" : "additional"}
       submitting={creatingAgent()}
       error={agentSetupError()}
-      modelOptions={createModelSupported() ? modelOptions() : undefined}
-      agentStatus={agentStatus()}
-      runtimeStatuses={localProviderDownloads() ? providerRuntimeStatuses() : undefined}
-      customProviders={customProviders()}
-      onDownloadProvider={localProviderDownloads() ? downloadProviderRuntime : undefined}
-      onCancelProviderDownload={localProviderDownloads() ? cancelProviderRuntimeDownload : undefined}
-      onConnectProvider={localProviderDownloads() ? connectProvider : undefined}
-      onChange={(next) => {
-        const current = agentSetupDraft();
-        if (next.provider !== current.provider || next.model !== current.model) setModelTouched(true);
-        setAgentSetupDraft(next);
+      modelReady={Boolean(daniModel())}
+      onChange={setAgentSetupDraft}
+      onSubmit={(draft) => {
+        const model = daniModel();
+        if (!model) return;
+        void createAgent({ ...draft, provider: "opencode", model: model.id });
       }}
-      onSubmit={createAgent}
       onCancel={agentList().length > 0 ? cancelAgentSetup : undefined}
     />
   );
