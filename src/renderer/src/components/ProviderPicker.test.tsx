@@ -49,6 +49,25 @@ function renderPicker(
 }
 
 describe("ProviderPicker", () => {
+  it("puts Dani Free first without removing other sign-in rows", () => {
+    const view = render(() => (
+      <ProviderPicker
+        value="opencode"
+        options={[claude, { id: "codex", name: "ChatGPT", state: "not-installed" }, openCode]}
+        daniOnly
+        ariaLabel="AI providers"
+        allowUnavailableSelection
+        onChange={vi.fn()}
+        onSignInProvider={vi.fn()}
+      />
+    ));
+    const rows = [...view.container.querySelectorAll('.provider-picker-option:not(.provider-picker-option-custom)')];
+    expect(rows.map((row) => row.querySelector('.provider-picker-name')?.textContent)).toEqual([
+      "Dani Free", "Claude", "ChatGPT",
+    ]);
+    expect(view.getByRole("radio", { name: /Claude/ })).toBeTruthy();
+  });
+
   it("sends a user to no install page for OpenCode, and falls back to Sign in with no runtime", () => {
     const { view, onSignInProvider } = renderPicker([claude, openCode]);
 

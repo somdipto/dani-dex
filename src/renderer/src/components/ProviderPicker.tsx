@@ -107,6 +107,9 @@ export function ProviderPicker(props: ProviderPickerProps) {
   const addCustomId = `${pickerId}-custom`;
   const customRadioId = `${pickerId}-custom-radio`;
   const openCode = () => props.options.find((option) => option.id === "opencode");
+  // The free route leads the list; connected alternatives remain visible and selectable.
+  const orderedOptions = () =>
+    [...props.options].sort((a, b) => (a.id === "opencode" ? -1 : 0) - (b.id === "opencode" ? -1 : 0));
   const customReady = () => servesCustomProvider(openCode());
   const endpointCount = () => props.customProviders?.length ?? 0;
   const endpointCountLabel = () => i18n.t("provider.endpointCount", { count: endpointCount() });
@@ -259,7 +262,7 @@ export function ProviderPicker(props: ProviderPickerProps) {
   createEffect(
     () => ({
       focusFirst: props.focusFirst,
-      options: props.options,
+      options: orderedOptions(),
       allowUnavailableSelection: props.allowUnavailableSelection,
     }),
     ({ focusFirst, options, allowUnavailableSelection }) => {
@@ -309,7 +312,7 @@ export function ProviderPicker(props: ProviderPickerProps) {
       <div class="provider-picker-list">
         {/* Custom row joins the group once endpoints exist. */}
         <div role="radiogroup" aria-label={props.ariaLabel}>
-          <For each={props.options} keyed={false}>
+          <For each={orderedOptions()} keyed={false}>
             {(option) => {
               const state = () => option().state;
               const runtimeStatus = () => option().runtimeStatus;
