@@ -18,6 +18,32 @@ export async function installDaniFreeEngineSeed(
   const bytes = await readFile(source);
   const actual = createHash("sha256").update(bytes).digest("hex");
   if (actual !== expected) throw new Error(`Dani Free engine seed executable digest mismatch for ${name}.`);
+  if (platform === "darwin") {
+    const machine = arch === "arm64" ? 0x0100000c : 0x01000007;
+    if (bytes.length < 8 || bytes.readUInt32LE(0) !== 0xfeedfacf || bytes.readUInt32LE(4) !== machine) {
+      throw new Error(`Dani Free engine seed is not a ${arch} Mach-O executable.`);
+    }
+  } else if (platform === "linux") {
+    if (
+      bytes.length < 20 ||
+      bytes.toString("binary", 0, 4) !== "\x7fELF" ||
+      bytes.readUInt16LE(18) !== (arch === "x64" ? 0x3e : 0xb7)
+    ) {
+      throw new Error(`Dani Free engine seed is not a ${arch} ELF executable.`);
+    }
+  } else {
+    if (bytes.length < 0x40 || bytes.toString("ascii", 0, 2) !== "MZ") {
+      throw new Error("Dani Free engine seed is not a Windows PE executable.");
+    }
+    const offset = bytes.readUInt32LE(0x3c);
+    if (
+      bytes.length < offset + 6 ||
+      bytes.toString("ascii", offset, offset + 4) !== "PE\0\0" ||
+      bytes.readUInt16LE(offset + 4) !== 0x8664
+    ) {
+      throw new Error("Dani Free engine seed is not a Windows x64 executable.");
+    }
+  }
   const directory = join(root, platform, arch);
   const destination = join(directory, platform === "win32" ? "dani-engine.exe" : "dani-engine");
   await mkdir(directory, { recursive: true });

@@ -60,7 +60,12 @@ export async function installDaniFree(
   const source = join(binariesDir, target.artifact);
   const bytes = await readFile(source);
   verifyDaniFreeBinary(bytes, target, pinned);
-  if (target.platform === "linux") {
+  if (target.platform === "darwin") {
+    const machine = target.arch === "arm64" ? 0x0100000c : 0x01000007;
+    if (bytes.length < 8 || bytes.readUInt32LE(0) !== 0xfeedfacf || bytes.readUInt32LE(4) !== machine) {
+      throw new Error(`Dani Free proxy is not a ${target.arch} Mach-O executable.`);
+    }
+  } else if (target.platform === "linux") {
     if (
       bytes.toString("binary", 0, 4) !== "\x7fELF" ||
       bytes.readUInt16LE(18) !== (target.arch === "x64" ? 0x3e : 0xb7)

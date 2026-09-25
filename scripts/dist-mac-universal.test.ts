@@ -8,12 +8,16 @@ describe("universal macOS configuration", () => {
   it("pins production installer icons to the same white tile and black mark", async () => {
     const config = parseBuilderConfig(await readFile("electron-builder.yml", "utf8"));
     expect(config.mac.icon).toBe("build/icon-production.icns");
-    expect(config.win.icon).toBe("build/icon-production.ico");
-    expect(config.linux.icon).toBe("build/icon-production.png");
-    expect(config.nsis).toMatchObject({
-      installerIcon: "build/icon-production.ico",
-      installerHeaderIcon: "build/icon-production.ico",
-      uninstallerIcon: "build/icon-production.ico",
+    expect(config).toMatchObject({
+      win: { icon: "build/icon-production.ico" },
+      linux: { icon: "build/icon-production.png" },
+      nsis: {
+        oneClick: false,
+        include: "build/dani-free-installer.nsh",
+        installerIcon: "build/icon-production.ico",
+        installerHeaderIcon: "build/icon-production.ico",
+        uninstallerIcon: "build/icon-production.ico",
+      },
     });
   });
 

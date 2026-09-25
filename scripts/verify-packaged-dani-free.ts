@@ -44,6 +44,15 @@ export async function verifyPackagedDaniFree(
       }
     }
   }
+  if (platform === "darwin") {
+    const machine = arch === "arm64" ? 0x0100000c : 0x01000007;
+    for (const executable of [proxy, engine.executable]) {
+      const bytes = await readFile(executable);
+      if (bytes.length < 8 || bytes.readUInt32LE(0) !== 0xfeedfacf || bytes.readUInt32LE(4) !== machine) {
+        throw new Error(`Packaged Dani Free macOS executable is not ${arch} Mach-O.`);
+      }
+    }
+  }
   if (platform === "linux") {
     for (const executable of [proxy, engine.executable]) {
       const bytes = await readFile(executable);

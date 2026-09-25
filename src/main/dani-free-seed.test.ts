@@ -15,7 +15,9 @@ describe("bundled Dani Free engine seed", () => {
   it("pins extracted executable bytes, stages and verifies the packaged copy", async () => {
     const root = await mkdtemp(join(tmpdir(), "engine-seed-"));
     directories.push(root);
-    const bytes = Buffer.from("extracted engine executable");
+    const bytes = Buffer.alloc(64);
+    bytes.set([0x7f, 0x45, 0x4c, 0x46]);
+    bytes.writeUInt16LE(0x3e, 18);
     const digest = createHash("sha256").update(bytes).digest("hex");
     const source = join(root, "engine");
     const pins = join(root, "pins.sha256");
@@ -37,12 +39,15 @@ describe("bundled Dani Free engine seed", () => {
     const source = join(root, "engine");
     const pins = join(root, "pins.sha256");
     await mkdir(root, { recursive: true });
-    await writeFile(source, "engine");
+    const seed = Buffer.alloc(64);
+    seed.set([0x7f, 0x45, 0x4c, 0x46]);
+    seed.writeUInt16LE(0x3e, 18);
+    await writeFile(source, seed);
     await writeFile(pins, "");
     await expect(installDaniFreeEngineSeed(source, "linux", "x64", pins, root)).rejects.toThrow("No pinned");
     await writeFile(pins, `${"0".repeat(64)}  linux-x64\n`);
     await expect(installDaniFreeEngineSeed(source, "linux", "x64", pins, root)).rejects.toThrow("digest mismatch");
-    expect(await readFile(source, "utf8")).toBe("engine");
+    expect(await readFile(source)).toEqual(seed);
   });
 });
 

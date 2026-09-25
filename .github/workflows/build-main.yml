@@ -49,11 +49,17 @@ jobs:
           bun scripts/install-grok-runtime.ts win32 x64
           bun scripts/install-hermes-runtime.ts win32 x64
 
+      - name: Stage pinned Dani Free resources
+        run: bun scripts/stage-dani-free-release.ts win32 x64
+
       - name: Build unsigned NSIS installer
         run: bun run dist:win
 
       - name: Verify packaged application and launch
         run: bun run verify:package:win
+
+      - name: Verify packaged Dani Free
+        run: bun scripts/smoke-packaged-dani-free.ts dist/win-unpacked/resources win32 x64
 
       # The harness the app runs by default for general work, started from inside the package through
       # the same `.cmd` launcher the app spawns.
@@ -103,6 +109,9 @@ jobs:
           bun scripts/install-grok-runtime.ts linux x64
           bun scripts/install-hermes-runtime.ts linux x64
 
+      - name: Stage pinned Dani Free resources
+        run: bun scripts/stage-dani-free-release.ts linux x64
+
       - name: Build AppImage
         run: bun run dist:linux
 
@@ -133,6 +142,9 @@ jobs:
           output=$(dist/linux-unpacked/resources/hermes/linux/x64/bin/hermes --version)
           echo "$output"
           grep -Fq "v$version" <<<"$output"
+
+      - name: Verify packaged Dani Free
+        run: bun scripts/smoke-packaged-dani-free.ts dist/linux-unpacked/resources linux x64
 
       - name: Upload AppImage
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -172,6 +184,9 @@ jobs:
 
       # The release job's build, with signing and notarization switched off. `dist:mac` would rebuild
       # the remote desktop runtime from source instead of installing the pinned one.
+      - name: Stage pinned Dani Free resources
+        run: bun scripts/stage-dani-free-release.ts darwin arm64
+
       - name: Build unsigned DMG
         run: |
           bun run voice:prepare-runtime
@@ -185,6 +200,9 @@ jobs:
           output=$(dist/mac-arm64/Dani-Dex.app/Contents/Resources/hermes/mac/arm64/bin/hermes --version)
           echo "$output"
           grep -Fq "v$version" <<<"$output"
+
+      - name: Verify packaged Dani Free
+        run: bun scripts/smoke-packaged-dani-free.ts dist/mac-arm64/Dani-Dex.app/Contents/Resources darwin arm64
 
       - name: Upload DMG
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -225,6 +243,11 @@ jobs:
           bun run verify:remote-desktop-runtime
           bun run prepare:cua-driver
 
+      - name: Stage pinned Dani Free resources for both Mac slices
+        run: |
+          bun scripts/stage-dani-free-release.ts darwin arm64
+          bun scripts/stage-dani-free-release.ts darwin x64
+
       - name: Build unsigned universal DMG
         run: |
           bun run voice:prepare-runtime
@@ -244,6 +267,11 @@ jobs:
           output=$("$app/Contents/Resources/hermes/mac/arm64/bin/hermes" --version)
           echo "$output"
           grep -Fq "v$version" <<<"$output"
+
+      - name: Verify packaged Dani Free in both slices
+        run: |
+          bun scripts/smoke-packaged-dani-free.ts dist/mac-universal/Dani-Dex.app/Contents/Resources darwin arm64
+          bun scripts/smoke-packaged-dani-free.ts dist/mac-universal/Dani-Dex.app/Contents/Resources darwin x64
 
       - name: Upload DMG
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

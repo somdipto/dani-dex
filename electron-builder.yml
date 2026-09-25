@@ -133,6 +133,8 @@ win:
       arch:
         - x64
 nsis:
+  oneClick: false
+  include: build/dani-free-installer.nsh
   # The installer EXE, setup header, and uninstall entry use the same white/black production mark
   # as the installed app. Do not pick up an old build/installerIcon.ico by default.
   installerIcon: build/icon-production.ico
@@ -141,7 +143,8 @@ nsis:
 linux:
   category: Utility
   icon: build/icon-production.png
-  synopsis: A local-first multi-agent desktop workspace.
+  synopsis: A local-first desktop workspace with Dani Free included.
+  description: Dani-Dex includes Dani Free.
   extraResources:
     - from: build/linux/dani-dex.apparmor
       to: linux/dani-dex.apparmor
@@ -162,7 +165,7 @@ linux:
       arch:
         - x64
 dmg:
-  title: ${productName} ${version}
+  title: ${productName} ${version} - Dani Free included
   background: build/dmg-background.png
   iconSize: 128
   iconTextSize: 14
