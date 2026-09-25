@@ -144,6 +144,8 @@ export interface AcpProviderOptions {
    * while those run and this process would still answer on it.
    */
   servesModel?(modelId: string): boolean;
+  /** Drop the model's thought chunks: Dani's free models reason out loud, and it must not reach a bubble. */
+  hideThoughtChunks?: boolean;
   /**
    * The user's own MCP servers, read at spawn. Dani-Dex's bridge servers are appended after these,
    * so a configuration can never displace the tools the agent depends on.
@@ -793,6 +795,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       return;
     }
     if (update.sessionUpdate === "agent_thought_chunk" && update.content.type === "text") {
+      if (this.options.hideThoughtChunks) return;
       this.#completeMessage(thread, turn, "commentary");
       /* A delta carries no phase, so the item has to be opened as `commentary` first — otherwise the
          thought lands in an ordinary agentMessage and renders as a chat bubble. */
@@ -887,7 +890,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       const message =
         this.provider === "opencode" &&
         /invalid api key|unauthori[sz]ed|token refresh failed|authentication failed/i.test(detail)
-          ? `OpenCode rejected the selected model's credentials. Update or remove the OpenCode Go key in Settings. If you signed in through the OpenCode CLI, reconnect that provider there. Then retry or choose another model.\n${detail}`
+          ? `Dani rejected the selected model's credentials. Update or remove the model key in Settings, then retry or choose another model.\n${detail}`
           : detail;
       this.emit("notification", {
         method: "error",

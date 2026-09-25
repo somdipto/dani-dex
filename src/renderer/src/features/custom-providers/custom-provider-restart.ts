@@ -8,8 +8,8 @@ import type { CustomProviderRestart } from "@dani-dex/contracts/ipc";
  */
 const RESTART_NOTE: Record<CustomProviderRestart, string> = {
   restarted: "Dani-Dex is loading the models.",
-  "skipped-busy": "OpenCode reads the list after the current task stops. Press Connect then.",
-  "not-running": "OpenCode reads the list when it next starts.",
+  "skipped-busy": "Dani reads the list after the current task stops. Press Connect then.",
+  "not-running": "Dani reads the list when it next starts.",
 };
 
 export function customProviderRestartMessage(action: "Saved" | "Removed", restart: CustomProviderRestart): string {

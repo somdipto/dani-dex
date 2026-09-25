@@ -35,7 +35,7 @@ describe("OpenCodeKeyDialog", () => {
 
     // The input is disabled until the dialog has read whether a key is stored already, so the wait
     // is for that state and not for a moment in time. Typing sooner is dropped by the browser.
-    const input = screen.getByLabelText("OpenCode Go key");
+    const input = screen.getByLabelText("Model key");
     await waitFor(() => expect(input).toBeEnabled());
     fireEvent.input(input, { target: { value: "  go-key-value  " } });
     fireEvent.click(screen.getByRole("button", { name: "Save key" }));
@@ -52,7 +52,7 @@ describe("OpenCodeKeyDialog", () => {
     renderDialog(api);
 
     await screen.findByText("Key saved. Paste a new one to replace it.");
-    expect(screen.getByLabelText("OpenCode Go key")).toHaveValue("");
+    expect(screen.getByLabelText("Model key")).toHaveValue("");
   });
 
   it("states that a saved key could not be read, and offers to remove it", async () => {
@@ -90,7 +90,7 @@ describe("OpenCodeKeyDialog", () => {
     });
     const { onClose } = renderDialog(api);
 
-    const input = screen.getByLabelText("OpenCode Go key");
+    const input = screen.getByLabelText("Model key");
     await waitFor(() => expect(input).toBeEnabled());
     fireEvent.input(input, { target: { value: "not-a-key" } });
     fireEvent.click(screen.getByRole("button", { name: "Save key" }));
@@ -103,7 +103,7 @@ describe("OpenCodeKeyDialog", () => {
   it("offers no reconnect action without a reconnect handler", async () => {
     renderDialog(createApi());
 
-    await screen.findByLabelText("OpenCode Go key");
+    await screen.findByLabelText("Model key");
     expect(screen.queryByRole("button", { name: "Reconnect" })).toBeNull();
   });
 
@@ -113,7 +113,7 @@ describe("OpenCodeKeyDialog", () => {
     const { onClose } = renderDialog(api, onReconnect);
 
     // The input is disabled until the dialog has read whether a key is stored already.
-    const input = await screen.findByLabelText("OpenCode Go key");
+    const input = await screen.findByLabelText("Model key");
     await waitFor(() => expect(input).toBeEnabled());
     fireEvent.click(screen.getByRole("button", { name: "Reconnect" }));
     await waitFor(() => expect(onReconnect).toHaveBeenCalledTimes(1));
@@ -129,7 +129,7 @@ describe("OpenCodeKeyDialog", () => {
     });
     renderDialog(createApi(), onReconnect);
 
-    const input = await screen.findByLabelText("OpenCode Go key");
+    const input = await screen.findByLabelText("Model key");
     await waitFor(() => expect(input).toBeEnabled());
     fireEvent.click(screen.getByRole("button", { name: "Reconnect" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("OpenCode did not answer.");

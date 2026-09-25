@@ -1,6 +1,7 @@
 import type { CentralAuthUser, ServerSummary } from "@dani-dex/contracts/ipc";
 import { MCP_SERVERS_CAPABILITY } from "@dani-dex/contracts/ipc";
 import { createMemo, Loading, Show } from "solid-js";
+import { useDaniOnly } from "./components/use-dani-only";
 import { useAuth } from "./features/account/account-context";
 import { useAgents } from "./features/agents/agents-context";
 import { useConversationController } from "./features/conversation/conversation-controller-context";
@@ -290,6 +291,7 @@ function ServerSettings() {
  * that animation off.
  */
 function AppSettings(props: AccountProps) {
+  const daniOnly = useDaniOnly();
   const platform = usePlatform();
   const auth = useAuth();
   const updates = useUpdates();
@@ -341,6 +343,7 @@ function AppSettings(props: AccountProps) {
   return (
     <Loading>
       <SettingsModal
+        daniOnly={daniOnly()}
         open={appSettingsOpen()}
         onOpenChange={setAppSettingsOpen}
         value={generalSettings()}

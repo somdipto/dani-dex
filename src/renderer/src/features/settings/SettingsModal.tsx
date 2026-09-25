@@ -73,6 +73,8 @@ export interface SettingsModalProps {
   processAvatarFile?: (file: File) => Promise<AvatarImageInput>;
   agentStatus?: AgentStatus;
   providerRuntimeStatuses?: Partial<Record<AgentProviderId, ProviderRuntimeStatus>>;
+  /** Dani's free models are the only model: the provider section shows the one Dani row instead. */
+  daniOnly?: boolean;
   providerAvailableVersions?: Partial<Record<AgentProviderId, string | null>>;
   onDownloadProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onCancelProviderDownload?: (provider: AgentProviderId) => void | Promise<void>;
@@ -347,6 +349,7 @@ export function SettingsModal(props: SettingsModalProps) {
       >
         <Tabs.Content value="general" class="settings-modal-tab-panel" data-tab="general">
           <SettingsGeneralTab
+            daniOnly={props.daniOnly}
             store={general}
             value={props.value}
             onUpdateSetting={updateSetting}

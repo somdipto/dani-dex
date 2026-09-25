@@ -504,7 +504,7 @@ describe("Dani-Dex connected desktop shell", () => {
       provider: "codex",
       model: "gpt-5.6-luna",
       initialMessage:
-        "Your ongoing role is: Compare travel options and turn my rough ideas into practical, day-by-day itineraries.",
+        "Your ongoing role is: Compare travel options and turn my rough ideas into practical, day-by-day itineraries. There is no task yet - just greet me briefly and confirm what you will help with.",
     });
     expect(window.danidex.agent.sendMessage).not.toHaveBeenCalled();
     expect(await screen.findByRole("heading", { name: "Trip Planner" })).toBeInTheDocument();

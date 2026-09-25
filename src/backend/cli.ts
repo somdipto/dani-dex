@@ -211,8 +211,8 @@ export async function resolveOpencodeCli(
   }
   throw new CodexCliError(
     found
-      ? "OpenCode could not start. Run `opencode --version` in a terminal."
-      : "OpenCode is not downloaded. Download it in Dani-Dex to continue.",
+      ? "Dani could not start. Restart Dani-Dex to try again."
+      : "Dani is not downloaded. Download it in Dani-Dex to continue.",
     found ? "invalid" : "missing",
   );
 }

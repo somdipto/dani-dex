@@ -378,7 +378,7 @@ describe("OpenCode CLI resolution", () => {
     process.env.DANI_DEX_OPENCODE_PATH = join(executable, "missing");
     await expect(resolveOpencodeCli()).rejects.toMatchObject({
       code: "missing",
-      message: "OpenCode is not downloaded. Download it in Dani-Dex to continue.",
+      message: "Dani is not downloaded. Download it in Dani-Dex to continue.",
     });
   });
 
@@ -418,7 +418,7 @@ describe("OpenCode CLI resolution", () => {
     const broken = await createExecutable("opencode", "not a version");
     await expect(resolveOpencodeCli({ systemCandidates: [broken], bundledExecutable: null })).rejects.toMatchObject({
       code: "invalid",
-      message: "OpenCode could not start. Run `opencode --version` in a terminal.",
+      message: "Dani could not start. Restart Dani-Dex to try again.",
     });
     await expect(resolveOpencodeCli({ systemCandidates: [], bundledExecutable: null })).rejects.toMatchObject({
       code: "missing",

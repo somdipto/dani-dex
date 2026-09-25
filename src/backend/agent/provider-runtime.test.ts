@@ -297,7 +297,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
         id: "opencode",
         state: "sign-in-required",
         version: expect.any(String),
-        message: expect.stringContaining("OpenCode"),
+        message: expect.stringContaining("model key"),
       }),
     );
     expect(service.listModels().filter((model) => model.provider === "opencode")).toEqual([]);
@@ -1895,7 +1895,7 @@ describe.sequential("ProviderRuntime: custom provider reload", () => {
         id: "opencode",
         state: "sign-in-required",
         message:
-          "OpenCode could not start a session. Check your custom provider's base URL and API key, or add an OpenCode Go key if you also use OpenCode's own models.",
+          "Dani could not start a session. Check your custom provider's base URL and API key, or add a model key in Settings instead.",
       }),
     );
     // Signed out, OpenCode keeps no client. A save must not read as a failure: the next spawn - the

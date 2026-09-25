@@ -1,4 +1,4 @@
-import { ProviderLogo } from "@dani-dex/brand";
+import { AppLogo, ProviderLogo } from "@dani-dex/brand";
 import { agentProviderDescriptor } from "@dani-dex/contracts/agent-providers";
 import type {
   AgentProviderId,
@@ -53,6 +53,12 @@ export interface ProviderPickerProps {
   hint?: string;
   embedded?: boolean;
   disabled?: boolean;
+  /**
+   * Dani's free models serve every agent: the row that runs them is presented as Dani Free,
+   * without the serving CLI's name, logo, or version. Other providers stay listed so the
+   * user can still sign in to their own subscriptions.
+   */
+  daniOnly?: boolean;
   allowUnavailableSelection?: boolean;
   focusFirst?: boolean;
   refreshingProviders?: boolean;
@@ -318,6 +324,7 @@ export function ProviderPicker(props: ProviderPickerProps) {
                 return runtime ? providerVersionLabel(runtime) : null;
               };
               const visualState = () => providerVisualState(state(), connecting(), runtimeStatus(), updatable());
+              const daniRow = () => Boolean(props.daniOnly) && option().id === "opencode";
               const runtimeAction = () =>
                 updatable() && props.onUpdateProvider && runtimeStatus()?.phase === "not-downloaded"
                   ? undefined
@@ -359,10 +366,15 @@ export function ProviderPicker(props: ProviderPickerProps) {
                       disabled={props.disabled || (!props.allowUnavailableSelection && !available())}
                       onChange={() => props.onChange(option().id)}
                     />
-                    <ProviderLogo provider={option().id} class="provider-picker-logo" />
+                    <Show
+                      when={daniRow()}
+                      fallback={<ProviderLogo provider={option().id} class="provider-picker-logo" />}
+                    >
+                      <AppLogo variant="production" class="provider-picker-logo" />
+                    </Show>
                     <span class="provider-picker-identity">
-                      <span class="provider-picker-name">{option().name}</span>
-                      <Show when={option().email ?? option().description}>
+                      <span class="provider-picker-name">{daniRow() ? "Dani Free" : option().name}</span>
+                      <Show when={daniRow() ? "Free models, picked for you" : (option().email ?? option().description)}>
                         {(detail) => <small class="provider-picker-email">{detail()}</small>}
                       </Show>
                       <Show when={option().checkError}>
@@ -371,7 +383,7 @@ export function ProviderPicker(props: ProviderPickerProps) {
                     </span>
                     {/* Version shares the badge column. */}
                     <span class="provider-picker-state">
-                      <Show when={version()}>
+                      <Show when={daniRow() ? null : version()}>
                         {(installed) => <small class="provider-picker-version">{installed()}</small>}
                       </Show>
                       {/* Free-tier badge only beside runtime badge. */}

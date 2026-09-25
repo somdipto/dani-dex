@@ -953,7 +953,7 @@ describe("SettingsModal", () => {
     ));
 
     const custom = await screen.findByRole("radio", { name: /Custom provider/ });
-    const openCode = screen.getByRole("radio", { name: /OpenCode/ });
+    const openCode = screen.getByRole("radio", { name: /Dani Free/ });
     await fireEvent.click(openCode);
     expect(openCode).toBeChecked();
 
@@ -1003,8 +1003,8 @@ describe("SettingsModal", () => {
     await screen.findByText("Free");
     expect(providerKeys.getProviderApiKeyState).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Sign in to OpenCode" }));
-    const input = await screen.findByLabelText("OpenCode Go key");
+    fireEvent.click(screen.getByRole("button", { name: "Sign in to Dani Free" }));
+    const input = await screen.findByLabelText("Model key");
     await waitFor(() => expect(input).toBeEnabled());
     // The dialog reconnects without touching credentials. The row behind keeps its own
     // "Connect OpenCode" button, so the name matches exactly.

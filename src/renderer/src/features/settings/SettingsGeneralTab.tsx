@@ -31,7 +31,7 @@ import { CustomProviderDialog } from "../custom-providers/CustomProviderDialog";
 import { CustomProviderListDialog } from "../custom-providers/CustomProviderListDialog";
 import { createCustomProviderHostState } from "../custom-providers/custom-provider-host-state";
 import type { GeneralSettingsValue } from "./app-settings";
-import { HarnessSettings, type HarnessSettingsApi } from "./HarnessSettings";
+import type { HarnessSettingsApi } from "./HarnessSettings";
 import { LanguageSelect } from "./LanguageSelect";
 import type { SettingsGeneralStore } from "./stores/general-store";
 import { type VoiceKeyApi, VoiceKeySettings } from "./VoiceKeySettings";
@@ -73,6 +73,9 @@ interface SettingsGeneralTabProps {
   /** Opens the code sign-in. Absent in the stories, where there is no provider to answer it. */
   onSignInWithCodeProvider?: (provider: AgentProviderId) => void | Promise<void>;
   turboModePending?: boolean;
+  /** Dani's free models are the only model: the provider section shows the one Dani row instead. */
+  daniOnly?: boolean;
+  /** Kept for callers that still build it; the section is no longer shown (no harness names in the UI). */
   harness?: HarnessSettingsApi;
   voiceKey?: VoiceKeyApi;
 }
@@ -104,6 +107,7 @@ export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
     <>
       <SettingsSection title={i18n.t("settings.providers.title")}>
         <ProviderPicker
+          daniOnly={props.daniOnly}
           value={props.store.selectedProvider()}
           options={props.store.providerOptions()}
           ariaLabel={i18n.t("settings.providers.title")}
@@ -155,10 +159,6 @@ export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
           />
         </Show>
       </SettingsSection>
-
-      <Show when={props.harness}>
-        {(harness) => <HarnessSettings api={harness()} selectMount={props.selectMount} />}
-      </Show>
 
       <Show when={props.voiceKey}>{(voiceKey) => <VoiceKeySettings api={voiceKey()} />}</Show>
 

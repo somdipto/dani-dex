@@ -121,7 +121,7 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
         <Dialog.Overlay class="opencode-key-backdrop">
           <Dialog.Content class="opencode-key-dialog" as="section">
             <header class="opencode-key-header">
-              <Dialog.Title class="opencode-key-title">Sign in to OpenCode Go</Dialog.Title>
+              <Dialog.Title class="opencode-key-title">Add a model key</Dialog.Title>
               {/* One line that is always the dialog's whole message: the default pitch, the saved
                   fact, or the unreadable warning. A second text block would repeat it. */}
               <Dialog.Description class="opencode-key-description">
@@ -130,7 +130,7 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
                   fallback={
                     <Show
                       when={stored() === "unreadable"}
-                      fallback={"Free models need no account. A key unlocks the paid Go models."}
+                      fallback={"Free models need no account. A key unlocks the paid models."}
                     >
                       Saved key is unreadable. Paste it again, or remove it.
                     </Show>
@@ -149,7 +149,7 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
                 void save();
               }}
             >
-              <Field label="OpenCode Go key">
+              <Field label="Model key">
                 <Input
                   type="password"
                   autocomplete="off"
@@ -168,7 +168,7 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
                       <OctagonX />
                     </AlertIcon>
                     <AlertContent>
-                      <AlertTitle>OpenCode Go</AlertTitle>
+                      <AlertTitle>Model key</AlertTitle>
                       <AlertDescription>{message()}</AlertDescription>
                     </AlertContent>
                   </Alert>

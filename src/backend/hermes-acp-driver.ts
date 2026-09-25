@@ -69,7 +69,7 @@ export function hermesEnvironment(
 export function hermesSignInMessage(provider: AgentProviderId): string {
   // Users never meet the engine by name, so this speaks of the provider only.
   return provider === "opencode"
-    ? "OpenCode needs an OpenCode Go key here. Add it in Settings."
+    ? "Dani needs a model key here. Add it in Settings."
     : `Sign in to ${agentProviderName(provider)} to continue.`;
 }
 

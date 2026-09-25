@@ -1,4 +1,5 @@
 import { Loading, Show } from "solid-js";
+import { useDaniOnly } from "./components/use-dani-only";
 import { useAuth } from "./features/account/account-context";
 import { accountForWindow, signInRequired } from "./features/account/sign-in-gate";
 import { useAgents } from "./features/agents/agents-context";
@@ -33,6 +34,7 @@ function LoadingScreen() {
  * gate has already ruled out.
  */
 export function AppAccessGate() {
+  const daniOnly = useDaniOnly();
   const platform = usePlatform();
   const auth = useAuth();
   const setup = useSetup();
@@ -82,6 +84,7 @@ export function AppAccessGate() {
                 fallback={
                   <Loading fallback={<LoadingScreen />}>
                     <OnboardingFlow
+                      daniOnly={daniOnly()}
                       state={setup.setupState() ?? { completed: false, preferredProvider: null, preferredModel: null }}
                       agentStatus={agentStatus()}
                       platform={platform.appInfo()?.platform ?? "darwin"}

@@ -55,6 +55,11 @@ export interface OnboardingFlowProps {
    * choice beside the built-in providers, and a duplicate ID is a field error before the round trip.
    */
   customProviders?: readonly CustomProviderSummary[];
+  /**
+   * Dani's free models are the only model: there is nothing to choose, so the provider step shows
+   * the one Dani row and the choice is recorded without naming what serves it.
+   */
+  daniOnly?: boolean;
 }
 
 type OnboardingStep = "meet" | "computer" | "jobs";
@@ -90,6 +95,13 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
    */
   const [screenElement, setScreenElement] = createSignal<HTMLElement | undefined>();
   const [selectedProvider, setSelectedProvider] = createSignal<AgentProviderId | null>(null);
+  // Dani serves every agent: the provider step is answered before it is shown.
+  createEffect(
+    () => props.daniOnly === true,
+    (dani) => {
+      if (dani) setSelectedProvider("opencode");
+    },
+  );
   /**
    * Whether the user chose their own endpoints rather than a built-in provider. `selectedProvider`
    * stays `opencode` beside it, because that is the provider setup records: which endpoint an agent
@@ -195,6 +207,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
     );
   const lazyProviderMode = () => Boolean(props.providerRuntimeStatuses || props.onDownloadProvider);
   const selectedProviderConnected = createMemo(() => {
+    if (props.daniOnly) return true;
     const selected = selectedProvider();
     return Boolean(
       selected && providerOptions().some((provider) => provider.id === selected && provider.state === "available"),
@@ -478,6 +491,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
 
                 <div class="onboarding-provider">
                   <ProviderPicker
+                    daniOnly={props.daniOnly}
                     value={selectedProvider()}
                     options={providerOptions()}
                     ariaLabel="Default provider"

@@ -105,12 +105,12 @@ const AGENT_PROVIDER_DESCRIPTOR_TABLE = {
   },
   opencode: {
     id: "opencode",
-    displayName: "OpenCode",
+    displayName: "Dani Free",
     cliName: "OpenCode CLI",
     onboardingDescription: "Free models, no account needed",
     // Only reached when a spawn lists no model at all, which is not the keyless free tier: that
     // one works with no credential. So this asks for the optional key instead of a terminal login.
-    signInMessage: "OpenCode listed no model. Add an OpenCode Go key to continue.",
+    signInMessage: "Dani listed no model. Add a model key in Settings to continue.",
     installGuideLink: null,
     defaultModel: "",
     legacyModelPrefix: null,
