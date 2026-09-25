@@ -1,0 +1,2 @@
+# SHA-256 of verified extracted engine executables. Empty until exact release CI bytes are pinned.
+# Format: <digest>  <platform>-<arch>; never paste an archive digest here.

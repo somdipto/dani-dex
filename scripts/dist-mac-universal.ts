@@ -21,12 +21,13 @@ const SINGLE_SLICE_RESOURCES = ["cua-driver", "remote-desktop-runtime", "whisper
  * `process.arch`, which is the running slice. Both trees are the same in the two slices, so they are
  * listed with the single-slice resources.
  */
-const BOTH_ARCH_RESOURCES = ["hermes", "dani-free"];
+const BOTH_ARCH_RESOURCES = ["hermes", "dani-free", "dani-free-engine"];
 
 /** The x64 trees the arm64 release leaves out and the universal build adds. */
 const X64_ONLY_RESOURCES = [
   { from: "build/hermes/mac/x64", to: "hermes/mac/x64" },
   { from: "build/dani-free/darwin/x64", to: "dani-free/darwin/x64" },
+  { from: "build/dani-free-engine/darwin/x64", to: "dani-free-engine/darwin/x64" },
 ];
 
 const builderConfigSchema = z

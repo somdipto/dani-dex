@@ -83,6 +83,7 @@ import {
 import { CustomProviderStore } from "./custom-provider-store";
 import { bundledDaniFreeExecutable, DaniFreeSupervisor } from "./dani-free";
 import { DANI_FREE_PREFERENCE_FILE, readDaniFreePreference } from "./dani-free-preference-store";
+import { bundledDaniFreeEngineSeed, verifiedDaniFreeEngineSeed } from "./dani-free-seed";
 import { MCP_OAUTH_REDIRECT_URL } from "./deep-link-router";
 import {
   applyDevelopmentRemoteAccount,
@@ -1199,7 +1200,7 @@ export async function createApplicationServices({
     await service.initialize();
   });
   // Dani's free models: the bundled proxy starts beside the app and stops with it. It never holds up
-  // the launch - OpenCode keeps its own catalog until the proxy reports ready, and then moves to it
+  // the launch - the home screen stays unavailable until the proxy reports ready, and then moves to it
   // through the same endpoint change a saved custom provider makes.
   const daniFreeExecutable = app.isPackaged
     ? bundledDaniFreeExecutable(process.resourcesPath)
@@ -1207,20 +1208,34 @@ export async function createApplicationServices({
   if (daniFreeExecutable) {
     // The Settings switch is stored beside the other preferences; DANI_FREE_PRIVATE_MODE=1 forces it on.
     const daniFreePreference = await readDaniFreePreference(join(app.getPath("userData"), DANI_FREE_PREFERENCE_FILE));
-    const daniFree = new DaniFreeSupervisor({
-      executable: daniFreeExecutable,
-      home: join(app.getPath("userData"), "dani-free"),
-      privateMode: daniFreePreference.privateMode || process.env.DANI_FREE_PRIVATE_MODE === "1",
-    });
-    teardown.push(TEARDOWN_ORDER.daniFree, "the Dani-Free proxy", () => daniFree.stop());
-    void daniFree
-      .start()
-      .then(async (source) => {
-        if (!source) return;
-        await service.saveCustomProvider(source.id, async () => setRuntimeModelSource(source));
-        await service.reloadOpenCodeConfig();
-      })
-      .catch((error) => logger.warn("Dani-Free could not be connected.", { error: String(error) }));
+    const seed = app.isPackaged ? bundledDaniFreeEngineSeed(process.resourcesPath) : null;
+    let engineSeed: { executable: string; sha256: string } | undefined;
+    if (seed) {
+      try {
+        engineSeed = await verifiedDaniFreeEngineSeed(seed);
+      } catch (error) {
+        logger.warn("Dani Free engine seed could not be verified.", { error: String(error) });
+      }
+    }
+    if (app.isPackaged && !engineSeed) {
+      logger.warn("Dani Free cannot start without its verified bundled engine seed.");
+    } else {
+      const daniFree = new DaniFreeSupervisor({
+        executable: daniFreeExecutable,
+        engineSeed,
+        home: join(app.getPath("userData"), "dani-free"),
+        privateMode: daniFreePreference.privateMode || process.env.DANI_FREE_PRIVATE_MODE === "1",
+      });
+      teardown.push(TEARDOWN_ORDER.daniFree, "the Dani-Free proxy", () => daniFree.stop());
+      void daniFree
+        .start()
+        .then(async (source) => {
+          if (!source) return;
+          await service.saveCustomProvider(source.id, async () => setRuntimeModelSource(source));
+          await service.reloadOpenCodeConfig();
+        })
+        .catch((error) => logger.warn("Dani-Free could not be connected.", { error: String(error) }));
+    }
   }
   const describeRestartReadiness = (): RestartReadiness =>
     checkRestartReadiness({

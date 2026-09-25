@@ -21,10 +21,20 @@ describe("universal macOS configuration", () => {
       from: "build/dani-free/darwin/x64",
       to: "dani-free/darwin/x64",
     });
+    expect(config.mac.extraResources).toContainEqual({
+      from: "build/dani-free-engine/darwin/arm64",
+      to: "dani-free-engine/darwin/arm64",
+    });
+    expect(config.mac.extraResources).toContainEqual({
+      from: "build/dani-free-engine/darwin/x64",
+      to: "dani-free-engine/darwin/x64",
+    });
     const rule = config.mac.x64ArchFiles ?? "";
-    expect(rule.startsWith("Contents/Resources/{cua-driver,remote-desktop-runtime,whisper,hermes,dani-free}/")).toBe(
-      true,
-    );
+    expect(
+      rule.startsWith(
+        "Contents/Resources/{cua-driver,remote-desktop-runtime,whisper,hermes,dani-free,dani-free-engine}/",
+      ),
+    ).toBe(true);
     const covered = (file: string) => minimatch(file, rule, { matchBase: true });
     // The file the first universal build with Hermes rejected.
     expect(
@@ -33,6 +43,7 @@ describe("universal macOS configuration", () => {
     expect(covered("Contents/Resources/hermes/a/.hidden.so")).toBe(true);
     expect(covered("Contents/Resources/whisper/bin/whisper-cli")).toBe(true);
     expect(covered("Contents/Resources/dani-free/darwin/x64/dani-free")).toBe(true);
+    expect(covered("Contents/Resources/dani-free-engine/darwin/x64/dani-engine")).toBe(true);
     expect(covered("Contents/Frameworks/Electron Framework.framework/Electron Framework")).toBe(false);
     expect(covered("Contents/MacOS/Dani-Dex")).toBe(false);
     // Every other mac key is carried over as is, so signing and notarization settings match the release.
@@ -52,6 +63,7 @@ describe("universal macOS configuration", () => {
     expect(destinations).toContain("hermes/mac/arm64");
     expect(destinations).toContain("hermes/mac/x64");
     expect(destinations).toContain("dani-free/darwin/x64");
+    expect(destinations).toContain("dani-free-engine/darwin/x64");
     expect(merged.mac).toMatchObject({ identity: null, notarize: false });
     expect(universalMacOverrides(parseBuilderConfig(text), true).mac).not.toHaveProperty("identity");
   });

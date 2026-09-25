@@ -8,8 +8,8 @@
 
 import { type ChildProcess, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
+import { isAbsolute, join, relative, resolve } from "node:path";
 import type { DaniDexModelSource } from "@dani-dex/contracts/online-services";
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { createDaniDexLogger, redactText } from "@dani-dex/logging";
@@ -46,10 +46,31 @@ export function parseDaniFreeReadyLine(line: string): DaniFreeReady | null {
   }
   if (!isDynamicRecord(value)) return null;
   const { baseUrl, port, pid, apiKeyFile, privateMode } = value;
-  if (typeof baseUrl !== "string" || !/^http:\/\/(?:127\.0\.0\.1|localhost|\[::1\])(?::\d+)?(?:\/|$)/.test(baseUrl)) {
+  if (typeof baseUrl !== "string" || !/^http:\/\/127\.0\.0\.1:\d+(?:\/|$)/.test(baseUrl)) {
     return null;
   }
-  if (typeof port !== "number" || typeof pid !== "number" || typeof apiKeyFile !== "string" || !apiKeyFile) return null;
+  if (
+    typeof port !== "number" ||
+    !Number.isInteger(port) ||
+    port < 1 ||
+    port > 65535 ||
+    typeof pid !== "number" ||
+    !Number.isInteger(pid) ||
+    pid < 1 ||
+    typeof apiKeyFile !== "string" ||
+    !apiKeyFile
+  )
+    return null;
+  const url = new URL(baseUrl);
+  if (
+    url.port !== String(port) ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    !["/", "/v1", "/v1/"].includes(url.pathname)
+  )
+    return null;
   // The proxy reports its OpenAI base (`.../v1`); this keeps the origin, and the paths below add it.
   return {
     baseUrl: baseUrl.replace(/\/+$/, "").replace(/\/v1$/, ""),
@@ -79,7 +100,10 @@ export function buildDaniModelSource(
   key: string,
   modelIds: readonly string[],
 ): DaniDexModelSource {
-  const id = modelIds.includes(DANI_AUTO_MODEL) ? DANI_AUTO_MODEL : (modelIds[0] ?? DANI_AUTO_MODEL);
+  if (modelIds.length !== 1 || modelIds[0] !== DANI_AUTO_MODEL) {
+    throw new Error("Dani Free did not return its single supported model.");
+  }
+  const id = DANI_AUTO_MODEL;
   return {
     id: DANI_MODEL_SOURCE_ID,
     name: DANI_MODEL_SOURCE_NAME,
@@ -97,6 +121,7 @@ export interface DaniFreeOptions {
   /** Extra environment for the proxy, for tests. */
   readonly env?: Readonly<Record<string, string>>;
   readonly privateMode?: boolean;
+  readonly engineSeed?: { readonly executable: string; readonly sha256: string };
   readonly readyTimeoutMs?: number;
   readonly fetch?: typeof fetch;
   readonly spawnProcess?: typeof spawn;
@@ -120,6 +145,13 @@ export class DaniFreeSupervisor {
     try {
       await this.sweepLeftovers();
       const ready = await this.#spawn();
+      if (ready.pid !== this.#child?.pid) throw new Error("Dani Free process identity did not match.");
+      if (
+        !isAbsolute(ready.apiKeyFile) ||
+        !withinHome(await realpath(this.#options.home), await realpath(ready.apiKeyFile))
+      ) {
+        throw new Error("Dani Free key path is outside its private home.");
+      }
       const key = await readKey(ready.apiKeyFile);
       // No refresh nudge: the proxy probes and refreshes on its own, and a refresh can take 20s+.
       const models = await this.#request(ready, key, "GET", "/v1/models");
@@ -203,11 +235,19 @@ export class DaniFreeSupervisor {
         DANI_FREE_HOME: this.#options.home,
         // Any free port, on 127.0.0.1: the ready line says which.
         DANI_FREE_PORT: "0",
+        DANI_FREE_HOST: "127.0.0.1",
+        ...(this.#options.engineSeed
+          ? {
+              DANI_FREE_ENGINE_SEED_BIN: this.#options.engineSeed.executable,
+              DANI_FREE_ENGINE_SEED_SHA256: this.#options.engineSeed.sha256,
+            }
+          : {}),
         // The proxy exits within about two seconds of this process going away, on every platform,
         // so a crash or a force-quit never leaves it running.
         DANI_FREE_PARENT_PID: String(process.pid),
         DANI_FREE_PRIVATE_MODE: this.#options.privateMode ? "1" : "0",
         ...this.#options.env,
+        DANI_FREE_ENGINE_AUTOUPDATE: "0",
       },
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
@@ -285,4 +325,14 @@ async function readKey(path: string): Promise<string> {
 
 function describe(error: unknown): string {
   return redactText(error instanceof Error ? error.message : String(error));
+}
+
+function withinHome(home: string, target: string): boolean {
+  const path = relative(resolve(home), resolve(target));
+  return (
+    Boolean(path) &&
+    path !== ".." &&
+    !path.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) &&
+    !isAbsolute(path)
+  );
 }

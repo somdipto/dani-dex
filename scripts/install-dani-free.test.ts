@@ -42,7 +42,10 @@ describe("bundled Dani-Free", () => {
   it("stages only a binary that matches its pin, executable, where the app finds it", async () => {
     const dir = await mkdtemp(join(tmpdir(), "dani-free-stage-"));
     const target = daniFreeTarget("linux", "x64");
-    await writeFile(join(dir, target.artifact), "proxy");
+    const executable = Buffer.alloc(64);
+    executable.set([0x7f, 0x45, 0x4c, 0x46]);
+    executable.writeUInt16LE(0x3e, 18); // ELF x86-64 e_machine.
+    await writeFile(join(dir, target.artifact), executable);
     const pins = join(dir, "pins");
     const root = join(dir, "resources", "dani-free");
 
@@ -51,9 +54,9 @@ describe("bundled Dani-Free", () => {
     await writeFile(pins, "");
     await expect(installDaniFree(dir, target, pins, root)).rejects.toThrow("No pinned SHA-256");
 
-    await writeFile(pins, `${sha("proxy")}  ${target.artifact}\n`);
+    await writeFile(pins, `${createHash("sha256").update(executable).digest("hex")}  ${target.artifact}\n`);
     const staged = await installDaniFree(dir, target, pins, root);
-    expect(await readFile(staged, "utf8")).toBe("proxy");
+    expect(await readFile(staged)).toEqual(executable);
     expect((await stat(staged)).mode & 0o111).not.toBe(0);
     expect(bundledDaniFreeExecutable(join(dir, "resources"), "linux", "x64")).toBe(staged);
   });

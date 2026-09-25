@@ -58,7 +58,22 @@ export async function installDaniFree(
 ): Promise<string> {
   const pinned = parseSha256Sums(await readFile(pinnedSumsPath, "utf8"));
   const source = join(binariesDir, target.artifact);
-  verifyDaniFreeBinary(await readFile(source), target, pinned);
+  const bytes = await readFile(source);
+  verifyDaniFreeBinary(bytes, target, pinned);
+  if (target.platform === "linux") {
+    if (
+      bytes.toString("binary", 0, 4) !== "\x7fELF" ||
+      bytes.readUInt16LE(18) !== (target.arch === "x64" ? 0x3e : 0xb7)
+    ) {
+      throw new Error(`Dani Free proxy is not a ${target.arch} ELF executable.`);
+    }
+  } else if (target.platform === "win32") {
+    if (bytes.toString("ascii", 0, 2) !== "MZ") throw new Error("Dani Free proxy is not a PE executable.");
+    const offset = bytes.readUInt32LE(0x3c);
+    if (bytes.toString("ascii", offset, offset + 4) !== "PE\0\0" || bytes.readUInt16LE(offset + 4) !== 0x8664) {
+      throw new Error("Dani Free proxy is not a Windows x64 executable.");
+    }
+  }
   const destination = stagedDaniFreePath(root, target);
   await mkdir(join(destination, ".."), { recursive: true });
   await copyFile(source, destination);
