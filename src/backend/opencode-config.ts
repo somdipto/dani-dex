@@ -132,7 +132,7 @@ export function openCodeConfigEnv(base: OpenCodeConfigBase, source: CustomProvid
  * signed in" for a refused key or an unreachable base URL just as it does for an empty catalog, and
  * the endpoint brings its own credentials.
  */
-export function openCodeSignInMessage(customProviderCount: number): string {
+export function openCodeSignInMessage(customProviderCount: number) {
   if (customProviderCount === 0) return OPENCODE_GO_ADVICE;
   return "Dani could not start a session. Check your custom provider's base URL and API key, or add a model key in Settings instead.";
 }

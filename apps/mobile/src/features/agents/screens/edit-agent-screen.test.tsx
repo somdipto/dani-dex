@@ -902,7 +902,7 @@ it("changes provider together with a compatible model and reasoning", async () =
   ]);
   await renderSheet("runtime");
   await waitFor(() => expect(screen.getByDisplayValue("ChatGPT")).toHaveProperty("disabled", false));
-  expect(screen.getByRole("option", { name: "OpenCode" })).toBeTruthy();
+  expect(screen.getByRole("option", { name: "Dani Free" })).toBeTruthy();
   await act(() => fireEvent.change(screen.getByDisplayValue("ChatGPT"), { target: { value: "claude" } }));
   await click("Save changes");
   expect(workspace.updateAgent).toHaveBeenCalledWith(

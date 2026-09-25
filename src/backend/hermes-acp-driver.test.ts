@@ -55,7 +55,8 @@ describe("Hermes harness drivers", () => {
   it("tells the user which sign-in Hermes borrows", () => {
     expect(hermesSignInMessage("codex")).toBe("Sign in to ChatGPT to continue.");
     expect(hermesSignInMessage("claude")).not.toMatch(/hermes/iu);
-    expect(hermesSignInMessage("opencode")).toContain("OpenCode Go key");
+    expect(hermesSignInMessage("opencode")).toContain("model key");
+    expect(hermesSignInMessage("opencode")).not.toMatch(/opencode/iu);
   });
 
   // Hermes' computer-use tool looks for `cua-driver` on its PATH and reads as unavailable otherwise.
