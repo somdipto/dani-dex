@@ -90,7 +90,7 @@ export function SettingsUpdatesTab(props: SettingsUpdatesTabProps) {
               checked={props.value.autoDownloadUpdates}
               onChange={(checked) => props.onUpdateSetting("autoDownloadUpdates", checked)}
               label="Automatically download updates"
-              description="Download new versions when they become available."
+              description="Download published Stable releases and restart after the app has been idle. Turn off to update manually."
             />
           }
         >

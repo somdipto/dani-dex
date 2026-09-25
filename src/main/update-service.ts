@@ -6,6 +6,7 @@ import type { UpdateBusyPhase, UpdateFailureCode, UpdateStatus } from "@dani-dex
 import { isUpdateBusyPhase } from "@dani-dex/contracts/ipc";
 import type { ProgressInfo, UpdateInfo } from "electron-updater";
 import type { HostUpdateState } from "../../packages/contracts/src/host-manager";
+import { restartActivityGeneration } from "../backend/restart-activity";
 import type { DaniDexSiblingInstance } from "./update-sibling-instances";
 
 /** Only the part of electron-updater's cancellation token this service depends on. */
@@ -82,6 +83,9 @@ interface UpdateServiceOptions {
   autoDownload: boolean;
   beforeInstall: () => Promise<void>;
   checkSiblingInstances?: () => Promise<readonly DaniDexSiblingInstance[]>;
+  /** Every live-work condition must be clear before an automatic restart. */
+  mayAutoInstall?: () => boolean;
+  autoInstallIdleMs?: number;
   platform?: NodeJS.Platform;
   logDirectory?: string;
   shipItDirectory?: string;
@@ -196,13 +200,23 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
   > &
     Pick<
       UpdateServiceOptions,
-      "beforeInstall" | "checkSiblingInstances" | "logDirectory" | "shipItDirectory" | "openManualDownload"
+      | "beforeInstall"
+      | "checkSiblingInstances"
+      | "mayAutoInstall"
+      | "logDirectory"
+      | "shipItDirectory"
+      | "openManualDownload"
     > & {
       phaseTimeoutsMs: Record<UpdateBusyPhase, number>;
+      autoInstallIdleMs: number;
     };
   #status: UpdateStatus;
   #checkTimer: ReturnType<typeof setTimeout> | null = null;
   #phaseTimer: ReturnType<typeof setTimeout> | null = null;
+  #autoInstallTimer: ReturnType<typeof setTimeout> | null = null;
+  #autoInstallActivity = restartActivityGeneration();
+  #autoInstallAttempt = false;
+  #autoInstallPending = false;
   #started = false;
   #installStarted = false;
   #operation: UpdateOperation = "check";
@@ -230,6 +244,7 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
       platform: options.platform ?? process.platform,
       initialCheckDelayMs: options.initialCheckDelayMs ?? 12_000,
       checkIntervalMs: options.checkIntervalMs ?? DEFAULT_CHECK_INTERVAL,
+      autoInstallIdleMs: options.autoInstallIdleMs ?? 5 * 60_000,
       phaseTimeoutsMs: {
         checking: options.checkTimeoutMs ?? DEFAULT_PHASE_TIMEOUTS.checking,
         downloading: options.downloadStallTimeoutMs ?? DEFAULT_PHASE_TIMEOUTS.downloading,
@@ -316,6 +331,8 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
 
   setAutoDownload(enabled: boolean): void {
     this.#autoDownload = enabled;
+    if (!enabled) this.#clearAutoInstallTimer();
+    else if (this.#status.phase === "ready") this.#scheduleAutoInstall();
     if (this.#options.openManualDownload) return;
     if (enabled && this.#options.enabled && this.#status.phase === "available") void this.downloadUpdate();
   }
@@ -324,6 +341,7 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
   setManagedByHost(managed: boolean): void {
     if (this.#managedByHost === managed) return;
     this.#managedByHost = managed;
+    if (managed) this.#clearAutoInstallTimer();
     if (!managed) {
       this.#downloadedVersion = null;
       this.#setStatus({
@@ -488,6 +506,16 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
     // that session, so refuse before the one-shot install latch and before shutdown preparation.
     // Nothing is torn down, the update stays ready, and the user retries once every session stopped.
     const siblings = (await this.#options.checkSiblingInstances?.()) ?? [];
+    if (
+      this.#autoInstallAttempt &&
+      (restartActivityGeneration() !== this.#autoInstallActivity ||
+        !this.#started ||
+        !this.#autoDownload ||
+        this.#managedByHost ||
+        !this.#options.mayAutoInstall?.())
+    ) {
+      throw new Error("Active work appeared before the automatic update could restart.");
+    }
     if (siblings.length > 0) {
       throw new Error(SIBLING_SESSION_MESSAGE);
     }
@@ -497,6 +525,7 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
     this.#activeInstall = generation;
     this.#installStarted = true;
     this.#operation = "install";
+    this.#clearAutoInstallTimer();
     this.#setStatus({ phase: "installing", progress: 100, message: null, errorCode: null });
     try {
       // Shutdown preparation stops services for good and is not reversible, so from here on this
@@ -522,6 +551,8 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
   stop(): void {
     if (this.#checkTimer) clearTimeout(this.#checkTimer);
     this.#checkTimer = null;
+    this.#clearAutoInstallTimer();
+    this.#started = false;
     // An install runs shutdown preparation, which stops background work through this method. The
     // install deadline has to survive that: it is the only thing that can release a restart which
     // never happens, and clearing it here would leave the app latched in "installing" forever.
@@ -595,6 +626,39 @@ export class UpdateService extends EventEmitter<UpdateServiceEvents> {
       message: null,
       errorCode: null,
     });
+    this.#scheduleAutoInstall();
+  }
+
+  #scheduleAutoInstall(): void {
+    this.#clearAutoInstallTimer();
+    if (!this.#started || !this.#autoDownload || !this.#options.mayAutoInstall || this.#managedByHost) return;
+    if (!this.#canInstall() || this.#teardownCommitted) return;
+    this.#autoInstallActivity = restartActivityGeneration();
+    this.#autoInstallTimer = setTimeout(() => {
+      this.#autoInstallTimer = null;
+      if (this.#autoInstallPending) return;
+      if (!this.#started || !this.#autoDownload || this.#managedByHost || !this.#canInstall()) return;
+      if (restartActivityGeneration() !== this.#autoInstallActivity || !this.#options.mayAutoInstall?.()) {
+        this.#scheduleAutoInstall();
+        return;
+      }
+      this.#autoInstallAttempt = true;
+      this.#autoInstallPending = true;
+      void this.installUpdate()
+        .catch(() => undefined)
+        .finally(() => {
+          this.#autoInstallAttempt = false;
+          this.#autoInstallPending = false;
+          // A sibling session or racing activity leaves the download ready. Check again after idle.
+          if (this.#canInstall() && !this.#managedByHost) this.#scheduleAutoInstall();
+        });
+    }, this.#options.autoInstallIdleMs);
+    this.#autoInstallTimer.unref?.();
+  }
+
+  #clearAutoInstallTimer(): void {
+    if (this.#autoInstallTimer) clearTimeout(this.#autoInstallTimer);
+    this.#autoInstallTimer = null;
   }
 
   #scheduleCheck(delayMs: number): void {

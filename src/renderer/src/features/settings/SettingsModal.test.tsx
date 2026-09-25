@@ -241,7 +241,11 @@ describe("SettingsModal", () => {
     await fireEvent.click(screen.getByRole("tab", { name: "Updates" }));
     await fireEvent.click(screen.getByRole("button", { name: "Check for updates" }));
     await waitFor(() => expect(onUpdateAction).toHaveBeenCalledOnce());
-    expect(await screen.findByText("Dani-Dex is up to date on the Stable track.")).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        "This version matches the latest published Stable release. New changes on main arrive in a later release.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("reports host management instead of tenant update controls on a managed host", async () => {

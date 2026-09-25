@@ -64,7 +64,7 @@ export function createSettingsUpdatesStore(props: UpdatesStoreProps) {
       case "installing":
         return `Restarting to apply ${targetUpdate()}…`;
       case "up-to-date":
-        return "Dani-Dex is up to date on the Stable track.";
+        return "This version matches the latest published Stable release. New changes on main arrive in a later release.";
       case "error":
         return errorMessage(props.updateStatus.message, "Dani-Dex could not check for updates. Try again.");
       case "unsupported":

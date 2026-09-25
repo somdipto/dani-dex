@@ -7,6 +7,7 @@ import { join } from "node:path";
 import type { UpdateBusyPhase } from "@dani-dex/contracts/ipc";
 import { isUpdateBusyPhase, UPDATE_BUSY_PHASES } from "@dani-dex/contracts/ipc";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { recordRestartActivity } from "../backend/restart-activity";
 import type { UpdateCancellationToken, UpdateCheckOutcome } from "./update-service";
 import {
   createDisabledUpdateAdapter,
@@ -63,6 +64,8 @@ function createService(
     beforeInstall?: () => Promise<void>;
     autoDownload?: boolean;
     checkIntervalMs?: number;
+    mayAutoInstall?: () => boolean;
+    autoInstallIdleMs?: number;
     checkSiblingInstances?: () => Promise<readonly DaniDexSiblingInstance[]>;
     openManualDownload?: (version: string) => Promise<void>;
   } = {},
@@ -76,6 +79,8 @@ function createService(
     ...(options.openManualDownload ? { openManualDownload: options.openManualDownload } : {}),
     platform: options.platform ?? "darwin",
     checkIntervalMs: options.checkIntervalMs ?? CHECK_INTERVAL,
+    mayAutoInstall: options.mayAutoInstall,
+    autoInstallIdleMs: options.autoInstallIdleMs,
     checkTimeoutMs: CHECK_TIMEOUT,
     downloadStallTimeoutMs: DOWNLOAD_STALL_TIMEOUT,
     installTimeoutMs: INSTALL_TIMEOUT,
@@ -171,6 +176,118 @@ describe("UpdateService", () => {
     await vi.waitFor(() => expect(service.getStatus().phase).toBe("ready"));
     expect(updater.downloadUpdate).toHaveBeenCalledOnce();
     expect(updater.downloadTokens.at(0)).toBe(updater.tokens.at(0));
+  });
+
+  it("automatically applies a downloaded release only after a quiet idle window", async () => {
+    vi.useFakeTimers();
+    const updater = new FakeUpdater();
+    const beforeInstall = vi.fn(async () => undefined);
+    makeUpdateAvailable(updater);
+    completeDownload(updater);
+    const service = createService(updater, {
+      platform: "win32",
+      autoDownload: true,
+      mayAutoInstall: () => true,
+      autoInstallIdleMs: 50,
+      beforeInstall,
+    });
+    service.start(false);
+    await service.checkForUpdates();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(service.getStatus().phase).toBe("ready");
+    expect(updater.quitAndInstall).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(50);
+    expect(beforeInstall).toHaveBeenCalledOnce();
+    expect(updater.quitAndInstall).toHaveBeenCalledWith(false, true);
+  });
+
+  it("waits for active work to clear, then applies automatically", async () => {
+    vi.useFakeTimers();
+    const updater = new FakeUpdater();
+    makeUpdateAvailable(updater);
+    completeDownload(updater);
+    let safe = false;
+    const service = createService(updater, { autoDownload: true, mayAutoInstall: () => safe, autoInstallIdleMs: 50 });
+    service.start(false);
+    await service.checkForUpdates();
+    await vi.advanceTimersByTimeAsync(50);
+    expect(updater.quitAndInstall).not.toHaveBeenCalled();
+    safe = true;
+    await vi.advanceTimersByTimeAsync(50);
+    expect(updater.quitAndInstall).toHaveBeenCalledOnce();
+  });
+
+  it("cancels automatic install if new work starts during the sibling scan", async () => {
+    vi.useFakeTimers();
+    const updater = new FakeUpdater();
+    makeUpdateAvailable(updater);
+    completeDownload(updater);
+    let finishScan: (value: readonly DaniDexSiblingInstance[]) => void = () => undefined;
+    const scan = new Promise<readonly DaniDexSiblingInstance[]>((resolve) => {
+      finishScan = resolve;
+    });
+    const beforeInstall = vi.fn(async () => undefined);
+    const service = createService(updater, {
+      autoDownload: true,
+      mayAutoInstall: () => true,
+      autoInstallIdleMs: 50,
+      checkSiblingInstances: () => scan,
+      beforeInstall,
+    });
+    service.start(false);
+    await service.checkForUpdates();
+    await vi.advanceTimersByTimeAsync(50);
+    recordRestartActivity();
+    finishScan([]);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(service.getStatus().phase).toBe("ready");
+    expect(beforeInstall).not.toHaveBeenCalled();
+    expect(updater.quitAndInstall).not.toHaveBeenCalled();
+    service.stop();
+  });
+
+  it("does not auto-restart when the host takes over while a sibling scan is pending", async () => {
+    vi.useFakeTimers();
+    const updater = new FakeUpdater();
+    makeUpdateAvailable(updater);
+    completeDownload(updater);
+    let finishScan: (value: readonly DaniDexSiblingInstance[]) => void = () => undefined;
+    const scan = new Promise<readonly DaniDexSiblingInstance[]>((resolve) => {
+      finishScan = resolve;
+    });
+    const beforeInstall = vi.fn(async () => undefined);
+    const service = createService(updater, {
+      autoDownload: true,
+      mayAutoInstall: () => true,
+      autoInstallIdleMs: 50,
+      checkSiblingInstances: () => scan,
+      beforeInstall,
+    });
+    service.start(false);
+    await service.checkForUpdates();
+    await vi.advanceTimersByTimeAsync(50);
+    service.setManagedByHost(true);
+    finishScan([]);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(service.getStatus().managedByHost).toBe(true);
+    expect(beforeInstall).not.toHaveBeenCalled();
+    expect(updater.quitAndInstall).not.toHaveBeenCalled();
+    service.stop();
+  });
+
+  it("does not auto-restart when the user disabled automatic updates", async () => {
+    vi.useFakeTimers();
+    const updater = new FakeUpdater();
+    makeUpdateAvailable(updater);
+    completeDownload(updater);
+    const service = createService(updater, { autoDownload: true, mayAutoInstall: () => true, autoInstallIdleMs: 50 });
+    service.start(false);
+    await service.checkForUpdates();
+    await vi.advanceTimersByTimeAsync(0);
+    service.setAutoDownload(false);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(service.getStatus().phase).toBe("ready");
+    expect(updater.quitAndInstall).not.toHaveBeenCalled();
   });
 
   it("waits for the download action when the preference is disabled", async () => {

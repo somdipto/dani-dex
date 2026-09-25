@@ -1170,6 +1170,9 @@ export async function createApplicationServices({
     enabled: updaterEnabled,
     autoDownload: updatePreference.autoDownload,
     beforeInstall: prepareForUpdateInstall,
+    // Auto-apply a downloaded release only after a quiet window, never during turns, browser
+    // control, transfers or initialization. Managed hosts own their own restart timing.
+    mayAutoInstall: () => describeRestartReadiness(true).safeToRestart,
     // Packaged runs share one application bundle across macOS users. Installing while another
     // login session runs Dani-Dex from that bundle would replace it underneath that session, so
     // the service refuses the install until every sibling session stopped. Unpackaged runs never
@@ -1237,13 +1240,14 @@ export async function createApplicationServices({
         .catch((error) => logger.warn("Dani-Free could not be connected.", { error: String(error) }));
     }
   }
-  const describeRestartReadiness = (): RestartReadiness =>
+  const describeRestartReadiness = (ignoreOwnUpdater = false): RestartReadiness =>
     checkRestartReadiness({
       agentWork: service.hasActiveWork(),
       hostBlockers: host.describeRestartBlockers(),
       activeBrowserControls: browser.getControlState().sessions.length,
       activeFileTransfers: remoteServers.hasActiveTransfers(),
-      updaterBusy: !updater.getStatus().managedByHost && isUpdateBusyPhase(updater.getStatus().phase),
+      updaterBusy:
+        !ignoreOwnUpdater && !updater.getStatus().managedByHost && isUpdateBusyPhase(updater.getStatus().phase),
       initializationPending: !agentInitialization.succeeded,
     });
   const hostUpdateCoordinator = new HostUpdateCoordinator({
