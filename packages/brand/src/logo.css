@@ -27,14 +27,11 @@
   fill: var(--app-logo-background);
 }
 
-.app-logo-eye {
-  fill: none;
-  stroke: var(--dani-dex-logo-eye);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 9.5px;
+.app-logo-mark {
+  fill: var(--dani-dex-logo-eye);
   pointer-events: none;
   transform-box: view-box;
+  transform-origin: center;
 }
 
 .app-logo-eye-motion {
@@ -44,57 +41,25 @@
   transition: transform var(--dani-dex-duration-normal) cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.app-logo-eye-left {
-  transform-origin: 28.7% 48.7%;
-}
-
-.app-logo-eye-right {
-  transform-origin: 71.2% 48.8%;
-}
-
-.app-logo[data-animation="blink"] .app-logo-eye {
-  animation: app-logo-blink 4.8s cubic-bezier(0.77, 0, 0.175, 1) infinite;
-}
-
-.app-logo[data-animation="look-around"] .app-logo-eye {
+/* The mark is one solid shape, so the old eye blinks become gentle whole-mark motion. */
+.app-logo[data-animation="look-around"] .app-logo-mark {
   animation: app-logo-look-around 6s cubic-bezier(0.77, 0, 0.175, 1) infinite;
 }
 
-.app-logo[data-animation="surprised"] .app-logo-eye {
+.app-logo[data-animation="surprised"] .app-logo-mark {
   animation: app-logo-surprised 5.4s cubic-bezier(0.77, 0, 0.175, 1) infinite;
 }
 
-.app-logo[data-click-reaction="wink"] .app-logo-eye-left {
-  animation: app-logo-wink-left 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-.app-logo[data-click-reaction="wink"] .app-logo-eye-right {
-  animation: app-logo-wink-right 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
+.app-logo[data-click-reaction="wink"] .app-logo-mark {
+  animation: app-logo-press 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
 .app-logo[data-easter-egg="party"] .app-logo-background {
   animation: app-logo-party-colors 1.2s cubic-bezier(0.77, 0, 0.175, 1) both;
 }
 
-.app-logo[data-easter-egg="party"] .app-logo-eye-left {
-  animation: app-logo-party-left 1.2s cubic-bezier(0.77, 0, 0.175, 1) both;
-}
-
-.app-logo[data-easter-egg="party"] .app-logo-eye-right {
-  animation: app-logo-party-right 1.2s cubic-bezier(0.77, 0, 0.175, 1) both;
-}
-
-@keyframes app-logo-blink {
-  0%,
-  44%,
-  48%,
-  100% {
-    transform: scaleY(1);
-  }
-
-  46% {
-    transform: scaleY(0.08);
-  }
+.app-logo[data-easter-egg="party"] .app-logo-mark {
+  animation: app-logo-party 1.2s cubic-bezier(0.77, 0, 0.175, 1) both;
 }
 
 @keyframes app-logo-look-around {
@@ -131,19 +96,7 @@
   }
 }
 
-@keyframes app-logo-wink-left {
-  0%,
-  100% {
-    transform: scaleY(1);
-  }
-
-  38%,
-  58% {
-    transform: scaleY(0.08);
-  }
-}
-
-@keyframes app-logo-wink-right {
+@keyframes app-logo-press {
   0%,
   100% {
     transform: translateY(0) scale(1);
@@ -173,7 +126,7 @@
   }
 }
 
-@keyframes app-logo-party-left {
+@keyframes app-logo-party {
   0%,
   100% {
     transform: translate(0) rotate(0);
@@ -192,25 +145,6 @@
   }
 }
 
-@keyframes app-logo-party-right {
-  0%,
-  100% {
-    transform: translate(0) rotate(0);
-  }
-
-  25% {
-    transform: translateY(6%) rotate(8deg);
-  }
-
-  50% {
-    transform: translate(-4%, -2%) rotate(-8deg);
-  }
-
-  75% {
-    transform: translate(4%, 2%) rotate(4deg);
-  }
-}
-
 @media (hover: hover) and (pointer: fine) {
   .app-logo[data-interactive="true"] {
     cursor: pointer;
@@ -218,9 +152,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-logo[data-animation] .app-logo-eye,
-  .app-logo[data-click-reaction] .app-logo-eye,
-  .app-logo[data-easter-egg] .app-logo-eye,
+  .app-logo[data-animation] .app-logo-mark,
+  .app-logo[data-click-reaction] .app-logo-mark,
+  .app-logo[data-easter-egg] .app-logo-mark,
   .app-logo[data-easter-egg] .app-logo-background {
     animation: none;
     transform: none;

@@ -129,8 +129,8 @@
   --dani-dex-chart-series-claude: var(--dani-dex-provider-claude);
   --dani-dex-chart-series-grok: #6bc7d9;
   --dani-dex-chart-series-other: var(--dani-dex-text-muted);
-  --dani-dex-logo-production: #d6adf2;
-  --dani-dex-logo-eye: #040007;
+  --dani-dex-logo-production: #ffffff;
+  --dani-dex-logo-eye: #000000;
   --dani-dex-logo-dev: var(--dani-dex-warning);
   --dani-dex-logo-preview: var(--dani-dex-success);
   --dani-dex-unread-surface: #74b9ff;
