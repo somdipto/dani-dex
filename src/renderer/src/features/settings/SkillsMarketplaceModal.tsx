@@ -57,6 +57,8 @@ import { AgentAvatar } from "../agents/AgentAvatar";
 import { safeBrowserUrl } from "../conversation/RichMessageText";
 import { routineScheduleSummary } from "../conversation/routine-schedule-ui";
 import { AgentSelect } from "./AgentSelect";
+import { GOAL_TEAM_TEMPLATES } from "./goal-team-templates";
+import { installGoalTeam } from "./install-goal-team";
 import { CATEGORY_LABELS, MarketplaceCatalog } from "./MarketplaceCatalog";
 import { MarketplaceDetail } from "./MarketplaceDetail";
 import { MarketplacePluginDetail, PluginIcon } from "./MarketplacePluginDetail";
@@ -88,6 +90,9 @@ interface SkillsMarketplaceModalProps {
   onOpenChange: (open: boolean) => void;
   onTrySkill?: (agentId: string, skill: MarketplaceSkillDetail) => void;
   onAgentInstalled?: (agent: AgentSummary) => void | Promise<void>;
+  onTeamCreated?: (channelId: string) => void | Promise<void>;
+  onLocalAgentCreated?: (agent: AgentSummary) => void;
+  canCreateTeams?: boolean;
   /** Optional plugin listings; absent = not served yet. */
   plugins?: PluginDetail[];
   /** Host server id for plugin app installs. */
@@ -1216,6 +1221,9 @@ description: Turn merged work into clear, consistent release notes.
                       refreshVersion={agentRefreshVersion()}
                       addVersion={agentAddVersion()}
                       onInstalled={props.onAgentInstalled}
+                      onTeamCreated={props.onTeamCreated}
+                      onLocalAgentCreated={props.onLocalAgentCreated}
+                      canCreateTeams={props.canCreateTeams}
                       onEnterDetail={enterDetails}
                       onLeaveDetail={leaveDetails}
                     />
@@ -1296,6 +1304,9 @@ function AgentMarketplacePanel(props: {
   refreshVersion: number;
   addVersion: number;
   onInstalled?: (agent: AgentSummary) => void | Promise<void>;
+  onTeamCreated?: (channelId: string) => void | Promise<void>;
+  onLocalAgentCreated?: (agent: AgentSummary) => void;
+  canCreateTeams?: boolean;
   onEnterDetail: (name: string, close: () => void) => void;
   onLeaveDetail: () => void;
 }) {
@@ -1316,6 +1327,30 @@ function AgentMarketplacePanel(props: {
   let openingAgent = false;
   let publicationRequest = 0;
   let detailRequest = 0;
+  const [creatingTeam, setCreatingTeam] = createSignal<string | null>(null);
+  const [teamError, setTeamError] = createSignal<string | null>(null);
+  const matchingTeams = () =>
+    GOAL_TEAM_TEMPLATES.filter((team) =>
+      `${team.name} ${team.summary} ${team.category}`.toLowerCase().includes(props.query.trim().toLowerCase()),
+    );
+
+  async function createTeam(template: (typeof GOAL_TEAM_TEMPLATES)[number]) {
+    if (!props.canCreateTeams || creatingTeam()) return;
+    setTeamError(null);
+    setCreatingTeam(template.id);
+    try {
+      const channelId = await installGoalTeam(
+        template,
+        { createAgent: window.danidex.agent.createAgent, channelCommand: window.danidex.agent.channelCommand },
+        (agent) => props.onLocalAgentCreated?.(agent),
+      );
+      await props.onTeamCreated?.(channelId);
+    } catch (error) {
+      setTeamError(errorMessage(error, "Could not create the team."));
+    } finally {
+      setCreatingTeam(null);
+    }
+  }
 
   createEffect(
     () => [props.view, props.refreshVersion] as const,
@@ -1501,6 +1536,38 @@ function AgentMarketplacePanel(props: {
       data-preview-loading={panel.busy === "publish" ? "" : undefined}
     >
       <Show when={props.view === "discover"}>
+        <Show when={!market.detail && matchingTeams().length}>
+          <section class="goal-team-marketplace" aria-label="Goal team templates">
+            <div class="goal-team-heading">
+              <h2>Goal teams</h2>
+              <p>Choose a template to create three specialist agents in one group chat. Then give them a goal.</p>
+            </div>
+            <Show when={teamError()}>{(message) => <p role="alert">{message()}</p>}</Show>
+            <div class="goal-team-grid">
+              <For each={matchingTeams()}>
+                {(team) => (
+                  <article class="goal-team-card">
+                    <small>{team.category}</small>
+                    <h3>{team.name}</h3>
+                    <p>{team.summary}</p>
+                    <p class="goal-team-roles">{team.roles.map((role) => role.name).join(" · ")}</p>
+                    <Button
+                      disabled={!props.canCreateTeams || creatingTeam() !== null}
+                      loading={creatingTeam() === team.id}
+                      loadingLabel="Creating team…"
+                      onClick={() => void createTeam(team)}
+                    >
+                      Create team
+                    </Button>
+                  </article>
+                )}
+              </For>
+            </div>
+            <Show when={!props.canCreateTeams}>
+              <p>Switch to your local workspace to create a group chat from a template.</p>
+            </Show>
+          </section>
+        </Show>
         <div hidden={Boolean(market.detail) || panel.loading} inert={Boolean(market.detail) || panel.loading}>
           <MarketplaceCatalog
             kind="agents"

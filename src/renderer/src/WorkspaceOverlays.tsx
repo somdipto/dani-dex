@@ -1,9 +1,12 @@
 import type { CentralAuthUser, ServerSummary } from "@dani-dex/contracts/ipc";
-import { MCP_SERVERS_CAPABILITY } from "@dani-dex/contracts/ipc";
+import { CHANNEL_CHATS_CAPABILITY, MCP_SERVERS_CAPABILITY } from "@dani-dex/contracts/ipc";
 import { createMemo, Loading, Show } from "solid-js";
+import { toAgentProfile } from "./app-message-projection";
+import { createStoredProfile } from "./app-stored-values";
 import { useDaniOnly } from "./components/use-dani-only";
 import { useAuth } from "./features/account/account-context";
 import { useAgents } from "./features/agents/agents-context";
+import { useChannels } from "./features/channels/channels-context";
 import { useConversationController } from "./features/conversation/conversation-controller-context";
 import { useCustomProviders } from "./features/custom-providers/custom-providers-context";
 import { useSetup } from "./features/onboarding/onboarding-context";
@@ -115,6 +118,9 @@ function SkillsMarketplace() {
   const { selectAgent } = useNavigation();
   const { activeServer } = useServers();
   const { openInstalledMarketplaceAgent } = useServerSelection();
+  const channels = useChannels();
+  const { setAgentList } = useAgents();
+  const { activeServerSupportsCapability } = useServers();
   const local = createMemo(() => activeServer()?.kind === "local");
   /* What both example controls need: a local agent whose composer is free to take another line. */
   const composerFree = createMemo(
@@ -153,6 +159,14 @@ function SkillsMarketplace() {
               : undefined
           }
           onAgentInstalled={openInstalledMarketplaceAgent}
+          canCreateTeams={local() && activeServerSupportsCapability(CHANNEL_CHATS_CAPABILITY)}
+          onLocalAgentCreated={(agent) =>
+            setAgentList((current) => [createStoredProfile(toAgentProfile(agent)), ...current])
+          }
+          onTeamCreated={async (channelId) => {
+            setSkillsMarketplaceOpen(false);
+            await channels.open(channelId);
+          }}
           plugins={MARKETPLACE_PLUGINS}
           initialPluginSlug={pendingPluginSlug() ?? undefined}
           onInitialPluginSlugConsumed={() => setPendingPluginSlug(null)}

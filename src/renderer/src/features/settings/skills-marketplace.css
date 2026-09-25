@@ -1544,3 +1544,40 @@
     transform: translateY(8px) scale(0.97);
   }
 }
+
+.goal-team-marketplace {
+  margin-bottom: var(--dani-dex-space-6);
+}
+.goal-team-heading h2 {
+  margin: 0;
+  font-size: var(--dani-dex-text-xl);
+}
+.goal-team-heading p {
+  color: var(--dani-dex-text-muted);
+}
+.goal-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+  gap: var(--dani-dex-space-3);
+  max-height: 400px;
+  overflow: auto;
+}
+.goal-team-card {
+  padding: var(--dani-dex-space-4);
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+  background: var(--dani-dex-bg-control);
+}
+.goal-team-card h3 {
+  margin: var(--dani-dex-space-2) 0;
+}
+.goal-team-card p {
+  line-height: 1.4;
+}
+.goal-team-card small,
+.goal-team-roles {
+  color: var(--dani-dex-text-muted);
+}
+.goal-team-card .ui-button {
+  margin-top: var(--dani-dex-space-2);
+}

@@ -96,6 +96,9 @@ function SkillsMarketplaceModalStory(props: {
           plugins={props.plugins ? STORY_MARKETPLACE_PLUGINS : undefined}
           onTrySkill={fn()}
           onAgentInstalled={fn()}
+          canCreateTeams
+          onLocalAgentCreated={fn()}
+          onTeamCreated={fn()}
         />
       </main>
       <Toaster />
