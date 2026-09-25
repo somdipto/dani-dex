@@ -61,11 +61,11 @@ describe("ProviderPicker", () => {
         onSignInProvider={vi.fn()}
       />
     ));
-    const rows = [...view.container.querySelectorAll('.provider-picker-option:not(.provider-picker-option-custom)')];
-    expect(rows.map((row) => row.querySelector('.provider-picker-name')?.textContent)).toEqual([
-      "Dani Free", "Claude", "ChatGPT",
+    expect(view.getAllByRole("radio")).toEqual([
+      view.getByRole("radio", { name: /Dani Free/ }),
+      view.getByRole("radio", { name: /Claude/ }),
+      view.getByRole("radio", { name: /ChatGPT/ }),
     ]);
-    expect(view.getByRole("radio", { name: /Claude/ })).toBeTruthy();
   });
 
   it("sends a user to no install page for OpenCode, and falls back to Sign in with no runtime", () => {
