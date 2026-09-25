@@ -132,6 +132,12 @@ win:
     - target: nsis
       arch:
         - x64
+nsis:
+  # The installer EXE, setup header, and uninstall entry use the same white/black production mark
+  # as the installed app. Do not pick up an old build/installerIcon.ico by default.
+  installerIcon: build/icon-production.ico
+  installerHeaderIcon: build/icon-production.ico
+  uninstallerIcon: build/icon-production.ico
 linux:
   category: Utility
   icon: build/icon-production.png

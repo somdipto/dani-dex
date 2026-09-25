@@ -5,6 +5,18 @@ import { describe, expect, it } from "vitest";
 import { parseBuilderConfig, universalMacConfig, universalMacOverrides } from "./dist-mac-universal";
 
 describe("universal macOS configuration", () => {
+  it("pins production installer icons to the same white tile and black mark", async () => {
+    const config = parseBuilderConfig(await readFile("electron-builder.yml", "utf8"));
+    expect(config.mac.icon).toBe("build/icon-production.icns");
+    expect(config.win.icon).toBe("build/icon-production.ico");
+    expect(config.linux.icon).toBe("build/icon-production.png");
+    expect(config.nsis).toMatchObject({
+      installerIcon: "build/icon-production.ico",
+      installerHeaderIcon: "build/icon-production.ico",
+      uninstallerIcon: "build/icon-production.ico",
+    });
+  });
+
   it("adds the x64 Hermes and Dani-Free trees and the shared-resource pattern without touching the arm64 config", async () => {
     const base = parseBuilderConfig(await readFile("electron-builder.yml", "utf8"));
     const before = structuredClone(base);
