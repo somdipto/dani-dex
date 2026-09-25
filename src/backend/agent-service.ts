@@ -1134,6 +1134,11 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     return this.#availableModels();
   }
 
+  /** Refresh catalogs from the already-running provider clients, without replacing an active turn. */
+  refreshModelCatalog(): Promise<void> {
+    return this.#providers.refreshModelCatalog();
+  }
+
   /**
    * The catalogue every caller may choose from: what the connected providers report, less the models
    * of an endpoint whose removal is written.

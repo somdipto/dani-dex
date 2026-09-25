@@ -64,6 +64,8 @@ const logger = createDaniDexLogger("provider-runtime");
 
 const CODEX_LOGIN_TIMEOUT_MS = 10 * 60_000;
 const ACCOUNT_USAGE_READ_TIMEOUT_MS = 30_000;
+/** Re-read connected CLIs without replacing their binaries, accounts or active turns. */
+const MODEL_CATALOG_REFRESH_MS = 24 * 60 * 60_000;
 
 function withUsageReadTimeout<T>(promise: Promise<T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -452,6 +454,8 @@ export class ProviderRuntime implements ProviderPort {
   readonly #replacingCli = new Set<AgentProvider>();
   #status: AgentStatus = structuredClone(INITIAL_STATUS);
   #providerRefresh: Promise<AgentStatus> | null = null;
+  #catalogRefreshTimer: NodeJS.Timeout | null = null;
+  #catalogRefresh: Promise<void> | null = null;
   #codexLogin: PendingCodexLogin | null = null;
   readonly #cliLogins = new Map<AgentProvider, PendingCliLogin>();
   #providerActivation = Promise.resolve();
@@ -627,6 +631,36 @@ export class ProviderRuntime implements ProviderPort {
       "starting",
       BUILT_IN_PROVIDER_DRIVERS.map((driver) => driver.id),
     );
+    this.#scheduleModelCatalogRefresh();
+  }
+
+  /** An unchanged CLI may report a new upstream model without an app release or a client restart. */
+  refreshModelCatalog(): Promise<void> {
+    if (this.#catalogRefresh) return this.#catalogRefresh;
+    const refresh = (async () => {
+      // An activation swaps clients and reads its own catalogue. Wait rather than racing that swap.
+      await this.#providerActivation;
+      if (this.#status.phase !== "ready") return;
+      await this.#refreshModelCatalog();
+      this.#setStatus({});
+    })().finally(() => {
+      if (this.#catalogRefresh === refresh) this.#catalogRefresh = null;
+    });
+    this.#catalogRefresh = refresh;
+    return refresh;
+  }
+
+  #scheduleModelCatalogRefresh(): void {
+    if (this.#catalogRefreshTimer) clearTimeout(this.#catalogRefreshTimer);
+    this.#catalogRefreshTimer = setTimeout(() => {
+      this.#catalogRefreshTimer = null;
+      void this.refreshModelCatalog()
+        .catch((error) => this.#emitError("model_catalog_refresh_failed", error))
+        .finally(() => {
+          if (this.#status.phase !== "stopped") this.#scheduleModelCatalogRefresh();
+        });
+    }, MODEL_CATALOG_REFRESH_MS);
+    this.#catalogRefreshTimer.unref();
   }
 
   async setPreferredProvider(provider: AgentProvider, initialized: boolean, model: AgentModelId | null): Promise<void> {
@@ -939,6 +973,8 @@ export class ProviderRuntime implements ProviderPort {
    * stop() interleaves that wait with the mailbox and image-generation teardown.
    */
   dispose(): AgentClient[] {
+    if (this.#catalogRefreshTimer) clearTimeout(this.#catalogRefreshTimer);
+    this.#catalogRefreshTimer = null;
     if (this.#restartTimer) clearTimeout(this.#restartTimer);
     this.#restartTimer = null;
     const pendingLogin = this.#codexLogin;
@@ -1880,6 +1916,8 @@ export class ProviderRuntime implements ProviderPort {
                   : (fallback?.supportedReasoningEfforts ?? ["medium"]),
               });
             }
+            // A transient empty catalog is not proof all models vanished. Keep the last good list.
+            if (models.length === 0 && previous.length > 0) throw new Error("Model catalog was empty.");
             const rank = PREFERRED_MODEL_ORDER.get(client.provider);
             if (!rank) return { provider, models, fresh: true };
             // Sort is stable, so the CLI's own order still decides inside one tier.

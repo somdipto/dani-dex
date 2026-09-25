@@ -59,6 +59,29 @@ afterEach(async () => {
 });
 
 describe.sequential("AgentService: providers", () => {
+  it("refreshes a running provider catalog without restarting its client or losing the last good list", async () => {
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_CODEX_PATH = join(root, "absent-codex");
+    const { store, mailbox } = stores(root);
+    const client = new FakeAgentClient("opencode");
+    let models = [{ model: "opencode/old-free" }];
+    client.modelList = () => ({ data: models });
+    service = createTestService({ store, mailbox, preferredProvider: "opencode", clientFactory: () => client });
+    await service.initialize();
+    expect(service.listModels().some((model) => model.id === "opencode/old-free")).toBe(true);
+    const initialStarts = client.requests.filter((request) => request.method === "initialize").length;
+
+    models = [{ model: "opencode/new-free" }];
+    await service.refreshModelCatalog();
+    expect(service.listModels().some((model) => model.id === "opencode/new-free")).toBe(true);
+    expect(service.listModels().some((model) => model.id === "opencode/old-free")).toBe(false);
+    expect(client.requests.filter((request) => request.method === "initialize")).toHaveLength(initialStarts);
+
+    models = [];
+    await service.refreshModelCatalog();
+    expect(service.listModels().some((model) => model.id === "opencode/new-free")).toBe(true);
+  });
+
   it("runs a channel turn in a separate session and returns to the unchanged normal conversation", async () => {
     const { service: agentService, store } = await startService(root, {
       provider: "codex",
