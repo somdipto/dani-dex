@@ -446,12 +446,14 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
       response = { data: [{ model: id }, { model: "newly-available" }] };
       await refresh();
       expect(catalog()?.map((model) => model.id)).toEqual([id, "newly-available"]);
+      // A transient empty response does not prove that every model was removed upstream.
+      // Keep the last working catalog until the provider reports another nonempty one.
       response = { data: [] };
       await refresh();
-      expect(catalog()).toEqual([]);
+      expect(catalog()?.map((model) => model.id)).toEqual([id, "newly-available"]);
       failure = true;
       await refresh();
-      expect(catalog()).toEqual([]);
+      expect(catalog()?.map((model) => model.id)).toEqual([id, "newly-available"]);
     },
   );
 
