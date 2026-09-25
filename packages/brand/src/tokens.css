@@ -129,6 +129,8 @@
   --dani-dex-chart-series-claude: var(--dani-dex-provider-claude);
   --dani-dex-chart-series-grok: #6bc7d9;
   --dani-dex-chart-series-other: var(--dani-dex-text-muted);
+  /* Published article cards retain this lilac, independent of the universal black-on-white logo. */
+  --dani-dex-article-art-lilac: #d6adf2;
   --dani-dex-logo-production: #ffffff;
   --dani-dex-logo-eye: #000000;
   --dani-dex-logo-dev: var(--dani-dex-warning);

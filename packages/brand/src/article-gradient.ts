@@ -9,8 +9,8 @@
 // not a var(), and this module is read by the build-time generator where no
 // document exists to resolve one. The same test pins them to tokens.css.
 
-/** `--dani-dex-logo-production` */
-const LOGO_PRODUCTION = "#d6adf2";
+/** `--dani-dex-article-art-lilac`: pinned published artwork, not the current logo colour. */
+const ARTICLE_LILAC = "#d6adf2";
 /** `--dani-dex-warning`, which `--dani-dex-logo-dev` aliases */
 const LOGO_DEV = "#ff9412";
 /** `--dani-dex-success`, which `--dani-dex-logo-preview` aliases */
@@ -35,7 +35,7 @@ const DIM = "#6a6a6a";
 const CANVAS = "#1a1a1a";
 
 export const ARTICLE_GRADIENT_BRAND_HEXES = {
-  "--dani-dex-logo-production": LOGO_PRODUCTION,
+  "--dani-dex-article-art-lilac": ARTICLE_LILAC,
   "--dani-dex-warning": LOGO_DEV,
   "--dani-dex-success": LOGO_PREVIEW,
   "--dani-dex-accent": ACCENT,
@@ -66,8 +66,8 @@ const SILVER = "#c8c8c8";
 // canvas colour, and that is what makes a card fade into the page at its edges
 // instead of sitting on it as a rectangle.
 const FAMILIES = [
-  // Lilac
-  [LOGO_PRODUCTION, VIOLET_DEEP, INDIGO, ACCENT, CANVAS],
+  // Lilac: published art keeps its palette even if the app logo changes.
+  [ARTICLE_LILAC, VIOLET_DEEP, INDIGO, ACCENT, CANVAS],
   // Ember
   [LOGO_DEV, RED_DEEP, CORAL, TERRACOTTA, CANVAS],
   // Mint
@@ -75,19 +75,19 @@ const FAMILIES = [
   // Deep water
   [ACCENT, BLUE_DEEP, UNREAD, INDIGO, CANVAS],
   // Sunset
-  [LOGO_DEV, LOGO_PRODUCTION, PLUM_DEEP, MAGENTA, CANVAS],
+  [LOGO_DEV, ARTICLE_LILAC, PLUM_DEEP, MAGENTA, CANVAS],
   // Graphite
-  [SILVER, DIM, LOGO_PRODUCTION, UNREAD, CANVAS],
+  [SILVER, DIM, ARTICLE_LILAC, UNREAD, CANVAS],
   // Terracotta
   [TERRACOTTA, LOGO_DEV, PLUM_DEEP, VIOLET_DEEP, CANVAS],
   // Lagoon
   [CYAN, ACCENT, LOGO_PREVIEW, UNREAD, CANVAS],
   // Magenta
-  [MAGENTA, PLUM_DEEP, LOGO_PRODUCTION, VIOLET_DEEP, CANVAS],
+  [MAGENTA, PLUM_DEEP, ARTICLE_LILAC, VIOLET_DEEP, CANVAS],
   // Indigo
-  [INDIGO, VIOLET_DEEP, UNREAD, LOGO_PRODUCTION, CANVAS],
+  [INDIGO, VIOLET_DEEP, UNREAD, ARTICLE_LILAC, CANVAS],
   // Rosewood
-  [CORAL, MAGENTA, INDIGO, LOGO_PRODUCTION, CANVAS],
+  [CORAL, MAGENTA, INDIGO, ARTICLE_LILAC, CANVAS],
   // Forest
   [GREEN_DEEP, LOGO_PREVIEW, CYAN, BLUE_DEEP, CANVAS],
 ] as const;
