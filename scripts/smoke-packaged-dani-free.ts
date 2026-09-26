@@ -28,7 +28,13 @@ export async function smokePackagedDaniFree(resources: string, platform: NodeJS.
     logger.info(`Packaged Dani Free ${platform}-${arch} answered its authenticated model handshake.`);
   } finally {
     await supervisor.stop();
-    await rm(home, { recursive: true, force: true });
+    // Windows may still hold a catalog file briefly after the proxy process exits.
+    // Teardown cannot turn a successful authenticated smoke into a packaging failure.
+    try {
+      await rm(home, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
+    } catch (error) {
+      logger.warn("Could not remove the temporary Dani Free smoke profile:", error);
+    }
   }
 }
 
