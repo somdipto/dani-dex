@@ -5,6 +5,20 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.3] - 2026-09-26
+
+### Added
+
+- Dani Free is bundled with the installer and starts with the app, without an extra
+  account or key. It can use an available fallback free model when the first
+  cannot answer.
+
+### Fixed
+
+- Show voice-call failures as notices instead of blocking the message box.
+- Require a real free-model answer from the installed Mac app's bundled resources
+  before uploading the CI installer.
+
 ## [0.17.2] - 2026-09-25
 
 ### Added
