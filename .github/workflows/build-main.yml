@@ -175,7 +175,7 @@ jobs:
     # signed build waits on the owner's Apple Developer team.
     name: macOS arm64 DMG (unsigned)
     runs-on: macos-14
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -227,6 +227,29 @@ jobs:
 
       - name: Verify packaged Dani Free
         run: bun scripts/smoke-packaged-dani-free.ts dist/mac-arm64/Dani-Dex.app/Contents/Resources darwin arm64
+
+      - name: Install DMG and require a real free-model answer
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          dmgs=(dist/*.dmg)
+          if (( ${#dmgs[@]} != 1 )); then
+            echo "Expected exactly one arm64 DMG." >&2
+            exit 1
+          fi
+          mount=$(mktemp -d)
+          installed=$(mktemp -d)
+          cleanup() {
+            hdiutil detach "$mount" || true
+            rm -rf "$mount" "$installed"
+          }
+          trap cleanup EXIT
+          hdiutil attach "${dmgs[0]}" -readonly -nobrowse -noautoopen -mountpoint "$mount"
+          test -d "$mount/Dani-Dex.app"
+          ditto --noqtn "$mount/Dani-Dex.app" "$installed/Dani-Dex.app"
+          xattr -dr com.apple.quarantine "$installed/Dani-Dex.app" || true
+          bun scripts/smoke-packaged-dani-free-answer.ts "$installed/Dani-Dex.app/Contents/Resources"
 
       - name: Upload DMG
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

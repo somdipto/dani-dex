@@ -137,10 +137,29 @@ export async function downloadDaniFreeProxy(options: {
 
 if (import.meta.main) {
   const token = process.env.DANI_FREE_ARTIFACT_TOKEN;
-  if (!token) throw new Error("DANI_FREE_ARTIFACT_TOKEN is required (cross-repository Actions artifact read grant).");
-  const lock = lockSchema.parse(JSON.parse(await readFile(resolve("scripts/dani-free-proxy-artifact.json"), "utf8")));
   const pinned = parseSha256Sums(await readFile(resolve("scripts/dani-free-binaries.sha256"), "utf8"));
-  const directory = await downloadDaniFreeProxy({ token, lock, pinned });
+  // Public release is the primary path. The older artifact is separately pinned and expires;
+  // only a missing release may trigger that backup, never a digest or provenance mismatch.
+  const { downloadDaniFreeProxyRelease } = await import("./download-dani-free-proxy-release");
+  const releaseLock = JSON.parse(await readFile(resolve("scripts/dani-free-proxy-release.json"), "utf8"));
+  let directory: string;
+  try {
+    directory = await downloadDaniFreeProxyRelease({ lock: releaseLock, pinned });
+  } catch (error) {
+    if (
+      !(error instanceof Error && /^Pinned Dani Free release metadata returned HTTP 404$/u.test(error.message)) ||
+      !token
+    )
+      throw error;
+    const lock = lockSchema.parse(JSON.parse(await readFile(resolve("scripts/dani-free-proxy-artifact.json"), "utf8")));
+    // The old artifact may differ byte-wise from this release. Even when its own archive is
+    // authentic, it must still match the current installer pins before a source is accepted.
+    const backupPins = parseSha256Sums(await readFile(resolve("scripts/dani-free-artifact-backup.sha256"), "utf8"));
+    if (backupPins.size !== pinned.size || [...pinned].some(([name, digest]) => backupPins.get(name) !== digest)) {
+      throw new Error("Backup Dani Free artifact does not match the current release pins.");
+    }
+    directory = await downloadDaniFreeProxy({ token, lock, pinned: backupPins });
+  }
   // Do not log the token, redirect URL, or binary content. GitHub Actions stores the location for later steps.
   if (process.env.GITHUB_ENV)
     await writeFile(process.env.GITHUB_ENV, `DANI_FREE_BINARIES_DIR=${directory}\n`, { flag: "a" });
