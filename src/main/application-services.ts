@@ -805,6 +805,7 @@ export async function createApplicationServices({
     // handing every provider a command it cannot start.
     computerUseMcpServer: () => cuaDriver.mcpServerForProviders(),
     localSkillTools: () => localSkillTools(skills),
+    installedSkills: (agentId) => skills.listInstalledForChatTags(agentId),
     approvalAutomation,
     deleteWithRevokedApproval: (agentId, remove) => approvalAutomation.deleteAgent(agentId, remove),
     tables,

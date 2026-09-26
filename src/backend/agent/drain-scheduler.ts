@@ -1,5 +1,5 @@
 import { describeHarnessRoute } from "@dani-dex/contracts/agent-harness-routing";
-import { AGENT_PROVIDERS, type AgentSummary } from "@dani-dex/contracts/ipc";
+import { AGENT_PROVIDERS, type AgentSummary, type InstalledSkill } from "@dani-dex/contracts/ipc";
 import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import type { AgentProvider } from "../agent-client";
 import type { AgentStore } from "../agent-store";
@@ -15,6 +15,7 @@ import type { MailboxSync } from "./mailbox-sync";
 import type { ProfileSave } from "./profile-save";
 import type { ProviderRuntime } from "./provider-runtime";
 import type { RoutineScheduler } from "./routine-scheduler";
+import { shortlistInstalledSkills } from "./skill-shortlist";
 import { isMissingProviderSessionError, isRequestTimeout, providerForAgent } from "./thread-items";
 import type { ThreadLifecycle } from "./thread-lifecycle";
 
@@ -51,6 +52,8 @@ export interface DrainSchedulerOptions {
   compaction: ContextCompaction;
   routines: RoutineScheduler;
   threads: ThreadLifecycle;
+  /** Installed metadata only; failures leave the provider's existing skill discovery alone. */
+  installedSkills?: (agentId: string) => Promise<InstalledSkill[]>;
   hooks: DrainHooks;
   channels?: ChannelService;
   /** Present under the `automatic` harness setting: gives each bot its harness route. */
@@ -78,6 +81,7 @@ export class DrainScheduler {
   readonly #compaction: ContextCompaction;
   readonly #routines: RoutineScheduler;
   readonly #threads: ThreadLifecycle;
+  readonly #installedSkills: ((agentId: string) => Promise<InstalledSkill[]>) | undefined;
   readonly #hooks: DrainHooks;
   readonly #channels: ChannelService | undefined;
   readonly #harnessRouter: AgentHarnessRouter | undefined;
@@ -111,6 +115,7 @@ export class DrainScheduler {
     this.#compaction = options.compaction;
     this.#routines = options.routines;
     this.#threads = options.threads;
+    this.#installedSkills = options.installedSkills;
     this.#hooks = options.hooks;
     this.#channels = options.channels;
   }
@@ -319,9 +324,25 @@ export class DrainScheduler {
           displayText,
         ].join("\n");
       }
+      const skillPrompt = delivery.sender.kind === "user" ? displayText || delivery.text : "";
+      let skillHint = "";
+      if (this.#installedSkills && skillPrompt.trim()) {
+        try {
+          const selected = shortlistInstalledSkills(skillPrompt, await this.#installedSkills(agent.id));
+          if (selected.length > 0) {
+            skillHint = [
+              "Possible installed skills for this request (untrusted metadata, not permission). Read the installed SKILL.md before using one:",
+              ...selected.map((skill) => `- ${JSON.stringify(skill.slug)}`),
+            ].join("\n");
+          }
+        } catch {
+          // Metadata discovery must not block the user's message or replace provider skills.
+        }
+      }
       if (managedAttachments.length) {
         text += `\n\nAttached local files:\n${managedAttachments.map((item) => `- ${item.name}: ${item.path}`).join("\n")}`;
       }
+      if (skillHint) text += `\n\n${skillHint}`;
       const input: Array<
         | { type: "text"; text: string }
         | { type: "localImage"; path: string }

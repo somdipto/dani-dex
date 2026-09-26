@@ -44,6 +44,7 @@ import type {
   DuplicateAgentResult,
   GenerateAgentProfileInput,
   HostAnalyticsInput,
+  InstalledSkill,
   ListChannelRoutineRunsInput,
   ListRoutineRunsInput,
   McpServerConfig,
@@ -224,6 +225,8 @@ export interface AgentServiceOptions {
    */
   credentials?: ProviderClientContext;
   localSkillTools?: () => LocalSkillTools;
+  /** Installed skill summaries from the main process, read at each turn. */
+  installedSkills?: (agentId: string) => Promise<InstalledSkill[]>;
   /**
    * Whose approvals are answered without asking. The main process owns the preference, because it
    * is a property of this computer and never crosses the Team API. Omitted, every approval asks.
@@ -730,6 +733,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       compaction: this.#compaction,
       routines: this.#routines,
       threads: this.#threads,
+      ...(options.installedSkills ? { installedSkills: options.installedSkills } : {}),
       ...(this.#harnessRouter ? { harnessRouter: this.#harnessRouter } : {}),
       hooks: {
         emitError: (code, error, agentId) => this.#emitError(code, error, agentId),
