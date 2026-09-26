@@ -323,10 +323,12 @@ jobs:
           echo "$output"
           grep -Fq "v$version" <<<"$output"
 
-      - name: Verify packaged Dani Free in both slices
+      - name: Verify packaged Dani Free arm64 and Intel bytes
         run: |
           bun scripts/smoke-packaged-dani-free.ts dist/mac-universal/Dani-Dex.app/Contents/Resources darwin arm64
-          bun scripts/smoke-packaged-dani-free.ts dist/mac-universal/Dani-Dex.app/Contents/Resources darwin x64
+          # This is an arm64 runner. The x64 slice can be checked for exact pinned bytes and
+          # Mach-O architecture here, but executing its x64 smoke needs a native Intel host.
+          bun -e 'import { verifyPackagedDaniFree } from "./scripts/verify-packaged-dani-free"; await verifyPackagedDaniFree("dist/mac-universal/Dani-Dex.app/Contents/Resources", "darwin", "x64");'
 
       - name: Upload DMG
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
