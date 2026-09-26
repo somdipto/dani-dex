@@ -106,16 +106,23 @@ describe("model source choices", () => {
   };
   const listed = [
     { id: "opencode/big-pickle", provider: "opencode" },
+    { id: "opencode/muse", name: "OpenCode/Muse Free", provider: "opencode" },
+    { id: "opencode/paid", name: "OpenCode/Paid", provider: "opencode" },
+    { id: "custom/free", name: "Custom/Free", provider: "opencode" },
     { id: "claude-sonnet", provider: "claude" },
     { id: "dani/auto", provider: "opencode" },
   ];
 
-  it("offers only the source's model once it is listed", () => {
-    expect(modelSourceChoices(listed, dani)).toEqual([{ id: "dani/auto", provider: "opencode" }]);
+  it("offers the source model and free OpenCode models, never a paid model", () => {
+    expect(modelSourceChoices(listed, dani)).toEqual([
+      { id: "opencode/big-pickle", provider: "opencode" },
+      { id: "opencode/muse", name: "OpenCode/Muse Free", provider: "opencode" },
+      { id: "dani/auto", provider: "opencode" },
+    ]);
   });
 
   it("keeps the list while the source's model is not listed yet, and with no source", () => {
-    expect(modelSourceChoices(listed.slice(0, 2), dani)).toEqual(listed.slice(0, 2));
+    expect(modelSourceChoices(listed.slice(0, 5), dani)).toEqual(listed.slice(0, 5));
     expect(modelSourceChoices(listed, null)).toEqual(listed);
   });
 });

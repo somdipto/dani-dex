@@ -82,6 +82,37 @@ describe.sequential("AgentService: providers", () => {
     expect(service.listModels().some((model) => model.id === "opencode/new-free")).toBe(true);
   });
 
+  it("chooses a free OpenCode model over a listed paid model for a new bot", async () => {
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
+    const { store, mailbox } = stores(root);
+    service = createTestService({
+      store,
+      mailbox,
+      preferredProvider: "opencode",
+      clientFactory: (provider) => {
+        const client = new FakeAgentClient(provider);
+        if (provider === "opencode") {
+          client.modelList = () => ({
+            data: [
+              { model: "opencode-go/paid", displayName: "Paid model" },
+              { model: "opencode/safe-free", displayName: "Safe Free" },
+            ],
+          });
+        }
+        return client;
+      },
+    });
+    await service.initialize();
+    const agent = await service.createAgent({
+      name: "Free helper",
+      description: "Help with daily tasks.",
+      initialMessage: "Greet me briefly.",
+      avatarSeed: "free-helper",
+      avatarHue: null,
+    });
+    expect(agent).toMatchObject({ provider: "opencode", model: "opencode/safe-free" });
+  });
+
   it("runs a channel turn in a separate session and returns to the unchanged normal conversation", async () => {
     const { service: agentService, store } = await startService(root, {
       provider: "codex",

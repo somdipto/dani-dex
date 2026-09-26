@@ -6,12 +6,10 @@ const RETRY_MS = 1500;
 const MAX_ATTEMPTS = 40;
 
 /**
- * Whether Dani's free models are the product's only model right now, read from the live model list,
- * the same source the model picker uses. At launch the list is empty, or still the engine's own
- * catalogue, until the free service is serving, so a "no" is re-read for the first minute rather
- * than taken as final. The read is an in-memory copy in the main process, so the retries are cheap. While it is
- * undecided or the read fails, everything shows, which is the safe default for a screen that offers
- * choices.
+ * Whether the live model list contains only keyless free choices,
+ * the same source the model picker uses. The proxy and OpenCode catalog can appear at different
+ * times, so a "no" is re-read for the first minute. While undecided, other sign-in choices remain
+ * visible. These are in-memory reads, not downloads or logged-in website requests.
  */
 export function useDaniOnly(): () => boolean {
   const [daniOnly, setDaniOnly] = createSignal(false);

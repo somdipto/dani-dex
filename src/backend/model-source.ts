@@ -4,10 +4,11 @@
 // `setRuntimeModelSource` replaces it while this process runs: the bundled Dani-Free proxy reports
 // its address, key and models only after it starts. Null keeps
 // OpenCode's own catalog (its free models, no account). A value is an OpenAI-compatible endpoint that
-// replaces it: this module turns it into one more provider on the `OPENCODE_CONFIG_CONTENT` layer
+// supplements the keyless catalog: this module turns it into one more provider on the `OPENCODE_CONFIG_CONTENT` layer
 // Dani-Dex already writes for the user's own endpoints, so a proxy is a config value, not a code
-// change. The OpenCode Go key saved in Settings, when there is one, is sent to the source as its key.
+// change. The local proxy's generated key never comes from a user-entered API key.
 
+import { isFreeOpencodeModel } from "@dani-dex/contracts/ipc";
 import { DANI_DEX_MODEL_SOURCE, type DaniDexModelSource } from "@dani-dex/contracts/online-services";
 import type { CustomProviderConfig, CustomProviderSource } from "./opencode-config";
 
@@ -62,17 +63,19 @@ export function hasModelSource(source: DaniDexModelSource | null = currentModelS
 }
 
 /**
- * The model choices the interface offers. A model source is the product's only model: once its models
- * are listed, every other model - OpenCode's own catalog and every other provider's - is left out, so
- * the picker shows the source's models alone. Until the source's models are listed (the proxy is
- * still starting, or OpenCode has not restarted onto it yet) the list is left as it is, so there is
- * always something to start on.
+ * Keep the keyless OpenCode catalog beside Dani Free Auto. Never expose paid OpenCode models
+ * from the proxy-backed default: they may be listed by a saved key but are not free to run.
  */
-export function modelSourceChoices<T extends { id: string }>(
+export function modelSourceChoices<T extends { id: string; name?: string }>(
   models: readonly T[],
   source: DaniDexModelSource | null = currentModelSource(),
 ): T[] {
   if (!source || !hasModelSource(source)) return [...models];
   const own = models.filter((model) => model.id.startsWith(`${source.id}/`));
-  return own.length > 0 ? own : [...models];
+  if (own.length === 0) return [...models];
+  return models.filter(
+    (model) =>
+      model.id.startsWith(`${source.id}/`) ||
+      (model.id.startsWith("opencode/") && isFreeOpencodeModel(model.id, model.name ?? model.id)),
+  );
 }

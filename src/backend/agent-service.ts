@@ -84,6 +84,7 @@ import type {
 import {
   AGENT_RUNTIME_TEXT_LIMIT,
   defaultProviderModel,
+  isFreeOpencodeModel,
   isMessageReaction,
   mcpConfigErrors,
   normalizeMcpConfig,
@@ -1220,16 +1221,24 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
    * The model a new agent, or a profile draft with no agent, starts on for `provider`.
    *
    * Setup records a model beside the preferred provider, so that model comes first -- but only while
-   * the CLI still lists it, because the list is the provider's answer and a saved id can name an
-   * endpoint or a model that is gone. After it come the provider's own default and then whatever it
-   * does list; `null` means it listed nothing at all.
+   * the CLI still lists it, because a saved id can name a model that is gone. Then use the
+   * provider's default, a listed free OpenCode model, or the first listed model. A caller that
+   * presents a billable choice still needs explicit approval; this method does not grant it.
    */
   #startingModel(provider: AgentProvider, models: AgentModelOption[]): AgentModelOption | null {
     const listed = (id: AgentModelId) => models.find((model) => model.provider === provider && model.id === id);
     const preferred = this.#providers.preferredModel();
     const chosen = preferred !== null && provider === this.#providers.preferredProvider() ? listed(preferred) : null;
+    const free =
+      provider === "opencode"
+        ? models.find((model) => model.provider === "opencode" && isFreeOpencodeModel(model.id, model.name))
+        : null;
     return (
-      chosen ?? listed(defaultProviderModel(provider)) ?? models.find((model) => model.provider === provider) ?? null
+      chosen ??
+      listed(defaultProviderModel(provider)) ??
+      free ??
+      models.find((model) => model.provider === provider) ??
+      null
     );
   }
 

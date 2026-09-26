@@ -543,6 +543,32 @@ describe("Dani-Dex connected desktop shell", () => {
     );
   });
 
+  it("creates an agent with a keyless free model when the local proxy is unavailable", async () => {
+    vi.mocked(window.danidex.agent.listModels).mockResolvedValue([
+      {
+        provider: "opencode",
+        id: "opencode/available-free",
+        name: "OpenCode/Available Free",
+        description: "",
+        defaultReasoningEffort: "medium",
+        supportedReasoningEfforts: ["medium"],
+      },
+    ]);
+    render(() => <App />);
+    await screen.findByRole("heading", { name: "Chief" });
+    await fireEvent.pointerDown(screen.getByRole("button", { name: "New agent or channel" }), { button: 0 });
+    await fireEvent.pointerUp(await screen.findByRole("menuitem", { name: "New agent" }), { button: 0 });
+    expect(await screen.findByRole("heading", { name: "Create a new agent" })).toBeInTheDocument();
+    const create = screen.getByRole("button", { name: "Create agent" });
+    expect(create).toBeEnabled();
+    await fireEvent.click(create);
+    await waitFor(() =>
+      expect(window.danidex.agent.createAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ provider: "opencode", model: "opencode/available-free" }),
+      ),
+    );
+  });
+
   it("hides every model identity on new-agent setup and refuses an upstream fallback", async () => {
     vi.mocked(window.danidex.agent.listModels).mockResolvedValue([
       {

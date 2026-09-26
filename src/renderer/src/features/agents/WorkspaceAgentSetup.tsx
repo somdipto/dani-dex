@@ -1,3 +1,4 @@
+import { isFreeOpencodeModel } from "@dani-dex/contracts/ipc";
 import { TEAM_AGENT_CREATE_MODEL_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
 import { createEffect, createMemo } from "solid-js";
 import { useServers } from "../servers/servers-context";
@@ -22,13 +23,16 @@ export function WorkspaceAgentSetup() {
   } = useAgents();
   const { createAgent } = useAgentActions();
   const { activeServer, activeServerSupportsCapability } = useServers();
-  // The home creation flow uses only the proxy-verified Dani Free Auto choice. No model name,
-  // upstream catalog or fallback selection is shown or submitted here.
+  // The home creation flow uses a listed free model: the local proxy when ready, or a
+  // keyless OpenCode model if the proxy failed. Never choose an unknown-price model.
   const daniModel = createMemo(() => {
     if (activeServer()?.kind === "remote" && !activeServerSupportsCapability(TEAM_AGENT_CREATE_MODEL_CAPABILITY)) {
       return undefined;
     }
-    return modelOptions().find((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto");
+    return (
+      modelOptions().find((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto") ??
+      modelOptions().find((option) => option.provider === "opencode" && isFreeOpencodeModel(option.id, option.name))
+    );
   });
   createEffect(
     () => daniModel(),

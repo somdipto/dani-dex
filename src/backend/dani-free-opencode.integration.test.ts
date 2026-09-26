@@ -3,7 +3,7 @@
 /*
  * Dani's free models end to end: the real Dani-Free proxy starts under a Dani-Dex folder, its model
  * source is set the way the app sets it, and the real OpenCode CLI - through the driver chain the app
- * uses - lists the Dani model from the proxy and nothing behind it, and answers a prompt through it.
+ * uses - lists the Dani model from the proxy and answers a prompt through it.
  * The prompt goes to the free services on the internet, so this needs a network. Runs when both
  * DANI_DEX_DANI_FREE_TEST_PATH and DANI_DEX_OPENCODE_TEST_PATH point at real executables.
  */
@@ -33,7 +33,7 @@ afterEach(async () => {
 });
 
 describe.skipIf(!proxyPath || !opencodePath)("Dani's free models through OpenCode", () => {
-  it("lists only Dani and answers through the bundled proxy, with no account", async () => {
+  it("lists Dani and answers through the bundled proxy, with no account", async () => {
     const home = await mkdtemp(join(tmpdir(), "dani-dex-dani-free-"));
     cleanups.push(() => rm(home, { recursive: true, force: true }));
     process.env.HOME = home;
@@ -63,7 +63,7 @@ describe.skipIf(!proxyPath || !opencodePath)("Dani's free models through OpenCod
     const dani = models.data.filter((model) => model.model?.startsWith("dani/"));
     expect(dani.map((model) => model.model)).toEqual(["dani/dani-free-auto"]);
     expect(dani[0]?.displayName).toMatch(/Dani Free Auto$/);
-    expect(JSON.stringify(dani)).not.toMatch(/kilo|nex|free\)/i);
+    expect(JSON.stringify(dani)).not.toMatch(/kilo|nex/i);
 
     const thread = await client.request(
       "thread/start",

@@ -68,68 +68,44 @@ describe("ProviderPicker", () => {
     ]);
   });
 
-  it("sends a user to no install page for OpenCode, and falls back to Sign in with no runtime", () => {
-    const { view, onSignInProvider } = renderPicker([claude, openCode]);
-
-    // Claude is the control: the same state and the same handlers still produce an Install button,
-    // so the missing one below is the descriptor's decision and not the test's setup.
-    expect(view.getByRole("button", { name: "Install Claude" })).toBeTruthy();
-    expect(view.queryByRole("button", { name: "Install OpenCode" })).toBeNull();
-
-    // No runtime on the row, so no Reconnect to carry the dialog: the fallback Sign in does.
-    const signIn = view.getByRole("button", { name: "Sign in to OpenCode" });
-    fireEvent.click(signIn);
-    expect(onSignInProvider).toHaveBeenCalledWith("opencode");
-    // Claude asks for a sign-in only while it is signed out, which `not-installed` is not.
-    expect(view.queryByRole("button", { name: "Sign in to Claude" })).toBeNull();
-  });
-
-  it("opens the OpenCode key dialog from Reconnect, with no second Sign in button", () => {
+  it("offers a keyless connection and no key dialog for Dani Free", () => {
     const onConnectProvider = vi.fn();
     const { view, onSignInProvider } = renderPicker(
-      [{ ...openCode, state: "available", runtimeStatus: runtime({}) }],
+      [claude, { ...openCode, state: "available", runtimeStatus: runtime({}) }],
       vi.fn(),
       onConnectProvider,
     );
-
-    // One key button on a downloaded row: Reconnect carries the dialog, so Sign in stays away.
-    expect(view.queryByRole("button", { name: "Sign in to OpenCode" })).toBeNull();
+    expect(view.getByRole("radio", { name: /Claude/ })).toBeTruthy();
+    expect(view.getByRole("button", { name: "Add paid models" })).toBeInTheDocument();
     fireEvent.click(view.getByRole("button", { name: "Reconnect OpenCode" }));
-    expect(onSignInProvider).toHaveBeenCalledWith("opencode");
-    expect(onConnectProvider).not.toHaveBeenCalled();
+    expect(onConnectProvider).toHaveBeenCalledWith("opencode");
+    expect(onSignInProvider).not.toHaveBeenCalled();
   });
 
-  it("keeps Connect and Restart on the provider connection, with the dialog only on Reconnect", () => {
-    const onSignInProvider = vi.fn();
+  it("retries a failed free runtime without asking for a paid-model key", () => {
     const onConnectProvider = vi.fn();
-    const renderRow = (option: ProviderPickerOption) => renderPicker([option], onSignInProvider, onConnectProvider);
-
-    // A failed provider offers a retry that needs no key, beside the dialog that replaces the
-    // key blocking startup.
-    const failed = renderRow({ ...openCode, state: "error", runtimeStatus: runtime({}) });
-    fireEvent.click(failed.view.getByRole("button", { name: "Connect OpenCode" }));
+    const { view, onSignInProvider } = renderPicker(
+      [{ ...openCode, state: "error", runtimeStatus: runtime({}) }],
+      vi.fn(),
+      onConnectProvider,
+    );
+    fireEvent.click(view.getByRole("button", { name: "Connect OpenCode" }));
     expect(onConnectProvider).toHaveBeenCalledWith("opencode");
-    fireEvent.click(failed.view.getByRole("button", { name: "Sign in to OpenCode" }));
+    expect(view.getByRole("button", { name: "Add paid models" })).toBeInTheDocument();
+    expect(onSignInProvider).not.toHaveBeenCalled();
+  });
+
+  it("keeps an optional paid-model key action separate from free connection", () => {
+    const { view, onSignInProvider } = renderPicker([{ ...openCode, state: "available", runtimeStatus: runtime({}) }]);
+    fireEvent.click(view.getByRole("button", { name: "Add paid models" }));
     expect(onSignInProvider).toHaveBeenCalledWith("opencode");
-
-    // A connecting provider offers a restart that needs no key either.
-    const restarting = renderRow({
-      ...openCode,
-      state: "available",
-      connectionState: "connecting",
-      runtimeStatus: runtime({}),
-    });
-    fireEvent.click(restarting.view.getByRole("button", { name: "Restart OpenCode" }));
-    expect(onConnectProvider).toHaveBeenCalledWith("opencode");
-    fireEvent.click(restarting.view.getByRole("button", { name: "Sign in to OpenCode" }));
-    expect(onSignInProvider).toHaveBeenCalledTimes(2);
   });
 
   it("keeps only Cancel on a downloading OpenCode row", () => {
     const downloading = renderPicker([
       { ...openCode, runtimeStatus: runtime({ phase: "downloading", progress: 40, version: null }) },
     ]);
-    expect(downloading.view.queryByRole("button", { name: "Sign in to OpenCode" })).toBeNull();
+    expect(downloading.view.queryByRole("button", { name: "Add paid models" })).toBeNull();
     expect(downloading.view.getByRole("button", { name: "Cancel OpenCode" })).toBeTruthy();
   });
 

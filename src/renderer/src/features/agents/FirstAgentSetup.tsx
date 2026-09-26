@@ -32,7 +32,7 @@ export interface FirstAgentSetupProps {
   mode?: "first" | "additional";
   submitting?: boolean;
   error?: string | null;
-  /** A real Dani Free Auto model must be listed before this form can create an agent. */
+  /** A real keyless free model must be listed before this form can create an agent. */
   modelReady?: boolean;
   onChange: (value: FirstAgentDraft) => void;
   onSubmit: (value: FirstAgentDraft) => void | Promise<void>;

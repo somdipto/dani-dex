@@ -426,12 +426,9 @@ export function ProviderPicker(props: ProviderPickerProps) {
                             if (action() === "cancel") {
                               void props.onCancelProviderDownload?.(option().id);
                             } else if (action() !== "download" && action() !== "retry") {
-                              // Only Reconnect opens the key dialog; Connect/Restart stay on onConnectProvider.
-                              if (option().id === "opencode" && action() === "reconnect" && props.onSignInProvider) {
-                                void props.onSignInProvider(option().id);
-                              } else {
-                                void props.onConnectProvider?.(option().id);
-                              }
+                              // Reconnect retries the keyless runtime. A paid-model key is an
+                              // optional, separate action, never a requirement for free models.
+                              void props.onConnectProvider?.(option().id);
                             } else {
                               void props.onDownloadProvider?.(option().id);
                             }
@@ -498,18 +495,13 @@ export function ProviderPicker(props: ProviderPickerProps) {
                         {i18n.t(PROVIDER_ACTION_TEXT[providerAction(state(), connecting())])}
                       </Button>
                     </Show>
-                    {/* Claude's sign-in is a browser round trip it only needs while signed out.
-                      OpenCode reconnects through its runtime Reconnect, so Sign in stays only where
-                      the row cannot offer it: with no runtime action at all, or a Connect or Restart
-                      that retries the same credentials. A saved key that blocks startup must stay
-                      replaceable and removable, so those actions never take the dialog away. */}
+                    {/* The optional OpenCode paid-model key stays separate from connection actions.
+                      The free tier never asks for it, even when retrying a failed runtime. */}
                     <Show
                       when={
                         props.onSignInProvider &&
                         (option().id === "opencode"
-                          ? runtimeAction() === undefined ||
-                            runtimeAction() === "connect" ||
-                            runtimeAction() === "restart"
+                          ? !props.daniOnly && Boolean(runtimeStatus()) && runtimeStatus()?.phase === "ready"
                           : option().id === "claude" &&
                             !runtimeStatus() &&
                             state() === "sign-in-required" &&
@@ -521,11 +513,15 @@ export function ProviderPicker(props: ProviderPickerProps) {
                         variant="outline"
                         size="xs"
                         class="provider-picker-install"
-                        aria-label={i18n.t("provider.aria.signIn", { name: option().name })}
+                        aria-label={
+                          option().id === "opencode"
+                            ? "Add paid models"
+                            : i18n.t("provider.aria.signIn", { name: option().name })
+                        }
                         disabled={props.disabled || props.refreshingProviders}
                         onClick={() => void props.onSignInProvider?.(option().id)}
                       >
-                        {i18n.t("provider.action.signIn")}
+                        {option().id === "opencode" ? "Paid models" : i18n.t("provider.action.signIn")}
                       </Button>
                     </Show>
                     {/* The second way in, for the computer the first one cannot serve: no browser,

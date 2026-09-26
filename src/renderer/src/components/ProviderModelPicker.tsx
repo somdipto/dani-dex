@@ -14,6 +14,7 @@ import {
   agentProviderName,
   defaultProviderModel,
   isCustomProviderModelId,
+  isFreeOpencodeModel,
   PICKER_PROVIDERS,
 } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, For, onSettled, Show, untrack } from "solid-js";
@@ -116,15 +117,20 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
     if (rail === CUSTOM_RAIL) return props.modelOptions.filter((option) => isCustomModel(option, customIds()));
     if (rail === "opencode") {
       return props.modelOptions
-        .filter((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto")
-        .map((option) => ({ ...option, name: DANI_MODEL_NAME, description: "" }));
+        .filter(
+          (option) =>
+            option.provider === "opencode" &&
+            (option.id === "dani/dani-free-auto" || isFreeOpencodeModel(option.id, option.name)),
+        )
+        .map((option) =>
+          option.id === "dani/dani-free-auto" ? { ...option, name: DANI_MODEL_NAME, description: "" } : option,
+        );
     }
     return props.modelOptions.filter((option) => option.provider === rail);
   }
 
   /**
-   * Dani's free models are the only model: one tab, named Dani, and nothing that names the agent,
-   * CLI or services behind it. The OpenCode wire id is kept, since that is what serves it.
+   * A keyless catalog is one Dani Free tab. The OpenCode wire id stays because it serves it.
    */
   const daniOnly = createMemo(() => isDaniOnly(props.modelOptions));
   const rails = (): readonly RailId[] => (daniOnly() ? ["opencode"] : PROVIDERS);
@@ -195,7 +201,7 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
   function selectModel(model: AgentModelId, rail: RailId): void {
     if (props.disabled || props.modelChangesDisabled) return;
     if (providerAvailability(props.agentStatus, props.modelOptions, rail).state !== "available") return;
-    if (rail === "opencode" && model !== "dani/dani-free-auto") return;
+    if (rail === "opencode" && !railModelOptions(rail).some((option) => option.id === model)) return;
     if (
       !showsReasoningEffort() &&
       !pickerModels(railModelOptions(rail)).find((option) => option.id === model)?.variants.length
@@ -210,7 +216,10 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
   }
 
   const daniRoute = () => props.provider === "opencode" && activeProvider() !== CUSTOM_RAIL;
-  const triggerModelName = () => (daniRoute() ? DANI_MODEL_NAME : displayModelName(selectedModel()?.name, props.value));
+  const triggerModelName = () =>
+    daniRoute() && props.value === "dani/dani-free-auto"
+      ? DANI_MODEL_NAME
+      : displayModelName(selectedModel()?.name, props.value);
   const field = () => props.variant === "field";
   const showsReasoningEffort = () => props.reasoningEffort !== undefined && props.onReasoningEffortChange !== undefined;
 
@@ -331,10 +340,7 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
               {(provider) => {
                 const status = () => {
                   const base = providerAvailability(props.agentStatus, props.modelOptions, provider);
-                  if (
-                    provider === "opencode" &&
-                    !railModelOptions(provider).some((model) => model.id.startsWith("dani/"))
-                  ) {
+                  if (provider === "opencode" && railModelOptions(provider).length === 0) {
                     return { ...base, state: "error" as const, message: "Dani Free is unavailable. Try again later." };
                   }
                   return base;
