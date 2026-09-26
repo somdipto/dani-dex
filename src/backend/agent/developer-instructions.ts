@@ -8,20 +8,14 @@ export function developerInstructions(
   memories: AgentMemory[],
   operatingInstructions: string | null = null,
 ): string {
-  const profile = JSON.stringify(
-    {
-      id: agent.id,
-      name: agent.name,
-      title: agent.title.trim() || "General assistant",
-      description: agent.description.trim() || "No additional description configured.",
-    },
-    null,
-    2,
-  );
+  const profile = JSON.stringify({
+    id: agent.id,
+    name: agent.name,
+    title: agent.title.trim() || "General assistant",
+    description: agent.description.trim() || "No additional description configured.",
+  });
   const memoryData = JSON.stringify(
     memories.map((memory) => ({ id: memory.id, text: memory.text, origin: memory.origin })),
-    null,
-    2,
   );
   return [
     "You are a persistent local Dani-Dex teammate with this user-configured profile:",
