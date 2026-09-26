@@ -53,6 +53,8 @@ extraResources:
     to: licenses/OpenAI-Whisper-LICENSE
   - from: build/licenses/whisper.cpp-LICENSE
     to: licenses/whisper.cpp-LICENSE
+  - from: build/licenses/OpenCode-MIT-LICENSE
+    to: licenses/OpenCode-MIT-LICENSE
 # Voice and remote desktop are prepared for macOS and Windows only, and each Computer Use driver
 # is built for one target, so their resources are listed under each platform instead of here.
 # electron-builder merges the root and platform lists, so every build still gets its own, while a

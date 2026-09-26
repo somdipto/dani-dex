@@ -1,2 +1,6 @@
-# SHA-256 of verified extracted engine executables. Empty until exact release CI bytes are pinned.
-# Format: <digest>  <platform>-<arch>; never paste an archive digest here.
+# OpenCode v1.18.32 release executables, independently verified against pinned archive digests.
+# Format: <digest>  <platform>-<arch>; these are extracted executable digests, not archive digests.
+a3c45d4e1d6620b436851f1ef6b25c71befcf06a382e279a1eb1c2196424395e  darwin-arm64
+5c944e90c2b3ac6bf6c9425b40b670b9950a0d4a3c0e6775470b93afc6c3dd6e  darwin-x64
+513f500a1a5ea1dc7d865547ac87b32a8936334e8d5abd5b3ff585c45a170080  linux-x64
+cf664aa1da32b788f9b2699b84a9bb9be30b7e025693b90f9b85829d5fe4e252  win32-x64

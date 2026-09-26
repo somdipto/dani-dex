@@ -54,6 +54,9 @@ jobs:
           DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
         run: bun scripts/download-dani-free-proxy.ts
 
+      - name: Download pinned Dani Free engine seeds
+        run: bun scripts/download-dani-free-engine-seeds.ts
+
       - name: Stage pinned Dani Free resources
         run: bun scripts/stage-dani-free-release.ts win32 x64
 
@@ -118,6 +121,9 @@ jobs:
         env:
           DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
         run: bun scripts/download-dani-free-proxy.ts
+
+      - name: Download pinned Dani Free engine seeds
+        run: bun scripts/download-dani-free-engine-seeds.ts
 
       - name: Stage pinned Dani Free resources
         run: bun scripts/stage-dani-free-release.ts linux x64
@@ -199,6 +205,9 @@ jobs:
           DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
         run: bun scripts/download-dani-free-proxy.ts
 
+      - name: Download pinned Dani Free engine seeds
+        run: bun scripts/download-dani-free-engine-seeds.ts
+
       - name: Stage pinned Dani Free resources
         run: bun scripts/stage-dani-free-release.ts darwin arm64
 
@@ -262,6 +271,9 @@ jobs:
         env:
           DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
         run: bun scripts/download-dani-free-proxy.ts
+
+      - name: Download pinned Dani Free engine seeds
+        run: bun scripts/download-dani-free-engine-seeds.ts
 
       - name: Stage pinned Dani Free resources for both Mac slices
         run: |
