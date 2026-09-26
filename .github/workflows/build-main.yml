@@ -373,3 +373,51 @@ jobs:
             dist/*.zip.blockmap
           if-no-files-found: error
           retention-days: 14
+
+  macos-intel-installed:
+    # Run the exact universal installer from the arm64 packaging job on native Intel hardware.
+    # Checking Mach-O x64 bytes on arm64 cannot establish that the proxy or engine starts on Intel.
+    name: Intel Mac installed Dani Free answer
+    needs: macos-universal
+    runs-on: macos-15-intel
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+        with:
+          install: ignore-scripts
+
+      - name: Download the exact universal DMG built for this commit
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dani-dex-main-macos-universal-${{ github.sha }}
+          path: intel-installer
+
+      - name: Install DMG and require a real Intel free-model answer
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = x86_64
+          shopt -s nullglob
+          dmgs=(intel-installer/*.dmg)
+          if (( ${#dmgs[@]} != 1 )); then
+            echo "Expected exactly one universal DMG." >&2
+            exit 1
+          fi
+          mount=$(mktemp -d)
+          installed=$(mktemp -d)
+          cleanup() {
+            hdiutil detach "$mount" || true
+            rm -rf "$mount" "$installed"
+          }
+          trap cleanup EXIT
+          hdiutil attach "${dmgs[0]}" -readonly -nobrowse -noautoopen -mountpoint "$mount"
+          test -d "$mount/Dani-Dex.app"
+          ditto --noqtn "$mount/Dani-Dex.app" "$installed/Dani-Dex.app"
+          xattr -dr com.apple.quarantine "$installed/Dani-Dex.app" || true
+          bun scripts/smoke-packaged-dani-free-answer.ts "$installed/Dani-Dex.app/Contents/Resources"

@@ -10,12 +10,12 @@ const logger = createDaniDexLogger("smoke-packaged-dani-free-answer");
 
 /** A real final response through the signed-off *packaged bytes*; no fake model or mock server. */
 export async function smokePackagedDaniFreeAnswer(resources: string): Promise<void> {
-  if (process.platform !== "darwin" || process.arch !== "arm64") {
-    throw new Error("Run this installed-DMG smoke on a native Apple Silicon macOS runner.");
+  if (process.platform !== "darwin" || !["arm64", "x64"].includes(process.arch)) {
+    throw new Error("Run this installed-DMG smoke on a native macOS runner.");
   }
-  await verifyPackagedDaniFree(resources, "darwin", "arm64");
-  const executable = bundledDaniFreeExecutable(resources, "darwin", "arm64");
-  const seed = bundledDaniFreeEngineSeed(resources, "darwin", "arm64");
+  await verifyPackagedDaniFree(resources, "darwin", process.arch);
+  const executable = bundledDaniFreeExecutable(resources, "darwin", process.arch);
+  const seed = bundledDaniFreeEngineSeed(resources, "darwin", process.arch);
   if (!executable || !seed) throw new Error("Installed app has no Dani Free proxy or engine seed.");
   const engineSeed = await verifiedDaniFreeEngineSeed(seed);
   const home = await mkdtemp(join(tmpdir(), "dani-dex-installed-answer-"));
