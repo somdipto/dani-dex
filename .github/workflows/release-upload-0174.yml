@@ -1,0 +1,131 @@
+name: Publish verified Dani-Dex 0.17.4 updater feed
+
+# Publish the exact gate-tested build-main bytes. Do not rebuild installers here.
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: publish-verified-dani-dex-v0.17.4
+  cancel-in-progress: false
+
+jobs:
+  publish-feed:
+    name: Verify, publish and read back complete updater feed
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: v0.17.4
+      SOURCE_SHA: a16e39f3d0eaa264a457ae12332b63de64bf35ee
+      SOURCE_RUN: "36217483399"
+      MAC_ARTIFACT: "10898430200"
+      MAC_ARCHIVE_SHA256: c95e0993883a7e683aab4e5e82606acf1101f3ffcf3239aa6d0c1ccf62f67cc7
+      WIN_ARTIFACT: "10897219460"
+      WIN_ARCHIVE_SHA256: 49f18f9f72294a9af0561f4c7d65c4f2bb4f1267779775d0f014d00dfc87bffc
+    steps:
+      - name: Require the pinned run, artifacts and existing release
+        shell: bash
+        run: |
+          set -euo pipefail
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN")
+          jq -e --arg sha "$SOURCE_SHA" '.head_sha == $sha and .status == "completed" and .conclusion == "success" and .event == "push" and .head_branch == "main"' <<<"$run"
+          for pair in "$MAC_ARTIFACT:macos-universal:$MAC_ARCHIVE_SHA256" "$WIN_ARTIFACT:windows:$WIN_ARCHIVE_SHA256"; do
+            IFS=: read -r id platform digest <<< "$pair"
+            artifact=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id")
+            jq -e --arg sha "$SOURCE_SHA" --argjson run "$SOURCE_RUN" --arg platform "$platform" --arg digest "sha256:$digest" \
+              '.expired == false and .workflow_run.id == $run and .workflow_run.head_sha == $sha and .digest == $digest and .name == ("dani-dex-main-" + $platform + "-" + $sha)' <<<"$artifact"
+          done
+          ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG")
+          jq -e --arg sha "$SOURCE_SHA" '.object.type == "commit" and .object.sha == $sha' <<<"$ref"
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG")
+          jq -e --arg tag "$TAG" --arg sha "$SOURCE_SHA" \
+            '.tag_name == $tag and .target_commitish == $sha and .draft == false' <<<"$release"
+
+      - name: Download and verify every source byte
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source publish
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$MAC_ARTIFACT/zip" > source/mac.zip
+          echo "$MAC_ARCHIVE_SHA256  source/mac.zip" | sha256sum --check
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$WIN_ARTIFACT/zip" > source/win.zip
+          echo "$WIN_ARCHIVE_SHA256  source/win.zip" | sha256sum --check
+          printf '%s\n' \
+            Dani-Dex-0.17.4-universal.dmg \
+            Dani-Dex-0.17.4-universal.zip \
+            Dani-Dex-0.17.4-universal.zip.blockmap \
+            latest-mac.yml | sort > source/expected-mac.txt
+          printf '%s\n' \
+            Dani-Dex-0.17.4-x64.exe \
+            Dani-Dex-0.17.4-x64.exe.blockmap \
+            latest.yml | sort > source/expected-win.txt
+          unzip -Z1 source/mac.zip | sort > source/actual-mac.txt
+          unzip -Z1 source/win.zip | sort > source/actual-win.txt
+          diff -u source/expected-mac.txt source/actual-mac.txt
+          diff -u source/expected-win.txt source/actual-win.txt
+          while IFS= read -r file; do unzip -p source/mac.zip "$file" > "publish/$file"; done < source/expected-mac.txt
+          while IFS= read -r file; do unzip -p source/win.zip "$file" > "publish/$file"; done < source/expected-win.txt
+          cat > source/pins.txt <<'PINS'
+          4f9d0f720b7951e474c15301347d718b9a00cede8ad40777b51e4ddd4ea1ecb1  publish/Dani-Dex-0.17.4-universal.dmg
+          764199745dfe1982ef92554fbc7f03140c6d6f7c376f776fd29a5cd7cf72e3e8  publish/Dani-Dex-0.17.4-universal.zip
+          cf71776d52a76f69e70efbfd0fdb2c3211b70905e1a441da2896e09d85cc6f2c  publish/Dani-Dex-0.17.4-universal.zip.blockmap
+          e04a47420ed138dcef8c8ccfd485bd5a1194be791912c4e8bd384ddb6e87b30f  publish/latest-mac.yml
+          265a2d551c20fc0a9fc407e8035500420a1d1d67ee5d3446fbf27b5aa67de81b  publish/Dani-Dex-0.17.4-x64.exe
+          627383edb0fb680b9c6c9cf6ba67fa692c2ba685442a11ff5e0792826e23454b  publish/Dani-Dex-0.17.4-x64.exe.blockmap
+          2bd04aa6977053ab1f6733941f3a46acaf79573512cf6972fceaa42beaddea40  publish/latest.yml
+          PINS
+          sha256sum --check source/pins.txt
+          test "$(wc -c < publish/Dani-Dex-0.17.4-universal.dmg | tr -d ' ')" = 660103968
+          test "$(wc -c < publish/Dani-Dex-0.17.4-universal.zip | tr -d ' ')" = 655129816
+          test "$(wc -c < publish/Dani-Dex-0.17.4-universal.zip.blockmap | tr -d ' ')" = 696061
+          test "$(wc -c < publish/latest-mac.yml | tr -d ' ')" = 516
+          test "$(wc -c < publish/Dani-Dex-0.17.4-x64.exe | tr -d ' ')" = 351840429
+          test "$(wc -c < publish/Dani-Dex-0.17.4-x64.exe.blockmap | tr -d ' ')" = 367198
+          test "$(wc -c < publish/latest.yml | tr -d ' ')" = 344
+          grep -F 'version: 0.17.4' publish/latest-mac.yml
+          grep -F 'Dani-Dex-0.17.4-universal.zip' publish/latest-mac.yml
+          grep -F 'GheNRVYr45r8194b4x98ZQAWKYuey+Yvik1ZSGhmkbRXm/psPcr86A1pzM0rn6Ei4uYxNfIH7V5ORml1XnSE7Q==' publish/latest-mac.yml
+          grep -F 'MK+BnsrAnkjwDaIUBbvi0mk/BiUzQ0aj9vFyiy2KS3TyRqrTC5rAGbcgMs/p8OCSspXdESAfKayQuuvSmE6jZA==' publish/latest-mac.yml
+          grep -F 'version: 0.17.4' publish/latest.yml
+          grep -F 'Dani-Dex-0.17.4-x64.exe' publish/latest.yml
+          grep -F 'l7Lg+ElBWkfzHUDWSJscXrBhXS3fpNZAfAs9atpj+KU4va7dhrZ0U/sMQryKE4I3v7CNNDIWzl59xWYaSesruw==' publish/latest.yml
+          test "$(openssl dgst -sha512 -binary publish/Dani-Dex-0.17.4-universal.dmg | openssl base64 -A)" = 'GheNRVYr45r8194b4x98ZQAWKYuey+Yvik1ZSGhmkbRXm/psPcr86A1pzM0rn6Ei4uYxNfIH7V5ORml1XnSE7Q=='
+          test "$(openssl dgst -sha512 -binary publish/Dani-Dex-0.17.4-universal.zip | openssl base64 -A)" = 'MK+BnsrAnkjwDaIUBbvi0mk/BiUzQ0aj9vFyiy2KS3TyRqrTC5rAGbcgMs/p8OCSspXdESAfKayQuuvSmE6jZA=='
+          test "$(openssl dgst -sha512 -binary publish/Dani-Dex-0.17.4-x64.exe | openssl base64 -A)" = 'l7Lg+ElBWkfzHUDWSJscXrBhXS3fpNZAfAs9atpj+KU4va7dhrZ0U/sMQryKE4I3v7CNNDIWzl59xWYaSesruw=='
+          cp publish/Dani-Dex-0.17.4-universal.dmg publish/Dani-Dex-mac-universal.dmg
+          cp publish/Dani-Dex-0.17.4-x64.exe publish/Dani-Dex-windows-x64.exe
+          echo '4f9d0f720b7951e474c15301347d718b9a00cede8ad40777b51e4ddd4ea1ecb1  publish/Dani-Dex-mac-universal.dmg' | sha256sum --check
+          echo '265a2d551c20fc0a9fc407e8035500420a1d1d67ee5d3446fbf27b5aa67de81b  publish/Dani-Dex-windows-x64.exe' | sha256sum --check
+
+      - name: Upload complete feed and verify published bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" publish/* --clobber --repo "$GITHUB_REPOSITORY"
+          mkdir -p readback
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir readback \
+            --pattern 'Dani-Dex-0.17.4-*' --pattern 'Dani-Dex-mac-universal.dmg' \
+            --pattern 'Dani-Dex-windows-x64.exe' --pattern 'latest-mac.yml' --pattern 'latest.yml'
+          test "$(find readback -maxdepth 1 -type f | wc -l | tr -d ' ')" = 9
+          while IFS= read -r file; do
+            name=${file#publish/}
+            test -f "readback/$name"
+            test "$(wc -c < "readback/$name" | tr -d ' ')" = "$(wc -c < "$file" | tr -d ' ')"
+            cmp "$file" "readback/$name"
+          done < <(find publish -maxdepth 1 -type f | sort)
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG")
+          jq -e --arg sha "$SOURCE_SHA" '.tag_name == "v0.17.4" and .target_commitish == $sha and .draft == false' <<<"$release"
+          for file in publish/*; do
+            name=${file#publish/}
+            digest="sha256:$(sha256sum "$file" | cut -d ' ' -f1)"
+            jq -e --arg name "$name" --arg digest "$digest" \
+              '[.assets[] | select(.name == $name and .state == "uploaded" and .digest == $digest)] | length == 1' <<<"$release"
+          done
+          gh release edit "$TAG" --latest --repo "$GITHUB_REPOSITORY"
+          echo "All nine v0.17.4 assets read back byte-for-byte; Mac and Windows updater feeds are published." >> "$GITHUB_STEP_SUMMARY"
