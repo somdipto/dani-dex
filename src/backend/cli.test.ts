@@ -432,7 +432,15 @@ describe("OpenCode CLI resolution", () => {
   );
 
   it("reports a CLI that cannot be started apart from one that is absent", async () => {
-    const broken = await createExecutable("opencode", "not a version");
+    let broken: string;
+    if (process.platform === "win32") {
+      const root = await mkdtemp(join(tmpdir(), "dani-dex-cli-test-"));
+      temporaryPaths.push(root);
+      broken = join(root, "opencode.cmd");
+      await writeFile(broken, "@echo off\r\necho not a version\r\n");
+    } else {
+      broken = await createExecutable("opencode", "not a version");
+    }
     await expect(resolveOpencodeCli({ systemCandidates: [broken], bundledExecutable: null })).rejects.toMatchObject({
       code: "invalid",
       message: "Dani could not start. Restart Dani-Dex to try again.",
