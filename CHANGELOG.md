@@ -5,6 +5,23 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.5] - 2026-09-26
+
+### Fixed
+
+- Keep Dani Free keyless: list the free models the installed engine actually reports,
+  and make Reconnect retry the engine without asking for an API key.
+- Let first-run setup choose an available free model when Dani Free Auto is not ready.
+- Record a private startup reason when Dani Free cannot start, and include only safe
+  startup stages and exit codes in an exported diagnostics report.
+
+### Changed
+
+- Test the installed universal Mac app on a native Intel runner before publishing,
+  including a real free-model answer.
+- Protect user-edited agent instructions from automatic rewrites and honor a pause
+  even if a rewrite was already running.
+
 ## [0.17.4] - 2026-09-26
 
 ### Fixed

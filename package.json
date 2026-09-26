@@ -2,7 +2,7 @@
   "name": "dani-dex",
   "productName": "Dani-Dex",
   "desktopName": "dani-dex.desktop",
-  "version": "0.17.4",
+  "version": "0.17.5",
   "description": "A local-first multi-agent desktop workspace with voice and delegated work.",
   "author": {
     "name": "Somdipto Nandy",
