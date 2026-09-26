@@ -495,17 +495,14 @@ export function ProviderPicker(props: ProviderPickerProps) {
                         {i18n.t(PROVIDER_ACTION_TEXT[providerAction(state(), connecting())])}
                       </Button>
                     </Show>
-                    {/* The optional OpenCode paid-model key stays separate from connection actions.
-                      The free tier never asks for it, even when retrying a failed runtime. */}
+                    {/* The free row never offers a key action. Paid-model key management lives in Settings. */}
                     <Show
                       when={
                         props.onSignInProvider &&
-                        (option().id === "opencode"
-                          ? !props.daniOnly && Boolean(runtimeStatus()) && runtimeStatus()?.phase === "ready"
-                          : option().id === "claude" &&
-                            !runtimeStatus() &&
-                            state() === "sign-in-required" &&
-                            !props.onConnectProvider)
+                        option().id === "claude" &&
+                        !runtimeStatus() &&
+                        state() === "sign-in-required" &&
+                        !props.onConnectProvider
                       }
                     >
                       <Button
@@ -513,15 +510,11 @@ export function ProviderPicker(props: ProviderPickerProps) {
                         variant="outline"
                         size="xs"
                         class="provider-picker-install"
-                        aria-label={
-                          option().id === "opencode"
-                            ? "Add paid models"
-                            : i18n.t("provider.aria.signIn", { name: option().name })
-                        }
+                        aria-label={i18n.t("provider.aria.signIn", { name: option().name })}
                         disabled={props.disabled || props.refreshingProviders}
                         onClick={() => void props.onSignInProvider?.(option().id)}
                       >
-                        {option().id === "opencode" ? "Paid models" : i18n.t("provider.action.signIn")}
+                        {i18n.t("provider.action.signIn")}
                       </Button>
                     </Show>
                     {/* The second way in, for the computer the first one cannot serve: no browser,

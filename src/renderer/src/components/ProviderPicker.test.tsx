@@ -7,8 +7,8 @@ import { ProviderPicker, type ProviderPickerOption } from "./ProviderPicker";
  * The two provider rows Dani-Dex treats differently.
  *
  * Claude keeps an install guide and a signed-out sign-in button. OpenCode has neither: Dani-Dex
- * downloads the CLI, and its free models work with no account, so the only thing an account adds is
- * the paid catalog. Both facts are only visible as buttons, so they are asserted as buttons.
+ * downloads the CLI, and its free models work with no account. Paid key management belongs in
+ * Settings, never alongside the free model's Connect or Reconnect action.
  */
 const openCode: ProviderPickerOption = {
   id: "opencode",
@@ -76,7 +76,7 @@ describe("ProviderPicker", () => {
       onConnectProvider,
     );
     expect(view.getByRole("radio", { name: /Claude/ })).toBeTruthy();
-    expect(view.getByRole("button", { name: "Add paid models" })).toBeInTheDocument();
+    expect(view.queryByRole("button", { name: "Add paid models" })).toBeNull();
     fireEvent.click(view.getByRole("button", { name: "Reconnect OpenCode" }));
     expect(onConnectProvider).toHaveBeenCalledWith("opencode");
     expect(onSignInProvider).not.toHaveBeenCalled();
@@ -91,14 +91,15 @@ describe("ProviderPicker", () => {
     );
     fireEvent.click(view.getByRole("button", { name: "Connect OpenCode" }));
     expect(onConnectProvider).toHaveBeenCalledWith("opencode");
-    expect(view.getByRole("button", { name: "Add paid models" })).toBeInTheDocument();
+    expect(view.queryByRole("button", { name: "Add paid models" })).toBeNull();
     expect(onSignInProvider).not.toHaveBeenCalled();
   });
 
-  it("keeps an optional paid-model key action separate from free connection", () => {
+  it("never offers a paid-model key action on the free row, even when ready", () => {
     const { view, onSignInProvider } = renderPicker([{ ...openCode, state: "available", runtimeStatus: runtime({}) }]);
-    fireEvent.click(view.getByRole("button", { name: "Add paid models" }));
-    expect(onSignInProvider).toHaveBeenCalledWith("opencode");
+    expect(view.queryByRole("button", { name: "Add paid models" })).toBeNull();
+    expect(view.queryByRole("button", { name: "Manage key" })).toBeNull();
+    expect(onSignInProvider).not.toHaveBeenCalled();
   });
 
   it("keeps only Cancel on a downloading OpenCode row", () => {

@@ -160,6 +160,30 @@ export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
         </Show>
       </SettingsSection>
 
+      {/* Paid OpenCode BYOK belongs in Settings, never on the Dani Free connection row. */}
+      <Show when={props.onSignInProvider}>
+        <SettingsSection title="Paid model keys">
+          <ItemGroup class="settings-modal-card">
+            <Item class="settings-modal-row">
+              <ItemContent>
+                <ItemTitle>OpenCode paid models</ItemTitle>
+                <ItemDescription>Optional key for paid models. Dani Free needs no key.</ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="xs"
+                  onClick={() => void props.onSignInProvider?.("opencode")}
+                >
+                  Manage key
+                </Button>
+              </ItemActions>
+            </Item>
+          </ItemGroup>
+        </SettingsSection>
+      </Show>
+
       <Show when={props.voiceKey}>{(voiceKey) => <VoiceKeySettings api={voiceKey()} />}</Show>
 
       <SettingsSection title={i18n.t("settings.appBehavior.title")}>

@@ -969,8 +969,8 @@ describe("SettingsModal", () => {
     expect(custom).not.toBeChecked();
   });
 
-  // The free runtime never demands a key. Its optional paid-model action is available only
-  // when the runtime is ready. The key badge re-reads after that separate dialog closes.
+  // The free row never presents a key action. Settings has a separate optional paid-model key
+  // entry; the key badge re-reads after that dialog closes.
   it("badges the OpenCode row with the account tier, and refreshes it after the key dialog closes", async () => {
     const providerKeys = {
       // Modal open, key dialog open: no key yet. Key dialog close: the save landed.
@@ -1008,7 +1008,8 @@ describe("SettingsModal", () => {
     await screen.findByText("Free");
     expect(providerKeys.getProviderApiKeyState).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Add paid models" }));
+    expect(screen.queryByRole("button", { name: "Add paid models" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Manage key" }));
     const input = await screen.findByLabelText("Model key");
     await waitFor(() => expect(input).toBeEnabled());
     // The optional paid-key dialog can retry the runtime without touching credentials.
