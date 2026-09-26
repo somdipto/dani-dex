@@ -845,8 +845,12 @@ describe.sequential("AgentService: queue", () => {
 
     const start = (await protocolMessages(logPath)).find((message) => message.method === "thread/start");
     const instructions = getString(start?.params, "developerInstructions") ?? "";
-    expect(instructions).toContain('"title": "Research & writing"');
-    expect(instructions).toContain('"description": "Researches topics and turns findings into clear writing."');
+    const profileText = instructions.split("<agent_profile>\n")[1]?.split("\n</agent_profile>")[0];
+    expect(profileText).toBeDefined();
+    expect(JSON.parse(profileText ?? "{}")).toMatchObject({
+      title: "Research & writing",
+      description: "Researches topics and turns findings into clear writing.",
+    });
     expect(instructions).toContain("Be pragmatic and direct");
     expect(instructions).toContain("Give the shortest answer that is complete and useful");
     expect(instructions).toContain("Do not add filler");
