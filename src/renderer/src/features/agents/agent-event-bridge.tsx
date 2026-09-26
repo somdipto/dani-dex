@@ -299,7 +299,8 @@ export function AgentEventBridge() {
           lastErrorToastAt.set(toastKey, now);
           // An MCP server left out at hand-off is not the provider failing, and calling it a
           // provider error sends the user to the wrong settings page.
-          const title = event.code === "mcp_server_not_started" ? "MCP server not started" : "Provider error";
+          const title =
+            event.code === "mcp_server_not_started" ? "A connected tool could not start" : "AI connection error";
           toast.error(title, { description: toastKey });
         }
       }

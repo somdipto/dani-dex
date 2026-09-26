@@ -54,7 +54,7 @@ export const en = {
   "settings.language.description": "Dani-Dex shows menus, buttons and messages in this language.",
   "settings.language.system": "System default",
   // The Settings window, General tab.
-  "settings.providers.title": "AI providers",
+  "settings.providers.title": "AI options",
   "settings.appBehavior.title": "App behavior",
   "settings.launchAtLogin.title": "Launch Dani-Dex at login",
   "settings.launchAtLogin.description": "Open the app when you sign in to this computer.",
@@ -151,8 +151,8 @@ export const en = {
   "provider.endpointCount": { one: "1 endpoint", other: "{count} endpoints" },
   "provider.manageEndpoints": { one: "Manage 1 endpoint", other: "Manage {count} endpoints" },
   "provider.refresh": "Refresh",
-  "provider.refreshLabel": "Refresh providers",
-  "provider.refreshingLabel": "Checking providers",
+  "provider.refreshLabel": "Refresh AI options",
+  "provider.refreshingLabel": "Checking AI options",
   "provider.refreshing": "Checking…",
 
   // What a provider row reports about itself. A percentage while downloading is a number, not a

@@ -58,7 +58,7 @@ export const fr = {
   "settings.language.description": "Dani-Dex affiche les menus, les boutons et les messages dans cette langue.",
   "settings.language.system": "Langue du système",
   // The Settings window, General tab.
-  "settings.providers.title": "Fournisseurs d’IA",
+  "settings.providers.title": "Options d’IA",
   "settings.appBehavior.title": "Comportement de l’application",
   "settings.launchAtLogin.title": "Lancer Dani-Dex à l’ouverture de session",
   "settings.launchAtLogin.description": "Ouvrir l’application lorsque vous vous connectez à cet ordinateur.",
@@ -162,8 +162,8 @@ export const fr = {
     other: "Gérer {count} points de terminaison",
   },
   "provider.refresh": "Actualiser",
-  "provider.refreshLabel": "Actualiser les fournisseurs",
-  "provider.refreshingLabel": "Vérification des fournisseurs",
+  "provider.refreshLabel": "Actualiser les options d’IA",
+  "provider.refreshingLabel": "Vérification des options d’IA",
   "provider.refreshing": "Vérification…",
 
   // What a provider row reports about itself. A percentage while downloading is a number, not a

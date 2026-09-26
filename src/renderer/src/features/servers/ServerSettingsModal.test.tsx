@@ -392,7 +392,7 @@ describe("ServerSettingsModal", () => {
   // member of a remote server is never handed one and never sees a tab that would answer 403.
   it("shows the MCP tab only when a caller supplies the list", async () => {
     render(() => <ServerSettingsModal {...props()} />);
-    expect(screen.queryByRole("tab", { name: "MCP" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Tools" })).not.toBeInTheDocument();
   });
 
   // The list is read when the section opens, not when the dialog does, because most visits to this
@@ -409,13 +409,13 @@ describe("ServerSettingsModal", () => {
     ));
     expect(onMcpSectionShown).not.toHaveBeenCalled();
 
-    await fireEvent.click(screen.getByRole("tab", { name: "MCP" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
     await waitFor(() => expect(onMcpSectionShown).toHaveBeenCalledTimes(1));
     expect(await screen.findByText("Filesystem")).toBeInTheDocument();
 
     // Leaving and coming back reads the list again; staying in the section does not.
     await fireEvent.click(screen.getByRole("tab", { name: "General" }));
-    await fireEvent.click(screen.getByRole("tab", { name: "MCP" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
     await waitFor(() => expect(onMcpSectionShown).toHaveBeenCalledTimes(2));
   });
 
@@ -424,7 +424,7 @@ describe("ServerSettingsModal", () => {
   it("manages MCP servers on a local server with no host configured", async () => {
     render(() => <ServerSettingsModal {...props({ hostStatus: unconfiguredHost, mcpServers: [] })} />);
 
-    await fireEvent.click(screen.getByRole("tab", { name: "MCP" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
     expect(await screen.findByRole("button", { name: "Connect a custom MCP" })).toBeEnabled();
   });
 
@@ -438,7 +438,7 @@ describe("ServerSettingsModal", () => {
       />
     ));
 
-    await fireEvent.click(screen.getByRole("tab", { name: "MCP" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
     expect(await screen.findByText("The host is not reachable.")).toBeInTheDocument();
     expect(screen.queryByText("No MCP servers yet.")).not.toBeInTheDocument();
 
@@ -458,7 +458,7 @@ describe("ServerSettingsModal", () => {
     });
     render(() => <ServerSettingsModal {...props({ mcpServers: [mcpServer] })} mcpToolRuntimeNote={note(status())} />);
 
-    await fireEvent.click(screen.getByRole("tab", { name: "MCP" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
     expect(
       await screen.findByText(/Downloading the runtime a STDIO server is started with \(40%\)/),
     ).toBeInTheDocument();
@@ -475,7 +475,7 @@ describe("ServerSettingsModal", () => {
     const [servers, setServers] = createSignal<McpServerConfig[]>([mcpServer]);
     render(() => <ServerSettingsModal {...props({ mcpServers: servers(), onTestMcpServer })} />);
 
-    await fireEvent.click(screen.getByRole("tab", { name: "MCP" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
     const trigger = await screen.findByRole("button", { name: "Actions for Filesystem" });
     await fireEvent.pointerDown(trigger, { button: 0 });
     await fireEvent.pointerUp(trigger, { button: 0 });
@@ -498,7 +498,7 @@ describe("ServerSettingsModal", () => {
     const onTestMcpServer = vi.fn(async () => ({ toolCount: 3, error: null }));
     render(() => <ServerSettingsModal {...props({ mcpServers: [], onTestMcpServer })} />);
 
-    await fireEvent.click(screen.getByRole("tab", { name: "MCP" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
     await fireEvent.click(await screen.findByRole("button", { name: "Connect a custom MCP" }));
     await fireEvent.input(screen.getByPlaceholderText("MCP server name"), { target: { value: "Filesystem" } });
     await fireEvent.input(screen.getByPlaceholderText("openai-dev-mcp"), { target: { value: "/bin/echo" } });
@@ -518,16 +518,16 @@ describe("ServerSettingsModal", () => {
     const [servers, setServers] = createSignal<McpServerConfig[] | undefined>([]);
     render(() => <ServerSettingsModal {...props({ mcpServers: servers() })} />);
 
-    await fireEvent.click(screen.getByRole("tab", { name: "MCP" }));
+    await fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
     await fireEvent.click(await screen.findByRole("button", { name: "Connect a custom MCP" }));
     expect(await screen.findByText("Connect to a custom MCP")).toBeInTheDocument();
 
     setServers(undefined);
-    await waitFor(() => expect(screen.queryByRole("tab", { name: "MCP" })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole("tab", { name: "Tools" })).not.toBeInTheDocument());
 
     // The gate opens again on the next read, and the panel it builds starts on the list.
     setServers([]);
-    await fireEvent.click(await screen.findByRole("tab", { name: "MCP" }));
+    await fireEvent.click(await screen.findByRole("tab", { name: "Tools" }));
     expect(await screen.findByRole("button", { name: "Connect a custom MCP" })).toBeInTheDocument();
     expect(screen.queryByText("Connect to a custom MCP")).not.toBeInTheDocument();
   });

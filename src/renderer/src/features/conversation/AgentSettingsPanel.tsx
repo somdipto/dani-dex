@@ -955,7 +955,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
                 </Select>
               </div>
               <div class="agent-settings-model-row agent-settings-workspace-row">
-                <span>Working directory</span>
+                <span>Workspace folder</span>
                 <span>{props.agent.workspacePath ?? "Not available yet"}</span>
               </div>
               <p class="agent-settings-access-note">

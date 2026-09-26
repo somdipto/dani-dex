@@ -255,8 +255,8 @@ export function InitialSetup(props: InitialSetupProps) {
               <ProviderPicker
                 value={selectedProvider()}
                 options={providerOptions()}
-                ariaLabel="Default provider"
-                label="Default provider"
+                ariaLabel="Default AI"
+                label="Choose an AI for Dani"
                 hint="Used for new local agents. You can change it for each agent later."
                 disabled={saving()}
                 allowUnavailableSelection

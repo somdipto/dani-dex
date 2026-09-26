@@ -108,7 +108,7 @@ type Story = StoryObj<typeof meta>;
 async function openMcp(userEvent: { click: (element: Element) => Promise<void> }) {
   const body = within(document.body);
   await body.findByRole("dialog", { name: "General" });
-  await userEvent.click(body.getByRole("tab", { name: "MCP" }));
+  await userEvent.click(body.getByRole("tab", { name: "Tools" }));
   return body;
 }
 
@@ -339,6 +339,6 @@ export const McpFormNarrowViewport: Story = {
     await enter(body.getByRole("textbox", { name: "Argument 1" }), "--database");
     await enter(body.getByRole("textbox", { name: "Environment variable 1 key" }), "SQLITE_READONLY");
     await enter(body.getByRole("textbox", { name: "Environment variable 1 value" }), "1");
-    await expectVisible(body.getByRole("button", { name: "MCP" }));
+    await expectVisible(body.getByRole("button", { name: "Tools" }));
   },
 };

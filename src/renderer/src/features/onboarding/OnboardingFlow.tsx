@@ -494,13 +494,13 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                     daniOnly={props.daniOnly}
                     value={selectedProvider()}
                     options={providerOptions()}
-                    ariaLabel="Default provider"
-                    label="Choose your AI provider"
+                    ariaLabel="Default AI"
+                    label="Choose an AI for Dani"
                     hint={
                       lazyProviderMode()
-                        ? "Download, connect, and select a provider to continue."
+                        ? "Download, connect, and choose an AI to continue."
                         : showsProviderSetup()
-                          ? "Connect and select a provider to continue. Use Refresh after external account changes."
+                          ? "Connect and choose an AI to continue. Select Refresh if you changed your account outside Dani-Dex."
                           : "You can change this for each agent later."
                     }
                     allowUnavailableSelection

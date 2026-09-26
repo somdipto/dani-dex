@@ -159,7 +159,7 @@ export function AgentUsageReport(props: {
         <dl class="agent-usage-totals">
           <For
             each={[
-              { label: "Processed tokens", value: totals().processedTokens },
+              { label: "Text processed", value: totals().processedTokens },
               { label: "Cached input", value: totals().cachedInput },
               { label: "Uncached input", value: totals().uncachedInput },
               { label: "Cache creation", value: totals().cacheCreation },
@@ -261,7 +261,7 @@ export function AgentUsageReport(props: {
                   <tr>
                     <th scope="col">Date</th>
                     <th scope="col">Cost · USD</th>
-                    <th scope="col">Processed tokens</th>
+                    <th scope="col">Text processed</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -35,7 +35,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("heading", { name: "Chief" })).not.toBeInTheDocument();
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
 
-    const providers = screen.getByRole("radiogroup", { name: "Default provider" });
+    const providers = screen.getByRole("radiogroup", { name: "Default AI" });
     const codex = within(providers).getByRole("radio", { name: /ChatGPT.*Connected/ });
     expect(codex).toBeChecked();
     await fireEvent.click(within(providers).getByRole("radio", { name: /Claude.*Connected/ }));
@@ -145,7 +145,7 @@ describe("Dani-Dex connected desktop shell", () => {
       action: "connect_completed",
       result: "succeeded",
     });
-    await fireEvent.click(screen.getByRole("button", { name: "Refresh providers" }));
+    await fireEvent.click(screen.getByRole("button", { name: "Refresh AI options" }));
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Reconnect ChatGPT" })).toBeEnabled());
     expect(screen.getByRole("button", { name: "Reconnect Claude" })).toBeEnabled();
@@ -179,8 +179,8 @@ describe("Dani-Dex connected desktop shell", () => {
     );
     render(() => <App />);
 
-    await fireEvent.click(await screen.findByRole("button", { name: "Refresh providers" }));
-    expect(screen.getByRole("button", { name: "Checking providers" })).toBeDisabled();
+    await fireEvent.click(await screen.findByRole("button", { name: "Refresh AI options" }));
+    expect(screen.getByRole("button", { name: "Checking AI options" })).toBeDisabled();
     expect(screen.queryByRole("button", { name: /^Install / })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
 
@@ -206,7 +206,7 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Connect ChatGPT" })).toBeEnabled());
     expect(
-      within(screen.getByRole("radiogroup", { name: "Default provider" })).getByRole("radio", { name: /Claude/ }),
+      within(screen.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /Claude/ }),
     ).toBeChecked();
     expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
     const connectChatGPT = screen.getByRole("button", { name: "Connect ChatGPT" });
@@ -362,7 +362,7 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
 
     expect(await screen.findByRole("heading", { name: "Sign in to Dani-Dex" })).toBeInTheDocument();
-    expect(screen.queryByRole("radiogroup", { name: "Default provider" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("radiogroup", { name: "Default AI" })).not.toBeInTheDocument();
     expect(window.danidex.agent.listConversationReads).not.toHaveBeenCalled();
 
     // Read state belongs to this computer, not a Dani-Dex account, so it refreshes while signed out.
@@ -430,7 +430,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(screen.getByRole("button", { name: "Providers & permissions" }));
 
     await screen.findByRole("dialog", { name: "Providers & permissions" });
-    const providers = screen.getByRole("radiogroup", { name: "Default provider" });
+    const providers = screen.getByRole("radiogroup", { name: "Default AI" });
     await fireEvent.click(within(providers).getByRole("radio", { name: /Claude.*Connected/ }));
     await fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     // The model belongs to the provider that was replaced, so this save must clear it.

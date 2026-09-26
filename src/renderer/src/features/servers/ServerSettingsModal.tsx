@@ -131,8 +131,8 @@ const sections: Record<Section, { title: string; description: string }> = {
   members: { title: "Members", description: "Invite people and manage access to this server." },
   desktop: { title: "Remote desktop", description: "Configure or connect to this server’s desktop." },
   mcp: {
-    title: "MCP",
-    description: "Connect MCP servers and choose which ones this server’s agents can use.",
+    title: "Tools",
+    description: "Connect tools for the agents on this server.",
   },
 };
 
@@ -754,7 +754,7 @@ export function ServerSettingsModal(props: ServerSettingsModalProps) {
             <Show when={props.mcpServers}>
               <Tabs.Trigger class="settings-modal-nav-item" value="mcp">
                 <Blocks aria-hidden="true" />
-                <span>MCP</span>
+                <span>Tools</span>
               </Tabs.Trigger>
             </Show>
           </Tabs.List>

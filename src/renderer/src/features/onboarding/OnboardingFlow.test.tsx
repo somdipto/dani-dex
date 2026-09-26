@@ -58,7 +58,7 @@ const AGENT_STATUS_WITH_OPENCODE: AgentStatus = {
 describe("OnboardingFlow", () => {
   it("supports provider selection and forward/back navigation", async () => {
     const view = renderFlow();
-    const providers = view.getByRole("radiogroup", { name: "Default provider" });
+    const providers = view.getByRole("radiogroup", { name: "Default AI" });
     expect(within(providers).getByRole("radio", { name: /Grok/ })).toBeInTheDocument();
     const claude = within(providers).getByRole("radio", { name: /Claude/ });
     await fireEvent.click(claude);
@@ -73,7 +73,7 @@ describe("OnboardingFlow", () => {
   it("persists Grok as the default provider", async () => {
     const onSave = vi.fn(async (_provider: AgentProviderId) => undefined);
     const view = renderFlow({ onSave });
-    const providers = view.getByRole("radiogroup", { name: "Default provider" });
+    const providers = view.getByRole("radiogroup", { name: "Default AI" });
     await fireEvent.click(within(providers).getByRole("radio", { name: /Grok/ }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
@@ -144,7 +144,7 @@ describe("OnboardingFlow", () => {
     await fireEvent.input(screen.getByLabelText("Model 1 display name"), { target: { value: "GLM 5 Air" } });
     await fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
-    const providers = () => view.getByRole("radiogroup", { name: "Default provider" });
+    const providers = () => view.getByRole("radiogroup", { name: "Default AI" });
     const custom = await waitFor(() => within(providers()).getByRole("radio", { name: /Custom provider/ }));
     expect(custom).toBeChecked();
     // The count is beside Add, outside the radio: it is the button that opens the saved endpoints.
@@ -250,7 +250,7 @@ describe("OnboardingFlow", () => {
       />
     ));
 
-    const providers = view.getByRole("radiogroup", { name: "Default provider" });
+    const providers = view.getByRole("radiogroup", { name: "Default AI" });
     await fireEvent.click(within(providers).getByRole("radio", { name: /Custom provider/ }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
@@ -316,7 +316,7 @@ describe("OnboardingFlow", () => {
     expect(next).toBeDisabled();
     await fireEvent.click(view.getByRole("button", { name: "Download Grok" }));
     expect(
-      within(view.getByRole("radiogroup", { name: "Default provider" })).getByRole("radio", { name: /Grok/ }),
+      within(view.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /Grok/ }),
     ).toBeChecked();
     expect(onDownloadProvider).toHaveBeenCalledWith("grok");
 
@@ -420,7 +420,7 @@ describe("OnboardingFlow", () => {
     // Nothing is connected, so nothing is chosen for the user, and the reason says that first.
     expect(view.getByText("Select a provider to continue.")).toBeInTheDocument();
     await fireEvent.click(
-      within(view.getByRole("radiogroup", { name: "Default provider" })).getByRole("radio", { name: /ChatGPT/ }),
+      within(view.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /ChatGPT/ }),
     );
 
     setRuntimeStatuses((current) => ({
