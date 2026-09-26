@@ -357,7 +357,9 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(await screen.findByRole("button", { name: "Start voice call" }));
 
     await waitFor(() => expect(window.danidex.voice.createRealtimeSession).toHaveBeenCalledOnce());
-    expect(await screen.findByRole("alert")).toHaveTextContent(/.+/u);
+    expect(await screen.findByText("Voice call unavailable")).toBeInTheDocument();
+    expect(await screen.findByText("Add your OpenAI API key to start a voice call.")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Message Chief" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Start voice call" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "End voice call" })).not.toBeInTheDocument();
   });

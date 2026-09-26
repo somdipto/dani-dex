@@ -19,6 +19,7 @@ import {
   PhoneOff,
   Plus,
   Puzzle,
+  toast,
 } from "../../components/ui";
 import { usePlatform } from "../../platform";
 import { fileBadge, formatFileSize } from "./AttachmentCards";
@@ -86,6 +87,14 @@ export function ConversationComposer() {
   // The mention picker grows out of the same edge as the queue, so only one of them holds it.
   const queueVisible = () => queuePanelVisible() && !pickerOpen();
   const voiceAvailable = () => voiceSupported(platform.appInfo()?.platform);
+  // Voice transport failures must not occupy the prompt composer or block ordinary text chat.
+  // The notice is emitted once per failure; retrying a call clears the store error first.
+  createEffect(
+    () => voiceCallError(),
+    (failure) => {
+      if (failure) toast.error("Voice call unavailable", { description: failure });
+    },
+  );
   /**
    * The provider status is the only source of truth for a signed-out provider, so the notice and the
    * model picker's "Sign in required" label can never disagree, and the notice is shown before the
@@ -400,13 +409,6 @@ export function ConversationComposer() {
                   >
                     <PhoneOff aria-hidden="true" />
                   </Button>
-                </Show>
-                <Show when={voiceCallError()}>
-                  {(message) => (
-                    <span class="voice-call-error" role="alert">
-                      {message()}
-                    </span>
-                  )}
                 </Show>
               </Show>
               <Show when={voiceAvailable() && voiceCallPhase() === "off"}>
