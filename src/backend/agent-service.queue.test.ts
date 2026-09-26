@@ -44,6 +44,29 @@ afterEach(async () => {
 });
 
 describe.sequential("AgentService: queue", () => {
+  it("logs a stored route without claiming it was the turn's actual driver", async () => {
+    const lines: string[] = [];
+    const output = vi.spyOn(process.stdout, "write").mockImplementation((chunk) => {
+      lines.push(String(chunk));
+      return true;
+    });
+    try {
+      const started = await startService(root, {
+        provider: "codex",
+        harnessRouting: { running: "hermes", availability: { hermes: true, omp: false } },
+      });
+      service = started.service;
+      await started.store.getOrCreate("chief");
+      await started.service.sendMessage({ agentId: "chief", text: "Plan a trip" });
+      await waitFor(() => started.mailbox.listQueue("chief").deliveries[0]?.status === "completed");
+      expect(started.store.database.harnessRoutes.get("chief")).toMatchObject({ harness: "hermes" });
+      const routeLine = lines.find((line) => line.includes("recorded route:"));
+      expect(routeLine).toContain("General - Hermes");
+      expect(routeLine).not.toContain("runs as:");
+    } finally {
+      output.mockRestore();
+    }
+  });
   it("sends an edited delivery once after a repeated save and drains past a deleted hold", async () => {
     const { service: agentService, client, store, mailbox } = await startService(root, { provider: "codex" });
     service = agentService;

@@ -484,14 +484,15 @@ export class DrainScheduler {
    * startDelivery has still to create can land on any of them, so all of them are claimed.
    */
   /**
-   * Makes sure the bot has its harness route and logs where this conversation runs. A failure here
-   * is logged and never stops the turn: the conversation still runs on the service's harness.
+   * Records the bot's intended harness route, not the actual provider driver. A provider whose
+   * sign-in the harness cannot use may run on its own CLI. A route-record failure is diagnostic
+   * only and must not stop a turn.
    */
   #routeAgent(agent: AgentSummary, threadId: string): void {
     if (!this.#harnessRouter) return;
     try {
       const route = this.#harnessRouter.routeAgent(agent);
-      logger.info(`Conversation ${threadId} of ${agent.id} runs as: ${describeHarnessRoute(route)}.`);
+      logger.info(`Conversation ${threadId} of ${agent.id} recorded route: ${describeHarnessRoute(route)}.`);
     } catch (error) {
       logger.warn(`Could not route ${agent.id}: ${toLogValue(error)}`);
     }

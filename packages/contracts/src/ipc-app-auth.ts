@@ -128,8 +128,9 @@ export interface AppSetupState {
   preferredModel: AgentModelId | null;
   /**
    * Layer 1, stored apart from the provider and model. Absent means each provider's own CLI runs
-   * the turn; `hermes` runs every provider inside the Hermes harness; `automatic` routes each new
-   * conversation to the harness its work belongs on.
+   * the turn; `hermes` uses Hermes for providers whose sign-in it supports, with the provider's
+   * own CLI as fallback; `automatic` records a sticky harness route for each bot. The stored route
+   * is not proof of which provider driver handled a turn.
    */
   harness?: AgentHarnessSetting | null;
   /**
