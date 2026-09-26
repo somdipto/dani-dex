@@ -135,6 +135,11 @@ jobs:
           bun run verify:remote-desktop-runtime
           bun run prepare:cua-driver
 
+      - name: Download the pinned Dani Free proxy artifact
+        env:
+          DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
+        run: bun scripts/download-dani-free-proxy.ts
+
       - name: Stage pinned Dani Free resources for both Mac slices
         run: |
           bun scripts/stage-dani-free-release.ts darwin arm64
@@ -260,6 +265,11 @@ jobs:
           bun scripts/install-claude-runtime.ts win32 x64
           bun scripts/install-grok-runtime.ts win32 x64
           bun scripts/install-hermes-runtime.ts win32 x64
+
+      - name: Download the pinned Dani Free proxy artifact
+        env:
+          DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
+        run: bun scripts/download-dani-free-proxy.ts
 
       - name: Stage pinned Dani Free resources
         run: bun scripts/stage-dani-free-release.ts win32 x64
@@ -408,6 +418,11 @@ jobs:
           bun scripts/install-claude-runtime.ts linux x64
           bun scripts/install-grok-runtime.ts linux x64
           bun scripts/install-hermes-runtime.ts linux x64
+
+      - name: Download the pinned Dani Free proxy artifact
+        env:
+          DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
+        run: bun scripts/download-dani-free-proxy.ts
 
       - name: Stage pinned Dani Free resources
         run: bun scripts/stage-dani-free-release.ts linux x64

@@ -1,2 +1,7 @@
-# SHA-256 of each dani-free executable, copied from the SHA256SUMS of the Dani-Free CI run that
-# built it. install-dani-free.ts refuses any binary not listed here. Empty until a run is pinned.
+# Executable digests verified against the green Dani-Free-proxy CI run 36204958093,
+# artifact ID 10893791354; archive SHA-256 and provenance are locked separately.
+af433e2dc803dab4f6935c1dc07c9000c3c05c4c8ddd8f564702f7fcdb8b5e17  dani-free-darwin-arm64
+a511e771347c0c4010a0efe52a9cc4e16bf07c12570b4e20ca89e336c9ea3899  dani-free-darwin-x64
+0226e95e48e56360bcdadabc09d88ac9c546eca66954331abd0093a1fda85288  dani-free-linux-arm64
+0c61295b1c46b0381a444cc3c33c64d57efc3e13c3883cb27e26394819f2cef0  dani-free-linux-x64
+7a1f1e37cc57739f2a0f70931b4722124d443a6224ea66f9ea515f715e0b820f  dani-free-windows-x64.exe

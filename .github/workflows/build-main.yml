@@ -49,6 +49,11 @@ jobs:
           bun scripts/install-grok-runtime.ts win32 x64
           bun scripts/install-hermes-runtime.ts win32 x64
 
+      - name: Download the pinned Dani Free proxy artifact
+        env:
+          DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
+        run: bun scripts/download-dani-free-proxy.ts
+
       - name: Stage pinned Dani Free resources
         run: bun scripts/stage-dani-free-release.ts win32 x64
 
@@ -108,6 +113,11 @@ jobs:
           bun scripts/install-claude-runtime.ts linux x64
           bun scripts/install-grok-runtime.ts linux x64
           bun scripts/install-hermes-runtime.ts linux x64
+
+      - name: Download the pinned Dani Free proxy artifact
+        env:
+          DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
+        run: bun scripts/download-dani-free-proxy.ts
 
       - name: Stage pinned Dani Free resources
         run: bun scripts/stage-dani-free-release.ts linux x64
@@ -184,6 +194,11 @@ jobs:
 
       # The release job's build, with signing and notarization switched off. `dist:mac` would rebuild
       # the remote desktop runtime from source instead of installing the pinned one.
+      - name: Download the pinned Dani Free proxy artifact
+        env:
+          DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
+        run: bun scripts/download-dani-free-proxy.ts
+
       - name: Stage pinned Dani Free resources
         run: bun scripts/stage-dani-free-release.ts darwin arm64
 
@@ -242,6 +257,11 @@ jobs:
           bun run install:remote-desktop-runtime
           bun run verify:remote-desktop-runtime
           bun run prepare:cua-driver
+
+      - name: Download the pinned Dani Free proxy artifact
+        env:
+          DANI_FREE_ARTIFACT_TOKEN: ${{ secrets.DANI_FREE_ARTIFACT_READ_TOKEN }}
+        run: bun scripts/download-dani-free-proxy.ts
 
       - name: Stage pinned Dani Free resources for both Mac slices
         run: |
