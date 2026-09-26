@@ -969,10 +969,8 @@ describe("SettingsModal", () => {
     expect(custom).not.toBeChecked();
   });
 
-  // The runtime badge reports the CLI, so the row carries a tier badge only while it adds
-  // anything: "Free" with no key, gone once the key is saved and the runtime "Connected" speaks
-  // for the row. The status is re-read after the key dialog closes, so a save lands on the row
-  // without reopening Settings.
+  // The free runtime never demands a key. Its optional paid-model action is available only
+  // when the runtime is ready. The key badge re-reads after that separate dialog closes.
   it("badges the OpenCode row with the account tier, and refreshes it after the key dialog closes", async () => {
     const providerKeys = {
       // Modal open, key dialog open: no key yet. Key dialog close: the save landed.
@@ -999,6 +997,9 @@ describe("SettingsModal", () => {
         onUpdateAccountName={vi.fn(async () => undefined)}
         onUpdateAccountAvatar={vi.fn(async () => undefined)}
         agentStatus={openCodeReadyStatus}
+        providerRuntimeStatuses={{
+          opencode: { phase: "ready", progress: null, message: null, version: "1.3.13", availableVersion: null },
+        }}
         providerKeys={providerKeys}
         onConnectProvider={onConnectProvider}
       />
@@ -1007,11 +1008,11 @@ describe("SettingsModal", () => {
     await screen.findByText("Free");
     expect(providerKeys.getProviderApiKeyState).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Sign in to Dani Free" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add paid models" }));
     const input = await screen.findByLabelText("Model key");
     await waitFor(() => expect(input).toBeEnabled());
-    // The dialog reconnects without touching credentials. The row behind keeps its own
-    // "Connect OpenCode" button, so the name matches exactly.
+    // The optional paid-key dialog can retry the runtime without touching credentials.
+    // The ordinary provider Reconnect remains keyless.
     fireEvent.click(screen.getByRole("button", { name: /^Reconnect$/ }));
     await waitFor(() => expect(onConnectProvider).toHaveBeenCalledWith("opencode"));
     fireEvent.input(input, { target: { value: "go-key-value" } });
