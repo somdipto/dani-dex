@@ -1,5 +1,6 @@
 import type { DaniDexModelSource } from "@dani-dex/contracts/online-services";
 import { createDaniDexLogger } from "@dani-dex/logging";
+import { CodexCliError } from "../backend/cli";
 import { setRuntimeModelSource } from "../backend/model-source";
 import type { AgentInitializationGate } from "./agent-initialization";
 import type { DaniFreeSupervisor } from "./dani-free";
@@ -44,7 +45,10 @@ export class DaniFreeConnection {
         await appendDaniFreeDiagnostic(this.home, {
           stage: "connected",
           outcome: "failed",
-          detail: String(error),
+          detail:
+            error instanceof CodexCliError && error.diagnosticDetail
+              ? `${String(error)}: ${error.diagnosticDetail}`
+              : String(error),
         }).catch(() => undefined);
         this.#failures += 1;
       })

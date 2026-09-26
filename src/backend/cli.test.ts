@@ -414,11 +414,29 @@ describe("OpenCode CLI resolution", () => {
     });
   });
 
+  it.runIf(process.platform !== "win32")(
+    "accepts a slow but valid installed CLI version",
+    async () => {
+      const root = await mkdtemp(join(tmpdir(), "dani-dex-slow-cli-"));
+      temporaryPaths.push(root);
+      const executable = join(root, "opencode");
+      await writeFile(executable, "#!/bin/sh\nsleep 6\nprintf '1.18.30\\n'\n");
+      await chmod(executable, 0o755);
+      await expect(resolveOpencodeCli({ systemCandidates: [executable], bundledExecutable: null })).resolves.toEqual({
+        executable,
+        version: "1.18.30",
+        source: "system",
+      });
+    },
+    15_000,
+  );
+
   it("reports a CLI that cannot be started apart from one that is absent", async () => {
     const broken = await createExecutable("opencode", "not a version");
     await expect(resolveOpencodeCli({ systemCandidates: [broken], bundledExecutable: null })).rejects.toMatchObject({
       code: "invalid",
       message: "Dani could not start. Restart Dani-Dex to try again.",
+      diagnosticDetail: expect.stringContaining("Unable to read the OpenCode CLI version."),
     });
     await expect(resolveOpencodeCli({ systemCandidates: [], bundledExecutable: null })).rejects.toMatchObject({
       code: "missing",

@@ -41,6 +41,7 @@ export class CodexCliError extends Error {
   constructor(
     message: string,
     readonly code: "missing" | "invalid" | "outdated",
+    readonly diagnosticDetail?: string,
   ) {
     super(message);
     this.name = "CodexCliError";
@@ -196,24 +197,39 @@ export async function resolveOpencodeCli(
     input.bundledExecutable === undefined ? bundledOpencodeExecutable() : input.bundledExecutable;
   const candidates = await cliCandidates("opencode", input.systemCandidates, bundledExecutable);
   let found = false;
+  let unreadable = false;
+  const failures: string[] = [];
   for (const candidate of candidates) {
-    if (!(await isExecutable(candidate.executable))) continue;
+    if (!(await isExecutable(candidate.executable))) {
+      if (
+        await access(candidate.executable, constants.F_OK).then(
+          () => true,
+          () => false,
+        )
+      )
+        unreadable = true;
+      continue;
+    }
     found = true;
     try {
-      const version = parseOpencodeVersion(await readCliVersion(candidate.executable));
+      const version = parseOpencodeVersion(await readCliVersion(candidate.executable, 30_000));
       // `source` has to be the candidate's own: hardcoding "system" made `updateProviderCli` refuse
       // to activate the managed copy, and made `trackSystemCliVersions` report the managed version
       // as the user's, which suppressed every later update offer.
       return { executable: candidate.executable, version, source: candidate.source };
-    } catch {
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      const code = error instanceof Error && "code" in error ? String(error.code) : "unknown";
+      failures.push(`${candidate.source}: ${code}: ${detail}`);
       /* Try the remaining installed candidates. */
     }
   }
   throw new CodexCliError(
-    found
+    found || unreadable
       ? "Dani could not start. Restart Dani-Dex to try again."
       : "Dani is not downloaded. Download it in Dani-Dex to continue.",
-    found ? "invalid" : "missing",
+    found || unreadable ? "invalid" : "missing",
+    found ? failures.join("; ") : unreadable ? "Found a non-executable CLI candidate." : "No CLI candidate was found.",
   );
 }
 
@@ -445,12 +461,12 @@ export function cliSpawnTarget(
   };
 }
 
-async function readCliVersion(candidate: string): Promise<string> {
+async function readCliVersion(candidate: string, timeout = 5_000): Promise<string> {
   if (process.platform === "win32" && [".bat", ".cmd"].includes(extname(candidate).toLowerCase())) {
     const commandProcessor = process.env.ComSpec?.trim() || "cmd.exe";
     const escapedCandidate = candidate.replaceAll("%", "%%");
     const { stdout } = await execFileAsync(commandProcessor, ["/d", "/s", "/c", `""${escapedCandidate}" --version"`], {
-      timeout: 5_000,
+      timeout,
       maxBuffer: 64 * 1024,
       windowsHide: true,
       windowsVerbatimArguments: true,
@@ -459,7 +475,7 @@ async function readCliVersion(candidate: string): Promise<string> {
   }
 
   const { stdout } = await execFileAsync(candidate, ["--version"], {
-    timeout: 5_000,
+    timeout,
     maxBuffer: 64 * 1024,
     windowsHide: process.platform === "win32",
   });
