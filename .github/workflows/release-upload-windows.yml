@@ -1,0 +1,81 @@
+name: Publish gate-tested Dani-Dex Windows installer
+
+# One-time recovery path: copy exact successful build-main bytes, never rebuild them.
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: publish-gate-tested-windows-v0.17.3
+  cancel-in-progress: false
+
+jobs:
+  publish-tested-windows:
+    name: Verify and upload gate-tested Windows EXE
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: v0.17.3
+      SOURCE_SHA: 21da03a1df08c96e4e44217d25e6db821469942a
+      SOURCE_RUN: "36212498904"
+      SOURCE_ARTIFACT: "10896083231"
+      EXPECTED_ARCHIVE_SHA256: d6e0f5d65b05edd0084b9c166233db8b6e26c64d602aaa4e584cefeba1a370f7
+      EXPECTED_EXE_SHA256: 3e6d18bc39ec3c798f4ca4142aae20884da4c55a003b5f4c3380eaca2a807a1c
+      EXPECTED_EXE_SIZE: "351838686"
+      RELEASE_ASSET: Dani-Dex-windows-x64.exe
+    steps:
+      - name: Verify the source run, artifact and release target
+        shell: bash
+        run: |
+          set -euo pipefail
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN")
+          jq -e --arg sha "$SOURCE_SHA" '.head_sha == $sha and .status == "completed" and .conclusion == "success" and .event == "push" and .head_branch == "main"' <<<"$run"
+          artifact=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT")
+          jq -e --arg sha "$SOURCE_SHA" --argjson run "$SOURCE_RUN" --arg digest "sha256:$EXPECTED_ARCHIVE_SHA256" \
+            '.expired == false and .workflow_run.id == $run and .workflow_run.head_sha == $sha and .digest == $digest and .name == ("dani-dex-main-windows-" + $sha)' <<<"$artifact"
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG")
+          jq -e --arg tag "$RELEASE_TAG" --arg sha "$SOURCE_SHA" \
+            '.tag_name == $tag and .target_commitish == $sha and .draft == false' <<<"$release"
+          ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG")
+          jq -e --arg sha "$SOURCE_SHA" '.object.type == "commit" and .object.sha == $sha' <<<"$ref"
+
+      - name: Download and check exact successful Windows artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT/zip" > source/archive.zip
+          echo "$EXPECTED_ARCHIVE_SHA256  source/archive.zip" | sha256sum --check
+          unzip -Z1 source/archive.zip > source/entries.txt
+          if [[ $(wc -l < source/entries.txt) -ne 1 ]]; then
+            echo 'Expected exactly one EXE inside the pinned artifact.' >&2
+            cat source/entries.txt >&2
+            exit 1
+          fi
+          entry=$(cat source/entries.txt)
+          if [[ "$entry" != Dani-Dex-0.17.3-x64.exe ]]; then
+            echo "Unexpected installer inside artifact: $entry" >&2
+            exit 1
+          fi
+          unzip -p source/archive.zip "$entry" > "$RELEASE_ASSET"
+          test "$(wc -c < "$RELEASE_ASSET" | tr -d ' ')" = "$EXPECTED_EXE_SIZE"
+          echo "$EXPECTED_EXE_SHA256  $RELEASE_ASSET" | sha256sum --check
+
+      - name: Publish only verified Windows EXE and check release copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" "$RELEASE_ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern "$RELEASE_ASSET" --dir published
+          test "$(wc -c < "published/$RELEASE_ASSET" | tr -d ' ')" = "$EXPECTED_EXE_SIZE"
+          echo "$EXPECTED_EXE_SHA256  published/$RELEASE_ASSET" | sha256sum --check
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG")
+          jq -e --arg name "$RELEASE_ASSET" --arg sha "sha256:$EXPECTED_EXE_SHA256" \
+            '[.assets[] | select(.name == $name and .state == "uploaded" and .digest == $sha)] | length == 1' <<<"$release"
+          echo "Verified Windows asset: https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$RELEASE_ASSET" >> "$GITHUB_STEP_SUMMARY"
