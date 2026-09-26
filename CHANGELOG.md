@@ -5,6 +5,16 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.7] - 2026-09-26
+
+### Changed
+
+- Keep Dani Free setup and reconnect keyless: remove the paid-model key action
+  from the Dani Free row. Manage an optional paid OpenCode model key separately
+  in Settings; other providers' sign-in choices remain available.
+- Carry forward the Dani Free first-launch proxy recovery released in 0.17.6,
+  so this installer includes both the startup fix and the keyless setup change.
+
 ## [0.17.6] - 2026-09-26
 
 ### Fixed
