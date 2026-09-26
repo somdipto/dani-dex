@@ -82,6 +82,7 @@ import {
 } from "./cua-driver-runtime";
 import { CustomProviderStore } from "./custom-provider-store";
 import { bundledDaniFreeExecutable, DaniFreeSupervisor } from "./dani-free";
+import { appendDaniFreeDiagnostic } from "./dani-free-diagnostic";
 import { DANI_FREE_PREFERENCE_FILE, readDaniFreePreference } from "./dani-free-preference-store";
 import { bundledDaniFreeEngineSeed, verifiedDaniFreeEngineSeed } from "./dani-free-seed";
 import { MCP_OAUTH_REDIRECT_URL } from "./deep-link-router";
@@ -1209,6 +1210,13 @@ export async function createApplicationServices({
   const daniFreeExecutable = app.isPackaged
     ? bundledDaniFreeExecutable(process.resourcesPath)
     : process.env.DANI_DEX_DANI_FREE_PATH?.trim() || null;
+  if (!daniFreeExecutable && app.isPackaged) {
+    await appendDaniFreeDiagnostic(join(app.getPath("userData"), "dani-free"), {
+      stage: "package",
+      outcome: "failed",
+      detail: "The packaged Dani Free proxy is missing.",
+    }).catch(() => undefined);
+  }
   if (daniFreeExecutable) {
     // The Settings switch is stored beside the other preferences; DANI_FREE_PRIVATE_MODE=1 forces it on.
     const daniFreePreference = await readDaniFreePreference(join(app.getPath("userData"), DANI_FREE_PREFERENCE_FILE));
@@ -1219,10 +1227,21 @@ export async function createApplicationServices({
         engineSeed = await verifiedDaniFreeEngineSeed(seed);
       } catch (error) {
         logger.warn("Dani Free engine seed could not be verified.", { error: String(error) });
+        await appendDaniFreeDiagnostic(join(app.getPath("userData"), "dani-free"), {
+          stage: "seed",
+          outcome: "failed",
+          detail: String(error),
+        }).catch(() => undefined);
       }
     }
     if (app.isPackaged && !engineSeed) {
       logger.warn("Dani Free cannot start without its verified bundled engine seed.");
+      if (!seed)
+        await appendDaniFreeDiagnostic(join(app.getPath("userData"), "dani-free"), {
+          stage: "seed",
+          outcome: "failed",
+          detail: "The bundled engine seed is missing.",
+        }).catch(() => undefined);
     } else {
       const daniFree = new DaniFreeSupervisor({
         executable: daniFreeExecutable,
@@ -1238,7 +1257,14 @@ export async function createApplicationServices({
           await service.saveCustomProvider(source.id, async () => setRuntimeModelSource(source));
           await service.reloadOpenCodeConfig();
         })
-        .catch((error) => logger.warn("Dani-Free could not be connected.", { error: String(error) }));
+        .catch(async (error) => {
+          logger.warn("Dani-Free could not be connected.", { error: String(error) });
+          await appendDaniFreeDiagnostic(join(app.getPath("userData"), "dani-free"), {
+            stage: "connected",
+            outcome: "failed",
+            detail: String(error),
+          }).catch(() => undefined);
+        });
     }
   }
   const describeRestartReadiness = (ignoreOwnUpdater = false): RestartReadiness =>

@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { bundledDaniFreeExecutable, DaniFreeSupervisor, parseDaniFreeReadyLine } from "./dani-free";
+import { readDaniFreeDiagnosticSummary } from "./dani-free-diagnostic";
 
 const directories: string[] = [];
 const supervisors: DaniFreeSupervisor[] = [];
@@ -203,6 +204,9 @@ describe("DaniFreeSupervisor", () => {
     const supervisor = new DaniFreeSupervisor({ executable: fake.executable, home: join(fake.root, "home") });
     supervisors.push(supervisor);
     await expect(supervisor.start()).resolves.toBeNull();
+    await expect
+      .poll(async () => (await readDaniFreeDiagnosticSummary(join(fake.root, "home"))).events)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ stage: "ready", outcome: "failed" })]));
   });
 
   it("resolves null when no ready line arrives in time", async () => {

@@ -9,6 +9,7 @@ import { app, type BrowserWindow, dialog } from "electron";
 import type { AgentService } from "../backend/agent-service";
 import type { BrowserHost } from "../backend/browser-host";
 import type { MailboxStore } from "../backend/mailbox-store";
+import { readDaniFreeDiagnosticSummary } from "./dani-free-diagnostic";
 import type { UpdateService } from "./update-service";
 
 const execFileAsync = promisify(execFile);
@@ -154,6 +155,7 @@ export async function exportDiagnostics(
         enabled: config.enabled,
       })),
     },
+    daniFree: await readDaniFreeDiagnosticSummary(join(app.getPath("userData"), "dani-free")),
     browser: {
       tabCount: context.browser.listTabs().length,
       activeControlCount: context.browser.getControlState().sessions.length,
@@ -168,7 +170,7 @@ export async function exportDiagnostics(
       history: context.updater.getDiagnostics(),
     },
     privacy:
-      "Contains no conversations, URLs, email addresses, tokens, file contents, file paths, or raw error messages.",
+      "Contains no conversations, URLs, email addresses, tokens, file contents, file paths, or raw error messages; Dani Free startup stages and exit codes are included.",
   };
   await writeFile(destination, `${JSON.stringify(diagnostics, null, 2)}\n`, {
     encoding: "utf8",

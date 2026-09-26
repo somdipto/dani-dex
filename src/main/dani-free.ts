@@ -13,6 +13,7 @@ import { isAbsolute, join, relative, resolve } from "node:path";
 import type { DaniDexModelSource } from "@dani-dex/contracts/online-services";
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { createDaniDexLogger, redactText } from "@dani-dex/logging";
+import { appendDaniFreeDiagnostic, type DaniFreeStage } from "./dani-free-diagnostic";
 
 const logger = createDaniDexLogger("dani-free");
 
@@ -142,9 +143,12 @@ export class DaniFreeSupervisor {
   }
 
   async start(): Promise<DaniDexModelSource | null> {
+    let stage: DaniFreeStage = "spawn";
     try {
       await this.sweepLeftovers();
+      stage = "ready";
       const ready = await this.#spawn();
+      stage = "key";
       if (ready.pid !== this.#child?.pid) throw new Error("Dani Free process identity did not match.");
       if (
         !isAbsolute(ready.apiKeyFile) ||
@@ -154,15 +158,23 @@ export class DaniFreeSupervisor {
       }
       const key = await readKey(ready.apiKeyFile);
       // No refresh nudge: the proxy probes and refreshes on its own, and a refresh can take 20s+.
+      stage = "models";
       const models = await this.#request(ready, key, "GET", "/v1/models");
       const ids =
         isDynamicRecord(models) && Array.isArray(models.data)
           ? models.data.flatMap((entry) => (isDynamicRecord(entry) && typeof entry.id === "string" ? [entry.id] : []))
           : [];
+      const source = buildDaniModelSource(ready, key, ids);
       logger.info("Dani-Free is ready.", { port: ready.port, models: ids.length, privateMode: ready.privateMode });
-      return buildDaniModelSource(ready, key, ids);
+      await appendDaniFreeDiagnostic(this.#options.home, { stage: "connected", outcome: "ready" }).catch(
+        () => undefined,
+      );
+      return source;
     } catch (error) {
       logger.warn("Dani-Free did not start.", { error: describe(error) });
+      await appendDaniFreeDiagnostic(this.#options.home, { stage, outcome: "failed", detail: describe(error) }).catch(
+        () => undefined,
+      );
       await this.stop();
       return null;
     }
@@ -263,7 +275,15 @@ export class DaniFreeSupervisor {
       stderr = (stderr + chunk).slice(-2000);
     });
     child.on("exit", (code, signal) => {
-      if (!this.#stopping) logger.warn("Dani-Free exited.", { code, signal, stderr: redactText(stderr) });
+      if (!this.#stopping) {
+        logger.warn("Dani-Free exited.", { code, signal, stderr: redactText(stderr) });
+        void appendDaniFreeDiagnostic(this.#options.home, {
+          stage: "exit",
+          outcome: "exited",
+          code,
+          signal,
+        }).catch(() => undefined);
+      }
     });
     return new Promise<DaniFreeReady>((resolve, reject) => {
       let buffer = "";
