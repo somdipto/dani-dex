@@ -5,6 +5,15 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.8] - 2026-09-27
+
+### Fixed
+
+- Give the Dani Free engine up to 30 seconds to report its version on slower machines,
+  instead of treating a slow start as an invalid installation.
+- Record the underlying startup error in private diagnostics when the engine cannot
+  start, while keeping the on-screen message simple.
+
 ## [0.17.7] - 2026-09-26
 
 ### Changed
