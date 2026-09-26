@@ -17,7 +17,7 @@ import type { SplashArtwork, SplashLogoTarget } from "@/shared/lib/use-splash-ga
 // the same mark once JS runs. Keep BACKDROP_COLOR in sync with the plugin
 // `backgroundColor` values and SPLASH_LOGO_SIZE with its `imageWidth`, so the handoff
 // from the native splash does not jump.
-const BACKDROP_COLOR = { light: "#E6C5FA", dark: "#181818" } as const;
+const BACKDROP_COLOR = { light: "#FFFFFF", dark: "#181818" } as const;
 
 // Gap between the centered mark and the status indicator below it. The mark
 // itself stays exactly centered so it keeps aligning with the native splash;

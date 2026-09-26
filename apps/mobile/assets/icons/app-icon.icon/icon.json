@@ -1,6 +1,6 @@
 {
   "fill": {
-    "linear-gradient": ["display-p3:0.81396,0.68457,0.93115,1.00000", "display-p3:0.81396,0.68457,0.93115,1.00000"],
+    "linear-gradient": ["display-p3:1.00000,1.00000,1.00000,1.00000", "display-p3:1.00000,1.00000,1.00000,1.00000"],
     "orientation": {
       "start": {
         "x": 0.5,
@@ -26,8 +26,8 @@
             }
           ],
           "hidden": false,
-          "image-name": "eyes.png",
-          "name": "eyes",
+          "image-name": "mark.png",
+          "name": "Dani mark",
           "opacity": 1,
           "position": {
             "scale": 0.21,

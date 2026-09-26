@@ -8,6 +8,7 @@
     "./bloub-avatar": "./src/bloub-avatar.ts",
     "./bloub-avatar-motion": "./src/bloub-avatar-motion.ts",
     "./logo.css": "./src/logo.css",
+    "./dani-mark": "./src/dani-mark.ts",
     "./tokens.css": "./src/tokens.css",
     "./tokens-native.css": "./src/tokens-native.css",
     "./article-gradient": "./src/article-gradient.ts"
