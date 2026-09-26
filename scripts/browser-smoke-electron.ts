@@ -423,7 +423,11 @@ async function main(): Promise<void> {
 
     await app.whenReady();
     process.stdout.write("BrowserHost: Electron ready.\n");
-    const window = new BrowserWindow({ show: false, opacity: 0 });
+    // The pointer-action smoke needs a composited native window. A zero-opacity
+    // window can be treated as non-hit-testable by xvfb/Chromium even while its
+    // child view and DOM report visible, so keep this window opaque on CI's
+    // virtual display. No user desktop is exposed by xvfb.
+    const window = new BrowserWindow({ show: false });
     window.show();
     app.focus({ steal: true });
     window.focus();
