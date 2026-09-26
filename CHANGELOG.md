@@ -5,6 +5,14 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.4] - 2026-09-26
+
+### Fixed
+
+- Publish the macOS and Windows update files alongside the installers, so Dani-Dex
+  can find a new version and check its download before installing it.
+
+
 ## [0.17.3] - 2026-09-26
 
 ### Added

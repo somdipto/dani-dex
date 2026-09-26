@@ -81,11 +81,17 @@ jobs:
           if (-not ($output -match [regex]::Escape("v$version"))) { Write-Error "Unexpected packaged Hermes version: $output" }
           $output
 
-      - name: Upload installer
+      - name: Verify Windows updater feed against the installer
+        run: bun run verify:update-artifacts windows
+
+      - name: Upload installer and updater feed
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dani-dex-main-windows-${{ github.sha }}
-          path: dist/*.exe
+          path: |
+            dist/*.exe
+            dist/latest.yml
+            dist/*.exe.blockmap
           if-no-files-found: error
           retention-days: 14
 
@@ -353,10 +359,17 @@ jobs:
           xattr -dr com.apple.quarantine "$installed/Dani-Dex.app" || true
           bun scripts/smoke-packaged-dani-free-answer.ts "$installed/Dani-Dex.app/Contents/Resources"
 
-      - name: Upload DMG
+      - name: Verify universal macOS updater feed against the ZIP
+        run: bun run verify:update-artifacts macos
+
+      - name: Upload universal DMG and updater feed
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dani-dex-main-macos-universal-${{ github.sha }}
-          path: dist/*.dmg
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/latest-mac.yml
+            dist/*.zip.blockmap
           if-no-files-found: error
           retention-days: 14
