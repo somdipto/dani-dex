@@ -109,12 +109,22 @@ export class OperatingInstructions {
     const output = await this.#options.generate(agent, rewritePrompt(agent, before, messages));
     const text = cleanRewrite(output);
     if (!text) throw new Error("The provider returned no operating instructions.");
+    // A user-edited line is not a suggestion the model can erase. Keep the edited provenance
+    // on successful append-only rewrites so future rewrites cannot erase the preserved lines.
+    if (before.source === "edited" && !preservesUserEdit(before.text, text)) {
+      this.#options.emitError(
+        "operating_instructions_user_edit_not_preserved",
+        new Error("The generated instructions omitted a user-edited line."),
+        agentId,
+      );
+      return this.#present(this.#options.table.get(agentId));
+    }
     const written = this.#options.table.write(agentId, {
       text,
       source: "generated",
       expectedRevision: before.revision,
     });
-    // The user edited them while this ran; theirs stands and the next window starts from it.
+    // The user edited or paused auto-evolution while this ran; either choice stands.
     if (!written) return this.#present(this.#options.table.get(agentId));
     if (written.text !== before.text) this.#options.changed(agentId);
     return this.#present(written);
@@ -161,7 +171,7 @@ export function rewritePrompt(agent: AgentSummary, current: StoredOperatingInstr
       ? "There are none yet: write the first version."
       : [
           current.source === "edited"
-            ? "The user wrote or edited this version themselves. Keep every line of theirs, word for word, unless a later message of theirs contradicts it; you may add to it."
+            ? "The user wrote or edited this version themselves. Keep every line of theirs, word for word. Only the user may change or remove those lines. You may add new lines."
             : "This is the version you wrote last time. Keep what still holds, sharpen it, and drop what the user has moved away from.",
           "<current_operating_instructions>",
           current.text,
@@ -200,4 +210,19 @@ export function cleanRewrite(output: string): string {
   const cut = text.slice(0, INPUT_LIMITS.agentOperatingInstructions);
   const lastBreak = cut.lastIndexOf("\n");
   return (lastBreak > 0 ? cut.slice(0, lastBreak) : cut).trim();
+}
+
+/** Require every user-edited instruction to survive verbatim; the model may add but not erase it. */
+function preservesUserEdit(edited: string, generated: string): boolean {
+  const lines = new Set(
+    generated
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean),
+  );
+  return edited
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .every((line) => lines.has(line));
 }

@@ -69,10 +69,11 @@ export class OperatingInstructionsTable {
     const result = this.#core.connection
       .prepare(
         `UPDATE projection_agent_operating_instructions
-         SET text = ?, source = ?, revision = revision + 1, revised_at_turn = user_turns, updated_at = ?
-         WHERE agent_id = ? AND revision = ?`,
+         SET text = ?, source = CASE WHEN source = 'edited' AND ? = 'generated' THEN 'edited' ELSE ? END,
+             revision = revision + 1, revised_at_turn = user_turns, updated_at = ?
+         WHERE agent_id = ? AND revision = ?${change.source === "generated" ? " AND auto_evolve = 1" : ""}`,
       )
-      .run(change.text, change.source, new Date().toISOString(), agentId, change.expectedRevision);
+      .run(change.text, change.source, change.source, new Date().toISOString(), agentId, change.expectedRevision);
     return Number(result.changes) === 1 ? this.get(agentId) : null;
   }
 

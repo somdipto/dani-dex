@@ -130,13 +130,14 @@ describe("OperatingInstructions", () => {
   });
 
   it("keeps the user's edit: a later rewrite is told to keep it, and one racing it is dropped", async () => {
-    const { database, agent, service, prompts } = await setup();
+    const { database, agent, service, prompts } = await setup(["- Review every diff before commit.\n- Use bun."]);
     const edited = service.update({ agentId: agent.id, text: "  - Review every diff before commit.  " });
     expect(edited).toMatchObject({ source: "edited", revision: 1, text: "- Review every diff before commit." });
 
     await service.refresh(agent.id);
     expect(prompts[0]).toContain("The user wrote or edited this version themselves");
     expect(prompts[0]).toContain("- Review every diff before commit.");
+    expect(service.get(agent.id)).toMatchObject({ source: "edited", revision: 2 });
 
     // A rewrite that finishes after an edit it never saw does not undo it.
     let release: (value: string) => void = () => undefined;
@@ -154,6 +155,35 @@ describe("OperatingInstructions", () => {
     release("- The model's version.");
     await racing;
     expect(slow.get(agent.id)).toMatchObject({ source: "edited", text: "- Mine, typed while it ran." });
+    database.close();
+  });
+
+  it("cannot overwrite a user-edited line or complete a rewrite after auto-evolution is paused", async () => {
+    const { database, agent, service, errors } = await setup(["- Use a new review tool."]);
+    service.update({ agentId: agent.id, text: "- Review every diff before commit." });
+    await service.refresh(agent.id);
+    expect(service.get(agent.id)).toMatchObject({
+      source: "edited",
+      revision: 1,
+      text: "- Review every diff before commit.",
+    });
+    expect(errors).toHaveBeenCalledWith("operating_instructions_user_edit_not_preserved", expect.any(Error), agent.id);
+
+    let release: (value: string) => void = () => undefined;
+    const slow = new OperatingInstructions({
+      table: database.operatingInstructions,
+      agent: () => agent,
+      userMessages: () => ["Keep commits small."],
+      generate: () => new Promise<string>((resolve) => (release = resolve)),
+      changed: () => undefined,
+      emitError: () => undefined,
+    });
+    const racing = slow.refresh(agent.id);
+    await Promise.resolve();
+    slow.update({ agentId: agent.id, autoEvolve: false });
+    release("- Review every diff before commit.\n- Keep commits small.");
+    await racing;
+    expect(slow.get(agent.id)).toMatchObject({ source: "edited", revision: 1, autoEvolve: false });
     database.close();
   });
 
