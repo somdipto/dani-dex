@@ -722,6 +722,7 @@ if (!hasSingleInstanceLock) {
       void built.agentInitialization.start().catch((error) => {
         logger.error("Unable to initialize the local agent backend:", toLogValue(error));
       });
+      built.daniFreeConnection?.start();
 
       const directoryRefresh = createRemoteDirectoryRefresh(() => {
         const generation = centralAuthGeneration;

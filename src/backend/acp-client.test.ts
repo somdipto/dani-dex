@@ -20,6 +20,7 @@ import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AgentClient } from "./agent-client";
 import type { OpencodeCliInfo } from "./cli";
+import { setRuntimeModelSource } from "./model-source";
 import type { CustomProviderConfig } from "./opencode-config";
 import {
   decodeAccountReadResult,
@@ -36,6 +37,7 @@ afterEach(async () => {
   // The fake agent reads its behaviour from the environment, so a stub left in place would decide
   // the next test as well.
   vi.unstubAllEnvs();
+  setRuntimeModelSource(null);
 });
 
 /** An ACP agent that answers `initialize` and `session/new`, and records the env it was spawned with. */
@@ -370,6 +372,28 @@ describe("OpenCode ACP environment", () => {
           models: { "qwen3-coder:30b": { name: "Qwen3 Coder 30B" } },
         },
       },
+    });
+  });
+
+  it("adds Dani Free to a fresh keyless OpenCode spawn without hiding other sign-in choices", async () => {
+    const fake = await createFakeOpencodeAgent("system");
+    setRuntimeModelSource({
+      id: "dani",
+      name: "Dani",
+      baseUrl: "http://127.0.0.1:40000/v1",
+      apiKey: "local-only",
+      models: [{ id: "dani-free-auto", name: "Dani Free Auto" }],
+    });
+    const client = startOpencode(fake.cli, () => null, fake.envLog);
+    await client.request("initialize", {}, decodeRecordResponse);
+    const [environment] = await fake.readSpawnEnvironments();
+    expect(environment?.apiKey).toBeNull();
+    const config = JSON.parse(environment?.configContent ?? "");
+    expect(config.provider.dani).toEqual({
+      npm: "@ai-sdk/openai-compatible",
+      name: "Dani",
+      options: { baseURL: "http://127.0.0.1:40000/v1", apiKey: "local-only" },
+      models: { "dani-free-auto": { name: "Dani Free Auto" } },
     });
   });
 

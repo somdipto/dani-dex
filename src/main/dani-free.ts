@@ -180,6 +180,10 @@ export class DaniFreeSupervisor {
     }
   }
 
+  isRunning(): boolean {
+    return Boolean(this.#child && this.#child.exitCode === null && this.#child.signalCode === null);
+  }
+
   async stop(): Promise<void> {
     const child = this.#child;
     this.#child = null;

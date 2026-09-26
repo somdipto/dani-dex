@@ -52,7 +52,6 @@ import { BrowserHost } from "../backend/browser-host";
 import { harnessDriverResolver } from "../backend/hermes-acp-driver";
 import { MailboxStore } from "../backend/mailbox-store";
 import { McpOAuth } from "../backend/mcp-oauth-provider";
-import { setRuntimeModelSource } from "../backend/model-source";
 import { SidebarLayoutStore } from "../backend/sidebar-layout-store";
 import { TeamChatStore } from "../backend/team-chat-store";
 import { AgentInitializationGate } from "./agent-initialization";
@@ -82,6 +81,7 @@ import {
 } from "./cua-driver-runtime";
 import { CustomProviderStore } from "./custom-provider-store";
 import { bundledDaniFreeExecutable, DaniFreeSupervisor } from "./dani-free";
+import { DaniFreeConnection } from "./dani-free-connection";
 import { appendDaniFreeDiagnostic } from "./dani-free-diagnostic";
 import { DANI_FREE_PREFERENCE_FILE, readDaniFreePreference } from "./dani-free-preference-store";
 import { bundledDaniFreeEngineSeed, verifiedDaniFreeEngineSeed } from "./dani-free-seed";
@@ -253,6 +253,7 @@ export interface ApplicationServices {
   approvalAutomation: ApprovalAutomation;
   language: LanguageService;
   agentInitialization: AgentInitializationGate;
+  daniFreeConnection: DaniFreeConnection | null;
   sidebarLayout: SidebarLayoutStore;
   host: HostService;
   remoteDesktop: RemoteDesktopManager;
@@ -1217,6 +1218,7 @@ export async function createApplicationServices({
       detail: "The packaged Dani Free proxy is missing.",
     }).catch(() => undefined);
   }
+  let daniFreeConnection: DaniFreeConnection | null = null;
   if (daniFreeExecutable) {
     // The Settings switch is stored beside the other preferences; DANI_FREE_PRIVATE_MODE=1 forces it on.
     const daniFreePreference = await readDaniFreePreference(join(app.getPath("userData"), DANI_FREE_PREFERENCE_FILE));
@@ -1249,22 +1251,14 @@ export async function createApplicationServices({
         home: join(app.getPath("userData"), "dani-free"),
         privateMode: daniFreePreference.privateMode || process.env.DANI_FREE_PRIVATE_MODE === "1",
       });
-      teardown.push(TEARDOWN_ORDER.daniFree, "the Dani-Free proxy", () => daniFree.stop());
-      void daniFree
-        .start()
-        .then(async (source) => {
-          if (!source) return;
-          await service.saveCustomProvider(source.id, async () => setRuntimeModelSource(source));
-          await service.reloadOpenCodeConfig();
-        })
-        .catch(async (error) => {
-          logger.warn("Dani-Free could not be connected.", { error: String(error) });
-          await appendDaniFreeDiagnostic(join(app.getPath("userData"), "dani-free"), {
-            stage: "connected",
-            outcome: "failed",
-            detail: String(error),
-          }).catch(() => undefined);
-        });
+      const connection = new DaniFreeConnection(
+        daniFree,
+        service,
+        agentInitialization,
+        join(app.getPath("userData"), "dani-free"),
+      );
+      teardown.push(TEARDOWN_ORDER.daniFree, "the Dani-Free proxy", () => connection.stop());
+      daniFreeConnection = connection;
     }
   }
   const describeRestartReadiness = (ignoreOwnUpdater = false): RestartReadiness =>
@@ -1318,6 +1312,7 @@ export async function createApplicationServices({
     approvalAutomation,
     language,
     agentInitialization,
+    daniFreeConnection,
     hostUpdateCoordinator,
     describeRestartReadiness,
     sidebarLayout,
