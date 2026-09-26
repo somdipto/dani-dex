@@ -1,0 +1,82 @@
+name: Publish gate-tested Dani-Dex macOS installer
+
+# One-time recovery path: copy the exact DMG proven by build-main, never rebuild it.
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: publish-gate-tested-mac-v0.17.3
+  cancel-in-progress: false
+
+jobs:
+  publish-tested-mac:
+    name: Verify and upload gate-tested universal DMG
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: v0.17.3
+      SOURCE_SHA: 21da03a1df08c96e4e44217d25e6db821469942a
+      SOURCE_RUN: "36212498904"
+      SOURCE_ARTIFACT: "10895738614"
+      EXPECTED_DMG_SHA256: 5ea3acce307ef0f046100cc50a5bf70a7ab10e3993314d955b8b76beb781262d
+      EXPECTED_DMG_SIZE: "660102042"
+      RELEASE_ASSET: Dani-Dex-mac-universal.dmg
+    steps:
+      - name: Verify the source run, artifact and release target
+        shell: bash
+        run: |
+          set -euo pipefail
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN")
+          jq -e --arg sha "$SOURCE_SHA" '.head_sha == $sha and .status == "completed" and .conclusion == "success" and .event == "push" and .head_branch == "main"' <<<"$run"
+          artifact=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT")
+          jq -e --arg sha "$SOURCE_SHA" --argjson run "$SOURCE_RUN" \
+            '.expired == false and .workflow_run.id == $run and .workflow_run.head_sha == $sha and .name == ("dani-dex-main-macos-universal-" + $sha)' <<<"$artifact"
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG")
+          jq -e --arg tag "$RELEASE_TAG" --arg sha "$SOURCE_SHA" \
+            '.tag_name == $tag and .target_commitish == $sha and .draft == false' <<<"$release"
+          ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG")
+          jq -e --arg sha "$SOURCE_SHA" '.object.type == "commit" and .object.sha == $sha' <<<"$ref"
+
+      - name: Download the exact successful build-main artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT/zip" > source/archive.zip
+          # The container hash is separate from the DMG hash. Both must match the pinned source.
+          echo '34e184005c2d0ee8443aafea872c11580c4502a814d5abfd8e20e1d627dd05ee  source/archive.zip' | sha256sum --check
+          unzip -Z1 source/archive.zip > source/entries.txt
+          if [[ $(wc -l < source/entries.txt) -ne 1 ]]; then
+            echo 'Expected exactly one DMG inside the pinned artifact.' >&2
+            cat source/entries.txt >&2
+            exit 1
+          fi
+          entry=$(cat source/entries.txt)
+          if [[ "$entry" != Dani-Dex-0.17.3-universal.dmg ]]; then
+            echo "Unexpected installer inside artifact: $entry" >&2
+            exit 1
+          fi
+          unzip -p source/archive.zip "$entry" > "$RELEASE_ASSET"
+          test "$(wc -c < "$RELEASE_ASSET" | tr -d ' ')" = "$EXPECTED_DMG_SIZE"
+          echo "$EXPECTED_DMG_SHA256  $RELEASE_ASSET" | sha256sum --check
+
+      - name: Publish only the verified DMG and verify the release copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" "$RELEASE_ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern "$RELEASE_ASSET" --dir published
+          test "$(wc -c < "published/$RELEASE_ASSET" | tr -d ' ')" = "$EXPECTED_DMG_SIZE"
+          echo "$EXPECTED_DMG_SHA256  published/$RELEASE_ASSET" | sha256sum --check
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG")
+          jq -e --arg name "$RELEASE_ASSET" --arg sha "sha256:$EXPECTED_DMG_SHA256" \
+            '[.assets[] | select(.name == $name and .state == "uploaded" and .digest == $sha)] | length == 1' <<<"$release"
+          gh release edit "$RELEASE_TAG" --latest --repo "$GITHUB_REPOSITORY"
+          echo "Verified published asset: https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$RELEASE_ASSET" >> "$GITHUB_STEP_SUMMARY"
