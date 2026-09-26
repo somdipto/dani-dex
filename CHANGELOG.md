@@ -5,6 +5,19 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.6] - 2026-09-26
+
+### Fixed
+
+- Restore Dani Free on first launch when its local proxy or model list is late. Retry startup,
+  reconnect the free model after the agent engine starts, and recover if the proxy stops.
+  No model key or extra sign-in is needed.
+
+### Changed
+
+- Replace technical labels in setup, AI settings, connected tools, and usage reports
+  with plainer wording.
+
 ## [0.17.5] - 2026-09-26
 
 ### Fixed
