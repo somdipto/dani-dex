@@ -5,6 +5,13 @@ import { ComputerUsePermissionHelp, permissionFromQuery } from "./features/compu
 import { DynamicIslandSurface } from "./features/dynamic-island/DynamicIslandSurface";
 import "./styles.css";
 
+try {
+  document.documentElement.dataset.daniDexTheme =
+    window.localStorage.getItem("dani-dex:theme") === "light" ? "light" : "dark";
+} catch {
+  document.documentElement.dataset.daniDexTheme = "dark";
+}
+
 const root = document.getElementById("root");
 
 if (!root) {

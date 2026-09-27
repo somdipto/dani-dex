@@ -21,7 +21,8 @@
 .ui-button.first-agent-character-choice {
   display: flex;
   min-width: 0;
-  height: 72px;
+  min-height: 90px;
+  height: auto;
   flex-direction: column;
   gap: 2px;
   padding: 3px;
@@ -45,7 +46,7 @@
   white-space: normal;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
 }
 
 .agent-avatar-manzanilla {
@@ -94,4 +95,48 @@
   .first-agent-character-options {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+}
+
+.first-agent-character-motion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.first-agent-character-motion legend {
+  margin: 0 auto 6px;
+  color: var(--dani-dex-text-secondary);
+  font-size: 12px;
+}
+.first-agent-character-motion select,
+.first-agent-model-label + select {
+  min-height: 36px;
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: 8px;
+  padding: 5px 10px;
+  background: var(--dani-dex-bg-control);
+  color: var(--dani-dex-text-primary);
+}
+.first-agent-model-label {
+  color: var(--dani-dex-text-secondary);
+  font-size: 12px;
+}
+
+/* The picker is taller than the old editor. Let the entire form scroll rather than hiding its header. */
+.first-agent-setup-panel .first-agent-setup-content {
+  grid-template-rows: auto auto;
+  align-content: start;
+}
+.first-agent-setup-panel .first-agent-editor {
+  align-content: start;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+.first-agent-character-options {
+  max-height: none;
+  overflow: visible;
+}
+.first-agent-character-choice > span:last-child {
+  -webkit-line-clamp: unset;
+  overflow: visible;
 }

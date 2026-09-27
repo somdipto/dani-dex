@@ -45,10 +45,20 @@ function ControlledFirstAgentSetup(props: FirstAgentSetupProps) {
 }
 
 const args: FirstAgentSetupProps = {
-  value: DEFAULT_FIRST_AGENT_DRAFT,
+  value: { ...DEFAULT_FIRST_AGENT_DRAFT, provider: "opencode", model: "dani/dani-free-auto" },
   suggestions: FIRST_AGENT_SUGGESTIONS,
   submitting: false,
   modelReady: true,
+  modelChoices: [
+    {
+      provider: "opencode",
+      id: "dani/dani-free-auto",
+      name: "Dani Free",
+      description: "Keyless",
+      defaultReasoningEffort: "medium",
+      supportedReasoningEfforts: ["medium"],
+    },
+  ],
   onChange: fn(),
   onSubmit: fn(),
 };

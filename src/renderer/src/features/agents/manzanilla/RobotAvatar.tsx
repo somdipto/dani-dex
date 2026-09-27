@@ -106,6 +106,7 @@ function motionFromState(state?: string): "idle" | "working" | "waiting" {
 }
 
 function motionDuration(motion: RobotMotion) {
+  if (motion === "walk") return 0;
   if (motion === "sit") return 8_000;
   if (motion === "laugh") return 2_000;
   if (motion === "blink") return 450;
@@ -120,6 +121,7 @@ function wantsLiveFrame(instance: AvatarInstance, reduced: boolean) {
     instance.animated &&
     !reduced &&
     (instance.size >= LIVE_AVATAR_SIZE ||
+      instance.motion === "walk" ||
       instance.waveStarted !== null ||
       (motionDuration(instance.motion) > 0 && !instance.motionCompleted))
   );
@@ -259,15 +261,16 @@ function draw(instance: AvatarInstance, now: number, reduced: boolean) {
   }
   if (instance.waveStarted !== null && now - instance.waveStarted >= WAVE_DURATION) instance.waveStarted = null;
   const duration = motionDuration(instance.motion);
+  const continuous = instance.motion === "walk" || instance.motion === "working" || instance.motion === "waiting";
   const canMove = instance.animated && !reduced;
-  if (canMove && duration > 0 && !instance.motionCompleted) {
+  if (canMove && duration > 0 && !continuous && !instance.motionCompleted) {
     instance.motionStarted ??= now;
     if (now - instance.motionStarted >= duration) instance.motionCompleted = true;
   }
   const waving = canMove && instance.waveStarted !== null;
   const oneShot = canMove && duration > 0 && !instance.motionCompleted;
   const motion = waving ? "wave" : instance.motionCompleted ? "idle" : instance.motion;
-  const still = !canMove || (instance.size < LIVE_AVATAR_SIZE && !waving && !oneShot);
+  const still = !canMove || (instance.size < LIVE_AVATAR_SIZE && !waving && !oneShot && !continuous);
   const cacheKey = `${instance.role}:${instance.color}:${pixels}:${motion}`;
   const cached = still ? thumbnails.get(cacheKey) : undefined;
   if (cached) {

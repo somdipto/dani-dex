@@ -34,12 +34,19 @@ export function WorkspaceAgentSetup() {
       modelOptions().find((option) => option.provider === "opencode" && isFreeOpencodeModel(option.id, option.name))
     );
   });
+  const modelChoices = createMemo(() =>
+    modelOptions().filter(
+      (option) =>
+        option.provider === "opencode" &&
+        (option.id === "dani/dani-free-auto" || isFreeOpencodeModel(option.id, option.name)),
+    ),
+  );
   createEffect(
     () => daniModel(),
     (model) => {
       if (!model) return;
       const draft = agentSetupDraft();
-      if (draft.provider !== "opencode" || draft.model !== model.id) {
+      if (!modelChoices().some((option) => option.id === draft.model && option.provider === draft.provider)) {
         setAgentSetupDraft({ ...draft, provider: "opencode", model: model.id });
       }
     },
@@ -53,11 +60,14 @@ export function WorkspaceAgentSetup() {
       submitting={creatingAgent()}
       error={agentSetupError()}
       modelReady={Boolean(daniModel())}
+      modelChoices={modelChoices()}
       onChange={setAgentSetupDraft}
       onSubmit={(draft) => {
-        const model = daniModel();
-        if (!model) return;
-        void createAgent({ ...draft, provider: "opencode", model: model.id });
+        const available = modelChoices().find(
+          (option) => option.id === draft.model && option.provider === draft.provider,
+        );
+        if (!available) return;
+        void createAgent(draft);
       }}
       onCancel={agentList().length > 0 ? cancelAgentSetup : undefined}
     />

@@ -1,9 +1,9 @@
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
-import type { AgentModelId, AgentProviderId, AvatarHue } from "@dani-dex/contracts/ipc";
+import type { AgentModelId, AgentModelOption, AgentProviderId, AvatarHue } from "@dani-dex/contracts/ipc";
 import { createSignal, For, onSettled, Show } from "solid-js";
 import { Button, Field, Input, Textarea } from "../../components/ui";
 import { RobotAvatar } from "./manzanilla/RobotAvatar";
-import { ROBOT_ROLES, type RobotRole } from "./manzanilla/robot-model";
+import { ROBOT_ROLES, type RobotMotion, type RobotRole } from "./manzanilla/robot-model";
 
 export interface FirstAgentDraft {
   name: string;
@@ -34,6 +34,7 @@ export interface FirstAgentSetupProps {
   error?: string | null;
   /** A real keyless free model must be listed before this form can create an agent. */
   modelReady?: boolean;
+  modelChoices?: AgentModelOption[];
   onChange: (value: FirstAgentDraft) => void;
   onSubmit: (value: FirstAgentDraft) => void | Promise<void>;
   onCancel?: () => void;
@@ -146,7 +147,33 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
   const [canScrollSuggestionsBack, setCanScrollSuggestionsBack] = createSignal(false);
   const [canScrollSuggestionsForward, setCanScrollSuggestionsForward] = createSignal(false);
   const [draggingSuggestions, setDraggingSuggestions] = createSignal(false);
-  const [lightPreview, setLightPreview] = createSignal(false);
+  const [lightPreview, setLightPreview] = createSignal(
+    typeof document !== "undefined" && document.documentElement.dataset.daniDexTheme === "light",
+  );
+  function changeTheme(light: boolean) {
+    setLightPreview(light);
+    document.documentElement.dataset.daniDexTheme = light ? "light" : "dark";
+    try {
+      window.localStorage.setItem("dani-dex:theme", light ? "light" : "dark");
+    } catch {
+      /* private storage may be disabled */
+    }
+  }
+  const [previewMotion, setPreviewMotion] = createSignal<RobotMotion>("idle");
+  const previewMotions: RobotMotion[] = [
+    "idle",
+    "walk",
+    "wave",
+    "blink",
+    "working",
+    "waiting",
+    "celebrate",
+    "point",
+    "jump",
+    "sit",
+    "cheer",
+    "laugh",
+  ];
   const canSubmit = () => Boolean(props.value.name.trim()) && props.modelReady === true && !props.submitting;
   const displayName = () => props.value.name.trim() || "New agent";
   const characterRole = (): RobotRole =>
@@ -329,7 +356,7 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
             data-avatar-seed={props.value.avatarSeed}
             data-avatar-hue={props.value.avatarHue ?? "automatic"}
           >
-            <RobotAvatar size={128} label={displayName()} role={characterRole()} animated />
+            <RobotAvatar size={128} label={displayName()} role={characterRole()} motion={previewMotion()} animated />
           </div>
 
           <fieldset class="first-agent-avatar-fieldset first-agent-character-fieldset" disabled={props.submitting}>
@@ -358,14 +385,35 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
             </div>
           </fieldset>
 
+          <fieldset class="first-agent-character-motion">
+            <legend>Character animation</legend>
+            <select
+              aria-label="Character animation"
+              value={previewMotion()}
+              onChange={(event) => {
+                const motion = previewMotions.find((item) => item === event.currentTarget.value);
+                if (motion) setPreviewMotion(motion);
+              }}
+            >
+              <For each={previewMotions}>
+                {(motion) => (
+                  <option value={motion}>
+                    {motion[0]?.toUpperCase()}
+                    {motion.slice(1)}
+                  </option>
+                )}
+              </For>
+            </select>
+          </fieldset>
+
           <fieldset class="first-agent-character-theme">
-            <legend>Character preview background</legend>
+            <legend>App appearance</legend>
             <Button
               type="button"
               variant="ghost"
               size="sm"
               aria-pressed={!lightPreview() ? "true" : "false"}
-              onClick={() => setLightPreview(false)}
+              onClick={() => changeTheme(false)}
             >
               Dark
             </Button>
@@ -374,13 +422,33 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
               variant="ghost"
               size="sm"
               aria-pressed={lightPreview() ? "true" : "false"}
-              onClick={() => setLightPreview(true)}
+              onClick={() => changeTheme(true)}
             >
               Light
             </Button>
           </fieldset>
 
           <div class="first-agent-fields">
+            <label class="first-agent-model-label" for="first-agent-model">
+              Model
+            </label>
+            <select
+              id="first-agent-model"
+              value={props.value.model}
+              disabled={props.submitting || !props.modelReady}
+              onChange={(event) => {
+                const selected = props.modelChoices?.find((option) => option.id === event.currentTarget.value);
+                if (selected) updateDraft({ provider: selected.provider, model: selected.id });
+              }}
+            >
+              <For each={props.modelChoices ?? []}>
+                {(option) => (
+                  <option value={option.id} selected={props.value.model === option.id}>
+                    {option.id === "dani/dani-free-auto" ? "Dani Free (default)" : option.name}
+                  </option>
+                )}
+              </For>
+            </select>
             <Field label="Name" required>
               <Input
                 value={props.value.name}
