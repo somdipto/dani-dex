@@ -109,7 +109,7 @@
   font-size: 12px;
 }
 .first-agent-character-motion select,
-.first-agent-model-label + select {
+.first-agent-model-select .ui-select-trigger {
   min-height: 36px;
   border: 1px solid var(--dani-dex-border-strong);
   border-radius: 8px;
@@ -140,3 +140,9 @@
   -webkit-line-clamp: unset;
   overflow: visible;
 }
+
+.first-agent-model-select { width: 100%; }
+.first-agent-model-select .ui-select-trigger { width: 100%; min-height: 36px; }
+.first-agent-model-value { display: inline-flex; align-items: center; gap: 8px; }
+.first-agent-model-logo { width: 22px; height: 22px; flex: 0 0 22px; }
+.first-agent-model-select .ui-select-item-label { display: flex; align-items: center; gap: 8px; }

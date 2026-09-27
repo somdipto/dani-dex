@@ -1,7 +1,18 @@
+import { AppLogo } from "@dani-dex/brand";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { AgentModelId, AgentModelOption, AgentProviderId, AvatarHue } from "@dani-dex/contracts/ipc";
 import { createSignal, For, onSettled, Show } from "solid-js";
-import { Button, Field, Input, Textarea } from "../../components/ui";
+import {
+  Button,
+  Field,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from "../../components/ui";
 import { RobotAvatar } from "./manzanilla/RobotAvatar";
 import { ROBOT_ROLES, type RobotMotion, type RobotRole } from "./manzanilla/robot-model";
 
@@ -429,26 +440,52 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
           </fieldset>
 
           <div class="first-agent-fields">
-            <label class="first-agent-model-label" for="first-agent-model">
+            <div class="first-agent-model-label" id="first-agent-model-label">
               Model
-            </label>
-            <select
-              id="first-agent-model"
-              value={props.value.model}
+            </div>
+            <Select<AgentModelOption>
+              class="first-agent-model-select"
+              options={props.modelChoices ?? []}
+              value={
+                props.modelChoices?.find(
+                  (option) => option.id === props.value.model && option.provider === props.value.provider,
+                ) ?? null
+              }
+              optionValue="id"
+              optionTextValue="name"
               disabled={props.submitting || !props.modelReady}
-              onChange={(event) => {
-                const selected = props.modelChoices?.find((option) => option.id === event.currentTarget.value);
-                if (selected) updateDraft({ provider: selected.provider, model: selected.id });
+              onChange={(option) => {
+                if (option) updateDraft({ provider: option.provider, model: option.id });
               }}
+              itemComponent={(item) => (
+                <SelectItem item={item.item}>
+                  <Show when={item.item.rawValue.id === "dani/dani-free-auto"}>
+                    <AppLogo variant="production" class="first-agent-model-logo" />
+                  </Show>
+                  <span>
+                    {item.item.rawValue.id === "dani/dani-free-auto" ? "Dani Free (default)" : item.item.rawValue.name}
+                  </span>
+                </SelectItem>
+              )}
             >
-              <For each={props.modelChoices ?? []}>
-                {(option) => (
-                  <option value={option.id} selected={props.value.model === option.id}>
-                    {option.id === "dani/dani-free-auto" ? "Dani Free (default)" : option.name}
-                  </option>
-                )}
-              </For>
-            </select>
+              <SelectTrigger aria-labelledby="first-agent-model-label" aria-label="Model">
+                <SelectValue<AgentModelOption>>
+                  {(state) => (
+                    <span class="first-agent-model-value">
+                      <Show when={state.selectedOption()?.id === "dani/dani-free-auto"}>
+                        <AppLogo variant="production" class="first-agent-model-logo" />
+                      </Show>
+                      <span>
+                        {state.selectedOption()?.id === "dani/dani-free-auto"
+                          ? "Dani Free (default)"
+                          : (state.selectedOption()?.name ?? "Choose a free model")}
+                      </span>
+                    </span>
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent />
+            </Select>
             <Field label="Name" required>
               <Input
                 value={props.value.name}
