@@ -18,6 +18,7 @@ import type { ProviderCodeLoginApi } from "../../components/provider-code-login-
 import { ArrowUp, Button, Plus } from "../../components/ui";
 import { errorMessage } from "../../error-message";
 import { AgentAvatar } from "../agents/AgentAvatar";
+import { RobotAvatar } from "../agents/manzanilla/RobotAvatar";
 import { ComputerUseSetup } from "../computer-use/ComputerUseSetup";
 import { CustomProviderDialog } from "../custom-providers/CustomProviderDialog";
 import { CustomProviderListDialog } from "../custom-providers/CustomProviderListDialog";
@@ -445,14 +446,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             <Match when={step() === "meet"}>
               <section class="onboarding-panel onboarding-panel-meet" aria-labelledby="onboarding-title">
                 <div class="onboarding-hero-avatar">
-                  <AgentAvatar
-                    seed={avatarVariants.meet.seed}
-                    hue={avatarVariants.meet.hue}
-                    motion="idle"
-                    cycleOffset={avatarVariants.meet.cycleOffset}
-                    animationOffset={avatarVariants.meet.animationOffset}
-                    class="onboarding-avatar-hero"
-                  />
+                  <RobotAvatar size={108} label="Dani" animated />
                 </div>
                 <h1 id="onboarding-title">Meet Dani-Dex</h1>
                 <p class="onboarding-description">A team that works with you.</p>

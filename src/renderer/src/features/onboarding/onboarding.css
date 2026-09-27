@@ -571,3 +571,10 @@
 }
 
 /* The one provider row shown when Dani's free models are the only model: nothing to choose. */
+
+/* First-run hero and agent creation use the same character system. */
+.onboarding-hero-avatar:has(.mz-robot-avatar) {
+  width: 108px;
+  height: 108px;
+  margin-bottom: 16px;
+}
