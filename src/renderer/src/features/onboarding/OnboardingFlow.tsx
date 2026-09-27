@@ -80,11 +80,7 @@ type OnboardingAvatarVariant = {
 };
 
 type OnboardingAvatarVariants = {
-  meet: OnboardingAvatarVariant;
   computer: OnboardingAvatarVariant;
-  inbox: OnboardingAvatarVariant;
-  weekly: OnboardingAvatarVariant;
-  research: OnboardingAvatarVariant;
 };
 
 export function OnboardingFlow(props: OnboardingFlowProps) {
@@ -646,36 +642,15 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
 
                 <section class="onboarding-job-orbit" aria-label="Example agent jobs">
                   <article class="onboarding-job-card onboarding-job-card-top">
-                    <AgentAvatar
-                      seed={avatarVariants.inbox.seed}
-                      hue={avatarVariants.inbox.hue}
-                      motion="always"
-                      cycleOffset={avatarVariants.inbox.cycleOffset}
-                      animationOffset={avatarVariants.inbox.animationOffset}
-                      class="onboarding-job-avatar"
-                    />
+                    <RobotAvatar size={76} label="Inbox Triage" role={"inbox" as const} animated />
                     <span>Inbox Triage</span>
                   </article>
                   <article class="onboarding-job-card onboarding-job-card-left">
-                    <AgentAvatar
-                      seed={avatarVariants.weekly.seed}
-                      hue={avatarVariants.weekly.hue}
-                      motion="always"
-                      cycleOffset={avatarVariants.weekly.cycleOffset}
-                      animationOffset={avatarVariants.weekly.animationOffset}
-                      class="onboarding-job-avatar"
-                    />
+                    <RobotAvatar size={76} label="Weekly Planning" role={"assistant" as const} animated />
                     <span>Weekly Planning</span>
                   </article>
                   <article class="onboarding-job-card onboarding-job-card-right">
-                    <AgentAvatar
-                      seed={avatarVariants.research.seed}
-                      hue={avatarVariants.research.hue}
-                      motion="always"
-                      cycleOffset={avatarVariants.research.cycleOffset}
-                      animationOffset={avatarVariants.research.animationOffset}
-                      class="onboarding-job-avatar"
-                    />
+                    <RobotAvatar size={76} label="Research Digest" role={"talent" as const} animated />
                     <span>Research Digest</span>
                   </article>
                 </section>
@@ -732,11 +707,7 @@ function createOnboardingAvatarVariants(): OnboardingAvatarVariants {
   });
 
   return {
-    meet: createVariant("meet"),
     computer: createVariant("computer"),
-    inbox: createVariant("inbox"),
-    weekly: createVariant("weekly"),
-    research: createVariant("research"),
   };
 }
 
