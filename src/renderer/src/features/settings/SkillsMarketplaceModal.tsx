@@ -1,3 +1,4 @@
+import { AppLogo } from "@dani-dex/brand";
 import type {
   AgentPublicationPreview,
   AgentSubmission,
@@ -789,6 +790,7 @@ export function SkillsMarketplaceModal(props: SkillsMarketplaceModalProps) {
             <Dialog.Content class="skills-marketplace" onOpenAutoFocus={(event) => event.preventDefault()}>
               <header class="skills-marketplace-topbar" data-detail={detailActive() ? "" : undefined}>
                 <div class="marketplace-crumbs">
+                  <AppLogo variant="production" class="marketplace-brand-mark" />
                   <Show when={detail()} fallback={<Dialog.Title class="marketplace-title">Marketplace</Dialog.Title>}>
                     {(open) => (
                       <>

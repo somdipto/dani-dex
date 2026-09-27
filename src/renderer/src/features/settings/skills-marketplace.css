@@ -1581,3 +1581,8 @@
 .goal-team-card .ui-button {
   margin-top: var(--dani-dex-space-2);
 }
+
+/* Carry the bare theme-adaptive Dan Lab mark into the marketplace shell. */
+.marketplace-brand-mark { width: 18px; height: 18px; flex: 0 0 18px; }
+.marketplace-brand-mark .app-logo-background { display: none; }
+.marketplace-brand-mark .app-logo-mark { fill: var(--dani-dex-text-primary); }
