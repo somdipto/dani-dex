@@ -146,3 +146,7 @@
 .first-agent-model-value { display: inline-flex; align-items: center; gap: 8px; }
 .first-agent-model-logo { width: 22px; height: 22px; flex: 0 0 22px; }
 .first-agent-model-select .ui-select-item-label { display: flex; align-items: center; gap: 8px; }
+
+/* The same brand path without its tile, inverted with the active app theme. */
+.first-agent-model-logo .app-logo-background { display: none; }
+.first-agent-model-logo .app-logo-mark { fill: var(--dani-dex-text-primary); }
