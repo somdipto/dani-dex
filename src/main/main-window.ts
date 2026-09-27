@@ -517,7 +517,12 @@ export function loadDynamicIslandRenderer(window: BrowserWindow, display: Displa
  * The custom `appMenu` replaces the default one, so the standard Preferences item with `Cmd + ,`
  * must be declared here: without it macOS has no Settings shortcut.
  */
-export function configureApplicationMenu(service: AgentService, updater: UpdateService, translate: AppTranslate): void {
+export function configureApplicationMenu(
+  service: AgentService,
+  updater: UpdateService,
+  translate: AppTranslate,
+  showArc?: () => void,
+): void {
   Menu.setApplicationMenu(
     Menu.buildFromTemplate([
       {
@@ -534,6 +539,9 @@ export function configureApplicationMenu(service: AgentService, updater: UpdateS
             click: () => void updater.checkForUpdates(),
           },
           { type: "separator" },
+          ...(process.platform === "darwin" && showArc
+            ? [{ label: "Show Arc dial", accelerator: "CommandOrControl+Shift+Space", click: showArc }]
+            : []),
           {
             label: translate("menu.preferences"),
             accelerator: "CommandOrControl+,",

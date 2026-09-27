@@ -7,6 +7,7 @@ import { createRemoteDirectoryRefresh } from "@dani-dex/team-client/remote-direc
 import { app, BrowserWindow, dialog, powerMonitor, protocol, screen, shell } from "electron";
 import { readAppVariant, resolveAppIconPath } from "./app-icon";
 import { type ApplicationServices, createApplicationServices } from "./application-services";
+import { DaniArcWindow } from "./dani-arc-window";
 import { type DeepLink, findDeepLink, parseDeepLink } from "./deep-link-router";
 import { guardDevelopmentOutput } from "./development-output";
 import {
@@ -659,7 +660,17 @@ if (!hasSingleInstanceLock) {
         language,
       } = built;
 
-      service.on("event", (event) => forwardAgentEvent("local", event));
+      const arc = new DaniArcWindow({
+        platform: process.platform,
+        getMainWindow: windows.getMainWindow,
+        showMainWindow,
+        listAgents: () => service.listAgents(),
+      });
+      teardown.push(21, "the Arc dial", () => arc.destroy());
+      service.on("event", (event) => {
+        forwardAgentEvent("local", event);
+        if (event.type === "agents-changed") arc.syncTeam();
+      });
       sidebarLayout.on("changed", (layout) => forwardAgentEvent("local", { type: "sidebar-layout-changed", layout }));
       host.on("changed", forwardHostStatus);
       host.on("presence", (snapshot) => forwardTeamPresence("local", snapshot));
@@ -683,12 +694,12 @@ if (!hasSingleInstanceLock) {
       // Before the renderer loads: the trust boundary and every protocol it fetches through have to
       // be in place before the first request can arrive.
       registerIpcHandlers(built);
-      configureApplicationMenu(service, updater, language.translate);
+      configureApplicationMenu(service, updater, language.translate, () => arc.show());
       // One place turns a language change into every visible consequence: the menu is built again
       // because a native label cannot be changed in place, and every window is told, including the
       // Dynamic Island, which has no Settings of its own to read the new value from.
       language.subscribe((preference) => {
-        configureApplicationMenu(service, updater, language.translate);
+        configureApplicationMenu(service, updater, language.translate, () => arc.show());
         for (const window of BrowserWindow.getAllWindows()) {
           sendToRenderer(window, IPC_CHANNELS.appLanguagePreference, preference);
         }

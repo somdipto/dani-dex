@@ -1,0 +1,11 @@
+<!doctype html>
+<html data-theme="liquid"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; media-src 'self'; img-src 'self' data:"><link rel="stylesheet" href="manzanilla-overlay.css"><title>Dani-Dex Arc</title></head>
+<body class="leaving">
+<svg id="arc" aria-label="Dani-Dex corner dial"><defs>
+  <linearGradient id="rim" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#ffffff" stop-opacity=".92"/><stop offset=".3" stop-color="#ffe3ac" stop-opacity=".35"/><stop offset=".62" stop-color="#9abdff" stop-opacity=".28"/><stop offset="1" stop-color="#ffffff" stop-opacity=".8"/></linearGradient>
+  <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffffff" stop-opacity=".5"/><stop offset=".42" stop-color="#ffffff" stop-opacity=".1"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+  <filter id="bloom" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter>
+  <filter id="sa-lens" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB"><feImage href="resources/dial-lens-map.png" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map"/><feDisplacementMap in="SourceGraphic" in2="map" scale="26" xChannelSelector="R" yChannelSelector="G" result="bent"/><feGaussianBlur in="bent" stdDeviation="2.4" result="soft"/><feColorMatrix in="soft" type="saturate" values="1.55"/></filter>
+</defs><g id="scene"><g id="bands"></g></g></svg>
+<section id="detail" hidden></section><script type="module" src="manzanilla-overlay.js"></script>
+</body></html>
