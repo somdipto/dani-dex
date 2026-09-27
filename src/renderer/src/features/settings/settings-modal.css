@@ -913,3 +913,14 @@
 }
 
 /* The one provider row shown when Dani's free models are the only model. */
+
+/* The creation screen and the rest of the workspace share this restrained choice control. */
+.settings-appearance-options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--dani-dex-space-1);
+}
+.settings-appearance-options .ui-button[aria-pressed="true"] {
+  border: 1px solid var(--dani-dex-accent-text);
+  background: var(--dani-dex-bg-control-hover);
+}

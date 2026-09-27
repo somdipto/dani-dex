@@ -82,6 +82,26 @@ interface SettingsGeneralTabProps {
 
 export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
   const i18n = useI18n();
+  function initialAppearance(): "dark" | "light" {
+    if (typeof document === "undefined") return "dark";
+    const selected = document.documentElement.dataset.daniDexTheme;
+    if (selected === "light" || selected === "dark") return selected;
+    try {
+      return window.localStorage.getItem("dani-dex:theme") === "light" ? "light" : "dark";
+    } catch {
+      return "dark";
+    }
+  }
+  const [appearance, setAppearance] = createSignal<"dark" | "light">(initialAppearance());
+  function changeAppearance(theme: "dark" | "light") {
+    setAppearance(theme);
+    document.documentElement.dataset.daniDexTheme = theme;
+    try {
+      window.localStorage.setItem("dani-dex:theme", theme);
+    } catch {
+      /* Private storage may be unavailable; the current appearance still changes. */
+    }
+  }
   const linkTargetLabel = (value: GeneralSettingsValue["externalLinkTarget"] | undefined) =>
     value === undefined ? "" : i18n.t(LINK_TARGET_KEYS[value]);
   const customProviders = () => props.customProviders ?? [];
@@ -185,6 +205,39 @@ export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
       </Show>
 
       <Show when={props.voiceKey}>{(voiceKey) => <VoiceKeySettings api={voiceKey()} />}</Show>
+
+      <SettingsSection title="Appearance">
+        <ItemGroup class="settings-modal-card">
+          <Item class="settings-modal-row">
+            <ItemContent>
+              <ItemTitle>App appearance</ItemTitle>
+              <ItemDescription>Use the same dark or light palette across the workspace.</ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <fieldset class="settings-appearance-options" aria-label="App appearance">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  aria-pressed={appearance() === "dark" ? "true" : "false"}
+                  onClick={() => changeAppearance("dark")}
+                >
+                  Dark
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  aria-pressed={appearance() === "light" ? "true" : "false"}
+                  onClick={() => changeAppearance("light")}
+                >
+                  Light
+                </Button>
+              </fieldset>
+            </ItemActions>
+          </Item>
+        </ItemGroup>
+      </SettingsSection>
 
       <SettingsSection title={i18n.t("settings.appBehavior.title")}>
         <ItemGroup class="settings-modal-card">
