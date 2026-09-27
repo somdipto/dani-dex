@@ -1,5 +1,6 @@
 /** The server name, the marketplace or expand toggle, and new agent - plus the window drag region. */
 
+import { AppLogo } from "@dani-dex/brand";
 import { Show } from "solid-js";
 import { Bot, Button, DropdownMenu, FolderPlus, Hash, Puzzle } from "../../components/ui";
 import { PlusIcon, SidebarToggleIcon } from "./SidebarIcons";
@@ -20,6 +21,7 @@ export function SidebarTopbar() {
         title={props.serverName}
         onClick={(event) => props.onOpenServerSettings(event.currentTarget)}
       >
+        <AppLogo variant="production" class="sidebar-brand-mark" />
         <span class="sidebar-server-name-label">{props.serverName}</span>
       </Button>
       <div class="sidebar-topbar-actions">

@@ -690,6 +690,15 @@ textarea {
     opacity var(--dani-dex-duration-fast) ease;
 }
 
+/* The universal brand glyph sits beside the workspace name, without a square tile. */
+.sidebar-brand-mark {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+}
+.sidebar-brand-mark .app-logo-background { display: none; }
+.sidebar-brand-mark .app-logo-mark { fill: var(--dani-dex-text-primary); }
+
 .sidebar-server-name-label {
   min-width: 0;
   overflow: hidden;
