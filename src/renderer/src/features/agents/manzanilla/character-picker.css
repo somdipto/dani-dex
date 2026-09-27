@@ -1,0 +1,97 @@
+.first-agent-live-avatar:has(.mz-robot-avatar) {
+  width: 128px;
+  height: 128px;
+  margin-bottom: 8px;
+}
+
+.first-agent-character-fieldset legend {
+  margin: 0 auto 8px;
+  color: var(--dani-dex-text-secondary);
+  font-size: 12px;
+}
+
+.first-agent-character-options {
+  display: grid;
+  max-height: 210px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.ui-button.first-agent-character-choice {
+  display: flex;
+  min-width: 0;
+  height: 72px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--dani-dex-border);
+  border-radius: 10px;
+  background: var(--dani-dex-bg-surface);
+  color: var(--dani-dex-text-primary);
+  font-size: 11px;
+}
+
+.first-agent-character-choice[aria-pressed="true"] {
+  outline: 2px solid var(--dani-dex-accent);
+  outline-offset: -2px;
+}
+
+.first-agent-character-choice > span:last-child {
+  overflow: hidden;
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.1;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.agent-avatar-manzanilla {
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+.agent-avatar-manzanilla .mz-robot-avatar {
+  transform: scale(0.68);
+}
+
+.first-agent-character-theme {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.first-agent-character-theme .ui-button[aria-pressed="true"] {
+  border-color: var(--dani-dex-accent-text);
+}
+
+.first-agent-setup-panel[data-character-theme="light"] .first-agent-live-avatar,
+.first-agent-setup-panel[data-character-theme="light"] .first-agent-character-choice {
+  background: #f7f6f4;
+  color: #242424;
+}
+
+.first-agent-setup-panel[data-character-theme="light"] .first-agent-character-choice {
+  border-color: #d6d5d2;
+}
+
+.first-agent-setup-panel[data-character-theme="light"] .first-agent-live-avatar {
+  border-radius: 18px;
+}
+
+.first-agent-suggestion-card > .mz-robot-avatar {
+  flex: 0 0 52px;
+}
+
+@media (max-width: 800px) {
+  .first-agent-live-avatar:has(.mz-robot-avatar) {
+    width: 112px;
+    height: 112px;
+  }
+
+  .first-agent-character-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

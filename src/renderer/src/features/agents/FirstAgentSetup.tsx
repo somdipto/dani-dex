@@ -1,9 +1,9 @@
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { AgentModelId, AgentProviderId, AvatarHue } from "@dani-dex/contracts/ipc";
 import { createSignal, For, onSettled, Show } from "solid-js";
-import { AVATAR_HUE_OPTIONS, avatarCandidateSeeds, avatarHeadColor, avatarHueSwatch } from "../../bloub-avatar";
 import { Button, Field, Input, Textarea } from "../../components/ui";
-import { AgentAvatar } from "./AgentAvatar";
+import { RobotAvatar } from "./manzanilla/RobotAvatar";
+import { ROBOT_ROLES, type RobotRole } from "./manzanilla/robot-model";
 
 export interface FirstAgentDraft {
   name: string;
@@ -39,9 +39,6 @@ export interface FirstAgentSetupProps {
   onCancel?: () => void;
 }
 
-export const FIRST_AGENT_AVATAR_SEEDS = avatarCandidateSeeds("first-bot", "first-bot", 0);
-const FIRST_AGENT_HUE_OPTIONS = AVATAR_HUE_OPTIONS.filter((option) => option.hue !== 100 && option.hue !== 280);
-
 const SUGGESTION_MOMENTUM_FRICTION = 0.88;
 const SUGGESTION_MOMENTUM_MINIMUM = 0.01;
 const SUGGESTION_MOMENTUM_MAXIMUM = 1.75;
@@ -51,7 +48,7 @@ const MOTION_FRAME_DURATION = 1000 / 60;
 export const DEFAULT_FIRST_AGENT_DRAFT: FirstAgentDraft = {
   name: "New agent",
   purpose: "",
-  avatarSeed: FIRST_AGENT_AVATAR_SEEDS[0] ?? "first-bot",
+  avatarSeed: "manzanilla:default",
   avatarHue: null,
   suggestionId: null,
   provider: "codex",
@@ -59,11 +56,8 @@ export const DEFAULT_FIRST_AGENT_DRAFT: FirstAgentDraft = {
 };
 
 export function createFirstAgentDraft(random: () => number = Math.random): FirstAgentDraft {
-  const index = Math.min(FIRST_AGENT_AVATAR_SEEDS.length - 1, Math.floor(random() * FIRST_AGENT_AVATAR_SEEDS.length));
-  return {
-    ...DEFAULT_FIRST_AGENT_DRAFT,
-    avatarSeed: FIRST_AGENT_AVATAR_SEEDS[index] ?? DEFAULT_FIRST_AGENT_DRAFT.avatarSeed,
-  };
+  const role = ROBOT_ROLES[Math.min(ROBOT_ROLES.length - 1, Math.floor(random() * ROBOT_ROLES.length))];
+  return { ...DEFAULT_FIRST_AGENT_DRAFT, avatarSeed: `manzanilla:${role?.id ?? "default"}` };
 }
 
 export const FIRST_AGENT_SUGGESTIONS: FirstAgentSuggestion[] = [
@@ -72,7 +66,7 @@ export const FIRST_AGENT_SUGGESTIONS: FirstAgentSuggestion[] = [
     name: "Inbox Helper",
     description: "Drafts replies and keeps follow-ups from slipping.",
     purpose: "Draft clear email replies in my voice, summarize long threads, and keep track of follow-ups.",
-    avatarSeed: FIRST_AGENT_AVATAR_SEEDS[1] ?? "first-bot:inbox",
+    avatarSeed: "manzanilla:inbox",
     avatarHue: 320,
     animationCycleOffset: 0,
     animationOffset: 0.15,
@@ -82,7 +76,7 @@ export const FIRST_AGENT_SUGGESTIONS: FirstAgentSuggestion[] = [
     name: "Trip Planner",
     description: "Compares options and builds practical itineraries.",
     purpose: "Compare travel options and turn my rough ideas into practical, day-by-day itineraries.",
-    avatarSeed: FIRST_AGENT_AVATAR_SEEDS[2] ?? "first-bot:travel",
+    avatarSeed: "manzanilla:assistant",
     avatarHue: 215,
     animationCycleOffset: 2,
     animationOffset: 0.65,
@@ -92,7 +86,7 @@ export const FIRST_AGENT_SUGGESTIONS: FirstAgentSuggestion[] = [
     name: "Personal Organizer",
     description: "Turns notes, errands, and tasks into a simple plan.",
     purpose: "Organize my notes, errands, and loose tasks into clear priorities and simple next steps.",
-    avatarSeed: FIRST_AGENT_AVATAR_SEEDS[3] ?? "first-bot:organizer",
+    avatarSeed: "manzanilla:chief",
     avatarHue: 55,
     animationCycleOffset: 4,
     animationOffset: 1.2,
@@ -102,7 +96,7 @@ export const FIRST_AGENT_SUGGESTIONS: FirstAgentSuggestion[] = [
     name: "Shopping Scout",
     description: "Compares products, prices, and reviews before I buy.",
     purpose: "Compare products, prices, and reviews so I can make practical buying decisions with less research.",
-    avatarSeed: FIRST_AGENT_AVATAR_SEEDS[4] ?? "first-bot:shopping",
+    avatarSeed: "manzanilla:sales",
     avatarHue: 150,
     animationCycleOffset: 6,
     animationOffset: 1.8,
@@ -112,7 +106,7 @@ export const FIRST_AGENT_SUGGESTIONS: FirstAgentSuggestion[] = [
     name: "Writing Partner",
     description: "Drafts messages and documents in a natural voice.",
     purpose: "Help me draft and improve messages and documents while keeping the writing clear and natural.",
-    avatarSeed: FIRST_AGENT_AVATAR_SEEDS[5] ?? "first-bot:writing",
+    avatarSeed: "manzanilla:growth",
     avatarHue: 30,
     animationCycleOffset: 8,
     animationOffset: 2.45,
@@ -122,7 +116,7 @@ export const FIRST_AGENT_SUGGESTIONS: FirstAgentSuggestion[] = [
     name: "Learning Coach",
     description: "Explains difficult topics and builds study plans.",
     purpose: "Explain difficult topics clearly and build study plans that match my pace and goals.",
-    avatarSeed: FIRST_AGENT_AVATAR_SEEDS[6] ?? "first-bot:learning",
+    avatarSeed: "manzanilla:support",
     avatarHue: 245,
     animationCycleOffset: 10,
     animationOffset: 3.15,
@@ -152,8 +146,11 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
   const [canScrollSuggestionsBack, setCanScrollSuggestionsBack] = createSignal(false);
   const [canScrollSuggestionsForward, setCanScrollSuggestionsForward] = createSignal(false);
   const [draggingSuggestions, setDraggingSuggestions] = createSignal(false);
+  const [lightPreview, setLightPreview] = createSignal(false);
   const canSubmit = () => Boolean(props.value.name.trim()) && props.modelReady === true && !props.submitting;
   const displayName = () => props.value.name.trim() || "New agent";
+  const characterRole = (): RobotRole =>
+    ROBOT_ROLES.find((item) => props.value.avatarSeed === `manzanilla:${item.id}`)?.id ?? "default";
 
   function updateSuggestionFades(): void {
     if (!suggestionList) return;
@@ -287,14 +284,18 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
   }
 
   return (
-    <main class="conversation-panel first-agent-setup-panel" aria-labelledby="first-agent-setup-title">
+    <main
+      class="conversation-panel first-agent-setup-panel"
+      data-character-theme={lightPreview() ? "light" : "dark"}
+      aria-labelledby="first-agent-setup-title"
+    >
       <header class="window-drag first-agent-setup-header">
         <div
           class="first-agent-header-identity"
           data-avatar-seed={props.value.avatarSeed}
           data-avatar-hue={props.value.avatarHue ?? "automatic"}
         >
-          <AgentAvatar seed={props.value.avatarSeed} hue={props.value.avatarHue} motion="idle" />
+          <RobotAvatar size={24} label={displayName()} role={characterRole()} animated={false} />
           <h1 aria-live="polite">{displayName()}</h1>
         </div>
         <Show when={props.mode === "additional" && props.onCancel}>
@@ -328,73 +329,55 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
             data-avatar-seed={props.value.avatarSeed}
             data-avatar-hue={props.value.avatarHue ?? "automatic"}
           >
-            <AgentAvatar
-              seed={props.value.avatarSeed}
-              hue={props.value.avatarHue}
-              motion="idle"
-              animationOffset={0.4}
-            />
+            <RobotAvatar size={128} label={displayName()} role={characterRole()} animated />
           </div>
 
-          <fieldset class="first-agent-avatar-fieldset first-agent-color-fieldset" disabled={props.submitting}>
-            <legend class="sr-only">Agent color</legend>
-            <div class="first-agent-color-options">
-              <Button
-                variant="ghost"
-                type="button"
-                size="sm"
-                class="first-agent-color-choice"
-                aria-label="Automatic agent color"
-                aria-pressed={props.value.avatarHue === null ? "true" : "false"}
-                onClick={() => updateDraft({ avatarHue: null })}
-              >
-                <span
-                  class="first-agent-color-swatch"
-                  style={{ background: avatarHeadColor(props.value.avatarSeed, null) }}
-                />
-              </Button>
-              <For each={FIRST_AGENT_HUE_OPTIONS}>
-                {(option) => (
+          <fieldset class="first-agent-avatar-fieldset first-agent-character-fieldset" disabled={props.submitting}>
+            <legend>Choose a character</legend>
+            <div class="first-agent-character-options">
+              <For each={ROBOT_ROLES}>
+                {(character) => (
                   <Button
                     variant="ghost"
                     type="button"
                     size="sm"
-                    class="first-agent-color-choice"
-                    aria-label={`${option.label} agent color`}
-                    aria-pressed={props.value.avatarHue === option.hue ? "true" : "false"}
-                    onClick={() => updateDraft({ avatarHue: option.hue })}
+                    class="first-agent-character-choice"
+                    aria-label={`${character.label} character`}
+                    aria-pressed={
+                      characterRole() === character.id && props.value.avatarSeed.startsWith("manzanilla:")
+                        ? "true"
+                        : "false"
+                    }
+                    onClick={() => updateDraft({ avatarSeed: `manzanilla:${character.id}` })}
                   >
-                    <span class="first-agent-color-swatch" style={{ background: avatarHueSwatch(option.hue) }} />
+                    <RobotAvatar size={42} label={character.label} role={character.id} animated={false} />
+                    <span>{character.label}</span>
                   </Button>
                 )}
               </For>
             </div>
           </fieldset>
 
-          <fieldset class="first-agent-avatar-fieldset first-agent-face-fieldset" disabled={props.submitting}>
-            <legend class="sr-only">Agent face</legend>
-            <div class="first-agent-face-options">
-              <For each={FIRST_AGENT_AVATAR_SEEDS}>
-                {(seed, index) => (
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    size="sm"
-                    class="first-agent-face-choice"
-                    aria-label={`Agent face ${index() + 1}`}
-                    aria-pressed={props.value.avatarSeed === seed ? "true" : "false"}
-                    onClick={() => updateDraft({ avatarSeed: seed })}
-                  >
-                    <AgentAvatar
-                      seed={seed}
-                      hue={props.value.avatarHue}
-                      motion="idle"
-                      animationOffset={index() * 0.16}
-                    />
-                  </Button>
-                )}
-              </For>
-            </div>
+          <fieldset class="first-agent-character-theme">
+            <legend>Character preview background</legend>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-pressed={!lightPreview() ? "true" : "false"}
+              onClick={() => setLightPreview(false)}
+            >
+              Dark
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-pressed={lightPreview() ? "true" : "false"}
+              onClick={() => setLightPreview(true)}
+            >
+              Light
+            </Button>
           </fieldset>
 
           <div class="first-agent-fields">
@@ -475,12 +458,13 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
                         if (!suppressSuggestionClick) selectSuggestion(suggestion);
                       }}
                     >
-                      <AgentAvatar
-                        seed={suggestion.avatarSeed}
-                        hue={suggestion.avatarHue}
-                        motion="always"
-                        cycleOffset={suggestion.animationCycleOffset}
-                        animationOffset={suggestion.animationOffset}
+                      <RobotAvatar
+                        size={52}
+                        label={suggestion.name}
+                        role={
+                          ROBOT_ROLES.find((item) => suggestion.avatarSeed === `manzanilla:${item.id}`)?.id ?? "default"
+                        }
+                        animated={false}
                       />
                       <span>
                         <strong>{suggestion.name}</strong>

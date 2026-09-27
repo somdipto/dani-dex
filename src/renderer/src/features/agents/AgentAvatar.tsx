@@ -20,6 +20,8 @@ import { createEffect, createMemo, createSignal, createUniqueId, For, onSettled,
 import { type AvatarMotion, bloubAvatarProfile, type SupportedAvatarSilhouetteId } from "../../bloub-avatar";
 import { prefersReducedMotion } from "../../components/ui/utils";
 import type { AgentProfile } from "../../data";
+import { RobotAvatar } from "./manzanilla/RobotAvatar";
+import { ROBOT_ROLES, type RobotRole } from "./manzanilla/robot-model";
 
 // Cap avatar animation at 30fps: uncapped bloub clocks measured 30% renderer / 24% GPU
 // for two visible avatars. The shape is 24-40px, so the eye cannot see the difference.
@@ -55,7 +57,7 @@ function slowerBlock(state: ShapeSafeStateId): Block {
 }
 
 interface AgentAvatarProps {
-  agent?: Pick<AgentProfile, "avatarSeed" | "avatarHue" | "avatarUrl">;
+  agent?: Pick<AgentProfile, "avatarSeed" | "avatarHue" | "avatarUrl"> & Partial<Pick<AgentProfile, "name">>;
   seed?: string;
   hue?: AvatarHue | null;
   url?: string | null;
@@ -83,6 +85,10 @@ export function AgentAvatar(props: AgentAvatarProps) {
       setImageFailed(false);
     },
   );
+  const characterRole = (): RobotRole | null => {
+    const role = seed().startsWith("manzanilla:") ? seed().slice("manzanilla:".length) : "";
+    return ROBOT_ROLES.find((item) => item.id === role)?.id ?? null;
+  };
   const className = () => `agent-avatar agent-avatar-motion-${motion()} ${props.class ?? ""}`;
   // The custom property rides with the attribute rather than being set on every avatar: the
   // keyframe is an infinite animation, and a selector that matched all of them would start one
@@ -96,18 +102,39 @@ export function AgentAvatar(props: AgentAvatarProps) {
     <Show
       when={url() && !imageFailed()}
       fallback={
-        <GeneratedAvatar
-          seed={seed()}
-          hue={hue()}
-          motion={motion()}
-          mood={mood()}
-          cycleOffset={props.cycleOffset}
-          animationOffset={props.animationOffset}
-          shape={props.shape}
-          breathe={breathe()}
-          class={className()}
-          style={style()}
-        />
+        <Show
+          when={characterRole()}
+          fallback={
+            <GeneratedAvatar
+              seed={seed()}
+              hue={hue()}
+              motion={motion()}
+              mood={mood()}
+              cycleOffset={props.cycleOffset}
+              animationOffset={props.animationOffset}
+              shape={props.shape}
+              breathe={breathe()}
+              class={className()}
+              style={style()}
+            />
+          }
+        >
+          {(role) => (
+            <span
+              class={`${className()} agent-avatar-manzanilla`}
+              style={style()}
+              data-avatar="manzanilla"
+              data-mood={mood()}
+            >
+              <RobotAvatar
+                size={72}
+                label={props.agent?.name ?? role()}
+                role={role()}
+                motion={mood() === "working" ? "working" : mood() === "waiting" ? "waiting" : "idle"}
+              />
+            </span>
+          )}
+        </Show>
       }
     >
       <span

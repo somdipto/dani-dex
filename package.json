@@ -233,7 +233,9 @@
     "solid-sonner": "0.3.2",
     "ws": "8.21.3",
     "yaml": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "three": "0.180.0",
+    "@types/three": "0.180.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.9",

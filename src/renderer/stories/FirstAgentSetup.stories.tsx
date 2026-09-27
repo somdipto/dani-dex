@@ -48,6 +48,7 @@ const args: FirstAgentSetupProps = {
   value: DEFAULT_FIRST_AGENT_DRAFT,
   suggestions: FIRST_AGENT_SUGGESTIONS,
   submitting: false,
+  modelReady: true,
   onChange: fn(),
   onSubmit: fn(),
 };
@@ -80,9 +81,8 @@ export const Default: Story = {
     await expect(createButton).toBeEnabled();
     await expect(canvas.getByRole("textbox", { name: "Name" })).toHaveValue("New agent");
     await expect(canvas.getByRole("textbox", { name: "What should this agent help with?" })).toHaveValue("");
-    await expect(canvas.getAllByRole("button", { name: /agent color$/ })).toHaveLength(9);
-    await expect(canvas.queryByRole("button", { name: "Lime agent color" })).not.toBeInTheDocument();
-    await expect(canvas.queryByRole("button", { name: "Violet agent color" })).not.toBeInTheDocument();
+    await expect(canvas.getAllByRole("button", { name: /character$/ })).toHaveLength(10);
+    await expect(canvas.getByRole("button", { name: "General character" })).toHaveAttribute("aria-pressed", "true");
 
     const suggestionViewport = canvasElement.querySelector<HTMLElement>(".first-agent-suggestion-viewport");
     const suggestionList = canvasElement.querySelector<HTMLElement>(".first-agent-suggestion-list");
@@ -91,13 +91,13 @@ export const Default: Story = {
     await expect(suggestionViewport).toHaveClass("can-scroll-forward");
     await expect(suggestionViewport).not.toHaveClass("can-scroll-back");
     const suggestionAvatars = Array.from(
-      canvasElement.querySelectorAll<HTMLElement>(".first-agent-suggestion-card .agent-avatar-motion-always"),
+      canvasElement.querySelectorAll<HTMLElement>(".first-agent-suggestion-card .mz-robot-avatar"),
     );
     await expect(suggestionAvatars).toHaveLength(6);
     const suggestionCards = Array.from(canvasElement.querySelectorAll<HTMLElement>(".first-agent-suggestion-card"));
     await expect(new Set(suggestionCards.map((card) => card.dataset.animationCycleOffset)).size).toBe(6);
     await expect(new Set(suggestionCards.map((card) => card.dataset.animationOffset)).size).toBe(6);
-    await expect(canvasElement.querySelector(".first-agent-live-avatar .agent-avatar-motion-idle")).toBeInTheDocument();
+    await expect(canvasElement.querySelector(".first-agent-live-avatar .mz-robot-avatar")).toBeInTheDocument();
     await expect(canvasElement.querySelector(".first-agent-live-avatar")).toHaveAttribute(
       "data-avatar-seed",
       DEFAULT_FIRST_AGENT_DRAFT.avatarSeed,
@@ -146,10 +146,10 @@ export const Interactions: Story = {
       expect.objectContaining({ name: "Weekend Planner", suggestionId: null }),
     );
 
-    await userEvent.click(canvas.getByRole("button", { name: "Blue agent color" }));
-    await userEvent.click(canvas.getByRole("button", { name: "Agent face 2" }));
-    await expect(canvas.getByRole("button", { name: "Blue agent color" })).toHaveAttribute("aria-pressed", "true");
-    await expect(canvas.getByRole("button", { name: "Agent face 2" })).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(canvas.getByRole("button", { name: "Assistant character" }));
+    await expect(canvas.getByRole("button", { name: "Assistant character" })).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(canvas.getByRole("button", { name: "Light" }));
+    await expect(canvas.getByRole("button", { name: "Light" })).toHaveAttribute("aria-pressed", "true");
   },
 };
 

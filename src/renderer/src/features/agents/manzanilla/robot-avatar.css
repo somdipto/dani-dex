@@ -1,0 +1,33 @@
+.mz-robot-avatar {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  isolation: isolate;
+  user-select: none;
+}
+
+.mz-robot-avatar > .mz-robot-canvas,
+.mz-robot-avatar > .mz-robot-fallback {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mz-robot-avatar > .mz-robot-canvas {
+  opacity: 0;
+}
+
+.mz-robot-avatar.is-ready > .mz-robot-canvas {
+  opacity: 1;
+}
+
+.mz-robot-avatar.is-ready > .mz-robot-fallback {
+  visibility: hidden;
+}
+
+/* Motion is articulated in the 3D rig, never applied to the image wrapper.
+   The renderer observes reduced motion and produces a cached still frame. */

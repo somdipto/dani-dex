@@ -14,6 +14,8 @@
 @import "./features/account/auth.css";
 @import "./features/onboarding/onboarding.css";
 @import "./features/agents/first-agent-setup.css";
+@import "./features/agents/manzanilla/robot-avatar.css";
+@import "./features/agents/manzanilla/character-picker.css";
 @import "./styles/app-shell.css";
 @import "./features/account/account-update-island.css";
 @import "./features/servers/join-server-dialog.css";
