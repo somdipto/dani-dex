@@ -185,7 +185,13 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
     "cheer",
     "laugh",
   ];
-  const canSubmit = () => Boolean(props.value.name.trim()) && props.modelReady === true && !props.submitting;
+  const canSubmit = () =>
+    Boolean(props.value.name.trim()) &&
+    props.modelReady === true &&
+    (props.modelChoices ?? []).some(
+      (option) => option.provider === props.value.provider && option.id === props.value.model,
+    ) &&
+    !props.submitting;
   const displayName = () => props.value.name.trim() || "New agent";
   const characterRole = (): RobotRole =>
     ROBOT_ROLES.find((item) => props.value.avatarSeed === `manzanilla:${item.id}`)?.id ?? "default";
@@ -463,7 +469,7 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
                     <AppLogo variant="production" class="first-agent-model-logo" />
                   </Show>
                   <span>
-                    {item.item.rawValue.id === "dani/dani-free-auto" ? "Dani Free (default)" : item.item.rawValue.name}
+                    {item.item.rawValue.id === "dani/dani-free-auto" ? "Dani Free Auto" : item.item.rawValue.name}
                   </span>
                 </SelectItem>
               )}
@@ -477,7 +483,7 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
                       </Show>
                       <span>
                         {state.selectedOption()?.id === "dani/dani-free-auto"
-                          ? "Dani Free (default)"
+                          ? "Dani Free Auto"
                           : (state.selectedOption()?.name ?? "Choose a free model")}
                       </span>
                     </span>
@@ -506,7 +512,7 @@ export function FirstAgentSetup(props: FirstAgentSetupProps) {
               />
             </Field>
             <Show when={!props.modelReady}>
-              <p role="status">Your assistant is unavailable. Try again later.</p>
+              <p role="status">Dani Free is unavailable. Retry the connection to create an agent.</p>
             </Show>
           </div>
 

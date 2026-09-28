@@ -8,7 +8,6 @@
 // Dani-Dex already writes for the user's own endpoints, so a proxy is a config value, not a code
 // change. The local proxy's generated key never comes from a user-entered API key.
 
-import { isFreeOpencodeModel } from "@dani-dex/contracts/ipc";
 import { DANI_DEX_MODEL_SOURCE, type DaniDexModelSource } from "@dani-dex/contracts/online-services";
 import type { CustomProviderConfig, CustomProviderSource } from "./opencode-config";
 
@@ -62,20 +61,18 @@ export function hasModelSource(source: DaniDexModelSource | null = currentModelS
   return modelSourceProviders(source).length > 0;
 }
 
-/**
- * Keep the keyless OpenCode catalog beside Dani Free Auto. Never expose paid OpenCode models
- * from the proxy-backed default: they may be listed by a saved key but are not free to run.
+/** Only the bundled proxy's exact Dani Free Auto route belongs in the product catalog.
+ * Connected provider models and the user's own endpoints remain available; a missing
+ * proxy must never turn a Zen model into an implicit replacement.
  */
 export function modelSourceChoices<T extends { id: string; name?: string }>(
   models: readonly T[],
   source: DaniDexModelSource | null = currentModelSource(),
 ): T[] {
-  if (!source || !hasModelSource(source)) return [...models];
-  const own = models.filter((model) => model.id.startsWith(`${source.id}/`));
-  if (own.length === 0) return [...models];
+  const proxyAvailable = source?.id === "dani" && source.models.some((model) => model.id === "dani-free-auto");
   return models.filter(
     (model) =>
-      model.id.startsWith(`${source.id}/`) ||
-      (model.id.startsWith("opencode/") && isFreeOpencodeModel(model.id, model.name ?? model.id)),
+      !model.id.startsWith("opencode/") &&
+      (!model.id.startsWith("dani/") || (proxyAvailable && model.id === "dani/dani-free-auto")),
   );
 }

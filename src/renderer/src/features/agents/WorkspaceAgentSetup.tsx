@@ -1,10 +1,15 @@
-import { isFreeOpencodeModel } from "@dani-dex/contracts/ipc";
+import type { AgentModelOption } from "@dani-dex/contracts/ipc";
 import { TEAM_AGENT_CREATE_MODEL_CAPABILITY } from "@dani-dex/contracts/team-protocol/current";
 import { createEffect, createMemo } from "solid-js";
 import { useServers } from "../servers/servers-context";
 import { useAgentActions } from "./agent-actions";
 import { useAgents } from "./agents-context";
 import { FIRST_AGENT_SUGGESTIONS, FirstAgentSetup } from "./FirstAgentSetup";
+
+/** The creation flow never falls back to an upstream or paid model. */
+export function daniFreeModelChoices(options: readonly AgentModelOption[]): AgentModelOption[] {
+  return options.filter((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto");
+}
 
 /**
  * The create-an-agent form, which takes over the conversation pane instead of
@@ -23,24 +28,14 @@ export function WorkspaceAgentSetup() {
   } = useAgents();
   const { createAgent } = useAgentActions();
   const { activeServer, activeServerSupportsCapability } = useServers();
-  // The home creation flow uses a listed free model: the local proxy when ready, or a
-  // keyless OpenCode model if the proxy failed. Never choose an unknown-price model.
+  // Only the live Dani Free Auto route can enable agent creation.
   const daniModel = createMemo(() => {
     if (activeServer()?.kind === "remote" && !activeServerSupportsCapability(TEAM_AGENT_CREATE_MODEL_CAPABILITY)) {
       return undefined;
     }
-    return (
-      modelOptions().find((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto") ??
-      modelOptions().find((option) => option.provider === "opencode" && isFreeOpencodeModel(option.id, option.name))
-    );
+    return daniFreeModelChoices(modelOptions())[0];
   });
-  const modelChoices = createMemo(() =>
-    modelOptions().filter(
-      (option) =>
-        option.provider === "opencode" &&
-        (option.id === "dani/dani-free-auto" || isFreeOpencodeModel(option.id, option.name)),
-    ),
-  );
+  const modelChoices = createMemo(() => daniFreeModelChoices(modelOptions()));
   createEffect(
     () => daniModel(),
     (model) => {

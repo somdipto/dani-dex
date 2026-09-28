@@ -68,7 +68,7 @@ describe("ProviderModelPicker", () => {
     expect(document.body.textContent ?? "").not.toMatch(/opencode|1\.18|Dani\/Dani|Codex|Claude|Grok/i);
   });
 
-  it("shows every listed keyless model beside Dani Free Auto", async () => {
+  it("does not show upstream Zen models beside Dani Free Auto", async () => {
     const models: AgentModelOption[] = [
       {
         provider: "opencode",
@@ -101,9 +101,9 @@ describe("ProviderModelPicker", () => {
     ));
     await fireEvent.click(view.getByRole("button", { name: "Agent model: Dani Free Auto" }));
     const dialog = within(view.getByRole("dialog", { name: "Choose agent model" }));
-    expect(dialog.getAllByRole("tab")).toHaveLength(1);
+    expect(dialog.getByRole("tab", { name: /Dani Free/ })).toBeInTheDocument();
     expect(dialog.getByRole("option", { name: /Dani Free Auto/ })).toBeInTheDocument();
-    expect(dialog.getByRole("option", { name: /Muse Free/ })).toBeInTheDocument();
+    expect(dialog.queryByRole("option", { name: /Muse Free/ })).not.toBeInTheDocument();
   });
 
   it("says when the provider CLI is the user's own install rather than a downloaded copy", async () => {
@@ -321,7 +321,7 @@ const upstreamModels: AgentModelOption[] = [
   supportedReasoningEfforts: ["medium"],
 }));
 
-it("lists the keyless free catalog when Dani's local proxy is not ready", async () => {
+it("shows an unavailable state rather than any upstream free model when Dani Free is missing", async () => {
   const status: AgentStatus = {
     ...agentStatus,
     providers: [{ id: "opencode", state: "available", version: "1.18.30", message: null, email: null }],
@@ -338,10 +338,9 @@ it("lists the keyless free catalog when Dani's local proxy is not ready", async 
   ));
   await fireEvent.click(view.getByRole("button", { name: /Agent model:/ }));
   const dialog = within(view.getByRole("dialog", { name: "Choose agent model" }));
-  expect(dialog.getByRole("option", { name: /Example Free/ })).toBeInTheDocument();
-  expect(dialog.queryByRole("option", { name: /Unknown price/ })).not.toBeInTheDocument();
-  await fireEvent.click(dialog.getByRole("option", { name: /Example Free/ }));
-  expect(onChange).toHaveBeenCalledWith("opencode/free", "opencode");
+  expect(dialog.queryByRole("option", { name: /Example Free|Unknown price/ })).not.toBeInTheDocument();
+  expect(dialog.getByRole("status")).toHaveTextContent("Dani Free is unavailable.");
+  expect(onChange).not.toHaveBeenCalled();
 });
 
 const openCodeBase: AgentProviderStatus = {

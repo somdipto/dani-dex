@@ -102,7 +102,7 @@ describe("model source choices", () => {
     id: "dani",
     name: "Dani",
     baseUrl: "http://127.0.0.1:4410/v1",
-    models: [{ id: "auto", name: "Dani Free Auto" }],
+    models: [{ id: "dani-free-auto", name: "Dani Free Auto" }],
   };
   const listed = [
     { id: "opencode/big-pickle", provider: "opencode" },
@@ -110,19 +110,21 @@ describe("model source choices", () => {
     { id: "opencode/paid", name: "OpenCode/Paid", provider: "opencode" },
     { id: "custom/free", name: "Custom/Free", provider: "opencode" },
     { id: "claude-sonnet", provider: "claude" },
-    { id: "dani/auto", provider: "opencode" },
+    { id: "dani/dani-free-auto", provider: "opencode" },
+    { id: "dani/other", provider: "opencode" },
   ];
 
-  it("offers the source model and free OpenCode models, never a paid model", () => {
+  it("offers only Dani Free Auto from the bundled route, preserving custom and connected providers", () => {
     expect(modelSourceChoices(listed, dani)).toEqual([
-      { id: "opencode/big-pickle", provider: "opencode" },
-      { id: "opencode/muse", name: "OpenCode/Muse Free", provider: "opencode" },
-      { id: "dani/auto", provider: "opencode" },
+      { id: "custom/free", name: "Custom/Free", provider: "opencode" },
+      { id: "claude-sonnet", provider: "claude" },
+      { id: "dani/dani-free-auto", provider: "opencode" },
     ]);
   });
 
-  it("keeps the list while the source's model is not listed yet, and with no source", () => {
-    expect(modelSourceChoices(listed.slice(0, 5), dani)).toEqual(listed.slice(0, 5));
-    expect(modelSourceChoices(listed, null)).toEqual(listed);
+  it("does not offer Zen as a fallback when the proxy route is absent or unavailable", () => {
+    const expected = listed.slice(0, 5).filter((model) => !model.id.startsWith("opencode/"));
+    expect(modelSourceChoices(listed.slice(0, 5), dani)).toEqual(expected);
+    expect(modelSourceChoices(listed, null)).toEqual(expected);
   });
 });

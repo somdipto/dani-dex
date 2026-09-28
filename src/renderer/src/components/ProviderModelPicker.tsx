@@ -14,7 +14,6 @@ import {
   agentProviderName,
   defaultProviderModel,
   isCustomProviderModelId,
-  isFreeOpencodeModel,
   PICKER_PROVIDERS,
 } from "@dani-dex/contracts/ipc";
 import { createEffect, createMemo, createSignal, For, onSettled, Show, untrack } from "solid-js";
@@ -117,11 +116,7 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
     if (rail === CUSTOM_RAIL) return props.modelOptions.filter((option) => isCustomModel(option, customIds()));
     if (rail === "opencode") {
       return props.modelOptions
-        .filter(
-          (option) =>
-            option.provider === "opencode" &&
-            (option.id === "dani/dani-free-auto" || isFreeOpencodeModel(option.id, option.name)),
-        )
+        .filter((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto")
         .map((option) =>
           option.id === "dani/dani-free-auto" ? { ...option, name: DANI_MODEL_NAME, description: "" } : option,
         );

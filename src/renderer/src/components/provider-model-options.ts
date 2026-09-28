@@ -77,14 +77,10 @@ export function isCustomModel(model: AgentModelOption, customIds: ReadonlySet<st
 /** What the product calls the local proxy's automatic free route. */
 export const DANI_MODEL_NAME = "Dani Free Auto";
 
-/** The free choice is the only model family when every listed model is actually keyless. */
+/** A single bundled route is the only model family when it is the sole listed option. */
 export function isDaniOnly(options: readonly AgentModelOption[]): boolean {
   return (
     options.length > 0 &&
-    options.every(
-      (option) =>
-        option.provider === "opencode" &&
-        (option.id === "dani/dani-free-auto" || isFreeOpencodeModel(option.id, option.name)),
-    )
+    options.every((option) => option.provider === "opencode" && option.id === "dani/dani-free-auto")
   );
 }
