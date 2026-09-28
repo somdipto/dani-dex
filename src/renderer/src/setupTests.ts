@@ -105,6 +105,37 @@ export class TestIntersectionObserver implements IntersectionObserver {
 globalThis.IntersectionObserver = TestIntersectionObserver;
 globalThis.ResizeObserver = TestResizeObserver;
 globalThis.scrollTo = () => undefined;
+// jsdom lacks the browser's media query and canvas 2D interfaces. RobotAvatar
+// subscribes to reduced-motion updates and obtains a 2D canvas at mount.
+if (typeof window !== "undefined" && !window.matchMedia) {
+  window.matchMedia = (query: string): MediaQueryList => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    dispatchEvent: () => true,
+  });
+}
+if (typeof HTMLCanvasElement !== "undefined") {
+  // This is a narrow jsdom stand-in for canvas methods exercised by renderer mounts,
+  // not a visual renderer. Production and pixel checks still need a real browser.
+  HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, contextId: string) {
+    if (contextId !== "2d") return null;
+    const context = {
+      canvas: this,
+      clearRect: () => undefined,
+      drawImage: () => undefined,
+      fillRect: () => undefined,
+      createRadialGradient: () => ({ addColorStop: () => undefined }),
+    };
+    // biome-ignore lint/nursery/noUnsafeTypeAssertion: test-only partial context for jsdom
+    return context as unknown as CanvasRenderingContext2D;
+    // biome-ignore lint/nursery/noUnsafeTypeAssertion: test-only overloaded browser method override
+  } as typeof HTMLCanvasElement.prototype.getContext;
+}
 
 const htmlElement = globalThis.HTMLElement;
 if (htmlElement && !htmlElement.prototype.getAnimations) {
