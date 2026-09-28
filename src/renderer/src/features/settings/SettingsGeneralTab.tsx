@@ -186,7 +186,7 @@ export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
           <ItemGroup class="settings-modal-card">
             <Item class="settings-modal-row">
               <ItemContent>
-                <ItemTitle>OpenCode paid models</ItemTitle>
+                <ItemTitle>Other model keys</ItemTitle>
                 <ItemDescription>Optional key for paid models. Dani Free needs no key.</ItemDescription>
               </ItemContent>
               <ItemActions>
