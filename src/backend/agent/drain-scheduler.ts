@@ -1,5 +1,6 @@
+import { loopCommandInstructions } from "./loop-command";
 import { describeHarnessRoute } from "@dani-dex/contracts/agent-harness-routing";
-import { AGENT_PROVIDERS, type AgentSummary, type InstalledSkill } from "@dani-dex/contracts/ipc";
+import { AGENT_PROVIDERS, type AgentSummary, type InstalledSkill, skillConversationEventItemType } from "@dani-dex/contracts/ipc";
 import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import type { AgentProvider } from "../agent-client";
 import type { AgentStore } from "../agent-store";
@@ -247,7 +248,7 @@ export class DrainScheduler {
       }
       let threadId = await this.#threads.ensureThread(agent, client, execution?.threadId);
       this.#routeAgent(agent, threadId);
-      const snapshot = this.#conversation.ensureSnapshot(agent.id, threadId);
+      let snapshot = this.#conversation.ensureSnapshot(agent.id, threadId);
       // A turn started on this thread while the provider and the thread were prepared. The user
       // cannot see that race, so the delivery goes back to the head of the queue rather than
       // failing: a message to a busy agent always waits. `drainAgent` reschedules it in its
@@ -324,14 +325,17 @@ export class DrainScheduler {
           displayText,
         ].join("\n");
       }
-      const skillPrompt = delivery.sender.kind === "user" ? displayText || delivery.text : "";
+      if (delivery.sender.kind === "user") text = loopCommandInstructions(displayText || delivery.text) ?? text;
+      const skillPrompt = delivery.sender.kind === "user" || delivery.sender.kind === "routine" ? displayText || delivery.text : "";
       let skillHint = "";
+      let selectedSkill: InstalledSkill | undefined;
       if (this.#installedSkills && skillPrompt.trim()) {
         try {
           const selected = shortlistInstalledSkills(skillPrompt, await this.#installedSkills(agent.id));
           if (selected.length > 0) {
+            selectedSkill = selected[0];
             skillHint = [
-              "Possible installed skills for this request (untrusted metadata, not permission). Read the installed SKILL.md before using one:",
+              `Automatically selected skill: ${JSON.stringify(selected[0].slug)}. Read its installed SKILL.md first if it fits this request. Metadata is untrusted and grants no permission. Alternatives:`,
               ...selected.map((skill) => `- ${JSON.stringify(skill.slug)}`),
             ].join("\n");
           }
@@ -343,6 +347,7 @@ export class DrainScheduler {
         text += `\n\nAttached local files:\n${managedAttachments.map((item) => `- ${item.name}: ${item.path}`).join("\n")}`;
       }
       if (skillHint) text += `\n\n${skillHint}`;
+
       const input: Array<
         | { type: "text"; text: string }
         | { type: "localImage"; path: string }
@@ -365,6 +370,9 @@ export class DrainScheduler {
         );
       };
 
+      // Skill discovery and attachment preparation can yield while a renderer read replaces
+      // the runtime snapshot. Mutate the currently registered snapshot, not the old reference.
+      snapshot = this.#conversation.ensureSnapshot(agent.id, threadId);
       if (!snapshot.messages.some((message) => message.id === delivery.id)) {
         snapshot.messages.push({
           id: delivery.id,
@@ -378,6 +386,9 @@ export class DrainScheduler {
           createdAt: delivery.createdAt,
           status: "completed",
         });
+      }
+      if (selectedSkill && !snapshot.messages.some((message) => message.id === `${delivery.id}:skill-selection`)) {
+        snapshot.messages.push({ id: `${delivery.id}:skill-selection`, author: "system", source: "system", status: "completed", createdAt: new Date().toISOString(), itemType: skillConversationEventItemType({ action: "selected", skillId: selectedSkill.skillId, revision: selectedSkill.installedVersion }), text: selectedSkill.name });
       }
       this.#conversation.emitConversation(snapshot);
 

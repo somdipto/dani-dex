@@ -1,12 +1,3 @@
-/**
- * The optional OpenCode Go key.
- *
- * OpenCode's free models run with no account, so this dialog is an addition and never a gate: it
- * says so first, and it opens from a provider row that is already usable. A saved key is reported
- * as a fact and never read back into the input -- main has no getter for it, and a renderer that
- * could show a key would carry it into every screenshot and crash report that follows.
- */
-
 import type {
   AgentProviderId,
   ExternalDestination,
@@ -28,7 +19,6 @@ import {
 } from "../../components/ui";
 import { errorMessage } from "../../error-message";
 
-/** The provider-key half of the desktop API, narrowed so a test can pass four functions. */
 export interface ProviderKeyApi {
   getProviderApiKeyState: (provider: AgentProviderId) => Promise<ProviderApiKeyState>;
   setProviderApiKey: (input: { provider: AgentProviderId; key: string }) => Promise<unknown>;
@@ -38,12 +28,8 @@ export interface ProviderKeyApi {
 
 export interface OpenCodeKeyDialogProps {
   api: ProviderKeyApi;
+  provider?: AgentProviderId;
   onClose: () => void;
-  /**
-   * Retries the connection without touching credentials. Without it a failed free provider with
-   * no stored key could never retry from here: saving needs a key, removing needs one saved,
-   * and closing answers nothing.
-   */
   onReconnect?: () => void | Promise<void>;
 }
 
@@ -63,7 +49,7 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
   async function readState(): Promise<void> {
     setPhase("loading");
     try {
-      setStored((await props.api.getProviderApiKeyState("opencode")).status);
+      setStored((await props.api.getProviderApiKeyState(props.provider ?? "opencode")).status);
     } catch (cause) {
       setError(errorMessage(cause, "Could not read the saved key."));
     } finally {
@@ -77,7 +63,7 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
     setPhase("saving");
     setError(null);
     try {
-      await props.api.setProviderApiKey({ provider: "opencode", key: value });
+      await props.api.setProviderApiKey({ provider: props.provider ?? "opencode", key: value });
       // The typed key is dropped rather than kept as a draft: OpenCode has restarted with it, and
       // the dialog keeps no copy of a secret it no longer needs.
       setKey("");
@@ -93,7 +79,7 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
     setPhase("removing");
     setError(null);
     try {
-      await props.api.clearProviderApiKey("opencode");
+      await props.api.clearProviderApiKey(props.provider ?? "opencode");
       setKey("");
       props.onClose();
     } catch (cause) {
@@ -121,7 +107,13 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
         <Dialog.Overlay class="opencode-key-backdrop">
           <Dialog.Content class="opencode-key-dialog" as="section">
             <header class="opencode-key-header">
-              <Dialog.Title class="opencode-key-title">Add a model key</Dialog.Title>
+              <Dialog.Title class="opencode-key-title">
+                {props.provider === "claude"
+                  ? "Add an Anthropic API key"
+                  : props.provider === "grok"
+                    ? "Add an xAI API key"
+                    : "Add a model key"}
+              </Dialog.Title>
               {/* One line that is always the dialog's whole message: the default pitch, the saved
                   fact, or the unreadable warning. A second text block would repeat it. */}
               <Dialog.Description class="opencode-key-description">
@@ -130,7 +122,11 @@ export function OpenCodeKeyDialog(props: OpenCodeKeyDialogProps) {
                   fallback={
                     <Show
                       when={stored() === "unreadable"}
-                      fallback={"Free models need no account. A key unlocks the paid models."}
+                      fallback={
+                        props.provider && props.provider !== "opencode"
+                          ? "API usage is billed by the provider, separately from any subscription. Your key stays encrypted on this computer."
+                          : "Free models need no account. A key unlocks the paid models."
+                      }
                     >
                       Saved key is unreadable. Paste it again, or remove it.
                     </Show>

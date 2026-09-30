@@ -35,6 +35,11 @@ describe("shouldAutoApprove", () => {
     expect(shouldAutoApprove(grants("agent-1"), approval("permissions"))).toBe(true);
   });
 
+  it("includes external directory access in an explicit standing grant and revokes it", () => {
+    const external = { ...approval("permissions"), externalDirectory: "/tmp/source" };
+    expect(shouldAutoApprove(grants("agent-1"), external)).toBe(true);
+    expect(shouldAutoApprove(NO_APPROVAL_AUTOMATION, external)).toBe(false);
+  });
   it("still asks an agent that was never granted", () => {
     expect(shouldAutoApprove(grants("agent-2"), approval("command"))).toBe(false);
     expect(shouldAutoApprove(grants("agent-2"), approval("permissions"))).toBe(false);

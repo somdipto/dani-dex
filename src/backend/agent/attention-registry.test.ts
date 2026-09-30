@@ -121,6 +121,24 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
       id: "approval-permissions",
       result: { permissions: {}, scope: "turn" },
     });
+    expect((await service.readConversation("chief")).messages).toContainEqual(expect.objectContaining({
+      id: "approval-denied:approval-permissions",
+      author: "system",
+      itemType: "approval_outcome",
+      text: "Permission denied. This action was not allowed.",
+    }));
+    const agent = store.list().find((candidate) => candidate.id === "chief")!;
+    expect(store.database.readConversation("chief", agent.threadId).messages).toContainEqual(expect.objectContaining({
+      id: "approval-denied:approval-permissions",
+    }));
+    client.emit("request", {
+      method: "item/permissions/requestApproval", id: "approval-external",
+      params: { threadId: externalId, turnId, acpExternalDirectory: "/tmp/source", permissions: { other: true } },
+    });
+    await waitFor(() => events.some((event) => event.type === "approval" && event.approval.requestId === "approval-external"));
+    expect(service.getRuntimeSnapshot().pendingApprovals.at(-1)?.externalDirectory).toBe("/tmp/source");
+    await service.respondToApproval({ requestId: "approval-external", decision: "accept" });
+    expect(client.responses.at(-1)).toEqual({ id: "approval-external", result: { decision: "accept" } });
   });
   it("surfaces Computer Use app access elicitations and returns the user's persistence choice", async () => {
     const clients = new Map<AgentProvider, FakeAgentClient>();
@@ -960,6 +978,10 @@ describe.sequential("AttentionRegistry: prompts, approvals and browser takeovers
     });
     expect(events.some((event) => event.type === "approval")).toBe(false);
     expect(service.getRuntimeSnapshot().pendingApprovals).toEqual([]);
+    client.emit("request", { method: "mcpServer/elicitation/request", id: "granted-computer-app", params: { threadId: externalId, turnId, serverName: COMPUTER_USE_MCP_SERVER_NAME, mode: "openai/form", message: "Allow app access?", requestedSchema: { type: "object", properties: {} } } });
+    await waitFor(() => client.responses.some(response => response.id === "granted-computer-app"));
+    expect(client.responses.at(-1)).toEqual({ id: "granted-computer-app", result: { action: "accept", content: {}, _meta: null } });
+    expect(events.some(event => event.type === "prompt")).toBe(false);
   });
   it("keeps asking for an agent that was never granted", async () => {
     const clients = new Map<AgentProvider, FakeAgentClient>();

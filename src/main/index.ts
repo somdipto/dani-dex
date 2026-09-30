@@ -1,3 +1,4 @@
+import { CodexRealtimeService } from "./codex-realtime-service";
 import { join, resolve } from "node:path";
 import { parseInviteUrl } from "@dani-dex/contracts/invite-links";
 import { type CentralAuthState, IPC_CHANNELS } from "@dani-dex/contracts/ipc";
@@ -25,6 +26,7 @@ import { attachmentIpcHandlers } from "./ipc/attachment-handlers";
 import { browserIpcHandlers } from "./ipc/browser-handlers";
 import { channelMemoryIpcHandlers } from "./ipc/channel-memory-handlers";
 import { channelRoutineIpcHandlers } from "./ipc/channel-routine-handlers";
+import { chatGptPlanIpcHandlers } from "./ipc/chatgpt-plan-handlers";
 import { computerUseIpcHandlers } from "./ipc/computer-use-handlers";
 import { customProviderIpcHandlers } from "./ipc/custom-provider-handlers";
 import { registerIpcGroups } from "./ipc/define-ipc-group";
@@ -299,6 +301,7 @@ function registerIpcHandlers({
   service,
   providerRuntimes,
   providerCredentials,
+  chatGptPlan,
   mailbox,
   browser,
   browserPictureInPicture,
@@ -333,6 +336,8 @@ function registerIpcHandlers({
   // covers - or a registrar that stops covering one - fails to compile here, naming the group.
   const getMainWindow = () => windowHolder.current;
 
+  const codexVoice = new CodexRealtimeService(join(app.getPath("userData"), "codex-voice"), () => providerRuntimes.executablePath("codex"), (url) => shell.openExternal(url));
+  app.once("before-quit", () => { void codexVoice.dispose(); });
   registerIpcGroups({
     ...appIpcHandlers({
       service,
@@ -360,8 +365,10 @@ function registerIpcHandlers({
       openExternal: (url) => shell.openExternal(url),
       permissionHelp: computerUsePermissionHelp,
     }),
-    ...providerIpcHandlers({ service, providerRuntimes, credentials: providerCredentials }),
+    ...chatGptPlanIpcHandlers({ service: chatGptPlan }),
+    ...providerIpcHandlers({ service, providerRuntimes, credentials: providerCredentials, chatGptPlan }),
     ...voiceIpcHandlers({
+      codex: codexVoice,
       voice,
       realtime: new OpenAiRealtimeSessionService(providerCredentials),
       credentials: providerCredentials,

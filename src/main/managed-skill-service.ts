@@ -259,12 +259,12 @@ export async function listManagedSkillsForChat(
         const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/u.exec(content)?.[1];
         if (!frontmatter) continue;
         const metadata = parseYaml(frontmatter);
-        if (!isDynamicRecord(metadata) || metadata.name !== entry.name || typeof metadata.description !== "string")
+        if (!isDynamicRecord(metadata) || typeof metadata.name !== "string" || !metadata.name.trim() || typeof metadata.description !== "string")
           continue;
         skills.push({
           skillId: entry.name,
           slug: entry.name,
-          name: entry.name,
+          name: metadata.name,
           description: metadata.description,
           installedVersion: 1,
           availableVersion: 1,

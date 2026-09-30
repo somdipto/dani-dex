@@ -39,7 +39,7 @@ export function providerFailureStatus(
       const label = provider === "codex" ? "ChatGPT" : "Claude";
       const bundledMessage =
         error.code === "missing"
-          ? `Dani-Dex's included ${label} runtime is missing. Reinstall Dani-Dex.`
+          ? `Dani-Dex's included ${label} runtime has not been downloaded. Choose Download, then sign in.`
           : `Dani-Dex could not start its included ${label} runtime. Update or reinstall Dani-Dex.`;
       return { state: "error", version: version ?? null, message: bundledMessage };
     }

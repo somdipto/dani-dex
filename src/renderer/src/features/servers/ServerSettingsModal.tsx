@@ -1072,7 +1072,7 @@ export function ServerSettingsModal(props: ServerSettingsModalProps) {
               disabled={Boolean(busy())}
               onChange={(value) => void run("mute", () => props.onSetMuted(value))}
               label="Mute notifications"
-              description="Stop desktop notifications and MacBook notch updates from this server."
+              description="Stop desktop notifications and status updates from this server."
             />
           </ItemGroup>
         </SettingsSection>

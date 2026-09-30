@@ -1089,7 +1089,7 @@ export class ProviderRuntime implements ProviderPort {
     await this.#connect(
       "starting",
       BUILT_IN_PROVIDER_DRIVERS.map((driver) => driver.id),
-      { preserveCheckErrors: true, refreshRuntimeInBackground: true },
+      { preserveCheckErrors: true, refreshRuntimeInBackground: true, notifyReady: false },
     );
     return this.status();
   }
@@ -1738,6 +1738,7 @@ export class ProviderRuntime implements ProviderPort {
     this.#configRevisions.set(client, this.#hooks.captureConfigRevision());
     this.#hooks.bindClient(client);
     client.on("diagnostic", (raw) => {
+      if (raw.startsWith("ACP permission scope:")) { logger.info("ACP permission scope", { provider: client.provider, message: shortenDiagnostic(this.#redactMcp(raw)) }); return; }
       if (!/error|failed|warning/i.test(raw)) return;
       const names = new Set([
         ...this.#credentials.mcpServers().map((config) => config.name),
@@ -1840,7 +1841,9 @@ export class ProviderRuntime implements ProviderPort {
           const previous = this.#models.filter((model) => model.provider === provider);
           const client = this.#clients.get(provider);
           if (!client) return { provider, models: previous, fresh: false };
-          const suppressed = SUPPRESSED_MODEL_IDS.get(provider) ?? new Set<string>();
+          const suppressed = client.accountSpecificCatalog
+            ? new Set<string>()
+            : (SUPPRESSED_MODEL_IDS.get(provider) ?? new Set<string>());
           // Read once per pass, not per model: a stored key cannot change inside one refresh, and
           // a model is unusable only because Dani-Dex is what put that key in the environment.
           const hasStoredKey = Boolean(this.#credentials.apiKey(provider));
@@ -1917,13 +1920,14 @@ export class ProviderRuntime implements ProviderPort {
               });
             }
             // A transient empty catalog is not proof all models vanished. Keep the last good list.
-            if (models.length === 0 && previous.length > 0) throw new Error("Model catalog was empty.");
-            const rank = PREFERRED_MODEL_ORDER.get(client.provider);
+            if (!client.accountSpecificCatalog && models.length === 0 && previous.length > 0)
+              throw new Error("Model catalog was empty.");
+            const rank = client.accountSpecificCatalog ? undefined : PREFERRED_MODEL_ORDER.get(client.provider);
             if (!rank) return { provider, models, fresh: true };
             // Sort is stable, so the CLI's own order still decides inside one tier.
             return { provider, models: [...models].sort((left, right) => rank(left) - rank(right)), fresh: true };
           } catch {
-            return { provider, models: previous, fresh: false };
+            return { provider, models: client.accountSpecificCatalog ? [] : previous, fresh: false };
           }
         },
       ),

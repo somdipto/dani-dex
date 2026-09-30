@@ -703,6 +703,14 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       provider,
       status: providerApiKeys.has(provider) ? "saved" : "missing",
     }),
+    chatGptPlan: {
+      list: async () => [],
+      connect: async () => {
+        throw new Error("Preview cannot sign in to ChatGPT.");
+      },
+      cancel: async () => undefined,
+      disconnect: async () => undefined,
+    },
     providerRuntimes: {
       getStatus: async () => clone(runtimeSnapshot),
       download: async (provider) => {
@@ -762,6 +770,10 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
     },
     openUrl: async () => undefined,
     voice: {
+      codexStatus: async () => ({ connected: false }),
+      codexConnect: async () => { throw new Error("Experimental voice login is not available in preview."); },
+      codexStart: async () => { throw new Error("Experimental voice is not available in preview."); },
+      codexStop: async () => undefined,
       getModelStatus: async () => ({ phase: "ready", progress: 100, message: null }),
       prepareModel: async () => ({ phase: "ready", progress: 100, message: null }),
       transcribe: async () => ({ text: "Mock voice transcript" }),

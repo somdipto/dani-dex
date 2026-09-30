@@ -20,6 +20,7 @@ export * from "./ipc-channel-memories";
 export * from "./ipc-channel-routines";
 export * from "./ipc-channels";
 export * from "./ipc-chat-channels";
+export * from "./ipc-chatgpt-plan";
 export * from "./ipc-conversation-events";
 export * from "./ipc-conversation-messages";
 export * from "./ipc-conversations";

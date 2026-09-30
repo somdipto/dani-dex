@@ -17,6 +17,19 @@ afterEach(async () => {
 });
 
 describe("CodexAppServerClient", () => {
+  it("uses child-only configuration without changing the owner process environment", async () => {
+    const executable = await createFakeCodex();
+    const before = process.env.DANI_TEST_CHILD_TOKEN;
+    const client = new CodexAppServerClient(executable, 5000, {
+      arguments: ["-c", 'model_provider="test"'],
+      environment: () => ({ ...process.env, DANI_TEST_CHILD_TOKEN: "selected-child" }),
+    });
+    clients.push(client);
+    client.start();
+    const result = await client.request("test/echo", { text: "env" }, decodeEchoResponse);
+    expect(result.echoed).toBe("selected-child");
+    expect(process.env.DANI_TEST_CHILD_TOKEN).toBe(before);
+  });
   it("matches responses and receives notifications over stdio", async () => {
     const executable = await createFakeCodex();
     const client = createClient(executable, 5_000);
@@ -110,7 +123,7 @@ process.stdin.on("data", (chunk) => {
     if (line) {
       const message = JSON.parse(line);
       if (message.method === "test/echo") {
-        const response = JSON.stringify({ id: message.id, result: { echoed: message.params.text } }) + "\\n";
+        const response = JSON.stringify({ id: message.id, result: { echoed: message.params.text === "env" ? process.env.DANI_TEST_CHILD_TOKEN : message.params.text } }) + "\\n";
         const middle = Math.floor(response.length / 2);
         process.stdout.write(response.slice(0, middle));
         process.stdout.write(response.slice(middle));

@@ -967,6 +967,17 @@ const danidexApi: DaniDexDesktopApi = {
     ipcRenderer.invoke(IPC_CHANNELS.startProviderCodeLogin, provider).then(decodeProviderCodeLoginStart),
   cancelProviderCodeLogin: (provider) =>
     ipcRenderer.invoke(IPC_CHANNELS.cancelProviderCodeLogin, provider).then(decodeAgentStatusFromMain),
+  chatGptPlan: {
+    list: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.chatGptPlanList).then((value: unknown) => {
+        if (!Array.isArray(value) || value.length > 32) throw new Error("Invalid ChatGPT registrations.");
+        return value.map(decodeChatGptConnection);
+      }),
+    connect: (clientId) =>
+      ipcRenderer.invoke(IPC_CHANNELS.chatGptPlanConnect, clientId ?? null).then(decodeChatGptConnection),
+    cancel: () => ipcRenderer.invoke(IPC_CHANNELS.chatGptPlanCancel),
+    disconnect: (clientId) => ipcRenderer.invoke(IPC_CHANNELS.chatGptPlanDisconnect, clientId),
+  },
   providerRuntimes: {
     getStatus: () => ipcRenderer.invoke(IPC_CHANNELS.providerRuntimesGetStatus).then(decodeProviderRuntimeSnapshot),
     download: (provider) =>
@@ -982,6 +993,10 @@ const danidexApi: DaniDexDesktopApi = {
   },
   openUrl: (url) => ipcRenderer.invoke(IPC_CHANNELS.openUrl, url),
   voice: {
+    codexStatus: () => ipcRenderer.invoke(IPC_CHANNELS.codexVoiceStatus),
+    codexConnect: () => ipcRenderer.invoke(IPC_CHANNELS.codexVoiceConnect),
+    codexStart: (input) => ipcRenderer.invoke(IPC_CHANNELS.codexVoiceStart, input),
+    codexStop: () => ipcRenderer.invoke(IPC_CHANNELS.codexVoiceStop),
     getModelStatus: () => ipcRenderer.invoke(IPC_CHANNELS.voiceGetModelStatus),
     prepareModel: () => ipcRenderer.invoke(IPC_CHANNELS.voicePrepareModel),
     transcribe: (input) => ipcRenderer.invoke(IPC_CHANNELS.voiceTranscribe, input),
@@ -1384,4 +1399,18 @@ function decodeRemoteDesktopSetupFromMain(value: unknown): RemoteDesktopSetupSta
 function decodeRemoteDesktopTestFromMain(value: unknown): RemoteDesktopTestStatus {
   if (!isRemoteDesktopTestStatus(value)) throw new Error("Invalid remote desktop test response.");
   return { ...value };
+}
+
+function decodeChatGptConnection(value: unknown): import("@dani-dex/contracts/ipc").ChatGptConnectionSummary {
+  if (
+    !isDynamicRecord(value) ||
+    typeof value.clientId !== "string" ||
+    !value.clientId ||
+    (value.email !== null && typeof value.email !== "string") ||
+    typeof value.planEnabled !== "boolean" ||
+    typeof value.expiresAt !== "number" ||
+    !Number.isSafeInteger(value.expiresAt)
+  )
+    throw new Error("Invalid ChatGPT registration.");
+  return { clientId: value.clientId, email: value.email, planEnabled: value.planEnabled, expiresAt: value.expiresAt };
 }

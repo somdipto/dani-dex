@@ -1,0 +1,22 @@
+{
+  "name": "dani-dex-onboard",
+  "version": "0.1.0",
+  "description": "One command to install Dani-Dex and open onboarding. Works the same on Windows, macOS and Linux.",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "author": "Somdipto Nandy <somdiptonandy@gmail.com>",
+  "homepage": "https://github.com/somdipto/dani-dex",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/somdipto/dani-dex.git",
+    "directory": "onboard"
+  },
+  "bin": {
+    "dani-dex-onboard": "bin/dani-dex-onboard.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=16"
+  }
+}

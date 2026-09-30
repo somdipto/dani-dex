@@ -1,0 +1,75 @@
+name: Android test APK
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/**'
+      - 'bun.lock'
+      - 'package.json'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CI: '1'
+      APK_ABIS: arm64-v8a,x86_64
+      GRADLE_OPTS: '-Xmx4096m -XX:MaxMetaspaceSize=1024m -Dorg.gradle.daemon=false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: android-${{ runner.os }}-jdk17-ndk27.1-${{ hashFiles('bun.lock', 'apps/mobile/app.json', 'apps/mobile/package.json') }}
+      - name: Install exact native toolchain
+        run: |
+          sdkmanager 'platform-tools' 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.1.12297006' 'cmake;3.22.1'
+      - name: Install mobile dependencies
+        run: bun install --filter '@dani-dex/mobile' --ignore-scripts --frozen-lockfile
+      - name: Focused robot regression
+        run: node --experimental-strip-types --test apps/mobile/src/features/agents/model/robot-appearance.node.test.ts
+      - name: Build standalone test APK
+        working-directory: apps/mobile
+        run: bun run android:apk:local
+      - name: Check APK identity, signature and bundle
+        run: |
+          apk=apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          test -s "$apk"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$apk" | tee apk-badging.txt
+          grep -q "package: name='dev.danlab.danidex.mobile'" apk-badging.txt
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$apk" | tee apk-signature.txt
+          unzip -l "$apk" | grep 'assets/index.android.bundle'
+          sha256sum "$apk" | tee apk-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dani-dex-test-apk-${{ github.sha }}
+          path: |
+            apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+            apk-badging.txt
+            apk-signature.txt
+            apk-sha256.txt
+          retention-days: 7
+          if-no-files-found: error

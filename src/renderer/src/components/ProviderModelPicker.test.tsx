@@ -68,7 +68,7 @@ describe("ProviderModelPicker", () => {
     expect(document.body.textContent ?? "").not.toMatch(/opencode|1\.18|Dani\/Dani|Codex|Claude|Grok/i);
   });
 
-  it("shows every listed keyless model beside Dani Free Auto", async () => {
+  it("hides underlying keyless names behind Dani Free Auto", async () => {
     const models: AgentModelOption[] = [
       {
         provider: "opencode",
@@ -103,7 +103,7 @@ describe("ProviderModelPicker", () => {
     const dialog = within(view.getByRole("dialog", { name: "Choose agent model" }));
     expect(dialog.getAllByRole("tab")).toHaveLength(1);
     expect(dialog.getByRole("option", { name: /Dani Free Auto/ })).toBeInTheDocument();
-    expect(dialog.getByRole("option", { name: /Muse Free/ })).toBeInTheDocument();
+    expect(dialog.queryByRole("option", { name: /Muse Free/ })).not.toBeInTheDocument();
   });
 
   it("says when the provider CLI is the user's own install rather than a downloaded copy", async () => {
@@ -338,9 +338,9 @@ it("lists the keyless free catalog when Dani's local proxy is not ready", async 
   ));
   await fireEvent.click(view.getByRole("button", { name: /Agent model:/ }));
   const dialog = within(view.getByRole("dialog", { name: "Choose agent model" }));
-  expect(dialog.getByRole("option", { name: /Example Free/ })).toBeInTheDocument();
+  expect(dialog.getByRole("option", { name: /Dani Free Auto/ })).toBeInTheDocument();
   expect(dialog.queryByRole("option", { name: /Unknown price/ })).not.toBeInTheDocument();
-  await fireEvent.click(dialog.getByRole("option", { name: /Example Free/ }));
+  await fireEvent.click(dialog.getByRole("option", { name: /Dani Free Auto/ }));
   expect(onChange).toHaveBeenCalledWith("opencode/free", "opencode");
 });
 

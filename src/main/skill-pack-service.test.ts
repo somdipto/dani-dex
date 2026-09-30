@@ -131,4 +131,24 @@ describe("SkillPackService", () => {
     const license = await readFile(resolve(__dirname, "../../resources/skill-packs/spec-kit/LICENSE"), "utf8");
     expect(license).toContain("MIT License");
   });
+  it("installs complete pinned engineering packs in both harness roots without changing user skills", async () => {
+    const workspace = await tempRoot();
+    const service = new SkillPackService({
+      bundledRoot: resolve(__dirname, "../../resources/skill-packs"),
+      cacheRoot: await tempRoot(),
+      packs: () => SKILL_PACKS.filter((pack) => ["pstack", "ponytail"].includes(pack.id)),
+    });
+    await service.syncAgent(agent(workspace, "Engineer"));
+    for (const provider of [".agents", ".claude"]) {
+      for (const slug of ["poteto-mode", "unslop", "ponytail", "ponytail-audit", "ponytail-gain"]) {
+        expect(await readFile(join(workspace, provider, "skills", slug, "SKILL.md"), "utf8")).toContain("name:");
+      }
+      expect(await readFile(join(workspace, provider, "skills", "poteto-mode", "playbooks", "prototype.md"), "utf8")).toBeTruthy();
+    }
+    for (const pack of ["pstack", "ponytail"]) {
+      expect(await readFile(resolve(__dirname, "../../resources/skill-packs", pack, "LICENSE"), "utf8")).toContain("MIT License");
+      expect(JSON.parse(await readFile(resolve(__dirname, "../../resources/skill-packs", pack, "SOURCE.json"), "utf8")).commit).toMatch(/^[a-f0-9]{40}$/);
+    }
+  });
+
 });

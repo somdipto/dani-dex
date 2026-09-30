@@ -13,11 +13,11 @@ afterEach(async () => {
 });
 
 describe("approval automation store", () => {
-  it("enables ordinary auto-approval when no preference exists", async () => {
+  it("requires opt-in when no preference exists", async () => {
     const root = await temporaryRoot();
     await expect(readApprovalAutomation(join(root, "automation.json"), [])).resolves.toEqual({
       turbo: false,
-      defaultAutoApprove: true,
+      defaultAutoApprove: false,
       autoApproveOverrides: {},
     });
   });
@@ -139,10 +139,12 @@ describe("ApprovalAutomation", () => {
       initial: await readApprovalAutomation(path, []),
       knownAgentIds: () => agents,
     });
+    expect(automation.autoApproves("agent-1")).toBe(false);
+    await automation.set({ agentId: "agent-1", autoApprove: true });
     expect(automation.autoApproves("agent-1")).toBe(true);
     expect(automation.autoApproves("unknown-agent")).toBe(false);
     agents.push("agent-2");
-    expect(automation.autoApproves("agent-2")).toBe(true);
+    expect(automation.autoApproves("agent-2")).toBe(false);
     await automation.set({ agentId: "agent-1", autoApprove: false });
     const restarted = new ApprovalAutomation({
       path,
@@ -155,7 +157,7 @@ describe("ApprovalAutomation", () => {
     expect(restarted.autoApproves("agent-1")).toBe(true);
     await restarted.set({ turbo: false });
     expect(restarted.autoApproves("agent-1")).toBe(false);
-    expect(restarted.autoApproves("agent-2")).toBe(true);
+    expect(restarted.autoApproves("agent-2")).toBe(false);
     await restarted.set({ agentId: "agent-1", autoApprove: true });
     expect(restarted.autoApproves("agent-1")).toBe(true);
   });

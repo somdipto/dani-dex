@@ -155,6 +155,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
     reportMcpDrops?: McpDropReporter,
     mcpToolRuntimes?: McpToolRuntimeSource,
     mcpAuthorization?: McpAuthorizationSource,
+    private readonly apiKey?: () => string | null,
   ) {
     super();
     this.#cli = cli;
@@ -287,7 +288,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
         pathToClaudeCodeExecutable: this.#cli.executable,
         settingSources: ["user", "project", "local"],
         persistSession: false,
-        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
+        env: { ...this.#environment(), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
       },
     });
     let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -358,7 +359,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
         pathToClaudeCodeExecutable: this.#cli.executable,
         settingSources: ["user", "project", "local"],
         persistSession: false,
-        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
+        env: { ...this.#environment(), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
       },
     });
     let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -383,13 +384,25 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
     }
   }
 
+  #environment(): NodeJS.ProcessEnv {
+    if (!this.apiKey) return claudeEnvironment(this.#cli);
+    const key = this.apiKey();
+    if (!key) throw new Error("Add an Anthropic API key in Dani-Dex to use Claude.");
+    const env = claudeEnvironment(this.#cli);
+    delete env.CLAUDE_CODE_OAUTH_TOKEN;
+    delete env.ANTHROPIC_AUTH_TOKEN;
+    return { ...env, ANTHROPIC_API_KEY: key };
+  }
   async #readAccount(): Promise<AccountReadResult> {
+    if (this.apiKey)
+      return { account: this.apiKey() ? { type: "claude", email: null } : null, requiresOpenaiAuth: false };
+
     try {
       const { stdout } = await execFileAsync(this.#cli.executable, ["auth", "status", "--json"], {
         timeout: 5_000,
         maxBuffer: 64 * 1024,
         shell: process.platform === "win32",
-        env: claudeEnvironment(this.#cli),
+        env: this.#environment(),
       });
       const status = JSON.parse(stdout);
       if (!isRecord(status) || status.loggedIn !== true) {
@@ -453,7 +466,7 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
         additionalDirectories: config.additionalDirectories,
         canUseTool,
         mcpServers,
-        env: { ...claudeEnvironment(this.#cli), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
+        env: { ...this.#environment(), CLAUDE_AGENT_SDK_CLIENT_APP: "danidex/0.1.0" },
       },
     });
     const runtime: ThreadRuntime = {

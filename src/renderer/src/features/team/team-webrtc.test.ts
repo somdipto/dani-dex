@@ -1,9 +1,9 @@
 import { isString } from "@dani-dex/contracts/runtime-values";
 import type { SignalServerMessage } from "@dani-dex/contracts/signal-protocol/messages";
 import { TEAM_PROTOCOL_V2_CHANNELS } from "@dani-dex/contracts/team-protocol/v2";
+import { encodeTeamWebRtcPayload, TeamWebRtcPayloadDecoder } from "@dani-dex/team-client";
 import { afterEach, describe, expect, it, type Mock, vi } from "vitest";
 import type { BridgeCommand } from "./team-webrtc";
-import { encodeTeamWebRtcPayload, TeamWebRtcPayloadDecoder } from "./team-webrtc-framing";
 
 // The previously untested boundary is the hidden renderer's actual MessagePort
 // routing: each authenticated Signal connection must own a separate RTC peer.

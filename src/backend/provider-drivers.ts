@@ -1,3 +1,4 @@
+import type { WorkerHistory } from "./agent/worker-history";
 import type { AgentAuthState, AgentProviderId } from "@dani-dex/contracts/ipc";
 import { AcpAgentClient } from "./acp-client";
 import type { AgentClient } from "./agent-client";
@@ -21,7 +22,6 @@ import {
 } from "./opencode-config";
 import type { AccountReadResult } from "./protocol";
 
-/** One command Dani-Dex runs against a provider's own CLI, waiting for the process to exit. */
 export interface ProviderCliCommand {
   readonly argv: readonly string[];
   readonly env: (cli: AgentCliInfo) => Record<string, string>;
@@ -30,14 +30,6 @@ export interface ProviderCliCommand {
 
 const CLI_LOGIN_TIMEOUT_MS = 10 * 60_000;
 
-/**
- * The environment one OpenCode process gets, read at spawn time.
- *
- * `OPENCODE_API_KEY` is the whole of the optional account: with it the CLI lists the paid Go
- * catalog, without it the free one. `OPENCODE_DISABLE_AUTOUPDATE` is not optional on a managed
- * install -- a CLI that updates itself past the pin fails the exact-version compare in
- * `verifyInstalledRuntime`, and Dani-Dex would then keep re-downloading a runtime it already has.
- */
 function opencodeEnv(cli: AgentCliInfo, credentials: ProviderClientContext): Record<string, string> {
   const key = credentials.apiKey("opencode");
   return {
@@ -46,89 +38,36 @@ function opencodeEnv(cli: AgentCliInfo, credentials: ProviderClientContext): Rec
   };
 }
 
-/**
- * How a provider is signed in. This used to be an optional `cliLogin` field, and its absence meant
- * "this is Codex": two call sites ran the Codex browser login for any driver without one, so a
- * provider that simply had nothing to spawn would have opened a ChatGPT login. The union makes each
- * answer say what it is, and a new arm is a compile error at both sites rather than a wrong login.
- */
 export type ProviderSignIn =
-  /** The provider's own protocol hands back a URL for Dani-Dex to open. */
   | { kind: "browser" }
-  /** Dani-Dex spawns the provider's CLI and waits for the process to exit. */
   | { kind: "cli-command"; command: ProviderCliCommand }
-  /** The user signs in with the CLI themselves; Dani-Dex only re-probes the provider afterwards. */
   | { kind: "external" };
 
-/**
- * What a client needs from the app at spawn, beyond its own CLI: the stored secrets, and the user's
- * own endpoints.
- *
- * Required rather than optional on purpose: a driver that needs a stored key has no other way to
- * reach one, and a call site that forgets the endpoints builds a client whose user simply sees their
- * models missing. `apiKey` is synchronous because the store is loaded eagerly at startup, and
- * `customProviders` is a getter, because both are read inside a spawn.
- */
 export interface ProviderClientContext {
   apiKey(provider: AgentProviderId): string | null;
   readonly customProviders: CustomProviderSource;
-  /**
-   * The MCP servers the user enabled, read at spawn like the endpoints above. Each client resolves
-   * and converts them itself, because the three providers take three different shapes.
-   */
   readonly mcpServers: McpServerSource;
-  /**
-   * What a provider could not be given, reported once per spawn. Optional, so the test call sites
-   * and `NO_PROVIDER_CREDENTIALS` stay valid: a driver with no reporter drops silently, exactly as
-   * every driver did before.
-   */
   readonly reportMcpDrops?: McpDropReporter;
-  /**
-   * What Dani-Dex downloaded for the MCP servers, read at spawn like everything else here. Optional
-   * for the same reason as `reportMcpDrops`: a driver without one sees the machine as it is.
-   */
   readonly mcpToolRuntimes?: McpToolRuntimeSource;
-  /**
-   * The bearer token for an http server this machine has signed in to, read at spawn. Optional for
-   * the same reason again: a driver without one hands over only the headers the user wrote.
-   */
   readonly mcpAuthorization?: McpAuthorizationSource;
-  /**
-   * The sign-ins this machine holds for http MCP servers. Read by `AgentService` and by nothing
-   * else: a driver is given `mcpAuthorization` above, which is the one token it can spend. This is
-   * the whole authority - it signs in, refreshes and forgets - so it travels no further.
-   */
   readonly mcpOAuth?: McpOAuthAuthority;
-  /**
-   * Whether this model may still be used. A removed endpoint stays in the running process, with the
-   * credentials it started with, until that process restarts, and the restart waits for the work in
-   * flight. Read at the last moment before a prompt leaves, because everything above it awaits.
-   */
   servesModel?(modelId: string): boolean;
+  validateModel?(modelId: string, signal?: AbortSignal): Promise<void>;
+  fallbackModel?: string;
+  workerHistory?: WorkerHistory;
 }
 
-/** Nothing stored and no endpoint, for tests and for call sites that predate the credential store. */
 export const NO_PROVIDER_CREDENTIALS: ProviderClientContext = {
   apiKey: () => null,
   customProviders: () => [],
   mcpServers: () => [],
 };
 
-/**
- * What a provider *does*. What it is called, how it is described and where its sign-in help points
- * live in the provider registry in `@dani-dex/contracts/agent-providers`; a driver holds only the
- * behaviour, so a new provider is one registry row plus one driver.
- */
 export interface BuiltInProviderDriver {
   id: AgentProviderId;
   signIn: ProviderSignIn;
   resolveCli(options?: { bundledExecutable?: string | null }): Promise<AgentCliInfo>;
   createClient(cli: AgentCliInfo, requestTimeoutMs: number, context: ProviderClientContext): AgentClient;
-  /**
-   * The client that writes an agent profile, when the provider needs a different one. Profile
-   * generation asks the model one question and must not let it act, so a provider that can be
-   * started without tools starts that way here. Without this hook the normal client is used.
-   */
   createProfileClient?(cli: AgentCliInfo, requestTimeoutMs: number, context: ProviderClientContext): AgentClient;
   authState(account: AccountReadResult["account"]): AgentAuthState;
   validateAccount(account: NonNullable<AccountReadResult["account"]>): void;
@@ -168,6 +107,7 @@ export const BUILT_IN_PROVIDER_DRIVERS: readonly BuiltInProviderDriver[] = [
         context.reportMcpDrops,
         context.mcpToolRuntimes,
         context.mcpAuthorization,
+        () => context.apiKey("claude"),
       ),
     authState: (account) => ({ kind: "claude", email: account?.email ?? null }),
     validateAccount: () => undefined,
@@ -192,8 +132,19 @@ export const BUILT_IN_PROVIDER_DRIVERS: readonly BuiltInProviderDriver[] = [
         context.reportMcpDrops,
         context.mcpToolRuntimes,
         context.mcpAuthorization,
+        context.apiKey("grok") ? () => context.apiKey("grok") : undefined,
       ),
-    createProfileClient: (cli, requestTimeoutMs) => new GrokAgentClient(cli, requestTimeoutMs, true),
+    createProfileClient: (cli, requestTimeoutMs, context) =>
+      new GrokAgentClient(
+        cli,
+        requestTimeoutMs,
+        true,
+        () => [],
+        undefined,
+        undefined,
+        undefined,
+        context.apiKey("grok") ? () => context.apiKey("grok") : undefined,
+      ),
     authState: (account) => ({ kind: "grok", email: account?.email ?? null }),
     validateAccount: () => undefined,
   },
@@ -222,6 +173,9 @@ export const BUILT_IN_PROVIDER_DRIVERS: readonly BuiltInProviderDriver[] = [
         signInMessage: openCodeSignInMessage(context.customProviders().length),
         hideThoughtChunks: hasModelSource(),
         servesModel: context.servesModel,
+        validateModel: context.validateModel,
+        fallbackModel: context.fallbackModel,
+        workerHistory: context.workerHistory,
         mcpServers: context.mcpServers,
         reportMcpDrops: context.reportMcpDrops,
         mcpToolRuntimes: context.mcpToolRuntimes,
@@ -243,6 +197,8 @@ export const BUILT_IN_PROVIDER_DRIVERS: readonly BuiltInProviderDriver[] = [
         signInMessage: openCodeSignInMessage(context.customProviders().length),
         hideThoughtChunks: hasModelSource(),
         servesModel: context.servesModel,
+        validateModel: context.validateModel,
+        fallbackModel: context.fallbackModel,
       }),
     authState: (account) => ({ kind: "opencode", email: account?.email ?? null }),
     validateAccount: () => undefined,

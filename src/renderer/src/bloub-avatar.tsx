@@ -1,8 +1,8 @@
-import { bloubAvatarProfile } from "@dani-dex/brand/bloub-avatar";
 import type { AvatarHue } from "@dani-dex/contracts/ipc";
-import { BloubBot } from "@norbert_bodziony/bloub";
 import { render } from "@solidjs/web";
 import { flush } from "solid-js";
+import { RobotAvatar } from "./features/agents/manzanilla/RobotAvatar";
+import { inferRobotRole } from "./features/agents/manzanilla/robot-model";
 
 /**
  * When an avatar animates, which is a performance decision and not a state one: `hover` and `idle`
@@ -33,37 +33,24 @@ export function createStaticAvatarSvg(seed: string, hue: AvatarHue | null): SVGS
   const svg = host.querySelector("svg");
   if (!svg) {
     dispose();
-    throw new Error("Bloub did not render an SVG avatar.");
+    throw new Error("Robot did not render an SVG avatar.");
   }
   const result = svg.cloneNode(true);
   if (!(result instanceof SVGSVGElement)) {
     dispose();
-    throw new Error("Bloub did not clone an SVG avatar.");
+    throw new Error("Robot did not clone an SVG avatar.");
   }
   dispose();
   return result;
 }
 
-function mountStaticAvatar(host: HTMLElement, seed: string, hue: AvatarHue | null): () => void {
-  const profile = bloubAvatarProfile(seed, hue);
-  const dispose = render(
-    () => (
-      <BloubBot
-        size={100}
-        shape={profile.shape}
-        color={profile.color}
-        expression={profile.expression}
-        frozenAt={0}
-        ariaLabel=""
-      />
-    ),
-    host,
-  );
+function mountStaticAvatar(host: HTMLElement, seed: string, _hue: AvatarHue | null): () => void {
+  const dispose = render(() => <RobotAvatar size={100} label="" role={inferRobotRole(seed)} animated={false} />, host);
   flush();
   const svg = host.querySelector("svg");
   if (!svg) {
     dispose();
-    throw new Error("Bloub did not render an SVG avatar.");
+    throw new Error("Robot did not render an SVG avatar.");
   }
   svg.removeAttribute("role");
   svg.removeAttribute("aria-label");

@@ -12,18 +12,7 @@ import type { AppMessages, AppTextKey, AppTranslate } from "@dani-dex/i18n";
 import { createEffect, createUniqueId, For, Show } from "solid-js";
 import { providerUpdateAvailable, providerVersionLabel } from "../features/provider-updates/provider-update";
 import { useI18n } from "../i18n-context";
-import {
-  Badge,
-  Button,
-  buttonVariants,
-  DropdownMenu,
-  Ellipsis,
-  Input,
-  RefreshCw,
-  SlidersHorizontal,
-  Smartphone,
-  Spinner,
-} from "./ui";
+import { Badge, Button, Input, RefreshCw, SlidersHorizontal, Spinner } from "./ui";
 
 export interface ProviderPickerOption {
   id: AgentProviderId;
@@ -35,13 +24,7 @@ export interface ProviderPickerOption {
   connectionState?: "connecting";
   checkError?: string | null;
   runtimeStatus?: ProviderRuntimeStatus;
-  /**
-   * Whether the optional OpenCode key is saved. Only the OpenCode row carries it: no other
-   * provider signs in with a pasted key. Absent while unknown, so the row shows no badge rather
-   * than a wrong one.
-   */
   keyStatus?: ProviderApiKeyStatus;
-  /** The newer runtime main says exists. The renderer never works this out itself. */
   availableVersion?: string | null;
 }
 
@@ -53,49 +36,24 @@ export interface ProviderPickerProps {
   hint?: string;
   embedded?: boolean;
   disabled?: boolean;
-  /**
-   * Dani's free models serve every agent: the row that runs them is presented as Dani Free,
-   * without the serving CLI's name, logo, or version. Other providers stay listed so the
-   * user can still sign in to their own subscriptions.
-   */
   daniOnly?: boolean;
   allowUnavailableSelection?: boolean;
   focusFirst?: boolean;
   refreshingProviders?: boolean;
+  onOptionalApiKey?: (provider: AgentProviderId) => void;
   onConnectProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onDownloadProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onCancelProviderDownload?: (provider: AgentProviderId) => void | Promise<void>;
-  /**
-   * Starts the update the row offers. Whether that re-downloads the managed runtime or runs the
-   * CLI's own updater is decided by the caller, which knows who owns the install.
-   */
   onUpdateProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onInstallProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onSignInProvider?: (provider: AgentProviderId) => void | Promise<void>;
-  /**
-   * Starts the sign-in the user finishes on another device. Offered beside the row's usual sign-in,
-   * never instead of it: this is the way out for a computer whose browser cannot complete the
-   * hand-off, and only for a provider whose descriptor says `codeSignIn`.
-   */
   onSignInWithCodeProvider?: (provider: AgentProviderId) => void | Promise<void>;
-  /**
-   * The dialog element a row's actions menu portals into. Without it the menu lands beside the
-   * dialog in `body`, where a modal makes it inert and out of reach.
-   */
   menuMount?: HTMLElement;
   onRefreshProviders?: () => void | Promise<void>;
-  /** Add row gated by OpenCode install; else offers install. */
   onAddCustomProvider?: () => void;
-  /** Named endpoints share one row; endpoint pick is model pick. */
   customProviders?: readonly CustomProviderSummary[];
-  /** Custom check suppresses provider check; needs endpoint + handler. */
   customSelected?: boolean;
   onSelectCustomProvider?: () => void;
-  /**
-   * Opens the list of saved endpoints, where they are removed. With it the count is a button beside
-   * Add; without it the count stays a badge inside the label, because a button must not sit inside
-   * a `<label>`: a click there would answer the radio instead.
-   */
   onManageCustomProviders?: () => void;
   onChange: (provider: AgentProviderId) => void;
 }
@@ -113,15 +71,11 @@ export function ProviderPicker(props: ProviderPickerProps) {
   const customReady = () => servesCustomProvider(openCode());
   const endpointCount = () => props.customProviders?.length ?? 0;
   const endpointCountLabel = () => i18n.t("provider.endpointCount", { count: endpointCount() });
-  /** The count answers a click only where the list can be opened. Elsewhere it stays a badge. */
   const countManageable = () => endpointCount() > 0 && Boolean(props.onManageCustomProviders);
-  /** The row is a choice once it has something to run and someone to tell about the choice. */
   const customSelectable = () => Boolean(props.onSelectCustomProvider) && endpointCount() > 0;
-  /** The Custom provider row holds the check mark, so the provider row that serves it does not. */
   const checkedProvider = () => (customSelectable() && props.customSelected ? null : props.value);
   let focused = false;
 
-  /** One custom row; inside group when choosable, after when add-only. */
   const customRow = (engine: () => ProviderPickerOption) => (
     <div
       class={[
@@ -202,59 +156,6 @@ export function ProviderPicker(props: ProviderPickerProps) {
             {i18n.t("provider.action.add")}
           </Button>
         </Show>
-        {/* Same OpenCode runtime fetch unblocks Add. */}
-        <Show
-          when={(() => {
-            if (!props.onDownloadProvider && !props.onCancelProviderDownload) return undefined;
-            const engineOption = engine();
-            const runtime = engineOption.runtimeStatus;
-            if (!runtime) return undefined;
-            if (runtime.phase === "not-downloaded") return "download" as const;
-            if (runtime.phase === "downloading") return "cancel" as const;
-            if (runtime.phase === "download-error") return "retry" as const;
-            return undefined;
-          })()}
-        >
-          {(action) => (
-            <Button
-              type="button"
-              variant={action() === "download" ? "default" : "outline"}
-              size="xs"
-              class="provider-picker-install"
-              aria-label={i18n.t(PROVIDER_ACTION_LABEL[action()], { name: engine().name })}
-              disabled={props.disabled || props.refreshingProviders}
-              onClick={() => {
-                if (action() === "cancel") {
-                  void props.onCancelProviderDownload?.("opencode");
-                } else {
-                  void props.onDownloadProvider?.("opencode");
-                }
-              }}
-            >
-              {i18n.t(PROVIDER_ACTION_TEXT[action()])}
-            </Button>
-          )}
-        </Show>
-        <Show
-          when={
-            !engine().runtimeStatus &&
-            engine().state === "not-installed" &&
-            agentProviderDescriptor("opencode").installGuideLink !== null &&
-            props.onInstallProvider
-          }
-        >
-          <Button
-            type="button"
-            variant="outline"
-            size="xs"
-            class="provider-picker-install"
-            aria-label={i18n.t("provider.custom.installLabel")}
-            disabled={props.disabled || props.refreshingProviders}
-            onClick={() => void props.onInstallProvider?.("opencode")}
-          >
-            {i18n.t("provider.action.install")}
-          </Button>
-        </Show>
       </div>
     </div>
   );
@@ -327,22 +228,13 @@ export function ProviderPicker(props: ProviderPickerProps) {
                 return runtime ? providerVersionLabel(runtime) : null;
               };
               const visualState = () => providerVisualState(state(), connecting(), runtimeStatus(), updatable());
-              const daniRow = () => Boolean(props.daniOnly) && option().id === "opencode";
+              const daniRow = () => option().id === "opencode";
               const runtimeAction = () =>
-                updatable() && props.onUpdateProvider && runtimeStatus()?.phase === "not-downloaded"
+                option().id === "codex" && !["not-downloaded", "download-error", "downloading", "finishing"].includes(runtimeStatus()?.phase ?? "")
                   ? undefined
-                  : providerRuntimeAction(state(), connecting(), runtimeStatus());
-              /**
-               * The row has a way in the user finishes elsewhere, and something to run it with.
-               *
-               * Offered while connected as well: that is how the user reaches a second account,
-               * which is otherwise only possible by signing out first and hoping the new sign-in
-               * works. A runtime still being downloaded has no CLI to ask for a code yet.
-               */
-              const codeSignInOffered = () =>
-                Boolean(props.onSignInWithCodeProvider) &&
-                agentProviderDescriptor(option().id).codeSignIn &&
-                (runtimeStatus()?.phase ?? "ready") === "ready";
+                  : updatable() && props.onUpdateProvider && runtimeStatus()?.phase === "not-downloaded"
+                    ? undefined
+                    : providerRuntimeAction(state(), connecting(), runtimeStatus());
               const inputId = () => `${pickerId}-${option().id}`;
               return (
                 <div
@@ -379,6 +271,13 @@ export function ProviderPicker(props: ProviderPickerProps) {
                       <span class="provider-picker-name">{daniRow() ? "Dani Free" : option().name}</span>
                       <Show when={daniRow() ? "Free models, picked for you" : (option().email ?? option().description)}>
                         {(detail) => <small class="provider-picker-email">{detail()}</small>}
+                      </Show>
+                      <Show when={option().id === "codex" && !available() && option().message}>
+                        {(message) => <small class="provider-picker-check-error">{message()}</small>}
+                      </Show>
+                      <Show when={runtimeStatus()?.phase === "download-error" && runtimeStatus()?.message}
+                      >
+                        {(message) => <small class="provider-picker-check-error">{message()}</small>}
                       </Show>
                       <Show when={option().checkError}>
                         {(checkError) => <small class="provider-picker-check-error">{checkError()}</small>}
@@ -476,15 +375,19 @@ export function ProviderPicker(props: ProviderPickerProps) {
                         {i18n.t("provider.action.install")}
                       </Button>
                     </Show>
-                    <Show when={!runtimeStatus() && props.onConnectProvider}>
+                    <Show when={(!runtimeStatus() || (option().id === "codex" && runtimeStatus()?.phase === "ready")) && props.onConnectProvider}>
                       <Button
                         type="button"
                         variant="outline"
                         size="xs"
                         class="provider-picker-install"
-                        aria-label={i18n.t(PROVIDER_ACTION_LABEL[providerAction(state(), connecting())], {
-                          name: option().name,
-                        })}
+                        aria-label={
+                          option().id === "codex"
+                            ? "Sign in with ChatGPT"
+                            : i18n.t(PROVIDER_ACTION_LABEL[providerAction(state(), connecting())], {
+                                name: option().name,
+                              })
+                        }
                         aria-busy={connecting() ? "true" : undefined}
                         disabled={props.disabled || props.refreshingProviders}
                         onClick={() => void props.onConnectProvider?.(option().id)}
@@ -492,7 +395,11 @@ export function ProviderPicker(props: ProviderPickerProps) {
                         <Show when={connecting()}>
                           <Spinner size="sm" />
                         </Show>
-                        {i18n.t(PROVIDER_ACTION_TEXT[providerAction(state(), connecting())])}
+                        {option().id === "codex"
+                          ? connecting()
+                            ? "Signing in..."
+                            : "Sign in with ChatGPT"
+                          : i18n.t(PROVIDER_ACTION_TEXT[providerAction(state(), connecting())])}
                       </Button>
                     </Show>
                     {/* The free row never offers a key action. Paid-model key management lives in Settings. */}
@@ -517,30 +424,15 @@ export function ProviderPicker(props: ProviderPickerProps) {
                         {i18n.t("provider.action.signIn")}
                       </Button>
                     </Show>
-                    {/* The second way in, for the computer the first one cannot serve: no browser,
-                      a remote session, or a browser signed in to the wrong account.
-
-                      Behind a menu rather than beside Connect: it is the rarer way in, and a second
-                      button on every row would make the rows argue about which one to press. The
-                      menu holds whatever else a row offers later. */}
-                    <Show when={codeSignInOffered()}>
-                      <DropdownMenu.Root placement="bottom-end" gutter={4} modal={false}>
-                        <DropdownMenu.Trigger
-                          class={`${buttonVariants({ variant: "ghost", size: "icon-sm" })} ui-icon-button`}
-                          aria-label={i18n.t("provider.aria.moreSignIn", { name: option().name })}
-                          disabled={props.disabled || props.refreshingProviders}
-                        >
-                          <Ellipsis aria-hidden="true" />
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Portal mount={props.menuMount}>
-                          <DropdownMenu.Content>
-                            <DropdownMenu.Item onSelect={() => void props.onSignInWithCodeProvider?.(option().id)}>
-                              <Smartphone aria-hidden="true" />
-                              {i18n.t("provider.action.signInWithCode")}
-                            </DropdownMenu.Item>
-                          </DropdownMenu.Content>
-                        </DropdownMenu.Portal>
-                      </DropdownMenu.Root>
+                    <Show when={props.onOptionalApiKey && (option().id === "claude" || option().id === "grok")}>
+                      <Button
+                        type="button"
+                        size="xs"
+                        variant="ghost"
+                        onClick={() => props.onOptionalApiKey?.(option().id)}
+                      >
+                        Optional API key
+                      </Button>
                     </Show>
                   </div>
                 </div>
@@ -558,7 +450,6 @@ export function ProviderPicker(props: ProviderPickerProps) {
   );
 }
 
-/** OpenCode runs user endpoints when its CLI is installed and answers; sign-in is irrelevant. */
 function servesCustomProvider(openCode: ProviderPickerOption | undefined): boolean {
   return openCode?.state === "available" || openCode?.state === "sign-in-required";
 }
@@ -574,7 +465,6 @@ function providerStatusTone(state: ProviderVisualState): "success" | "warning" |
   return "neutral";
 }
 
-/** Badge text, translated where drawn; downloads report a percentage, not a key. */
 function providerStatusLabel(
   translate: AppTranslate,
   state: AgentProviderState,
@@ -590,7 +480,7 @@ function providerStatusLabel(
   if (connecting && state !== "available") return translate("provider.status.connecting");
   // Update offers outrank "Connected"/"Ready": a hidden offer is never taken.
   if (updatable) return translate("provider.status.updateAvailable");
-  if (runtimeStatus?.phase === "download-error") return translate("provider.status.downloadFailed");
+  if (runtimeStatus?.phase === "download-error") return runtimeStatus.failureStage === "connection" ? "Connection failed" : translate("provider.status.downloadFailed");
   if (state === "available") return translate("provider.status.connected");
   if (runtimeStatus?.phase === "not-downloaded") return translate("provider.status.notDownloaded");
   if (runtimeStatus?.phase === "ready") return translate("provider.status.ready");
@@ -617,7 +507,6 @@ function providerVisualState(
   return phase ?? state;
 }
 
-/** Row action identifier; never a translated label, since the handler branches on it. */
 type ProviderAction = "download" | "cancel" | "connect" | "reconnect" | "restart" | "retry";
 
 const PROVIDER_ACTION_TEXT = {
@@ -629,8 +518,6 @@ const PROVIDER_ACTION_TEXT = {
   retry: "provider.action.retry",
 } as const satisfies Record<ProviderAction, AppTextKey>;
 
-/** The name a screen reader reads. It repeats the provider, because a list of rows that all say
- * "Connect" names nothing. */
 const PROVIDER_ACTION_LABEL = {
   download: "provider.aria.download",
   cancel: "provider.aria.cancel",
@@ -640,16 +527,6 @@ const PROVIDER_ACTION_LABEL = {
   retry: "provider.aria.retry",
 } as const satisfies Record<ProviderAction, keyof AppMessages>;
 
-/**
- * Whether the action reaches main's managed runtime store rather than a provider CLI.
- *
- * A download, its cancellation and its retry are file transfers the runtime manager owns; it neither
- * asks the agent runtime for anything nor waits for it. The rest put a question to a CLI, so they
- * wait while the providers are being checked. Keeping the two apart is what stops a provider check
- * that never ends from disabling the one action that would end it: with nothing downloaded, every
- * other button on the first-run screen is refused by design, and disabling Download as well leaves
- * the user with no way forward at all.
- */
 function runtimeStoreAction(action: ProviderAction): boolean {
   return action === "download" || action === "cancel" || action === "retry";
 }

@@ -1,10 +1,10 @@
 import { EventEmitter } from "node:events";
 import { access } from "node:fs/promises";
 import { type AgentProfileDraft, AVATAR_HUES } from "@dani-dex/contracts/ipc";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import type { AgentClient } from "../agent-client";
 import { getString, type RequestId, type ResponseDecoder, type RpcError } from "../protocol";
-import { generateProfile, profilePrompt } from "./profile-generation";
+import { generateProfile, generateTextWithoutTools, profilePrompt, generateGatewayProfile, generateGatewayTextWithoutTools } from "./profile-generation";
 
 const draft: AgentProfileDraft = {
   name: "Researcher",
@@ -122,4 +122,71 @@ it("revises from the current draft using the existing avatar palette", () => {
   const prompt = profilePrompt({ prompt: "Focus on science", draft }, []);
   expect(prompt).toContain(JSON.stringify(draft));
   expect(prompt).toContain(AVATAR_HUES.join(","));
+});
+
+it("preserves a redacted provider failure instead of mislabeling routing as profile failure", async () => {
+  const client = new ProfileClient("");
+  const request = client.request.bind(client);
+  client.request = async (method, params, decode) => {
+    if (method === "turn/start") {
+      client.emit("notification", { method: "error", params: { message: "Provider refused request. Authorization: Bearer abcdef123456" } });
+      client.emit("notification", { method: "turn/completed", params: { turn: { status: "failed" } } });
+      return decode({});
+    }
+    return request(method, params, decode);
+  };
+  await expect(generateTextWithoutTools(client, { ...model, supportedReasoningEfforts: ["medium"] }, "Return JSON")).rejects.toThrow("Provider refused request.");
+  expect(client.running).toBe(false);
+});
+
+import { validateGatewayRoute } from "./profile-generation";
+
+const gatewayRoute = { endpoint: "https://api.kilo.ai/api/gateway/chat/completions", modelId: "stepfun/step-3.7-flash:free" };
+const catalog = { data: [{ id: gatewayRoute.modelId, isFree: true, pricing: { prompt: "0", completion: "0", request: "0" }, architecture: { output_modalities: ["text"] } }] };
+const reply = (payload: unknown) => new Response(JSON.stringify(payload), { status: 200 });
+it("uses exact zero-cost gateway selection without tools or redirects", async () => {
+  const request = vi.fn(async (url: string | URL | Request, _init?: RequestInit) => String(url).endsWith("/models") ? reply(catalog) : reply({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify(draft) } }] }));
+  vi.stubGlobal("fetch", request);
+  try {
+    expect(await generateGatewayProfile(gatewayRoute, { prompt: "Synthetic" }, [])).toEqual(draft);
+    const body = JSON.parse(request.mock.calls[1][1]!.body as string);
+    expect(body.model).toBe(gatewayRoute.modelId); expect(body.tools).toBeUndefined(); expect(body.max_tokens).toBe(8192);
+    expect(request.mock.calls[1][1]!.redirect).toBe("error"); expect(request).toHaveBeenCalledTimes(2);
+  } finally { vi.unstubAllGlobals(); }
+});
+it.each(["length", "content_filter", "tool_calls"])("rejects gateway finish %s with no fallback", async (finish_reason) => {
+  const request = vi.fn(async (url: string | URL | Request) => String(url).endsWith("/models") ? reply(catalog) : reply({ choices: [{ finish_reason, message: { content: "partial" } }] }));
+  vi.stubGlobal("fetch", request);
+  try { await expect(generateGatewayTextWithoutTools(gatewayRoute, "Synthetic")).rejects.toThrow("incomplete or filtered"); expect(request).toHaveBeenCalledTimes(2); }
+  finally { vi.unstubAllGlobals(); }
+});
+it.each([ {isFree:false}, {isFree:"false"}, {pricing:{prompt:null,completion:"0"}}, {pricing:{prompt:"",completion:"0"}}, {pricing:{prompt:false,completion:"0"}}, {pricing:{request:"0"}}, {pricing:{prompt:"0.1"}}, {expires_at:"2020-01-01T00:00:00Z"}, {architecture:{output_modalities:["image"]}} ])("rejects unusable catalog %j before inference", async (change) => {
+  const request = vi.fn(async () => reply({ data: [{ ...catalog.data[0], ...change }] })); vi.stubGlobal("fetch", request);
+  try { await expect(generateGatewayTextWithoutTools(gatewayRoute, "Synthetic")).rejects.toThrow("expired, paid"); expect(request).toHaveBeenCalledOnce(); }
+  finally { vi.unstubAllGlobals(); }
+});
+it("rejects endpoint/model mismatch without network", async () => {
+ const request = vi.fn();vi.stubGlobal("fetch",request);
+ try {await expect(generateGatewayTextWithoutTools({...gatewayRoute,modelId:"kilo-auto/free"},"Synthetic")).rejects.toThrow("not permitted");expect(request).not.toHaveBeenCalled();}finally{vi.unstubAllGlobals();}
+});
+it("bounds response bytes before parsing", async () => {
+ const request=vi.fn(async (url:string|URL|Request)=>String(url).endsWith("/models")?reply(catalog):new Response("x".repeat(256001)));vi.stubGlobal("fetch",request);
+ try{await expect(generateGatewayTextWithoutTools(gatewayRoute,"Synthetic")).rejects.toThrow("too large");}finally{vi.unstubAllGlobals();}
+});
+it("aborts a generation during fetch",async()=>{
+ const controller=new AbortController(); const request=vi.fn(async (_url:string|URL|Request,init?:RequestInit)=>new Promise<Response>((_resolve,reject)=>init!.signal!.addEventListener("abort",()=>reject(new Error("aborted")))));vi.stubGlobal("fetch",request);
+ try{const result=generateGatewayTextWithoutTools(gatewayRoute,"Synthetic",()=>false,{signal:controller.signal});controller.abort();await expect(result).rejects.toThrow("aborted");}finally{vi.unstubAllGlobals();}
+});
+it("rejects HTTP 200 error envelopes",async()=>{
+ const request=vi.fn(async(url:string|URL|Request)=>String(url).endsWith("/models")?reply(catalog):reply({error:{message:"blocked"}}));vi.stubGlobal("fetch",request);
+ try{await expect(generateGatewayTextWithoutTools(gatewayRoute,"Synthetic")).rejects.toThrow("rejected");}finally{vi.unstubAllGlobals();}
+});
+
+it.each([undefined, "tools", [], ["temperature"]])("worker rejects missing/malformed tool capability %j", async (supported_parameters) => {
+ vi.stubGlobal("fetch",vi.fn(async()=>reply({data:[{...catalog.data[0],supported_parameters}]})));
+ try {await expect(validateGatewayRoute(gatewayRoute,AbortSignal.timeout(1000),true)).rejects.toThrow();}finally{vi.unstubAllGlobals();}
+});
+it("worker requires fresh catalog and tool capability each dispatch",async()=>{
+ const fetcher=vi.fn(async()=>reply({data:[{...catalog.data[0],supported_parameters:["tools"]}]}));vi.stubGlobal("fetch",fetcher);
+ try{await validateGatewayRoute(gatewayRoute,AbortSignal.timeout(1000),true);await validateGatewayRoute(gatewayRoute,AbortSignal.timeout(1000),true);expect(fetcher).toHaveBeenCalledTimes(2);}finally{vi.unstubAllGlobals();}
 });

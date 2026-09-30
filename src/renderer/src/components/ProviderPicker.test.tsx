@@ -110,43 +110,17 @@ describe("ProviderPicker", () => {
     expect(downloading.view.getByRole("button", { name: "Cancel OpenCode" })).toBeTruthy();
   });
 
-  it("offers the code sign-in on a connected row, and not while the runtime is still downloading", () => {
-    const onSignInWithCodeProvider = vi.fn();
-    const codex: ProviderPickerOption = { id: "codex", name: "ChatGPT", state: "available", message: null };
-    const menu = (option: ProviderPickerOption) =>
-      render(() => (
-        <ProviderPicker
-          value="codex"
-          options={[option]}
-          ariaLabel="AI providers"
-          allowUnavailableSelection
-          onChange={vi.fn()}
-          onSignInProvider={vi.fn()}
-          onSignInWithCodeProvider={onSignInWithCodeProvider}
-        />
-      )).queryByRole("button", { name: "More ways to log in to ChatGPT" });
-
-    // Signed in is not a reason to hide it: this is the way to a second account.
-    expect(menu(codex)).toBeTruthy();
-    expect(menu({ ...codex, state: "sign-in-required" })).toBeTruthy();
-    // Nothing to ask for a code with until the CLI is on the computer.
-    expect(
-      menu({ ...codex, runtimeStatus: runtime({ phase: "downloading", progress: 40, version: null }) }),
-    ).toBeNull();
-    // Claude has no code sign-in, so its row has no menu to hold one.
-    expect(
-      render(() => (
-        <ProviderPicker
-          value="claude"
-          options={[{ ...claude, state: "available" }]}
-          ariaLabel="AI providers"
-          allowUnavailableSelection
-          onChange={vi.fn()}
-          onSignInProvider={vi.fn()}
-          onSignInWithCodeProvider={onSignInWithCodeProvider}
-        />
-      )).queryByRole("button", { name: "More ways to log in to Claude" }),
-    ).toBeNull();
+  it("does not offer legacy CLI device-code login", () => {
+    const view = render(() => (
+      <ProviderPicker
+        value="codex"
+        options={[{ id: "codex", name: "ChatGPT", state: "available" }]}
+        ariaLabel="AI providers"
+        onChange={vi.fn()}
+        onSignInWithCodeProvider={vi.fn()}
+      />
+    ));
+    expect(view.queryByRole("button", { name: "More ways to log in to ChatGPT" })).toBeNull();
   });
 
   it("badges the tier and connection state without doubling them", () => {
@@ -186,32 +160,29 @@ describe("ProviderPicker", () => {
     expect(downloading.view.queryByText("Connecting")).toBeNull();
   });
 
-  it("keeps the managed download reachable while the providers are being checked", async () => {
-    const onDownloadProvider = vi.fn();
+  it("requires the ChatGPT runtime download before offering sign-in", () => {
     const view = render(() => (
       <ProviderPicker
         value="opencode"
         options={[
           { ...claude, runtimeStatus: runtime({ phase: "not-downloaded", version: null }) },
-          { ...openCode, state: "available", runtimeStatus: runtime({}) },
+          {
+            id: "codex",
+            name: "ChatGPT",
+            state: "sign-in-required",
+            runtimeStatus: runtime({ phase: "not-downloaded", version: null }),
+          },
         ]}
         ariaLabel="AI providers"
-        allowUnavailableSelection
-        refreshingProviders
         onChange={vi.fn()}
-        onDownloadProvider={onDownloadProvider}
+        onDownloadProvider={vi.fn()}
         onConnectProvider={vi.fn()}
+        onOptionalApiKey={vi.fn()}
       />
     ));
-
-    // The download is a file transfer main's runtime store owns, so a provider check that has not
-    // finished - or never will - must not take it away: it is what ends the check.
-    const download = view.getByRole("button", { name: "Download Claude" });
-    expect(download).toBeEnabled();
-    await fireEvent.click(download);
-    expect(onDownloadProvider).toHaveBeenCalledWith("claude");
-
-    // The CLI is what a reconnect asks, so that one still waits.
-    expect(view.getByRole("button", { name: "Reconnect OpenCode" })).toBeDisabled();
+    expect(view.getByRole("button", { name: "Download Claude" })).toBeTruthy();
+    expect(view.getByRole("button", { name: "Download ChatGPT" })).toBeTruthy();
+    expect(view.queryByRole("button", { name: "Sign in with ChatGPT" })).toBeNull();
+    expect(view.getByRole("button", { name: "Optional API key" })).toBeTruthy();
   });
 });

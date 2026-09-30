@@ -89,6 +89,7 @@ import type {
   UpdateChannelRoutineInput,
 } from "./ipc-channel-routines";
 import type { Channel, ChannelCommand, ChannelPage, ChannelReadInput, ChannelSummary } from "./ipc-chat-channels";
+import type { ChatGptPlanDesktopApi } from "./ipc-chatgpt-plan";
 import type {
   ConversationPage,
   ConversationReadState,
@@ -504,6 +505,10 @@ export interface RemoteDesktopDesktopApi {
 }
 
 export interface VoiceDesktopApi {
+  codexStatus: () => Promise<{ connected: boolean }>;
+  codexConnect: () => Promise<void>;
+  codexStart: (input: { sdp: string; consent: boolean }) => Promise<{ sdp: string }>;
+  codexStop: () => Promise<void>;
   getModelStatus: () => Promise<VoiceModelStatus>;
   prepareModel: () => Promise<VoiceModelStatus>;
   transcribe: (input: VoiceTranscriptionInput) => Promise<VoiceTranscriptionResult>;
@@ -611,6 +616,7 @@ export interface DaniDexDesktopApi {
   startProviderCodeLogin: (provider: AgentProviderId) => Promise<ProviderCodeLoginStart>;
   /** Abandons a code sign-in: the provider is told, the code is dead, and the provider goes idle. */
   cancelProviderCodeLogin: (provider: AgentProviderId) => Promise<AgentStatus>;
+  chatGptPlan: ChatGptPlanDesktopApi;
   providerRuntimes: ProviderRuntimesDesktopApi;
   openUrl: (url: string) => Promise<void>;
   voice: VoiceDesktopApi;

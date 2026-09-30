@@ -12,11 +12,14 @@
 }
 
 .onboarding-shell {
+  max-height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   width: min(100%, 680px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 52px 24px;
+  padding: 28px 24px;
   -webkit-app-region: no-drag;
 }
 
@@ -105,16 +108,16 @@
 }
 
 .onboarding-hero-avatar {
-  width: 86px;
-  height: 86px;
+  width: 160px;
+  height: 160px;
   display: grid;
   place-items: center;
   margin: 0 0 26px;
 }
 
 .onboarding-hero-avatar .agent-avatar {
-  width: 86px;
-  height: 86px;
+  width: 160px;
+  height: 160px;
 }
 
 .onboarding-hero-avatar .agent-avatar > svg {
@@ -448,6 +451,11 @@
 }
 
 .onboarding-actions {
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+  padding-bottom: 12px;
+  background: var(--dani-dex-bg-canvas);
   width: min(100%, 288px);
   display: grid;
   gap: var(--dani-dex-space-2);
@@ -571,3 +579,27 @@
 }
 
 /* The one provider row shown when Dani's free models are the only model: nothing to choose. */
+
+/* Keep the larger Meet character and its next action visible on laptop-height windows. */
+@media (max-height: 800px) {
+  .onboarding-shell {
+    padding-block: 12px;
+  }
+
+  .onboarding-progress {
+    margin-bottom: 8px;
+  }
+
+  .onboarding-hero-avatar {
+    margin-bottom: 8px;
+  }
+
+  .onboarding-panel-meet .onboarding-composer {
+    margin-top: 12px;
+  }
+
+  .onboarding-provider {
+    margin-top: 16px;
+  }
+
+}

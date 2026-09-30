@@ -116,15 +116,12 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
   function railModelOptions(rail: RailId): AgentModelOption[] {
     if (rail === CUSTOM_RAIL) return props.modelOptions.filter((option) => isCustomModel(option, customIds()));
     if (rail === "opencode") {
-      return props.modelOptions
-        .filter(
-          (option) =>
-            option.provider === "opencode" &&
-            (option.id === "dani/dani-free-auto" || isFreeOpencodeModel(option.id, option.name)),
-        )
-        .map((option) =>
-          option.id === "dani/dani-free-auto" ? { ...option, name: DANI_MODEL_NAME, description: "" } : option,
-        );
+      const free = props.modelOptions.filter((option) => option.provider === "opencode" &&
+        (option.id === "dani/dani-free-auto" || isFreeOpencodeModel(option.id, option.name)));
+      const selected = free.find((option) => option.id === props.value);
+      const automatic = free.find((option) => option.id === "dani/dani-free-auto");
+      const choice = automatic ?? selected ?? free[0];
+      return choice ? [{ ...choice, name: DANI_MODEL_NAME, description: "" }] : [];
     }
     return props.modelOptions.filter((option) => option.provider === rail);
   }
@@ -217,7 +214,7 @@ export function ProviderModelPicker(props: ProviderModelPickerProps) {
 
   const daniRoute = () => props.provider === "opencode" && activeProvider() !== CUSTOM_RAIL;
   const triggerModelName = () =>
-    daniRoute() && props.value === "dani/dani-free-auto"
+    daniRoute()
       ? DANI_MODEL_NAME
       : displayModelName(selectedModel()?.name, props.value);
   const field = () => props.variant === "field";

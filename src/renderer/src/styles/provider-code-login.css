@@ -1,14 +1,3 @@
-/*
- * The code sign-in dialog. It opens from the provider rows, which appear inside the settings modal
- * as well as on their own, so it sits one layer above the shared dialog layer for the same reason
- * `opencode-key-dialog.css` does: both portals are children of `body`, and insertion order alone
- * would decide it wrongly the first time a caller mounts it from elsewhere.
- *
- * The code itself is the largest thing on screen. It is about to be typed on another device from
- * this screen alone, so it is set in the mono face at display size with the characters spaced
- * apart: a code read wrong costs the whole round trip.
- */
-
 .provider-code-login-backdrop {
   position: fixed;
   inset: 0;
@@ -161,3 +150,62 @@
     transform: scale(0.97);
   }
 }
+
+.voice-setup-dialog {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 16px;
+}
+.voice-setup-option {
+  display: grid;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dani-dex-border);
+}
+.voice-setup-option h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.voice-setup-option p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--dani-dex-text-secondary);
+}
+.voice-setup-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.voice-setup-consent input {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.provider-picker-identity { min-width: 0; }
+.provider-picker-email, .provider-picker-check-error {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.voice-setup-dialog { max-height: calc(100dvh - 48px); overflow-y: auto; }
+.voice-setup-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.composer-slash-suggestions { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 8px; }
+
+.voice-setup-heading { position: sticky; top: -24px; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 8px 0; background: var(--dani-dex-bg-panel, #202020); }
+
+.voice-choice-card { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--dani-dex-border); border-radius: 12px; }
+.voice-choice-card h3, .voice-choice-card p { margin: 0; }
+.voice-choice-card p, .voice-choice-card small { color: var(--dani-dex-text-muted); }
+.voice-choice-card h3 { font-size: 16px; }
+
+.voice-auth-brand { display:flex; align-items:center; gap:10px; }
+.voice-auth-brand svg { width:24px; height:24px; flex-shrink:0; }
+.voice-auth-button-logo { width:18px; height:18px; margin-right:6px; }
+/* OpenAI auth marks follow the surrounding foreground in either theme. */
+.voice-auth-brand svg, .voice-auth-button-logo { fill: currentColor; color: inherit; }
+.voice-auth-brand svg path, .voice-auth-button-logo path { fill: currentColor; }

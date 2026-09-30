@@ -9,23 +9,14 @@ import { createProviderRuntimeStore } from "./features/provider-updates/provider
 import { useServers } from "./features/servers/servers-context";
 import { createSimpleContext } from "./simple-context";
 
-/**
- * Coding providers (Codex, Claude, Grok) as two paths the renderer reconciles: managed
- * `providerRuntimes` snapshots from main, and the older installed-CLI sign-in state via
- * `AgentStatus`. Consumers pick handlers through `providerRuntimeDownloadsAvailable()`.
- * Nested under `agents` so the edge stays one-way; see docs/ARCHITECTURE.md.
- */
 const Providers = createSimpleContext({
   name: "Providers",
   init: () => {
     const { agentStatus, setAgentStatus } = useAgents();
     const { activeServer } = useServers();
+    const [apiKeyProvider, setApiKeyProvider] = createSignal<AgentProviderId | null>(null);
+    const [chatGptConnecting, setChatGptConnecting] = createSignal(false);
     const [refreshingProviders, setRefreshingProviders] = createSignal(false);
-    /**
-     * A CLI the user installed themselves, and the version it reports. Only the agent status knows
-     * this, and the runtime store needs it to offer that install the same update a managed runtime
-     * gets. Updates install the managed copy without changing the system installation.
-     */
     function systemCliVersion(provider: AgentProviderId): string | null {
       const row = agentStatus().providers?.find((candidate) => candidate.id === provider);
       return row?.cliSource === "system" ? (row.version ?? null) : null;
@@ -34,22 +25,14 @@ const Providers = createSimpleContext({
       systemCliVersion,
       isLocalServer: () => activeServer()?.kind === "local",
     });
-    /** Connect attempts still waiting for the status that says how they ended. */
     const pendingProviderConnections = new Map<AgentProviderId, ReturnType<typeof desktopAnalytics.scope>>();
-    /** The provider whose code dialog is open, and the phase that dialog shows. */
     const [codeLoginProvider, setCodeLoginProvider] = createSignal<AgentProviderId | null>(null);
     const [codeLoginState, setCodeLoginState] = createSignal<ProviderCodeLoginState>({ phase: "starting" });
     let codeLoginExpiry: number | undefined;
-    /** Whether the provider has been seen working on the open code sign-in. */
     let codeLoginStarted = false;
     let codeLoginGeneration = 0;
     let codeLoginCancellation: Promise<void> = Promise.resolve();
 
-    /**
-     * The status is the completion signal for every connect started here: main
-     * answers `connect()` before the provider has finished coming up, so the
-     * outcome arrives later, in a status this or an agent event applies.
-     */
     function applyAgentStatus(status: AgentStatus): void {
       for (const provider of status.providers ?? []) {
         const analytics = pendingProviderConnections.get(provider.id);
@@ -82,14 +65,13 @@ const Providers = createSimpleContext({
       return window.danidex.openExternal(descriptor.installGuideLink);
     }
 
-    /**
-     * Signs the user in to one provider, through that provider's own login: Codex opens a browser,
-     * Claude and Grok run their CLI's OAuth command, and OpenCode is asked again. Every sign-in
-     * entry point calls this - the composer notice, the model picker, onboarding and settings - so
-     * none of them leaves the user to read a documentation page and sign in in a terminal.
-     */
     async function connectProvider(provider: AgentProviderId): Promise<void> {
       if (refreshingProviders()) return;
+      if (provider === "claude")
+        throw new Error(
+          "Claude.ai subscription login in third-party apps requires Anthropic permission. Use the optional API key until this is approved.",
+        );
+      if (provider === "codex") setChatGptConnecting(true);
       const analytics = beginProviderConnection(provider);
       try {
         const status = await window.danidex.connectProvider(provider);
@@ -97,10 +79,11 @@ const Providers = createSimpleContext({
       } catch (error) {
         endFailedProviderConnection(provider, analytics);
         throw error;
+      } finally {
+        if (provider === "codex") setChatGptConnecting(false);
       }
     }
 
-    /** Opens a connect attempt: the status that ends it is matched back to this scope by provider. */
     function beginProviderConnection(provider: AgentProviderId) {
       const analytics = desktopAnalytics.scope();
       pendingProviderConnections.set(provider, analytics);
@@ -121,14 +104,6 @@ const Providers = createSimpleContext({
       });
     }
 
-    /**
-     * The sign-in the user finishes on another device, for a provider whose descriptor offers one.
-     *
-     * Everything about how it ends arrives in the agent status, the same way a browser sign-in's
-     * does, so this holds only what the status cannot say: which provider the open dialog belongs
-     * to, and the code that provider issued. The code is a one-time handle and is meant to be read
-     * out; nothing it is later traded for reaches the renderer.
-     */
     async function startProviderCodeLogin(provider: AgentProviderId): Promise<void> {
       const generation = ++codeLoginGeneration;
       clearCodeLoginExpiry();
@@ -180,7 +155,6 @@ const Providers = createSimpleContext({
       }
     }
 
-    /** Abandons the code sign-in and closes the dialog. The code stops working before this returns. */
     function cancelProviderCodeLogin(): void {
       const provider = codeLoginProvider();
       const generation = ++codeLoginGeneration;
@@ -199,14 +173,6 @@ const Providers = createSimpleContext({
         .catch(() => undefined);
     }
 
-    /**
-     * Closes the dialog on an ending and says how it went in a notification.
-     *
-     * Not a last screen in the dialog: the user finished this sign-in on another device, so they
-     * come back to an app that should already be theirs to use, not to a modal to dismiss. The
-     * notification carries the retry, because "the code expired" with no way to ask for another
-     * one is a dead end.
-     */
     function endProviderCodeLogin(
       provider: AgentProviderId,
       outcome:
@@ -247,15 +213,6 @@ const Providers = createSimpleContext({
       codeLoginExpiry = undefined;
     }
 
-    /**
-     * How a code sign-in ends: the provider's own status, which is what a browser sign-in reports
-     * too. An account means it worked; anything else that stops the connect means it did not.
-     *
-     * The row has to be seen working on this login before its end is read out of it. A provider the
-     * user is already signed in to is `available` from the start, and taking that for the finish
-     * reported success as soon as the code appeared: nobody asking for a second account ever got to
-     * type one.
-     */
     createEffect(
       () => {
         const provider = codeLoginProvider();
@@ -315,10 +272,6 @@ const Providers = createSimpleContext({
       };
     });
 
-    /**
-     * The code sign-in as the one object its surfaces take. Onboarding and Settings both offer it
-     * and would otherwise each assemble the same six pieces.
-     */
     const codeLogin: ProviderCodeLoginApi = {
       provider: codeLoginProvider,
       state: codeLoginState,
@@ -329,6 +282,11 @@ const Providers = createSimpleContext({
 
     return {
       ...runtimes,
+      apiKeyProvider,
+      openApiKey: (provider: AgentProviderId) => setApiKeyProvider(provider),
+      closeApiKey: () => setApiKeyProvider(null),
+      chatGptConnecting,
+      cancelChatGpt: () => void window.danidex.chatGptPlan.cancel(),
       refreshingProviders,
       applyAgentStatus,
       connectProvider,

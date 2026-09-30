@@ -39,6 +39,11 @@ export class AppServerError extends Error {
   }
 }
 
+export interface CodexProcessConfiguration {
+  readonly arguments?: readonly string[];
+  readonly environment?: () => NodeJS.ProcessEnv;
+}
+
 export class CodexAppServerClient extends EventEmitter<ClientEvents> {
   readonly provider: AgentProvider = "codex";
   readonly #executable: string;
@@ -49,7 +54,11 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
   #nextId = 1;
   #stopping = false;
 
-  constructor(executable: string, requestTimeoutMs = 30_000) {
+  constructor(
+    executable: string,
+    requestTimeoutMs = 30_000,
+    private readonly configuration: CodexProcessConfiguration = {},
+  ) {
     super();
     this.#executable = executable;
     this.#requestTimeoutMs = requestTimeoutMs;
@@ -64,12 +73,16 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
 
     this.#stopping = false;
     this.#decoder = new JsonLineDecoder();
-    const child = spawn(this.#executable, ["app-server", "--listen", "stdio://"], {
-      stdio: ["pipe", "pipe", "pipe"],
-      env: process.env,
-      shell: process.platform === "win32",
-      windowsHide: true,
-    });
+    const child = spawn(
+      this.#executable,
+      ["app-server", "--listen", "stdio://", ...(this.configuration.arguments ?? [])],
+      {
+        stdio: ["pipe", "pipe", "pipe"],
+        env: this.configuration.environment?.() ?? process.env,
+        shell: process.platform === "win32",
+        windowsHide: true,
+      },
+    );
     this.#process = child;
 
     child.stdin.on("error", (error) => this.#fail(error, child));

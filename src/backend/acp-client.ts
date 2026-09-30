@@ -17,6 +17,9 @@ import {
   type SessionConfigOption,
   type SessionNotification,
 } from "@agentclientprotocol/sdk";
+import { isFreeOpencodeModel } from "@dani-dex/contracts/ipc";
+import { transferableHistory, historyData, type WorkerHistory } from "./agent/worker-history";
+import { fallbackFailure } from "./agent/worker-fallback";
 import { agentProviderName } from "@dani-dex/contracts/agent-providers";
 import { type DynamicRecord, isBoolean, isString } from "@dani-dex/contracts/runtime-values";
 import { redactText } from "@dani-dex/logging";
@@ -98,11 +101,18 @@ interface AcpTurn {
   receivedOutput: boolean;
   messages: ThreadItem[];
   toolNames: Map<string, string>;
+  toolOperations: Map<string, {operation: string | null; toolKind: string | null; displayTitle: string | null}>;
   task: Promise<void>;
+  controller: AbortController;
+  fallbackUsed: boolean;
 }
 
 interface AcpThread {
   id: string;
+  wireId: string;
+  resumed: boolean;
+  retiredAttempt?: boolean;
+  sessionArgs: { cwd: string; additionalDirectories: string[]; mcpServers: Parameters<ClientSideConnection["newSession"]>[0]["mcpServers"] };
   cwd: string;
   developerInstructions: string;
   configOptions: SessionConfigOption[];
@@ -144,6 +154,10 @@ export interface AcpProviderOptions {
    * while those run and this process would still answer on it.
    */
   servesModel?(modelId: string): boolean;
+  validateModel?(modelId: string, signal?: AbortSignal): Promise<void>;
+  fallbackModel?: string;
+  promptDeadlineMs?: number;
+  workerHistory?: WorkerHistory;
   /** Drop the model's thought chunks: Dani's free models reason out loud, and it must not reach a bubble. */
   hideThoughtChunks?: boolean;
   /**
@@ -169,6 +183,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
   get provider(): AgentProvider {
     return this.options.provider;
   }
+  readonly #pendingTurns = new Map<string, AbortController>();
   readonly #cli: AgentCliInfo;
   readonly #requestTimeoutMs: number;
   readonly #bridge = new LocalMcpBridge();
@@ -240,11 +255,13 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
 
   async stop(): Promise<void> {
     this.#stopping = true;
+    for (const controller of this.#pendingTurns.values()) controller.abort();
+    this.#pendingTurns.clear();
     const child = this.#process;
     this.#process = null;
     this.#connection = null;
     this.#initialized = null;
-    for (const thread of this.#threads.values()) thread.mcp.close();
+    for (const thread of this.#threads.values()) { thread.activeTurn?.controller.abort(); thread.mcp.close(); }
     this.#threads.clear();
     this.#startingThreads.clear();
     for (const pending of this.#pendingServerRequests.values()) pending.reject(new Error("ACP session stopped."));
@@ -273,9 +290,10 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
   async releaseThread(sessionId: string): Promise<void> {
     const thread = this.#threads.get(sessionId);
     if (!thread) return;
-    this.#threads.delete(sessionId);
+    for (const [id, held] of this.#threads) if (held === thread) this.#threads.delete(id);
+    thread.activeTurn?.controller.abort();
     thread.mcp.close();
-    await this.#connection?.closeSession({ sessionId }).catch(() => undefined);
+    await this.#connection?.closeSession({ sessionId: thread.wireId }).catch(() => undefined);
   }
 
   async request<T>(method: string, params: unknown, decoder: ResponseDecoder<T>, timeoutMs?: number): Promise<T> {
@@ -334,7 +352,14 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
         return decoder(await this.#startTurn(params, true));
       case "turn/interrupt": {
         const thread = this.#requireThread(requiredString(params, "threadId"));
-        this.#requireConnection().cancel({ sessionId: thread.id });
+        this.#pendingTurns.get(thread.id)?.abort();
+        if(thread.activeTurn){
+          thread.retiredAttempt=true;
+          try {this.options.workerHistory?.append(thread.id,{kind:"retirement",turnId:thread.activeTurn.id,reason:"user cancellation"});}
+          catch(error){this.emit("diagnostic",redactText(`Retirement persistence failed; attempt remains quarantined: ${String(error)}`));}
+        }
+        thread.activeTurn?.controller.abort();
+        void this.#requireConnection().cancel({ sessionId: thread.wireId }).catch(error=>this.emit("diagnostic",redactText(String(error))));
         return decoder({});
       }
       case "thread/compact/start":
@@ -400,8 +425,10 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     );
     try {
       await this.options.authenticate?.(connection, this.#initialization);
-      this.#models = await this.#discoverModels();
-      if (this.#models.length === 0) {
+      // Disposable routing/profile clients use a model already validated by the main client.
+      // Avoid a second full catalogue and per-model reasoning sweep before one read-only prompt.
+      this.#models = this.options.profileGeneration ? [] : await this.#discoverModels();
+      if (!this.options.profileGeneration && this.#models.length === 0) {
         throw new Error("ACP CLI did not advertise any ACP models. Dani-Dex will not guess a fallback model.");
       }
       this.#signedIn = true;
@@ -609,12 +636,12 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       this.options.reportMcpDrops?.(this.provider, handoff.dropped);
       const mcpServers = [...handoff.servers, ...mcp.servers];
       if (resume && requestedThreadId) {
-        const response = await connection.loadSession({
-          sessionId: requestedThreadId,
-          cwd,
-          additionalDirectories,
-          mcpServers,
-        });
+        let response;
+        try {response=await connection.loadSession({sessionId:requestedThreadId,cwd,additionalDirectories,mcpServers});}
+        catch(error){
+          this.emit("diagnostic",redactText(`ACP saved-session load failed: ${String(error)}`));
+          throw new Error("Saved provider session unavailable. Your conversation is preserved. Restore the provider data before continuing; no messages or tools were replayed.",{cause:error});
+        }
         id = requestedThreadId;
         configOptions = response.configOptions ?? [];
         currentModelId = currentModelFromSessionSetup(response);
@@ -627,6 +654,9 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       mcp.setThreadId(id);
       const thread: AcpThread = {
         id,
+        wireId: id,
+        sessionArgs: {cwd, additionalDirectories, mcpServers},
+        resumed: resume,
         cwd,
         developerInstructions: getString(params, "developerInstructions") ?? "",
         configOptions,
@@ -638,6 +668,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       threadRef = thread;
       this.#threads.set(id, thread);
       await this.#applyConfig(thread, getString(params, "model"), getString(params, "effort"));
+
       return { thread: { id } };
     } catch (error) {
       mcp.close();
@@ -656,7 +687,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
         if (currentModel && currentModel.usesModelReasoningEffort !== null) {
           if (currentModel.usesModelReasoningEffort && currentModel.supportedReasoningEfforts.includes(value)) {
             await this.#requireConnection().request("session/set_model", {
-              sessionId: thread.id,
+              sessionId: thread.wireId,
               modelId: thread.currentModelId,
               _meta: { reasoningEffort: currentModel.reasoningEffortWireValues.get(value) ?? value },
             });
@@ -671,7 +702,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       if (!option) {
         if (category === "model" && thread.currentModelId !== value) {
           await this.#requireConnection().request("session/set_model", {
-            sessionId: thread.id,
+            sessionId: thread.wireId,
             modelId: value,
           });
           thread.currentModelId = value;
@@ -686,7 +717,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       const selected = values.find((candidate) => candidate.value === wanted);
       if (!selected) continue;
       const response = await this.#requireConnection().setSessionConfigOption({
-        sessionId: thread.id,
+        sessionId: thread.wireId,
         configId: option.id,
         value: selected.value,
       });
@@ -700,27 +731,45 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     steer: boolean,
   ): Promise<{ turn: { id: string; status: string }; turnId?: string }> {
     const thread = this.#requireThread(requiredString(params, "threadId"));
+    const deliveryId = getString(params, "clientUserMessageId");
+    const completed = deliveryId ? thread.turns.find(turn => turn.id === deliveryId) : undefined;
+    if (!steer && completed) return { turn: { id: completed.id, status: completed.status } };
+    const persisted=this.options.workerHistory?.read(thread.id);
+    const priorDelivery=deliveryId?persisted?.find(entry=>entry.kind==="terminal"&&entry.turnId===deliveryId):undefined;
+    if(!steer&&priorDelivery?.kind==="terminal")return {turn:{id:priorDelivery.turnId,status:priorDelivery.status}};
+    const resolved=new Set(persisted?.filter(entry=>entry.kind==="terminal").map(entry=>entry.turnId));
+    const unresolved=persisted?.some(entry=>(entry.kind==="user"||entry.kind==="item")&&entry.turnId!==thread.activeTurn?.id&&!resolved.has(entry.turnId));
+    if(thread.retiredAttempt||unresolved||persisted?.some(entry=>entry.kind==="retirement"||entry.kind==="terminal"&&entry.retiredAttempt))throw new Error("This provider attempt was quarantined. Safe recovery is required before a new turn.");
     if (!steer && thread.activeTurn) throw new Error("The ACP thread already has an active turn.");
-    if (steer && !thread.activeTurn) throw new Error("The ACP thread has no active turn to steer.");
+    if (steer) throw new Error("Steering is temporarily unavailable for ACP: start a new message after the current turn finishes.");
     await this.#applyConfig(thread, getString(params, "model"), getString(params, "effort"));
     const activeTurn = thread.activeTurn;
     const turnId = steer && activeTurn ? activeTurn.id : (getString(params, "clientUserMessageId") ?? randomUUID());
     const blocks = await promptBlocks(params);
+    if(!steer&&!thread.resumed&&thread.turns.length===0)this.options.workerHistory?.append(thread.id,{kind:"coverage",turnId:"origin",version:1,fromBeginning:true});
+    if (!steer) this.options.workerHistory?.append(thread.id, {kind:"user",turnId,input:structuredClone(blocks)});
     if (!steer && thread.developerInstructions) {
       blocks.unshift({
         type: "text",
         text: `<dani-dex-developer-instructions>\n${thread.developerInstructions}\n</dani-dex-developer-instructions>`,
       });
     }
+    const controller = new AbortController();
+    if (this.#pendingTurns.has(thread.id)) throw new Error("A turn is already preparing.");
+    this.#pendingTurns.set(thread.id, controller);
+    try {
+      this.#requireServedModel(thread);
+      if (thread.currentModelId) await this.options.validateModel?.(thread.currentModelId, controller.signal);
+      this.emit("notification", {method:"danidex/modelAttempt",params:{threadId:thread.id,turnId,
+        primaryModel:thread.currentModelId,state:"dispatching",at:new Date().toISOString(),outputBoundary:false}});
+      if (controller.signal.aborted || this.#stopping) throw new Error("Turn cancelled before dispatch.");
+      this.#requireServedModel(thread);
+    } catch(error) {
+      if(!steer)this.options.workerHistory?.append(thread.id,{kind:"terminal",turnId,status:controller.signal.aborted?"interrupted":"failed"});
+      throw error;
+    } finally { this.#pendingTurns.delete(thread.id); }
     this.#requireServedModel(thread);
-    if (steer) {
-      void this.#requireConnection()
-        .prompt({ sessionId: thread.id, prompt: blocks })
-        .catch((error) => {
-          this.emit("diagnostic", redactText(`ACP steer failed: ${String(error)}`));
-        });
-      return { turn: { id: turnId, status: "inProgress" }, turnId };
-    }
+    if (!steer && thread.activeTurn) throw new Error("The ACP thread already has an active turn.");
     const turn: AcpTurn = {
       id: turnId,
       itemId: `${turnId}:assistant`,
@@ -731,7 +780,10 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       receivedOutput: false,
       messages: [],
       toolNames: new Map(),
+      toolOperations: new Map(),
       task: Promise.resolve(),
+      controller,
+      fallbackUsed: false,
     };
     thread.activeTurn = turn;
     this.emit("notification", {
@@ -753,7 +805,29 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
 
   async #consumePrompt(thread: AcpThread, turn: AcpTurn, prompt: ContentBlock[]): Promise<void> {
     try {
-      const response = await this.#requireConnection().prompt({ sessionId: thread.id, prompt });
+      const wireId=thread.wireId;
+      let deadline:ReturnType<typeof setTimeout>|undefined;
+      let abortListener:(()=>void)|undefined;
+      const stopped=new Promise<never>((_resolve,reject)=>{
+        deadline=setTimeout(()=>{
+          thread.retiredAttempt=true;
+          let persistenceFailure="";
+          try{this.options.workerHistory?.append(thread.id,{kind:"retirement",turnId:turn.id,reason:"prompt deadline"});}
+          catch(error){persistenceFailure=` Retirement persistence failed: ${String(error)}`;this.emit("diagnostic",redactText(persistenceFailure));}
+          void this.#requireConnection().cancel({sessionId:wireId}).catch(error=>this.emit("diagnostic",redactText(String(error))));
+          reject(new Error("ACP prompt deadline expired. The old attempt was quarantined; cancellation does not prove tool termination. Fallback paused."+persistenceFailure));
+        },this.options.promptDeadlineMs??120_000);
+        abortListener=()=>{reject(new Error("Turn cancelled"));};
+        turn.controller.signal.addEventListener("abort",abortListener,{once:true});
+      });
+      let response;
+      try { response=await Promise.race([this.#requireConnection().prompt({ sessionId: wireId, prompt }),stopped]); }
+      finally {if(deadline)clearTimeout(deadline);if(abortListener)turn.controller.signal.removeEventListener("abort",abortListener);}
+
+      if (turn.controller.signal.aborted || thread.activeTurn !== turn || this.#stopping) {
+        this.#completeTurn(thread, turn, "interrupted", null);
+        return;
+      }
       if (response.usage)
         this.emit("notification", {
           method: "danidex/usage",
@@ -776,18 +850,62 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
           : response.stopReason === "end_turn"
             ? "completed"
             : "failed";
+
       this.#completeTurn(thread, turn, status, status === "failed" ? response.stopReason : null);
     } catch (error) {
-      this.#completeTurn(thread, turn, "failed", error);
+      const failure = fallbackFailure(error);
+      const primary = thread.currentModelId;
+      let coverage:ReturnType<WorkerHistory["read"]>;
+      try {coverage=this.options.workerHistory?.read(thread.id)??null;}
+      catch(historyError){this.#completeTurn(thread,turn,turn.controller.signal.aborted?"interrupted":"failed",historyError);return;}
+      if (this.provider === "opencode" && primary && primary.startsWith("opencode/") && isFreeOpencodeModel(primary, primary) &&
+          this.options.fallbackModel && this.options.validateModel && failure && (thread.turns.length === 0 && !thread.resumed || !!coverage?.some(entry => entry.kind === "coverage" && entry.version === 1 && entry.fromBeginning)) && !thread.retiredAttempt && !turn.fallbackUsed && !turn.receivedOutput &&
+          !turn.controller.signal.aborted && thread.activeTurn === turn) {
+        turn.fallbackUsed = true;
+        this.emit("notification", { method: "danidex/modelAttempt", params: { threadId: thread.id, turnId: turn.id,
+          primaryModel: primary, fallbackModel: this.options.fallbackModel, error: redactText(String(error)),
+          failure, at: new Date().toISOString(), outputBoundary: false, state: "switching" } });
+        try {
+          const history=this.options.workerHistory?.read(thread.id);
+          if(history===null&&(thread.resumed||thread.turns.length))throw new Error("Committed history unavailable. Fallback paused.");
+          const transferred=history?.length?transferableHistory(history,turn.id):[];
+          await this.options.validateModel?.(this.options.fallbackModel, turn.controller.signal);
+          if (turn.controller.signal.aborted || thread.activeTurn !== turn || turn.receivedOutput) throw new Error("Fallback paused after cancellation or output boundary.");
+          // A distinct ACP session makes late primary notifications unambiguously stale.
+          const opened = await this.#requireConnection().newSession(thread.sessionArgs);
+          if (turn.controller.signal.aborted || thread.activeTurn !== turn || turn.receivedOutput) throw new Error("Fallback paused after cancellation or output boundary.");
+          const retiredWireId = thread.wireId;
+          thread.wireId = opened.sessionId;
+          thread.retiredAttempt=false;
+          thread.configOptions = opened.configOptions ?? [];
+          thread.currentModelId = currentModelFromSessionSetup(opened);
+          this.#threads.set(thread.wireId, thread);
+          thread.mcp.setThreadId(thread.id);
+          this.emit("notification", {method:"danidex/sessionRerouted",params:{threadId:thread.id,
+            externalSessionId:thread.wireId,model:this.options.fallbackModel,turnId:turn.id}});
+          if (retiredWireId !== thread.id) this.#threads.delete(retiredWireId);
+          await this.#applyConfig(thread, this.options.fallbackModel, null);
+          if (turn.controller.signal.aborted || thread.activeTurn !== turn || turn.receivedOutput) throw new Error("Fallback paused after cancellation or output boundary.");
+          this.#requireServedModel(thread);
+          this.emit("notification", { method: "model/rerouted", params: {threadId:thread.id,turnId:turn.id,fromModel:primary,toModel:thread.currentModelId} });
+          if(turn.controller.signal.aborted||thread.activeTurn!==turn||this.#stopping||turn.receivedOutput)throw new Error("Turn cancelled or output boundary during history transfer.");
+          await this.#consumePrompt(thread, turn, transferred.length ? [historyData(transferred), ...prompt] : prompt);
+          return;
+        } catch (fallbackError) {
+          this.#completeTurn(thread, turn, turn.controller.signal.aborted ? "interrupted" : "failed", fallbackError);
+          return;
+        }
+      }
+      this.#completeTurn(thread, turn, turn.controller.signal.aborted ? "interrupted" : "failed", error);
     }
   }
 
   #sessionUpdate(notification: SessionNotification): void {
     const thread = this.#threads.get(notification.sessionId);
-    if (!thread) return;
+    if (!thread || thread.retiredAttempt || thread.wireId !== notification.sessionId) return;
     const turn = thread.activeTurn;
     const update = notification.update;
-    if (!turn) return;
+    if (!turn || turn.controller.signal.aborted) return;
     if (update.sessionUpdate === "agent_message_chunk" && update.content.type === "text") {
       if (update.content.text) this.#completeThought(thread, turn);
       if (update.content.text.trim()) turn.receivedOutput = true;
@@ -795,6 +913,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       return;
     }
     if (update.sessionUpdate === "agent_thought_chunk" && update.content.type === "text") {
+      if (update.content.text) turn.receivedOutput = true;
       if (this.options.hideThoughtChunks) return;
       this.#completeMessage(thread, turn, "commentary");
       /* A delta carries no phase, so the item has to be opened as `commentary` first — otherwise the
@@ -821,21 +940,26 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       turn.receivedOutput = true;
       if (update.sessionUpdate === "tool_call") this.#completeMessage(thread, turn, "commentary");
       // ACP updates are partial; OpenCode omits the name when a tool finishes.
-      const name = update.name ?? update.title ?? turn.toolNames.get(update.toolCallId) ?? "tool";
+      const name = update.name ?? turn.toolNames.get(update.toolCallId) ?? update.title ?? "tool";
       turn.toolNames.set(update.toolCallId, name);
+      const previousOperation=turn.toolOperations.get(update.toolCallId);
+      const operation={operation:update.name ?? previousOperation?.operation ?? null,
+        toolKind:update.kind ?? previousOperation?.toolKind ?? null,
+        displayTitle:update.title ?? previousOperation?.displayTitle ?? null};
+      turn.toolOperations.set(update.toolCallId,operation);
+      const prior = turn.messages.find(item => item.id === update.toolCallId);
+      const committed = { ...prior, id:update.toolCallId, type:"toolCall", name,
+        status:update.status ?? prior?.status, arguments:mergeToolData(prior?.arguments, update.rawInput), result:mergeToolData(prior?.result, update.rawOutput),
+        content:update.content ?? prior?.content } satisfies ThreadItem;
+      if (prior) Object.assign(prior, committed); else turn.messages.push(committed);
+      this.options.workerHistory?.append(thread.id, {kind:"item",turnId:turn.id,item:committed,
+        effectCommitted:update.status === "completed",effectUnknown:update.status!=="completed",...operation});
       this.emit("notification", {
         method: update.status === "completed" || update.status === "failed" ? "item/completed" : "item/started",
         params: {
           threadId: thread.id,
           turnId: turn.id,
-          item: {
-            id: update.toolCallId,
-            type: "toolCall",
-            name,
-            status: update.status,
-            arguments: update.rawInput,
-            result: update.rawOutput,
-          },
+          item: committed,
         },
       });
       return;
@@ -861,6 +985,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     if (!turn.text) return;
     const item = { id: turn.itemId, type: "agentMessage", phase, text: turn.text } satisfies ThreadItem;
     turn.messages.push(item);
+    this.options.workerHistory?.append(thread.id, {kind:"item",turnId:turn.id,item,effectCommitted:false});
     this.emit("notification", { method: "item/completed", params: { threadId: thread.id, turnId: turn.id, item } });
     turn.text = "";
     turn.itemId = `${turn.id}:assistant:${turn.messages.length}`;
@@ -883,6 +1008,9 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
 
   #completeTurn(thread: AcpThread, turn: AcpTurn, status: string, error: unknown): void {
     if (thread.activeTurn !== turn) return;
+    this.emit("notification", { method: "danidex/modelAttempt", params: { threadId: thread.id, turnId: turn.id,
+      servingModel: thread.currentModelId, fallbackUsed: turn.fallbackUsed, outcome: status,
+      outputBoundary: turn.receivedOutput, at: new Date().toISOString() } });
     this.#completeThought(thread, turn);
     this.#completeMessage(thread, turn, "final_answer");
     if (status === "failed" && error) {
@@ -897,6 +1025,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
         params: { threadId: thread.id, turnId: turn.id, message },
       });
     }
+    this.options.workerHistory?.append(thread.id, {kind:"terminal",turnId:turn.id,status,retiredAttempt:thread.retiredAttempt===true});
     this.emit("notification", {
       method: "turn/completed",
       params: { threadId: thread.id, turn: { id: turn.id, status } },
@@ -908,30 +1037,57 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
   async #requestPermission(params: RequestPermissionRequest): Promise<RequestPermissionResponse> {
     if (this.options.profileGeneration) return { outcome: { outcome: "cancelled" } };
     const thread = this.#threads.get(params.sessionId);
-    const turnId = thread?.activeTurn?.id ?? randomUUID();
+    if (!thread || thread.retiredAttempt || thread.wireId !== params.sessionId) return { outcome: { outcome: "cancelled" } };
+    if (thread.activeTurn) thread.activeTurn.receivedOutput = true;
+    if (thread?.activeTurn?.controller.signal.aborted) return { outcome: { outcome: "cancelled" } };
+    const activeTurn = thread?.activeTurn;
+    if (!activeTurn || thread?.activeTurn !== activeTurn || activeTurn.controller.signal.aborted) return { outcome: { outcome: "cancelled" } };
+    const turnId = activeTurn.id;
     const kind =
       params.toolCall.kind === "execute"
         ? "command"
         : ["edit", "delete", "move"].includes(params.toolCall.kind ?? "")
           ? "file-change"
           : "permissions";
+    const rawInput = isRecord(params.toolCall.rawInput) ? params.toolCall.rawInput : {};
+    const acpScope = {
+      kind: params.toolCall.kind ?? null,
+      name: params.toolCall.name ?? null,
+      title: params.toolCall.title ?? null,
+      locations: (params.toolCall.locations ?? []).map((location) => ({ path: location.path, line: location.line ?? null })),
+      rawInput: params.toolCall.rawInput ?? null,
+      options: params.options.map((option) => ({ kind: option.kind, name: option.name, optionId: option.optionId })),
+    };
+    this.emit("diagnostic", redactText(`ACP permission scope: ${JSON.stringify(acpScope)}`));
     const requestedPermissions = kind === "permissions" ? { [params.toolCall.kind ?? "file-system"]: true } : null;
     const result = await this.#callServerRequest(
       `item/${kind === "command" ? "commandExecution" : kind === "file-change" ? "fileChange" : "permissions"}/requestApproval`,
       {
-        threadId: params.sessionId,
+        threadId: thread.id,
         turnId,
         command: params.toolCall.kind === "execute" ? printableInput(params.toolCall.rawInput) : null,
         reason: params.toolCall.title ?? null,
         permissions: requestedPermissions,
         acpOptions: params.options,
+        acpToolCall: acpScope,
+        acpExternalDirectory: this.provider === "opencode" && params.toolCall.kind === "other" &&
+          typeof rawInput.parentDir === "string" &&
+          typeof rawInput.filepath === "string" &&
+          params.toolCall.locations?.some((location) => location.path === rawInput.parentDir) &&
+          params.options.some((option) => option.kind === "allow_once")
+          ? rawInput.parentDir : null,
       },
     );
+    if (thread?.activeTurn !== activeTurn || thread.retiredAttempt || thread.wireId!==params.sessionId || activeTurn.controller.signal.aborted || this.#stopping) return { outcome: { outcome: "cancelled" } };
     const accepted =
       isRecord(result) &&
       (result.decision === "accept" ||
         result.decision === "approved" ||
         (isRecord(result.permissions) && Object.keys(result.permissions).length > 0));
+    if(!accepted)this.options.workerHistory?.append(thread.id,{kind:"item",turnId,
+      item:{id:params.toolCall.toolCallId,type:"toolCall",name:params.toolCall.name??"tool",status:"failed",arguments:params.toolCall.rawInput},
+      operation:params.toolCall.name??null,toolKind:params.toolCall.kind??null,displayTitle:params.toolCall.title??null,
+      effectCommitted:false,effectUnknown:false,permission:"denied"});
     const option = bestPermissionOption(params.options, accepted);
     return option
       ? { outcome: { outcome: "selected", optionId: option.optionId } }
@@ -939,18 +1095,24 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
   }
 
   async #requestUserInput(method: string, params: DynamicRecord): Promise<DynamicRecord> {
-    const sessionId = getString(params, "sessionId") ?? [...this.#threads.keys()][0];
+    const sessionId = getString(params, "sessionId");
     const thread = sessionId ? this.#threads.get(sessionId) : undefined;
+    if(!thread||thread.retiredAttempt||thread.wireId!==sessionId||!thread.activeTurn||thread.activeTurn.controller.signal.aborted)throw new Error("No live attempt for user input.");
+    const active=thread.activeTurn;
     const result = await this.#callServerRequest("item/tool/requestUserInput", {
       ...params,
       threadId: sessionId,
       turnId: thread?.activeTurn?.id ?? randomUUID(),
       sourceMethod: method,
     });
+    if(thread.retiredAttempt||thread.wireId!==sessionId||thread.activeTurn!==active||active.controller.signal.aborted)throw new Error("Attempt retired during user input.");
     return isRecord(result) ? result : {};
   }
 
   async #createElicitation(params: CreateElicitationRequest): Promise<CreateElicitationResponse> {
+    const sessionId=getString(params,"sessionId");
+    const thread=sessionId?this.#threads.get(sessionId):undefined;
+    if(!thread||thread.retiredAttempt||thread.wireId!==sessionId||!thread.activeTurn||thread.activeTurn.controller.signal.aborted)return {action:"cancel"};
     const schema = getRecord(params, "requestedSchema");
     const properties = getRecord(schema, "properties") ?? {};
     const questions = Object.entries(properties).flatMap(([id, rawProperty]) => {
@@ -995,8 +1157,19 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     tool: string;
     arguments: unknown;
   }): Promise<DynamicToolResult> {
+    const turn = this.#threads.get(params.threadId)?.activeTurn;
+    if (!turn || turn.id !== params.turnId || this.#threads.get(params.threadId)?.retiredAttempt) throw new Error("No active attempt for tool dispatch.");
+    turn.receivedOutput = true;
+    if (turn.controller.signal.aborted) throw new Error("Turn cancelled before tool dispatch.");
+    this.options.workerHistory?.append(params.threadId,{kind:"item",turnId:turn.id,
+      item:{id:params.callId,type:"toolCall",name:params.namespace+"."+params.tool,arguments:params.arguments,status:"in_progress"},
+      operation:params.namespace+"."+params.tool,effectCommitted:false,effectUnknown:true});
     const result = await this.#callServerRequest("item/tool/call", params);
     if (!isDynamicToolResult(result)) throw new Error("Dani-Dex returned an invalid dynamic tool result.");
+    this.options.workerHistory?.append(params.threadId, {kind:"item",turnId:turn.id,
+      operation:params.namespace+"."+params.tool,
+      item:{id:params.callId,type:"toolCall",name:params.namespace+"."+params.tool,arguments:params.arguments,result,status:result.success?"completed":"failed"},
+      effectCommitted:result.success,effectUnknown:!result.success});
     return result;
   }
 
@@ -1239,7 +1412,7 @@ function printableInput(value: unknown): string | null {
 }
 
 function bestPermissionOption(options: PermissionOption[], accepted: boolean): PermissionOption | null {
-  const kinds = accepted ? ["allow_once", "allow_always"] : ["reject_once", "reject_always"];
+  const kinds = accepted ? ["allow_once"] : ["reject_once", "reject_always"];
   return kinds.flatMap((kind) => options.filter((option) => option.kind === kind))[0] ?? null;
 }
 
@@ -1276,4 +1449,12 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: s
   } finally {
     if (timer) clearTimeout(timer);
   }
+}
+
+function mergeToolData(previous:unknown,next:unknown):unknown {
+ if(next===undefined||next===null)return previous;
+ if(isRecord(previous)&&isRecord(next)) {
+   const merged={...previous};for(const [key,value] of Object.entries(next))merged[key]=mergeToolData(previous[key],value);return merged;
+ }
+ return next;
 }

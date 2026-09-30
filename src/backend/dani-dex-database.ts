@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 import type {
@@ -79,6 +80,12 @@ export class DaniDexDatabase {
 
   async initialize(): Promise<void> {
     await this.#core.initialize();
+  }
+
+  appendWorkerHistory(threadId: string, entry: import("./agent/worker-history").WorkerHistoryEntry): void {
+    const id = createHash("sha256").update(JSON.stringify(entry)).digest("hex");
+    this.#core.dispatch(`worker-history:${threadId}:${entry.turnId}:${entry.kind}:${id}`, [{aggregateType:"thread",aggregateId:threadId,
+      eventType:"turn.worker-history",payload:{entry}}], () => null);
   }
 
   close(): void {

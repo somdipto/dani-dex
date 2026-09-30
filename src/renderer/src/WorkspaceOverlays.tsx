@@ -327,6 +327,7 @@ function AppSettings(props: AccountProps) {
     startProviderUpdate,
     cancelProviderRuntimeDownload,
     connectProvider,
+    openApiKey,
     openProviderInstallGuide,
     codeLogin,
   } = useProviders();
@@ -380,6 +381,7 @@ function AppSettings(props: AccountProps) {
         onUpdateProvider={localProviderDownloads() ? startProviderUpdate : undefined}
         onDownloadProvider={localProviderDownloads() ? downloadProviderRuntime : undefined}
         onCancelProviderDownload={localProviderDownloads() ? cancelProviderRuntimeDownload : undefined}
+        onOptionalApiKey={localProviderDownloads() ? openApiKey : undefined}
         onConnectProvider={localProviderDownloads() ? connectProvider : undefined}
         onInstallProvider={localProviderDownloads() ? openProviderInstallGuide : undefined}
         customProviders={localCustomProviders() ? customProviders() : undefined}

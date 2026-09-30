@@ -96,7 +96,8 @@
     "lint": "biome check --max-diagnostics=none src",
     "codegen": "expo customize tsconfig.json && uniwind generate-artifacts --css ./global.css --dts ./src/uniwind-types.d.ts",
     "typecheck": "bun run codegen && tsc --noEmit",
-    "doctor": "bunx expo-doctor@latest"
+    "doctor": "bunx expo-doctor@latest",
+    "android:apk:local": "bash scripts/build-apk.sh"
   },
   "private": true
 }

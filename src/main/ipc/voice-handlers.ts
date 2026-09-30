@@ -1,3 +1,5 @@
+import type { CodexRealtimeService } from "../codex-realtime-service";
+import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 // The local Whisper model, dictation, and Realtime call credentials.
 
 import type {
@@ -17,6 +19,7 @@ import { parseVoiceTranscription } from "./voice-inputs";
 const MAX_REALTIME_API_KEY_LENGTH = 512;
 
 export interface VoiceIpcDependencies {
+  codex: CodexRealtimeService;
   voice: VoiceTranscriptionService;
   realtime: Pick<OpenAiRealtimeSessionService, "create">;
   credentials: Pick<ProviderCredentialStore, "set" | "clear" | "status">;
@@ -24,11 +27,19 @@ export interface VoiceIpcDependencies {
 
 export function voiceIpcHandlers({
   voice,
+  codex,
   realtime,
   credentials,
 }: VoiceIpcDependencies): Pick<IpcGroupHandlers, "voice"> {
   return {
     voice: {
+      codexStatus: handler(() => codex.status()),
+      codexConnect: handler(() => codex.connect()),
+      codexStop: handler(() => codex.stop()),
+      codexStart: payloadHandler((value: unknown) => {
+        if (!isDynamicRecord(value) || typeof value.sdp !== "string" || value.consent !== true) throw new Error("A WebRTC offer and explicit plan-usage consent are required.");
+        return { sdp: value.sdp, consent: true };
+      }, (input) => codex.start(input.sdp, input.consent)),
       getModelStatus: handler((): Promise<VoiceModelStatus> => voice.getModelStatus()),
       prepareModel: handler((): Promise<VoiceModelStatus> => voice.prepareModel()),
       transcribe: payloadHandler(

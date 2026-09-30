@@ -20,6 +20,7 @@ export class GrokAgentClient extends AcpAgentClient {
     reportMcpDrops?: McpDropReporter,
     mcpToolRuntimes?: McpToolRuntimeSource,
     mcpAuthorization?: McpAuthorizationSource,
+    apiKey?: () => string | null,
   ) {
     super(cli, requestTimeoutMs, {
       provider: "grok",
@@ -35,9 +36,21 @@ export class GrokAgentClient extends AcpAgentClient {
         "agent",
         "stdio",
       ],
-      env: { GROK_OAUTH2_REFERRER: "openbot" },
+      env: apiKey
+        ? (() => {
+            const key = apiKey();
+            if (!key) throw new Error("Add an xAI API key in Dani-Dex to use Grok.");
+            return { XAI_API_KEY: key };
+          })()
+        : {},
       signInMessage: "Run `grok login` or set XAI_API_KEY to use Grok.",
-      authenticate,
+      authenticate: apiKey
+        ? async (connection, initialization) => {
+            if (!initialization.authMethods?.some((method) => method.id === "xai.api_key"))
+              throw new Error("The Grok runtime did not offer API-key authentication.");
+            await connection.authenticate({ methodId: "xai.api_key" });
+          }
+        : authenticate,
       readAccount: async (connection) => grokAccount(await connection.extMethod("_x.ai/auth/info", {})),
       readRateLimits: async (connection) => grokRateLimits(await connection.extMethod("_x.ai/billing", {})),
     });

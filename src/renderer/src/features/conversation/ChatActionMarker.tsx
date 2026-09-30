@@ -324,7 +324,7 @@ function ActionTarget(props: {
 function markerLabel(marker: ChatActionMarkerModel): string {
   if (marker.kind === "unavailable") return marker.label;
   if (marker.kind === "skill-lifecycle")
-    return { created: "Created skill", revised: "Revised skill", installed: "Installed skill" }[marker.action];
+    return { created: "Created skill", revised: "Revised skill", installed: "Installed skill", selected: "Selected skill" }[marker.action];
   if (marker.kind === "agent-message") {
     if (marker.expectsReply) return marker.direction === "outgoing" ? "Messaged" : "Message from";
     return marker.direction === "outgoing" ? "Informed" : "Update from";

@@ -16,7 +16,8 @@ import {
   type ProviderRuntimeStatus,
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
-import { redactText } from "@dani-dex/logging";
+import { createDaniDexLogger, redactText } from "@dani-dex/logging";
+const runtimeLogger = createDaniDexLogger("provider-runtime");
 import lockValue from "../../native-runtime.lock.json";
 import { type AgentRuntimeLock, parseAgentRuntimeLock } from "../../scripts/agent-runtime-lock";
 import { type BundledProviderExecutables, configuredCliPath } from "../backend/cli";
@@ -417,18 +418,24 @@ export class ProviderRuntimeManager extends EventEmitter<ProviderRuntimeManagerE
    */
   async #activate(spec: RuntimeSpec, signal: AbortSignal | null): Promise<void> {
     let installed = false;
+    let installVerified = false;
     try {
       await this.#updateRuntime(spec.runtime, async () => {
         if (signal) {
           installed = await this.#runDownload(spec, signal);
           await this.#removePartial(spec);
         }
+        installVerified = true;
         return join(this.#installRoot(spec), "bin", spec.executableName);
       });
       this.#setStatus(spec.runtime, readyStatus(spec.version));
       this.emit("ready", spec.runtime);
     } catch (error) {
-      if (installed) await rm(this.#installRoot(spec), { recursive: true, force: true });
+      if (installVerified) {
+        const message = redactText(error instanceof Error ? error.message : String(error));
+        runtimeLogger.warn(`Installed ${spec.runtime} ${spec.version}, but connection failed: ${message}`);
+        this.#setStatus(spec.runtime, { phase: "download-error", failureStage: "connection", progress: null, version: spec.version, message });
+      } else if (installed) await rm(this.#installRoot(spec), { recursive: true, force: true });
       throw error;
     }
   }
@@ -671,13 +678,16 @@ export class ProviderRuntimeManager extends EventEmitter<ProviderRuntimeManagerE
   async #handleDownloadFailure(runtime: ManagedRuntimeId, error: unknown): Promise<void> {
     if (this.#cancelled.has(runtime)) return;
     if (this.#stopping && isAbortError(error)) return;
+    if (this.#statuses[runtime].failureStage === "connection") return;
     const message = isAbortError(error)
       ? "Download stopped. Try again."
       : error instanceof Error
         ? redactText(error.message)
         : "Download failed. Try again.";
+    runtimeLogger.warn(`Runtime ${runtime} download/extraction failed: ${message}`);
     this.#setStatus(runtime, {
       phase: "download-error",
+      failureStage: "download",
       progress: null,
       message,
       version: this.#statuses[runtime].version,
