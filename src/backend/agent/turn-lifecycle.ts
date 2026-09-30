@@ -157,6 +157,27 @@ export class TurnLifecycle {
     }
 
     switch (notification.method) {
+      case "danidex/sessionRerouted": {
+        const externalSessionId = getString(params, "externalSessionId");
+        const model = getString(params, "model");
+        if (threadId && agentId && externalSessionId && model) {
+          const publicId = this.#conversation.publicThreadId(agentId, threadId);
+          const agent = this.#store.list().find(item => item.id === agentId);
+          if (publicId && agent) {
+            this.#store.database.bindProviderSession({threadId:publicId,provider:source.provider,
+              externalSessionId,model,effort:agent.reasoningEffort});
+            this.#conversation.bindThread(externalSessionId,agentId,publicId);
+          }
+        }
+        return;
+      }
+      case "danidex/modelAttempt": {
+        if (threadId && agentId) {
+          const snapshot = this.#conversation.ensureSnapshot(agentId, this.#conversation.publicThreadId(agentId, threadId));
+          this.#store.database.persistConversation(snapshot, "turn.model-attempt", getRecord(notification, "params") ?? {});
+        }
+        return;
+      }
       case "account/login/completed": {
         this.#providers.completeCodexLogin(params, source, decodeAccountLoginCompletedResult);
         return;

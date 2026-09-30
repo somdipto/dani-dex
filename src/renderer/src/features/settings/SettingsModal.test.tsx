@@ -1047,7 +1047,7 @@ describe("SettingsModal", () => {
       />
     ));
 
-    const toggle = await screen.findByRole("switch", { name: "Turbo mode" });
+    const toggle = await screen.findByRole("switch", { name: "Allow all - computer access" });
     await fireEvent.click(toggle);
     // Nothing is on yet: the switch is a request to turn it on, and the dialog is where it is given.
     expect(value().turboMode).toBe(false);
@@ -1058,7 +1058,7 @@ describe("SettingsModal", () => {
     await fireEvent.click(await screen.findByRole("button", { name: "Turn on" }));
     await waitFor(() => expect(value().turboMode).toBe(true));
 
-    await fireEvent.click(await screen.findByRole("switch", { name: "Turbo mode" }));
+    await fireEvent.click(await screen.findByRole("switch", { name: "Allow all - computer access" }));
     await waitFor(() => expect(value().turboMode).toBe(false));
   });
 
@@ -1078,7 +1078,7 @@ describe("SettingsModal", () => {
       />
     ));
 
-    expect(await screen.findByRole("switch", { name: "Turbo mode" })).toBeEnabled();
+    expect(await screen.findByRole("switch", { name: "Allow all - computer access" })).toBeEnabled();
     expect(screen.queryByRole("button", { name: "Revoke all" })).not.toBeInTheDocument();
   });
 

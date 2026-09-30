@@ -80,6 +80,7 @@ export interface SettingsModalProps {
   onCancelProviderDownload?: (provider: AgentProviderId) => void | Promise<void>;
   onUpdateProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onInstallProvider?: (provider: AgentProviderId) => void | Promise<void>;
+  onOptionalApiKey?: (provider: AgentProviderId) => void;
   onConnectProvider?: (provider: AgentProviderId) => void | Promise<void>;
   /** Accepts a described endpoint from the General tab. Omitted on a remote server, which hides it. */
   onAddCustomProvider?: (value: SaveCustomProviderInput) => Promise<CustomProviderRestart>;
@@ -358,6 +359,7 @@ export function SettingsModal(props: SettingsModalProps) {
             onDownloadProvider={props.onDownloadProvider}
             onCancelProviderDownload={props.onCancelProviderDownload}
             onUpdateProvider={props.onUpdateProvider}
+            onOptionalApiKey={props.onOptionalApiKey}
             onConnectProvider={props.onConnectProvider}
             onInstallProvider={props.onInstallProvider}
             onAddCustomProvider={props.onAddCustomProvider}

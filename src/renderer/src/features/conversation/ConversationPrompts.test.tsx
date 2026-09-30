@@ -53,6 +53,24 @@ const approval: AgentApproval = {
 };
 
 describe("ApprovalCard", () => {
+  it("denies an empty permission scope without offering persistent approval", async () => {
+    const approve = vi.fn(async () => true), reject = vi.fn(async () => true);
+    render(() => <ApprovalCard approval={{ ...approval, kind: "permissions", permissions: { fileSystem: { read: [], write: [] }, network: false } }} onApprove={approve} onReject={reject} onAlwaysAllow={vi.fn(async () => true)} />);
+    expect(screen.getByRole("button", { name: "Allow", exact: true })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Always allow" })).toBeNull();
+    expect(screen.getByRole("alert")).toHaveTextContent("access scope for this request is unavailable");
+    await fireEvent.click(screen.getByRole("button", { name: "Deny" }));
+    expect(reject).toHaveBeenCalledOnce(); expect(approve).not.toHaveBeenCalled();
+  });
+  it("shows external directory access honestly and offers a confirmed standing grant", async () => {
+    const approve = vi.fn(async () => true);
+    render(() => <ApprovalCard approval={{ ...approval, kind: "permissions", externalDirectory: "/tmp/source", permissions: { fileSystem: { read: [], write: [] }, network: false } }} onApprove={approve} onReject={async () => true} onAlwaysAllow={vi.fn(async () => true)} />);
+    expect(screen.getByText(/This is not a read-only guarantee/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Always allow" })).toBeEnabled();
+    expect(screen.queryByRole("alert")).toBeNull();
+    await fireEvent.click(screen.getByRole("button", { name: "Allow once" }));
+    expect(approve).toHaveBeenCalledOnce();
+  });
   afterEach(() => toast.dismiss());
 
   it("shows a failed grant write and restores the approval controls", async () => {

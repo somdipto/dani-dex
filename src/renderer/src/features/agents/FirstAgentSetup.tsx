@@ -55,9 +55,8 @@ export const DEFAULT_FIRST_AGENT_DRAFT: FirstAgentDraft = {
   model: "gpt-5.6-luna",
 };
 
-export function createFirstAgentDraft(random: () => number = Math.random): FirstAgentDraft {
-  const role = ROBOT_ROLES[Math.min(ROBOT_ROLES.length - 1, Math.floor(random() * ROBOT_ROLES.length))];
-  return { ...DEFAULT_FIRST_AGENT_DRAFT, avatarSeed: `manzanilla:${role?.id ?? "default"}` };
+export function createFirstAgentDraft(_random: () => number = Math.random): FirstAgentDraft {
+  return { ...DEFAULT_FIRST_AGENT_DRAFT };
 }
 
 export const FIRST_AGENT_SUGGESTIONS: FirstAgentSuggestion[] = [

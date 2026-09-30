@@ -660,6 +660,42 @@ describe("DaniDexDatabase", () => {
     database.close();
   });
 
+  it("rolls back worker event and receipt together if the database fails mid-append",async()=>{
+    const database=await createDatabase();
+    database.connection.exec(`CREATE TRIGGER reject_worker_receipt BEFORE INSERT ON orchestration_command_receipts
+      WHEN NEW.command_id LIKE 'worker-history:%' BEGIN SELECT RAISE(ABORT,'synthetic crash point'); END`);
+    expect(()=>database.appendWorkerHistory("thread-test",{kind:"terminal",turnId:"a",status:"completed"})).toThrow("synthetic crash point");
+    expect(database.connection.prepare("SELECT COUNT(*) AS count FROM orchestration_events WHERE event_type='turn.worker-history'").get()).toMatchObject({count:0});
+    database.connection.exec("DROP TRIGGER reject_worker_receipt");
+    database.appendWorkerHistory("thread-test",{kind:"terminal",turnId:"a",status:"completed"});
+    expect(database.connection.prepare("SELECT COUNT(*) AS count FROM orchestration_events WHERE event_type='turn.worker-history'").get()).toMatchObject({count:1});
+    database.close();
+  });
+
+  it("keeps ordered worker history through snapshot pruning, restart and duplicate append", async () => {
+    let database = await createDatabase();
+    const agent = testAgent();
+    database.replaceAgents("history-seed", [agent], "agents.imported");
+    if (!agent.threadId) throw new Error("Missing thread.");
+    const entries = [
+      {kind:"user" as const,turnId:"turn-a",input:[{type:"text" as const,text:"Unique fact"}]},
+      {kind:"item" as const,turnId:"turn-a",item:{id:"call-a",type:"toolCall" as const,result:{value:931}},effectCommitted:true},
+      {kind:"terminal" as const,turnId:"turn-a",status:"completed"},
+    ];
+    for (const entry of entries) database.appendWorkerHistory(agent.threadId, entry);
+    database.appendWorkerHistory(agent.threadId, entries[1]);
+    const retirement={kind:"retirement" as const,turnId:"crash-before-terminal",reason:"deadline"};
+    database.appendWorkerHistory(agent.threadId,retirement);
+    for (let i=0;i<10;i++) database.persistConversation(conversationSnapshot(agent,"later"),"conversation.saved");
+    const root = database.userDataPath;
+    database.close();
+    database = new DaniDexDatabase(root); await database.initialize();
+    const rows=database.connection.prepare("SELECT payload_json FROM orchestration_events WHERE aggregate_id=? AND event_type='turn.worker-history' ORDER BY sequence").all(agent.threadId);
+    expect(rows.map(row=>JSON.parse(String(row.payload_json)).entry)).toEqual([...entries,retirement]);
+    expect(snapshotEventCount(database,agent.threadId)).toBe(1);
+    database.close();
+  });
+
   it("keeps one full conversation snapshot and a small idempotency receipt", async () => {
     const database = await createDatabase();
     const agent = testAgent();

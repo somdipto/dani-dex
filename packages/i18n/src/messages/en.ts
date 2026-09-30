@@ -95,12 +95,12 @@ export const en = {
   "settings.voiceKey.saveFailed": "Couldn't save the key. Try again.",
   "settings.voiceKey.removeFailed": "Couldn't remove the key. Try again.",
   "settings.autonomy.title": "Agent autonomy",
-  "settings.turbo.title": "Turbo mode",
+  "settings.turbo.title": "Allow all - computer access",
   "settings.turbo.description":
-    "Let every agent run commands, change files, widen its own filesystem and network access, and publish, update or delete public sites without asking.",
-  "settings.turbo.confirmTitle": "Turn on Turbo mode?",
+    "Let all local agents use accessible files, apps, software, commands and network without approval prompts. OS permissions and provider restrictions still apply.",
+  "settings.turbo.confirmTitle": "Allow all agents access to this computer?",
   "settings.turbo.confirmDescription":
-    "Agents will run commands, change files, widen their own access on this computer, and publish, update or delete public sites without asking you first. Turn this off here at any time.",
+    "All local agents can read, change or delete accessible files, run commands and use connected apps without asking. This can expose private data or damage files. OS protections, sign-in and provider restrictions still apply. Public-site changes follow the same grant. Turn this off here at any time; it does not undo actions already taken.",
   "settings.turbo.confirmCancel": "Cancel",
   "settings.turbo.confirmAccept": "Turn on",
   "settings.autoApprove.revokeFailed":

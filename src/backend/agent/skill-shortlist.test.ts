@@ -17,6 +17,20 @@ function skill(id: string, description: string, overrides: Partial<InstalledSkil
 }
 
 describe("installed skill metadata shortlist", () => {
+  it.each([
+    "Hi. Tell me briefly how you can help.",
+    "Text-only, no tools, files, commands, network or skills. Turn these notes into a four-line release checklist: test onboarding, check error messages, confirm cancellation, inspect permissions. Do not audit anything.",
+    "Do not use any skills. Audit is only a word in this checklist.",
+    "Without skills, write a release checklist.",
+  ])("respects greeting and explicit skill exclusion: %s", (prompt) => {
+    expect(shortlistInstalledSkills(prompt, [skill("ponytail-audit", "audit release checklist"), skill("ponytail-help", "help")])).toEqual([]);
+  });
+  it("excludes audit without excluding another explicitly requested skill", () => {
+    expect(shortlistInstalledSkills("Do not audit anything. Use the writing skill to write a document.", [skill("ponytail-audit", "audit document"), skill("writing", "write a document")]).map(s => s.slug)).toEqual(["writing"]);
+  });
+  it("ranks an audit skill over generic skill-creation wording for a code audit", () => {
+    expect(shortlistInstalledSkills("Audit source code, choose the best installed skill and read SKILL.md, report findings", [skill("dani-dex-skill-creator", "Read source code and report installed skill creation"), skill("ponytail-audit", "Codebase audit")])[0]?.slug).toBe("ponytail-audit");
+  });
   it("returns multiple relevant installed skills in a stable bounded order", () => {
     const skills = [
       skill("calendar", "Find free times"),

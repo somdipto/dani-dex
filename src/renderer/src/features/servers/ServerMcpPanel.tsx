@@ -304,7 +304,7 @@ export function ServerMcpPanel(props: ServerMcpPanelProps) {
          * no such flag, and guessing a key name would fail silently at the next turn, so the
          * limit is stated rather than hidden.
          */
-        description="Model Context Protocol servers give this server’s agents extra tools. Claude and Codex agents get only the servers in this list; OpenCode and Grok agents can also start servers from their own configuration files."
+        description="Connect extra tools for your agents. Some providers can also load tools from their own settings. Only connect services you trust."
         actions={
           <Show when={props.servers.length > 0}>
             <Button type="button" size="sm" variant="outline" disabled={disabled()} onClick={() => openForm(null)}>

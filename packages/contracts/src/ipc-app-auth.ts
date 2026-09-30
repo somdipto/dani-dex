@@ -87,6 +87,8 @@ export interface UpdatePreference {
 export type ProviderRuntimePhase = "not-downloaded" | "downloading" | "finishing" | "ready" | "download-error";
 
 export interface ProviderRuntimeStatus {
+  /** Transfer/extraction and post-install connection failures are different recovery steps. */
+  failureStage?: "download" | "connection";
   /** Newer managed version pinned by this Dani-Dex release, when an older install exists. */
   availableVersion?: string | null;
   phase: ProviderRuntimePhase;

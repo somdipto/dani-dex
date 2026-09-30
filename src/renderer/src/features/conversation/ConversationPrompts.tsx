@@ -137,6 +137,9 @@ export function ApprovalCard(props: {
     }
   };
 
+  const unknownPermissionScope = () => props.approval.kind === "permissions" && !props.approval.externalDirectory &&
+    !props.approval.permissions?.network &&
+    !(props.approval.permissions?.fileSystem.read.length || props.approval.permissions?.fileSystem.write.length);
   return (
     <section
       class="approval-card conversation-interaction-card"
@@ -169,7 +172,9 @@ export function ApprovalCard(props: {
           </div>
         </Show>
         <Show when={props.approval.kind === "permissions"}>
+          <Show when={props.approval.externalDirectory}>{(path) => <p>Access outside the agent workspace: <strong>{path()}</strong>. Allow once approves this directory-access request only. This is not a read-only guarantee or permanent permission.</p>}</Show>
           <PermissionDetails permissions={props.approval.permissions} />
+          <Show when={unknownPermissionScope()}><p role="alert">The access scope for this request is unavailable, so it cannot be approved safely. Deny it and ask the agent to use a scoped tool.</p></Show>
         </Show>
       </div>
       <footer class="approval-card-footer">
@@ -177,12 +182,12 @@ export function ApprovalCard(props: {
           variant="default"
           type="button"
           class="approval-button"
-          disabled={submitting()}
+          disabled={submitting() || unknownPermissionScope()}
           onClick={() => void submit("accept")}
         >
-          {submitting() ? "Sending…" : "Allow"}
+          {submitting() ? "Sending…" : props.approval.externalDirectory ? "Allow once" : "Allow"}
         </Button>
-        <Show when={props.onAlwaysAllow}>
+        <Show when={props.onAlwaysAllow && !unknownPermissionScope()}>
           <Button
             ref={alwaysAllowButton}
             variant="secondary"

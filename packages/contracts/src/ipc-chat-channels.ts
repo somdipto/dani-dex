@@ -51,6 +51,8 @@ export interface ChannelTask {
   state: ChannelTaskState;
   revision: number;
   assignmentCount: number;
+  /** Separate automatic handoff budget; legacy rows derive it from their child tasks. */
+  handoffCount?: number;
   error: string | null;
 }
 
@@ -219,6 +221,7 @@ export function isChannelTask(value: unknown): value is ChannelTask {
     isOneOf(["queued", "running", "waiting", "paused", "completed", "failed", "cancelled"] as const, value.state) &&
     sequence(value.revision) &&
     sequence(value.assignmentCount) &&
+    (value.handoffCount === undefined || sequence(value.handoffCount)) &&
     (value.error === null || isBoundedString(value.error, INPUT_LIMITS.messageText))
   );
 }

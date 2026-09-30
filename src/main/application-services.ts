@@ -1,9 +1,14 @@
+import { validateGatewayRoute, KILO_PROFILE_ENDPOINT, KILO_PROFILE_MODEL } from "../backend/agent/profile-generation";
 import { isManagedRuntimeProvider } from "@dani-dex/contracts/agent-providers";
 import { AGENT_HARNESS_DESCRIPTORS, type AgentHarnessSetting, fixedHarness } from "@dani-dex/contracts/ipc";
 import { DANI_DEX_API_ORIGIN } from "@dani-dex/contracts/online-services";
 import { AgentDatabaseSupervisor } from "../backend/agent-data/agent-database-supervisor";
 import { AgentTables } from "../backend/agent-data/agent-tables";
+import { requireProviderDriver } from "../backend/provider-drivers";
 import { spawnAgentDatabaseHost } from "./agent-database-host-process";
+import { ChatGptPlanClient } from "./chatgpt-plan-client";
+import { ChatGptPlanService } from "./chatgpt-plan-service";
+import { ChatGptPlanStore } from "./chatgpt-plan-store";
 import { LocalSkillLibrary } from "./local-skill-library";
 import { localSkillTools } from "./local-skill-tools";
 import { MAC_PERMISSION_URLS } from "./mac-permission-urls";
@@ -235,6 +240,7 @@ export interface ApplicationServices {
   service: AgentService;
   providerRuntimes: ProviderRuntimeManager;
   providerCredentials: ProviderCredentialStore;
+  chatGptPlan: ChatGptPlanService;
   /** Reached by the entry point for one thing only: handing a returning grant to its sign-in. */
   mcpOAuth: McpOAuth;
   mailbox: MailboxStore;
@@ -540,12 +546,46 @@ export async function createApplicationServices({
    * the decrypted map has to already exist by the time any client is built. A machine with no
    * secret storage keeps working on the free tier -- only saving a key needs the cipher.
    */
-  const providerCredentials = new ProviderCredentialStore(join(app.getPath("userData"), PROVIDER_CREDENTIAL_FILE), {
+  const chatGptStore = new ChatGptPlanStore(join(app.getPath("userData"), "dani-dex-chatgpt-plan-v1.bin"), {
     encrypt: (value) => {
-      if (!safeStorage.isEncryptionAvailable()) throw new Error("System secret storage is unavailable.");
+      if (
+        !safeStorage.isEncryptionAvailable() ||
+        (process.platform === "linux" && safeStorage.getSelectedStorageBackend() === "basic_text")
+      )
+        throw new Error("Secure ChatGPT storage is unavailable.");
       return safeStorage.encryptString(value);
     },
-    decrypt: (value) => safeStorage.decryptString(value),
+    decrypt: (value) => {
+      if (
+        !safeStorage.isEncryptionAvailable() ||
+        (process.platform === "linux" && safeStorage.getSelectedStorageBackend() === "basic_text")
+      )
+        throw new Error("Secure ChatGPT storage is unavailable.");
+      return safeStorage.decryptString(value);
+    },
+  });
+  await chatGptStore
+    .load()
+    .catch(() => logger.warn("ChatGPT sign-in storage is unavailable; existing registrations were kept."));
+  const chatGptPlan = new ChatGptPlanService(chatGptStore, (url) => shell.openExternal(url));
+  teardown.push(TEARDOWN_ORDER.mcpOAuthRedirect, "ChatGPT sign-in", () => chatGptPlan.cancel());
+  const providerCredentials = new ProviderCredentialStore(join(app.getPath("userData"), PROVIDER_CREDENTIAL_FILE), {
+    encrypt: (value) => {
+      if (
+        !safeStorage.isEncryptionAvailable() ||
+        (process.platform === "linux" && safeStorage.getSelectedStorageBackend() === "basic_text")
+      )
+        throw new Error("Secure API-key storage is unavailable.");
+      return safeStorage.encryptString(value);
+    },
+    decrypt: (value) => {
+      if (
+        !safeStorage.isEncryptionAvailable() ||
+        (process.platform === "linux" && safeStorage.getSelectedStorageBackend() === "basic_text")
+      )
+        throw new Error("Secure API-key storage is unavailable.");
+      return safeStorage.decryptString(value);
+    },
   });
   // An unreadable key file is reported, not fatal: the app starts, OpenCode runs on the free models,
   // and Settings tells the user to save the key again. Only the error's class is logged, because a
@@ -752,25 +792,36 @@ export async function createApplicationServices({
       : setupState.harness
         ? fixedHarness(setupState.harness, harnessAvailability)
         : null;
+  const harnessDrivers = runningHarness
+    ? harnessDriverResolver(runningHarness, {
+        hermesHome: join(app.getPath("userData"), "hermes"),
+        apiKey: (provider) => providerCredentials.get(provider),
+        computerUse: () =>
+          cuaDriver.executable ? { executable: cuaDriver.executable, env: CUA_DRIVER_VENDOR_CALLS_OFF } : null,
+      })
+    : null;
+  const chatGptDriver = {
+    ...requireProviderDriver("codex"),
+    createClient: (cli: import("../backend/cli").AgentCliInfo, timeout: number) =>
+      new ChatGptPlanClient(cli.executable, timeout, () => chatGptPlan.ready()),
+  };
   const service: AgentService = new AgentService({
     store,
     mailbox,
     browser,
     requestTimeoutMs: 30_000,
+    profileGenerationRoute: () => ({
+      provider: "opencode", modelId: "stepfun/step-3.7-flash:free",
+      endpoint: "https://api.kilo.ai/api/gateway/chat/completions",
+    }),
     preferredProvider: setupState.preferredProvider ?? "codex",
     bundledExecutables: providerRuntimes.bundledExecutables(),
-    // Layer 1. Hermes keeps its own state under Dani-Dex's data directory, never ~/.hermes.
-    ...(runningHarness
-      ? {
-          providerDriver: harnessDriverResolver(runningHarness, {
-            hermesHome: join(app.getPath("userData"), "hermes"),
-            apiKey: (provider) => providerCredentials.get(provider),
-            // The driver Dani-Dex ships, read at each spawn: a driver found later is used next time.
-            computerUse: () =>
-              cuaDriver.executable ? { executable: cuaDriver.executable, env: CUA_DRIVER_VENDOR_CALLS_OFF } : null,
-          }),
-        }
-      : {}),
+    providerDriver: (provider) =>
+      provider === "codex"
+        ? chatGptDriver
+        : harnessDrivers
+          ? harnessDrivers(provider)
+          : requireProviderDriver(provider),
     ...(setupState.harness === "automatic"
       ? { harnessRouting: { running: runningHarness, availability: harnessAvailability } }
       : {}),
@@ -790,7 +841,15 @@ export async function createApplicationServices({
       apiKey: (provider) => providerCredentials.get(provider),
       // `configs()`, not `list()`: this is the one path the API keys travel, and it ends at the
       // spawned provider process. The IPC handlers are given `list()`.
-      customProviders: () => customProviders.configs(),
+      customProviders: () => [...customProviders.configs(), {
+        id: "dani-kilo-worker", name: "Dani", baseUrl: "https://api.kilo.ai/api/gateway", apiKey: null,
+        models: [{ id: KILO_PROFILE_MODEL, name: "Dani" }], headers: [],
+      }],
+      fallbackModel: `dani-kilo-worker/${KILO_PROFILE_MODEL}`,
+      validateModel: async (modelId, signal) => {
+        if (modelId === `dani-kilo-worker/${KILO_PROFILE_MODEL}`)
+          await validateGatewayRoute({ endpoint: KILO_PROFILE_ENDPOINT, modelId: KILO_PROFILE_MODEL }, AbortSignal.any([AbortSignal.timeout(15000), ...(signal ? [signal] : [])]), true);
+      },
       // The enabled MCP servers, read at each spawn. The service owns the store, so this reads back
       // into the object being constructed; nothing calls it before the constructor returns.
       mcpServers: () => service.enabledMcpServers(),
@@ -1299,6 +1358,7 @@ export async function createApplicationServices({
     service,
     providerRuntimes,
     providerCredentials,
+    chatGptPlan,
     mcpOAuth,
     mailbox,
     browser,

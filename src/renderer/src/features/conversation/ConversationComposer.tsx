@@ -22,6 +22,7 @@ import {
   toast,
 } from "../../components/ui";
 import { usePlatform } from "../../platform";
+import { VoiceSetupDialog } from "../voice-call/VoiceSetupDialog";
 import { fileBadge, formatFileSize } from "./AttachmentCards";
 import { attachmentReferenceTone } from "./AttachmentReference";
 import { ComposerEditor } from "./ComposerEditor";
@@ -34,6 +35,7 @@ import { formatVoiceDuration, voiceButtonLabel, voiceCallStatusLabel, voiceSuppo
 
 /** @internal Stable HMR boundary for conversation composer. */
 export function ConversationComposer() {
+  const [voiceSetupOpen, setVoiceSetupOpen] = createSignal(false);
   const {
     agentReady,
     attachmentAction,
@@ -155,6 +157,13 @@ export function ConversationComposer() {
   return (
     <Show when={!props.approval && !props.browserTakeover}>
       <div class="composer-wrap">
+        <VoiceSetupDialog
+          open={voiceSetupOpen()}
+          localSupported={voiceAvailable()}
+          onClose={() => setVoiceSetupOpen(false)}
+          onLocalDictation={() => void startVoiceRecording()}
+          onOpenAiCall={() => void startCall()}
+        />
         <div
           class="agent-queue-slot"
           data-open={queueVisible() ? "true" : "false"}
@@ -236,6 +245,19 @@ export function ConversationComposer() {
             />
           )}
         </Show>
+        <Show when={/^\/\w*$/.test(currentDraft().text.trim())}>
+          <div class="composer-slash-suggestions" role="listbox" aria-label="Chat commands">
+            <For each={[
+              { command: "/goal", description: "Assign a goal with completion checks" },
+              { command: "/loop", description: "Build, test and verify up to five cycles" },
+            ].filter((item) => item.command.startsWith(currentDraft().text.trim()))}>
+              {(item) => <Button role="option" variant="ghost" onClick={() => {
+                updateCurrentDraft({ text: `${item.command} ` });
+                setComposerFocusRequest((value) => value + 1);
+              }}>{item.command} - {item.description}</Button>}
+            </For>
+          </div>
+        </Show>
         <div
           class={`composer${voicePhase() === "recording" ? " composer-recording" : ""}`}
           data-compact={
@@ -291,7 +313,7 @@ export function ConversationComposer() {
               }
               placeholder={
                 !agentReady()
-                  ? "Complete agent CLI setup to start"
+                  ? props.agent?.provider === "opencode" ? "Starting Dani Free..." : "Connect your provider to start"
                   : replyTarget()
                     ? "Reply…"
                     : `Message ${props.agent?.name ?? "agent"}`
@@ -381,7 +403,7 @@ export function ConversationComposer() {
               </DropdownMenu.Portal>
             </DropdownMenu.Root>
             <div class="composer-primary-actions">
-              <Show when={voiceAvailable()}>
+              <Show when={Boolean(props.agent)}>
                 <Show
                   when={voiceCallPhase() !== "off"}
                   fallback={
@@ -391,7 +413,7 @@ export function ConversationComposer() {
                       class="voice-call-button"
                       aria-label="Start voice call"
                       disabled={!props.agent || !agentReady() || voicePhase() !== "idle"}
-                      onClick={() => void startCall()}
+                      onClick={() => setVoiceSetupOpen(true)}
                     >
                       <AudioLines aria-hidden="true" />
                     </Button>

@@ -1,3 +1,4 @@
+import { AcpAgentClient } from "./acp-client";
 // @vitest-environment node
 
 /*
@@ -69,6 +70,9 @@ const CONFIG_MODELS = [
   "agent/plain",
 ];
 const THOUGHT_LEVELS = ["minimal", "low", "medium", "high", "xhigh", "default"];
+let pendingPrompt;
+let sessionCount = 0;
+let promptCount = 0;
 let selected = CONFIG_MODELS[0];
 const configOptions = () => [
   {
@@ -109,6 +113,11 @@ process.stdin.on("data", (chunk) => {
   }
 });
 function handle(message) {
+  if (typeof message.id !== "undefined" && !message.method && process.env.DANI_DEX_FAKE_ACP_APPROVAL === "1") {
+    const allowed=message.result?.outcome?.outcome === "selected";
+    const effectLog=process.env.DANI_DEX_FAKE_ACP_EFFECT_LOG;if(effectLog)fs.appendFileSync(effectLog,JSON.stringify({allowed})+NL);
+    write({jsonrpc:"2.0",id:pendingPrompt.id,result:{stopReason:allowed?"end_turn":"cancelled"}});return;
+  }
   if (typeof message.id === "undefined") return;
   if (message.method === "initialize") {
     const agentCapabilities = process.env.DANI_DEX_FAKE_ACP_LOAD_SESSION === "1" ? { loadSession: true } : {};
@@ -122,8 +131,31 @@ function handle(message) {
     return;
   }
   if (message.method === "session/prompt") {
+    if(process.env.DANI_DEX_FAKE_ACP_APPROVAL === "1") {pendingPrompt=message;write({jsonrpc:"2.0",id:"approval-from-provider",method:"session/request_permission",params:{sessionId:message.params.sessionId,toolCall:{toolCallId:"write-approval",kind:"edit",title:"temp-write",status:"pending"},options:[{optionId:"once",name:"Allow once",kind:"allow_once"},{optionId:"reject",name:"Reject",kind:"reject_once"}]}});return;}
+
+    if (process.env.DANI_DEX_FAKE_ACP_DELAY_SUCCESS === "1") {
+      setTimeout(()=>{write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"LATE SUCCESS"}}}});write({jsonrpc:"2.0",id:message.id,result:{stopReason:"end_turn"}});},150);return;
+    }
     const promptLog = process.env.DANI_DEX_FAKE_ACP_PROMPT_LOG;
     if (promptLog) fs.appendFileSync(promptLog, JSON.stringify(message.params) + NL);
+    promptCount++;
+    if(process.env.DANI_DEX_FAKE_ACP_MISSING_INPUT === "1")write({jsonrpc:"2.0",id:"missing-input",method:"_synthetic_input",params:{question:"unbound"}});
+    if(process.env.DANI_DEX_FAKE_ACP_HANG_PRIMARY === "1"&&promptCount===1){
+      if(process.env.DANI_DEX_FAKE_ACP_TIMEOUT_LATE === "1")setTimeout(()=>{
+       write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"LATE PRIMARY"}}}});
+       write({jsonrpc:"2.0",id:"late-primary-permission",method:"session/request_permission",params:{sessionId:message.params.sessionId,toolCall:{toolCallId:"late-write",kind:"edit",title:"temp-write",status:"pending"},options:[{optionId:"once",name:"Allow once",kind:"allow_once"}]}});
+      },95);return;
+    }
+    const failure = process.env.DANI_DEX_FAKE_ACP_FAILURE;
+    const boundary = process.env.DANI_DEX_FAKE_ACP_BOUNDARY;
+    if (boundary === "text") write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"partial"}}}});
+    if (boundary === "tool") write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"tool_call",toolCallId:"effect-1",title:"write",kind:"edit",status:"completed",rawInput:{path:"temp"},rawOutput:"written"}}});
+    if (failure && (promptCount === 1 || process.env.DANI_DEX_FAKE_ACP_FALLBACK_FAIL === "1")) {
+      write({jsonrpc:"2.0",id:message.id,error:{code:-32000,message:failure}});
+      if(process.env.DANI_DEX_FAKE_ACP_LATE_PRIMARY === "1")setTimeout(()=>write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"STALE PRIMARY"}}}}),50);
+      return;
+    }
+    write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"FALLBACK OK"}}}});
     write({ jsonrpc: "2.0", id: message.id, result: { stopReason: "end_turn" } });
     return;
   }
@@ -141,6 +173,7 @@ function handle(message) {
     return;
   }
   if (message.method === "session/new") {
+    sessionCount++;
     const sessionLog = process.env.DANI_DEX_FAKE_ACP_SESSION_LOG;
     if (sessionLog) fs.appendFileSync(sessionLog, JSON.stringify(message.params) + NL);
     if (process.env.DANI_DEX_FAKE_ACP_REJECT_KEY === "1") {
@@ -149,11 +182,11 @@ function handle(message) {
     }
     if (process.env.DANI_DEX_FAKE_ACP_CONFIG_MODELS === "1") {
       selected = CONFIG_MODELS[0];
-      write({ jsonrpc: "2.0", id: message.id, result: { sessionId: "session-1", configOptions: configOptions() } });
+      write({ jsonrpc: "2.0", id: message.id, result: { sessionId: "session-" + sessionCount, configOptions: configOptions() } });
       return;
     }
     if (process.env.DANI_DEX_FAKE_ACP_EMPTY_MODELS === "1") {
-      write({ jsonrpc: "2.0", id: message.id, result: { sessionId: "session-1" } });
+      write({ jsonrpc: "2.0", id: message.id, result: { sessionId: "session-" + sessionCount } });
       return;
     }
     const ids = process.env.OPENCODE_API_KEY
@@ -163,7 +196,7 @@ function handle(message) {
       jsonrpc: "2.0",
       id: message.id,
       result: {
-        sessionId: "session-1",
+        sessionId: "session-" + sessionCount,
         models: { availableModels: ids.map((modelId) => ({ modelId, name: modelId })), currentModelId: ids[0] },
       },
     });
@@ -248,6 +281,10 @@ function startOpencode(
     profile?: boolean;
     /** Read at every prompt, so a test can remove an endpoint while a turn is prepared. */
     servesModel?: (modelId: string) => boolean;
+    validateModel?: (modelId: string, signal?: AbortSignal) => Promise<void>;
+    fallbackModel?: string;
+    promptDeadlineMs?: number;
+    workerHistory?: import("./agent/worker-history").WorkerHistory;
     /** Read at every session, the same way the real source is. */
     mcpServers?: () => McpServerConfig[];
     /** The bearer token a signed-in http server is given, minted at the hand-off and never stored. */
@@ -264,9 +301,12 @@ function startOpencode(
     mcpServers: options.mcpServers ?? (() => []),
     mcpAuthorization: options.mcpAuthorization,
     servesModel: options.servesModel,
+    validateModel: options.validateModel,
+    fallbackModel: options.fallbackModel,
+    workerHistory: options.workerHistory,
   };
   const timeoutMs = options.requestTimeoutMs ?? 10_000;
-  const client = options.profile
+  const client = options.promptDeadlineMs ? new AcpAgentClient(cli,timeoutMs,{provider:"opencode",argv:["acp"],env:{},signInMessage:"none",validateModel:options.validateModel,fallbackModel:options.fallbackModel,workerHistory:options.workerHistory,promptDeadlineMs:options.promptDeadlineMs}) : options.profile
     ? (driver.createProfileClient?.(cli, timeoutMs, context) ?? driver.createClient(cli, timeoutMs, context))
     : driver.createClient(cli, timeoutMs, context);
   started.push(client);
@@ -500,7 +540,7 @@ describe("OpenCode ACP reasoning efforts", () => {
     // The sweep ends on the model the session opened on. An agent that remembers a last used model
     // outside the session would otherwise start the user's own next session on `agent/plain`.
     expect((await fake.readConfigCalls()).at(-1)).toEqual({
-      sessionId: "session-1",
+      sessionId: expect.any(String),
       configId: "model",
       value: "agent/thinker",
     });
@@ -572,8 +612,8 @@ describe("OpenCode ACP reasoning efforts", () => {
     // `minimal` also reads as low effort and comes first in the agent's list, so a first-match
     // mapping sent the model's lowest setting whenever the user asked for low.
     expect((await fake.readConfigCalls()).slice(-2)).toEqual([
-      { sessionId: "session-1", configId: "model", value: "agent/thinker" },
-      { sessionId: "session-1", configId: "effort", value: "low" },
+      { sessionId: expect.any(String), configId: "model", value: "agent/thinker" },
+      { sessionId: expect.any(String), configId: "effort", value: "low" },
     ]);
   });
 });
@@ -745,4 +785,201 @@ describe("OpenCode ACP session loading", () => {
     ).rejects.toThrow(/unknown acp session/i);
     expect(await fake.readLoadedSessions()).toEqual([]);
   });
+});
+
+it("validates the selected model before sending any prompt", async () => {
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
+ const validateModel=vi.fn(async()=>{throw new Error("Catalog revoked");});
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{validateModel});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/muse-spark-1.3-contributor-free"},decodeRecordResponse);
+ const threadId=(opened.thread as {id:string}).id;
+ await expect(client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse)).rejects.toThrow("Catalog revoked");
+ expect(validateModel).toHaveBeenCalledOnce();expect(await readFile(fake.promptLog,"utf8").catch(()=>"" )).toBe("");
+});
+
+it.each(["403 Forbidden", "429 quota", "503 service unavailable", "upstream timed out", "OpenCode's free tier can only be used from within OpenCode", "FreeTierError", "504 Gateway Timeout", "500 Internal Server Error", "ECONNRESET"]) ("fallback once on classified backend failure %s",async(failure)=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE",failure);
+ const validateModel=vi.fn(async()=>{});const client=startOpencode(fake.cli,()=>null,fake.envLog,{validateModel,fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free"});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;
+ const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId,clientUserMessageId:"same-delivery",input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ expect(events.filter(e=>e.method==="turn/completed")).toEqual([expect.objectContaining({params:expect.objectContaining({turn:{id:"same-delivery",status:"completed"}})})]);
+ expect(events.filter(e=>e.method==="item/completed"&&e.params.item.phase==="final_answer")).toHaveLength(1);
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(2);
+ expect(validateModel).toHaveBeenCalledWith("dani-kilo-worker/stepfun/step-3.7-flash:free",expect.any(AbortSignal));
+});
+it.each(["text","tool"])("never fallback after primary %s boundary",async(boundary)=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");vi.stubEnv("DANI_DEX_FAKE_ACP_BOUNDARY",boundary);
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{}});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId:(opened.thread as {id:string}).id,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("failed");
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+ expect(events.some(e=>e.method==="model/rerouted")).toBe(false);
+});
+it("cancel during catalog validation sends no prompt",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);let validating=false;
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{validateModel:async(_id,signal)=>{validating=true;await new Promise<void>((resolve)=>signal!.addEventListener("abort",()=>resolve()));}});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;
+ const pending=client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);const rejected=expect(pending).rejects.toThrow("cancelled");
+ await vi.waitFor(()=>expect(validating).toBe(true));await client.request("turn/interrupt",{threadId},decodeRecordResponse);await rejected;
+ expect(await readFile(fake.promptLog,"utf8").catch(()=>"")).toBe("");
+});
+it.each(["invalid prompt", "safety refusal", "cancelled", "permission denied by user"])("does not fallback for %s",async(failure)=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE",failure);
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{}});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId:(opened.thread as {id:string}).id,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));expect(events.some(e=>e.method==="model/rerouted")).toBe(false);
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+});
+it.each(["invalid catalog","fallback failed","cancel during switch"])("fallback closes honestly: %s",async(mode)=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");if(mode==="fallback failed")vi.stubEnv("DANI_DEX_FAKE_ACP_FALLBACK_FAIL","1");let switching=false;
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async(id,signal)=>{
+ if(!id.startsWith("dani-kilo-worker/"))return;switching=true;if(mode==="invalid catalog")throw Error("Paid or invalid catalog");
+ if(mode==="cancel during switch")await new Promise<void>(resolve=>signal!.addEventListener("abort",()=>resolve()));
+ }});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
+ if(mode==="cancel during switch"){await vi.waitFor(()=>expect(switching).toBe(true));await client.request("turn/interrupt",{threadId},decodeRecordResponse);}
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ expect(events.filter(e=>e.method==="turn/completed")).toHaveLength(1);
+ expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe(mode==="cancel during switch"?"interrupted":"failed");
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(mode==="fallback failed"?2:1);
+});
+it("duplicate delivery id never replays a completed ACP prompt",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
+ const client=startOpencode(fake.cli,()=>null,fake.envLog);const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;const events:any[]=[];client.on("notification",n=>events.push(n));
+ const input={threadId,clientUserMessageId:"duplicate-delivery",input:[{type:"text",text:"Synthetic"}]};await client.request("turn/start",input,decodeRecordResponse);await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ await client.request("turn/start",input,decodeRecordResponse);
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+});
+
+it("late primary notification cannot contaminate distinct fallback session",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");vi.stubEnv("DANI_DEX_FAKE_ACP_LATE_PRIMARY","1");
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{}});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId:(opened.thread as {id:string}).id,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));await new Promise(r=>setTimeout(r,100));
+ expect(events.filter(e=>e.method==="turn/completed")).toHaveLength(1);expect(JSON.stringify(events)).not.toContain("STALE PRIMARY");
+});
+it.each(["cancel","shutdown"])("late successful response after %s never completes cancelled work",async(action)=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_DELAY_SUCCESS","1");const client=startOpencode(fake.cli,()=>null,fake.envLog);
+ const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
+ if(action==="cancel")await client.request("turn/interrupt",{threadId},decodeRecordResponse);else await client.stop();
+ await new Promise(r=>setTimeout(r,220));
+ expect(events.some(e=>e.method==="turn/completed"&&e.params.turn.status==="completed")).toBe(false);
+});
+
+it("approval accepted after cancellation cannot dispatch effect",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_APPROVAL","1");const effectLog=join(fake.directory,"effect.log");vi.stubEnv("DANI_DEX_FAKE_ACP_EFFECT_LOG",effectLog);
+ const client=startOpencode(fake.cli,()=>null,fake.envLog);let approval:any;const events:any[]=[];client.on("request",r=>{approval=r;});client.on("notification",n=>events.push(n));
+ const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;
+ await client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(approval).toBeDefined());await client.request("turn/interrupt",{threadId},decodeRecordResponse);client.respond(approval.id,{decision:"accept"});
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ expect(JSON.parse((await readFile(effectLog,"utf8")).trim()).allowed).toBe(false);
+ expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("interrupted");
+});
+
+it("no-response deadline quarantines primary and fails closed without proven termination",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:70,fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{}});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId:(opened.thread as any).id,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ expect(events.filter(e=>e.method==="turn/completed")).toHaveLength(1);
+ expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("failed");
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+});
+it("predispatch validation failure writes original input and a failed terminal",async()=>{
+ const fake=await createFakeOpencodeAgent();const entries:any[]=[];
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{workerHistory:{read:()=>entries,append:(_id,e)=>entries.push(e)},validateModel:async()=>{throw new Error("revoked");}});
+ const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);
+ await expect(client.request("turn/start",{threadId:(opened.thread as any).id,input:[{type:"text",text:"original"}]},decodeRecordResponse)).rejects.toThrow("revoked");
+ expect(entries.map(e=>e.kind)).toEqual(["coverage","user","terminal"]);expect(entries.at(-1).status).toBe("failed");
+});
+
+it("cancel while reading transfer history never sends the fallback prompt",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
+ const entries:any[]=[];let reads=0;let threadId="";let client:AgentClient;
+ client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{},
+ workerHistory:{append:(_id,e)=>entries.push(e),read:()=>{if(++reads===2)void client.request("turn/interrupt",{threadId},decodeRecordResponse);return entries;}}});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);threadId=(opened.thread as any).id;const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId,input:[{type:"text",text:"original"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("interrupted");
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+});
+it("second fallback failure is terminal and transferred history never becomes a recorded prompt",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");vi.stubEnv("DANI_DEX_FAKE_ACP_FALLBACK_FAIL","1");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
+ const entries:any[]=[];const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{},workerHistory:{read:()=>entries,append:(_id,e)=>entries.push(e)}});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
+ await client.request("turn/start",{threadId:(opened.thread as any).id,input:[{type:"text",text:"original"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ expect(events.filter(e=>e.method==="turn/completed")).toHaveLength(1);expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("failed");
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(2);
+ expect(entries.filter(e=>e.kind==="user")).toHaveLength(1);expect(JSON.stringify(entries)).not.toContain("<committed_history>");
+});
+
+it("timeout quarantines late primary text and permissions without reaching fallback validation",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");vi.stubEnv("DANI_DEX_FAKE_ACP_TIMEOUT_LATE","1");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
+ let release:()=>void=()=>{};let validating=false;
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:60,fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async(model)=>{if(model.startsWith("dani-kilo")){validating=true;await new Promise<void>(resolve=>release=resolve);}}});
+ const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];const approvals:any[]=[];client.on("notification",n=>events.push(n));client.on("request",r=>approvals.push(r));
+ await client.request("turn/start",{threadId:(opened.thread as any).id,input:[{type:"text",text:"original"}]},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));await new Promise(resolve=>setTimeout(resolve,130));
+ expect(JSON.stringify(events)).not.toContain("LATE PRIMARY");expect(approvals).toHaveLength(0);expect(validating).toBe(false);
+ expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("failed");
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+});
+
+it("timed-out delivery is idempotent and new or steered work cannot reuse its retired wire",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:60});const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as any).id;const events:any[]=[];client.on("notification",n=>events.push(n));
+ const input={threadId,clientUserMessageId:"deadline-delivery",input:[{type:"text",text:"original"}]};await client.request("turn/start",input,decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ const duplicate=await client.request("turn/start",input,decodeRecordResponse);expect((duplicate.turn as any).status).toBe("failed");
+ await expect(client.request("turn/start",{...input,clientUserMessageId:"new-delivery"},decodeRecordResponse)).rejects.toThrow("Safe recovery");
+ await expect(client.request("turn/steer",input,decodeRecordResponse)).rejects.toThrow("Safe recovery");
+ expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+});
+
+it.each(["retirement","unresolved"])("persisted %s blocks a resumed attempt before prompt",async(mode)=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_LOAD_SESSION","1");
+ const entries:any[]=[{kind:"coverage",turnId:"origin",version:1,fromBeginning:true},{kind:"user",turnId:"old",input:[{type:"text",text:"old"}]}];
+ if(mode==="retirement")entries.push({kind:"retirement",turnId:"old",reason:"deadline"});
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{workerHistory:{read:()=>entries,append:(_id,e)=>entries.push(e)}});
+ const opened=await client.request("thread/resume",{threadId:"persisted-wire",cwd:tmpdir()},decodeRecordResponse);
+ await expect(client.request("turn/start",{threadId:(opened.thread as any).id,clientUserMessageId:"new",input:[{type:"text",text:"new"}]},decodeRecordResponse)).rejects.toThrow("Safe recovery");
+});
+it("ACP steer fails closed before config or prompt until bounded safe dispatch exists",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_DELAY_SUCCESS","1");const entries:any[]=[];
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{workerHistory:{read:()=>entries,append:(_id,e)=>entries.push(e)}});
+ const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as any).id;
+ await client.request("turn/start",{threadId,input:[{type:"text",text:"original"}]},decodeRecordResponse);
+ await expect(client.request("turn/steer",{threadId,input:[{type:"text",text:"changed fact"}]},decodeRecordResponse)).rejects.toThrow("temporarily unavailable");
+ expect(entries.filter(e=>e.kind==="steer")).toHaveLength(0);
+});
+it.each(["deadline","interrupt"])("retirement append failure during %s still quarantines and closes",async(mode)=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");const entries:any[]=[];
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:mode==="deadline"?60:500,workerHistory:{read:()=>entries,append:(_id,e)=>{if(e.kind==="retirement")throw new Error("disk full");entries.push(e);}}});
+ const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as any).id;const events:any[]=[];const diagnostics:string[]=[];client.on("notification",n=>events.push(n));client.on("diagnostic",d=>diagnostics.push(d));
+ await client.request("turn/start",{threadId,input:[{type:"text",text:"original"}]},decodeRecordResponse);
+ if(mode==="interrupt")await client.request("turn/interrupt",{threadId},decodeRecordResponse);
+ await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
+ expect(diagnostics.join(" ")).toContain("persistence failed");
+ await expect(client.request("turn/start",{threadId,input:[{type:"text",text:"new"}]},decodeRecordResponse)).rejects.toThrow("Safe recovery");
+ expect(entries.some(e=>e.kind==="retirement")).toBe(false);
+});
+
+it("unbound user input never picks another live session",async()=>{
+ const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");vi.stubEnv("DANI_DEX_FAKE_ACP_MISSING_INPUT","1");
+ const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:500});const requests:any[]=[];client.on("request",r=>requests.push(r));
+ const first=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);await client.request("turn/start",{threadId:(first.thread as any).id,input:[{type:"text",text:"one"}]},decodeRecordResponse);await client.request("turn/interrupt",{threadId:(first.thread as any).id},decodeRecordResponse);
+ const second=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);await client.request("turn/start",{threadId:(second.thread as any).id,input:[{type:"text",text:"two"}]},decodeRecordResponse);
+ await new Promise(resolve=>setTimeout(resolve,100));expect(requests).toHaveLength(0);
 });

@@ -68,6 +68,12 @@ export const IPC_ENDPOINTS = {
     startProviderCodeLogin: request(IPC_CHANNELS.startProviderCodeLogin),
     cancelProviderCodeLogin: request(IPC_CHANNELS.cancelProviderCodeLogin),
   },
+  chatGptPlan: {
+    list: request(IPC_CHANNELS.chatGptPlanList),
+    connect: request(IPC_CHANNELS.chatGptPlanConnect),
+    cancel: request(IPC_CHANNELS.chatGptPlanCancel),
+    disconnect: request(IPC_CHANNELS.chatGptPlanDisconnect),
+  },
   providerRuntimes: {
     getStatus: request(IPC_CHANNELS.providerRuntimesGetStatus),
     download: request(IPC_CHANNELS.providerRuntimesDownload),
@@ -75,6 +81,10 @@ export const IPC_ENDPOINTS = {
     event: event(IPC_CHANNELS.providerRuntimesEvent),
   },
   voice: {
+    codexStatus: request(IPC_CHANNELS.codexVoiceStatus),
+    codexConnect: request(IPC_CHANNELS.codexVoiceConnect),
+    codexStart: request(IPC_CHANNELS.codexVoiceStart),
+    codexStop: request(IPC_CHANNELS.codexVoiceStop),
     getModelStatus: request(IPC_CHANNELS.voiceGetModelStatus),
     prepareModel: request(IPC_CHANNELS.voicePrepareModel),
     transcribe: request(IPC_CHANNELS.voiceTranscribe),

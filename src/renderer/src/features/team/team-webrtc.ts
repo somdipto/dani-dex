@@ -7,7 +7,7 @@ import {
   type SignalServerMessage,
 } from "@dani-dex/contracts/signal-protocol/messages";
 import { TEAM_PROTOCOL_V2_CHANNELS } from "@dani-dex/contracts/team-protocol/v2";
-import { encodeTeamWebRtcPayload, TeamWebRtcPayloadDecoder } from "./team-webrtc-framing";
+import { encodeTeamWebRtcPayload, TeamWebRtcPayloadDecoder } from "@dani-dex/team-client";
 
 export interface BridgeCommand {
   commandId: string;

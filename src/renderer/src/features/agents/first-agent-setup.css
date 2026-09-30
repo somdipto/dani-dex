@@ -44,14 +44,14 @@
   min-width: 0;
   min-height: 0;
   flex: 1;
-  grid-template-rows: minmax(430px, 1fr) auto;
+  grid-template-rows: max-content max-content;
   overflow-y: auto;
 }
 
 .first-agent-editor {
   display: grid;
   width: min(420px, calc(100% - 48px));
-  align-content: center;
+  align-content: start;
   justify-self: center;
   gap: var(--dani-dex-space-3);
   padding: var(--dani-dex-space-6) 0;
@@ -337,7 +337,7 @@
 
 @media (max-width: 800px) {
   .first-agent-setup-content {
-    grid-template-rows: minmax(410px, 1fr) auto;
+    grid-template-rows: max-content max-content;
   }
 
   .first-agent-editor {

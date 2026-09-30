@@ -44,6 +44,30 @@ afterEach(async () => {
 });
 
 describe.sequential("AgentService: queue", () => {
+  it("reports profile generation unavailable without starting a provider when no permitted route exists", async () => {
+    const started = await startService(root, { provider: "codex" });
+    service = started.service;
+    const before = started.client.requests.length;
+    await expect(service.generateProfile({ prompt: "Make a research team" }, [])).rejects.toThrow("Profile generation unavailable");
+    expect(started.client.requests).toHaveLength(before);
+  });
+  it("keeps the selected skill marker when a conversation read races skill discovery", async () => {
+    const started = await startService(root, { provider: "codex", installedSkills: async () => {
+      await service!.readConversation("chief");
+      return [{
+      skillId: "ponytail-audit", slug: "ponytail-audit", name: "ponytail-audit", description: "Codebase audit",
+      installedVersion: 1, availableVersion: 1, state: "installed", enabled: true,
+    }]; } });
+    service = started.service;
+    const events: AgentEvent[] = [];
+    service.on("event", (event) => events.push(event));
+    await service.sendMessage({ agentId: "chief", text: "Audit source code with ponytail-audit" });
+    await waitFor(() => events.some((event) => event.type === "turn-completed"));
+    const snapshots = events.filter((event) => event.type === "conversation").map((event) => event.snapshot);
+    expect(snapshots.some((snapshot) => snapshot.messages.some((message) => message.itemType?.startsWith("skill-event:selected:")))).toBe(true);
+    expect((await service.readConversation("chief")).messages.some((message) => message.itemType?.startsWith("skill-event:selected:"))).toBe(true);
+    expect((await service.readConversationPageFor("chief", "test-reader")).messages.some((message) => message.itemType?.startsWith("skill-event:selected:"))).toBe(true);
+  });
   it("logs a stored route without claiming it was the turn's actual driver", async () => {
     const lines: string[] = [];
     const output = vi.spyOn(process.stdout, "write").mockImplementation((chunk) => {

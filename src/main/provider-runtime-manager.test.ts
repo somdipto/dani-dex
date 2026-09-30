@@ -151,7 +151,7 @@ describe("ProviderRuntimeManager", () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it("waits for activation and removes a rejected artifact before restart", async () => {
+  it("keeps verified install after a connection failure and retries activation without transfer", async () => {
     const root = await temporaryRoot();
     const fixture = grokFixture();
     const previous = join(root, "grok", "darwin-arm64", "1.0.21", "bin", "grok");
@@ -201,8 +201,9 @@ describe("ProviderRuntimeManager", () => {
       architecture: "arm64",
       lock: fixture.lock,
     });
-    expect((await restarted.initialize()).providers.grok).toMatchObject({ phase: "not-downloaded", version: "1.0.21" });
-    expect(restarted.executablePath("grok")).toBe(previous);
+    expect(manager.getStatus().providers.grok).toMatchObject({ failureStage: "connection", phase: "download-error", version: "1.0.22" });
+    expect((await restarted.initialize()).providers.grok).toMatchObject({ phase: "ready", version: "1.0.22" });
+    expect(restarted.executablePath("grok")).toBe(join(root, "grok", "darwin-arm64", "1.0.22", "bin", "grok"));
     expect(await readFile(previous, "utf8")).toBe("previous runtime");
     failActivation = false;
     await manager.downloadAndWait("grok");

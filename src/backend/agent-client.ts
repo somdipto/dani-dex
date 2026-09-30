@@ -6,6 +6,7 @@ export type AgentProvider = AgentProviderId;
 export interface AgentClient {
   readonly provider: AgentProvider;
   readonly running: boolean;
+  readonly accountSpecificCatalog?: boolean;
   start(): void;
   stop(): Promise<void>;
   /**

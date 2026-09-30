@@ -13,7 +13,7 @@ import type {
   RespondToBrowserTakeoverInput,
   RespondToPromptInput,
 } from "@dani-dex/contracts/ipc";
-import { AGENT_RUNTIME_ATTENTION_LIMIT } from "@dani-dex/contracts/ipc";
+import { COMPUTER_USE_MCP_SERVER_NAME, AGENT_RUNTIME_ATTENTION_LIMIT } from "@dani-dex/contracts/ipc";
 import type { AgentClient } from "../agent-client";
 import type { PreparedBrowserSecret } from "../browser-host";
 import {
@@ -239,6 +239,8 @@ export class AttentionRegistry {
         { client: pending.client, id: pending.id, agentId: pending.approval.agentId },
         input.decision,
       );
+    } else if (pending.approval.externalDirectory) {
+      pending.client.respond(pending.id, { decision: input.decision });
     } else if (pending.approval.kind === "permissions") {
       const permissions = getRecord(pending.params, "permissions") ?? {};
       pending.client.respond(pending.id, {
@@ -254,6 +256,23 @@ export class AttentionRegistry {
       pending.client.respond(pending.id, { decision: input.decision });
     }
     this.#approvals.delete(input.requestId);
+    if (input.decision === "decline") {
+      const snapshot = this.#conversation.ensureSnapshot(pending.approval.agentId, pending.approval.threadId);
+      const id = `approval-denied:${String(input.requestId)}`;
+      if (!snapshot.messages.some((message) => message.id === id)) {
+        snapshot.messages.push({
+          id,
+          turnId: pending.approval.turnId,
+          author: "system",
+          source: "system",
+          status: "completed",
+          createdAt: new Date().toISOString(),
+          itemType: "approval_outcome",
+          text: "Permission denied. This action was not allowed.",
+        });
+        this.#conversation.emitConversation(snapshot, "approval.denied", { requestId: input.requestId });
+      }
+    }
     this.#emit({
       type: "agent-input-resolved",
       kind: "approval",
@@ -332,7 +351,9 @@ export class AttentionRegistry {
    */
   #answerWithoutAsking(client: AgentClient, request: AppServerRequest, approval: AgentApproval): boolean {
     if (!shouldAutoApprove(this.#approvalAutomation, approval)) return false;
-    if (approval.kind === "permissions") {
+    if (approval.externalDirectory) {
+      client.respond(request.id, { decision: "accept" });
+    } else if (approval.kind === "permissions") {
       client.respond(request.id, { permissions: getRecord(request.params, "permissions") ?? {}, scope: "turn" });
     } else if (request.method === "applyPatchApproval" || request.method === "execCommandApproval") {
       client.respond(request.id, { decision: "approved" });
@@ -362,6 +383,8 @@ export class AttentionRegistry {
       reason: getString(request.params, "reason"),
       grantRoot: getString(request.params, "grantRoot"),
       permissions: kind === "permissions" ? approvalPermissions(request.params) : null,
+      ...(getString(request.params, "acpExternalDirectory")
+        ? { externalDirectory: getString(request.params, "acpExternalDirectory")! } : {}),
     };
     if (this.#answerWithoutAsking(client, request, approval)) return;
     this.#approvals.set(request.id, {
@@ -603,6 +626,14 @@ export class AttentionRegistry {
       return;
     }
 
+    // Only the bundled computer-use consent form, never a secret/input question or
+    // another plugin. Use one-shot so revoking the mode also revokes future app access.
+    const properties = getRecord(getRecord(request.params, "requestedSchema"), "properties");
+    if (getString(request.params, "serverName") === COMPUTER_USE_MCP_SERVER_NAME &&
+        properties && Object.keys(properties).length === 0 && this.#approvalAutomation.autoApproves(agentId)) {
+      client.respond(request.id, { action: "accept", content: {}, _meta: null });
+      return;
+    }
     const messageId = this.#persistQuestionPrompt(agentId, publicThreadId, turnId, request.id, questions);
     this.#prompts.set(request.id, {
       client,

@@ -30,6 +30,7 @@ export interface OnboardingFlowProps {
   platform: DesktopPlatform;
   refreshingProviders?: boolean;
   providerRuntimeStatuses?: Partial<Record<AgentProviderId, ProviderRuntimeStatus>>;
+  onOptionalApiKey?: (provider: AgentProviderId) => void;
   onConnectProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onDownloadProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onCancelProviderDownload?: (provider: AgentProviderId) => void | Promise<void>;
@@ -446,7 +447,8 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
               <section class="onboarding-panel onboarding-panel-meet" aria-labelledby="onboarding-title">
                 <div class="onboarding-hero-avatar">
                   <AgentAvatar
-                    seed={avatarVariants.meet.seed}
+                    seed="manzanilla:default"
+                    characterSize={160}
                     hue={avatarVariants.meet.hue}
                     motion="idle"
                     cycleOffset={avatarVariants.meet.cycleOffset}
@@ -498,7 +500,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                     label="Choose an AI for Dani"
                     hint={
                       lazyProviderMode()
-                        ? "Download, connect, and choose an AI to continue."
+                        ? "Start with Dani Free. Other providers are optional and can be connected later."
                         : showsProviderSetup()
                           ? "Connect and choose an AI to continue. Select Refresh if you changed your account outside Dani-Dex."
                           : "You can change this for each agent later."
@@ -507,6 +509,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                     focusFirst
                     disabled={saving()}
                     refreshingProviders={props.refreshingProviders}
+                    onOptionalApiKey={props.onOptionalApiKey}
                     onConnectProvider={props.onConnectProvider ? connectProvider : undefined}
                     onDownloadProvider={props.onDownloadProvider ? downloadProvider : undefined}
                     onCancelProviderDownload={props.onCancelProviderDownload ? cancelProviderDownload : undefined}
@@ -653,7 +656,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                 <section class="onboarding-job-orbit" aria-label="Example agent jobs">
                   <article class="onboarding-job-card onboarding-job-card-top">
                     <AgentAvatar
-                      seed={avatarVariants.inbox.seed}
+                      seed="manzanilla:inbox"
                       hue={avatarVariants.inbox.hue}
                       motion="always"
                       cycleOffset={avatarVariants.inbox.cycleOffset}
@@ -664,7 +667,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                   </article>
                   <article class="onboarding-job-card onboarding-job-card-left">
                     <AgentAvatar
-                      seed={avatarVariants.weekly.seed}
+                      seed="manzanilla:chief"
                       hue={avatarVariants.weekly.hue}
                       motion="always"
                       cycleOffset={avatarVariants.weekly.cycleOffset}
@@ -675,7 +678,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                   </article>
                   <article class="onboarding-job-card onboarding-job-card-right">
                     <AgentAvatar
-                      seed={avatarVariants.research.seed}
+                      seed="manzanilla:assistant"
                       hue={avatarVariants.research.hue}
                       motion="always"
                       cycleOffset={avatarVariants.research.cycleOffset}

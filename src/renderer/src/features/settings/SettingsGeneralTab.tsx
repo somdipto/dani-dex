@@ -58,6 +58,7 @@ interface SettingsGeneralTabProps {
   onCancelProviderDownload?: (provider: AgentProviderId) => void | Promise<void>;
   onUpdateProvider?: (provider: AgentProviderId) => void | Promise<void>;
   onInstallProvider?: (provider: AgentProviderId) => void | Promise<void>;
+  onOptionalApiKey?: (provider: AgentProviderId) => void;
   onConnectProvider?: (provider: AgentProviderId) => void | Promise<void>;
   /**
    * Accepts a described endpoint. Without it the section offers no custom provider at all, which is
@@ -122,6 +123,7 @@ export function SettingsGeneralTab(props: SettingsGeneralTabProps) {
           onDownloadProvider={props.onDownloadProvider}
           onCancelProviderDownload={props.onCancelProviderDownload}
           onUpdateProvider={props.onUpdateProvider}
+          onOptionalApiKey={props.onOptionalApiKey}
           onConnectProvider={props.onConnectProvider}
           onInstallProvider={props.onInstallProvider}
           onAddCustomProvider={props.onAddCustomProvider ? host.openForm : undefined}

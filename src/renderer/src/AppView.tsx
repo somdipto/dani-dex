@@ -1,4 +1,5 @@
 import { Loading, Show } from "solid-js";
+import { ProviderConnectionDialogs } from "./components/ProviderConnectionDialogs";
 import { useDaniOnly } from "./components/use-dani-only";
 import { useAuth } from "./features/account/account-context";
 import { accountForWindow, signInRequired } from "./features/account/sign-in-gate";
@@ -46,6 +47,7 @@ export function AppAccessGate() {
     cancelProviderRuntimeDownload,
     refreshingProviders,
     connectProvider,
+    openApiKey,
     openProviderInstallGuide,
     refreshAgentProviders,
     codeLogin,
@@ -56,83 +58,89 @@ export function AppAccessGate() {
   const { joinRemoteDuringSetup } = useServerSelection();
 
   return (
-    <Show when={setup.setupLoaded() && platform.appInfo() !== null} fallback={<LoadingScreen />}>
-      <Show
-        when={accountForWindow(auth.visibleSignedInAccount(), signInRequired())}
-        fallback={
-          <Loading fallback={<LoadingScreen />}>
-            <AccountLogin
-              variant={platform.appInfo()?.variant ?? "production"}
-              state={auth.centralAuth()}
-              onRetry={auth.retryCentralAccount}
-              onRequestEmailCode={auth.requestEmailCode}
-              onVerifyEmailCode={auth.verifyEmailCode}
-              providers={auth.signInOptions().providers}
-              onSignInWithProvider={auth.signInWithProvider}
-              onCancelProviderSignIn={auth.cancelProviderSignIn}
-              onReset={auth.logoutCentralAccount}
-            />
-          </Loading>
-        }
-      >
-        {(account) => (
-          <Show
-            when={setup.setupState()?.completed}
-            fallback={
-              <Show
-                when={setup.pendingInviteUrl().trim()}
-                fallback={
+    <>
+      <ProviderConnectionDialogs />
+      <Show when={setup.setupLoaded() && platform.appInfo() !== null} fallback={<LoadingScreen />}>
+        <Show
+          when={accountForWindow(auth.visibleSignedInAccount(), signInRequired())}
+          fallback={
+            <Loading fallback={<LoadingScreen />}>
+              <AccountLogin
+                variant={platform.appInfo()?.variant ?? "production"}
+                state={auth.centralAuth()}
+                onRetry={auth.retryCentralAccount}
+                onRequestEmailCode={auth.requestEmailCode}
+                onVerifyEmailCode={auth.verifyEmailCode}
+                providers={auth.signInOptions().providers}
+                onSignInWithProvider={auth.signInWithProvider}
+                onCancelProviderSignIn={auth.cancelProviderSignIn}
+                onReset={auth.logoutCentralAccount}
+              />
+            </Loading>
+          }
+        >
+          {(account) => (
+            <Show
+              when={setup.setupState()?.completed}
+              fallback={
+                <Show
+                  when={setup.pendingInviteUrl().trim()}
+                  fallback={
+                    <Loading fallback={<LoadingScreen />}>
+                      <OnboardingFlow
+                        daniOnly={daniOnly()}
+                        state={
+                          setup.setupState() ?? { completed: false, preferredProvider: null, preferredModel: null }
+                        }
+                        agentStatus={agentStatus()}
+                        platform={platform.appInfo()?.platform ?? "darwin"}
+                        refreshingProviders={
+                          refreshingProviders() ||
+                          agentStatus().phase === "starting" ||
+                          agentStatus().phase === "restarting"
+                        }
+                        providerRuntimeStatuses={
+                          providerRuntimeDownloadsAvailable() ? providerRuntimeStatuses() : undefined
+                        }
+                        onDownloadProvider={providerRuntimeDownloadsAvailable() ? downloadProviderRuntime : undefined}
+                        onCancelProviderDownload={
+                          providerRuntimeDownloadsAvailable() ? cancelProviderRuntimeDownload : undefined
+                        }
+                        onOptionalApiKey={openApiKey}
+                        onConnectProvider={connectProvider}
+                        onInstallProvider={openProviderInstallGuide}
+                        onSignInProvider={providerRuntimeDownloadsAvailable() ? undefined : connectProvider}
+                        codeLogin={codeLogin}
+                        onRefreshProviders={providerRuntimeDownloadsAvailable() ? undefined : refreshAgentProviders}
+                        onSave={setup.saveSetup}
+                        customProviders={customProviders()}
+                        onAddCustomProvider={saveCustomProvider}
+                        onDeleteCustomProvider={deleteCustomProvider}
+                      />
+                    </Loading>
+                  }
+                >
                   <Loading fallback={<LoadingScreen />}>
-                    <OnboardingFlow
-                      daniOnly={daniOnly()}
+                    <InitialSetup
                       state={setup.setupState() ?? { completed: false, preferredProvider: null, preferredModel: null }}
                       agentStatus={agentStatus()}
                       platform={platform.appInfo()?.platform ?? "darwin"}
-                      refreshingProviders={
-                        refreshingProviders() ||
-                        agentStatus().phase === "starting" ||
-                        agentStatus().phase === "restarting"
-                      }
-                      providerRuntimeStatuses={
-                        providerRuntimeDownloadsAvailable() ? providerRuntimeStatuses() : undefined
-                      }
-                      onDownloadProvider={providerRuntimeDownloadsAvailable() ? downloadProviderRuntime : undefined}
-                      onCancelProviderDownload={
-                        providerRuntimeDownloadsAvailable() ? cancelProviderRuntimeDownload : undefined
-                      }
-                      onConnectProvider={connectProvider}
-                      onInstallProvider={openProviderInstallGuide}
-                      onSignInProvider={providerRuntimeDownloadsAvailable() ? undefined : connectProvider}
-                      codeLogin={codeLogin}
-                      onRefreshProviders={providerRuntimeDownloadsAvailable() ? undefined : refreshAgentProviders}
+                      accountEmail={account().email}
+                      inviteUrl={setup.pendingInviteUrl()}
                       onSave={setup.saveSetup}
-                      customProviders={customProviders()}
-                      onAddCustomProvider={saveCustomProvider}
-                      onDeleteCustomProvider={deleteCustomProvider}
+                      onPreviewInvite={setup.previewInvite}
+                      onJoinRemote={joinRemoteDuringSetup}
+                      onLogout={auth.logoutCentralAccount}
                     />
                   </Loading>
-                }
-              >
-                <Loading fallback={<LoadingScreen />}>
-                  <InitialSetup
-                    state={setup.setupState() ?? { completed: false, preferredProvider: null, preferredModel: null }}
-                    agentStatus={agentStatus()}
-                    platform={platform.appInfo()?.platform ?? "darwin"}
-                    accountEmail={account().email}
-                    inviteUrl={setup.pendingInviteUrl()}
-                    onSave={setup.saveSetup}
-                    onPreviewInvite={setup.previewInvite}
-                    onJoinRemote={joinRemoteDuringSetup}
-                    onLogout={auth.logoutCentralAccount}
-                  />
-                </Loading>
-              </Show>
-            }
-          >
-            <WorkspaceShell account={account} />
-          </Show>
-        )}
+                </Show>
+              }
+            >
+              <WorkspaceShell account={account} />
+            </Show>
+          )}
+        </Show>
       </Show>
-    </Show>
+    </>
   );
 }

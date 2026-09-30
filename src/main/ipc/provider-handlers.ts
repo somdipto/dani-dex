@@ -6,6 +6,7 @@ import type { AgentProviderId } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { shell } from "electron";
 import type { AgentService } from "../../backend/agent-service";
+import type { ChatGptPlanService } from "../chatgpt-plan-service";
 import type { ProviderCredentialStore } from "../provider-credential-store";
 import type { ProviderRuntimeManager } from "../provider-runtime-manager";
 import { parseProviderId } from "./app-inputs";
@@ -18,22 +19,36 @@ export interface ProviderIpcDependencies {
   service: AgentService;
   providerRuntimes: ProviderRuntimeManager;
   credentials: ProviderCredentialStore;
+  chatGptPlan?: ChatGptPlanService;
 }
 
 export function providerIpcHandlers({
   service,
   providerRuntimes,
   credentials,
+  chatGptPlan,
 }: ProviderIpcDependencies): Pick<IpcGroupHandlers, "providers" | "providerRuntimes"> {
   return {
     providers: {
-      connectProvider: payloadHandler(parseProviderId, (provider) =>
-        service.connectProvider(provider, async (value) => {
+      connectProvider: payloadHandler(parseProviderId, (provider) => {
+        if (provider === "codex" && chatGptPlan)
+          return (async () => {
+            const registration = await chatGptPlan.connect();
+            if (!chatGptPlan.planEnabled(registration.clientId))
+              throw new Error("ChatGPT sign-in did not grant model access. Sign in again and allow plan access.");
+            await providerRuntimes.downloadAndWait("codex");
+            return service.changeProviderCredential(provider, () => chatGptPlan.select(registration.clientId));
+          })();
+        if (provider === "claude")
+          throw new Error(
+            "Claude.ai subscription login requires Anthropic permission for third-party apps. The optional API-key path is available.",
+          );
+        return service.connectProvider(provider, async (value) => {
           const url = new URL(value);
           if (url.protocol !== "https:") throw new Error("Only HTTPS ChatGPT login links can open in the browser.");
           await shell.openExternal(url.toString());
-        }),
-      ),
+        });
+      }),
       updateProviderCli: payloadHandler(parseManagedProviderId, async (provider) => {
         await providerRuntimes.downloadAndWait(provider);
         return service.getStatus();
@@ -45,9 +60,10 @@ export function providerIpcHandlers({
       // The key and the process that uses it change as one step, because the catalog the CLI
       // advertises is decided at spawn time: the service writes the key only when it can restart
       // the provider on it, and reports success only once the new process is up.
-      setProviderApiKey: payloadHandler(parseProviderApiKeyInput, ({ provider, key }) =>
-        service.changeProviderCredential(provider, () => credentials.set(provider, key)),
-      ),
+      setProviderApiKey: payloadHandler(parseProviderApiKeyInput, async ({ provider, key }) => {
+        if (provider === "claude" || provider === "grok") await providerRuntimes.downloadAndWait(provider);
+        return service.changeProviderCredential(provider, () => credentials.set(provider, key));
+      }),
       clearProviderApiKey: payloadHandler(parseProviderId, (provider) =>
         service.changeProviderCredential(provider, () => credentials.clear(provider)),
       ),

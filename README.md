@@ -73,6 +73,24 @@ Dani-Dex is the first step: a team of agents on your computer that can already d
 ## Get started
 
 1. Click the download button for your computer above.
+
+   Terminal onboarding candidate for **Windows, macOS or Linux**. The npm command below
+   becomes available after `dani-dex-onboard` is published; it is not published yet:
+   ```bash
+   npx dani-dex-onboard
+   ```
+   It needs [Node.js](https://nodejs.org). After these scripts land on main, the native
+   one-liners below will download the current release. macOS and Windows installs still
+   need real-OS verification. The PowerShell candidate has not yet gained the same
+   fail-closed checksum path as the shell and npm candidates:
+   - **macOS, Linux or WSL** (Terminal):
+     ```bash
+     curl -fsSL https://raw.githubusercontent.com/somdipto/dani-dex/main/scripts/onboard.sh | bash
+     ```
+   - **Windows** (PowerShell):
+     ```powershell
+     irm https://raw.githubusercontent.com/somdipto/dani-dex/main/scripts/onboard.ps1 | iex
+     ```
 2. Install it:
    - **Mac:** open the file and drag Dani-Dex to Applications. The first time, Control-click
      Dani-Dex in Applications and choose **Open**. If macOS still blocks it, go to **System

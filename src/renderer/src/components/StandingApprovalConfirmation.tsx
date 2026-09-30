@@ -31,9 +31,7 @@ export function StandingApprovalConfirmation(props: {
           >
             <AlertDialog.Title>Always allow {props.agentName ?? "this agent"}?</AlertDialog.Title>
             <AlertDialog.Description>
-              {props.agentName ?? "This agent"} will run commands, change files and widen its own filesystem and network
-              access on this computer without asking again. Publishing, replacing and deleting public sites still
-              require approval unless Turbo mode is on. You can turn off Auto approve in this agent's model menu.
+              {props.agentName ?? "This agent"} can read, change or delete accessible files, run commands and use apps and network on this computer without asking again. This includes access outside its workspace and can expose private data or damage files. OS permissions and provider restrictions still apply. Public-site changes require the global Allow all mode. Turn off Auto approve in this agent's model menu to revoke future access; actions already taken are not undone.
             </AlertDialog.Description>
             <div class="approval-confirm-actions">
               <Button ref={cancelButton} variant="outline" type="button" onClick={props.onCancel}>
