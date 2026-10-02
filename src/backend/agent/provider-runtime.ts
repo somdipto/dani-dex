@@ -1738,7 +1738,13 @@ export class ProviderRuntime implements ProviderPort {
     this.#configRevisions.set(client, this.#hooks.captureConfigRevision());
     this.#hooks.bindClient(client);
     client.on("diagnostic", (raw) => {
-      if (raw.startsWith("ACP permission scope:")) { logger.info("ACP permission scope", { provider: client.provider, message: shortenDiagnostic(this.#redactMcp(raw)) }); return; }
+      if (raw.startsWith("ACP permission scope:")) {
+        logger.info("ACP permission scope", {
+          provider: client.provider,
+          message: shortenDiagnostic(this.#redactMcp(raw)),
+        });
+        return;
+      }
       if (!/error|failed|warning/i.test(raw)) return;
       const names = new Set([
         ...this.#credentials.mcpServers().map((config) => config.name),

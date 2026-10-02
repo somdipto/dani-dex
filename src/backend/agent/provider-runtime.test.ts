@@ -1907,48 +1907,114 @@ describe.sequential("ProviderRuntime: custom provider reload", () => {
 });
 
 it("background provider refresh never runs boot recovery on a live delivery, and late exit cannot downgrade completed work", async () => {
- let release!:()=>void;let block=false;
- const started=await startService(root,{provider:"codex",autoComplete:false,client:(provider)=>new FakeAgentClient(provider,"DONE",false,true,{},async method=>{if(method==="model/list"&&block)await new Promise<void>(resolve=>{release=resolve;});})});service=started.service;
- block=true;await service.refreshProviders();await waitFor(()=>!!release);
- const agent=await service.createAgent(CREATE_AGENT_INPUT);
- await waitFor(()=>service!.listQueue(agent.id).deliveries.some(d=>d.status==="running"));
- const running=service.listQueue(agent.id).deliveries.find(d=>d.status==="running")!;
- release();await new Promise(resolve=>setTimeout(resolve,30));
- expect(service.listQueue(agent.id).deliveries.find(d=>d.id===running.id)?.status).toBe("running");
- const snapshot=await service.readConversation(agent.id);const session=started.store.database.activeProviderSession(snapshot.threadId!,"codex")!;
- started.clientFor("codex")!.emit("notification",{method:"item/completed",params:{threadId:session.externalSessionId,turnId:running.turnId,item:{id:"done",type:"agentMessage",phase:"final_answer",text:"DONE"}}});
- started.clientFor("codex")!.emit("notification",{method:"turn/completed",params:{threadId:session.externalSessionId,turn:{id:running.turnId,status:"completed"}}});
- await waitFor(()=>service!.listQueue(agent.id).deliveries.find(d=>d.id===running.id)?.status==="completed");
- expect((await service.readConversation(agent.id)).activeTurnId).toBeNull();
- block=false;started.clientFor("codex")!.emit("exit",new Error("Deliberately late process exit"));
- await new Promise(resolve=>setTimeout(resolve,60));
- expect(service.listQueue(agent.id).deliveries.find(d=>d.id===running.id)?.status).toBe("completed");
- await service.stop();const restarted=await startService(root,{provider:"codex"});service=restarted.service;
- expect(service.listQueue(agent.id).deliveries.find(d=>d.id===running.id)?.status).toBe("completed");
- expect((await service.readConversation(agent.id)).messages.some(m=>m.author==="assistant"&&m.text==="DONE"&&m.status==="completed")).toBe(true);
- expect(restarted.client.requests.filter(r=>r.method==="turn/start")).toHaveLength(0);
+  const gate: { release?: () => void } = {};
+  let block = false;
+  const started = await startService(root, {
+    provider: "codex",
+    autoComplete: false,
+    client: (provider) =>
+      new FakeAgentClient(provider, "DONE", false, true, {}, async (method) => {
+        if (method === "model/list" && block)
+          await new Promise<void>((resolve) => {
+            gate.release = resolve;
+          });
+      }),
+  });
+  service = started.service;
+  const runningService = started.service;
+  const codexClient = started.clientFor("codex");
+  if (!codexClient) throw new Error("Expected codex client");
+  block = true;
+  await service.refreshProviders();
+  await waitFor(() => !!gate.release);
+  const agent = await service.createAgent(CREATE_AGENT_INPUT);
+  await waitFor(() => runningService.listQueue(agent.id).deliveries.some((d) => d.status === "running"));
+  const running = runningService.listQueue(agent.id).deliveries.find((d) => d.status === "running");
+  if (!running) throw new Error("Expected running delivery");
+  if (!gate.release) throw new Error("Expected blocked catalog request");
+  block = false;
+  gate.release();
+  await runningService.refreshModelCatalog();
+  expect(service.listQueue(agent.id).deliveries.find((d) => d.id === running.id)?.status).toBe("running");
+  const snapshot = await service.readConversation(agent.id);
+  if (!snapshot.threadId) throw new Error("Expected bound provider thread");
+  const session = started.store.database.activeProviderSession(snapshot.threadId, "codex");
+  if (!session) throw new Error("Expected active provider session");
+  codexClient.emit("notification", {
+    method: "item/completed",
+    params: {
+      threadId: session.externalSessionId,
+      turnId: running.turnId,
+      item: { id: "done", type: "agentMessage", phase: "final_answer", text: "DONE" },
+    },
+  });
+  codexClient.emit("notification", {
+    method: "turn/completed",
+    params: { threadId: session.externalSessionId, turn: { id: running.turnId, status: "completed" } },
+  });
+  await waitFor(
+    () => runningService.listQueue(agent.id).deliveries.find((d) => d.id === running.id)?.status === "completed",
+  );
+  expect((await service.readConversation(agent.id)).activeTurnId).toBeNull();
+  block = false;
+  codexClient.emit("exit", new Error("Deliberately late process exit"));
+  await waitFor(
+    () =>
+      runningService
+        .getStatus()
+        .providers?.some((provider) => provider.id === "codex" && provider.state === "error") === true,
+  );
+  expect(service.listQueue(agent.id).deliveries.find((d) => d.id === running.id)?.status).toBe("completed");
+  await service.stop();
+  const restarted = await startService(root, { provider: "codex" });
+  service = restarted.service;
+  expect(service.listQueue(agent.id).deliveries.find((d) => d.id === running.id)?.status).toBe("completed");
+  expect(
+    (await service.readConversation(agent.id)).messages.some(
+      (m) => m.author === "assistant" && m.text === "DONE" && m.status === "completed",
+    ),
+  ).toBe(true);
+  expect(restarted.client.requests.filter((r) => r.method === "turn/start")).toHaveLength(0);
 });
 
-it("a true interrupted turn stays interrupted across restart and is not replayed",async()=>{
- const started=await startService(root,{provider:"codex",autoComplete:false});service=started.service;
- const agent=await service.createAgent(CREATE_AGENT_INPUT);
- await waitFor(()=>service!.listQueue(agent.id).deliveries.some(d=>d.status==="running"));
- const running=service.listQueue(agent.id).deliveries.find(d=>d.status==="running")!;
- const snapshot=await service.readConversation(agent.id);const session=started.store.database.activeProviderSession(snapshot.threadId!,"codex")!;
- started.client.emit("notification",{method:"turn/completed",params:{threadId:session.externalSessionId,turn:{id:running.turnId,status:"interrupted"}}});
- await waitFor(()=>service!.listQueue(agent.id).deliveries.find(d=>d.id===running.id)?.status==="interrupted");
- await service.stop();const restarted=await startService(root,{provider:"codex"});service=restarted.service;
- expect(service.listQueue(agent.id).deliveries.find(d=>d.id===running.id)?.status).toBe("interrupted");
- expect((await service.readConversation(agent.id)).activeTurnId).toBeNull();
- expect(restarted.client.requests.filter(r=>r.method==="turn/start")).toHaveLength(0);
+it("a true interrupted turn stays interrupted across restart and is not replayed", async () => {
+  const started = await startService(root, { provider: "codex", autoComplete: false });
+  service = started.service;
+  const runningService = started.service;
+  const agent = await service.createAgent(CREATE_AGENT_INPUT);
+  await waitFor(() => runningService.listQueue(agent.id).deliveries.some((d) => d.status === "running"));
+  const running = runningService.listQueue(agent.id).deliveries.find((d) => d.status === "running");
+  if (!running) throw new Error("Expected running delivery");
+  const snapshot = await service.readConversation(agent.id);
+  if (!snapshot.threadId) throw new Error("Expected bound provider thread");
+  const session = started.store.database.activeProviderSession(snapshot.threadId, "codex");
+  if (!session) throw new Error("Expected active provider session");
+  started.client.emit("notification", {
+    method: "turn/completed",
+    params: { threadId: session.externalSessionId, turn: { id: running.turnId, status: "interrupted" } },
+  });
+  await waitFor(
+    () => runningService.listQueue(agent.id).deliveries.find((d) => d.id === running.id)?.status === "interrupted",
+  );
+  await service.stop();
+  const restarted = await startService(root, { provider: "codex" });
+  service = restarted.service;
+  expect(service.listQueue(agent.id).deliveries.find((d) => d.id === running.id)?.status).toBe("interrupted");
+  expect((await service.readConversation(agent.id)).activeTurnId).toBeNull();
+  expect(restarted.client.requests.filter((r) => r.method === "turn/start")).toHaveLength(0);
 });
-it("first boot still recovers genuinely unfinished delivery without replay",async()=>{
- const started=await startService(root,{provider:"codex",autoComplete:false});service=started.service;
- const agent=await service.createAgent(CREATE_AGENT_INPUT);
- await waitFor(()=>service!.listQueue(agent.id).deliveries.some(d=>d.status==="running"));
- const delivery=service.listQueue(agent.id).deliveries.find(d=>d.status==="running")!;
- await service.stop();const restarted=await startService(root,{provider:"codex"});service=restarted.service;
- expect(service.listQueue(agent.id).deliveries.find(d=>d.id===delivery.id)?.status).toBe("interrupted");
- expect((await service.readConversation(agent.id)).activeTurnId).toBeNull();
- expect(restarted.client.requests.filter(r=>r.method==="turn/start")).toHaveLength(0);
+it("first boot still recovers genuinely unfinished delivery without replay", async () => {
+  const started = await startService(root, { provider: "codex", autoComplete: false });
+  service = started.service;
+  const runningService = started.service;
+  const agent = await service.createAgent(CREATE_AGENT_INPUT);
+  await waitFor(() => runningService.listQueue(agent.id).deliveries.some((d) => d.status === "running"));
+  const delivery = runningService.listQueue(agent.id).deliveries.find((d) => d.status === "running");
+  if (!delivery) throw new Error("Expected running delivery");
+  await service.stop();
+  const restarted = await startService(root, { provider: "codex" });
+  service = restarted.service;
+  expect(service.listQueue(agent.id).deliveries.find((d) => d.id === delivery.id)?.status).toBe("interrupted");
+  expect((await service.readConversation(agent.id)).activeTurnId).toBeNull();
+  expect(restarted.client.requests.filter((r) => r.method === "turn/start")).toHaveLength(0);
 });

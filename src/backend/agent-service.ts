@@ -119,7 +119,12 @@ import { isHostedSiteMutationTool } from "./agent/hosted-site-events";
 import { ImageGenRuntime } from "./agent/image-gen-runtime";
 import { MailboxSync } from "./agent/mailbox-sync";
 import { OperatingInstructions } from "./agent/operating-instructions";
-import { generateProfile, generateTextWithoutTools, generateGatewayTextWithoutTools, generateGatewayProfile } from "./agent/profile-generation";
+import {
+  generateGatewayProfile,
+  generateGatewayTextWithoutTools,
+  generateProfile,
+  generateTextWithoutTools,
+} from "./agent/profile-generation";
 import { ProfileSave } from "./agent/profile-save";
 import { createAgentToolSchema, updateProfileToolSchema } from "./agent/profile-tools";
 import { type AgentClientFactory, ProviderRuntime } from "./agent/provider-runtime";
@@ -528,14 +533,22 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
             const agentId = this.#conversation.agentForThread(externalId);
             if (!agentId) return null;
             const publicId = this.#conversation.publicThreadId(agentId, externalId);
-            const rows = store.database.connection.prepare("SELECT payload_json FROM orchestration_events WHERE aggregate_id = ? AND event_type = 'turn.worker-history' ORDER BY sequence LIMIT 5001").all(publicId);
-            if(rows.length>5000) throw new Error("Committed history exceeds the safe event budget. Fallback paused.");
-            return rows.length ? rows.map(row => JSON.parse(String(row.payload_json)).entry) : null;
+            const rows = store.database.connection
+              .prepare(
+                "SELECT payload_json FROM orchestration_events WHERE aggregate_id = ? AND event_type = 'turn.worker-history' ORDER BY sequence LIMIT 5001",
+              )
+              .all(publicId);
+            if (rows.length > 5000)
+              throw new Error("Committed history exceeds the safe event budget. Fallback paused.");
+            return rows.length ? rows.map((row) => JSON.parse(String(row.payload_json)).entry) : null;
           },
           append: (externalId, entry) => {
             const agentId = this.#conversation.agentForThread(externalId);
             if (!agentId) throw new Error("Worker history thread is unbound.");
-            const snapshot = this.#conversation.ensureSnapshot(agentId, this.#conversation.publicThreadId(agentId, externalId));
+            const snapshot = this.#conversation.ensureSnapshot(
+              agentId,
+              this.#conversation.publicThreadId(agentId, externalId),
+            );
             if (!snapshot.threadId) throw new Error("Worker history snapshot is unbound.");
             store.database.appendWorkerHistory(snapshot.threadId, entry);
           },
@@ -1209,21 +1222,36 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     const agent = input.agentId ? this.listAgents().find((candidate) => candidate.id === input.agentId) : null;
     if (input.agentId && !agent) throw new Error("This agent no longer exists.");
     if (this.#stopping) throw new Error("Dani-Dex is shutting down.");
-    if (this.#profileClients.size + this.#gatewayGenerations.size >= 3) throw new Error("Profile generation is busy. Try again shortly.");
+    if (this.#profileClients.size + this.#gatewayGenerations.size >= 3)
+      throw new Error("Profile generation is busy. Try again shortly.");
     const route = this.#profileGenerationRoute?.();
     if (!route)
-      throw new Error("Profile generation unavailable: no permitted zero-cost tool-free provider route is configured. Create the profile manually.");
+      throw new Error(
+        "Profile generation unavailable: no permitted zero-cost tool-free provider route is configured. Create the profile manually.",
+      );
     if (route.endpoint) {
-      const controller = new AbortController(); this.#gatewayGenerations.add(controller);
-      try { return await generateGatewayProfile({ endpoint: route.endpoint, modelId: route.modelId }, input, sections, controller.signal); }
-      finally { this.#gatewayGenerations.delete(controller); }
+      const controller = new AbortController();
+      this.#gatewayGenerations.add(controller);
+      try {
+        return await generateGatewayProfile(
+          { endpoint: route.endpoint, modelId: route.modelId },
+          input,
+          sections,
+          controller.signal,
+        );
+      } finally {
+        this.#gatewayGenerations.delete(controller);
+      }
     }
     const provider = route.provider;
     await this.ensureProvider(provider);
-    const model = this.#availableModels().find((candidate) => candidate.id === route.modelId && candidate.provider === provider);
+    const model = this.#availableModels().find(
+      (candidate) => candidate.id === route.modelId && candidate.provider === provider,
+    );
     if (!model) throw new Error("Profile generation unavailable: the configured model is not available.");
     if (this.#stopping) throw new Error("Dani-Dex is shutting down.");
-    if (this.#profileClients.size + this.#gatewayGenerations.size >= 3) throw new Error("Profile generation is busy. Try again shortly.");
+    if (this.#profileClients.size + this.#gatewayGenerations.size >= 3)
+      throw new Error("Profile generation is busy. Try again shortly.");
     const client = this.#providers.createProfileClient(provider);
     const generation = { cancelled: false };
     this.#profileClients.set(client, generation);
@@ -2679,11 +2707,21 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     if (!route)
       throw new Error("Profile generation unavailable: no permitted zero-cost tool-free provider route is configured.");
     if (route.endpoint) {
-      if (this.#profileClients.size + this.#gatewayGenerations.size >= 3) throw new Error("Profile generation is busy. Try again shortly.");
+      if (this.#profileClients.size + this.#gatewayGenerations.size >= 3)
+        throw new Error("Profile generation is busy. Try again shortly.");
       if (this.#stopping) throw new Error("Dani-Dex is shutting down.");
-      const controller = new AbortController(); this.#gatewayGenerations.add(controller);
-      try { return await generateGatewayTextWithoutTools({ endpoint: route.endpoint, modelId: route.modelId }, prompt, () => false, { signal: controller.signal, purpose: "team" }); }
-      finally { this.#gatewayGenerations.delete(controller); }
+      const controller = new AbortController();
+      this.#gatewayGenerations.add(controller);
+      try {
+        return await generateGatewayTextWithoutTools(
+          { endpoint: route.endpoint, modelId: route.modelId },
+          prompt,
+          () => false,
+          { signal: controller.signal, purpose: "team" },
+        );
+      } finally {
+        this.#gatewayGenerations.delete(controller);
+      }
     }
     const provider = route.provider;
     await this.#providers.ensureProvider(provider);

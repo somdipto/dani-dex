@@ -97,9 +97,7 @@ describe("onboard.sh", () => {
       const asset = result.stdout.match(/^asset=(.+)$/m)?.[1];
       expect(asset).toBeDefined();
       expect(README_INSTALL_ASSETS).toContain(asset);
-      expect(result.stdout).toContain(
-        `url=https://github.com/somdipto/dani-dex/releases/latest/download/${asset}`,
-      );
+      expect(result.stdout).toContain(`url=https://github.com/somdipto/dani-dex/releases/latest/download/${asset}`);
     }
   });
 

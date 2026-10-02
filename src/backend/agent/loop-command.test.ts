@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loopCommandInstructions } from "./loop-command";
+
 describe("bounded loop command", () => {
   it("does not change ordinary messages or command prefixes", () => {
     expect(loopCommandInstructions("hello")).toBeNull();

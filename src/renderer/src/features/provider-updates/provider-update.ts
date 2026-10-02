@@ -67,7 +67,9 @@ export function presentProviderUpdate(update: ProviderUpdate): ProviderUpdatePre
   let title = `${name} is up to date`;
   if (updatable) title = `${name} update available`;
   else if (busy) title = `Updating ${name}`;
-  else if (failed) title = runtime.failureStage === "connection" ? `${name} installed, but connection failed` : `${name} update failed`;
+  else if (failed)
+    title =
+      runtime.failureStage === "connection" ? `${name} installed, but connection failed` : `${name} update failed`;
 
   return {
     updatable,

@@ -1,6 +1,6 @@
-import type { WorkerHistory } from "./agent/worker-history";
 import type { AgentAuthState, AgentProviderId } from "@dani-dex/contracts/ipc";
 import { AcpAgentClient } from "./acp-client";
+import type { WorkerHistory } from "./agent/worker-history";
 import type { AgentClient } from "./agent-client";
 import { CodexAppServerClient } from "./app-server-client";
 import { ClaudeAgentClient } from "./claude-client";

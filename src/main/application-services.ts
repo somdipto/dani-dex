@@ -1,7 +1,7 @@
-import { validateGatewayRoute, KILO_PROFILE_ENDPOINT, KILO_PROFILE_MODEL } from "../backend/agent/profile-generation";
 import { isManagedRuntimeProvider } from "@dani-dex/contracts/agent-providers";
 import { AGENT_HARNESS_DESCRIPTORS, type AgentHarnessSetting, fixedHarness } from "@dani-dex/contracts/ipc";
 import { DANI_DEX_API_ORIGIN } from "@dani-dex/contracts/online-services";
+import { KILO_PROFILE_ENDPOINT, KILO_PROFILE_MODEL, validateGatewayRoute } from "../backend/agent/profile-generation";
 import { AgentDatabaseSupervisor } from "../backend/agent-data/agent-database-supervisor";
 import { AgentTables } from "../backend/agent-data/agent-tables";
 import { requireProviderDriver } from "../backend/provider-drivers";
@@ -811,7 +811,8 @@ export async function createApplicationServices({
     browser,
     requestTimeoutMs: 30_000,
     profileGenerationRoute: () => ({
-      provider: "opencode", modelId: "stepfun/step-3.7-flash:free",
+      provider: "opencode",
+      modelId: "stepfun/step-3.7-flash:free",
       endpoint: "https://api.kilo.ai/api/gateway/chat/completions",
     }),
     preferredProvider: setupState.preferredProvider ?? "codex",
@@ -841,14 +842,25 @@ export async function createApplicationServices({
       apiKey: (provider) => providerCredentials.get(provider),
       // `configs()`, not `list()`: this is the one path the API keys travel, and it ends at the
       // spawned provider process. The IPC handlers are given `list()`.
-      customProviders: () => [...customProviders.configs(), {
-        id: "dani-kilo-worker", name: "Dani", baseUrl: "https://api.kilo.ai/api/gateway", apiKey: null,
-        models: [{ id: KILO_PROFILE_MODEL, name: "Dani" }], headers: [],
-      }],
+      customProviders: () => [
+        ...customProviders.configs(),
+        {
+          id: "dani-kilo-worker",
+          name: "Dani",
+          baseUrl: "https://api.kilo.ai/api/gateway",
+          apiKey: null,
+          models: [{ id: KILO_PROFILE_MODEL, name: "Dani" }],
+          headers: [],
+        },
+      ],
       fallbackModel: `dani-kilo-worker/${KILO_PROFILE_MODEL}`,
       validateModel: async (modelId, signal) => {
         if (modelId === `dani-kilo-worker/${KILO_PROFILE_MODEL}`)
-          await validateGatewayRoute({ endpoint: KILO_PROFILE_ENDPOINT, modelId: KILO_PROFILE_MODEL }, AbortSignal.any([AbortSignal.timeout(15000), ...(signal ? [signal] : [])]), true);
+          await validateGatewayRoute(
+            { endpoint: KILO_PROFILE_ENDPOINT, modelId: KILO_PROFILE_MODEL },
+            AbortSignal.any([AbortSignal.timeout(15000), ...(signal ? [signal] : [])]),
+            true,
+          );
       },
       // The enabled MCP servers, read at each spawn. The service owns the store, so this reads back
       // into the object being constructed; nothing calls it before the constructor returns.

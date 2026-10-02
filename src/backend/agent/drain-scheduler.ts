@@ -1,6 +1,10 @@
-import { loopCommandInstructions } from "./loop-command";
 import { describeHarnessRoute } from "@dani-dex/contracts/agent-harness-routing";
-import { AGENT_PROVIDERS, type AgentSummary, type InstalledSkill, skillConversationEventItemType } from "@dani-dex/contracts/ipc";
+import {
+  AGENT_PROVIDERS,
+  type AgentSummary,
+  type InstalledSkill,
+  skillConversationEventItemType,
+} from "@dani-dex/contracts/ipc";
 import { createDaniDexLogger, toLogValue } from "@dani-dex/logging";
 import type { AgentProvider } from "../agent-client";
 import type { AgentStore } from "../agent-store";
@@ -12,6 +16,7 @@ import type { ConversationRuntime } from "./conversation-runtime";
 import { agentNamesById, displayMessageReferences } from "./delivery-content";
 import type { DuplicationGate } from "./duplication-gate";
 import type { AgentHarnessRouter } from "./harness-router";
+import { loopCommandInstructions } from "./loop-command";
 import type { MailboxSync } from "./mailbox-sync";
 import type { ProfileSave } from "./profile-save";
 import type { ProviderRuntime } from "./provider-runtime";
@@ -326,7 +331,8 @@ export class DrainScheduler {
         ].join("\n");
       }
       if (delivery.sender.kind === "user") text = loopCommandInstructions(displayText || delivery.text) ?? text;
-      const skillPrompt = delivery.sender.kind === "user" || delivery.sender.kind === "routine" ? displayText || delivery.text : "";
+      const skillPrompt =
+        delivery.sender.kind === "user" || delivery.sender.kind === "routine" ? displayText || delivery.text : "";
       let skillHint = "";
       let selectedSkill: InstalledSkill | undefined;
       if (this.#installedSkills && skillPrompt.trim()) {
@@ -388,7 +394,19 @@ export class DrainScheduler {
         });
       }
       if (selectedSkill && !snapshot.messages.some((message) => message.id === `${delivery.id}:skill-selection`)) {
-        snapshot.messages.push({ id: `${delivery.id}:skill-selection`, author: "system", source: "system", status: "completed", createdAt: new Date().toISOString(), itemType: skillConversationEventItemType({ action: "selected", skillId: selectedSkill.skillId, revision: selectedSkill.installedVersion }), text: selectedSkill.name });
+        snapshot.messages.push({
+          id: `${delivery.id}:skill-selection`,
+          author: "system",
+          source: "system",
+          status: "completed",
+          createdAt: new Date().toISOString(),
+          itemType: skillConversationEventItemType({
+            action: "selected",
+            skillId: selectedSkill.skillId,
+            revision: selectedSkill.installedVersion,
+          }),
+          text: selectedSkill.name,
+        });
       }
       this.#conversation.emitConversation(snapshot);
 

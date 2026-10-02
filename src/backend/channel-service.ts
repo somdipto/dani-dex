@@ -21,9 +21,11 @@ import {
   type UpdateChannelMemoryInput,
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
-import { z } from "zod";
 import { createDaniDexLogger, redactText } from "@dani-dex/logging";
+import { z } from "zod";
+
 const channelLogger = createDaniDexLogger("channel-routing");
+
 import { ChannelHistory, type ChannelTextModel } from "./channel-history";
 import { ChannelMemoryStore } from "./channel-memory-store";
 import { type ChannelAssignment, ChannelStore } from "./channel-store";
@@ -692,10 +694,15 @@ export class ChannelService {
             continue;
           }
           channel = this.store.get(channelId);
-          channelLogger.warn("Channel routing failed", { channelId, message: redactText(error instanceof Error ? error.message : String(error)) });
+          channelLogger.warn("Channel routing failed", {
+            channelId,
+            message: redactText(error instanceof Error ? error.message : String(error)),
+          });
           const detail =
-            error instanceof ChannelRoutingError || (error instanceof Error && error.message.startsWith("Profile generation"))
-              ? error.message : "Routing failed. Choose a member or try again.";
+            error instanceof ChannelRoutingError ||
+            (error instanceof Error && error.message.startsWith("Profile generation"))
+              ? error.message
+              : "Routing failed. Choose a member or try again.";
           this.store.update(channel, {
             tasks: [{ ...task, state: "paused", error: detail }],
             messages: [
@@ -754,7 +761,10 @@ export class ChannelService {
         pendingRevision: null,
         pendingOutcome: null,
       };
-      this.store.update(channel, { assignments: [assignment], tasks: [{ ...task, assignmentCount: task.assignmentCount + 1 }] });
+      this.store.update(channel, {
+        assignments: [assignment],
+        tasks: [{ ...task, assignmentCount: task.assignmentCount + 1 }],
+      });
       // The request message belongs to the task that the request created, not to a child task that
       // only inherits the id. A send commits its uploads before it is accepted, so `committing`
       // now only serves a task an earlier version queued with its drafts still open: it turns
@@ -1278,7 +1288,8 @@ export class ChannelService {
       throw new Error("A source message is unavailable.");
     const root = tasks.find((item) => item.id === task.rootTaskId);
     if (!root) throw new Error("The root task is unavailable.");
-    const handoffCount = root.handoffCount ?? tasks.filter(item => item.rootTaskId === root.id && item.id !== root.id).length;
+    const handoffCount =
+      root.handoffCount ?? tasks.filter((item) => item.rootTaskId === root.id && item.id !== root.id).length;
     if (handoffCount >= CHANNEL_ASSIGNMENT_LIMIT) {
       this.store.update(
         channel,
@@ -1338,7 +1349,11 @@ export class ChannelService {
       ...task,
       dependencies: tool === "channel_assign" ? [...task.dependencies, next.id] : task.dependencies,
     };
-    const rootUpdate = { ...(root.id === task.id ? parentUpdate : root), assignmentCount: root.assignmentCount, handoffCount: handoffCount + 1 };
+    const rootUpdate = {
+      ...(root.id === task.id ? parentUpdate : root),
+      assignmentCount: root.assignmentCount,
+      handoffCount: handoffCount + 1,
+    };
     const changes =
       next.id === root.id
         ? [{ ...next, assignmentCount: rootUpdate.assignmentCount }]

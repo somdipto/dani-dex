@@ -201,7 +201,11 @@ describe("ProviderRuntimeManager", () => {
       architecture: "arm64",
       lock: fixture.lock,
     });
-    expect(manager.getStatus().providers.grok).toMatchObject({ failureStage: "connection", phase: "download-error", version: "1.0.22" });
+    expect(manager.getStatus().providers.grok).toMatchObject({
+      failureStage: "connection",
+      phase: "download-error",
+      version: "1.0.22",
+    });
     expect((await restarted.initialize()).providers.grok).toMatchObject({ phase: "ready", version: "1.0.22" });
     expect(restarted.executablePath("grok")).toBe(join(root, "grok", "darwin-arm64", "1.0.22", "bin", "grok"));
     expect(await readFile(previous, "utf8")).toBe("previous runtime");

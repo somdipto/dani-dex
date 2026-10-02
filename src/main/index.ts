@@ -1,4 +1,3 @@
-import { CodexRealtimeService } from "./codex-realtime-service";
 import { join, resolve } from "node:path";
 import { parseInviteUrl } from "@dani-dex/contracts/invite-links";
 import { type CentralAuthState, IPC_CHANNELS } from "@dani-dex/contracts/ipc";
@@ -8,6 +7,7 @@ import { createRemoteDirectoryRefresh } from "@dani-dex/team-client/remote-direc
 import { app, BrowserWindow, dialog, powerMonitor, protocol, screen, shell } from "electron";
 import { readAppVariant, resolveAppIconPath } from "./app-icon";
 import { type ApplicationServices, createApplicationServices } from "./application-services";
+import { CodexRealtimeService } from "./codex-realtime-service";
 import { DaniArcWindow } from "./dani-arc-window";
 import { type DeepLink, findDeepLink, parseDeepLink } from "./deep-link-router";
 import { guardDevelopmentOutput } from "./development-output";
@@ -336,8 +336,14 @@ function registerIpcHandlers({
   // covers - or a registrar that stops covering one - fails to compile here, naming the group.
   const getMainWindow = () => windowHolder.current;
 
-  const codexVoice = new CodexRealtimeService(join(app.getPath("userData"), "codex-voice"), () => providerRuntimes.executablePath("codex"), (url) => shell.openExternal(url));
-  app.once("before-quit", () => { void codexVoice.dispose(); });
+  const codexVoice = new CodexRealtimeService(
+    join(app.getPath("userData"), "codex-voice"),
+    () => providerRuntimes.executablePath("codex"),
+    (url) => shell.openExternal(url),
+  );
+  app.once("before-quit", () => {
+    void codexVoice.dispose();
+  });
   registerIpcGroups({
     ...appIpcHandlers({
       service,

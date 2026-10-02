@@ -17,7 +17,9 @@ import {
 } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isNumber, isString } from "@dani-dex/contracts/runtime-values";
 import { createDaniDexLogger, redactText } from "@dani-dex/logging";
+
 const runtimeLogger = createDaniDexLogger("provider-runtime");
+
 import lockValue from "../../native-runtime.lock.json";
 import { type AgentRuntimeLock, parseAgentRuntimeLock } from "../../scripts/agent-runtime-lock";
 import { type BundledProviderExecutables, configuredCliPath } from "../backend/cli";
@@ -434,7 +436,13 @@ export class ProviderRuntimeManager extends EventEmitter<ProviderRuntimeManagerE
       if (installVerified) {
         const message = redactText(error instanceof Error ? error.message : String(error));
         runtimeLogger.warn(`Installed ${spec.runtime} ${spec.version}, but connection failed: ${message}`);
-        this.#setStatus(spec.runtime, { phase: "download-error", failureStage: "connection", progress: null, version: spec.version, message });
+        this.#setStatus(spec.runtime, {
+          phase: "download-error",
+          failureStage: "connection",
+          progress: null,
+          version: spec.version,
+          message,
+        });
       } else if (installed) await rm(this.#installRoot(spec), { recursive: true, force: true });
       throw error;
     }

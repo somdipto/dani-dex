@@ -1,2 +1,39 @@
-const {chromium}=require('playwright-core'); const fs=require('fs'); const path=require('path');
-(async()=>{const b=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']}); const p=await b.newPage({viewport:{width:256,height:256}}); await p.setContent('<style>body{margin:0}</style>');await p.addScriptTag({path:__dirname+'/render.js'}); const out=path.resolve(__dirname,'../../assets/robot');fs.mkdirSync(out,{recursive:true});for(const [name,color] of Object.entries({blue:'#3299F4',pink:'#E65CAA',teal:'#17B4BD',violet:'#9561ED'})){for(const [mood,motion,time] of [['idle','idle',0],['working','working',1],['waiting','waiting',1],['replied','cheer',0.6]]){const data=await p.evaluate(([c,m,t])=>window.renderRobot(c,m,t),[color,motion,time]);fs.writeFileSync(`${out}/${name}-${mood}.png`,Buffer.from(data.split(',')[1],'base64'));}}await p.screenshot({path:path.resolve(__dirname,'robot-render-proof.png')});await b.close();})();
+const { chromium } = require("playwright-core");
+const fs = require("fs");
+const path = require("path");
+(async () => {
+  const b = await chromium.launch({
+    executablePath: "/usr/bin/google-chrome",
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--use-gl=angle",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      "--disable-dev-shm-usage",
+    ],
+  });
+  const p = await b.newPage({ viewport: { width: 256, height: 256 } });
+  await p.setContent("<style>body{margin:0}</style>");
+  await p.addScriptTag({ path: __dirname + "/render.js" });
+  const out = path.resolve(__dirname, "../../assets/robot");
+  fs.mkdirSync(out, { recursive: true });
+  for (const [name, color] of Object.entries({
+    blue: "#3299F4",
+    pink: "#E65CAA",
+    teal: "#17B4BD",
+    violet: "#9561ED",
+  })) {
+    for (const [mood, motion, time] of [
+      ["idle", "idle", 0],
+      ["working", "working", 1],
+      ["waiting", "waiting", 1],
+      ["replied", "cheer", 0.6],
+    ]) {
+      const data = await p.evaluate(([c, m, t]) => window.renderRobot(c, m, t), [color, motion, time]);
+      fs.writeFileSync(`${out}/${name}-${mood}.png`, Buffer.from(data.split(",")[1], "base64"));
+    }
+  }
+  await p.screenshot({ path: path.resolve(__dirname, "robot-render-proof.png") });
+  await b.close();
+})();

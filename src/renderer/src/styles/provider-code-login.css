@@ -164,12 +164,12 @@
 }
 .voice-setup-option h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--dani-dex-text-xl);
   font-weight: 600;
 }
 .voice-setup-option p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--dani-dex-text-lg);
   line-height: 1.5;
   color: var(--dani-dex-text-secondary);
 }
@@ -177,7 +177,7 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--dani-dex-text-lg);
   line-height: 1.5;
 }
 .voice-setup-consent input {
@@ -185,27 +185,85 @@
   flex-shrink: 0;
 }
 
-.provider-picker-identity { min-width: 0; }
-.provider-picker-email, .provider-picker-check-error {
+.provider-picker-identity {
+  min-width: 0;
+}
+.provider-picker-email,
+.provider-picker-check-error {
   white-space: normal;
   overflow-wrap: anywhere;
   text-overflow: clip;
 }
 
-.voice-setup-dialog { max-height: calc(100dvh - 48px); overflow-y: auto; }
-.voice-setup-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.composer-slash-suggestions { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 8px; }
+.voice-setup-dialog {
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+}
+.voice-setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.composer-slash-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 8px;
+}
 
-.voice-setup-heading { position: sticky; top: -24px; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 8px 0; background: var(--dani-dex-bg-panel, #202020); }
+.voice-setup-heading {
+  position: sticky;
+  top: -24px;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  background: var(--dani-dex-bg-panel);
+}
 
-.voice-choice-card { display: grid; gap: 10px; padding: 18px; border: 1px solid var(--dani-dex-border); border-radius: 12px; }
-.voice-choice-card h3, .voice-choice-card p { margin: 0; }
-.voice-choice-card p, .voice-choice-card small { color: var(--dani-dex-text-muted); }
-.voice-choice-card h3 { font-size: 16px; }
+.voice-choice-card {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--dani-dex-border);
+  border-radius: var(--dani-dex-radius-lg);
+}
+.voice-choice-card h3,
+.voice-choice-card p {
+  margin: 0;
+}
+.voice-choice-card p,
+.voice-choice-card small {
+  color: var(--dani-dex-text-muted);
+}
+.voice-choice-card h3 {
+  font-size: var(--dani-dex-text-xl);
+}
 
-.voice-auth-brand { display:flex; align-items:center; gap:10px; }
-.voice-auth-brand svg { width:24px; height:24px; flex-shrink:0; }
-.voice-auth-button-logo { width:18px; height:18px; margin-right:6px; }
+.voice-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.voice-auth-brand svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.voice-auth-button-logo {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+}
 /* OpenAI auth marks follow the surrounding foreground in either theme. */
-.voice-auth-brand svg, .voice-auth-button-logo { fill: currentColor; color: inherit; }
-.voice-auth-brand svg path, .voice-auth-button-logo path { fill: currentColor; }
+.voice-auth-brand svg,
+.voice-auth-button-logo {
+  fill: currentColor;
+  color: inherit;
+}
+.voice-auth-brand svg path,
+.voice-auth-button-logo path {
+  fill: currentColor;
+}

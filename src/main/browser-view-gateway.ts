@@ -87,7 +87,7 @@ export class BrowserViewGateway {
   }
 
   /** Views with a live socket. Created but never opened views do not hold anything. */
-  activeViewCount(): number {
+  activeViewCount() {
     let count = 0;
     for (const session of this.#sessions.values()) {
       if (session.socket) count += 1;

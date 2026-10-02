@@ -19,7 +19,11 @@ export function ProviderConnectionDialogs() {
         <Dialog.Portal>
           <Dialog.Overlay class="provider-code-login-backdrop">
             <Dialog.Content class="provider-code-login-dialog">
-              <Dialog.Title><span class="voice-auth-brand"><ProviderLogo provider="codex" /> Sign in with OpenAI / ChatGPT</span></Dialog.Title>
+              <Dialog.Title>
+                <span class="voice-auth-brand">
+                  <ProviderLogo provider="codex" /> Sign in with OpenAI / ChatGPT
+                </span>
+              </Dialog.Title>
               <Dialog.Description>
                 Finish signing in in your browser. Allow model access to use your ChatGPT plan. Dani-Dex does not need
                 its own account.

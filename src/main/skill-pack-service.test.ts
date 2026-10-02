@@ -143,12 +143,18 @@ describe("SkillPackService", () => {
       for (const slug of ["poteto-mode", "unslop", "ponytail", "ponytail-audit", "ponytail-gain"]) {
         expect(await readFile(join(workspace, provider, "skills", slug, "SKILL.md"), "utf8")).toContain("name:");
       }
-      expect(await readFile(join(workspace, provider, "skills", "poteto-mode", "playbooks", "prototype.md"), "utf8")).toBeTruthy();
+      expect(
+        await readFile(join(workspace, provider, "skills", "poteto-mode", "playbooks", "prototype.md"), "utf8"),
+      ).toBeTruthy();
     }
     for (const pack of ["pstack", "ponytail"]) {
-      expect(await readFile(resolve(__dirname, "../../resources/skill-packs", pack, "LICENSE"), "utf8")).toContain("MIT License");
-      expect(JSON.parse(await readFile(resolve(__dirname, "../../resources/skill-packs", pack, "SOURCE.json"), "utf8")).commit).toMatch(/^[a-f0-9]{40}$/);
+      expect(await readFile(resolve(__dirname, "../../resources/skill-packs", pack, "LICENSE"), "utf8")).toContain(
+        "MIT License",
+      );
+      expect(
+        JSON.parse(await readFile(resolve(__dirname, "../../resources/skill-packs", pack, "SOURCE.json"), "utf8"))
+          .commit,
+      ).toMatch(/^[a-f0-9]{40}$/);
     }
   });
-
 });

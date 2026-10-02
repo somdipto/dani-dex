@@ -24,6 +24,10 @@ const UNTRUSTED_EVENT = { senderFrame: { url: "https://evil.example/index.html" 
 // takes nothing, a request that takes a payload, and an event the main process only ever sends.
 function registerVoice(transcribe: (text: string) => unknown): void {
   registerIpcGroup("voice", {
+    codexStatus: handler(() => "status"),
+    codexConnect: handler(() => "connected"),
+    codexStart: handler(() => "started"),
+    codexStop: handler(() => "stopped"),
     getModelStatus: handler(() => "status"),
     prepareModel: handler(() => "prepared"),
     transcribe: payloadHandler((value) => String(value), transcribe),

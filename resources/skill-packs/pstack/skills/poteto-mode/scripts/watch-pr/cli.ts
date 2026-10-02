@@ -1,23 +1,7 @@
 import { setTimeout as delay } from "node:timers/promises";
-import {
-  Command,
-  CommanderError,
-  InvalidArgumentError,
-  Option,
-} from "commander";
-import {
-  GhGitHubReader,
-  WatcherQueryError,
-  discoverStack,
-  resolveContext,
-} from "./github.ts";
-import {
-  runQueued,
-  runSimple,
-  statusQueryVerdict,
-  verdictFactory,
-  type WatchClock,
-} from "./policy.ts";
+import { Command, CommanderError, InvalidArgumentError, Option } from "commander";
+import { discoverStack, GhGitHubReader, resolveContext, WatcherQueryError } from "./github.ts";
+import { runQueued, runSimple, statusQueryVerdict, verdictFactory, type WatchClock } from "./policy.ts";
 import { renderJson, renderPretty } from "./render.ts";
 import type * as T from "./types.ts";
 import { nonEmpty, parsePrNumber } from "./types.ts";
@@ -33,20 +17,17 @@ export interface CliOptions {
 }
 function positiveNumber(value: string): number {
   const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0)
-    throw new InvalidArgumentError("must be greater than zero");
+  if (!Number.isFinite(parsed) || parsed <= 0) throw new InvalidArgumentError("must be greater than zero");
   return parsed;
 }
 function nonNegativeNumber(value: string): number {
   const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed < 0)
-    throw new InvalidArgumentError("must be zero or greater");
+  if (!Number.isFinite(parsed) || parsed < 0) throw new InvalidArgumentError("must be zero or greater");
   return parsed;
 }
 function positiveInteger(value: string): number {
   const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed <= 0)
-    throw new InvalidArgumentError("must be a positive integer");
+  if (!Number.isInteger(parsed) || parsed <= 0) throw new InvalidArgumentError("must be a positive integer");
   return parsed;
 }
 function prNumber(value: string): T.PrNumber {
@@ -58,8 +39,7 @@ function prNumber(value: string): T.PrNumber {
 }
 function stackPrList(value: string): T.NonEmpty<T.PrNumber> {
   const numbers = value.split(",").map((part) => prNumber(part.trim()));
-  if (new Set(numbers).size !== numbers.length)
-    throw new InvalidArgumentError("contains a duplicate PR");
+  if (new Set(numbers).size !== numbers.length) throw new InvalidArgumentError("contains a duplicate PR");
   const parsed = nonEmpty(numbers);
   if (parsed === null) throw new InvalidArgumentError("cannot be empty");
   return parsed;
@@ -79,60 +59,29 @@ interface RawOptions {
   readonly allowDraft: boolean;
   readonly pretty: boolean;
 }
-export function parseArgs(
-  argv: readonly string[],
-  io: Pick<CliRuntime, "stdout" | "stderr">
-): CliOptions {
+export function parseArgs(argv: readonly string[], io: Pick<CliRuntime, "stdout" | "stderr">): CliOptions {
   const program = new Command("watch-pr")
     .description(
-      "Watch one pull request, a connected stack, or an immutable queued stack.\nJSON (NDJSON while polling) is the default; --pretty renders human text."
+      "Watch one pull request, a connected stack, or an immutable queued stack.\nJSON (NDJSON while polling) is the default; --pretty renders human text.",
     )
     .configureOutput({ writeOut: io.stdout, writeErr: io.stderr })
     .exitOverride()
     .option("--owner <owner>", "GitHub repository owner")
     .option("--repo <repo>", "GitHub repository name")
     .option("--pr <number>", "pull request number", prNumber)
-    .addOption(
-      new Option("--stack", "watch the connected open stack")
-        .default(false)
-        .conflicts("queuedStack")
-    )
-    .option(
-      "--queued-stack",
-      "watch the captured stack until all PRs merge",
-      false
-    )
-    .option(
-      "--stack-prs <n,...>",
-      "frozen bottom-to-top queue (queued mode only)",
-      stackPrList
-    )
+    .addOption(new Option("--stack", "watch the connected open stack").default(false).conflicts("queuedStack"))
+    .option("--queued-stack", "watch the captured stack until all PRs merge", false)
+    .option("--stack-prs <n,...>", "frozen bottom-to-top queue (queued mode only)", stackPrList)
     .option("--interval <seconds>", "poll interval", positiveNumber, 60)
-    .option(
-      "--sweep-interval <seconds>",
-      "whole-stack sweep interval",
-      positiveNumber,
-      300
-    )
-    .option(
-      "--timeout <seconds>",
-      "deadline; 0 disables it",
-      nonNegativeNumber,
-      0
-    )
-    .option(
-      "--max-query-errors <count>",
-      "consecutive query-error budget",
-      positiveInteger,
-      5
-    )
+    .option("--sweep-interval <seconds>", "whole-stack sweep interval", positiveNumber, 300)
+    .option("--timeout <seconds>", "deadline; 0 disables it", nonNegativeNumber, 0)
+    .option("--max-query-errors <count>", "consecutive query-error budget", positiveInteger, 5)
     .option("--status-only", "print one status table and exit 0", false)
     .option("--allow-draft", "do not treat a draft as a merge gate", false)
     .option("--pretty", "render human text instead of JSON", false);
   program.parse(argv, { from: "user" });
   const raw = program.opts<RawOptions>();
-  if (raw.stackPrs !== undefined && !raw.queuedStack)
-    program.error("error: --stack-prs requires --queued-stack");
+  if (raw.stackPrs !== undefined && !raw.queuedStack) program.error("error: --stack-prs requires --queued-stack");
   return {
     owner: raw.owner ?? null,
     repo: raw.repo ?? null,
@@ -170,10 +119,7 @@ function realRuntime(): CliRuntime {
     stderr: (value) => process.stderr.write(value),
   };
 }
-export async function main(
-  argv: readonly string[],
-  runtime: CliRuntime = realRuntime()
-): Promise<number> {
+export async function main(argv: readonly string[], runtime: CliRuntime = realRuntime()): Promise<0 | 1 | 2> {
   let options: CliOptions;
   try {
     options = parseArgs(argv, runtime);
@@ -182,8 +128,7 @@ export async function main(
     return error.exitCode === 0 ? 0 : 64;
   }
   const render = options.pretty ? renderPretty : renderJson;
-  const emit = (verdict: T.ProgressVerdict): void =>
-    runtime.stdout(render(verdict));
+  const emit = (verdict: T.ProgressVerdict): void => runtime.stdout(render(verdict));
   let contexts: T.NonEmpty<T.PrContext>;
   try {
     const seed = await resolveContext({
@@ -194,16 +139,10 @@ export async function main(
     });
     contexts =
       nonEmpty(options.stackPrs.map((number) => ({ ...seed, number }))) ??
-      (options.mode === "single"
-        ? [seed]
-        : await discoverStack(runtime.reader, seed));
+      (options.mode === "single" ? [seed] : await discoverStack(runtime.reader, seed));
   } catch (error) {
     if (!(error instanceof WatcherQueryError)) throw error;
-    const verdict = statusQueryVerdict(
-      verdictFactory(runtime.clock, options.mode),
-      1,
-      error.failure
-    );
+    const verdict = statusQueryVerdict(verdictFactory(runtime.clock, options.mode), 1, error.failure);
     runtime.stdout(render(verdict));
     return verdict.exitCode;
   }

@@ -35,12 +35,16 @@ export interface SkillPack {
 
 export const SKILL_PACKS: readonly SkillPack[] = [
   {
-    id: "pstack", title: "pstack engineering workflows", roles: ["technical"],
+    id: "pstack",
+    title: "pstack engineering workflows",
+    roles: ["technical"],
     source: { kind: "bundled", directory: "pstack", license: "MIT" },
     homepage: "https://github.com/cursor/plugins/tree/main/pstack",
   },
   {
-    id: "ponytail", title: "ponytail measured simplification", roles: ["technical"],
+    id: "ponytail",
+    title: "ponytail measured simplification",
+    roles: ["technical"],
     source: { kind: "bundled", directory: "ponytail", license: "MIT" },
     homepage: "https://github.com/DietrichGebert/ponytail/",
   },

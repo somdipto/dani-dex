@@ -69,7 +69,7 @@ describe("parseArgs", () => {
         "--allow-draft",
         "--pretty",
       ],
-      silentIo
+      silentIo,
     );
     expect(parsed.mode).toBe("queued-stack");
     expect(parsed.stackPrs.map(Number)).toEqual([10, 11, 12]);
@@ -147,9 +147,7 @@ describe("rendering", () => {
   it("renders the Markdown table from the same verdict only", () => {
     const rendered = renderPretty(status);
     expect(rendered).toContain("| PR | CI | Review | Merge |");
-    expect(rendered).toContain(
-      "| [#1](https://github.com/owner/repo/pull/1) | \u2014 | \u2014 | ✅ merged |"
-    );
+    expect(rendered).toContain("| [#1](https://github.com/owner/repo/pull/1) | \u2014 | \u2014 | ✅ merged |");
   });
 });
 
@@ -158,30 +156,19 @@ describe("main", () => {
     const harness = testRuntime(fakeReader());
     expect(await main(["--interval", "0"], harness.runtime)).toBe(64);
     expect(harness.stdout).toEqual([]);
-    expect(harness.stderr.join("")).toContain(
-      "option '--interval <seconds>' argument '0' is invalid"
-    );
+    expect(harness.stderr.join("")).toContain("option '--interval <seconds>' argument '0' is invalid");
   });
 
   it("bypasses the queue machine for queued-stack status-only", async () => {
     const reader = fakeReader();
     const harness = testRuntime(reader);
     const code = await main(
-      [
-        "--owner",
-        "owner",
-        "--repo",
-        "repo",
-        "--queued-stack",
-        "--stack-prs",
-        "1",
-        "--status-only",
-      ],
-      harness.runtime
+      ["--owner", "owner", "--repo", "repo", "--queued-stack", "--stack-prs", "1", "--status-only"],
+      harness.runtime,
     );
     expect(code).toBe(0);
     expect(harness.stdout).toHaveLength(1);
-    const verdict: unknown = JSON.parse(harness.stdout[0]);
+    const verdict = JSON.parse(harness.stdout[0]);
     expect(verdict).toMatchObject({
       kind: "STATUS",
       terminal: true,
@@ -198,10 +185,7 @@ describe("main", () => {
       commitRollups: [{ oid: "head", state: "FAILURE" }],
     });
     const harness = testRuntime(reader);
-    const code = await main(
-      ["--owner", "owner", "--repo", "repo", "--pr", "1"],
-      harness.runtime
-    );
+    const code = await main(["--owner", "owner", "--repo", "repo", "--pr", "1"], harness.runtime);
     expect(code).toBe(4);
     expect(harness.stdout).toHaveLength(1);
     expect(JSON.parse(harness.stdout[0])).toMatchObject({

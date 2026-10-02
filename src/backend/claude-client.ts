@@ -385,17 +385,15 @@ export class ClaudeAgentClient extends EventEmitter<ClientEvents> {
   }
 
   #environment(): NodeJS.ProcessEnv {
-    if (!this.apiKey) return claudeEnvironment(this.#cli);
-    const key = this.apiKey();
-    if (!key) throw new Error("Add an Anthropic API key in Dani-Dex to use Claude.");
+    const key = this.apiKey?.();
+    if (!key) return claudeEnvironment(this.#cli);
     const env = claudeEnvironment(this.#cli);
     delete env.CLAUDE_CODE_OAUTH_TOKEN;
     delete env.ANTHROPIC_AUTH_TOKEN;
     return { ...env, ANTHROPIC_API_KEY: key };
   }
   async #readAccount(): Promise<AccountReadResult> {
-    if (this.apiKey)
-      return { account: this.apiKey() ? { type: "claude", email: null } : null, requiresOpenaiAuth: false };
+    if (this.apiKey?.()) return { account: { type: "claude", email: null }, requiresOpenaiAuth: false };
 
     try {
       const { stdout } = await execFileAsync(this.#cli.executable, ["auth", "status", "--json"], {

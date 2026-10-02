@@ -13,6 +13,14 @@
  */
 
 :root {
+  /* Existing character-picker values, centralized without changing pixels. */
+  --dani-dex-character-light-surface: #f7f6f4;
+  --dani-dex-character-light-ink: #242424;
+  --dani-dex-character-light-border: #d6d5d2;
+  --dani-dex-text-character-label: 11px;
+  --dani-dex-radius-character-choice: 10px;
+  --dani-dex-radius-character-preview: 18px;
+
   --dani-dex-provider-current: currentcolor;
   /* Grouped sheet surfaces, used by the native app. */
   --dani-dex-bg-sheet: #121212;

@@ -7,7 +7,7 @@
 .first-agent-character-fieldset legend {
   margin: 0 auto 8px;
   color: var(--dani-dex-text-secondary);
-  font-size: 12px;
+  font-size: var(--dani-dex-text-sm);
 }
 
 .first-agent-character-options {
@@ -26,10 +26,10 @@
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--dani-dex-border);
-  border-radius: 10px;
+  border-radius: var(--dani-dex-radius-character-choice);
   background: var(--dani-dex-bg-surface);
   color: var(--dani-dex-text-primary);
-  font-size: 11px;
+  font-size: var(--dani-dex-text-character-label);
 }
 
 .first-agent-character-choice[aria-pressed="true"] {
@@ -71,16 +71,16 @@
 
 .first-agent-setup-panel[data-character-theme="light"] .first-agent-live-avatar,
 .first-agent-setup-panel[data-character-theme="light"] .first-agent-character-choice {
-  background: #f7f6f4;
-  color: #242424;
+  background: var(--dani-dex-character-light-surface);
+  color: var(--dani-dex-character-light-ink);
 }
 
 .first-agent-setup-panel[data-character-theme="light"] .first-agent-character-choice {
-  border-color: #d6d5d2;
+  border-color: var(--dani-dex-character-light-border);
 }
 
 .first-agent-setup-panel[data-character-theme="light"] .first-agent-live-avatar {
-  border-radius: 18px;
+  border-radius: var(--dani-dex-radius-character-preview);
 }
 
 .first-agent-suggestion-card > .mz-robot-avatar {

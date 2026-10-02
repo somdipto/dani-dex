@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { createRequire } from "node:module";
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -14,9 +14,15 @@ import { README_INSTALL_ASSETS } from "./verify-readme-install-links";
 const cli = resolve(import.meta.dirname, "..", "onboard", "bin", "dani-dex-onboard.js");
 const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, "..", "onboard", "package.json"), "utf8"));
 
-const { pickChecksumTarget } = createRequire(import.meta.url)(
-  resolve(import.meta.dirname, "..", "onboard", "bin", "dani-dex-onboard.js"),
-) as { pickChecksumTarget: (sumsText: string, platform: string) => { name: string; expected: string } | null };
+const onboardModule = createRequire(import.meta.url)(cli);
+if (typeof onboardModule?.pickChecksumTarget !== "function") throw new Error("Onboard checksum parser is missing");
+function pickChecksumTarget(sumsText: string, platform: string): { name: string; expected: string } | null {
+  const target = onboardModule.pickChecksumTarget(sumsText, platform);
+  if (target === null) return null;
+  if (typeof target?.name !== "string" || typeof target?.expected !== "string")
+    throw new Error("Invalid checksum target");
+  return { name: target.name, expected: target.expected };
+}
 
 // The real v0.17.8 release checksum files: GNU sha256sum format, versioned file
 // names, CRLF on the Windows file, and a macOS file that also lists the .zip.

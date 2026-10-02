@@ -13,7 +13,7 @@ import type {
   RespondToBrowserTakeoverInput,
   RespondToPromptInput,
 } from "@dani-dex/contracts/ipc";
-import { COMPUTER_USE_MCP_SERVER_NAME, AGENT_RUNTIME_ATTENTION_LIMIT } from "@dani-dex/contracts/ipc";
+import { AGENT_RUNTIME_ATTENTION_LIMIT, COMPUTER_USE_MCP_SERVER_NAME } from "@dani-dex/contracts/ipc";
 import type { AgentClient } from "../agent-client";
 import type { PreparedBrowserSecret } from "../browser-host";
 import {
@@ -372,6 +372,7 @@ export class AttentionRegistry {
       return;
     }
 
+    const externalDirectory = getString(request.params, "acpExternalDirectory");
     const approval: AgentApproval = {
       requestId: request.id,
       agentId,
@@ -383,8 +384,7 @@ export class AttentionRegistry {
       reason: getString(request.params, "reason"),
       grantRoot: getString(request.params, "grantRoot"),
       permissions: kind === "permissions" ? approvalPermissions(request.params) : null,
-      ...(getString(request.params, "acpExternalDirectory")
-        ? { externalDirectory: getString(request.params, "acpExternalDirectory")! } : {}),
+      ...(externalDirectory ? { externalDirectory } : {}),
     };
     if (this.#answerWithoutAsking(client, request, approval)) return;
     this.#approvals.set(request.id, {
@@ -629,8 +629,12 @@ export class AttentionRegistry {
     // Only the bundled computer-use consent form, never a secret/input question or
     // another plugin. Use one-shot so revoking the mode also revokes future app access.
     const properties = getRecord(getRecord(request.params, "requestedSchema"), "properties");
-    if (getString(request.params, "serverName") === COMPUTER_USE_MCP_SERVER_NAME &&
-        properties && Object.keys(properties).length === 0 && this.#approvalAutomation.autoApproves(agentId)) {
+    if (
+      getString(request.params, "serverName") === COMPUTER_USE_MCP_SERVER_NAME &&
+      properties &&
+      Object.keys(properties).length === 0 &&
+      this.#approvalAutomation.autoApproves(agentId)
+    ) {
       client.respond(request.id, { action: "accept", content: {}, _meta: null });
       return;
     }

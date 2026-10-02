@@ -230,7 +230,8 @@ export function ProviderPicker(props: ProviderPickerProps) {
               const visualState = () => providerVisualState(state(), connecting(), runtimeStatus(), updatable());
               const daniRow = () => option().id === "opencode";
               const runtimeAction = () =>
-                option().id === "codex" && !["not-downloaded", "download-error", "downloading", "finishing"].includes(runtimeStatus()?.phase ?? "")
+                option().id === "codex" &&
+                !["not-downloaded", "download-error", "downloading", "finishing"].includes(runtimeStatus()?.phase ?? "")
                   ? undefined
                   : updatable() && props.onUpdateProvider && runtimeStatus()?.phase === "not-downloaded"
                     ? undefined
@@ -275,8 +276,7 @@ export function ProviderPicker(props: ProviderPickerProps) {
                       <Show when={option().id === "codex" && !available() && option().message}>
                         {(message) => <small class="provider-picker-check-error">{message()}</small>}
                       </Show>
-                      <Show when={runtimeStatus()?.phase === "download-error" && runtimeStatus()?.message}
-                      >
+                      <Show when={runtimeStatus()?.phase === "download-error" && runtimeStatus()?.message}>
                         {(message) => <small class="provider-picker-check-error">{message()}</small>}
                       </Show>
                       <Show when={option().checkError}>
@@ -375,7 +375,12 @@ export function ProviderPicker(props: ProviderPickerProps) {
                         {i18n.t("provider.action.install")}
                       </Button>
                     </Show>
-                    <Show when={(!runtimeStatus() || (option().id === "codex" && runtimeStatus()?.phase === "ready")) && props.onConnectProvider}>
+                    <Show
+                      when={
+                        (!runtimeStatus() || (option().id === "codex" && runtimeStatus()?.phase === "ready")) &&
+                        props.onConnectProvider
+                      }
+                    >
                       <Button
                         type="button"
                         variant="outline"
@@ -480,7 +485,10 @@ function providerStatusLabel(
   if (connecting && state !== "available") return translate("provider.status.connecting");
   // Update offers outrank "Connected"/"Ready": a hidden offer is never taken.
   if (updatable) return translate("provider.status.updateAvailable");
-  if (runtimeStatus?.phase === "download-error") return runtimeStatus.failureStage === "connection" ? "Connection failed" : translate("provider.status.downloadFailed");
+  if (runtimeStatus?.phase === "download-error")
+    return runtimeStatus.failureStage === "connection"
+      ? "Connection failed"
+      : translate("provider.status.downloadFailed");
   if (state === "available") return translate("provider.status.connected");
   if (runtimeStatus?.phase === "not-downloaded") return translate("provider.status.notDownloaded");
   if (runtimeStatus?.phase === "ready") return translate("provider.status.ready");

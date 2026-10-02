@@ -246,17 +246,26 @@ export function ConversationComposer() {
           )}
         </Show>
         <Show when={/^\/\w*$/.test(currentDraft().text.trim())}>
-          <div class="composer-slash-suggestions" role="listbox" aria-label="Chat commands">
-            <For each={[
-              { command: "/goal", description: "Assign a goal with completion checks" },
-              { command: "/loop", description: "Build, test and verify up to five cycles" },
-            ].filter((item) => item.command.startsWith(currentDraft().text.trim()))}>
-              {(item) => <Button role="option" variant="ghost" onClick={() => {
-                updateCurrentDraft({ text: `${item.command} ` });
-                setComposerFocusRequest((value) => value + 1);
-              }}>{item.command} - {item.description}</Button>}
+          <section class="composer-slash-suggestions" aria-label="Chat commands">
+            <For
+              each={[
+                { command: "/goal", description: "Assign a goal with completion checks" },
+                { command: "/loop", description: "Build, test and verify up to five cycles" },
+              ].filter((item) => item.command.startsWith(currentDraft().text.trim()))}
+            >
+              {(item) => (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    updateCurrentDraft({ text: `${item.command} ` });
+                    setComposerFocusRequest((value) => value + 1);
+                  }}
+                >
+                  {item.command} - {item.description}
+                </Button>
+              )}
             </For>
-          </div>
+          </section>
         </Show>
         <div
           class={`composer${voicePhase() === "recording" ? " composer-recording" : ""}`}
@@ -313,7 +322,9 @@ export function ConversationComposer() {
               }
               placeholder={
                 !agentReady()
-                  ? props.agent?.provider === "opencode" ? "Starting Dani Free..." : "Connect your provider to start"
+                  ? props.agent?.provider === "opencode"
+                    ? "Starting Dani Free..."
+                    : "Connect your provider to start"
                   : replyTarget()
                     ? "Reply…"
                     : `Message ${props.agent?.name ?? "agent"}`

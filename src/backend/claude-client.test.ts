@@ -1759,3 +1759,41 @@ it("disables tools, project settings and session persistence for profile generat
   }
   expect(query.closed).toBe(true);
 });
+
+it("uses CLI login when the provider credential callback has no API key", async () => {
+  root = await mkdtemp(join(tmpdir(), "dani-claude-cli-login-"));
+  const executable = join(root, "claude");
+  await writeFile(
+    executable,
+    `#!/bin/sh
+if [ "$1" = "auth" ]; then
+  printf '%s' '{"loggedIn":true,"email":"claude@example.com","subscriptionType":"max"}'
+fi
+`,
+  );
+  await chmod(executable, 0o755);
+  const output = new TestQueue<TestStreamMessage>();
+  const generator = new TestQuery(output);
+  const client = new ClaudeAgentClient(
+    { executable, version: "2.1.251" },
+    () => generator,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    () => null,
+  );
+  client.start();
+  try {
+    expect(await client.request("account/read", {}, decodeAccountReadResult)).toMatchObject({
+      account: { type: "claude", email: "claude@example.com", planType: "max" },
+    });
+    await expect(client.request("thread/start", { cwd: root }, decodeThreadResponse)).resolves.toMatchObject({
+      thread: { id: expect.any(String) },
+    });
+  } finally {
+    await client.stop();
+  }
+});

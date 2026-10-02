@@ -771,8 +771,12 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
     openUrl: async () => undefined,
     voice: {
       codexStatus: async () => ({ connected: false }),
-      codexConnect: async () => { throw new Error("Experimental voice login is not available in preview."); },
-      codexStart: async () => { throw new Error("Experimental voice is not available in preview."); },
+      codexConnect: async () => {
+        throw new Error("Experimental voice login is not available in preview.");
+      },
+      codexStart: async () => {
+        throw new Error("Experimental voice is not available in preview.");
+      },
       codexStop: async () => undefined,
       getModelStatus: async () => ({ phase: "ready", progress: 100, message: null }),
       prepareModel: async () => ({ phase: "ready", progress: 100, message: null }),

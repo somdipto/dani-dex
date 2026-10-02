@@ -19,15 +19,19 @@ import { join } from "node:path";
 import type { McpServerConfig } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { WorkerHistoryEntry } from "./agent/worker-history";
 import type { AgentClient } from "./agent-client";
 import type { OpencodeCliInfo } from "./cli";
 import { setRuntimeModelSource } from "./model-source";
 import type { CustomProviderConfig } from "./opencode-config";
+import type { AppServerNotification, AppServerRequest } from "./protocol";
 import {
   decodeAccountReadResult,
   decodeModelListResponse,
   decodeRecordResponse,
   decodeThreadResponse,
+  getRecord,
+  getString,
 } from "./protocol";
 import { requireProviderDriver } from "./provider-drivers";
 
@@ -58,6 +62,7 @@ if (envLog) {
   );
 }
 let buffer = "";
+function observedLate() { if(process.env.DANI_DEX_FAKE_ACP_LATE_LOG) fs.appendFileSync(process.env.DANI_DEX_FAKE_ACP_LATE_LOG,"observed" + NL); }
 // An agent of the second kind: no \`models\` in \`session/new\`, one \`model\` config option, and a
 // \`thought_level\` option that exists only while the session is on a model that reasons. OpenCode
 // works this way, and \`minimal\` next to \`low\` is its own naming.
@@ -134,7 +139,7 @@ function handle(message) {
     if(process.env.DANI_DEX_FAKE_ACP_APPROVAL === "1") {pendingPrompt=message;write({jsonrpc:"2.0",id:"approval-from-provider",method:"session/request_permission",params:{sessionId:message.params.sessionId,toolCall:{toolCallId:"write-approval",kind:"edit",title:"temp-write",status:"pending"},options:[{optionId:"once",name:"Allow once",kind:"allow_once"},{optionId:"reject",name:"Reject",kind:"reject_once"}]}});return;}
 
     if (process.env.DANI_DEX_FAKE_ACP_DELAY_SUCCESS === "1") {
-      setTimeout(()=>{write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"LATE SUCCESS"}}}});write({jsonrpc:"2.0",id:message.id,result:{stopReason:"end_turn"}});},150);return;
+      setTimeout(()=>{write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"LATE SUCCESS"}}}});write({jsonrpc:"2.0",id:message.id,result:{stopReason:"end_turn"}});observedLate();},150);return;
     }
     const promptLog = process.env.DANI_DEX_FAKE_ACP_PROMPT_LOG;
     if (promptLog) fs.appendFileSync(promptLog, JSON.stringify(message.params) + NL);
@@ -144,7 +149,7 @@ function handle(message) {
       if(process.env.DANI_DEX_FAKE_ACP_TIMEOUT_LATE === "1")setTimeout(()=>{
        write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"LATE PRIMARY"}}}});
        write({jsonrpc:"2.0",id:"late-primary-permission",method:"session/request_permission",params:{sessionId:message.params.sessionId,toolCall:{toolCallId:"late-write",kind:"edit",title:"temp-write",status:"pending"},options:[{optionId:"once",name:"Allow once",kind:"allow_once"}]}});
-      },95);return;
+      observedLate();},95);return;
     }
     const failure = process.env.DANI_DEX_FAKE_ACP_FAILURE;
     const boundary = process.env.DANI_DEX_FAKE_ACP_BOUNDARY;
@@ -152,7 +157,7 @@ function handle(message) {
     if (boundary === "tool") write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"tool_call",toolCallId:"effect-1",title:"write",kind:"edit",status:"completed",rawInput:{path:"temp"},rawOutput:"written"}}});
     if (failure && (promptCount === 1 || process.env.DANI_DEX_FAKE_ACP_FALLBACK_FAIL === "1")) {
       write({jsonrpc:"2.0",id:message.id,error:{code:-32000,message:failure}});
-      if(process.env.DANI_DEX_FAKE_ACP_LATE_PRIMARY === "1")setTimeout(()=>write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"STALE PRIMARY"}}}}),50);
+      if(process.env.DANI_DEX_FAKE_ACP_LATE_PRIMARY === "1")setTimeout(()=>{write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"STALE PRIMARY"}}}});observedLate();},50);
       return;
     }
     write({jsonrpc:"2.0",method:"session/update",params:{sessionId:message.params.sessionId,update:{sessionUpdate:"agent_message_chunk",content:{type:"text",text:"FALLBACK OK"}}}});
@@ -306,9 +311,20 @@ function startOpencode(
     workerHistory: options.workerHistory,
   };
   const timeoutMs = options.requestTimeoutMs ?? 10_000;
-  const client = options.promptDeadlineMs ? new AcpAgentClient(cli,timeoutMs,{provider:"opencode",argv:["acp"],env:{},signInMessage:"none",validateModel:options.validateModel,fallbackModel:options.fallbackModel,workerHistory:options.workerHistory,promptDeadlineMs:options.promptDeadlineMs}) : options.profile
-    ? (driver.createProfileClient?.(cli, timeoutMs, context) ?? driver.createClient(cli, timeoutMs, context))
-    : driver.createClient(cli, timeoutMs, context);
+  const client = options.promptDeadlineMs
+    ? new AcpAgentClient(cli, timeoutMs, {
+        provider: "opencode",
+        argv: ["acp"],
+        env: {},
+        signInMessage: "none",
+        validateModel: options.validateModel,
+        fallbackModel: options.fallbackModel,
+        workerHistory: options.workerHistory,
+        promptDeadlineMs: options.promptDeadlineMs,
+      })
+    : options.profile
+      ? (driver.createProfileClient?.(cli, timeoutMs, context) ?? driver.createClient(cli, timeoutMs, context))
+      : driver.createClient(cli, timeoutMs, context);
   started.push(client);
   client.start();
   return client;
@@ -788,198 +804,567 @@ describe("OpenCode ACP session loading", () => {
 });
 
 it("validates the selected model before sending any prompt", async () => {
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
- const validateModel=vi.fn(async()=>{throw new Error("Catalog revoked");});
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{validateModel});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/muse-spark-1.3-contributor-free"},decodeRecordResponse);
- const threadId=(opened.thread as {id:string}).id;
- await expect(client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse)).rejects.toThrow("Catalog revoked");
- expect(validateModel).toHaveBeenCalledOnce();expect(await readFile(fake.promptLog,"utf8").catch(()=>"" )).toBe("");
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  const validateModel = vi.fn(async () => {
+    throw new Error("Catalog revoked");
+  });
+  const client = startOpencode(fake.cli, () => null, fake.envLog, { validateModel });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/muse-spark-1.3-contributor-free" },
+    decodeRecordResponse,
+  );
+  const threadId = requireThreadId(opened);
+  await expect(
+    client.request("turn/start", { threadId, input: [{ type: "text", text: "Synthetic" }] }, decodeRecordResponse),
+  ).rejects.toThrow("Catalog revoked");
+  expect(validateModel).toHaveBeenCalledOnce();
+  expect(await readFile(fake.promptLog, "utf8").catch(() => "")).toBe("");
 });
 
-it.each(["403 Forbidden", "429 quota", "503 service unavailable", "upstream timed out", "OpenCode's free tier can only be used from within OpenCode", "FreeTierError", "504 Gateway Timeout", "500 Internal Server Error", "ECONNRESET"]) ("fallback once on classified backend failure %s",async(failure)=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE",failure);
- const validateModel=vi.fn(async()=>{});const client=startOpencode(fake.cli,()=>null,fake.envLog,{validateModel,fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free"});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;
- const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId,clientUserMessageId:"same-delivery",input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- expect(events.filter(e=>e.method==="turn/completed")).toEqual([expect.objectContaining({params:expect.objectContaining({turn:{id:"same-delivery",status:"completed"}})})]);
- expect(events.filter(e=>e.method==="item/completed"&&e.params.item.phase==="final_answer")).toHaveLength(1);
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(2);
- expect(validateModel).toHaveBeenCalledWith("dani-kilo-worker/stepfun/step-3.7-flash:free",expect.any(AbortSignal));
+it.each([
+  "403 Forbidden",
+  "429 quota",
+  "503 service unavailable",
+  "upstream timed out",
+  "OpenCode's free tier can only be used from within OpenCode",
+  "FreeTierError",
+  "504 Gateway Timeout",
+  "500 Internal Server Error",
+  "ECONNRESET",
+])("fallback once on classified backend failure %s", async (failure) => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE", failure);
+  const validateModel = vi.fn(async () => {});
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    validateModel,
+    fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+  });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/big-pickle" },
+    decodeRecordResponse,
+  );
+  const threadId = requireThreadId(opened);
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  await client.request(
+    "turn/start",
+    { threadId, clientUserMessageId: "same-delivery", input: [{ type: "text", text: "Synthetic" }] },
+    decodeRecordResponse,
+  );
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  expect(events.filter((e) => e.method === "turn/completed")).toEqual([
+    expect.objectContaining({
+      params: expect.objectContaining({ turn: { id: "same-delivery", status: "completed" } }),
+    }),
+  ]);
+  expect(
+    events.filter(
+      (e) => e.method === "item/completed" && getString(getRecord(e.params, "item"), "phase") === "final_answer",
+    ),
+  ).toHaveLength(1);
+  expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(2);
+  expect(validateModel).toHaveBeenCalledWith("dani-kilo-worker/stepfun/step-3.7-flash:free", expect.any(AbortSignal));
 });
-it.each(["text","tool"])("never fallback after primary %s boundary",async(boundary)=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");vi.stubEnv("DANI_DEX_FAKE_ACP_BOUNDARY",boundary);
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{}});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId:(opened.thread as {id:string}).id,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("failed");
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
- expect(events.some(e=>e.method==="model/rerouted")).toBe(false);
+it.each(["text", "tool"])("never fallback after primary %s boundary", async (boundary) => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE", "403 Forbidden");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_BOUNDARY", boundary);
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+    validateModel: async () => {},
+  });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/big-pickle" },
+    decodeRecordResponse,
+  );
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  await client.request(
+    "turn/start",
+    { threadId: requireThreadId(opened), input: [{ type: "text", text: "Synthetic" }] },
+    decodeRecordResponse,
+  );
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  expect(completedStatus(events)).toBe("failed");
+  expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(1);
+  expect(events.some((e) => e.method === "model/rerouted")).toBe(false);
 });
-it("cancel during catalog validation sends no prompt",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);let validating=false;
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{validateModel:async(_id,signal)=>{validating=true;await new Promise<void>((resolve)=>signal!.addEventListener("abort",()=>resolve()));}});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;
- const pending=client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);const rejected=expect(pending).rejects.toThrow("cancelled");
- await vi.waitFor(()=>expect(validating).toBe(true));await client.request("turn/interrupt",{threadId},decodeRecordResponse);await rejected;
- expect(await readFile(fake.promptLog,"utf8").catch(()=>"")).toBe("");
+it("cancel during catalog validation sends no prompt", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  let validating = false;
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    validateModel: async (_id, signal) => {
+      validating = true;
+      if (!signal) throw new Error("Validation must receive cancellation signal");
+      await new Promise<void>((resolve) => signal.addEventListener("abort", () => resolve()));
+    },
+  });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/big-pickle" },
+    decodeRecordResponse,
+  );
+  const threadId = requireThreadId(opened);
+  const pending = client.request(
+    "turn/start",
+    { threadId, input: [{ type: "text", text: "Synthetic" }] },
+    decodeRecordResponse,
+  );
+  const rejected = expect(pending).rejects.toThrow("cancelled");
+  await vi.waitFor(() => expect(validating).toBe(true));
+  await client.request("turn/interrupt", { threadId }, decodeRecordResponse);
+  await rejected;
+  expect(await readFile(fake.promptLog, "utf8").catch(() => "")).toBe("");
 });
-it.each(["invalid prompt", "safety refusal", "cancelled", "permission denied by user"])("does not fallback for %s",async(failure)=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE",failure);
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{}});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId:(opened.thread as {id:string}).id,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));expect(events.some(e=>e.method==="model/rerouted")).toBe(false);
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
-});
-it.each(["invalid catalog","fallback failed","cancel during switch"])("fallback closes honestly: %s",async(mode)=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");if(mode==="fallback failed")vi.stubEnv("DANI_DEX_FAKE_ACP_FALLBACK_FAIL","1");let switching=false;
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async(id,signal)=>{
- if(!id.startsWith("dani-kilo-worker/"))return;switching=true;if(mode==="invalid catalog")throw Error("Paid or invalid catalog");
- if(mode==="cancel during switch")await new Promise<void>(resolve=>signal!.addEventListener("abort",()=>resolve()));
- }});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
- if(mode==="cancel during switch"){await vi.waitFor(()=>expect(switching).toBe(true));await client.request("turn/interrupt",{threadId},decodeRecordResponse);}
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- expect(events.filter(e=>e.method==="turn/completed")).toHaveLength(1);
- expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe(mode==="cancel during switch"?"interrupted":"failed");
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(mode==="fallback failed"?2:1);
-});
-it("duplicate delivery id never replays a completed ACP prompt",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
- const client=startOpencode(fake.cli,()=>null,fake.envLog);const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;const events:any[]=[];client.on("notification",n=>events.push(n));
- const input={threadId,clientUserMessageId:"duplicate-delivery",input:[{type:"text",text:"Synthetic"}]};await client.request("turn/start",input,decodeRecordResponse);await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- await client.request("turn/start",input,decodeRecordResponse);
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+it.each(["invalid prompt", "safety refusal", "cancelled", "permission denied by user"])(
+  "does not fallback for %s",
+  async (failure) => {
+    const fake = await createFakeOpencodeAgent();
+    vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE", failure);
+    const client = startOpencode(fake.cli, () => null, fake.envLog, {
+      fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+      validateModel: async () => {},
+    });
+    const opened = await client.request(
+      "thread/start",
+      { cwd: tmpdir(), model: "opencode/big-pickle" },
+      decodeRecordResponse,
+    );
+    const events: AppServerNotification[] = [];
+    client.on("notification", (n) => events.push(n));
+    await client.request(
+      "turn/start",
+      { threadId: requireThreadId(opened), input: [{ type: "text", text: "Synthetic" }] },
+      decodeRecordResponse,
+    );
+    await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+    expect(events.some((e) => e.method === "model/rerouted")).toBe(false);
+    expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(1);
+  },
+);
+it.each(["invalid catalog", "fallback failed", "cancel during switch"])(
+  "fallback closes honestly: %s",
+  async (mode) => {
+    const fake = await createFakeOpencodeAgent();
+    vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+    vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE", "403 Forbidden");
+    if (mode === "fallback failed") vi.stubEnv("DANI_DEX_FAKE_ACP_FALLBACK_FAIL", "1");
+    let switching = false;
+    const client = startOpencode(fake.cli, () => null, fake.envLog, {
+      fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+      validateModel: async (id, signal) => {
+        if (!id.startsWith("dani-kilo-worker/")) return;
+        switching = true;
+        if (mode === "invalid catalog") throw Error("Paid or invalid catalog");
+        if (mode === "cancel during switch") {
+          if (!signal) throw new Error("Expected cancellation signal");
+          await new Promise<void>((resolve) => signal.addEventListener("abort", () => resolve()));
+        }
+      },
+    });
+    const opened = await client.request(
+      "thread/start",
+      { cwd: tmpdir(), model: "opencode/big-pickle" },
+      decodeRecordResponse,
+    );
+    const threadId = requireThreadId(opened);
+    const events: AppServerNotification[] = [];
+    client.on("notification", (n) => events.push(n));
+    await client.request(
+      "turn/start",
+      { threadId, input: [{ type: "text", text: "Synthetic" }] },
+      decodeRecordResponse,
+    );
+    if (mode === "cancel during switch") {
+      await vi.waitFor(() => expect(switching).toBe(true));
+      await client.request("turn/interrupt", { threadId }, decodeRecordResponse);
+    }
+    await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+    expect(events.filter((e) => e.method === "turn/completed")).toHaveLength(1);
+    expect(completedStatus(events)).toBe(mode === "cancel during switch" ? "interrupted" : "failed");
+    expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(
+      mode === "fallback failed" ? 2 : 1,
+    );
+  },
+);
+it("duplicate delivery id never replays a completed ACP prompt", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  const client = startOpencode(fake.cli, () => null, fake.envLog);
+  const opened = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  const threadId = requireThreadId(opened);
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  const input = { threadId, clientUserMessageId: "duplicate-delivery", input: [{ type: "text", text: "Synthetic" }] };
+  await client.request("turn/start", input, decodeRecordResponse);
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  await client.request("turn/start", input, decodeRecordResponse);
+  expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(1);
 });
 
-it("late primary notification cannot contaminate distinct fallback session",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");vi.stubEnv("DANI_DEX_FAKE_ACP_LATE_PRIMARY","1");
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{}});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId:(opened.thread as {id:string}).id,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));await new Promise(r=>setTimeout(r,100));
- expect(events.filter(e=>e.method==="turn/completed")).toHaveLength(1);expect(JSON.stringify(events)).not.toContain("STALE PRIMARY");
+it("late primary notification cannot contaminate distinct fallback session", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE", "403 Forbidden");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_LATE_PRIMARY", "1");
+  const lateLog = join(fake.directory, "late.log");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_LATE_LOG", lateLog);
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+    validateModel: async () => {},
+  });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/big-pickle" },
+    decodeRecordResponse,
+  );
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  await client.request(
+    "turn/start",
+    { threadId: requireThreadId(opened), input: [{ type: "text", text: "Synthetic" }] },
+    decodeRecordResponse,
+  );
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  await vi.waitFor(async () => expect(await readFile(lateLog, "utf8")).toContain("observed"));
+  await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  expect(events.filter((e) => e.method === "turn/completed")).toHaveLength(1);
+  expect(JSON.stringify(events)).not.toContain("STALE PRIMARY");
 });
-it.each(["cancel","shutdown"])("late successful response after %s never completes cancelled work",async(action)=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_DELAY_SUCCESS","1");const client=startOpencode(fake.cli,()=>null,fake.envLog);
- const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
- if(action==="cancel")await client.request("turn/interrupt",{threadId},decodeRecordResponse);else await client.stop();
- await new Promise(r=>setTimeout(r,220));
- expect(events.some(e=>e.method==="turn/completed"&&e.params.turn.status==="completed")).toBe(false);
-});
-
-it("approval accepted after cancellation cannot dispatch effect",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_APPROVAL","1");const effectLog=join(fake.directory,"effect.log");vi.stubEnv("DANI_DEX_FAKE_ACP_EFFECT_LOG",effectLog);
- const client=startOpencode(fake.cli,()=>null,fake.envLog);let approval:any;const events:any[]=[];client.on("request",r=>{approval=r;});client.on("notification",n=>events.push(n));
- const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as {id:string}).id;
- await client.request("turn/start",{threadId,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(approval).toBeDefined());await client.request("turn/interrupt",{threadId},decodeRecordResponse);client.respond(approval.id,{decision:"accept"});
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- expect(JSON.parse((await readFile(effectLog,"utf8")).trim()).allowed).toBe(false);
- expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("interrupted");
-});
-
-it("no-response deadline quarantines primary and fails closed without proven termination",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:70,fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{}});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId:(opened.thread as any).id,input:[{type:"text",text:"Synthetic"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- expect(events.filter(e=>e.method==="turn/completed")).toHaveLength(1);
- expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("failed");
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
-});
-it("predispatch validation failure writes original input and a failed terminal",async()=>{
- const fake=await createFakeOpencodeAgent();const entries:any[]=[];
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{workerHistory:{read:()=>entries,append:(_id,e)=>entries.push(e)},validateModel:async()=>{throw new Error("revoked");}});
- const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);
- await expect(client.request("turn/start",{threadId:(opened.thread as any).id,input:[{type:"text",text:"original"}]},decodeRecordResponse)).rejects.toThrow("revoked");
- expect(entries.map(e=>e.kind)).toEqual(["coverage","user","terminal"]);expect(entries.at(-1).status).toBe("failed");
-});
-
-it("cancel while reading transfer history never sends the fallback prompt",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
- const entries:any[]=[];let reads=0;let threadId="";let client:AgentClient;
- client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{},
- workerHistory:{append:(_id,e)=>entries.push(e),read:()=>{if(++reads===2)void client.request("turn/interrupt",{threadId},decodeRecordResponse);return entries;}}});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);threadId=(opened.thread as any).id;const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId,input:[{type:"text",text:"original"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("interrupted");
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
-});
-it("second fallback failure is terminal and transferred history never becomes a recorded prompt",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE","403 Forbidden");vi.stubEnv("DANI_DEX_FAKE_ACP_FALLBACK_FAIL","1");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
- const entries:any[]=[];const client=startOpencode(fake.cli,()=>null,fake.envLog,{fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async()=>{},workerHistory:{read:()=>entries,append:(_id,e)=>entries.push(e)}});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];client.on("notification",n=>events.push(n));
- await client.request("turn/start",{threadId:(opened.thread as any).id,input:[{type:"text",text:"original"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- expect(events.filter(e=>e.method==="turn/completed")).toHaveLength(1);expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("failed");
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(2);
- expect(entries.filter(e=>e.kind==="user")).toHaveLength(1);expect(JSON.stringify(entries)).not.toContain("<committed_history>");
+it.each(["cancel", "shutdown"])("late successful response after %s never completes cancelled work", async (action) => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_DELAY_SUCCESS", "1");
+  const lateLog = join(fake.directory, "late.log");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_LATE_LOG", lateLog);
+  const client = startOpencode(fake.cli, () => null, fake.envLog);
+  const opened = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  const threadId = requireThreadId(opened);
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  await client.request("turn/start", { threadId, input: [{ type: "text", text: "Synthetic" }] }, decodeRecordResponse);
+  if (action === "cancel") await client.request("turn/interrupt", { threadId }, decodeRecordResponse);
+  else await client.stop();
+  if (action === "cancel") {
+    await vi.waitFor(async () => expect(await readFile(lateLog, "utf8")).toContain("observed"));
+    await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  }
+  expect(
+    events.some(
+      (e) => e.method === "turn/completed" && getString(getRecord(e.params, "turn"), "status") === "completed",
+    ),
+  ).toBe(false);
 });
 
-it("timeout quarantines late primary text and permissions without reaching fallback validation",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");vi.stubEnv("DANI_DEX_FAKE_ACP_TIMEOUT_LATE","1");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
- let release:()=>void=()=>{};let validating=false;
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:60,fallbackModel:"dani-kilo-worker/stepfun/step-3.7-flash:free",validateModel:async(model)=>{if(model.startsWith("dani-kilo")){validating=true;await new Promise<void>(resolve=>release=resolve);}}});
- const opened=await client.request("thread/start",{cwd:tmpdir(),model:"opencode/big-pickle"},decodeRecordResponse);const events:any[]=[];const approvals:any[]=[];client.on("notification",n=>events.push(n));client.on("request",r=>approvals.push(r));
- await client.request("turn/start",{threadId:(opened.thread as any).id,input:[{type:"text",text:"original"}]},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));await new Promise(resolve=>setTimeout(resolve,130));
- expect(JSON.stringify(events)).not.toContain("LATE PRIMARY");expect(approvals).toHaveLength(0);expect(validating).toBe(false);
- expect(events.find(e=>e.method==="turn/completed").params.turn.status).toBe("failed");
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+it("approval accepted after cancellation cannot dispatch effect", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_APPROVAL", "1");
+  const effectLog = join(fake.directory, "effect.log");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_EFFECT_LOG", effectLog);
+  const client = startOpencode(fake.cli, () => null, fake.envLog);
+  let approval: AppServerRequest | undefined;
+  const events: AppServerNotification[] = [];
+  client.on("request", (r) => {
+    approval = r;
+  });
+  client.on("notification", (n) => events.push(n));
+  const opened = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  const threadId = requireThreadId(opened);
+  await client.request("turn/start", { threadId, input: [{ type: "text", text: "Synthetic" }] }, decodeRecordResponse);
+  await vi.waitFor(() => expect(approval).toBeDefined());
+  await client.request("turn/interrupt", { threadId }, decodeRecordResponse);
+  if (!approval) throw new Error("No permission request received");
+  client.respond(approval.id, { decision: "accept" });
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  expect(JSON.parse((await readFile(effectLog, "utf8")).trim()).allowed).toBe(false);
+  expect(completedStatus(events)).toBe("interrupted");
 });
 
-it("timed-out delivery is idempotent and new or steered work cannot reuse its retired wire",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG",fake.promptLog);
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:60});const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as any).id;const events:any[]=[];client.on("notification",n=>events.push(n));
- const input={threadId,clientUserMessageId:"deadline-delivery",input:[{type:"text",text:"original"}]};await client.request("turn/start",input,decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- const duplicate=await client.request("turn/start",input,decodeRecordResponse);expect((duplicate.turn as any).status).toBe("failed");
- await expect(client.request("turn/start",{...input,clientUserMessageId:"new-delivery"},decodeRecordResponse)).rejects.toThrow("Safe recovery");
- await expect(client.request("turn/steer",input,decodeRecordResponse)).rejects.toThrow("Safe recovery");
- expect((await readFile(fake.promptLog,"utf8")).trim().split("\n")).toHaveLength(1);
+it("no-response deadline quarantines primary and fails closed without proven termination", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY", "1");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    promptDeadlineMs: 70,
+    fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+    validateModel: async () => {},
+  });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/big-pickle" },
+    decodeRecordResponse,
+  );
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  await client.request(
+    "turn/start",
+    { threadId: requireThreadId(opened), input: [{ type: "text", text: "Synthetic" }] },
+    decodeRecordResponse,
+  );
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  expect(events.filter((e) => e.method === "turn/completed")).toHaveLength(1);
+  expect(completedStatus(events)).toBe("failed");
+  expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(1);
+});
+it("predispatch validation failure writes original input and a failed terminal", async () => {
+  const fake = await createFakeOpencodeAgent();
+  const entries: WorkerHistoryEntry[] = [];
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    workerHistory: { read: () => entries, append: (_id, e) => entries.push(e) },
+    validateModel: async () => {
+      throw new Error("revoked");
+    },
+  });
+  const opened = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  await expect(
+    client.request(
+      "turn/start",
+      { threadId: requireThreadId(opened), input: [{ type: "text", text: "original" }] },
+      decodeRecordResponse,
+    ),
+  ).rejects.toThrow("revoked");
+  expect(entries.map((e) => e.kind)).toEqual(["coverage", "user", "terminal"]);
+  const terminal = entries.at(-1);
+  if (terminal?.kind !== "terminal") throw new Error("Expected terminal worker history");
+  expect(terminal.status).toBe("failed");
 });
 
-it.each(["retirement","unresolved"])("persisted %s blocks a resumed attempt before prompt",async(mode)=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_LOAD_SESSION","1");
- const entries:any[]=[{kind:"coverage",turnId:"origin",version:1,fromBeginning:true},{kind:"user",turnId:"old",input:[{type:"text",text:"old"}]}];
- if(mode==="retirement")entries.push({kind:"retirement",turnId:"old",reason:"deadline"});
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{workerHistory:{read:()=>entries,append:(_id,e)=>entries.push(e)}});
- const opened=await client.request("thread/resume",{threadId:"persisted-wire",cwd:tmpdir()},decodeRecordResponse);
- await expect(client.request("turn/start",{threadId:(opened.thread as any).id,clientUserMessageId:"new",input:[{type:"text",text:"new"}]},decodeRecordResponse)).rejects.toThrow("Safe recovery");
+it("cancel while reading transfer history never sends the fallback prompt", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE", "403 Forbidden");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  const entries: WorkerHistoryEntry[] = [];
+  let reads = 0;
+  let threadId = "";
+  let client: AgentClient;
+  client = startOpencode(fake.cli, () => null, fake.envLog, {
+    fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+    validateModel: async () => {},
+    workerHistory: {
+      append: (_id, e) => entries.push(e),
+      read: () => {
+        if (++reads === 2) void client.request("turn/interrupt", { threadId }, decodeRecordResponse);
+        return entries;
+      },
+    },
+  });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/big-pickle" },
+    decodeRecordResponse,
+  );
+  threadId = requireThreadId(opened);
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  await client.request("turn/start", { threadId, input: [{ type: "text", text: "original" }] }, decodeRecordResponse);
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  expect(completedStatus(events)).toBe("interrupted");
+  expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(1);
 });
-it("ACP steer fails closed before config or prompt until bounded safe dispatch exists",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_DELAY_SUCCESS","1");const entries:any[]=[];
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{workerHistory:{read:()=>entries,append:(_id,e)=>entries.push(e)}});
- const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as any).id;
- await client.request("turn/start",{threadId,input:[{type:"text",text:"original"}]},decodeRecordResponse);
- await expect(client.request("turn/steer",{threadId,input:[{type:"text",text:"changed fact"}]},decodeRecordResponse)).rejects.toThrow("temporarily unavailable");
- expect(entries.filter(e=>e.kind==="steer")).toHaveLength(0);
-});
-it.each(["deadline","interrupt"])("retirement append failure during %s still quarantines and closes",async(mode)=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");const entries:any[]=[];
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:mode==="deadline"?60:500,workerHistory:{read:()=>entries,append:(_id,e)=>{if(e.kind==="retirement")throw new Error("disk full");entries.push(e);}}});
- const opened=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);const threadId=(opened.thread as any).id;const events:any[]=[];const diagnostics:string[]=[];client.on("notification",n=>events.push(n));client.on("diagnostic",d=>diagnostics.push(d));
- await client.request("turn/start",{threadId,input:[{type:"text",text:"original"}]},decodeRecordResponse);
- if(mode==="interrupt")await client.request("turn/interrupt",{threadId},decodeRecordResponse);
- await vi.waitFor(()=>expect(events.some(e=>e.method==="turn/completed")).toBe(true));
- expect(diagnostics.join(" ")).toContain("persistence failed");
- await expect(client.request("turn/start",{threadId,input:[{type:"text",text:"new"}]},decodeRecordResponse)).rejects.toThrow("Safe recovery");
- expect(entries.some(e=>e.kind==="retirement")).toBe(false);
+it("second fallback failure is terminal and transferred history never becomes a recorded prompt", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_FAILURE", "403 Forbidden");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_FALLBACK_FAIL", "1");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  const entries: WorkerHistoryEntry[] = [];
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+    validateModel: async () => {},
+    workerHistory: { read: () => entries, append: (_id, e) => entries.push(e) },
+  });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/big-pickle" },
+    decodeRecordResponse,
+  );
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  await client.request(
+    "turn/start",
+    { threadId: requireThreadId(opened), input: [{ type: "text", text: "original" }] },
+    decodeRecordResponse,
+  );
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  expect(events.filter((e) => e.method === "turn/completed")).toHaveLength(1);
+  expect(completedStatus(events)).toBe("failed");
+  expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(2);
+  expect(entries.filter((e) => e.kind === "user")).toHaveLength(1);
+  expect(JSON.stringify(entries)).not.toContain("<committed_history>");
 });
 
-it("unbound user input never picks another live session",async()=>{
- const fake=await createFakeOpencodeAgent();vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY","1");vi.stubEnv("DANI_DEX_FAKE_ACP_MISSING_INPUT","1");
- const client=startOpencode(fake.cli,()=>null,fake.envLog,{promptDeadlineMs:500});const requests:any[]=[];client.on("request",r=>requests.push(r));
- const first=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);await client.request("turn/start",{threadId:(first.thread as any).id,input:[{type:"text",text:"one"}]},decodeRecordResponse);await client.request("turn/interrupt",{threadId:(first.thread as any).id},decodeRecordResponse);
- const second=await client.request("thread/start",{cwd:tmpdir()},decodeRecordResponse);await client.request("turn/start",{threadId:(second.thread as any).id,input:[{type:"text",text:"two"}]},decodeRecordResponse);
- await new Promise(resolve=>setTimeout(resolve,100));expect(requests).toHaveLength(0);
+it("timeout quarantines late primary text and permissions without reaching fallback validation", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY", "1");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_TIMEOUT_LATE", "1");
+  const lateLog = join(fake.directory, "late.log");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_LATE_LOG", lateLog);
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  let validating = false;
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    promptDeadlineMs: 60,
+    fallbackModel: "dani-kilo-worker/stepfun/step-3.7-flash:free",
+    validateModel: async (model) => {
+      if (model.startsWith("dani-kilo")) {
+        validating = true;
+        await new Promise<void>(() => {});
+      }
+    },
+  });
+  const opened = await client.request(
+    "thread/start",
+    { cwd: tmpdir(), model: "opencode/big-pickle" },
+    decodeRecordResponse,
+  );
+  const events: AppServerNotification[] = [];
+  const approvals: AppServerRequest[] = [];
+  client.on("notification", (n) => events.push(n));
+  client.on("request", (r) => approvals.push(r));
+  await client.request(
+    "turn/start",
+    { threadId: requireThreadId(opened), input: [{ type: "text", text: "original" }] },
+    decodeRecordResponse,
+  );
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  await vi.waitFor(async () => expect(await readFile(lateLog, "utf8")).toContain("observed"));
+  await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  expect(JSON.stringify(events)).not.toContain("LATE PRIMARY");
+  expect(approvals).toHaveLength(0);
+  expect(validating).toBe(false);
+  expect(completedStatus(events)).toBe("failed");
+  expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(1);
 });
+
+it("timed-out delivery is idempotent and new or steered work cannot reuse its retired wire", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY", "1");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_PROMPT_LOG", fake.promptLog);
+  const client = startOpencode(fake.cli, () => null, fake.envLog, { promptDeadlineMs: 60 });
+  const opened = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  const threadId = requireThreadId(opened);
+  const events: AppServerNotification[] = [];
+  client.on("notification", (n) => events.push(n));
+  const input = { threadId, clientUserMessageId: "deadline-delivery", input: [{ type: "text", text: "original" }] };
+  await client.request("turn/start", input, decodeRecordResponse);
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  const duplicate = await client.request("turn/start", input, decodeRecordResponse);
+  expect(getString(getRecord(duplicate, "turn"), "status")).toBe("failed");
+  await expect(
+    client.request("turn/start", { ...input, clientUserMessageId: "new-delivery" }, decodeRecordResponse),
+  ).rejects.toThrow("Safe recovery");
+  await expect(client.request("turn/steer", input, decodeRecordResponse)).rejects.toThrow("Safe recovery");
+  expect((await readFile(fake.promptLog, "utf8")).trim().split("\n")).toHaveLength(1);
+});
+
+it.each(["retirement", "unresolved"])("persisted %s blocks a resumed attempt before prompt", async (mode) => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_LOAD_SESSION", "1");
+  const entries: WorkerHistoryEntry[] = [
+    { kind: "coverage", turnId: "origin", version: 1, fromBeginning: true },
+    { kind: "user", turnId: "old", input: [{ type: "text", text: "old" }] },
+  ];
+  if (mode === "retirement") entries.push({ kind: "retirement", turnId: "old", reason: "deadline" });
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    workerHistory: { read: () => entries, append: (_id, e) => entries.push(e) },
+  });
+  const opened = await client.request(
+    "thread/resume",
+    { threadId: "persisted-wire", cwd: tmpdir() },
+    decodeRecordResponse,
+  );
+  await expect(
+    client.request(
+      "turn/start",
+      { threadId: requireThreadId(opened), clientUserMessageId: "new", input: [{ type: "text", text: "new" }] },
+      decodeRecordResponse,
+    ),
+  ).rejects.toThrow("Safe recovery");
+});
+it("ACP steer fails closed before config or prompt until bounded safe dispatch exists", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_DELAY_SUCCESS", "1");
+  const entries: WorkerHistoryEntry[] = [];
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    workerHistory: { read: () => entries, append: (_id, e) => entries.push(e) },
+  });
+  const opened = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  const threadId = requireThreadId(opened);
+  await client.request("turn/start", { threadId, input: [{ type: "text", text: "original" }] }, decodeRecordResponse);
+  await expect(
+    client.request("turn/steer", { threadId, input: [{ type: "text", text: "changed fact" }] }, decodeRecordResponse),
+  ).rejects.toThrow("temporarily unavailable");
+  expect(entries.filter((e) => e.kind === "steer")).toHaveLength(0);
+});
+it.each(["deadline", "interrupt"])("retirement append failure during %s still quarantines and closes", async (mode) => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY", "1");
+  const entries: WorkerHistoryEntry[] = [];
+  const client = startOpencode(fake.cli, () => null, fake.envLog, {
+    promptDeadlineMs: mode === "deadline" ? 60 : 500,
+    workerHistory: {
+      read: () => entries,
+      append: (_id, e) => {
+        if (e.kind === "retirement") throw new Error("disk full");
+        entries.push(e);
+      },
+    },
+  });
+  const opened = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  const threadId = requireThreadId(opened);
+  const events: AppServerNotification[] = [];
+  const diagnostics: string[] = [];
+  client.on("notification", (n) => events.push(n));
+  client.on("diagnostic", (d) => diagnostics.push(d));
+  await client.request("turn/start", { threadId, input: [{ type: "text", text: "original" }] }, decodeRecordResponse);
+  if (mode === "interrupt") await client.request("turn/interrupt", { threadId }, decodeRecordResponse);
+  await vi.waitFor(() => expect(events.some((e) => e.method === "turn/completed")).toBe(true));
+  expect(diagnostics.join(" ")).toContain("persistence failed");
+  await expect(
+    client.request("turn/start", { threadId, input: [{ type: "text", text: "new" }] }, decodeRecordResponse),
+  ).rejects.toThrow("Safe recovery");
+  expect(entries.some((e) => e.kind === "retirement")).toBe(false);
+});
+
+it("unbound user input never picks another live session", async () => {
+  const fake = await createFakeOpencodeAgent();
+  vi.stubEnv("DANI_DEX_FAKE_ACP_HANG_PRIMARY", "1");
+  vi.stubEnv("DANI_DEX_FAKE_ACP_MISSING_INPUT", "1");
+  const client = startOpencode(fake.cli, () => null, fake.envLog, { promptDeadlineMs: 500 });
+  const requests: AppServerRequest[] = [];
+  const events: AppServerNotification[] = [];
+  client.on("notification", (event) => {
+    events.push(event);
+  });
+  client.on("request", (r) => requests.push(r));
+  const first = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  await client.request(
+    "turn/start",
+    { threadId: requireThreadId(first), input: [{ type: "text", text: "one" }] },
+    decodeRecordResponse,
+  );
+  await client.request("turn/interrupt", { threadId: requireThreadId(first) }, decodeRecordResponse);
+  const second = await client.request("thread/start", { cwd: tmpdir() }, decodeRecordResponse);
+  await client.request(
+    "turn/start",
+    { threadId: requireThreadId(second), input: [{ type: "text", text: "two" }] },
+    decodeRecordResponse,
+  );
+  await vi.waitFor(() => expect(events.some((event) => event.method === "turn/completed")).toBe(true));
+  expect(requests).toHaveLength(0);
+});
+
+function requireThreadId(response: Parameters<typeof decodeRecordResponse>[0]): string {
+  const id = getString(getRecord(response, "thread"), "id");
+  if (!id) throw new Error("Fake provider did not return a thread ID");
+  return id;
+}
+function completedStatus(events: AppServerNotification[]): string | null {
+  const event = events.find((item) => item.method === "turn/completed");
+  if (!event) throw new Error("No completed turn event received");
+  return getString(getRecord(event.params, "turn"), "status");
+}

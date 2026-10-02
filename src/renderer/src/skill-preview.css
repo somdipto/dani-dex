@@ -191,7 +191,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .t-page-slide .t-page {
-    transition: none !important;
+    transition: none;
   }
 }
 
@@ -224,7 +224,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .t-resize {
-    transition: none !important;
+    transition: none;
   }
 }
 
@@ -276,7 +276,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .t-stagger-line {
-    transition: none !important;
+    transition: none;
   }
 }
 
