@@ -14,7 +14,7 @@ const { bound, saveDialog } = vi.hoisted(() => ({
 vi.mock("electron", () => ({
   app: { getPath: () => tmpdir() },
   dialog: { showSaveDialog: saveDialog },
-  shell: {},
+  shell: { openPath: vi.fn(async () => "") },
   ipcMain: { handle: (channel: string, invoke: Invoke) => bound.set(channel, invoke) },
 }));
 const { saveAttachmentArchive, attachmentIpcHandlers } = await import("./attachment-handlers");
@@ -180,5 +180,57 @@ describe("single attachment download", () => {
     expect(saveDialog).toHaveBeenCalledOnce();
     expect(saveDialog.mock.calls[0]?.[0]).toMatchObject({ defaultPath: expect.stringMatching(/launch-brief\.md$/) });
     expect(await readFile(targetPath, "utf8")).toBe("brief");
+  });
+});
+
+describe("local clicked directory preview", () => {
+  it("lists the clicked shared directory without opening the OS", async () => {
+    const { shell } = await import("electron");
+    const root = await mkdtemp(join(tmpdir(), "directory-preview-"));
+    directories.push(root);
+    await writeFile(join(root, "note.txt"), "note");
+    vi.mocked(shell.openPath).mockClear();
+    const resolveSharedFile = vi.fn(async () => ({
+      path: root,
+      name: "shared-folder",
+      size: 0,
+      isDirectory: true,
+    }));
+    const service = {
+      prepareAttachments: vi.fn(),
+      prepareImportedAttachments: vi.fn(),
+      discardDraftAttachment: vi.fn(),
+      resolveSharedFile,
+      resolveWorkspaceFile: vi.fn(),
+    };
+    const remoteServers = {
+      supportsCapability: vi.fn(),
+      request: vi.fn(),
+      downloadSharedFile: vi.fn(),
+      downloadWorkspaceFile: vi.fn(),
+      uploadAttachment: vi.fn(),
+      downloadAttachment: vi.fn(),
+    };
+    const handlers = attachmentIpcHandlers({
+      getMainWindow: () => null,
+      service,
+      mailbox: { resolveAttachment: async () => ({ path: "unused", mimeType: "text/plain", name: "unused" }) },
+      remoteServers,
+    });
+    handlers.agentAttachments.previewSharedFile("preview-directory");
+    const invoke = bound.get("preview-directory");
+    if (!invoke) throw new Error("No handler");
+    const result = await invoke(
+      { senderFrame: { url: "dani-dex-app://app/index.html" } },
+      { serverId: "local", payload: { path: "~/Dani-Dex/Shared" } },
+    );
+    expect(resolveSharedFile).toHaveBeenCalledWith("~/Dani-Dex/Shared", true);
+    expect(shell.openPath).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      directory: { path: root, entries: [{ name: "note.txt", path: join(root, "note.txt"), isDirectory: false }] },
+      bytes: null,
+      previewKind: "none",
+    });
+    expect(remoteServers.downloadSharedFile).not.toHaveBeenCalled();
   });
 });

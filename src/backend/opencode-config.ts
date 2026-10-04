@@ -16,7 +16,10 @@ export interface CustomProviderConfig {
   readonly name: string;
   readonly baseUrl: string;
   readonly apiKey: string | null;
-  readonly models: readonly CustomProviderModel[];
+  readonly models: readonly (CustomProviderModel & {
+    readonly limit?: { readonly context: number; readonly output: number };
+    readonly reasoningEffortLevels?: readonly ("low" | "medium" | "high" | "max")[];
+  })[];
   readonly headers: readonly CustomProviderHeader[];
 }
 
@@ -41,7 +44,19 @@ export interface OpenCodeProviderEntry {
   readonly npm: string;
   readonly name: string;
   readonly options: OpenCodeProviderOptions;
-  readonly models: Readonly<Record<string, { readonly name: string }>>;
+  readonly models: Readonly<
+    Record<
+      string,
+      {
+        readonly name: string;
+        readonly limit?: { readonly context: number; readonly output: number };
+        readonly reasoning?: boolean;
+        readonly variants?: Readonly<
+          Record<string, { readonly disabled?: boolean; readonly reasoningEffort?: string }>
+        >;
+      }
+    >
+  >;
 }
 
 /** One rule per tool pattern, which is all Dani-Dex sends under `permission`. */
@@ -61,6 +76,10 @@ export type OpenCodeConfigBase = Omit<OpenCodeConfig, "provider">;
  * to touch the computer. This layer is the reason the custom-provider config has to merge rather than
  * replace: both live under the same environment variable.
  */
+// Native OpenCode defaults allow file operations. Always request permission at its boundary;
+// Dani's current per-agent automation policy decides whether to show or approve each request.
+export const OPENCODE_INTERACTIVE_CONFIG: OpenCodeConfigBase = { permission: { "*": "ask" } };
+
 export const OPENCODE_PROFILE_CONFIG: OpenCodeConfigBase = { permission: { "*": "deny" } };
 
 export const OPENCODE_CONFIG_ENV = "OPENCODE_CONFIG_CONTENT";
@@ -85,7 +104,29 @@ function providerEntry(provider: CustomProviderConfig): OpenCodeProviderEntry {
         ? { headers: Object.fromEntries(provider.headers.map((header) => [header.name, header.value])) }
         : {}),
     },
-    models: Object.fromEntries(provider.models.map((model) => [model.id, { name: model.name }])),
+    models: Object.fromEntries(
+      provider.models.map((model) => [
+        model.id,
+        {
+          name: model.name,
+          ...(model.limit ? { limit: model.limit } : {}),
+          ...(model.reasoningEffortLevels
+            ? {
+                reasoning: model.reasoningEffortLevels.length > 0,
+                // Disable automatic defaults that the proxy did not prove it supports.
+                variants: Object.fromEntries(
+                  ["low", "medium", "high", "xhigh", "max"].map((effort) => [
+                    effort,
+                    model.reasoningEffortLevels?.some((level) => level === effort)
+                      ? { reasoningEffort: effort }
+                      : { disabled: true },
+                  ]),
+                ),
+              }
+            : {}),
+        },
+      ]),
+    ),
   };
 }
 

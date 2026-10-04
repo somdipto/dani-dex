@@ -746,7 +746,12 @@ describe("Dani-Dex connected desktop shell", () => {
   });
 
   it("applies an explicit read after an older automatic read", async () => {
-    render(() => <App />);
+    render(() => (
+      <AppProviders>
+        <AppAccessGate />
+        <UsageProbe />
+      </AppProviders>
+    ));
     await screen.findByRole("heading", { name: "Chief" });
     const firstPage = unreadConversationPage("chief", [
       agentReply("reply-automatic-first", "First automatic reply", "2026-08-30T02:03:00.000Z"),
@@ -754,8 +759,8 @@ describe("Dani-Dex connected desktop shell", () => {
     emitAgentEvent?.({ type: "conversation-page", page: firstPage });
     await waitFor(() => expect(window.danidex.agent.markConversationRead).toHaveBeenCalledOnce());
 
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
-    await screen.findByRole("heading", { name: "Sales Outbound" });
+    await fireEvent.click(screen.getByRole("button", { name: "Open usage" }));
+    flush();
     const newerPage = testConversationPage(
       "chief",
       [
@@ -774,6 +779,7 @@ describe("Dani-Dex connected desktop shell", () => {
     emitAgentEvent?.({ type: "conversation-page", page: newerPage });
     vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValueOnce(newerPage);
 
+    await fireEvent.click(screen.getByRole("button", { name: "Close usage" }));
     await fireEvent.click(screen.getByRole("button", { name: /Chief/ }));
     await waitFor(() =>
       expect(window.danidex.agent.markConversationRead).toHaveBeenNthCalledWith(
@@ -960,7 +966,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await waitFor(() => expect(screen.queryByRole("status", { name: /new messages?/ })).not.toBeInTheDocument());
   });
 
-  it("keeps another agent new until that agent is opened after focus returns", async () => {
+  it("keeps hidden worker replies unread after focus returns", async () => {
     const unreadPage = unreadConversationPage("sales-outbound", [
       agentReply("sales-background-answer", "Sales result from the background", "2026-08-19T09:04:00.000Z"),
     ]);
@@ -972,36 +978,10 @@ describe("Dani-Dex connected desktop shell", () => {
     emitAgentEvent?.({ type: "conversation-page", page: unreadPage });
     window.dispatchEvent(new Event("focus"));
 
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: /Sales Outbound/ })).toHaveTextContent("1 new reply"),
-    );
+    expect(screen.queryByRole("button", { name: /Sales Outbound/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
     expect(window.danidex.agent.markConversationRead).not.toHaveBeenCalled();
-    await waitFor(() =>
-      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
-        mode: "message",
-        message: { agent: { id: "sales-outbound" }, messageId: "sales-background-answer" },
-      }),
-    );
-
-    vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValue(unreadPage);
-    const sales = screen.getByRole("button", { name: /Sales Outbound/ });
-    await fireEvent.click(sales);
-
-    await waitFor(() =>
-      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
-        {
-          agentId: "sales-outbound",
-          throughMessageId: "sales-background-answer",
-        },
-        "local",
-      ),
-    );
-    await waitFor(() => expect(sales).not.toHaveTextContent("1 new reply"));
-    await waitFor(() =>
-      expect(vi.mocked(window.danidex.dynamicIsland.publishPresentation).mock.calls.at(-1)?.[0]).toMatchObject({
-        mode: "idle",
-      }),
-    );
+    expect(screen.queryByText("Sales result from the background")).not.toBeInTheDocument();
   });
 
   it("keeps a message read when it arrives in the open agent chat", async () => {
@@ -1070,7 +1050,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("status", { name: "1 new message" })).toBeInTheDocument();
   });
 
-  it("keeps an agent reply unread while an open channel covers the conversation", async () => {
+  it("keeps Chief readable when a blocked channel open is attempted", async () => {
     const unreadPage = unreadConversationPage("chief", [
       agentReply("agent-channel-answer", "Ready while the channel was open", "2026-08-19T09:06:00.000Z"),
     ]);
@@ -1086,15 +1066,17 @@ describe("Dani-Dex connected desktop shell", () => {
     vi.mocked(window.danidex.agent.markConversationRead).mockClear();
     vi.mocked(window.danidex.agent.readConversationPage).mockResolvedValue(unreadPage);
 
-    fireEvent.click(screen.getByRole("button", { name: "Open channel" }));
-    await screen.findByRole("heading", { level: 1, name: "Project" });
+    await fireEvent.click(screen.getByRole("button", { name: "Open channel" }));
+    expect(screen.queryByRole("main", { name: "Channel conversation" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
     emitAgentEvent?.({ type: "conversation-page", page: unreadPage });
-
-    // Unlike the Usage report, the channel replaces the conversation rather than covering it, so the
-    // reply is not in the DOM until the channel closes. Both paths must leave it unread.
-    fireEvent.click(screen.getByRole("button", { name: "Close channel" }));
-    expect(await screen.findByRole("status", { name: "1 new message" })).toBeInTheDocument();
-    expect(window.danidex.agent.markConversationRead).not.toHaveBeenCalled();
+    expect(await screen.findByText("Ready while the channel was open")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
+        { agentId: "chief", throughMessageId: "agent-channel-answer" },
+        "local",
+      ),
+    );
   });
 
   it("uncovers the conversation a global search result opens", async () => {
@@ -1107,7 +1089,7 @@ describe("Dani-Dex connected desktop shell", () => {
       status: "completed" as const,
     };
     vi.mocked(window.danidex.agent.searchConversationMessages).mockResolvedValue({
-      results: [{ agentId: "sales-outbound", message: result }],
+      results: [{ agentId: "chief", message: result }],
       total: 1,
       nextCursor: null,
     });
@@ -1116,9 +1098,9 @@ describe("Dani-Dex connected desktop shell", () => {
       threadId: null,
       activeTurnId: null,
       revision: 1,
-      messages: agentId === "sales-outbound" ? [result] : [],
+      messages: agentId === "chief" ? [result] : [],
       readState:
-        agentId === "sales-outbound"
+        agentId === "chief"
           ? { unreadCount: 1, firstUnreadMessageId: result.id, throughMessageId: null }
           : { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
     }));
@@ -1142,20 +1124,20 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.input(screen.getByRole("combobox", { name: "Search Dani-Dex" }), { target: { value: "report" } });
     await fireEvent.click(await screen.findByRole("option", { name: /Found while the report was open/ }));
 
-    expect(await screen.findByRole("heading", { name: "Sales Outbound" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeInTheDocument();
   });
 
-  it("clears unread messages when entering an agent chat", async () => {
+  it("clears unread messages when entering the Chief chat", async () => {
     const unreadState = {
       unreadCount: 1,
       firstUnreadMessageId: "sales-new",
       throughMessageId: null,
     };
     vi.mocked(window.danidex.agent.listConversationReads).mockResolvedValueOnce({
-      "sales-outbound": unreadState,
+      chief: unreadState,
     });
     vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) =>
-      agentId === "sales-outbound"
+      agentId === "chief"
         ? {
             agentId,
             threadId: "thread-sales",
@@ -1176,13 +1158,13 @@ describe("Dani-Dex connected desktop shell", () => {
 
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
+    await fireEvent.click(screen.getByRole("button", { name: /Chief/ }));
 
     expect(await screen.findByText("A new sales reply")).toBeInTheDocument();
     await waitFor(() =>
       expect(window.danidex.agent.markConversationRead).toHaveBeenCalledWith(
         {
-          agentId: "sales-outbound",
+          agentId: "chief",
           throughMessageId: "sales-new",
         },
         "local",

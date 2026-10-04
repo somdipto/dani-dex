@@ -54,6 +54,7 @@ const Settings = createSimpleContext({
     let analyticsVersionRecorded = false;
     let autoDownloadUpdatesChanged = false;
     let turboModeChanged = false;
+    let approvalAutomationRevision = 0;
     const [turboModePending, setTurboModePending] = createSignal(false);
 
     createEffect(
@@ -113,6 +114,7 @@ const Settings = createSimpleContext({
       }
       if (previous.turboMode !== turboMode) {
         turboModeChanged = true;
+        approvalAutomationRevision += 1;
         setTurboModePending(true);
         void window.danidex
           .setApprovalAutomation({ turbo: turboMode })
@@ -184,6 +186,7 @@ const Settings = createSimpleContext({
      * stored - accepting first would leave an agent the user believes is trusted still asking.
      */
     async function setAgentAutoApprove(agentId: string, autoApprove: boolean): Promise<void> {
+      approvalAutomationRevision += 1;
       const preference = await window.danidex.setApprovalAutomation({ agentId, autoApprove });
       setApprovalAutomation(preference);
       setGeneralSettings((current) => ({ ...current, turboMode: preference.turbo }));
@@ -228,9 +231,11 @@ const Settings = createSimpleContext({
           setAnalyticsPreferenceLoaded(false);
           setGeneralSettings((current) => ({ ...current, productAnalytics: false }));
         });
+      const initialApprovalRevision = approvalAutomationRevision;
       void window.danidex
         .getApprovalAutomation()
         .then((preference) => {
+          if (approvalAutomationRevision !== initialApprovalRevision) return;
           setApprovalAutomation(preference);
           // A toggle made before this read resolves has already been persisted, so the older value
           // must not be painted back over it.

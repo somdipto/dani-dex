@@ -281,7 +281,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await screen.findByRole("heading", { name: "Chief" });
     // Wait for the agent list before the message reference resolves. The
     // heading renders first, so without this the reference button flakes.
-    await screen.findByRole("button", { name: /Sales Outbound, Outbound specialist/ });
+    await screen.findByRole("button", { name: /Chief, Chief of staff/ });
     emitAgentEvent?.({
       type: "conversation",
       snapshot: {
@@ -623,11 +623,11 @@ describe("Dani-Dex connected desktop shell", () => {
       await screen.findByRole("status", { name: "Chief is working: Working in Project launch" }),
     ).toBeInTheDocument();
 
-    // Same hold reserves the host: only the owning agent reads as working.
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound, Outbound specialist/ }));
-    await screen.findByRole("heading", { name: "Sales Outbound" });
-    const salesQueue = await screen.findByRole("region", { name: "Message queue" });
-    expect(within(salesQueue).getByText("Waiting - Chief is working in Project launch")).toBeVisible();
+    // Worker queue events stay internal and do not replace the Chief's visible queue.
+    expect(screen.queryByRole("button", { name: /Sales Outbound, Outbound specialist/ })).not.toBeInTheDocument();
+    emitAgentEvent?.({ type: "queue-changed", snapshot: { agentId: "sales-outbound", deliveries: [held], hold } });
+    expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
+    expect(within(queue).getByRole("group", { name: "Queued message 1: Read the report" })).toBeInTheDocument();
     expect(screen.queryByRole("status", { name: /^Sales Outbound is working/u })).not.toBeInTheDocument();
 
     // Same wait survives a fresh queue read (reload/reconnect).

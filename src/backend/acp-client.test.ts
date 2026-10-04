@@ -351,7 +351,12 @@ describe("OpenCode ACP environment", () => {
     // An empty `OPENCODE_API_KEY` is not the same as an absent one: the CLI reads it as an account
     // and lists nothing. A user with no account has to see the variable missing.
     const [environment] = await fake.readSpawnEnvironments();
-    expect(environment).toEqual({ argv: ["acp"], apiKey: null, disableAutoupdate: null, configContent: null });
+    expect(environment).toEqual({
+      argv: ["acp"],
+      apiKey: null,
+      disableAutoupdate: null,
+      configContent: JSON.stringify({ permission: { "*": "ask" } }),
+    });
     const account = await client.request("account/read", { refreshToken: false }, decodeAccountReadResult);
     expect(account.account).not.toBeNull();
     const models = await client.request("model/list", {}, decodeModelListResponse);
@@ -420,6 +425,7 @@ describe("OpenCode ACP environment", () => {
 
     const [environment] = await fake.readSpawnEnvironments();
     expect(JSON.parse(environment?.configContent ?? "")).toEqual({
+      permission: { "*": "ask" },
       provider: {
         "studio-local": {
           npm: "@ai-sdk/openai-compatible",
@@ -468,7 +474,7 @@ describe("OpenCode ACP environment", () => {
 
     const environments = await fake.readSpawnEnvironments();
     // No endpoint means no config layer at all: an empty layer is not the same as no layer.
-    expect(environments[0]?.configContent).toBeNull();
+    expect(JSON.parse(environments[0]?.configContent ?? "").permission).toEqual({ "*": "ask" });
     expect(environments[1]?.configContent).toContain("studio-local");
   });
 

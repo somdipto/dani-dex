@@ -12,7 +12,7 @@ import { useDirectMessages } from "../conversation/direct-messages-context";
 import { useServers } from "../servers/servers-context";
 import { useUsage } from "../usage/usage-context";
 import { mergeChannelPage } from "./channel-page-merge";
-import { readChannelSelection, writeChannelSelection } from "./channel-selection";
+import { writeChannelSelection } from "./channel-selection";
 
 interface ChannelsState {
   channels: ChannelSummary[];
@@ -56,10 +56,9 @@ const Channels = createSimpleContext({
     let failedCommand: ChannelCommand | null = null;
     const readThrough = new Map<string, number>();
 
-    function savedChannelId(account: string): string | null {
-      return account === "loading" || account === "error"
-        ? null
-        : (readChannelSelection()[account]?.[selectionServerId] ?? null);
+    function savedChannelId(_account: string): null {
+      // Preserve channel records, but do not reopen an owner-facing role room.
+      return null;
     }
 
     function persistChannelSelection(channelId: string | null): void {
@@ -182,21 +181,9 @@ const Channels = createSimpleContext({
           });
       }
     }
-    async function open(channelId: string) {
-      setAgentSetupOpen(false);
-      // The channel covers the workspace, and a direct conversation left selected under it is read
-      // automatically as its messages arrive. Selecting an agent closes the channel in the shared
-      // navigation; this is the same exchange the other way round.
-      setDirectTyping(false);
-      clearDirectSelection();
-      usage.dismissUsage();
-      persistChannelSelection(channelId);
-      flush(() =>
-        setState((state) => {
-          Object.assign(state, { selectedId: channelId, page: null, editing: null, loading: true });
-        }),
-      );
-      await refreshAfter();
+    function open(_channelId: string): Promise<void> {
+      // Preserve delegation records without opening a second owner conversation.
+      return Promise.resolve();
     }
     async function perform(action: () => Promise<void>): Promise<boolean> {
       const account = accountKey();

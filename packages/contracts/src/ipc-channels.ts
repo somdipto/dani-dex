@@ -1,4 +1,16 @@
 export const IPC_CHANNELS = {
+  arcAction: "dani-arc:action",
+  arcTeam: "dani-arc:team",
+  arcConnection: "dani-arc:connection",
+  arcHold: "dani-arc:hold",
+  arcRotate: "dani-arc:rotate",
+  arcSound: "dani-arc:sound",
+  arcVoice: "dani-arc:voice",
+  arcTargets: "dani-arc:targets",
+  arcVisibility: "dani-arc:visibility",
+  arcPreferences: "dani-arc:preferences",
+  arcEdit: "dani-arc:edit",
+
   getAppInfo: "app:get-info",
   getSetupState: "app:get-setup-state",
   saveSetup: "app:save-setup",

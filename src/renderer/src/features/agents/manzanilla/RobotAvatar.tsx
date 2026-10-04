@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, Show, untrack } from "solid-js";
 import {
   ACESFilmicToneMapping,
   CanvasTexture,
@@ -53,6 +53,7 @@ type AvatarInstance = {
   motionStarted: number | null;
   motionCompleted: boolean;
   onReady: (ready: boolean) => void;
+  onFailure: (reason: string) => void;
 };
 
 type RenderStage = {
@@ -144,6 +145,13 @@ function modelFor(role: RobotRole, color: string) {
   return model;
 }
 
+function failRendering(reason: string) {
+  for (const instance of instances.values()) {
+    setReady(instance, false);
+    instance.onFailure(reason);
+  }
+}
+
 function ensureStage() {
   if (stage || unavailable) return stage;
   let renderer: WebGLRenderer | undefined;
@@ -196,7 +204,7 @@ function ensureStage() {
       unavailable = true;
       cancelAnimationFrame(frameRequest);
       frameRequest = 0;
-      for (const instance of instances.values()) setReady(instance, false);
+      failRendering("3D renderer lost its graphics context.");
     };
     const onRestored = () => {
       unavailable = false;
@@ -207,7 +215,10 @@ function ensureStage() {
     renderer.domElement.addEventListener("webglcontextrestored", onRestored);
     stage = { renderer, scene, camera, shadow, texture, onLost, onRestored };
     return stage;
-  } catch {
+  } catch (error) {
+    failRendering(
+      error instanceof Error ? `3D renderer could not start: ${error.message}` : "3D renderer could not start.",
+    );
     renderer?.dispose();
     renderer?.forceContextLoss();
     unavailable = true;
@@ -334,10 +345,10 @@ function tick(now: number) {
       draw(instance, now, reduced);
       instance.dirty = false;
     }
-  } catch {
+  } catch (error) {
     unavailable = true;
+    failRendering(error instanceof Error ? `3D frame failed: ${error.message}` : "3D frame failed.");
     releaseStage();
-    for (const instance of instances.values()) setReady(instance, false);
   }
   requestFrame();
 }
@@ -372,8 +383,9 @@ function startListening() {
   if (listening) return;
   listening = true;
   unavailable = false;
-  motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-  motionPreference.addEventListener("change", invalidate);
+  motionPreference =
+    typeof window.matchMedia === "function" ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  motionPreference?.addEventListener("change", invalidate);
   document.addEventListener("visibilitychange", visibilityChanged);
   window.addEventListener("resize", invalidate);
   if (typeof IntersectionObserver !== "undefined") {
@@ -446,6 +458,7 @@ export function RobotAvatar(props: RobotAvatarProps) {
   let instance: AvatarInstance | null = null;
   let previousMotionKey = props.motionKey;
   const [ready, updateReady] = createSignal(false);
+  const [failure, setFailure] = createSignal<string | null>(null);
   const label = () => (typeof props.label === "string" && props.label.trim() ? props.label : "AI agent");
   const role = () => props.role ?? inferRobotRole(label());
   const validSize = () => (Number.isFinite(props.size) ? Math.max(16, Math.min(props.size ?? 64, 1024)) : 64);
@@ -454,41 +467,48 @@ export function RobotAvatar(props: RobotAvatarProps) {
 
   createEffect(
     () => [validSize(), label(), role(), resolvedColor(), resolvedMotion(), props.animated ?? true] as const,
-    ([size, name, selected, color, motion, animated]) => {
-      if (!element || !canvas) return;
-      updateReady(false);
-      const current: AvatarInstance = {
-        element,
-        canvas,
-        context: canvas.getContext("2d"),
-        size,
-        role: selected,
-        color,
-        motion,
-        animated,
-        seed: seedFromLabel(name),
-        visible: false,
-        dirty: true,
-        ready: false,
-        waveStarted: null,
-        motionStarted: null,
-        motionCompleted: false,
-        onReady: updateReady,
-      };
-      instance = current;
-      const unregister = register(current);
-      const owner = element.closest('button, a[href], [role="button"], [tabindex]') ?? element;
-      const greetOnInteraction = () => greet(current);
-      owner.addEventListener("pointerenter", greetOnInteraction);
-      owner.addEventListener("focusin", greetOnInteraction);
-      return () => {
-        owner.removeEventListener("pointerenter", greetOnInteraction);
-        owner.removeEventListener("focusin", greetOnInteraction);
-        instance = null;
+    ([size, name, selected, color, motion, animated]) =>
+      untrack(() => {
+        if (!element || !canvas) return;
         updateReady(false);
-        unregister();
-      };
-    },
+        setFailure(null);
+        const current: AvatarInstance = {
+          element,
+          canvas,
+          context: canvas.getContext("2d"),
+          size,
+          role: selected,
+          color,
+          motion,
+          animated,
+          seed: seedFromLabel(name),
+          visible: false,
+          dirty: true,
+          ready: false,
+          waveStarted: null,
+          motionStarted: null,
+          motionCompleted: false,
+          onReady: (ready) => {
+            updateReady(ready);
+            if (ready) setFailure(null);
+          },
+          onFailure: setFailure,
+        };
+        if (!current.context) setFailure("3D avatar cannot display: canvas drawing is unavailable.");
+        instance = current;
+        const unregister = untrack(() => register(current));
+        const owner = element.closest('button, a[href], [role="button"], [tabindex]') ?? element;
+        const greetOnInteraction = () => greet(current);
+        owner.addEventListener("pointerenter", greetOnInteraction);
+        owner.addEventListener("focusin", greetOnInteraction);
+        return () => {
+          owner.removeEventListener("pointerenter", greetOnInteraction);
+          owner.removeEventListener("focusin", greetOnInteraction);
+          instance = null;
+          // Disposal runs in the parent render scope; the next apply resets readiness.
+          unregister();
+        };
+      }),
   );
   createEffect(
     () => props.motionKey,
@@ -510,24 +530,22 @@ export function RobotAvatar(props: RobotAvatarProps) {
       class={`mz-robot-avatar${ready() ? " is-ready" : ""}${props.className ? ` ${props.className}` : ""}`}
       style={{ width: `${validSize()}px`, height: `${validSize()}px` }}
       role="img"
-      aria-label={label()}
+      aria-label={failure() ? `${label()}. 3D avatar unavailable.` : label()}
+      title={failure() ?? label()}
+      data-robot-error={failure() ?? undefined}
       data-robot-role={role()}
       data-robot-motion={resolvedMotion()}
-      data-robot-renderer={ready() ? "webgl" : "fallback"}
+      data-robot-renderer={ready() ? "webgl" : failure() ? "unavailable" : "loading"}
     >
-      <svg class="mz-robot-fallback" viewBox="0 0 100 100" role="presentation">
-        <rect x="29" y="64" width="42" height="18" rx="9" fill="#bcbfc7" stroke="#7b898d" stroke-width="1.5" />
-        <path d="M20 63v11M80 63v11" stroke="#7b898d" stroke-width="12" stroke-linecap="round" />
-        <path d="M20 63v10M80 63v10" stroke="#fafcfc" stroke-width="9" stroke-linecap="round" />
-        <rect x="20" y="23" width="60" height="49" rx="18" fill={resolvedColor()} stroke="#7b898d" stroke-width="1.5" />
-        <rect x="25" y="28" width="50" height="39" rx="14" fill="#fafcfc" />
-        <rect x="35" y="40" width="8" height="14" rx="4" fill="#19262c" />
-        <rect x="57" y="40" width="8" height="14" rx="4" fill="#19262c" />
-        <path d="M59 24c-1-9 5-16 13-16 0 8-5 14-13 16ZM59 24c-8-1-12-5-11-11 7 0 11 4 11 11Z" fill="#20ba78" />
-        <rect x="31" y="79" width="15" height="10" rx="4" fill="#fafcfc" stroke="#7b898d" stroke-width="1.5" />
-        <rect x="54" y="79" width="15" height="10" rx="4" fill="#fafcfc" stroke="#7b898d" stroke-width="1.5" />
-      </svg>
+      <span class="mz-robot-placeholder" aria-hidden="true">
+        {failure() ? "3D unavailable" : "Loading 3D"}
+      </span>
       <canvas ref={canvas} class="mz-robot-canvas" />
+      <Show when={failure()}>
+        <span class="mz-robot-error" aria-hidden="true">
+          !
+        </span>
+      </Show>
     </span>
   );
 }

@@ -53,6 +53,40 @@ const ENGINE_SESSION_START_STDERR = [
 ];
 
 describe.sequential("ProviderRuntime: account checks and login", () => {
+  it("keeps a locked optional ChatGPT store on its own status row, not a Dani Free error", async () => {
+    process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
+    process.env.DANI_DEX_CODEX_PATH = await createFakeCodex(root);
+    const { store, mailbox } = stores(root);
+    const events: AgentEvent[] = [];
+    service = createTestService({
+      store,
+      mailbox,
+      preferredProvider: "opencode",
+      clientFactory: (provider) => {
+        const client = new FakeAgentClient(provider, "DONE", false);
+        if (provider === "codex")
+          client.request = async () => {
+            throw new Error("ChatGPT sign-in storage is not available.");
+          };
+        return client;
+      },
+    });
+    service.on("event", (event) => events.push(event));
+    await service.initialize();
+    expect(service.getStatus().phase).toBe("ready");
+    expect(service.getStatus().providers).toContainEqual(
+      expect.objectContaining({
+        id: "codex",
+        state: "sign-in-required",
+        message: expect.stringContaining("unlock Keychain"),
+      }),
+    );
+    expect(events.filter((event) => event.type === "error")).not.toContainEqual(
+      expect.objectContaining({ code: "codex_start_failed" }),
+    );
+    expect(service.getStatus().message).toBeNull();
+  });
+
   it("reconnects OpenCode without a browser and refuses to replace an active client", async () => {
     process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { store, mailbox } = stores(root);
@@ -1144,12 +1178,14 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
       },
     });
     // What a spawn reads. The running process keeps this credential until it stops.
-    expect(service.enabledMcpServers()).toHaveLength(1);
+    expect(service.enabledMcpServers().filter((server) => server.name === "Filesystem")).toHaveLength(1);
     const events: AgentEvent[] = [];
     service.on("event", (event) => events.push(event));
 
     // The user removes the server while that process runs, so the store no longer names the value.
-    service.removeMcpServer({ mcpServerId: service.listMcpServers()[0]?.id ?? "" });
+    service.removeMcpServer({
+      mcpServerId: service.listMcpServers().find((server) => server.name === "Filesystem")?.id ?? "",
+    });
     client.emit("diagnostic", "Failed to spawn MCP server 'Filesystem': rejected abcdef123456");
 
     await waitFor(() => events.filter((event) => event.type === "error").length === 1);
@@ -1193,7 +1229,7 @@ describe.sequential("ProviderRuntime: account checks and login", () => {
       },
     });
     // What a spawn reads. The process holds this server, so its failure stays visible to the user.
-    expect(service.enabledMcpServers()).toHaveLength(1);
+    expect(service.enabledMcpServers().filter((server) => server.name === "Filesystem")).toHaveLength(1);
     const events: AgentEvent[] = [];
     service.on("event", (event) => events.push(event));
 

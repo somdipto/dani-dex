@@ -32,6 +32,19 @@ function event<Channel extends string>(channel: Channel): EventEndpoint<Channel>
 }
 
 export const IPC_ENDPOINTS = {
+  arc: {
+    action: request(IPC_CHANNELS.arcAction),
+    team: event(IPC_CHANNELS.arcTeam),
+    connection: event(IPC_CHANNELS.arcConnection),
+    hold: event(IPC_CHANNELS.arcHold),
+    rotate: event(IPC_CHANNELS.arcRotate),
+    sound: event(IPC_CHANNELS.arcSound),
+    voice: event(IPC_CHANNELS.arcVoice),
+    targets: event(IPC_CHANNELS.arcTargets),
+    visibility: event(IPC_CHANNELS.arcVisibility),
+    preferences: event(IPC_CHANNELS.arcPreferences),
+    edit: event(IPC_CHANNELS.arcEdit),
+  },
   app: {
     getAppInfo: request(IPC_CHANNELS.getAppInfo),
     getSetupState: request(IPC_CHANNELS.getSetupState),

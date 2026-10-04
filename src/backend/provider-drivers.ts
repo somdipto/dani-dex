@@ -16,6 +16,7 @@ import type {
 import { hasModelSource, withModelSource } from "./model-source";
 import {
   type CustomProviderSource,
+  OPENCODE_INTERACTIVE_CONFIG,
   OPENCODE_PROFILE_CONFIG,
   openCodeConfigEnv,
   openCodeSignInMessage,
@@ -166,7 +167,7 @@ export const BUILT_IN_PROVIDER_DRIVERS: readonly BuiltInProviderDriver[] = [
         extraEnv: () => ({
           ...opencodeEnv(cli, context),
           ...openCodeConfigEnv(
-            {},
+            OPENCODE_INTERACTIVE_CONFIG,
             withModelSource(context.customProviders, () => context.apiKey("opencode")),
           ),
         }),

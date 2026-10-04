@@ -7,6 +7,7 @@ import {
   mergeOpenCodeConfig,
   OPENCODE_COMPATIBLE_NPM,
   OPENCODE_CONFIG_ENV,
+  OPENCODE_INTERACTIVE_CONFIG,
   OPENCODE_PROFILE_CONFIG,
   type OpenCodeProviderOptions,
   openCodeConfigEnv,
@@ -100,6 +101,13 @@ describe("mergeOpenCodeConfig", () => {
 });
 
 describe("openCodeConfigEnv", () => {
+  it("asks at the native tool boundary with or without custom providers", () => {
+    for (const providers of [[], [provider()]]) {
+      const env = openCodeConfigEnv(OPENCODE_INTERACTIVE_CONFIG, () => providers);
+      expect(JSON.parse(env[OPENCODE_CONFIG_ENV] ?? "").permission).toEqual({ "*": "ask" });
+    }
+  });
+
   it("sets no variable when there is nothing to configure", () => {
     expect(openCodeConfigEnv({}, () => [])).toEqual({});
   });

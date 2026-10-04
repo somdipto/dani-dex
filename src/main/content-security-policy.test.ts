@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { buildContentSecurityPolicy } from "./content-security-policy";
 
 describe("buildContentSecurityPolicy", () => {
+  it("allows local image and PDF blobs without enabling blob scripts", () => {
+    const p = buildContentSecurityPolicy(true);
+    expect(p).toContain("img-src 'self' blob:");
+    expect(p).toContain("frame-src 'self' blob:");
+    expect(p).toContain("script-src 'self';");
+  });
   it("allows the production analytics endpoint", () => {
     const policy = buildContentSecurityPolicy(true);
 
@@ -14,7 +20,7 @@ describe("buildContentSecurityPolicy", () => {
   it.each([true, false])("allows loopback viewer frames when packaged=%s", (packaged) => {
     const directives = buildContentSecurityPolicy(packaged).split("; ");
     expect(directives.find((directive) => directive.startsWith("frame-src "))).toBe(
-      "frame-src 'self' dani-dex-attachment: dani-dex-remote-attachment: https://*.dani-dex.example http://127.0.0.1:* http://localhost:*",
+      "frame-src 'self' blob: dani-dex-attachment: dani-dex-remote-attachment: https://*.dani-dex.example http://127.0.0.1:* http://localhost:*",
     );
     expect(directives.find((directive) => directive.startsWith("script-src "))).toBe("script-src 'self'");
   });

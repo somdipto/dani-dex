@@ -104,7 +104,10 @@ export class ChatGptPlanStore {
     });
   }
   #loaded(): State {
-    if (!this.#state) throw new Error("ChatGPT sign-in storage is not available.");
+    if (!this.#state)
+      throw new Error(
+        "ChatGPT sign-in storage is locked. Open Dani-Dex on your Mac and unlock Keychain, then try ChatGPT again.",
+      );
     return this.#state;
   }
   #enqueue(run: () => Promise<void>): Promise<void> {

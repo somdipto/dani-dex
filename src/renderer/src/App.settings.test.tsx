@@ -47,7 +47,7 @@ describe("Dani-Dex connected desktop shell", () => {
     vi.mocked(window.danidex.setApprovalAutomation).mockReturnValueOnce(write.promise);
     render(() => <App />);
     await fireEvent.click(await screen.findByRole("button", { name: "Settings" }));
-    const toggle = await screen.findByRole("switch", { name: "Turbo mode" });
+    const toggle = await screen.findByRole("switch", { name: "Allow all - computer access" });
     await waitFor(() => expect(toggle).toBeChecked());
     await fireEvent.click(toggle);
     await waitFor(() => expect(window.danidex.setApprovalAutomation).toHaveBeenCalledWith({ turbo: false }));
@@ -61,17 +61,45 @@ describe("Dani-Dex connected desktop shell", () => {
       await screen.findByText("Could not turn off Turbo mode. It is still active. Try again."),
     ).toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "Settings" }));
-    const restored = await screen.findByRole("switch", { name: "Turbo mode" });
+    const restored = await screen.findByRole("switch", { name: "Allow all - computer access" });
     expect(restored).toBeChecked();
     expect(restored).toBeEnabled();
+  });
+
+  it("does not replace a saved Chief grant with a late startup preference", async () => {
+    await import("./features/account/AccountDock");
+    const startup = Promise.withResolvers<ApprovalAutomationPreference>();
+    vi.mocked(window.danidex.getApprovalAutomation).mockReturnValue(startup.promise);
+    vi.mocked(window.danidex.setApprovalAutomation).mockResolvedValue({
+      turbo: false,
+      defaultAutoApprove: false,
+      autoApproveOverrides: { chief: true },
+    });
+    render(() => <App />);
+    await screen.findByRole("heading", { name: "Chief" });
+    await fireEvent.click(screen.getByRole("button", { name: "Agent model: GPT-5.6 Luna" }));
+    await fireEvent.click(await screen.findByRole("switch", { name: "Auto approve this agent's actions" }));
+    await fireEvent.click(await screen.findByRole("button", { name: "Always allow" }));
+    await waitFor(() =>
+      expect(window.danidex.setApprovalAutomation).toHaveBeenCalledWith({ agentId: "chief", autoApprove: true }),
+    );
+    await fireEvent.click(screen.getByRole("button", { name: "Agent model: GPT-5.6 Luna" }));
+    const toggle = await screen.findByRole("switch", { name: "Auto approve this agent's actions" });
+    await waitFor(() => expect(toggle).toBeChecked());
+    startup.resolve({ turbo: false, defaultAutoApprove: false, autoApproveOverrides: {} });
+    await startup.promise;
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
+    expect(toggle).toBeChecked();
   });
 
   it.each<ApprovalAutomationPreference & { enabled: boolean }>([
     { defaultAutoApprove: true, autoApproveOverrides: {}, turbo: false, enabled: true },
     { defaultAutoApprove: false, autoApproveOverrides: {}, turbo: false, enabled: false },
+    { defaultAutoApprove: false, autoApproveOverrides: { chief: true }, turbo: false, enabled: true },
     { defaultAutoApprove: true, autoApproveOverrides: { chief: false }, turbo: false, enabled: false },
     { defaultAutoApprove: true, autoApproveOverrides: { chief: false }, turbo: true, enabled: true },
   ])("shows the effective auto-approval choice: %j", async ({ enabled, ...preference }) => {
+    await import("./features/account/AccountDock");
     vi.mocked(window.danidex.getApprovalAutomation).mockResolvedValue(preference);
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
@@ -105,7 +133,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(window.danidex.setApprovalAutomation).toHaveBeenCalledTimes(2);
   });
 
-  it("answers the original approval after switching agents during a grant write", async () => {
+  it("answers the original Chief approval while worker events arrive during a grant write", async () => {
     vi.mocked(window.danidex.agent.listAgents).mockResolvedValue(
       AGENTS.map((agent) => ({ ...agent, threadId: `thread-${agent.id}` })),
     );
@@ -138,17 +166,16 @@ describe("Dani-Dex connected desktop shell", () => {
     await waitFor(() =>
       expect(window.danidex.setApprovalAutomation).toHaveBeenCalledWith({ agentId: "chief", autoApprove: true }),
     );
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound, Outbound specialist/ }));
-    await screen.findByRole("heading", { name: "Sales Outbound" });
+    expect(screen.queryByRole("button", { name: /Sales Outbound, Outbound specialist/ })).not.toBeInTheDocument();
     requestApproval("sales-outbound");
-    await screen.findByRole("button", { name: "Deny" });
+    expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
     write.resolve({ turbo: false, defaultAutoApprove: false, autoApproveOverrides: { chief: true } });
     await waitFor(() => expect(window.danidex.agent.respondToApproval).toHaveBeenCalledOnce());
     expect(window.danidex.agent.respondToApproval).toHaveBeenCalledWith({
       requestId: "approval-chief",
       decision: "accept",
     });
-    expect(screen.getByRole("button", { name: "Deny" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Deny" })).not.toBeInTheDocument();
   });
 
   it("shows Turbo without per-agent approval controls in Settings", async () => {
@@ -160,7 +187,7 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     await fireEvent.click(await screen.findByRole("button", { name: "Settings" }));
-    expect(await screen.findByRole("switch", { name: "Turbo mode" })).toBeEnabled();
+    expect(await screen.findByRole("switch", { name: "Allow all - computer access" })).toBeEnabled();
     expect(screen.queryByRole("button", { name: /Revoke the standing approval/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Revoke all" })).not.toBeInTheDocument();
     expect(window.danidex.setApprovalAutomation).not.toHaveBeenCalled();
@@ -902,7 +929,7 @@ describe("Dani-Dex connected desktop shell", () => {
       }),
     );
 
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
+    expect(screen.queryByRole("button", { name: /Sales Outbound/ })).not.toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: /Coordinator, Chief of staff/ }));
     expect(await screen.findByRole("heading", { name: "Coordinator" })).toBeInTheDocument();
   });
@@ -924,32 +951,27 @@ describe("Dani-Dex connected desktop shell", () => {
     );
   });
 
-  it("keeps provider choices separate for each agent profile", async () => {
+  it("changes only the Chief provider while worker profiles stay hidden", async () => {
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     await fireEvent.click(screen.getByRole("button", { name: "View agent settings" }));
-    let settings = await screen.findByRole("complementary", { name: "Agent settings" });
+    const settings = await screen.findByRole("complementary", { name: "Agent settings" });
     await fireEvent.click(within(settings).getByRole("button", { name: "Agent model: GPT-5.6 Luna" }));
-    let picker = within(settings).getByRole("dialog", { name: "Choose agent model" });
+    const picker = within(settings).getByRole("dialog", { name: "Choose agent model" });
     await fireEvent.click(within(picker).getByRole("tab", { name: /^Claude:/ }));
     await fireEvent.click(within(picker).getByRole("option", { name: "Claude Opus 5" }));
 
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
-    await fireEvent.click(screen.getByRole("button", { name: "View agent settings" }));
-    settings = await screen.findByRole("complementary", { name: "Agent settings" });
-    expect(within(settings).getByRole("button", { name: "Agent model: GPT-5.6 Luna" })).toBeEnabled();
-
-    await fireEvent.click(within(settings).getByRole("button", { name: "Agent model: GPT-5.6 Luna" }));
-    picker = within(settings).getByRole("dialog", { name: "Choose agent model" });
-    await fireEvent.click(within(picker).getByRole("tab", { name: /^Claude:/ }));
-    await fireEvent.click(within(picker).getByRole("option", { name: "Claude Opus 5" }));
     await waitFor(() =>
       expect(window.danidex.agent.updateAgent).toHaveBeenCalledWith({
-        agentId: "sales-outbound",
+        agentId: "chief",
         model: "claude-opus-5",
         provider: "claude",
         reasoningEffort: "medium",
       }),
+    );
+    expect(screen.queryByRole("button", { name: /Sales Outbound/ })).not.toBeInTheDocument();
+    expect(vi.mocked(window.danidex.agent.updateAgent).mock.calls.every(([input]) => input.agentId === "chief")).toBe(
+      true,
     );
   });
 
@@ -1021,15 +1043,21 @@ describe("Dani-Dex connected desktop shell", () => {
   it("does not remount pinned agents when instructions refresh the agent list", async () => {
     window.localStorage.setItem(
       SIDEBAR_PINS_STORAGE_KEY,
-      JSON.stringify({ local: [{ kind: "agent", id: "sales-outbound" }] }),
+      JSON.stringify({
+        local: [
+          { kind: "agent", id: "chief" },
+          { kind: "agent", id: "sales-outbound" },
+        ],
+      }),
     );
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-    const pinnedAgent = screen.getByRole("button", { name: "Sales Outbound, pinned agent" });
+    expect(screen.queryByRole("button", { name: /Sales Outbound/ })).not.toBeInTheDocument();
+    const pinnedAgent = screen.getByRole("button", { name: "Chief, pinned agent" });
     emitAgentEvent?.({
       type: "conversation-page",
       page: testConversationPage(
-        "sales-outbound",
+        "chief",
         [
           {
             id: "sales-reply",
@@ -1051,7 +1079,7 @@ describe("Dani-Dex connected desktop shell", () => {
       ),
     });
 
-    expect(screen.getByRole("button", { name: "Sales Outbound, pinned agent" })).toBe(pinnedAgent);
+    expect(screen.getByRole("button", { name: "Chief, pinned agent" })).toBe(pinnedAgent);
     expect(within(pinnedAgent).getByText("3")).toBe(notificationCount);
   });
 

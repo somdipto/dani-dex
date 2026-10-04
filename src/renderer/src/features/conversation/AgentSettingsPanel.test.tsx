@@ -13,6 +13,50 @@ afterEach(() => {
 });
 
 describe("AgentSettingsPanel", () => {
+  it.each([{ levels: [] }, { levels: ["low", "high"] }] as const)(
+    "shows reasoning only for proven levels: $levels",
+    async ({ levels }) => {
+      mock = createMockDaniDex();
+      window.danidex = mock.api;
+      const auto = {
+        ...STORY_MODELS[0],
+        provider: "opencode" as const,
+        id: "dani/dani-free-auto",
+        name: "Dani Free Auto",
+        supportedReasoningEfforts: [...levels],
+      };
+      render(() => (
+        <AgentSettingsPanel
+          onOpenUsage={vi.fn()}
+          agent={{ ...STORY_AGENTS[0], provider: auto.provider, model: auto.id }}
+          runtimeSettings={{ provider: auto.provider, model: auto.id, reasoningEffort: "low" }}
+          agentStatus={STORY_AGENT_STATUS}
+          modelOptions={[auto]}
+          working={false}
+          maxWidth={() => 640}
+          onClose={vi.fn()}
+          onWidthChange={vi.fn()}
+          onUpdateAgent={vi.fn(async () => undefined)}
+          onUpdateRuntimeSettings={vi.fn(async () => true)}
+          onSetAgentAvatar={vi.fn(async () => undefined)}
+        />
+      ));
+      await screen.findByRole("textbox", { name: "Agent instructions" });
+      if (levels.length === 0) {
+        expect(screen.queryByRole("button", { name: /Agent reasoning level/ })).not.toBeInTheDocument();
+        expect(screen.queryByText("Reasoning", { exact: true })).not.toBeInTheDocument();
+        expect(screen.queryByText("Select reasoning")).not.toBeInTheDocument();
+      } else {
+        const trigger = screen.getByRole("button", { name: /Agent reasoning level/ });
+        expect(trigger).toHaveTextContent("Low");
+        await fireEvent.keyDown(trigger, { key: "ArrowDown" });
+        expect(await screen.findByRole("option", { name: "Low" })).toBeInTheDocument();
+        expect(screen.getByRole("option", { name: "High" })).toBeInTheDocument();
+        expect(screen.queryByRole("option", { name: "Medium" })).not.toBeInTheDocument();
+      }
+    },
+  );
+
   it("saves edited instructions while the field stays focused", async () => {
     vi.useFakeTimers();
     try {

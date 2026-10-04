@@ -1581,3 +1581,15 @@
 .goal-team-card .ui-button {
   margin-top: var(--dani-dex-space-2);
 }
+
+.skills-marketplace-source-heading {
+  margin: var(--dani-dex-space-6) 0 var(--dani-dex-space-3);
+}
+.skills-marketplace-source-heading h2 {
+  margin: 0;
+  font-size: var(--dani-dex-text-lg);
+}
+.skills-marketplace-source-heading p {
+  margin: var(--dani-dex-space-1) 0 0;
+  color: var(--dani-dex-text-muted);
+}

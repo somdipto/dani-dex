@@ -964,14 +964,14 @@ export function createConversationViewScope(props: ConversationProps) {
   const setScrollElement = (element: HTMLDivElement) => {
     scrollElement = element;
     scrollFades.adopt(element);
-    updateVirtualScrollMargin();
+    // Ref callbacks run in render scope. The settled/resize frame measures layout.
   };
   const setStickToLatest = (value: boolean) => {
     stickToLatest = value;
   };
   const setVirtualRootElement = (element: HTMLDivElement) => {
     virtualRoot = element;
-    updateVirtualScrollMargin();
+    // Capture only: measuring here would write a signal in render scope.
     scrollResizeObserver?.observe(element);
   };
   const setUnreadMessagesDividerElement = (element: HTMLDivElement) => {

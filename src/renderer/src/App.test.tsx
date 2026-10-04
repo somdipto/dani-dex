@@ -37,18 +37,15 @@ describe("Dani-Dex connected desktop shell", () => {
     toast.dismiss();
   });
 
-  it("restores the selected agent after the app remounts", async () => {
+  it("restores Chief after remount and hides worker conversations", async () => {
+    window.localStorage.setItem(AGENT_SELECTION_STORAGE_KEY, JSON.stringify({ local: "sales-outbound" }));
     const view = render(() => <App />);
-    await fireEvent.click(await screen.findByRole("button", { name: /Sales Outbound, Outbound specialist/ }));
-    await screen.findByRole("heading", { name: "Sales Outbound" });
+    await screen.findByRole("heading", { name: "Chief" });
+    expect(screen.queryByRole("button", { name: /Sales Outbound, Outbound specialist/ })).not.toBeInTheDocument();
     view.unmount();
-
     render(() => <App />);
-    expect(await screen.findByRole("heading", { name: "Sales Outbound" })).toBeVisible();
-    expect(screen.getByRole("button", { name: /Sales Outbound, Outbound specialist/ })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Chief, Chief of staff/ })).toHaveAttribute("aria-pressed", "true");
   });
 
   it("replaces a deleted saved selection with the first available agent", async () => {
@@ -66,7 +63,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(JSON.parse(window.localStorage.getItem(AGENT_SELECTION_STORAGE_KEY) ?? "{}")).toEqual({ team: "other" });
   });
 
-  it("keeps a saved selection after a failed agent load and restores it on retry", async () => {
+  it("keeps a saved selection after a failed load and routes it to Chief on retry", async () => {
     window.localStorage.setItem(AGENT_SELECTION_STORAGE_KEY, JSON.stringify({ local: "sales-outbound" }));
     vi.mocked(window.danidex.agent.listAgents).mockRejectedValueOnce(new Error("Offline"));
     function LoadStatus() {
@@ -81,7 +78,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await waitFor(() => expect(screen.getByLabelText("Agent load status")).toHaveTextContent("Offline"));
     view.unmount();
     render(() => <App />);
-    expect(await screen.findByRole("heading", { name: "Sales Outbound" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeVisible();
   });
 
   it("keeps an explicit agent selection made while the initial list is loading", async () => {
@@ -204,9 +201,7 @@ describe("Dani-Dex connected desktop shell", () => {
     );
     await fireEvent.click(screen.getByRole("button", { name: "Set shell state" }));
     await waitFor(() =>
-      expect(screen.getByRole("status", { name: "shell controller state" })).toHaveTextContent(
-        "local|sales-outbound|0|360",
-      ),
+      expect(screen.getByRole("status", { name: "shell controller state" })).toHaveTextContent("local|chief|0|360"),
     );
 
     const agentSubscriptionCount = vi.mocked(window.danidex.agent.onEvent).mock.calls.length;
@@ -217,9 +212,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("status", { name: "shell controller state" })).not.toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "Toggle shell view" }));
 
-    expect(screen.getByRole("status", { name: "shell controller state" })).toHaveTextContent(
-      "local|sales-outbound|0|360",
-    );
+    expect(screen.getByRole("status", { name: "shell controller state" })).toHaveTextContent("local|chief|0|360");
     expect(window.danidex.agent.onEvent).toHaveBeenCalledTimes(agentSubscriptionCount);
     expect(window.danidex.auth.onEvent).toHaveBeenCalledTimes(authSubscriptionCount);
     expect(window.danidex.servers.onPresence).toHaveBeenCalledTimes(presenceSubscriptionCount);
@@ -463,14 +456,15 @@ describe("Dani-Dex connected desktop shell", () => {
       expect(window.danidex.agent.createAgent).toHaveBeenCalledWith({
         name: "Helper",
         description: "General-purpose assistant",
-        initialMessage: "Greet me briefly.",
+        initialMessage: "Hi. Tell me briefly how you can help.",
         avatarSeed: expect.any(String),
         avatarHue: null,
         provider: "opencode",
         model: "dani/dani-free-auto",
       }),
     );
-    expect(await screen.findByRole("heading", { name: "Helper" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Helper,/ })).not.toBeInTheDocument();
   });
 
   it("creates an agent from a suggestion with one complete backend input", async () => {
@@ -503,11 +497,11 @@ describe("Dani-Dex connected desktop shell", () => {
       avatarHue: 215,
       provider: "opencode",
       model: "dani/dani-free-auto",
-      initialMessage:
-        "Your ongoing role is: Compare travel options and turn my rough ideas into practical, day-by-day itineraries. There is no task yet - just greet me briefly and confirm what you will help with.",
+      initialMessage: "Hi. Tell me briefly how you can help.",
     });
     expect(window.danidex.agent.sendMessage).not.toHaveBeenCalled();
-    expect(await screen.findByRole("heading", { name: "Trip Planner" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Trip Planner,/ })).not.toBeInTheDocument();
   });
 
   it("seeds the creation form from the saved setup choice and submits the pair", async () => {
@@ -645,6 +639,17 @@ describe("Dani-Dex connected desktop shell", () => {
         {
           agentId: "sales-outbound",
           message: {
+            id: "hidden-worker-result",
+            author: "assistant",
+            source: "assistant",
+            text: "research worker-only result",
+            createdAt: "2026-08-20T09:30:00.000Z",
+            status: "completed",
+          },
+        },
+        {
+          agentId: "chief",
+          message: {
             id: "sales-search-result",
             author: "assistant",
             source: "assistant",
@@ -654,7 +659,7 @@ describe("Dani-Dex connected desktop shell", () => {
           },
         },
       ],
-      total: 1,
+      total: 2,
       nextCursor: null,
     });
     vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) => ({
@@ -663,7 +668,7 @@ describe("Dani-Dex connected desktop shell", () => {
       activeTurnId: null,
       revision: 1,
       messages:
-        agentId === "sales-outbound"
+        agentId === "chief"
           ? [
               {
                 id: "sales-search-result",
@@ -692,14 +697,15 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.input(input, { target: { value: "research" } });
     const messageResult = await screen.findByRole("option", { name: /Ask @Research to use Sources \(skill\)\./ });
     expect(messageResult).not.toHaveTextContent("research-hidden-id");
+    expect(screen.queryByRole("option", { name: /worker-only result/ })).not.toBeInTheDocument();
     await fireEvent.click(messageResult);
-    await screen.findByRole("heading", { name: "Sales Outbound" });
+    await screen.findByRole("heading", { name: "Chief" });
     expect(window.danidex.agent.searchConversationMessages).toHaveBeenCalledWith({
       query: "research",
       limit: 100,
     });
     expect(window.danidex.agent.readConversationPage).toHaveBeenCalledWith({
-      agentId: "sales-outbound",
+      agentId: "chief",
       anchor: { type: "around", messageId: "sales-search-result" },
       limit: 50,
     });
@@ -867,7 +873,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByText("This approval is no longer active.")).toBeInTheDocument();
   });
 
-  it("opens the recipient chat from a persistent agent exchange", async () => {
+  it("keeps a worker exchange visible without entering the worker conversation", async () => {
     vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) => ({
       agentId,
       threadId: "thread-1",
@@ -907,7 +913,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await screen.findByRole("heading", { name: "Chief" });
     expect(await screen.findByText("Messaged")).toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "Open chat with Sales Outbound" }));
-    expect(await screen.findByRole("heading", { name: "Sales Outbound" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Messages with Sales Outbound" })).not.toBeInTheDocument();
   });
 
@@ -1077,14 +1083,13 @@ describe("Dani-Dex connected desktop shell", () => {
     await waitFor(() => expect(window.danidex.connectProvider).toHaveBeenCalledWith("codex"));
   });
 
-  it("starts the Claude login from the composer notice rather than opening a page", async () => {
+  it("explains the Claude subscription restriction without offering a blocked login", async () => {
     await renderSignedOutProvider("claude", "claude-sonnet-5");
-
-    await fireEvent.click(await screen.findByRole("button", { name: "Sign in to Claude" }));
-
-    // Claude signs in through its own CLI login, so the button connects the provider. It used to
-    // open the authentication docs, which left the user to finish the sign-in themselves.
-    await waitFor(() => expect(window.danidex.connectProvider).toHaveBeenCalledWith("claude"));
+    expect(
+      await screen.findByText("Claude subscription sign-in is unavailable. Use a Claude API key in provider settings."),
+    ).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Sign in to Claude" })).not.toBeInTheDocument();
+    expect(window.danidex.connectProvider).not.toHaveBeenCalled();
     expect(window.danidex.openExternal).not.toHaveBeenCalled();
   });
 

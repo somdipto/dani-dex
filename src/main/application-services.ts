@@ -9,6 +9,7 @@ import { spawnAgentDatabaseHost } from "./agent-database-host-process";
 import { ChatGptPlanClient } from "./chatgpt-plan-client";
 import { ChatGptPlanService } from "./chatgpt-plan-service";
 import { ChatGptPlanStore } from "./chatgpt-plan-store";
+import { prepareChiefOfStaff } from "./chief-of-staff-bootstrap";
 import { LocalSkillLibrary } from "./local-skill-library";
 import { localSkillTools } from "./local-skill-tools";
 import { MAC_PERMISSION_URLS } from "./mac-permission-urls";
@@ -479,6 +480,7 @@ export async function createApplicationServices({
   const analyticsPreferenceFile = join(app.getPath("userData"), ANALYTICS_PREFERENCE_FILE);
   const updatePreferenceFile = join(app.getPath("userData"), UPDATE_PREFERENCE_FILE);
   const setupState = await readSetupState(setupFile);
+  await prepareChiefOfStaff(store, setupState.completed);
   const analyticsPreference = await readAnalyticsPreference(analyticsPreferenceFile);
   // Loaded before the first window and before the application menu is built, so every native
   // surface draws in the saved language on the first frame rather than switching after startup.
@@ -960,7 +962,11 @@ export async function createApplicationServices({
     centralAuth,
     () => service.listAgents(),
     async (agentId) => service.refreshAgentRuntime(agentId),
-    new LocalSkillLibrary(join(app.getPath("userData"), "local-skills"), () => service.listAgents()),
+    new LocalSkillLibrary(
+      join(app.getPath("userData"), "local-skills"),
+      () => service.listAgents(),
+      app.isPackaged ? join(process.resourcesPath, "skill-packs") : resolve(__dirname, "../../resources/skill-packs"),
+    ),
   );
   const marketplaceAgents = new AgentMarketplaceService(centralAuth, service, skills);
   const teamStore = new TeamStore(

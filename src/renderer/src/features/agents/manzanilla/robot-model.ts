@@ -5,6 +5,9 @@ import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.j
 export const ROBOT_ROLES = [
   { id: "default", label: "General", color: "#F5F5F2" },
   { id: "chief", label: "Chief of staff", color: "#9561ED" },
+  { id: "research", label: "Research", color: "#17B4BD" },
+  { id: "builder", label: "Builder", color: "#FF934F" },
+  { id: "launch", label: "Launch", color: "#ED6383" },
   { id: "assistant", label: "Assistant", color: "#3299F4" },
   { id: "inbox", label: "Inbox manager", color: "#20BA78" },
   { id: "sales", label: "Sales", color: "#17B4BD" },
@@ -33,6 +36,9 @@ export type RobotPose = { motion?: RobotMotion; time: number; seed?: number };
 
 const rolePatterns: ReadonlyArray<readonly [RobotRole, RegExp]> = [
   ["chief", /\b(chief|chief of staff|cos|coordinator|director)\b/],
+  ["research", /\b(research|researcher|analyst|investigator)\b/],
+  ["builder", /\b(builder|engineer|developer|coder)\b/],
+  ["launch", /\b(launch|launcher|release)\b/],
   ["inbox", /\b(inbox|email manager|mail manager|email triage|mailbox)\b/],
   ["invoice", /\b(invoice|invoices|billing|accounts receivable|collections)\b/],
   ["expense", /\b(expense|expenses|bookkeeper|bookkeeping|accountant)\b/],
@@ -380,7 +386,32 @@ function addAccessories(
       0.095,
     );
   }
-  if (role === "chief") {
+  if (role === "research") {
+    const lens = group(rightArm, "research-lens", [0.16, -0.05, 0.48]);
+    mesh(lens, "lens-rim", new THREE.TorusGeometry(0.27, 0.048, 12, 32), ink, [0, 0.18, 0.04]);
+    mesh(
+      lens,
+      "lens-glass",
+      new THREE.CircleGeometry(0.225, 32),
+      new THREE.MeshPhysicalMaterial({ color: "#7DE3EE", transparent: true, opacity: 0.45, roughness: 0.1 }),
+      [0, 0.18, 0.03],
+    );
+    roundBox(lens, "lens-handle", [0.07, 0.33, 0.08], 0.025, shell, [0, -0.12, 0.04]);
+  } else if (role === "builder") {
+    const helmet = group(head, "builder-helmet", [0, 0.55, 0]);
+    ellipsoid(helmet, "helmet-dome", [0.72, 0.3, 0.51], material("#FFC94C"), [0, 0.04, 0]);
+    roundBox(helmet, "helmet-brim", [1.55, 0.08, 1.12], 0.04, material("#FFB72F"), [0, -0.1, 0.02]);
+    const tool = group(rightArm, "builder-tool", [0.16, -0.05, 0.48]);
+    roundBox(tool, "tool-handle", [0.09, 0.52, 0.1], 0.03, ink, [0, 0, 0]);
+    roundBox(tool, "tool-head", [0.35, 0.16, 0.15], 0.035, material("#B9CBD8"), [0, 0.28, 0]);
+  } else if (role === "launch") {
+    const rocket = group(rightArm, "launch-rocket", [0.16, -0.06, 0.48]);
+    mesh(rocket, "rocket-body", new THREE.CylinderGeometry(0.13, 0.13, 0.46, 24), white, [0, 0.1, 0]);
+    mesh(rocket, "rocket-nose", new THREE.ConeGeometry(0.13, 0.22, 24), shell, [0, 0.44, 0]);
+    for (const sign of [-1, 1])
+      roundBox(rocket, `rocket-fin-${sign}`, [0.07, 0.2, 0.2], 0.02, shell, [sign * 0.16, -0.08, 0]);
+    mesh(rocket, "rocket-window", new THREE.CircleGeometry(0.065, 20), ink, [0, 0.15, 0.132]);
+  } else if (role === "chief") {
     const gold = material("#F7BD45", 0.3);
     const crown = group(head, "crown", [0, 0.8, 0.06]);
     const shape = new THREE.Shape();

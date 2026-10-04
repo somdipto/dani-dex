@@ -104,6 +104,15 @@ export function isFilePreviewKind(value: unknown): value is FilePreviewKind {
 }
 
 export interface FilePreview {
+  inspection?: string;
+  truncated?: boolean;
+  directory?: {
+    path: string;
+    entries: Array<{ name: string; path: string; isDirectory: boolean }>;
+    truncated: boolean;
+  };
+  /** A user-clicked local directory was opened in the OS, not previewed. */
+  openedExternally?: boolean;
   name: string;
   size: number;
   mimeType: string;

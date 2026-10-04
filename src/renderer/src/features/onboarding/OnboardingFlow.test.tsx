@@ -9,7 +9,7 @@ import type {
 } from "@dani-dex/contracts/ipc";
 import { fireEvent, render, screen, waitFor, within } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ProviderCodeLoginState } from "../../components/ProviderCodeLoginDialog";
 import { Toaster, toast } from "../../components/ui";
 import { STORY_AGENT_STATUS } from "../../preview/fixtures";
@@ -18,6 +18,14 @@ import { OnboardingFlow } from "./OnboardingFlow";
 
 let activeMock: MockDaniDexControls | undefined;
 const previousApi = window.danidex;
+
+beforeEach(() => {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    value: vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
+  });
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+});
 
 afterEach(() => {
   activeMock?.dispose();
@@ -66,7 +74,7 @@ describe("OnboardingFlow", () => {
 
     expect(await view.findByRole("heading", { name: "Dani-Dex might control your computer" })).toBeInTheDocument();
     await fireEvent.click(view.getByRole("button", { name: "Back" }));
-    expect(await view.findByRole("heading", { name: "Meet Dani-Dex" })).toBeInTheDocument();
+    expect(await view.findByRole("heading", { name: "Meet your chief of staff" })).toBeInTheDocument();
     expect(claude).toBeChecked();
   });
 

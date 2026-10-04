@@ -39,7 +39,12 @@ export function modelSourceProviders(
       name: source.name,
       baseUrl: source.baseUrl,
       apiKey: source.apiKey ?? apiKey,
-      models: source.models.map((model) => ({ id: model.id, name: model.name })),
+      models: source.models.map((model) => ({
+        id: model.id,
+        name: model.name,
+        ...(model.limit ? { limit: model.limit } : {}),
+        ...(model.reasoningEffortLevels ? { reasoningEffortLevels: model.reasoningEffortLevels } : {}),
+      })),
       headers: (source.headers ?? []).map((header) => ({ name: header.name, value: header.value })),
     },
   ];
@@ -79,4 +84,15 @@ export function modelSourceChoices<T extends { id: string; name?: string }>(
       model.id === "dani-kilo-worker/stepfun/step-3.7-flash:free" ||
       (model.id.startsWith("opencode/") && isFreeOpencodeModel(model.id, model.name ?? model.id)),
   );
+}
+
+/** Auto effort is real only when both its proxy and the spawned CLI support the level. */
+export function modelSourceEfforts<T extends string>(
+  modelId: string,
+  reported: readonly T[],
+  source = currentModelSource(),
+): T[] | null {
+  if (source?.id !== "dani" || modelId !== "dani/dani-free-auto") return null;
+  const auto = source.models.find((model) => model.id === "dani-free-auto");
+  return reported.filter((effort) => auto?.reasoningEffortLevels?.some((level) => level === effort));
 }

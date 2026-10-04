@@ -15,7 +15,7 @@ export function buildContentSecurityPolicy(packaged: boolean, developmentSignalU
     "default-src 'self'",
     "script-src 'self'",
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: dani-dex-attachment: dani-dex-remote-attachment: dani-dex-avatar: dani-dex-remote-avatar: dani-dex-server-logo: dani-dex-remote-server-logo: https:${developmentImageSources}`,
+    `img-src 'self' blob: data: dani-dex-attachment: dani-dex-remote-attachment: dani-dex-avatar: dani-dex-remote-avatar: dani-dex-server-logo: dani-dex-remote-server-logo: https:${developmentImageSources}`,
     "font-src 'self' data:",
     // The lightbox plays a recording from the attachment scheme, and the preview panel plays one
     // from an object URL of the bytes that the main process sent. Neither matches `default-src`.
@@ -23,7 +23,7 @@ export function buildContentSecurityPolicy(packaged: boolean, developmentSignalU
     `connect-src 'self' dani-dex-attachment: dani-dex-remote-attachment:${analyticsSource} ws://127.0.0.1:*${teamHostSocketSource}${developmentSources}`,
     "object-src 'none'",
     // The remote desktop viewer uses a loopback proxy in packaged apps too.
-    `frame-src 'self' dani-dex-attachment: dani-dex-remote-attachment:${teamHostFrameSource} http://127.0.0.1:* http://localhost:*`,
+    `frame-src 'self' blob: dani-dex-attachment: dani-dex-remote-attachment:${teamHostFrameSource} http://127.0.0.1:* http://localhost:*`,
     "base-uri 'none'",
   ].join("; ");
 }

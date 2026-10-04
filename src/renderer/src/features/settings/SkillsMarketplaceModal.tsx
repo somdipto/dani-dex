@@ -524,7 +524,31 @@ export function SkillsMarketplaceModal(props: SkillsMarketplaceModalProps) {
     });
   }
 
+  // Local revisions are readable without the online account service. Share one read
+  // across the category requests, and let an explicit refresh retry a failed read.
+  let localSkillRead: Promise<MarketplaceSkillDetail[]> | null = null;
+  function listLocalSkills(query: MarketplaceSkillQuery) {
+    localSkillRead ??= window.danidex.skills.localList().catch((error) => {
+      localSkillRead = null;
+      throw error;
+    });
+    return localSkillRead.then((skills) => {
+      const filtered = skills.filter(
+        (skill) =>
+          (!query.category || skill.category === query.category) &&
+          (!query.query ||
+            `${skill.name} ${skill.description} ${skill.creatorName}`
+              .toLowerCase()
+              .includes(query.query.toLowerCase())),
+      );
+      const start = Number(query.cursor ?? 0);
+      const end = start + (query.limit ?? 50);
+      return { items: filtered.slice(start, end), nextCursor: end < filtered.length ? String(end) : null };
+    });
+  }
+
   function loadSkills() {
+    localSkillRead = null;
     setSkillRefreshVersion((version) => version + 1);
   }
 
@@ -895,6 +919,19 @@ export function SkillsMarketplaceModal(props: SkillsMarketplaceModalProps) {
                   <Show when={market.browse.kind === "skills"}>
                     <Show when={market.browse.tab === "discover"}>
                       <div class="skills-marketplace-discover" hidden={detailOpen()} inert={detailOpen()}>
+                        <div class="skills-marketplace-source-heading">
+                          <h2>On this computer</h2>
+                          <p>Bundled and local skills are available without the online marketplace.</p>
+                        </div>
+                        <MarketplaceCatalog
+                          kind="skills"
+                          query={searchQuery()}
+                          refreshVersion={skillRefreshVersion()}
+                          list={listLocalSkills}
+                          icon={(skill) => <SkillIcon skill={skill} />}
+                          onOpen={openDetails}
+                        />
+                        <h2 class="skills-marketplace-source-heading">Online marketplace</h2>
                         <MarketplaceCatalog
                           kind="skills"
                           query={searchQuery()}

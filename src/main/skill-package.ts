@@ -7,7 +7,7 @@ import { parse as parseYaml } from "yaml";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_FILES = 200;
-export async function archiveDirectory(root: string): Promise<Uint8Array> {
+export async function archiveDirectory(root: string, options: { deterministic?: boolean } = {}): Promise<Uint8Array> {
   const files: Record<string, Uint8Array> = {};
   let expandedSize = 0;
   async function visit(directory: string): Promise<void> {
@@ -26,12 +26,18 @@ export async function archiveDirectory(root: string): Promise<Uint8Array> {
     }
   }
   await visit(root);
-  const bytes = zipSync(files, { level: 6 });
+  const bytes = zipSync(files, {
+    level: 6,
+    ...(options.deterministic ? { mtime: new Date(1980, 0, 1) } : {}),
+  });
   if (bytes.byteLength > MAX_BYTES) throw new Error("The skill package must be under 10 MB.");
   return bytes;
 }
 
-export function inspectArchive(bytes: Uint8Array): Omit<SkillPackagePreview, "draftId" | "size"> {
+export function inspectArchive(
+  bytes: Uint8Array,
+  options: { bundled?: boolean } = {},
+): Omit<SkillPackagePreview, "draftId" | "size"> {
   const files = normalizedFiles(bytes);
   const skillFile = files["SKILL.md"];
   if (!skillFile) throw new Error("The skill package must contain SKILL.md at its root.");
@@ -42,7 +48,7 @@ export function inspectArchive(bytes: Uint8Array): Omit<SkillPackagePreview, "dr
   if (!isDynamicRecord(metadata)) throw new Error("SKILL.md metadata is invalid.");
   const name = isString(metadata.name) ? metadata.name.trim() : "";
   const description = isString(metadata.description) ? metadata.description.trim() : "";
-  if (!name || name.length > 80 || !description || description.length > 500)
+  if (!name || name.length > 80 || !description || description.length > (options.bundled ? 1000 : 500))
     throw new Error("SKILL.md needs a valid name and description.");
   return { name, description, slug: slugify(name), files: Object.keys(files).sort() };
 }

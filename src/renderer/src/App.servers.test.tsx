@@ -19,14 +19,71 @@ import {
   testServer,
   trackAnalytics,
 } from "./app-test-harness";
+import { Toaster } from "./components/ui";
+import { useAgentActions } from "./features/agents/agent-actions";
+import { AGENT_SELECTION_STORAGE_KEY } from "./features/agents/agent-selection";
+import { useAgents } from "./features/agents/agents-context";
 import { useServers } from "./features/servers/servers-context";
 import { SIDEBAR_PINS_STORAGE_KEY } from "./features/sidebar/sidebar-pins";
 import { useUsage } from "./features/usage/usage-context";
 import { TestResizeObserver } from "./setupTests";
 
+// Exercise internal actions without reopening worker conversation entry points.
+function InternalAgentActions() {
+  const actions = useAgentActions();
+  const agents = useAgents();
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          void actions.duplicateAgent("sales-outbound").catch(() => {});
+        }}
+      >
+        Test internal duplicate
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          void actions.deleteAgent("research").catch(() => {});
+        }}
+      >
+        Test internal delete
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          void actions.deleteAgent("sales-outbound").catch(() => {});
+        }}
+      >
+        Test internal delete sales
+      </button>
+      <output aria-label="Internal agent IDs">
+        {agents
+          .agentList()
+          .map((agent) => agent.id)
+          .join(",")}
+      </output>
+    </>
+  );
+}
+function AppWithInternalActions() {
+  return (
+    <>
+      <AppProviders>
+        <AppAccessGate />
+        <InternalAgentActions />
+      </AppProviders>
+      <Toaster />
+    </>
+  );
+}
+
 describe("Dani-Dex connected desktop shell", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     installDanidexStub();
+    await import("./features/account/AccountDock");
+    await import("./features/settings/SettingsModal");
   });
 
   it.each(["darwin", "win32", "linux"] as const)(
@@ -112,7 +169,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(window.danidex.servers.select).not.toHaveBeenCalled();
   });
 
-  it("restores a separate selected agent for each server", async () => {
+  it("keeps Chief selected on each server despite saved worker selections", async () => {
     vi.mocked(window.danidex.servers.list).mockResolvedValue([
       testServer("local", true),
       testServer("remote-1", false),
@@ -121,13 +178,17 @@ describe("Dani-Dex connected desktop shell", () => {
       testServer("local", id === "local"),
       testServer("remote-1", id === "remote-1"),
     ]);
+    localStorage.setItem(
+      AGENT_SELECTION_STORAGE_KEY,
+      JSON.stringify({ local: "sales-outbound", "remote-1": "sales-outbound" }),
+    );
     const view = render(() => <App />);
-    await fireEvent.click(await screen.findByRole("button", { name: /Sales Outbound, Outbound specialist/ }));
-    await screen.findByRole("heading", { name: "Sales Outbound" });
+    await screen.findByRole("heading", { name: "Chief" });
+    expect(screen.queryByRole("button", { name: /Sales Outbound/ })).not.toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
     await screen.findByRole("heading", { name: "Chief" });
     await fireEvent.click(screen.getByRole("button", { name: "Local server" }));
-    expect(await screen.findByRole("heading", { name: "Sales Outbound" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeVisible();
     view.unmount();
 
     vi.mocked(window.danidex.servers.list).mockResolvedValue([
@@ -137,7 +198,7 @@ describe("Dani-Dex connected desktop shell", () => {
     render(() => <App />);
     expect(await screen.findByRole("heading", { name: "Chief" })).toBeVisible();
     await fireEvent.click(screen.getByRole("button", { name: "Local server" }));
-    expect(await screen.findByRole("heading", { name: "Sales Outbound" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeVisible();
   });
 
   it("keeps the newer saved selection when deletion finishes in a disposed server scope", async () => {
@@ -159,11 +220,11 @@ describe("Dani-Dex connected desktop shell", () => {
         finishDelete = resolve;
       }),
     );
-    const view = render(() => <App />);
+    const view = render(() => <AppWithInternalActions />);
     await screen.findByRole("heading", { name: "Chief" });
-    await fireEvent.contextMenu(screen.getByRole("button", { name: /Research, Outbound specialist/ }));
-    await fireEvent.pointerUp(screen.getByRole("menuitem", { name: "Delete agent" }), { button: 0 });
-    await fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    await screen.findByText(/research/, { selector: "output" });
+    expect(screen.queryByRole("button", { name: /Research, Outbound specialist/ })).not.toBeInTheDocument();
+    await fireEvent.click(screen.getByRole("button", { name: "Test internal delete" }));
     await waitFor(() => expect(window.danidex.agent.deleteAgent).toHaveBeenCalledWith("research"));
 
     // A main-process server switch can arrive while the delete dialog is waiting.
@@ -175,8 +236,7 @@ describe("Dani-Dex connected desktop shell", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Local server" })).toHaveAttribute("aria-pressed", "true"),
     );
-    await fireEvent.click(await screen.findByRole("button", { name: /Sales Outbound, Outbound specialist/ }));
-    await screen.findByRole("heading", { name: "Sales Outbound" });
+    await screen.findByRole("heading", { name: "Chief" });
     finishDelete?.();
     await waitFor(() =>
       expect(trackAnalytics).toHaveBeenCalledWith(
@@ -187,7 +247,7 @@ describe("Dani-Dex connected desktop shell", () => {
     view.unmount();
 
     render(() => <App />);
-    expect(await screen.findByRole("heading", { name: "Sales Outbound" })).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeVisible();
   });
 
   it("restores the active server before loading its workspace data", async () => {
@@ -1154,28 +1214,19 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Release notes" })).toBeInTheDocument();
   });
 
-  it("duplicates an agent from its context menu and opens its empty conversation", async () => {
+  it("duplicates an internal agent without opening a worker conversation", async () => {
     localStorage.setItem(
       SIDEBAR_PINS_STORAGE_KEY,
       JSON.stringify({ local: [{ kind: "agent", id: "sales-outbound" }] }),
     );
-    render(() => <App />);
+    render(() => <AppWithInternalActions />);
     await screen.findByRole("heading", { name: "Chief" });
-    await fireEvent.contextMenu(screen.getByRole("button", { name: "Sales Outbound, pinned agent" }), {
-      clientX: 120,
-      clientY: 90,
-    });
-
-    await fireEvent.pointerUp(screen.getByRole("menuitem", { name: "Duplicate agent" }), { button: 0 });
-
+    expect(screen.queryByRole("button", { name: /Sales Outbound, pinned agent/ })).not.toBeInTheDocument();
+    await fireEvent.click(screen.getByRole("button", { name: "Test internal duplicate" }));
     await waitFor(() => expect(window.danidex.agent.duplicateAgent).toHaveBeenCalledWith("sales-outbound"));
-    expect(await screen.findByRole("heading", { name: "Sales Outbound copy" })).toBeInTheDocument();
-    await waitFor(() => expect(window.danidex.agent.readConversation).toHaveBeenCalledWith("sales-outbound-copy"));
-    expect(
-      screen.getByRole("button", {
-        name: "Sales Outbound copy, Outbound specialist. No messages yet",
-      }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
+    await screen.findByText(/sales-outbound-copy/, { selector: "output" });
+    expect(window.danidex.agent.readConversation).not.toHaveBeenCalledWith("sales-outbound-copy");
     emitAgentEvent?.({
       type: "agents-changed",
       agents: [
@@ -1191,16 +1242,8 @@ describe("Dani-Dex connected desktop shell", () => {
         },
       ],
     });
-    expect(
-      await screen.findByRole("button", {
-        name: "Sales Outbound copy, Outbound specialist. I finished the copied task.",
-      }),
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByRole("region", { name: "Pinned chats" })).queryByRole("button", {
-        name: /Sales Outbound copy/,
-      }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Sales Outbound copy/ })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Internal agent IDs")).toHaveTextContent("sales-outbound-copy");
   });
 
   it.each([
@@ -1211,32 +1254,23 @@ describe("Dani-Dex connected desktop shell", () => {
     ],
   ])("keeps the current selection and explains duplication failures: %s", async (error, message) => {
     vi.mocked(window.danidex.agent.duplicateAgent).mockRejectedValueOnce(new Error(error));
-    render(() => <App />);
+    render(() => <AppWithInternalActions />);
     await screen.findByRole("heading", { name: "Chief" });
-    await fireEvent.contextMenu(screen.getByRole("button", { name: /Sales Outbound/ }), {
-      clientX: 120,
-      clientY: 90,
-    });
-
-    await fireEvent.pointerUp(screen.getByRole("menuitem", { name: "Duplicate agent" }), { button: 0 });
+    await fireEvent.click(screen.getByRole("button", { name: "Test internal duplicate" }));
 
     expect(await screen.findByText(message)).toBeVisible();
     expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
   });
 
-  it("confirms and persistently deletes an agent from its context menu", async () => {
-    render(() => <App />);
+  it("deletes an internal agent without exposing worker conversation controls", async () => {
+    render(() => <AppWithInternalActions />);
     await screen.findByRole("heading", { name: "Chief" });
-    const sales = screen.getByRole("button", { name: /Sales Outbound/ });
-    await fireEvent.contextMenu(sales, { clientX: 120, clientY: 90 });
-    await fireEvent.pointerUp(screen.getByRole("menuitem", { name: "Delete agent" }), { button: 0 });
-    const dialog = screen.getByRole("alertdialog", { name: "Delete Sales Outbound?" });
-    expect(dialog).toHaveTextContent(
-      "This removes the agent and its Dani-Dex conversation from the app. Its queue, memories, routines, and workspace are deleted. History stored separately by the connected CLI provider is not deleted.",
-    );
-    await fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    await screen.findByText(/sales-outbound/, { selector: "output" });
+    expect(screen.queryByRole("button", { name: /Sales Outbound/ })).not.toBeInTheDocument();
+    await fireEvent.click(screen.getByRole("button", { name: "Test internal delete sales" }));
     await waitFor(() => expect(window.danidex.agent.deleteAgent).toHaveBeenCalledWith("sales-outbound"));
-    await waitFor(() => expect(screen.queryByRole("button", { name: /Sales Outbound/ })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByLabelText("Internal agent IDs")).not.toHaveTextContent("sales-outbound"));
+    expect(screen.getByRole("heading", { name: "Chief" })).toBeInTheDocument();
   });
 
   it("shows the server rail and opens the join flow", async () => {

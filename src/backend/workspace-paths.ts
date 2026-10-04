@@ -1,8 +1,19 @@
+import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative } from "node:path";
 import { legacyAgentId } from "@dani-dex/contracts/validation";
 
+/** Expand home paths only for an explicit local desktop file click, never a remote request. */
+export function localClickedPath(inputPath: string, home = homedir()): string {
+  const decoded = decodePath(inputPath.trim());
+  if (/^~[/\\]Dani-Dex[/\\](?:Shared|Agents|Bots)(?:[/\\]|$)/u.test(decoded)) return decoded;
+  if (decoded === "~") return home;
+  if (/^~[/\\]/u.test(decoded)) return join(home, decoded.slice(2));
+  return decoded;
+}
+
 export function sharedPathFromInput(sharedRoot: string, inputPath: string): string {
   const normalized = inputPath.replaceAll("\\", "/");
+  if (["~/Dani-Dex/Shared", "Dani-Dex/Shared", "Shared"].includes(normalized.replace(/\/$/u, ""))) return sharedRoot;
   for (const prefix of ["~/Dani-Dex/Shared/", "Dani-Dex/Shared/", "Shared/"]) {
     if (normalized.startsWith(prefix)) return join(sharedRoot, normalized.slice(prefix.length));
   }

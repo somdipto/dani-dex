@@ -31,12 +31,15 @@ export class CodexRealtimeService {
           return env;
         },
       }),
+    private readonly prepareRuntime?: () => Promise<void>,
   ) {}
   async #ready(): Promise<RealtimeClient> {
     if (this.#disposed) throw new Error("Voice service is closed.");
     if (this.#client) return this.#client;
     if (!this.#preparing)
       this.#preparing = (async () => {
+        if (!this.executable()) await this.prepareRuntime?.();
+        if (this.#disposed) throw new Error("Voice service is closed.");
         const executable = this.executable();
         if (!executable) throw new Error("Download the ChatGPT runtime first.");
         await mkdir(this.home, { recursive: true, mode: 0o700 });
@@ -80,7 +83,7 @@ export class CodexRealtimeService {
     const response = await client.request("account/login/start", { type: "chatgpt" }, decodeRecordResponse);
     if (typeof response.authUrl !== "string") throw new Error("Codex did not return its ChatGPT sign-in URL.");
     const url = new URL(response.authUrl);
-    if (url.protocol !== "https:" || url.hostname !== "auth.openai.com")
+    if (url.protocol !== "https:" || url.hostname !== "auth.openai.com" || url.username || url.password || url.port)
       throw new Error("Unexpected Codex sign-in destination.");
     await this.open(url.href);
   }

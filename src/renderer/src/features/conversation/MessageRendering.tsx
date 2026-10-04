@@ -147,6 +147,7 @@ export function MessageBody(props: {
   onAttachmentAction: (attachment: AttachmentSummary, action: "open" | "reveal" | "download") => void;
   onOpenSharedFile?: (path: string) => void;
   onOpenWorkspaceFile?: (path: string) => void;
+  workspaceRoot?: string;
   onDownloadAttachments?: (attachments: AttachmentSummary[]) => Promise<void>;
   onDownload?: (attachment: AttachmentSummary) => void;
 }) {
@@ -215,6 +216,7 @@ export function MessageBody(props: {
       }
       onOpenSharedFile={props.onOpenSharedFile}
       onOpenWorkspaceFile={props.onOpenWorkspaceFile}
+      workspaceRoot={props.workspaceRoot}
     />
   );
 
@@ -248,6 +250,7 @@ export function MessageBody(props: {
                 }
                 onOpenSharedFile={props.onOpenSharedFile}
                 onOpenWorkspaceFile={props.onOpenWorkspaceFile}
+                workspaceRoot={props.workspaceRoot}
                 showCitationFooter={false}
               />
             </p>
@@ -292,6 +295,7 @@ export function MessageBody(props: {
                         }
                         onOpenSharedFile={props.onOpenSharedFile}
                         onOpenWorkspaceFile={props.onOpenWorkspaceFile}
+                        workspaceRoot={props.workspaceRoot}
                         showCitationFooter={index() === lastTextBlockIndex()}
                         streaming={streamingBody.revealing() && index() === contentBlocks().length - 1}
                         streamingTail={streamingBody.animateTail() && index() === lastTextBlockIndex()}
@@ -319,6 +323,7 @@ export function MessageBody(props: {
                       }
                       onOpenSharedFile={props.onOpenSharedFile}
                       onOpenWorkspaceFile={props.onOpenWorkspaceFile}
+                      workspaceRoot={props.workspaceRoot}
                     />
                   </p>
                 );

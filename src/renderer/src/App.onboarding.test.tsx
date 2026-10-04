@@ -12,9 +12,11 @@ import { setSignInRequiredForTesting } from "./features/account/sign-in-gate";
 const CUSTOM_ENDPOINT_MODEL = "opencode/local-studio/qwen3-coder";
 
 describe("Dani-Dex connected desktop shell", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     installDanidexStub();
     setSignInRequiredForTesting(true);
+    await import("./features/account/AccountDock");
+    await import("./features/settings/SettingsModal");
   });
 
   afterEach(() => {
@@ -29,7 +31,7 @@ describe("Dani-Dex connected desktop shell", () => {
     });
     render(() => <App />);
 
-    expect(await screen.findByRole("heading", { name: "Meet Dani-Dex" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Meet your chief of staff" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Where will Dani-Dex run?" })).not.toBeInTheDocument();
     expect(screen.queryByText("Verified. Opening Dani-Dex…")).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Chief" })).not.toBeInTheDocument();
@@ -46,13 +48,13 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("heading", { name: "Chief" })).toBeInTheDocument();
   });
 
-  it("connects each bundled provider independently and Refresh re-verifies every connection", async () => {
+  it("keeps ChatGPT sign-in separate from the optional Claude API key", async () => {
     vi.mocked(window.danidex.getSetupState).mockResolvedValueOnce({
       completed: false,
       preferredProvider: null,
       preferredModel: null,
     });
-    const disconnectedStatus: AgentStatus = {
+    const status: AgentStatus = {
       phase: "blocked",
       cliVersion: null,
       auth: { kind: "unknown" },
@@ -65,92 +67,35 @@ describe("Dani-Dex connected desktop shell", () => {
       message: null,
       fullAccess: true,
     };
-    vi.mocked(window.danidex.agent.getStatus).mockResolvedValueOnce(disconnectedStatus);
-    // One channel for all three, so the mock has to remember which providers it has already been
-    // asked for: each call marks its own provider connecting and leaves the earlier ones connecting.
-    const connecting = new Set<string>();
-    vi.mocked(window.danidex.connectProvider).mockImplementation(async (provider) => {
-      connecting.add(provider);
-      return {
-        ...disconnectedStatus,
-        providers: disconnectedStatus.providers?.map((entry) =>
-          connecting.has(entry.id) ? { ...entry, connectionState: "connecting" as const } : entry,
-        ),
-      };
-    });
-    vi.mocked(window.danidex.refreshAgentProviders).mockResolvedValueOnce({
-      ...disconnectedStatus,
-      phase: "ready",
-      providers: [
-        {
-          id: "codex",
-          state: "available",
-          version: "0.149.1",
-          message: null,
-          email: "norbert@example.com",
-          checkError: "Could not verify ChatGPT. Keeping the existing connection.",
-        },
-        { id: "claude", state: "available", version: "2.1.246", message: null, email: "claude@example.com" },
-      ],
-    });
+    vi.mocked(window.danidex.agent.getStatus).mockResolvedValueOnce(status);
+    let finish: ((status: AgentStatus) => void) | undefined;
+    vi.mocked(window.danidex.connectProvider).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
     render(() => <App />);
-
-    await fireEvent.click(await screen.findByRole("button", { name: "Connect Grok" }));
-    expect(window.danidex.connectProvider).toHaveBeenCalledWith("grok");
-    expect(screen.getByRole("button", { name: "Restart Grok" })).toBeEnabled();
-    await fireEvent.click(screen.getByRole("button", { name: "Connect ChatGPT" }));
+    await fireEvent.click(await screen.findByRole("button", { name: "Sign in with ChatGPT" }));
+    const login = await screen.findByRole("dialog", { name: "Sign in with OpenAI / ChatGPT" });
+    expect(within(login).getByRole("button", { name: "Cancel sign-in" })).toBeEnabled();
+    expect(window.danidex.connectProvider).toHaveBeenCalledExactlyOnceWith("codex");
+    finish?.({
+      ...status,
+      phase: "ready",
+      providers: status.providers?.map((p) =>
+        p.id === "codex" ? { ...p, state: "available", email: "person@example.com" } : p,
+      ),
+    });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Sign in with OpenAI / ChatGPT" })).not.toBeInTheDocument(),
+    );
     await fireEvent.click(screen.getByRole("button", { name: "Connect Claude" }));
-    expect(screen.getByRole("button", { name: "Restart ChatGPT" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Restart Claude" })).toBeEnabled();
-    expect(window.danidex.connectProvider).toHaveBeenCalledWith("codex");
-    expect(window.danidex.connectProvider).toHaveBeenCalledWith("claude");
-    expect(trackAnalytics).toHaveBeenCalledWith("provider_action", {
-      provider: "codex",
-      action: "connect_started",
-      result: "succeeded",
-    });
-    expect(trackAnalytics).toHaveBeenCalledWith("provider_action", {
-      provider: "claude",
-      action: "connect_started",
-      result: "succeeded",
-    });
-
-    await fireEvent.click(screen.getByRole("button", { name: "Restart ChatGPT" }));
-    expect(window.danidex.connectProvider).toHaveBeenCalledTimes(4);
-    emitAgentEvent?.({
-      type: "status",
-      status: {
-        ...disconnectedStatus,
-        phase: "ready",
-        providers: [
-          {
-            id: "codex",
-            state: "sign-in-required",
-            version: "0.149.1",
-            message: "ChatGPT connection was not completed. Try again.",
-          },
-          {
-            id: "claude",
-            state: "available",
-            version: "2.1.246",
-            message: null,
-            email: "claude@example.com",
-          },
-        ],
-      },
-    });
-    expect(await screen.findByRole("alert")).toHaveTextContent("ChatGPT connection was not completed. Try again.");
-    expect(trackAnalytics).toHaveBeenCalledWith("provider_action", {
-      provider: "claude",
-      action: "connect_completed",
-      result: "succeeded",
-    });
-    await fireEvent.click(screen.getByRole("button", { name: "Refresh AI options" }));
-
-    await waitFor(() => expect(screen.getByRole("button", { name: "Reconnect ChatGPT" })).toBeEnabled());
-    expect(screen.getByRole("button", { name: "Reconnect Claude" })).toBeEnabled();
-    expect(screen.queryByText("ChatGPT connection was not completed. Try again.")).not.toBeInTheDocument();
-    expect(screen.getByText("Could not verify ChatGPT. Keeping the existing connection.")).toBeVisible();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Dani-Dex could not connect Claude. Try again.");
+    expect(window.danidex.connectProvider).not.toHaveBeenCalledWith("claude");
+    await fireEvent.click(screen.getAllByRole("button", { name: "Optional API key" })[0]);
+    expect(await screen.findByRole("dialog", { name: "Add an Anthropic API key" })).toBeInTheDocument();
+    expect(window.danidex.connectProvider).not.toHaveBeenCalledWith("claude");
   });
 
   it("refreshes provider detection and opens the matching sign-in guide", async () => {
@@ -204,15 +149,18 @@ describe("Dani-Dex connected desktop shell", () => {
       fullAccess: true,
     });
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Connect ChatGPT" })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Sign in with ChatGPT" })).toBeEnabled());
     expect(
       within(screen.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /Claude/ }),
     ).toBeChecked();
     expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
-    const connectChatGPT = screen.getByRole("button", { name: "Connect ChatGPT" });
+    const connectChatGPT = screen.getByRole("button", { name: "Sign in with ChatGPT" });
     await fireEvent.click(connectChatGPT);
     expect(window.danidex.connectProvider).toHaveBeenCalledWith("codex");
-    expect(screen.getByRole("button", { name: "Restart ChatGPT" })).toBeEnabled();
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Sign in with OpenAI / ChatGPT" })).not.toBeInTheDocument(),
+    );
+    expect(screen.getByRole("button", { name: "Sign in with ChatGPT" })).toBeEnabled();
   });
 
   it("shows a friendly inline error when a provider guide cannot open", async () => {
@@ -236,7 +184,7 @@ describe("Dani-Dex connected desktop shell", () => {
     vi.mocked(window.danidex.connectProvider).mockRejectedValueOnce(new Error("Raw IPC failure"));
     render(() => <App />);
 
-    await fireEvent.click(await screen.findByRole("button", { name: "Connect ChatGPT" }));
+    await fireEvent.click(await screen.findByRole("button", { name: "Sign in with ChatGPT" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Dani-Dex could not connect ChatGPT. Try again.");
     expect(screen.getByRole("alert")).not.toHaveTextContent("Raw IPC failure");
@@ -273,8 +221,11 @@ describe("Dani-Dex connected desktop shell", () => {
     });
     render(() => <App />);
 
-    await fireEvent.click(await screen.findByRole("button", { name: "Connect ChatGPT" }));
-    expect(screen.getByRole("button", { name: "Restart ChatGPT" })).toBeEnabled();
+    await fireEvent.click(await screen.findByRole("button", { name: "Sign in with ChatGPT" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Sign in with OpenAI / ChatGPT" })).not.toBeInTheDocument(),
+    );
+    expect(screen.getByRole("button", { name: "Sign in with ChatGPT" })).toBeEnabled();
 
     emitAgentEvent?.({
       type: "status",
@@ -298,7 +249,10 @@ describe("Dani-Dex connected desktop shell", () => {
     });
 
     expect(await screen.findByRole("alert")).toHaveTextContent("ChatGPT connection timed out. Try again.");
-    expect(screen.getByRole("button", { name: "Connect ChatGPT" })).toBeEnabled();
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: "Sign in with OpenAI / ChatGPT" })).not.toBeInTheDocument(),
+    );
+    expect(screen.getByRole("button", { name: "Sign in with ChatGPT" })).toBeEnabled();
   });
 
   it("connects to a remote host after account sign-in", async () => {
@@ -382,7 +336,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(trackAnalytics).toHaveBeenCalledWith("account_sign_in_completed", { result: "succeeded" });
     expect(await screen.findByText("Verified. Opening Dani-Dex…")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Where will Dani-Dex run?" })).not.toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "Meet Dani-Dex" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Meet your chief of staff" })).toBeInTheDocument();
   });
 
   it("shows a soft loader until the account API becomes available", async () => {
@@ -472,16 +426,17 @@ describe("Dani-Dex connected desktop shell", () => {
     await fireEvent.click(screen.getByRole("button", { name: "Create agent" }));
     await waitFor(() =>
       expect(window.danidex.agent.createAgent).toHaveBeenCalledWith({
-        name: "New agent",
-        description: "General-purpose assistant",
-        initialMessage: "Greet me briefly.",
-        avatarSeed: expect.any(String),
+        name: "Chief",
+        description: "Chief of staff",
+        initialMessage: "Hi. Tell me briefly how you can help.",
+        avatarSeed: "manzanilla:chief",
         avatarHue: null,
         provider: "opencode",
         model: "dani/dani-free-auto",
       }),
     );
-    expect(await screen.findByRole("heading", { name: "New agent" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Chief" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /New agent, General-purpose assistant/ })).not.toBeInTheDocument();
   });
 
   it("blocks chat for signed-out users", async () => {

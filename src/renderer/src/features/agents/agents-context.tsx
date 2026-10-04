@@ -1,3 +1,4 @@
+import { chiefConversationAgent } from "@dani-dex/contracts/chief-conversation";
 import type {
   AgentModelOption,
   AgentStatus,
@@ -83,15 +84,26 @@ const Agents = createSimpleContext({
     const [agentStatus, setAgentStatus] = createSignal<AgentStatus>(FALLBACK_STATUS);
     let openedAgentChatId: string | null = null;
 
-    const activeAgent = createMemo(() => {
-      if (activeDirectMember()) return undefined;
-      return agentList().find((agent) => agent.id === activeAgentId()) ?? agentList()[0];
+    const conversationAgents = createMemo(() => {
+      const chief = chiefConversationAgent(agentList());
+      return chief ? [chief] : [];
     });
 
-    function setActiveAgentId(value: string | ((current: string) => string)): void {
+    const activeAgent = createMemo(() => {
+      if (activeDirectMember()) return undefined;
+      return chiefConversationAgent(agentList());
+    });
+
+    function setActiveAgentId(
+      value: string | ((current: string) => string),
+      roster: readonly AgentProfile[] = agentList(),
+    ): void {
       if (!scopeIsCurrent()) return;
       updateActiveAgentId((current) => {
-        const next = typeof value === "function" ? value(current) : value;
+        const requested = typeof value === "function" ? value(current) : value;
+        const chief = chiefConversationAgent(roster);
+        const next = chief?.id ?? "";
+        if (requested && !chief) return current;
         savedAgentId = "";
         writeAgentSelection(selectionServerId, next);
         return next;
@@ -128,12 +140,17 @@ const Agents = createSimpleContext({
       });
       setAgentList(profiles);
       setActiveAgentId((current) => {
-        // Validate the saved choice before it can trigger conversation requests.
+        // Resolve against the incoming roster, not a stale read in this write batch.
         const preferred = current || savedAgentId;
         return profiles.some((agent) => agent.id === preferred) ? preferred : (profiles[0]?.id ?? "");
-      });
+      }, profiles);
       if (profiles.length === 0 && !agentSetupOpen()) {
-        setAgentSetupDraft(createFirstAgentDraft());
+        setAgentSetupDraft({
+          ...createFirstAgentDraft(),
+          name: "Chief",
+          purpose: "Chief of staff",
+          avatarSeed: "manzanilla:chief",
+        });
         setAgentSetupError(null);
         setAgentSetupOpen(true);
       }
@@ -233,6 +250,7 @@ const Agents = createSimpleContext({
 
     return {
       agentList,
+      conversationAgents,
       setAgentList,
       duplicatingAgentIds,
       setDuplicatingAgentIds,

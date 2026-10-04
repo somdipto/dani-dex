@@ -1,11 +1,11 @@
+import { chiefConversationAgent } from "@dani-dex/contracts/chief-conversation";
 /** Mac-only host for the supplied Arc dial. Separate from the existing Dynamic Island. */
 
 import { join } from "node:path";
 import { type AgentSummary, IPC_CHANNELS, LOCAL_SERVER_ID } from "@dani-dex/contracts/ipc";
-import { BrowserWindow, type Display, ipcMain, type Rectangle, screen } from "electron";
+import { BrowserWindow, type Display, type IpcMainInvokeEvent, type Rectangle, screen } from "electron";
 import { arcHitTest } from "./dani-arc-geometry";
 import { sendToRenderer } from "./renderer-ipc";
-import { isTrustedRendererUrl } from "./trusted-renderer";
 
 const SIZE = { width: 800, height: 650 } as const;
 const ROLES = new Set([
@@ -27,13 +27,13 @@ const ROLES = new Set([
 ]);
 export class DaniArcWindow {
   #window: BrowserWindow | null = null;
+  readonly #pendingSignals = new Map<string, unknown>();
   #timer: ReturnType<typeof setInterval> | null = null;
   #depth = 1;
   #visible = false;
   #ignored = true;
   #team: { id: string; name: string; status: string }[] = [];
   #preferences = { theme: "liquid", glow: "normal", motion: "full", volume: 0.38 };
-  #onAction: (_event: Electron.IpcMainEvent, payload: unknown) => void;
   constructor(
     private readonly options: {
       platform: NodeJS.Platform;
@@ -41,25 +41,28 @@ export class DaniArcWindow {
       showMainWindow: (window: BrowserWindow) => void;
       listAgents: () => AgentSummary[];
     },
-  ) {
-    this.#onAction = (event, payload) => {
-      if (
-        event.sender !== this.#window?.webContents ||
-        event.senderFrame !== event.sender.mainFrame ||
-        !isTrustedRendererUrl(event.senderFrame.url) ||
-        typeof payload !== "object" ||
-        payload === null
-      )
-        return;
-      if (!("type" in payload) || typeof payload.type !== "string" || !ROLES.has(payload.type)) return;
-      const action = {
-        type: payload.type,
-        id: "id" in payload ? payload.id : undefined,
-        depth: "depth" in payload ? payload.depth : undefined,
-      };
-      this.handleAction(action);
+  ) {}
+  requireSender(event: IpcMainInvokeEvent): void {
+    if (event.sender !== this.#window?.webContents || event.senderFrame !== event.sender.mainFrame)
+      throw new Error("Rejected Arc action from another renderer.");
+  }
+  decodeAction(payload: unknown): { type: string; id?: unknown; depth?: unknown } {
+    if (
+      typeof payload !== "object" ||
+      payload === null ||
+      !("type" in payload) ||
+      typeof payload.type !== "string" ||
+      !ROLES.has(payload.type)
+    )
+      throw new Error("Invalid Arc action.");
+    return {
+      type: payload.type,
+      id: "id" in payload ? payload.id : undefined,
+      depth: "depth" in payload ? payload.depth : undefined,
     };
-    ipcMain.on("dani-arc:action", this.#onAction);
+  }
+  performAction(action: { type: string; id?: unknown; depth?: unknown }): void {
+    this.handleAction(action);
   }
   show(): void {
     if (this.options.platform !== "darwin") return;
@@ -77,17 +80,15 @@ export class DaniArcWindow {
     this.#startTracking();
   }
   syncTeam(): void {
-    this.#team = this.options
-      .listAgents()
-      .slice(0, 100)
-      .map((agent) => ({ id: agent.id, name: agent.name, status: "Agent" }));
+    const chief = chiefConversationAgent(this.options.listAgents());
+    this.#team = chief ? [{ id: chief.id, name: chief.name, status: "Chief of staff" }] : [];
     this.#send("team", this.#team);
   }
   destroy(): void {
     this.#stopTracking();
-    ipcMain.removeListener("dani-arc:action", this.#onAction);
     if (this.#window && !this.#window.isDestroyed()) this.#window.destroy();
     this.#window = null;
+    this.#pendingSignals.clear();
   }
   private bounds(): Rectangle {
     const cursor = screen.getCursorScreenPoint();
@@ -127,8 +128,15 @@ export class DaniArcWindow {
     });
     window.on("closed", () => {
       this.#window = null;
+      this.#pendingSignals.clear();
       this.#visible = false;
       this.#stopTracking();
+    });
+    window.webContents.on("did-stop-loading", () => {
+      if (this.#window !== window || window.isDestroyed()) return;
+      for (const [name, value] of this.#pendingSignals) {
+        if (this.#sendSignal(name, value)) this.#pendingSignals.delete(name);
+      }
     });
     window.webContents.on("did-finish-load", () => {
       this.#send("preferences", this.#preferences);
@@ -230,8 +238,42 @@ export class DaniArcWindow {
     this.handleAction({ type: "close" });
   }
   #send(name: string, value: unknown): void {
-    if (this.#window && !this.#window.isDestroyed() && !this.#window.webContents.isLoadingMainFrame())
-      sendToRenderer(this.#window, `dani-arc:${name}`, value);
+    const window = this.#window;
+    if (!window || window.isDestroyed()) return;
+    if (this.#sendSignal(name, value)) {
+      this.#pendingSignals.delete(name);
+    } else if (name !== "rotate") {
+      // Keep state while the native page is loading. A late ready/finish-load can still
+      // arrive before Electron clears isLoadingMainFrame, so did-stop-loading flushes it.
+      this.#pendingSignals.set(name, value);
+    }
+  }
+  #sendSignal(name: string, value: unknown): boolean {
+    const window = this.#window;
+    if (!window) return false;
+    switch (name) {
+      case "team":
+        return sendToRenderer(window, IPC_CHANNELS.arcTeam, value);
+      case "connection":
+        return sendToRenderer(window, IPC_CHANNELS.arcConnection, value);
+      case "hold":
+        return sendToRenderer(window, IPC_CHANNELS.arcHold, value);
+      case "rotate":
+        return sendToRenderer(window, IPC_CHANNELS.arcRotate, value);
+      case "sound":
+        return sendToRenderer(window, IPC_CHANNELS.arcSound, value);
+      case "voice":
+        return sendToRenderer(window, IPC_CHANNELS.arcVoice, value);
+      case "targets":
+        return sendToRenderer(window, IPC_CHANNELS.arcTargets, value);
+      case "visibility":
+        return sendToRenderer(window, IPC_CHANNELS.arcVisibility, value);
+      case "preferences":
+        return sendToRenderer(window, IPC_CHANNELS.arcPreferences, value);
+      case "edit":
+        return sendToRenderer(window, IPC_CHANNELS.arcEdit, value);
+    }
+    return false;
   }
   #startTracking(): void {
     if (this.#timer) return;

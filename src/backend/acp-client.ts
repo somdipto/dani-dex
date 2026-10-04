@@ -27,6 +27,7 @@ import { historyData, transferableHistory, type WorkerHistory } from "./agent/wo
 import type { AgentProvider } from "./agent-client";
 import { type AgentCliInfo, cliSpawnTarget } from "./cli";
 import { type DynamicToolNamespace, LocalMcpBridge, type LocalMcpSession } from "./local-mcp-bridge";
+import { prepareManagedOpenCodeEnvironment } from "./managed-opencode-environment";
 import {
   acpMcpServers,
   type McpAuthorizationSource,
@@ -220,9 +221,14 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     if (this.running) return;
     this.#stopping = false;
     const target = cliSpawnTarget(this.#cli.executable, this.options.argv);
+    const inheritedEnvironment = { ...process.env, ...this.options.env, ...this.options.extraEnv?.() };
+    const environment =
+      this.options.provider === "opencode" && this.#cli.source === "managed"
+        ? prepareManagedOpenCodeEnvironment(inheritedEnvironment)
+        : inheritedEnvironment;
     const child = spawn(target.command, target.args, {
       stdio: ["pipe", "pipe", "pipe"],
-      env: { ...process.env, ...this.options.env, ...this.options.extraEnv?.() },
+      env: environment,
       windowsVerbatimArguments: target.windowsVerbatimArguments,
       windowsHide: true,
     });

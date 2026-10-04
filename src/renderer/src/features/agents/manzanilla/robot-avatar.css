@@ -8,7 +8,7 @@
 }
 
 .mz-robot-avatar > .mz-robot-canvas,
-.mz-robot-avatar > .mz-robot-fallback {
+.mz-robot-avatar > .mz-robot-placeholder {
   position: absolute;
   inset: 0;
   display: block;
@@ -25,9 +25,34 @@
   opacity: 1;
 }
 
-.mz-robot-avatar.is-ready > .mz-robot-fallback {
+.mz-robot-avatar.is-ready > .mz-robot-placeholder {
   visibility: hidden;
 }
 
 /* Motion is articulated in the 3D rig, never applied to the image wrapper.
    The renderer observes reduced motion and produces a cached still frame. */
+
+.mz-robot-error {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--dani-dex-radius-pill);
+  width: 12px;
+  height: 12px;
+  font-size: var(--dani-dex-text-sm);
+  line-height: 12px;
+  text-align: center;
+  background: var(--dani-dex-danger);
+  color: var(--dani-dex-text-on-accent);
+}
+
+.mz-robot-avatar > .mz-robot-placeholder {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font: 10px / 1.2 system-ui;
+  color: var(--dani-dex-text-muted);
+  border: 1px solid var(--dani-dex-border-strong);
+  border-radius: var(--dani-dex-radius-md);
+  background: var(--dani-dex-bg-control);
+}

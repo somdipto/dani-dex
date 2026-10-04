@@ -33,7 +33,8 @@ export function WorkspaceSidebar(props: { peopleEnabled: boolean }) {
   const { activeServer, activeServerSupportsCapability } = useServers();
   const { openServerSettings } = useServerSettings();
   const { setSkillsMarketplaceOpen } = useSettings();
-  const { agentList, activeAgent, agentSetupDraft, duplicatingAgentIds, daniDexSetup } = useAgents();
+  const { agentList, conversationAgents, activeAgent, agentSetupDraft, duplicatingAgentIds, daniDexSetup } =
+    useAgents();
   const { editAgent, duplicateAgent, deleteAgent } = useAgentActions();
   const { activeTurns, queues, failedTurns, pendingPrompts, pendingApprovals } = useTurns();
   const { unreadReplies, recentReplies } = useConversation();
@@ -55,9 +56,6 @@ export function WorkspaceSidebar(props: { peopleEnabled: boolean }) {
 
   /* Channels reach the sidebar as data, not as a list of their own: they sit in the layout's
    * sections beside the agents, so the sidebar has to be able to order and group them. */
-  const visibleChannels = createMemo(() =>
-    channels.supported() ? channels.state.channels.filter((channel) => !channel.archived) : [],
-  );
 
   const sidebarAgentStates = createMemo(() =>
     computeSidebarAgentStates({
@@ -85,21 +83,21 @@ export function WorkspaceSidebar(props: { peopleEnabled: boolean }) {
 
   return (
     <Sidebar
-      channels={visibleChannels()}
-      deletedChannels={channels.supported() ? channels.state.channels.filter((channel) => channel.archived) : []}
+      channels={[]}
+      deletedChannels={[]}
       activeChannelId={channels.state.selectedId}
       onSelectChannel={(id) => void channels.open(id)}
       onEditChannel={(id) => void channels.editChannel(id)}
       onDeleteChannel={channels.deletionSupported() ? channels.remove : undefined}
       showingArchivedChannels={channels.state.archived}
-      onToggleArchivedChannels={channels.supported() ? channels.toggleArchived : undefined}
-      onCreateChannel={channels.supported() ? channels.create : undefined}
+      onToggleArchivedChannels={undefined}
+      onCreateChannel={undefined}
       serverName={activeServer()?.name ?? "Local"}
       onOpenServerSettings={(trigger) => {
         const server = activeServer();
         if (server) openServerSettings(server.id, trigger);
       }}
-      agents={agentList()}
+      agents={conversationAgents()}
       activeAgentId={activeDirectMember() || channels.state.selectedId ? "" : (activeAgent()?.id ?? "")}
       showPeople={props.peopleEnabled}
       people={directPeople()}

@@ -2,7 +2,7 @@
 // Every path here crosses to the local filesystem, so the parsers are the boundary.
 
 import { createHash, randomUUID } from "node:crypto";
-import { chmod, copyFile, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { chmod, copyFile, mkdir, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import {
   assertSupportedAttachmentName,
@@ -177,7 +177,7 @@ export function attachmentIpcHandlers({
         const parsed = parseOpenSharedFile(scoped.payload);
         return routeToServer<void>(scoped.serverId, {
           local: async () => {
-            const sharedFile = await service.resolveSharedFile(parsed.path);
+            const sharedFile = await service.resolveSharedFile(parsed.path, true);
             await openPath(sharedFile.path);
           },
           remote: async (serverId) => {
@@ -191,7 +191,7 @@ export function attachmentIpcHandlers({
         const parsed = parseOpenWorkspaceFile(scoped.payload);
         return routeToServer<void>(scoped.serverId, {
           local: async () => {
-            const workspaceFile = await service.resolveWorkspaceFile(parsed.agentId, parsed.path);
+            const workspaceFile = await service.resolveWorkspaceFile(parsed.agentId, parsed.path, true);
             await openPath(workspaceFile.path);
           },
           remote: async (serverId) => {
@@ -206,7 +206,8 @@ export function attachmentIpcHandlers({
         const parsed = parseOpenSharedFile(scoped.payload);
         return routeToServer(scoped.serverId, {
           local: async () => {
-            const sharedFile = await service.resolveSharedFile(parsed.path);
+            const sharedFile = await service.resolveSharedFile(parsed.path, true);
+            if (sharedFile.isDirectory) return directoryPreview(sharedFile.path, sharedFile.name);
             return localFilePreview(sharedFile.path, sharedFile.name, sharedFile.size);
           },
           remote: async (serverId) => {
@@ -219,7 +220,8 @@ export function attachmentIpcHandlers({
         const parsed = parseOpenWorkspaceFile(scoped.payload);
         return routeToServer(scoped.serverId, {
           local: async () => {
-            const workspaceFile = await service.resolveWorkspaceFile(parsed.agentId, parsed.path);
+            const workspaceFile = await service.resolveWorkspaceFile(parsed.agentId, parsed.path, true);
+            if (workspaceFile.isDirectory) return directoryPreview(workspaceFile.path, workspaceFile.name);
             return localFilePreview(workspaceFile.path, workspaceFile.name, workspaceFile.size);
           },
           remote: async (serverId) => {
@@ -402,4 +404,23 @@ export async function saveAttachmentArchive(
   } finally {
     await rm(temporary, { force: true });
   }
+}
+
+async function directoryPreview(path: string, name: string): Promise<FilePreview> {
+  const items = await readdir(path, { withFileTypes: true });
+  items.sort((a, b) => Number(b.isDirectory()) - Number(a.isDirectory()) || a.name.localeCompare(b.name));
+  return {
+    name,
+    size: 0,
+    mimeType: "inode/directory",
+    previewKind: "none",
+    bytes: null,
+    directory: {
+      path,
+      entries: items
+        .slice(0, 500)
+        .map((item) => ({ name: item.name, path: join(path, item.name), isDirectory: item.isDirectory() })),
+      truncated: items.length > 500,
+    },
+  };
 }

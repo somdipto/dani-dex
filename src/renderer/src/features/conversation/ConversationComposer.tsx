@@ -423,7 +423,7 @@ export function ConversationComposer() {
                       type="button"
                       class="voice-call-button"
                       aria-label="Start voice call"
-                      disabled={!props.agent || !agentReady() || voicePhase() !== "idle"}
+                      disabled={!props.agent || voicePhase() !== "idle"}
                       onClick={() => setVoiceSetupOpen(true)}
                     >
                       <AudioLines aria-hidden="true" />

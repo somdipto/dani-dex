@@ -17,6 +17,7 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve("src/main/index.ts"),
+          "harmless-effect-pilot": resolve("src/main/harmless-effect-pilot-app.ts"),
           // The database host is its own process. Its runtime imports are `node:*` only, so it
           // emits a standalone chunk that `utilityProcess.fork` can load by path.
           "agent-database-host": resolve("src/backend/agent-data/agent-database-host.ts"),
@@ -25,8 +26,10 @@ export default defineConfig({
     },
   },
   preload: {
-    plugins: [externalizeDepsPlugin({ exclude: ["@dani-dex/contracts"] })],
     build: {
+      // Electron sandbox preloads cannot require shared relative chunks.
+      isolatedEntries: true,
+      externalizeDeps: false,
       rollupOptions: {
         input: {
           index: resolve("src/preload/index.ts"),
@@ -43,10 +46,10 @@ export default defineConfig({
   renderer: {
     plugins: [solidPlugin(), tailwindcss({ optimize: false })],
     optimizeDeps: {
-      include: ["@norbert_bodziony/bloub"],
+      include: ["@norbert_bodziony/bloub", "@solidjs/signals"],
     },
     resolve: {
-      dedupe: ["solid-js", "@solidjs/web"],
+      dedupe: ["solid-js", "@solidjs/web", "@solidjs/signals"],
     },
     server: rendererPort ? { port: rendererPort, strictPort: true } : undefined,
     build: {

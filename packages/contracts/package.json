@@ -44,7 +44,8 @@
     "./validation": "./src/validation.ts",
     "./team-protocol/channels-v1": "./src/team-protocol/channels-v1.ts",
     "./team-protocol/mcp-v1": "./src/team-protocol/mcp-v1.ts",
-    "./skill-packs": "./src/skill-packs.ts"
+    "./skill-packs": "./src/skill-packs.ts",
+    "./chief-conversation": "./src/chief-conversation.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",

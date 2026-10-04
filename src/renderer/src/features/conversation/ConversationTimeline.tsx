@@ -380,6 +380,7 @@ export function ConversationTimeline() {
                             onAttachmentAction={attachmentAction}
                             onOpenSharedFile={openSharedFile}
                             onOpenWorkspaceFile={openWorkspaceFile}
+                            workspaceRoot={props.agent?.workspacePath}
                             onDownloadAttachments={downloadAttachments}
                             onDownload={(attachment) => attachmentAction(attachment, "download")}
                             actions={

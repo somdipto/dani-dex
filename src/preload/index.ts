@@ -47,7 +47,6 @@ import {
   decodeOptionalAgentAnalytics,
   decodeOptionalHostAnalytics,
   decodeSaveAgentProfileResult,
-  type FilePreview,
   type HostedSiteSummary,
   type ImportAttachmentsInput,
   type InstalledSkill,
@@ -72,7 +71,6 @@ import {
   isDynamicIslandNotchSize,
   isDynamicIslandPreference,
   isDynamicIslandPresentation,
-  isFilePreviewKind,
   isQueuedMessageReceipt,
   isQueueSnapshot,
   isRemoteDesktopSetupStatus,
@@ -119,6 +117,7 @@ import { isPluginSlug } from "@dani-dex/contracts/plugin-links";
 import { isBoolean, isDynamicRecord, isNumber, isOneOf, isString } from "@dani-dex/contracts/runtime-values";
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 import { clipboardFiles } from "./clipboard-files";
+import { decodeFilePreview } from "./file-preview";
 import { decodeProviderRuntimeSnapshot } from "./provider-runtime";
 
 const attachmentImportListeners = new Set<(event: AttachmentImportEvent) => void>();
@@ -394,26 +393,6 @@ const decodeRoutine = guardedDecoder(isRoutine, "routine response");
 const decodeRoutines = guardedListDecoder(isRoutine, "routine list response");
 const decodeRoutineRun = guardedDecoder(isRoutineRun, "routine run response");
 const decodeRoutineRuns = guardedListDecoder(isRoutineRun, "routine history response");
-
-function decodeFilePreview(value: unknown): FilePreview {
-  const preview = decodeRecord(value, "file preview");
-  if (
-    !isString(preview.name) ||
-    !isNumber(preview.size) ||
-    !isString(preview.mimeType) ||
-    !isFilePreviewKind(preview.previewKind) ||
-    (preview.bytes !== null && !(preview.bytes instanceof Uint8Array))
-  ) {
-    throw new Error("Invalid file preview response.");
-  }
-  return {
-    name: preview.name,
-    size: preview.size,
-    mimeType: preview.mimeType,
-    previewKind: preview.previewKind,
-    bytes: preview.bytes,
-  };
-}
 
 /** A reply carrying nothing but the provider and a status, so an unexpected field cannot slip in. */
 function decodeProviderApiKeyState(value: unknown): ProviderApiKeyState {

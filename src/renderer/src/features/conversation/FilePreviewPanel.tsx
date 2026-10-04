@@ -1,5 +1,5 @@
 import type { FilePreview } from "@dani-dex/contracts/ipc";
-import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js";
 import { PanelResizer, readPanelWidth, savePanelWidth } from "../../components/PanelResizer";
 import { Button, Download, ExternalLink, File, FolderOpen, X } from "../../components/ui";
 import type { AgentProfile } from "../../data";
@@ -41,6 +41,21 @@ export default function FilePreviewPanel(props: FilePreviewPanelProps) {
   // first. Two frames guarantee that paint before the open state applies.
   const [revealed, setRevealed] = createSignal(false);
   let currentPreviewUrl: string | null = null;
+  const [mediaFailure, setMediaFailure] = createSignal(false);
+  createEffect(
+    () => ({ preview: props.preview }),
+    () => {
+      setMediaFailure(false);
+    },
+  );
+  const binaryFallback = createMemo(() => {
+    const bytes = props.preview.bytes?.subarray(0, 4096);
+    if (!bytes) return "No raw bytes were supplied; file metadata is shown above.";
+    return Array.from({ length: Math.ceil(bytes.length / 16) }, (_, row) => {
+      const offset = row * 16;
+      return `${offset.toString(16).padStart(8, "0")}  ${Array.from(bytes.subarray(offset, offset + 16), (value) => value.toString(16).padStart(2, "0")).join(" ")}`;
+    }).join("\n");
+  });
   const text = createMemo(() => {
     if (!props.preview.bytes || (props.preview.previewKind !== "text" && props.preview.previewKind !== "markdown")) {
       return { value: "", truncated: false };
@@ -77,13 +92,14 @@ export default function FilePreviewPanel(props: FilePreviewPanelProps) {
     if (currentPreviewUrl) URL.revokeObjectURL(currentPreviewUrl);
   });
 
+  let revealFrame = 0;
+  onCleanup(() => cancelAnimationFrame(revealFrame));
   const revealPanel = () => {
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => {
+    revealFrame = requestAnimationFrame(() => {
+      revealFrame = requestAnimationFrame(() => {
         setRevealed(true);
       });
     });
-    onCleanup(() => cancelAnimationFrame(frame));
   };
 
   const resizeDefaultPanel = () => {
@@ -164,6 +180,47 @@ export default function FilePreviewPanel(props: FilePreviewPanelProps) {
         </Button>
       </header>
       <div class="file-preview-content">
+        <Show when={mediaFailure()}>
+          <section aria-label="Media file inspection" style={{ padding: "16px" }}>
+            <p>This media codec could not be decoded. Internal file inspection:</p>
+            <p>
+              {props.preview.mimeType} · {props.preview.size.toLocaleString()} bytes
+            </p>
+            <pre class="file-preview-text">{binaryFallback()}</pre>
+          </section>
+        </Show>
+        <Show when={props.preview.directory}>
+          {(directory) => (
+            <section aria-label="Folder contents" style={{ padding: "16px" }}>
+              <p style={{ "overflow-wrap": "anywhere" }}>{directory().path}</p>
+              <Show when={directory().entries.length === 0}>
+                <p>This folder is empty.</p>
+              </Show>
+              <ul style={{ "list-style": "none", padding: "0" }}>
+                <For each={directory().entries}>
+                  {(entry) => (
+                    <li>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => props.onOpenWorkspaceFile(entry.path)}
+                        aria-label={`Preview ${entry.isDirectory ? "folder" : "file"} ${entry.name}`}
+                      >
+                        <Show when={entry.isDirectory} fallback={<File />}>
+                          <FolderOpen />
+                        </Show>
+                        {entry.name}
+                      </Button>
+                    </li>
+                  )}
+                </For>
+              </ul>
+              <Show when={directory().truncated}>
+                <p>Showing the first 500 entries.</p>
+              </Show>
+            </section>
+          )}
+        </Show>
         <Show when={props.preview.previewKind === "markdown"}>
           <MarkdownFilePreview
             class="file-preview-markdown"
@@ -187,36 +244,45 @@ export default function FilePreviewPanel(props: FilePreviewPanelProps) {
         </Show>
         <Show when={props.preview.previewKind === "image" && previewUrl()}>
           <div class="file-preview-image-wrap">
-            <img class="file-preview-image" src={previewUrl() ?? ""} alt={props.preview.name} />
+            <img
+              class="file-preview-image"
+              src={previewUrl() ?? ""}
+              alt={props.preview.name}
+              onError={() => setMediaFailure(true)}
+            />
           </div>
         </Show>
         <Show when={props.preview.previewKind === "pdf" && previewUrl()}>
           <iframe class="file-preview-pdf" title={props.preview.name} src={previewUrl() ?? ""} />
         </Show>
         <Show when={props.preview.previewKind === "audio" && previewUrl()}>
-          <audio class="file-preview-audio" controls src={previewUrl() ?? ""}>
+          <audio class="file-preview-audio" controls onError={() => setMediaFailure(true)} src={previewUrl() ?? ""}>
             {/* A file on the user's computer carries no caption track. The empty element declares
                 that, which browsers ignore, and keeps the media-caption rule satisfied. */}
             <track kind="captions" />
           </audio>
         </Show>
         <Show when={props.preview.previewKind === "video" && previewUrl()}>
-          <video class="file-preview-video" controls src={previewUrl() ?? ""}>
+          <video class="file-preview-video" controls onError={() => setMediaFailure(true)} src={previewUrl() ?? ""}>
             <track kind="captions" />
           </video>
         </Show>
         <Show when={props.preview.previewKind === "spreadsheet"}>
           <SpreadsheetFilePreview class="file-preview-spreadsheet" bytes={props.preview.bytes} />
         </Show>
-        <Show when={props.preview.previewKind === "none"}>
-          <div class="file-preview-unsupported">
-            <File />
-            <strong>Preview unavailable</strong>
-            <span>This file type can be opened in its default application.</span>
-            <Button variant="outline" type="button" onClick={props.onOpenExternally}>
-              Open externally
-            </Button>
-          </div>
+        <Show when={props.preview.previewKind === "none" && !props.preview.directory}>
+          <section aria-label="File inspection" style={{ padding: "16px" }}>
+            <p>
+              {props.preview.mimeType} · {props.preview.size.toLocaleString()} bytes
+            </p>
+            <pre class="file-preview-text">
+              {props.preview.inspection ??
+                "No file bytes are available. This panel still shows the file name, type and size."}
+            </pre>
+            <Show when={props.preview.truncated}>
+              <p>Large file: showing a bounded preview of the first 8 MiB.</p>
+            </Show>
+          </section>
         </Show>
       </div>
     </aside>

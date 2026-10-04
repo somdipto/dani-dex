@@ -34,6 +34,17 @@ export function providerFailureStatus(
   // quotes what it was given: an OpenCode failure can carry the API key or a header value of a
   // custom endpoint. The fixed strings below need no redaction, but the CLI's own text does.
   const message = redactText(error instanceof Error ? error.message : String(error));
+  if (
+    provider === "codex" &&
+    /ChatGPT sign-in storage|Secure ChatGPT storage|errSecInteractionNotAllowed/u.test(message)
+  ) {
+    return {
+      state: "sign-in-required",
+      version: version ?? null,
+      message:
+        "ChatGPT sign-in storage is locked. Open Dani-Dex on your Mac and unlock Keychain, then try ChatGPT again. Dani Free is still available.",
+    };
+  }
   if (error instanceof CodexCliError) {
     if (provider === "codex" || provider === "claude") {
       const label = provider === "codex" ? "ChatGPT" : "Claude";

@@ -23,6 +23,7 @@ export interface RichMessageTextProps {
   onOpenAttachment?: (attachment: AttachmentSummary) => void;
   onOpenSharedFile?: (path: string) => void;
   onOpenWorkspaceFile?: (path: string) => void;
+  workspaceRoot?: string;
   showCitationFooter?: boolean;
   streamingTail?: boolean;
 }

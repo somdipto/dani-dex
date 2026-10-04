@@ -100,16 +100,41 @@ export function buildDaniModelSource(
   ready: DaniFreeReady,
   key: string,
   modelIds: readonly string[],
+  metadata: readonly unknown[] = [],
 ): DaniDexModelSource {
   if (modelIds.length !== 1 || modelIds[0] !== DANI_AUTO_MODEL) {
     throw new Error("Dani Free did not return its single supported model.");
   }
   const id = DANI_AUTO_MODEL;
+  const info = metadata.find((entry) => isDynamicRecord(entry) && entry.id === id);
+  const limit =
+    isDynamicRecord(info) &&
+    typeof info.contextWindow === "number" &&
+    Number.isSafeInteger(info.contextWindow) &&
+    info.contextWindow > 0 &&
+    typeof info.maxTokens === "number" &&
+    Number.isSafeInteger(info.maxTokens) &&
+    info.maxTokens > 0
+      ? { context: info.contextWindow, output: Math.min(info.maxTokens, info.contextWindow, 32_000) }
+      : undefined;
+  const reasoningEffortLevels =
+    isDynamicRecord(info) &&
+    info.reasoningControlKey === "reasoning_effort" &&
+    Array.isArray(info.reasoningEffortLevels)
+      ? [
+          ...new Set(
+            info.reasoningEffortLevels.filter(
+              (level): level is "low" | "medium" | "high" | "max" =>
+                level === "low" || level === "medium" || level === "high" || level === "max",
+            ),
+          ),
+        ]
+      : [];
   return {
     id: DANI_MODEL_SOURCE_ID,
     name: DANI_MODEL_SOURCE_NAME,
     baseUrl: `${ready.baseUrl}/v1`,
-    models: [{ id, name: DANI_AUTO_MODEL_NAME }],
+    models: [{ id, name: DANI_AUTO_MODEL_NAME, ...(limit ? { limit } : {}), reasoningEffortLevels }],
     headers: [{ name: "x-api-key", value: key }],
     apiKey: key,
   };
@@ -137,6 +162,7 @@ export class DaniFreeSupervisor {
   readonly #options: DaniFreeOptions;
   #child: ChildProcess | null = null;
   #stopping = false;
+  #refreshController: AbortController | null = null;
 
   constructor(options: DaniFreeOptions) {
     this.#options = options;
@@ -157,14 +183,35 @@ export class DaniFreeSupervisor {
         throw new Error("Dani Free key path is outside its private home.");
       }
       const key = await readKey(ready.apiKeyFile);
-      // No refresh nudge: the proxy probes and refreshes on its own, and a refresh can take 20s+.
+      // Ready means the local listener is up, not that discovery has finished.
       stage = "models";
       const models = await this.#request(ready, key, "GET", "/v1/models");
       const ids =
         isDynamicRecord(models) && Array.isArray(models.data)
           ? models.data.flatMap((entry) => (isDynamicRecord(entry) && typeof entry.id === "string" ? [entry.id] : []))
           : [];
-      const source = buildDaniModelSource(ready, key, ids);
+      const source = buildDaniModelSource(
+        ready,
+        key,
+        ids,
+        isDynamicRecord(models) && Array.isArray(models.data) ? models.data : [],
+      );
+      this.#refreshController?.abort();
+      const refresh = new AbortController();
+      this.#refreshController = refresh;
+      // Never hold app startup or discard the usable Auto source for a discovery failure.
+      void this.#request(ready, key, "POST", "/v1/models/refresh", refresh.signal)
+        .catch(async () => {
+          if (!refresh.signal.aborted)
+            await appendDaniFreeDiagnostic(this.#options.home, {
+              stage: "models",
+              outcome: "failed",
+              detail: "Model refresh failed; keeping the current Auto source.",
+            }).catch(() => undefined);
+        })
+        .finally(() => {
+          if (this.#refreshController === refresh) this.#refreshController = null;
+        });
       logger.info("Dani-Free is ready.", { port: ready.port, models: ids.length, privateMode: ready.privateMode });
       await appendDaniFreeDiagnostic(this.#options.home, { stage: "connected", outcome: "ready" }).catch(
         () => undefined,
@@ -185,6 +232,8 @@ export class DaniFreeSupervisor {
   }
 
   async stop(): Promise<void> {
+    this.#refreshController?.abort();
+    this.#refreshController = null;
     const child = this.#child;
     this.#child = null;
     if (!child || child.exitCode !== null || child.signalCode !== null) {
@@ -323,11 +372,19 @@ export class DaniFreeSupervisor {
     });
   }
 
-  async #request(ready: DaniFreeReady, key: string, method: "GET" | "POST", path: string): Promise<unknown> {
+  async #request(
+    ready: DaniFreeReady,
+    key: string,
+    method: "GET" | "POST",
+    path: string,
+    signal?: AbortSignal,
+  ): Promise<unknown> {
     const response = await (this.#options.fetch ?? fetch)(`${ready.baseUrl}${path}`, {
       method,
       headers: { "x-api-key": key, authorization: `Bearer ${key}` },
-      signal: AbortSignal.timeout(DANI_FREE_REQUEST_TIMEOUT_MS),
+      signal: signal
+        ? AbortSignal.any([signal, AbortSignal.timeout(DANI_FREE_REQUEST_TIMEOUT_MS)])
+        : AbortSignal.timeout(DANI_FREE_REQUEST_TIMEOUT_MS),
     });
     if (!response.ok) throw new Error(`${method} ${path} answered ${response.status}.`);
     const text = await response.text();

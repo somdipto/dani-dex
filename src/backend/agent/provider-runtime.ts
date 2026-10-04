@@ -29,6 +29,7 @@ import {
   resolveCodexCli,
 } from "./../cli";
 import { McpHandoffLog } from "./../mcp-handoff-log";
+import { modelSourceEfforts } from "../model-source";
 import { openCodeSignInMessage } from "./../opencode-config";
 import {
   type AccountLoginCompletedResult,
@@ -1673,7 +1674,10 @@ export class ProviderRuntime implements ProviderPort {
               message: failure.message === null ? null : this.#redactMcp(failure.message),
             }),
           });
-          if (!(error instanceof CodexCliError)) this.#emitError(`${provider}_start_failed`, error);
+          // Optional ChatGPT startup failure is already on its provider row. Do not label
+          // a working Dani Free connection as broken when Keychain is locked.
+          if (provider !== "codex" && !(error instanceof CodexCliError))
+            this.#emitError(`${provider}_start_failed`, error);
           return message;
         }
       }),
@@ -1887,9 +1891,11 @@ export class ProviderRuntime implements ProviderPort {
               const fallback = FALLBACK_MODELS.find(
                 (candidate) => candidate.provider === client.provider && candidate.id === server.model,
               );
-              const efforts = (server?.supportedReasoningEfforts ?? [])
+              const reportedEfforts = (server?.supportedReasoningEfforts ?? [])
                 .map((item) => item.reasoningEffort)
                 .filter(isReasoningEffort);
+              const autoEfforts = modelSourceEfforts(server.model, reportedEfforts);
+              const efforts = autoEfforts ?? reportedEfforts;
               // The name the provider CLI gives, whole: a model is easier to recognise as
               // `GPT-5.6 Sol` than as `Sol`, and its own CLI names it that way.
               // Claude Code is the exception, and `claudeModelName` says why.
@@ -1920,9 +1926,12 @@ export class ProviderRuntime implements ProviderPort {
                 defaultReasoningEffort: isReasoningEffort(server?.defaultReasoningEffort)
                   ? server.defaultReasoningEffort
                   : (fallback?.defaultReasoningEffort ?? "medium"),
-                supportedReasoningEfforts: efforts.length
-                  ? efforts
-                  : (fallback?.supportedReasoningEfforts ?? ["medium"]),
+                supportedReasoningEfforts:
+                  autoEfforts !== null
+                    ? efforts
+                    : efforts.length
+                      ? efforts
+                      : (fallback?.supportedReasoningEfforts ?? ["medium"]),
               });
             }
             // A transient empty catalog is not proof all models vanished. Keep the last good list.

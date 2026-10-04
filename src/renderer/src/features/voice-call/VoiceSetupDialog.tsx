@@ -1,4 +1,5 @@
-import { createEffect, createSignal, createUniqueId, Show } from "solid-js";
+import type { ProviderRuntimeSnapshot } from "@dani-dex/contracts/ipc";
+import { createEffect, createSignal, createUniqueId, onCleanup, Show } from "solid-js";
 import { Button, Checkbox, Dialog, Input } from "../../components/ui";
 import { CodexVoicePanel } from "./CodexVoicePanel";
 export interface VoiceSetupDialogProps {
@@ -10,6 +11,97 @@ export interface VoiceSetupDialogProps {
 }
 export function VoiceSetupDialog(props: VoiceSetupDialogProps) {
   const consentId = createUniqueId();
+  const [runtimeReady, setRuntimeReady] = createSignal(false);
+  const [runtimeBusy, setRuntimeBusy] = createSignal(false);
+  const [runtimeMessage, setRuntimeMessage] = createSignal(
+    "Install the experimental runtime only if you choose to use it.",
+  );
+  let setupGeneration = 0;
+  let unsubscribe: (() => void) | undefined;
+  let initializingGeneration: number | null = null;
+  async function initialize(generation: number) {
+    if (runtimeReady() || initializingGeneration === generation || generation !== setupGeneration || !props.open)
+      return;
+    initializingGeneration = generation;
+    try {
+      await window.danidex.voice.codexStatus();
+      if (generation !== setupGeneration || !props.open) return;
+      setRuntimeReady(true);
+      setRuntimeBusy(false);
+      setRuntimeMessage("Voice runtime ready. Sign-in and call consent are separate.");
+    } catch (cause) {
+      if (generation !== setupGeneration || !props.open) return;
+      setRuntimeBusy(false);
+      setRuntimeMessage(cause instanceof Error ? cause.message : "Voice initialization failed.");
+    } finally {
+      if (initializingGeneration === generation) initializingGeneration = null;
+    }
+  }
+  function updateRuntime(snapshot: ProviderRuntimeSnapshot, generation: number) {
+    if (generation !== setupGeneration || !props.open) return;
+    const status = snapshot.providers.codex;
+    if (status.phase === "ready") {
+      setRuntimeMessage("Initializing voice runtime...");
+      void initialize(generation);
+    } else if (status.phase === "downloading" || status.phase === "finishing") {
+      setRuntimeMessage(
+        status.message ??
+          (status.progress === null
+            ? "Installing voice runtime..."
+            : `Installing voice runtime: ${Math.round(status.progress)}%`),
+      );
+    } else if (status.phase === "download-error") {
+      setRuntimeBusy(false);
+      setRuntimeMessage(status.message ?? "Voice runtime installation failed.");
+    }
+  }
+  async function prepareRuntime() {
+    const generation = ++setupGeneration;
+    setRuntimeReady(false);
+    setRuntimeBusy(true);
+    setRuntimeMessage("Preparing voice runtime...");
+    unsubscribe?.();
+    unsubscribe = window.danidex.providerRuntimes.onEvent((snapshot) => updateRuntime(snapshot, generation));
+    try {
+      const current = await window.danidex.providerRuntimes.getStatus();
+      if (generation !== setupGeneration || !props.open) return;
+      updateRuntime(
+        current.providers.codex.phase === "ready" ? current : await window.danidex.providerRuntimes.download("codex"),
+        generation,
+      );
+    } catch (cause) {
+      if (generation !== setupGeneration || !props.open) return;
+      setRuntimeBusy(false);
+      setRuntimeMessage(cause instanceof Error ? cause.message : "Voice runtime setup failed.");
+    }
+  }
+  async function cancelRuntime() {
+    setupGeneration++;
+    unsubscribe?.();
+    unsubscribe = undefined;
+    setRuntimeBusy(false);
+    setRuntimeReady(false);
+    setRuntimeMessage("Voice setup cancelled. You can retry.");
+    try {
+      await window.danidex.providerRuntimes.cancel("codex");
+    } catch (cause) {
+      setRuntimeMessage(cause instanceof Error ? cause.message : "Could not cancel runtime installation.");
+    }
+  }
+  createEffect(
+    () => props.open,
+    (open) => {
+      if (!open) {
+        setupGeneration++;
+        unsubscribe?.();
+        unsubscribe = undefined;
+      }
+    },
+  );
+  onCleanup(() => {
+    setupGeneration++;
+    unsubscribe?.();
+  });
   const [view, setView] = createSignal<"choose" | "paid" | "experimental">("choose");
   const [key, setKey] = createSignal("");
   const [busy, setBusy] = createSignal(false);
@@ -125,7 +217,20 @@ export function VoiceSetupDialog(props: VoiceSetupDialogProps) {
               <Dialog.Description>
                 This option is still being tested. It may not work with your account.
               </Dialog.Description>
-              <CodexVoicePanel />
+              <section class="voice-choice-card" aria-label="Voice runtime setup">
+                <p role="status">{runtimeMessage()}</p>
+                <Show when={runtimeBusy()}>
+                  <Button variant="outline" onClick={() => void cancelRuntime()}>
+                    Cancel voice setup
+                  </Button>
+                </Show>
+                <Show when={!runtimeBusy() && !runtimeReady()}>
+                  <Button variant="outline" onClick={() => void prepareRuntime()}>
+                    Prepare experimental voice runtime
+                  </Button>
+                </Show>
+              </section>
+              <CodexVoicePanel ready={runtimeReady()} />
             </Show>
             <Show when={view() !== "choose"}>
               <Button

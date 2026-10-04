@@ -2,6 +2,7 @@ import { type AgentProviderId, agentProviderName } from "@dani-dex/contracts/age
 import type { JSX } from "@solidjs/web";
 import { createSignal, Show } from "solid-js";
 import { Button, TriangleAlert } from "../../components/ui";
+import { errorMessage } from "../../error-message";
 import { CloseIcon } from "./ConversationIcons";
 
 /**
@@ -104,12 +105,16 @@ export function ComposerSignInNotice(props: {
    * whole gap, so the user presses it again and opens a second guide.
    */
   const [starting, setStarting] = createSignal(false);
+  const [signInError, setSignInError] = createSignal<string | null>(null);
   const busy = () => starting() || Boolean(props.signingIn);
   const signIn = async () => {
     if (busy()) return;
     setStarting(true);
+    setSignInError(null);
     try {
       await props.onSignIn(props.provider);
+    } catch (error) {
+      setSignInError(errorMessage(error, "Could not sign in. Try again."));
     } finally {
       // A failed sign-in leaves the notice in place, so the button has to become pressable again.
       setStarting(false);
@@ -118,19 +123,25 @@ export function ComposerSignInNotice(props: {
   return (
     <ComposerNotice
       title="Sign in required"
-      body={`Sign in to ${providerName()} to send messages.`}
+      body={
+        props.provider === "claude"
+          ? "Claude subscription sign-in is unavailable. Use a Claude API key in provider settings."
+          : (signInError() ?? `Sign in to ${providerName()} to send messages.`)
+      }
       action={
-        <Button
-          variant="outline"
-          size="sm"
-          type="button"
-          loading={busy()}
-          loadingLabel="Signing in…"
-          aria-label={`Sign in to ${providerName()}`}
-          onClick={() => void signIn()}
-        >
-          Sign in
-        </Button>
+        props.provider !== "claude" && (
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            loading={busy()}
+            loadingLabel="Signing in…"
+            aria-label={`Sign in to ${providerName()}`}
+            onClick={() => void signIn()}
+          >
+            Sign in
+          </Button>
+        )
       }
     />
   );

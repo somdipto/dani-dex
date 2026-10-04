@@ -2,10 +2,11 @@ import { ProviderLogo } from "@dani-dex/brand";
 import { createSignal, createUniqueId, onCleanup, Show } from "solid-js";
 import { Button, Checkbox } from "../../components/ui";
 /** Experimental official Codex WebRTC route, separate from SIWC text and API-key voice. */
-export function CodexVoicePanel() {
+export function CodexVoicePanel(props: { ready: boolean }) {
   const consentId = createUniqueId();
   const [accepted, setAccepted] = createSignal(false);
   const [state, setState] = createSignal("Not connected");
+  const [signedIn, setSignedIn] = createSignal(false);
   const [live, setLive] = createSignal(false);
   const [busy, setBusy] = createSignal(false);
   let peer: RTCPeerConnection | null = null;
@@ -29,6 +30,7 @@ export function CodexVoicePanel() {
       audio = null;
     }
     await window.danidex.voice.codexStop().catch(() => undefined);
+    setAccepted(false);
     setLive(false);
     setState("Ended");
     setBusy(false);
@@ -37,23 +39,52 @@ export function CodexVoicePanel() {
     void end();
   });
   async function connect() {
+    if (!props.ready || busy()) return;
+    const current = ++generation;
+    setSignedIn(false);
     setBusy(true);
     try {
       await window.danidex.voice.codexConnect();
-      setState("Finish Codex's sign-in in your browser, then start the call.");
+      if (current !== generation) return;
+      setState("Finish OpenAI sign-in in your browser, then check sign-in here.");
     } catch (error) {
-      setState(error instanceof Error ? error.message : "Sign-in failed.");
+      if (current === generation) setState(error instanceof Error ? error.message : "Sign-in failed.");
     } finally {
-      setBusy(false);
+      if (current === generation) setBusy(false);
+    }
+  }
+  async function checkSignIn() {
+    if (!props.ready || busy()) return;
+    const current = ++generation;
+    setBusy(true);
+    try {
+      const result = await window.danidex.voice.codexStatus();
+      if (current !== generation) return;
+      setSignedIn(result.connected);
+      setState(
+        result.connected
+          ? "OpenAI sign-in confirmed. Approve one call to continue."
+          : "OpenAI sign-in is not complete. Finish it in your browser, then check again.",
+      );
+    } catch (error) {
+      if (current === generation) {
+        setSignedIn(false);
+        setState(error instanceof Error ? error.message : "Could not check sign-in.");
+      }
+    } finally {
+      if (current === generation) setBusy(false);
     }
   }
   async function start() {
-    if (!accepted() || busy()) return;
+    if (!props.ready || !signedIn() || !accepted() || busy()) return;
     const current = ++generation;
     setBusy(true);
     setState("Connecting...");
     try {
-      if (!(await window.danidex.voice.codexStatus()).connected) throw new Error("Sign in with Codex first.");
+      if (!(await window.danidex.voice.codexStatus()).connected) {
+        setSignedIn(false);
+        throw new Error("OpenAI sign-in expired. Sign in again before a call.");
+      }
       if (current !== generation) return;
       const microphone = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (current !== generation) {
@@ -93,11 +124,12 @@ export function CodexVoicePanel() {
       await peer.setRemoteDescription({ type: "answer", sdp: answer.sdp });
       setState("Connecting audio...");
     } catch (error) {
+      if (current !== generation) return;
       const message = error instanceof Error ? error.message : "Call failed.";
       await end();
       setState(message);
     } finally {
-      setBusy(false);
+      if (current === generation) setBusy(false);
     }
   }
   return (
@@ -115,10 +147,13 @@ export function CodexVoicePanel() {
         I approve one experimental call using my ChatGPT plan quota.
       </label>
       <div class="voice-setup-actions">
-        <Button variant="outline" disabled={busy()} onClick={() => void connect()}>
+        <Button variant="outline" disabled={!props.ready || busy()} onClick={() => void connect()}>
           <ProviderLogo provider="codex" class="voice-auth-button-logo" /> Sign in with OpenAI
         </Button>
-        <Button disabled={!accepted() || busy()} onClick={() => void start()}>
+        <Button variant="outline" disabled={!props.ready || busy()} onClick={() => void checkSignIn()}>
+          Check OpenAI sign-in
+        </Button>
+        <Button disabled={!props.ready || !signedIn() || !accepted() || busy()} onClick={() => void start()}>
           Start experimental call
         </Button>
         <Show when={busy() || live()}>

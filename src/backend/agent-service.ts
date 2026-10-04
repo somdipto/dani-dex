@@ -145,6 +145,7 @@ import { ChannelService } from "./channel-service";
 import type { BundledProviderExecutables } from "./cli";
 import { type ConversationMarkerExclusions, ConversationReadStore } from "./conversation-read-store";
 import { mergeConversationSnapshots } from "./conversation-snapshots";
+import { prepareFreeResearch } from "./free-research-bootstrap";
 import type { MailboxStore } from "./mailbox-store";
 import { McpHandoffLog } from "./mcp-handoff-log";
 import { type McpOAuthAuthority, normalizeResource } from "./mcp-oauth-provider";
@@ -163,7 +164,13 @@ import { type BuiltInProviderDriver, NO_PROVIDER_CREDENTIALS, type ProviderClien
 import { recordAgentRestartActivity } from "./restart-activity";
 import { RoutineTimer } from "./routine-timer";
 import type { SidebarLayoutStore } from "./sidebar-layout-store";
-import { isWithin, rebaseLegacyWorkspacePath, sharedPathFromInput, workspacePathFromInput } from "./workspace-paths";
+import {
+  isWithin,
+  localClickedPath,
+  rebaseLegacyWorkspacePath,
+  sharedPathFromInput,
+  workspacePathFromInput,
+} from "./workspace-paths";
 
 const logger = createDaniDexLogger("agent-service");
 
@@ -185,6 +192,7 @@ interface AgentServiceEvents {
 }
 
 export interface ResolvedSharedFile {
+  isDirectory?: boolean;
   path: string;
   name: string;
   size: number;
@@ -1547,23 +1555,36 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     return this.#store.resolveAvatar(agentId);
   }
 
-  async resolveSharedFile(inputPath: string): Promise<ResolvedSharedFile> {
+  async resolveSharedFile(inputPath: string, localUserClick = false): Promise<ResolvedSharedFile> {
     const sharedRoot = await realpath(this.#store.sharedRoot);
-    const candidatePath = sharedPathFromInput(this.#store.sharedRoot, inputPath);
+    const candidatePath = sharedPathFromInput(
+      this.#store.sharedRoot,
+      localUserClick ? localClickedPath(inputPath) : inputPath,
+    );
     const resolvedPath = await realpath(candidatePath);
-    if (!isWithin(sharedRoot, resolvedPath)) {
+    if (!localUserClick && !isWithin(sharedRoot, resolvedPath)) {
       throw new Error("Shared file must be inside the shared directory.");
     }
     const metadata = await stat(resolvedPath);
-    if (!metadata.isFile()) throw new Error("Shared path is not a file.");
-    return { path: resolvedPath, name: basename(resolvedPath), size: metadata.size };
+    if (!metadata.isFile() && !(localUserClick && metadata.isDirectory()))
+      throw new Error("Shared path is not a file.");
+    return {
+      path: resolvedPath,
+      name: basename(resolvedPath),
+      size: metadata.size,
+      ...(metadata.isDirectory() ? { isDirectory: true } : {}),
+    };
   }
 
-  async resolveWorkspaceFile(agentId: string, inputPath: string): Promise<ResolvedSharedFile> {
+  async resolveWorkspaceFile(agentId: string, inputPath: string, localUserClick = false): Promise<ResolvedSharedFile> {
     const agent = this.#store.list().find((candidate) => candidate.id === agentId);
     if (!agent) throw new Error(`Unknown agent: ${agentId}`);
     const workspaceRoot = await realpath(agent.workspacePath);
-    const candidatePath = workspacePathFromInput(agent.workspacePath, agent.id, inputPath);
+    const candidatePath = workspacePathFromInput(
+      agent.workspacePath,
+      agent.id,
+      localUserClick ? localClickedPath(inputPath) : inputPath,
+    );
     const resolvedPath = await realpath(candidatePath).catch(async (error: unknown) => {
       // The file may be one the provider's own transcript still names under this agent's pre-rename
       // workspace root. The containment check below is unchanged and runs on whatever comes back.
@@ -1574,12 +1595,18 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       if (rebased === null) throw error;
       return await realpath(rebased);
     });
-    if (!isWithin(workspaceRoot, resolvedPath)) {
+    if (!localUserClick && !isWithin(workspaceRoot, resolvedPath)) {
       throw new Error("Workspace file must be inside the agent workspace.");
     }
     const metadata = await stat(resolvedPath);
-    if (!metadata.isFile()) throw new Error("Workspace path is not a file.");
-    return { path: resolvedPath, name: basename(resolvedPath), size: metadata.size };
+    if (!metadata.isFile() && !(localUserClick && metadata.isDirectory()))
+      throw new Error("Workspace path is not a file.");
+    return {
+      path: resolvedPath,
+      name: basename(resolvedPath),
+      size: metadata.size,
+      ...(metadata.isDirectory() ? { isDirectory: true } : {}),
+    };
   }
 
   async deleteAgent(agentId: string): Promise<void> {
@@ -1685,6 +1712,9 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     // Rows installed from the old catalog's `mcp-remote` bridge definitions reach their servers
     // natively from here on. Exact matches only; anything the user changed stays as it is.
     this.#mcpServers.migrateCatalogBridgesToHttp();
+    await prepareFreeResearch(this.#mcpServers, this.#store.database.userDataPath).catch((error) => {
+      logger.warn("Free research setup unavailable; continuing without changing existing MCP settings.", { error });
+    });
     this.channels.restoreDeliveryLinks();
     await this.#threads.reconcileProviderSessionFiles();
     this.#boot.recoverPersistedTurns();

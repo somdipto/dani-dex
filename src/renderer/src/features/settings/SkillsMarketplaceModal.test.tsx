@@ -3,6 +3,7 @@ import type {
   DaniDexDesktopApi,
   InstalledSkill,
   MarketplaceAgentDetail,
+  MarketplaceSkillDetail,
   MarketplaceSkillPage,
   McpServerConfig,
   SkillSubmission,
@@ -83,6 +84,19 @@ describe("SkillsMarketplaceModal", () => {
   });
 
   beforeEach(() => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
     trackMarketplaceAnalytics.mockClear();
     vi.spyOn(desktopAnalytics, "scope").mockImplementation(() => ({ track: trackScopedMarketplaceAnalytics }));
     const page: MarketplaceSkillPage = {
@@ -138,6 +152,108 @@ describe("SkillsMarketplaceModal", () => {
       submit: vi.fn(),
       install: vi.fn(),
     };
+  });
+
+  it("browses and installs local skills when the online marketplace is unavailable", async () => {
+    const local: MarketplaceSkillDetail = {
+      id: "local-skill-00000000-0000-4000-8000-000000000001",
+      slug: "offline-notes",
+      name: "Offline Notes",
+      description: "Prepare notes on this computer.",
+      category: "other",
+      creatorName: "Local",
+      version: 1,
+      versionId: "1",
+      installs: 0,
+      featured: false,
+      iconUrl: null,
+      updatedAt: "2026-10-03T00:00:00Z",
+      bundleSha256: "fixture",
+      files: ["SKILL.md"],
+      instructions: "Summarize the provided notes.",
+    };
+    window.danidex.skills.list = vi.fn(async () => {
+      throw new Error("Online marketplace is unavailable.");
+    });
+    window.danidex.skills.localList = vi.fn(async () => [local]);
+    window.danidex.skills.get = vi.fn(async () => local);
+    window.danidex.skills.install = vi.fn(async () =>
+      installedSkill(local.id, local.name, { installedVersion: 1, availableVersion: 1, origin: "local" }),
+    );
+    renderMarketplace({ agents: [{ id: "writer", name: "Writer" }], activeAgentId: "writer" });
+    openSkillsTab();
+    expect(await screen.findByText("On this computer")).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "View Offline Notes details" }));
+    expect(await screen.findByText("Summarize the provided notes.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Install skill" }));
+    await waitFor(() =>
+      expect(window.danidex.skills.install).toHaveBeenCalledWith({
+        agentId: "writer",
+        skillId: local.id,
+        replaceModified: false,
+      }),
+    );
+  });
+
+  it("pages the offline library and searches local creators without requesting online details", async () => {
+    const locals = Array.from({ length: 8 }, (_, index) => ({
+      id: `local-skill-00000000-0000-4000-8000-00000000000${index}`,
+      slug: `local-${index}`,
+      name: `Local ${index}`,
+      description: "Offline skill",
+      category: "other" as const,
+      creatorName: "Bundled: spec-kit",
+      version: 1,
+      versionId: "1",
+      installs: 0,
+      featured: false,
+      iconUrl: null,
+      updatedAt: "2026-10-03T00:00:00Z",
+      bundleSha256: "fixture",
+      files: ["SKILL.md"],
+      instructions: "Local instructions",
+    }));
+    window.danidex.skills.list = vi.fn(async () => {
+      throw new Error("Offline");
+    });
+    window.danidex.skills.localList = vi.fn(async () => locals);
+    renderMarketplace();
+    openSkillsTab();
+    expect(await screen.findByRole("button", { name: "View Local 0 details" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "View Local 7 details" })).toBeNull();
+    const heading = screen.getByRole("heading", { name: "Other" });
+    const section = heading.closest("section");
+    if (!section) throw new Error("Local catalog category is missing.");
+    fireEvent.click(within(section).getByRole("button", { name: /view all/i }));
+    expect(await screen.findByRole("button", { name: "View Local 7 details" })).toBeInTheDocument();
+    fireEvent.input(screen.getByRole("searchbox", { name: "Search skills" }), { target: { value: "spec-kit" } });
+    expect(await screen.findByRole("button", { name: "View Local 7 details" })).toBeInTheDocument();
+    expect(window.danidex.skills.localList).toHaveBeenCalledTimes(1);
+    expect(window.danidex.skills.get).not.toHaveBeenCalled();
+    await waitFor(() => {
+      const catalog = screen
+        .getAllByRole("region", { name: "Discover skills" })
+        .find((region) => within(region).queryByText("Offline"));
+      expect(catalog).toBeDefined();
+      expect(catalog).not.toHaveAttribute("data-pending");
+    });
+  });
+
+  it("reports local library failures and allows a local retry independently of online listing", async () => {
+    window.danidex.skills.list = vi.fn(async () => {
+      throw new Error("Online marketplace is unavailable.");
+    });
+    const localList = vi.fn().mockRejectedValueOnce(new Error("Cannot read local skills.")).mockResolvedValue([]);
+    window.danidex.skills.localList = localList;
+    renderMarketplace();
+    openSkillsTab();
+    const error = await screen.findByText("Cannot read local skills.");
+    const alert = error.closest('[role="alert"]');
+    if (!(alert instanceof HTMLElement)) throw new Error("Local library error alert is missing.");
+    fireEvent.click(within(alert).getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(screen.queryByText("Cannot read local skills.")).toBeNull());
+    expect(localList).toHaveBeenCalledTimes(2);
+    expect(screen.getByText("Online marketplace is unavailable.")).toBeInTheDocument();
   });
 
   it.each([1, 2])("tries only a matching installed version %s for the selected agent", async (version) => {

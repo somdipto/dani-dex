@@ -120,6 +120,7 @@ export function MarkdownMessageText(props: MarkdownMessageTextProps) {
     onOpenAttachment: props.onOpenAttachment,
     onOpenSharedFile: props.onOpenSharedFile,
     onOpenWorkspaceFile: props.onOpenWorkspaceFile,
+    workspaceRoot: props.workspaceRoot,
     fileDirectory: messageFileDirectory(props.body),
   });
 
@@ -153,6 +154,7 @@ export function MarkdownInlineText(
     onOpenAttachment: props.onOpenAttachment,
     onOpenSharedFile: props.onOpenSharedFile,
     onOpenWorkspaceFile: props.onOpenWorkspaceFile,
+    workspaceRoot: props.workspaceRoot,
     fileDirectory: messageFileDirectory(props.body),
   });
   return <MarkdownInline tokens={tokens()} content={contentProps()} />;
@@ -767,7 +769,8 @@ function sharedFileTarget(value: string): string | null {
   const path = value.trim();
   if (!path || /[\0\r\n]/u.test(path)) return null;
   const normalized = path.replaceAll("\\", "/");
-  return normalized.startsWith("~/Dani-Dex/Shared/") ||
+  return /(?:^|\/)Dani-Dex\/Shared(?:\/|$)/u.test(normalized) ||
+    normalized.startsWith("~/Dani-Dex/Shared/") ||
     normalized.startsWith("Dani-Dex/Shared/") ||
     normalized.includes("/Dani-Dex/Shared/")
     ? path

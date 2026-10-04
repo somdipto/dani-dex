@@ -66,7 +66,7 @@ describe("ChatGPT protected registrations", () => {
     await writeFile(path, "old-unreadable");
     const store = new ChatGptPlanStore(path, cipher);
     await expect(store.load()).rejects.toThrow("kept");
-    await expect(store.save(record)).rejects.toThrow("not available");
+    await expect(store.save(record)).rejects.toThrow("unlock Keychain");
     expect(await readFile(path, "utf8")).toBe("old-unreadable");
   });
   it("does not write plaintext or publish memory when OS encryption fails", async () => {
@@ -79,6 +79,6 @@ describe("ChatGPT protected registrations", () => {
     });
     await expect(store.load()).rejects.toThrow("Locked");
     await expect(readFile(path)).rejects.toThrow();
-    expect(() => store.hostId()).toThrow("not available");
+    expect(() => store.hostId()).toThrow("unlock Keychain");
   });
 });

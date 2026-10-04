@@ -403,7 +403,7 @@ function AppSettings(props: AccountProps) {
 
 /** Search across every conversation on the active server. */
 function GlobalMessageSearch() {
-  const { agentList } = useAgents();
+  const { conversationAgents } = useAgents();
   const { globalSearchOpen, searchGlobalMessages, setGlobalSearchVisibility, selectAgent, selectGlobalSearchMessage } =
     useNavigation();
 
@@ -412,7 +412,7 @@ function GlobalMessageSearch() {
       <Loading>
         <GlobalSearch
           open={true}
-          agents={agentList()}
+          agents={conversationAgents()}
           onSearchMessages={searchGlobalMessages}
           onOpenChange={setGlobalSearchVisibility}
           onSelectAgent={selectAgent}

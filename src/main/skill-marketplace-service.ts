@@ -151,6 +151,14 @@ export class SkillMarketplaceService {
         toInstalledSkill(entry, availableVersion, state, await installedSkillDescription(agent.workspacePath, entry)),
       );
     }
+    // Role packs may already be managed in this workspace. Show their shipped
+    // catalog identity without turning them into user-removable installations.
+    if (this.localLibrary) {
+      for (const skill of await listManagedSkillsForChat(agent)) {
+        const id = await this.localLibrary.bundledIdForSlug(skill.slug);
+        if (id && !installed.some((item) => item.skillId === id)) installed.push({ ...skill, skillId: id });
+      }
+    }
     return installed.sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -265,9 +273,13 @@ export class SkillMarketplaceService {
   ): Promise<InstalledSkill> {
     if (sha256(bundle) !== detail.bundleSha256)
       throw new Error("The downloaded skill did not match its signed catalog record.");
-    const archive = inspectArchive(bundle);
+    const archive = inspectArchive(bundle, { bundled: await this.localLibrary?.isBundled(detail.id) });
     if (archive.slug !== detail.slug) throw new Error("The downloaded skill metadata does not match the catalog.");
     const files = normalizedFiles(bundle);
+    if (await this.localLibrary?.isBundled(detail.id)) {
+      const managed = (await listManagedSkillsForChat(agent)).find((skill) => skill.slug === detail.slug);
+      if (managed) return { ...managed, skillId: detail.id };
+    }
     await assertSkillPaths(agent.workspacePath, detail.slug);
     const lock = await readLock(agent.workspacePath);
     const existing = lock.skills[detail.id];

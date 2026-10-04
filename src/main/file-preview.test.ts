@@ -62,11 +62,11 @@ describe("file previews", () => {
     }
   });
 
-  it("does not transfer bytes for unsupported local files", async () => {
+  it("shows internal hex for binary local files without transferring raw bytes", async () => {
     const directory = await mkdtemp(join(tmpdir(), "dani-dex-file-preview-"));
     temporaryDirectories.push(directory);
     const path = join(directory, "archive.zip");
-    await writeFile(path, new Uint8Array([1, 2, 3]));
+    await writeFile(path, new Uint8Array([0, 2, 3]));
 
     await expect(localFilePreview(path, "archive.zip", 3)).resolves.toEqual({
       name: "archive.zip",
@@ -74,12 +74,14 @@ describe("file previews", () => {
       mimeType: "application/octet-stream",
       previewKind: "none",
       bytes: null,
+      truncated: false,
+      inspection: expect.stringContaining("Binary hex preview"),
     });
   });
 
-  it("rejects oversized previews before reading local content", async () => {
+  it("does not invent successful reads for missing large files", async () => {
     await expect(
       localFilePreview("/does/not/need/to/exist", "large.txt", ATTACHMENT_LIMITS.fileBytes + 1),
-    ).rejects.toThrow("100 MB");
+    ).rejects.toThrow("ENOENT");
   });
 });

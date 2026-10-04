@@ -154,6 +154,11 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
     void window.danidex.agent.previewSharedFile({ path }).then(
       (preview) => {
         if (generation !== deps.currentFilePreviewGeneration() || deps.props.agent?.id !== ownerAgentId) return;
+        if (preview.openedExternally) {
+          deps.setSidebarFilePreview(null);
+          setActiveRightPanel("none", ownerAgentId);
+          return;
+        }
         deps.setSidebarFilePreview({ ownerAgentId, source: { kind: "shared", path }, preview });
         setActiveRightPanel("file-preview", ownerAgentId);
       },
@@ -174,6 +179,11 @@ export function createPanelsStore(deps: PanelsStoreDeps) {
     void window.danidex.agent.previewWorkspaceFile({ agentId, path }).then(
       (preview) => {
         if (generation !== deps.currentFilePreviewGeneration() || deps.props.agent?.id !== agentId) return;
+        if (preview.openedExternally) {
+          deps.setSidebarFilePreview(null);
+          setActiveRightPanel("none", agentId);
+          return;
+        }
         deps.setSidebarFilePreview({ ownerAgentId: agentId, source: { kind: "workspace", path }, preview });
         setActiveRightPanel("file-preview", agentId);
       },

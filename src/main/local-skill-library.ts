@@ -3,15 +3,18 @@ import { lstat, mkdir, readdir, readFile, realpath, rename, rm, stat, writeFile 
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { AgentSummary, MarketplaceSkillDetail } from "@dani-dex/contracts/ipc";
 import { isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { SKILL_PACKS } from "@dani-dex/contracts/skill-packs";
 import { parse as parseYaml } from "yaml";
 import { archiveDirectory, inspectArchive, normalizedFiles } from "./skill-package";
 
 /** Owns immutable local revisions. A revision exists only after its directory is published. */
 export class LocalSkillLibrary {
   #writes: Promise<void> = Promise.resolve();
+  #bundled: Promise<Map<string, { path: string; creatorName: string }>> | null = null;
   constructor(
     readonly root: string,
     private readonly agents: () => AgentSummary[],
+    private readonly bundledRoot?: string,
   ) {}
 
   async list(): Promise<MarketplaceSkillDetail[]> {
@@ -23,8 +26,45 @@ export class LocalSkillLibrary {
       const revisions = await readdir(join(this.root, entry.name));
       if (revisions.some((name) => /^[1-9]\d*$/u.test(name))) published.push(entry.name);
     }
-    const results = await Promise.all(published.map((id) => this.get(id)));
+    const bundled = await this.bundledEntries();
+    const results = await Promise.all([...published, ...bundled.keys()].map((id) => this.get(id)));
     return results.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /** Only manifest-listed shipped packs are eligible, never remote first-use packs. */
+  private bundledEntries(): Promise<Map<string, { path: string; creatorName: string }>> {
+    this.#bundled ??= this.readBundledEntries().catch((error) => {
+      this.#bundled = null;
+      throw error;
+    });
+    return this.#bundled;
+  }
+
+  private async readBundledEntries(): Promise<Map<string, { path: string; creatorName: string }>> {
+    const entries = new Map<string, { path: string; creatorName: string }>();
+    if (!this.bundledRoot) return entries;
+    for (const pack of SKILL_PACKS) {
+      if (pack.source.kind !== "bundled") continue;
+      const root = join(this.bundledRoot, pack.source.directory, "skills");
+      for (const entry of await readdir(root, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        const hash = createHash("sha256").update(`bundled:${pack.id}/${entry.name}`).digest("hex").slice(0, 32);
+        const id = `local-skill-${hash.slice(0, 8)}-${hash.slice(8, 12)}-${hash.slice(12, 16)}-${hash.slice(16, 20)}-${hash.slice(20)}`;
+        entries.set(id, { path: join(root, entry.name), creatorName: `Bundled: ${pack.title}` });
+      }
+    }
+    return entries;
+  }
+
+  async isBundled(id: string): Promise<boolean> {
+    return (await this.bundledEntries()).has(id);
+  }
+
+  async bundledIdForSlug(slug: string): Promise<string | undefined> {
+    for (const [id, entry] of await this.bundledEntries()) {
+      if (entry.path.endsWith(`${sep}${slug}`)) return id;
+    }
+    return undefined;
   }
 
   private directory(id: string): string {
@@ -46,15 +86,41 @@ export class LocalSkillLibrary {
   }
 
   async bundle(id: string, revision: number): Promise<Uint8Array> {
+    const bundled = (await this.bundledEntries()).get(id);
+    if (bundled) {
+      if (revision !== 1) throw new Error("Bundled skills have only the shipped revision.");
+      return archiveDirectory(bundled.path, { deterministic: true });
+    }
     const path = join(this.directory(id), String(await this.revision(id, revision)), "bundle.zip");
     await rejectLinks(this.root, path);
     return new Uint8Array(await readFile(path));
   }
 
-  async get(id: string, requested?: number): Promise<MarketplaceSkillDetail> {
-    const revision = await this.revision(id, requested);
+  async archivePath(id: string, revision: number): Promise<string> {
+    const bundled = (await this.bundledEntries()).get(id);
+    if (!bundled) return join(this.root, id, String(revision), "bundle.zip");
+    // Agent tools need a real archive path, not a fictional revision directory.
     const bytes = await this.bundle(id, revision);
-    const info = inspectArchive(bytes);
+    const root = join(this.root, ".bundled");
+    await mkdir(root, { recursive: true, mode: 0o700 });
+    const hash = createHash("sha256").update(bytes).digest("hex");
+    const path = join(root, `${id}-${hash}.zip`);
+    await rejectLinks(this.root, root);
+    await writeFile(path, bytes, { mode: 0o600, flag: "wx" }).catch((error) => {
+      if (!(error instanceof Error) || !("code" in error) || error.code !== "EEXIST") throw error;
+    });
+    await rejectLinks(this.root, path);
+    const cached = await readFile(path);
+    if (createHash("sha256").update(cached).digest("hex") !== hash)
+      throw new Error("Bundled archive cache is damaged.");
+    return path;
+  }
+
+  async get(id: string, requested?: number): Promise<MarketplaceSkillDetail> {
+    const bundled = (await this.bundledEntries()).get(id);
+    const revision = bundled ? (requested ?? 1) : await this.revision(id, requested);
+    const bytes = await this.bundle(id, revision);
+    const info = inspectArchive(bytes, { bundled: Boolean(bundled) });
     const files = normalizedFiles(bytes);
     const text = new TextDecoder().decode(files["SKILL.md"]);
     const match = text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/u);
@@ -72,11 +138,11 @@ export class LocalSkillLibrary {
       version: revision,
       versionId: String(revision),
       category: "other",
-      creatorName: "Local",
+      creatorName: bundled?.creatorName ?? "Local",
       installs: 0,
       featured: false,
       iconUrl,
-      updatedAt: (await stat(join(this.directory(id), String(revision)))).mtime.toISOString(),
+      updatedAt: (await stat(bundled?.path ?? join(this.directory(id), String(revision)))).mtime.toISOString(),
       bundleSha256: createHash("sha256").update(bytes).digest("hex"),
       instructions: text.slice(match?.[0].length ?? 0).trim(),
       ...(example && example.length <= 1000 ? { examplePrompt: example } : {}),
@@ -97,6 +163,8 @@ export class LocalSkillLibrary {
 
   revise(agentId: string, id: string, expectedRevision: number, sourcePath: string): Promise<MarketplaceSkillDetail> {
     return this.serialize(async () => {
+      if ((await this.bundledEntries()).has(id))
+        throw new Error("Bundled skills are read-only. Create a local skill to customize one.");
       const current = await this.get(id);
       if (current.version !== expectedRevision)
         throw new Error("The skill changed. Read its latest revision before revising it.");

@@ -24,7 +24,13 @@ export type AvatarHue = (typeof AVATAR_HUES)[number];
 // the `/` a provider prefix uses, and nothing downstream builds a filesystem path or a URL out of
 // one -- `/v1/agents/models` takes no model parameter.
 export function isAgentModel(value: unknown): value is AgentModelId {
-  return isString(value) && value.length > 0 && value.length <= 160 && /^[A-Za-z0-9][A-Za-z0-9._:/[\]-]*$/.test(value);
+  if (!isString(value) || value.length === 0 || value.length > 160) return false;
+  // OpenRouter reports routed aliases with a single tilde before its vendor segment.
+  // No other token position gains tilde support; all prior charset restrictions remain.
+  return (
+    /^[A-Za-z0-9][A-Za-z0-9._:/[\]-]*$/.test(value) ||
+    /^openrouter\/~[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._:/[\]-]*$/.test(value)
+  );
 }
 
 /**

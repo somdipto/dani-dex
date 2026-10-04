@@ -181,7 +181,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
       (option) => option.provider === draft.runtime.provider && option.id === draft.runtime.model,
     ),
   );
-  const reasoningOptions = createMemo(() => selectedModel()?.supportedReasoningEfforts ?? ["medium" as const]);
+  const reasoningOptions = createMemo(() => selectedModel()?.supportedReasoningEfforts ?? []);
   const avatarCandidates = createMemo(() =>
     avatarCandidateSeeds(props.agent.id, draft.avatar.candidateSeed, draft.avatar.batch),
   );
@@ -929,31 +929,33 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
                   onChange={(nextModel, provider) => void selectModel(nextModel, provider)}
                 />
               </div>
-              <div class="agent-settings-model-row agent-settings-thinking-row">
-                <span>Reasoning</span>
-                <Select<AgentReasoningEffort>
-                  class="agent-settings-reasoning-control"
-                  options={reasoningOptions()}
-                  value={draft.runtime.reasoningEffort}
-                  onChange={(nextReasoning) => {
-                    if (!nextReasoning || nextReasoning === draft.runtime.reasoningEffort) return;
-                    void selectReasoning(nextReasoning);
-                  }}
-                  itemComponent={(item) => (
-                    <SelectItem item={item.item}>{reasoningLabel(item.item.rawValue)}</SelectItem>
-                  )}
-                >
-                  <SelectTrigger size="sm" class="agent-settings-reasoning-select" aria-label="Agent reasoning level">
-                    <SelectValue<AgentReasoningEffort>>
-                      {(state) => {
-                        const effort = state.selectedOption();
-                        return effort ? reasoningLabel(effort) : "Select reasoning";
-                      }}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent />
-                </Select>
-              </div>
+              <Show when={reasoningOptions().length > 0}>
+                <div class="agent-settings-model-row agent-settings-thinking-row">
+                  <span>Reasoning</span>
+                  <Select<AgentReasoningEffort>
+                    class="agent-settings-reasoning-control"
+                    options={reasoningOptions()}
+                    value={draft.runtime.reasoningEffort}
+                    onChange={(nextReasoning) => {
+                      if (!nextReasoning || nextReasoning === draft.runtime.reasoningEffort) return;
+                      void selectReasoning(nextReasoning);
+                    }}
+                    itemComponent={(item) => (
+                      <SelectItem item={item.item}>{reasoningLabel(item.item.rawValue)}</SelectItem>
+                    )}
+                  >
+                    <SelectTrigger size="sm" class="agent-settings-reasoning-select" aria-label="Agent reasoning level">
+                      <SelectValue<AgentReasoningEffort>>
+                        {(state) => {
+                          const effort = state.selectedOption();
+                          return effort ? reasoningLabel(effort) : "Select reasoning";
+                        }}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent />
+                  </Select>
+                </div>
+              </Show>
               <div class="agent-settings-model-row agent-settings-workspace-row">
                 <span>Workspace folder</span>
                 <span>{props.agent.workspacePath ?? "Not available yet"}</span>

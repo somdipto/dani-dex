@@ -11,7 +11,18 @@ import {
   type ProviderRuntimeStatus,
   type SaveCustomProviderInput,
 } from "@dani-dex/contracts/ipc";
-import { createEffect, createMemo, createSignal, createUniqueId, For, Match, onCleanup, Show, Switch } from "solid-js";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  createUniqueId,
+  For,
+  Match,
+  onCleanup,
+  onSettled,
+  Show,
+  Switch,
+} from "solid-js";
 import { ProviderCodeLoginDialog } from "../../components/ProviderCodeLoginDialog";
 import { ProviderPicker, type ProviderPickerOption } from "../../components/ProviderPicker";
 import type { ProviderCodeLoginApi } from "../../components/provider-code-login-api";
@@ -95,6 +106,10 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
    * behind it. Menus mount here instead.
    */
   const [screenElement, setScreenElement] = createSignal<HTMLElement | undefined>();
+  let screenRef: HTMLElement | undefined;
+  onSettled(() => {
+    setScreenElement(screenRef);
+  });
   const [selectedProvider, setSelectedProvider] = createSignal<AgentProviderId | null>(null);
   // Dani serves every agent: the provider step is answered before it is shown.
   createEffect(
@@ -432,7 +447,9 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
       class="onboarding-screen"
       data-step={step()}
       data-direction={direction()}
-      ref={(element) => setScreenElement(element)}
+      ref={(element) => {
+        screenRef = element;
+      }}
     >
       <div class="onboarding-shell">
         <nav class="onboarding-progress" aria-label={`Onboarding step ${stepNumber()} of 3`}>
@@ -456,13 +473,13 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                     class="onboarding-avatar-hero"
                   />
                 </div>
-                <h1 id="onboarding-title">Meet Dani-Dex</h1>
-                <p class="onboarding-description">A team that works with you.</p>
+                <h1 id="onboarding-title">Meet your chief of staff</h1>
+                <p class="onboarding-description">Your chief of staff coordinates your team. Connect an AI to start.</p>
 
                 <section class="composer onboarding-composer" data-compact aria-label="Example task handoff">
                   <div class="composer-input-label">
                     <div class="composer-editor-root">
-                      <span class="composer-editor-placeholder">Hand off any task to your team</span>
+                      <span class="composer-editor-placeholder">Hand off a task to your chief of staff</span>
                     </div>
                   </div>
                   <div class="composer-toolbar">

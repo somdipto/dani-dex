@@ -606,38 +606,6 @@
   color: var(--dani-dex-text-muted);
   font-size: var(--dani-dex-text-sm);
 }
-.file-preview-unsupported {
-  display: grid;
-  min-height: 100%;
-  place-content: center;
-  justify-items: center;
-  gap: 8px;
-  padding: 24px;
-  color: var(--dani-dex-text-muted);
-  text-align: center;
-}
-
-.file-preview-unsupported > svg {
-  width: 28px;
-  height: 28px;
-  margin-bottom: 4px;
-}
-
-.file-preview-unsupported strong {
-  color: var(--dani-dex-text-primary);
-  font-size: var(--dani-dex-text-md);
-}
-
-.file-preview-unsupported span {
-  max-width: 260px;
-  font-size: var(--dani-dex-text-sm);
-  line-height: 1.45;
-}
-
-.file-preview-unsupported button {
-  margin-top: 6px;
-}
-
 .file-preview-truncated {
   position: sticky;
   bottom: 0;

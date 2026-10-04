@@ -67,7 +67,7 @@ const sources = new Map<string, string>();
 
 const mainSources = sourceFilesUnder("src/main");
 const PRELOAD_MODULE = "src/preload/index.ts";
-const preloadSources = [PRELOAD_MODULE];
+const preloadSources = [PRELOAD_MODULE, "src/preload/arc.ts"];
 
 // The one module allowed to touch ipcMain, because it is the sender check.
 const TRUSTED_IPC_MODULE = "src/main/trusted-ipc.ts";

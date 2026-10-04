@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import type { LocalSkillTools } from "../backend/agent/skill-tools";
 import type { SkillMarketplaceService } from "./skill-marketplace-service";
 
@@ -8,7 +7,7 @@ export function localSkillTools(skills: SkillMarketplaceService): LocalSkillTool
     list: () => library.list(),
     get: async (input) => {
       const detail = await library.get(input.skillId, input.revision);
-      return { ...detail, archivePath: join(library.root, detail.id, String(detail.version), "bundle.zip") };
+      return { ...detail, archivePath: await library.archivePath(detail.id, detail.version) };
     },
     revise: (input) => library.revise(input.agentId, input.skillId, input.expectedRevision, input.sourcePath),
     install: (input) => skills.installLocal(input),

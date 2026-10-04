@@ -1,6 +1,6 @@
 import { mkdir, mkdtemp, readdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import type { AgentSummary } from "@dani-dex/contracts/ipc";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CentralAuthManager } from "./central-auth-manager";
@@ -12,6 +12,7 @@ let root: string;
 let agents: AgentSummary[];
 let library: LocalSkillLibrary;
 let service: SkillMarketplaceService;
+let auth: CentralAuthManager;
 const network = vi.fn(async () => {
   throw new Error("Unexpected network request");
 });
@@ -39,7 +40,7 @@ beforeEach(async () => {
   for (const agent of agents) await mkdir(join(agent.workspacePath, "draft"), { recursive: true });
   await writeFile(join(agents[0].workspacePath, "draft/SKILL.md"), markdown("First version"));
   library = new LocalSkillLibrary(join(root, "library"), () => agents);
-  const auth = new CentralAuthManager({
+  auth = new CentralAuthManager({
     apiUrl: "http://127.0.0.1:3100",
     storagePath: join(root, "auth"),
     encrypt: (value) => Buffer.from(value),
@@ -89,6 +90,91 @@ describe("local skill library", () => {
     await service.setEnabled({ agentId: "reader", skillId: first.id, enabled: true });
     expect(await readFile(join(agents[1].workspacePath, ".claude/skills/weekly-summary/SKILL.md"), "utf8")).toContain(
       "Second version",
+    );
+    expect(network).not.toHaveBeenCalled();
+  });
+
+  it("lists shipped skills and installs them without an online account", async () => {
+    library = new LocalSkillLibrary(
+      join(root, "library"),
+      () => agents,
+      resolve(__dirname, "../../resources/skill-packs"),
+    );
+    const bundled = await library.list();
+    expect(bundled).toHaveLength(63);
+    const firstBundle = await library.bundle(bundled[0].id, 1);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2027-01-01T00:00:00Z"));
+    expect(await library.bundle(bundled[0].id, 1)).toEqual(firstBundle);
+    vi.useRealTimers();
+    const previousTimezone = process.env.TZ;
+    try {
+      for (const timezone of ["UTC", "Asia/Calcutta", "America/Los_Angeles"]) {
+        process.env.TZ = timezone;
+        expect(await library.bundle(bundled[0].id, 1)).toEqual(firstBundle);
+      }
+    } finally {
+      if (previousTimezone === undefined) delete process.env.TZ;
+      else process.env.TZ = previousTimezone;
+    }
+    const archived = await localSkillTools(
+      new SkillMarketplaceService(
+        auth,
+        () => agents,
+        async () => undefined,
+        library,
+      ),
+    ).get({ skillId: bundled[0].id });
+    expect((await readFile(archived.archivePath)).byteLength).toBeGreaterThan(0);
+    expect(bundled.every((skill) => skill.creatorName.startsWith("Bundled:"))).toBe(true);
+    expect(bundled.some((skill) => skill.slug === "karpathy-guidelines")).toBe(false);
+    const skill = bundled.find((skill) => skill.slug === "speckit-analyze");
+    if (!skill) throw new Error("Shipped spec-kit skill missing.");
+    expect(
+      (
+        await new LocalSkillLibrary(library.root, () => agents, resolve(__dirname, "../../resources/skill-packs")).get(
+          skill.id,
+        )
+      ).id,
+    ).toBe(skill.id);
+    service = new SkillMarketplaceService(
+      auth,
+      () => agents,
+      async () => undefined,
+      library,
+    );
+    await service.install({ agentId: "reader", skillId: skill.id });
+    const ponytail = bundled.find((item) => item.slug === "ponytail");
+    if (!ponytail) throw new Error("Shipped ponytail skill missing.");
+    await service.install({ agentId: "reader", skillId: ponytail.id });
+    expect(await readFile(join(agents[1].workspacePath, ".agents/skills/speckit-analyze/SKILL.md"), "utf8")).toContain(
+      "spec-kit",
+    );
+    await expect(library.revise("writer", skill.id, 1, "draft")).rejects.toThrow("read-only");
+    await expect(library.get(skill.id, 2)).rejects.toThrow("shipped revision");
+    expect(network).not.toHaveBeenCalled();
+  });
+
+  it("recognizes role-managed bundled skills without overwriting them or contacting the marketplace", async () => {
+    const bundledRoot = resolve(__dirname, "../../resources/skill-packs");
+    library = new LocalSkillLibrary(join(root, "library"), () => agents, bundledRoot);
+    const { syncManagedSkillFiles } = await import("./managed-skill-service");
+    const content = await readFile(join(bundledRoot, "spec-kit/skills/speckit-analyze/SKILL.md"), "utf8");
+    await syncManagedSkillFiles(agents[1].workspacePath, "speckit-analyze", [{ path: "SKILL.md", content }]);
+    service = new SkillMarketplaceService(
+      auth,
+      () => agents,
+      async () => undefined,
+      library,
+    );
+    const skill = (await library.list()).find((item) => item.slug === "speckit-analyze");
+    if (!skill) throw new Error("Shipped skill missing.");
+    expect(await service.listInstalled("reader")).toContainEqual(
+      expect.objectContaining({ skillId: skill.id, origin: "managed" }),
+    );
+    expect(await service.install({ agentId: "reader", skillId: skill.id })).toMatchObject({ origin: "managed" });
+    expect(await readFile(join(agents[1].workspacePath, ".agents/skills/speckit-analyze/SKILL.md"), "utf8")).toBe(
+      content,
     );
     expect(network).not.toHaveBeenCalled();
   });

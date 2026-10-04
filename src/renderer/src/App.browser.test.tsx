@@ -13,6 +13,7 @@ import {
   emitAgentEvent,
   emitBrowserLiveView,
   emitBrowserPictureInPicture,
+  emitServers,
   installDanidexStub,
   testServer,
 } from "./app-test-harness";
@@ -34,8 +35,10 @@ async function openComputerAndCard(title: string): Promise<void> {
 }
 
 describe("Dani-Dex connected desktop shell", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     installDanidexStub();
+    await import("./features/account/AccountDock");
+    await import("./features/settings/SettingsModal");
   });
 
   afterEach(() => {
@@ -553,8 +556,12 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.getByRole("textbox", { name: "Browser address" })).toHaveValue("https://example.com/active");
   });
 
-  it("restores desktop Picture in Picture per conversation without overriding it during agent control", async () => {
+  it("restores desktop Picture in Picture per Chief server scope without overriding it during agent control", async () => {
     window.localStorage.setItem("danidex:browser-pip-native-bounds", "640,320,460,340");
+    vi.mocked(window.danidex.servers.list).mockResolvedValue([
+      testServer("local", true),
+      testServer("remote-1", false),
+    ]);
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
     emitAgentEvent?.({
@@ -563,7 +570,7 @@ describe("Dani-Dex connected desktop shell", () => {
       activeTabId: "tab-pip-restore",
     });
     await openComputerAndCard("Restored PiP");
-    await fireEvent.click(screen.getByRole("button", { name: "Open browser Picture in Picture" }));
+    await fireEvent.click(await screen.findByRole("button", { name: "Open browser Picture in Picture" }));
     await waitFor(() =>
       expect(window.danidex.browser.openPictureInPicture).toHaveBeenLastCalledWith({
         x: 640,
@@ -591,10 +598,24 @@ describe("Dani-Dex connected desktop shell", () => {
       },
     });
     expect(screen.queryByRole("complementary", { name: "Browser" })).not.toBeInTheDocument();
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
+    emitServers?.([testServer("local", false), testServer("remote-1", true)]);
     await waitFor(() => expect(window.danidex.browser.closePictureInPicture).toHaveBeenCalled());
-    await fireEvent.click(screen.getByRole("button", { name: /Chief/ }));
+    emitServers?.([testServer("local", true), testServer("remote-1", false)]);
+    await screen.findByRole("heading", { name: "Chief" });
+    emitAgentEvent?.({
+      type: "browser-changed",
+      tabs: [browserTab("tab-pip-restore", "Restored PiP")],
+      activeTabId: "tab-pip-restore",
+    });
+    await openComputerAndCard("Restored PiP");
+    await fireEvent.click(await screen.findByRole("button", { name: "Open browser Picture in Picture" }));
     await waitFor(() => expect(window.danidex.browser.openPictureInPicture).toHaveBeenCalledTimes(2));
+    expect(window.danidex.browser.openPictureInPicture).toHaveBeenLastCalledWith({
+      x: 640,
+      y: 320,
+      width: 460,
+      height: 340,
+    });
   });
 
   it("shows the browser control indicator only while an agent acts", async () => {
@@ -1277,23 +1298,108 @@ describe("Dani-Dex connected desktop shell", () => {
       expect(await screen.findByText("Approved body")).toBeInTheDocument();
     });
 
-    it.each(["another preview", "another agent"])("ignores a late failure after opening %s", async (next) => {
+    it.each(["another preview", "another server"])("ignores a late failure after opening %s", async (next) => {
       const pending = Promise.withResolvers<typeof preview>();
       previewMock().mockReturnValueOnce(pending.promise).mockResolvedValueOnce(preview);
+      vi.mocked(window.danidex.servers.list).mockResolvedValue([
+        testServer("local", true),
+        testServer("remote-1", false),
+      ]);
       render(() => <App />);
       await fireEvent.click(await screen.findByRole("button", { name: linkName }));
       if (next === "another preview") {
         await fireEvent.click(screen.getByRole("button", { name: linkName }));
         await screen.findByText("Approved body");
       } else {
-        await fireEvent.click(screen.getByRole("button", { name: /^Sales Outbound/ }));
-        await screen.findByRole("heading", { name: "Sales Outbound" });
+        emitServers?.([testServer("local", false), testServer("remote-1", true)]);
+        await waitFor(() =>
+          expect(screen.getByRole("button", { name: "Studio Mac server" })).toHaveAttribute("aria-pressed", "true"),
+        );
+        await screen.findByRole("heading", { name: "Chief" });
       }
       pending.reject(missingError);
       await pending.promise.catch(() => {});
       flush();
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
+  });
+
+  it("previews an outside workspace file from a user click without a containment banner", async () => {
+    const path = "/tmp/dani-9409-permission-off.txt";
+    vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) => ({
+      agentId,
+      threadId: agentId === "chief" ? "thread-chief" : null,
+      activeTurnId: null,
+      revision: 1,
+      messages:
+        agentId === "chief"
+          ? [
+              {
+                id: "outside-workspace-path",
+                author: "assistant",
+                text: `Created [receipt](${path}) and \`${path}\`.`,
+                createdAt: "2026-08-24T12:16:00.000Z",
+                status: "completed",
+              },
+            ]
+          : [],
+      readState: { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
+    }));
+    render(() => <App />);
+    const links = await screen.findAllByRole("button", { name: "Open workspace file dani-9409-permission-off.txt" });
+    await fireEvent.click(links[0]);
+    await waitFor(() =>
+      expect(window.danidex.agent.previewWorkspaceFile).toHaveBeenCalledWith({ agentId: "chief", path }),
+    );
+    expect(window.danidex.agent.openWorkspaceFile).not.toHaveBeenCalled();
+    expect(screen.queryByText("Workspace file must be inside the agent workspace.")).not.toBeInTheDocument();
+  });
+
+  it("shows Shared folder contents in the panel without opening Finder", async () => {
+    vi.mocked(window.danidex.agent.readConversation).mockImplementation(async (agentId) => ({
+      agentId,
+      threadId: "thread-chief",
+      activeTurnId: null,
+      revision: 1,
+      messages: [
+        {
+          id: "file-folder",
+          author: "assistant",
+          text: "[old.txt](/tmp/old.txt) [Shared](/Users/dan/Dani-Dex/Shared)",
+          createdAt: "2026-10-04T12:00:00Z",
+          status: "completed",
+        },
+      ],
+      readState: { unreadCount: 0, firstUnreadMessageId: null, throughMessageId: null },
+    }));
+    vi.mocked(window.danidex.agent.previewWorkspaceFile).mockResolvedValueOnce({
+      name: "old.txt",
+      size: 3,
+      mimeType: "text/plain",
+      previewKind: "text",
+      bytes: new TextEncoder().encode("old preview"),
+    });
+    vi.mocked(window.danidex.agent.previewSharedFile).mockResolvedValueOnce({
+      name: "Shared",
+      size: 0,
+      mimeType: "inode/directory",
+      previewKind: "none",
+      bytes: null,
+      directory: {
+        path: "/Users/dan/Dani-Dex/Shared",
+        entries: [{ name: "note.txt", path: "/Users/dan/Dani-Dex/Shared/note.txt", isDirectory: false }],
+        truncated: false,
+      },
+    });
+    render(() => <App />);
+    await fireEvent.click(await screen.findByRole("button", { name: "Open workspace file old.txt" }));
+    await screen.findByText("old preview");
+    await fireEvent.click(screen.getByRole("button", { name: "Open shared file Shared" }));
+    await waitFor(() => expect(screen.queryByText("old preview")).not.toBeInTheDocument());
+    expect(await screen.findByRole("button", { name: "Preview file note.txt" })).toBeInTheDocument();
+    expect(window.danidex.agent.openSharedFile).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(window.danidex.agent.previewSharedFile).toHaveBeenCalledWith({ path: "/Users/dan/Dani-Dex/Shared" });
   });
 
   it("opens workspace Markdown in the right sidebar and keeps external opening explicit", async () => {

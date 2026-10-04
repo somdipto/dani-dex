@@ -28,7 +28,7 @@ describe("Dani-Dex with sign-in switched off", () => {
     vi.mocked(window.danidex.auth.getState).mockResolvedValueOnce({ status: "signed_out" });
     render(() => <App />);
 
-    expect(await screen.findByRole("heading", { name: "Meet Dani-Dex" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Meet your chief of staff" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Sign in to Dani-Dex" })).not.toBeInTheDocument();
   });
 

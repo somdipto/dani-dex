@@ -36,6 +36,8 @@ import { loginShellPath, type McpToolRuntimes, NO_MCP_TOOL_RUNTIMES } from "./mc
 import type { DynamicToolCallParams } from "./protocol";
 import { SidebarLayoutStore } from "./sidebar-layout-store";
 
+const RESEARCH_MCP_CONFIG = { http_headers: {}, url: "https://mcp.exa.ai/mcp?tools=web_search_exa,web_fetch_exa" };
+
 let root: string;
 let logPath: string;
 let service: AgentService | null = null;
@@ -398,9 +400,9 @@ describe.sequential("AgentService: providers", () => {
     await service.sendMessage({ agentId: "chief", text: "Start." });
     await waitFor(() => service?.listQueue("chief").deliveries.every((delivery) => delivery.status === "completed"));
     const firstSession = store.activeProviderSession("chief")?.externalSessionId;
-    expect(paramsRecord(client.requests.find((request) => request.method === "thread/start")?.params)?.config).toBe(
-      undefined,
-    );
+    expect(paramsRecord(client.requests.find((request) => request.method === "thread/start")?.params)?.config).toEqual({
+      mcp_servers: { "dani-free-research": RESEARCH_MCP_CONFIG },
+    });
 
     // Codex ignores the configuration on resume, so a new MCP server has to force a new session.
     service.saveMcpServer({
@@ -429,6 +431,7 @@ describe.sequential("AgentService: providers", () => {
     expect(starts).toHaveLength(2);
     expect(paramsRecord(starts[1]?.params)?.config).toEqual({
       mcp_servers: {
+        "dani-free-research": RESEARCH_MCP_CONFIG,
         Filesystem: { command: "/bin/echo", args: ["ready"], env: await launchEnvironment({ TOKEN: "secret" }) },
       },
     });
@@ -471,7 +474,12 @@ describe.sequential("AgentService: providers", () => {
 
     // Reported, and still not sent: the point of the report is that the server is missing.
     const starts = client.requests.filter((request) => request.method === "thread/start");
-    expect(paramsRecord(starts.at(-1)?.params)?.config).toBe(undefined);
+    const config = paramsRecord(paramsRecord(starts.at(-1)?.params)?.config);
+    const mcpServers = paramsRecord(config?.mcp_servers);
+    expect(mcpServers).toEqual({
+      "dani-free-research": { http_headers: {}, url: "https://mcp.exa.ai/mcp?tools=web_search_exa,web_fetch_exa" },
+    });
+    expect(mcpServers).not.toHaveProperty("local-sqlite");
 
     await service.sendMessage({ agentId: "chief", text: "Again." });
     await waitFor(() => service?.listQueue("chief").deliveries.every((delivery) => delivery.status === "completed"));
@@ -529,6 +537,7 @@ describe.sequential("AgentService: providers", () => {
     const starts = client.requests.filter((request) => request.method === "thread/start");
     expect(paramsRecord(starts.at(-1)?.params)?.config).toEqual({
       mcp_servers: {
+        "dani-free-research": RESEARCH_MCP_CONFIG,
         "Signed in": { url: "https://mcp.example.com/mcp", http_headers: { Authorization: `Bearer ${token}` } },
       },
     });
@@ -615,7 +624,9 @@ describe.sequential("AgentService: providers", () => {
     if (!firstSession) throw new Error("The Codex session did not start.");
     // No runtime yet, so the server is dropped from the session while the stored row stays.
     const firstStart = client.requests.filter((request) => request.method === "thread/start").at(-1);
-    expect(paramsRecord(firstStart?.params)?.config ?? {}).not.toHaveProperty("mcp_servers");
+    expect(paramsRecord(paramsRecord(firstStart?.params)?.config)?.mcp_servers).toEqual({
+      "dani-free-research": RESEARCH_MCP_CONFIG,
+    });
 
     // Bun finishes downloading between the turns. Nothing about the stored set changed.
     toolRuntimes = { binDirectories: ["/tmp/fake-bun-bin"], commandAliases: { npx: "/tmp/fake-bun-bin/bunx" } };
@@ -697,7 +708,9 @@ describe.sequential("AgentService: providers", () => {
       url,
       headers: [],
     });
-    const [first] = service.saveMcpServer({ config: httpConfig("Stripe", "https://mcp.stripe.com") });
+    const first = service
+      .saveMcpServer({ config: httpConfig("Stripe", "https://mcp.stripe.com") })
+      .find((config) => config.name === "Stripe");
     const [second] = service
       .saveMcpServer({ config: httpConfig("Stripe copy", "https://mcp.stripe.com/") })
       .filter((config) => config.name === "Stripe copy");
@@ -769,7 +782,10 @@ describe.sequential("AgentService: providers", () => {
     // `Database` is left out: the Codex configuration shape for a working directory is unconfirmed,
     // and a server told to open `./data.db` from the wrong place creates a second database.
     expect(paramsRecord(starts[1]?.params)?.config).toEqual({
-      mcp_servers: { Filesystem: { command: "/bin/echo", args: ["ready"], env: await launchEnvironment() } },
+      mcp_servers: {
+        "dani-free-research": RESEARCH_MCP_CONFIG,
+        Filesystem: { command: "/bin/echo", args: ["ready"], env: await launchEnvironment() },
+      },
     });
   });
 
@@ -804,12 +820,16 @@ describe.sequential("AgentService: providers", () => {
     });
     await service.initialize();
 
-    expect(service.enabledMcpServers().map((entry) => entry.name)).toEqual([COMPUTER_USE_MCP_SERVER_NAME]);
+    expect(service.enabledMcpServers().map((entry) => entry.name)).toEqual([
+      "dani-free-research",
+      COMPUTER_USE_MCP_SERVER_NAME,
+    ]);
     await service.sendMessage({ agentId: "chief", text: "Start." });
     await waitFor(() => service?.listQueue("chief").deliveries.every((delivery) => delivery.status === "completed"));
     const [start] = client.requests.filter((request) => request.method === "thread/start");
     expect(paramsRecord(start?.params)?.config).toEqual({
       mcp_servers: {
+        "dani-free-research": RESEARCH_MCP_CONFIG,
         [COMPUTER_USE_MCP_SERVER_NAME]: {
           command: "/opt/cua/bin/cua-driver",
           args: ["mcp", "--socket", "/tmp/dani-dex-test.sock"],
@@ -819,7 +839,7 @@ describe.sequential("AgentService: providers", () => {
     });
 
     driverRunning = false;
-    expect(service.enabledMcpServers()).toEqual([]);
+    expect(service.enabledMcpServers().map((entry) => entry.name)).toEqual(["dani-free-research"]);
   });
 
   /*
@@ -872,6 +892,7 @@ describe.sequential("AgentService: providers", () => {
     // entry is whole.
     expect(paramsRecord(starts().at(-1)?.params)?.config).toEqual({
       mcp_servers: {
+        "dani-free-research": RESEARCH_MCP_CONFIG,
         "Local notes": { enabled: false },
         Filesystem: { command: "/bin/echo", args: ["ready"], env: await launchEnvironment() },
       },
@@ -1026,7 +1047,10 @@ describe.sequential("AgentService: providers", () => {
     const starts = client.requests.filter((request) => request.method === "thread/start");
     expect(starts).toHaveLength(2);
     expect(paramsRecord(starts[1]?.params)?.config).toEqual({
-      mcp_servers: { Filesystem: { command: "/bin/echo", args: ["ready"], env: await launchEnvironment() } },
+      mcp_servers: {
+        "dani-free-research": RESEARCH_MCP_CONFIG,
+        Filesystem: { command: "/bin/echo", args: ["ready"], env: await launchEnvironment() },
+      },
     });
   });
 
@@ -1186,7 +1210,10 @@ describe.sequential("AgentService: providers", () => {
     const starts = client.requests.filter((request) => request.method === "thread/start");
     expect(starts).toHaveLength(2);
     expect(paramsRecord(starts[1]?.params)?.config).toEqual({
-      mcp_servers: { Filesystem: { command: "/bin/echo", args: ["ready"], env: await launchEnvironment() } },
+      mcp_servers: {
+        "dani-free-research": RESEARCH_MCP_CONFIG,
+        Filesystem: { command: "/bin/echo", args: ["ready"], env: await launchEnvironment() },
+      },
     });
   });
 
@@ -1837,6 +1864,7 @@ describe.sequential("AgentService: providers", () => {
       store,
       mailbox,
       preferredProvider: "opencode",
+      profileGenerationRoute: () => ({ provider: "opencode", modelId: "studio/local-llm" }),
       clientFactory: (provider) => {
         const profile = generating;
         const client = new FakeAgentClient(provider, undefined, true, true, {}, async () => {
@@ -2178,6 +2206,20 @@ describe.sequential("AgentService: providers", () => {
     });
     await expect(service.resolveSharedFile(outside)).rejects.toThrow("inside the shared directory");
     await expect(service.resolveSharedFile(link)).rejects.toThrow("inside the shared directory");
+    await expect(service.resolveSharedFile(outside, true)).resolves.toMatchObject({
+      path: await realpath(outside),
+      name: "outside.csv",
+    });
+    await expect(service.resolveSharedFile(link, true)).resolves.toMatchObject({ path: await realpath(outside) });
+    await expect(service.resolveSharedFile("~/Dani-Dex/Shared", true)).resolves.toMatchObject({
+      path: await realpath(store.sharedRoot),
+      isDirectory: true,
+    });
+    await expect(service.resolveSharedFile(store.sharedRoot, true)).resolves.toMatchObject({
+      path: await realpath(store.sharedRoot),
+      isDirectory: true,
+    });
+    await expect(service.resolveSharedFile(store.sharedRoot)).rejects.toThrow("inside the shared directory");
   });
 
   it("opens a historical routine message that only exists in the mailbox", async () => {
@@ -2241,6 +2283,16 @@ describe.sequential("AgentService: providers", () => {
     });
     await expect(service.resolveWorkspaceFile(agent.id, outside)).rejects.toThrow("inside the agent workspace");
     await expect(service.resolveWorkspaceFile(agent.id, link)).rejects.toThrow("inside the agent workspace");
+    await expect(service.resolveWorkspaceFile(agent.id, outside, true)).resolves.toMatchObject({
+      path: await realpath(outside),
+      name: "outside.html",
+    });
+    await expect(service.resolveWorkspaceFile(agent.id, link, true)).resolves.toMatchObject({
+      path: await realpath(outside),
+    });
+    await expect(service.resolveWorkspaceFile(agent.id, join(root, "missing.txt"), true)).rejects.toMatchObject({
+      code: "ENOENT",
+    });
     await expect(service.resolveWorkspaceFile("missing", page)).rejects.toThrow("Unknown agent");
   });
 

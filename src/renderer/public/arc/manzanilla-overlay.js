@@ -18,14 +18,14 @@ const NS = "http://www.w3.org/2000/svg",
   detail = document.querySelector("#detail");
 const icons = {
   mic: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3ZM5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8",
-  team: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
+  team: "M3 3h7v7H3ZM14 3h7v7h-7ZM3 14h7v7H3ZM14 14h7v7h-7Z",
   tasks: "M9 4H5v18h14V4h-4M9 2h6v4H9ZM8 11h8M8 16h8",
   desk: "M3 3h18v14H3ZM8 22h8M12 17v5",
   plus: "M12 4v16M4 12h16",
   loop: "M4 8a8 8 0 0 1 14-3l3 3M21 2v6h-6M20 16A8 8 0 0 1 6 19l-3-3M3 22v-6h6",
   talk: "M21 11a9 9 0 0 1-9 9H4l-3 2 1-7a9 9 0 1 1 19-4",
   activity: "M3 3v18h18M6 15l5-6 4 3 6-8",
-  person: "M20 22v-2a8 8 0 0 0-16 0v2M16 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
+  workspace: "M4 4h16v12H4ZM8 20h8M12 16v4",
 };
 icons.link = "M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2";
 icons.phone = "M6 2h12v20H6ZM9 5h6M10 18h4";
@@ -189,7 +189,7 @@ const el = (tag, attrs = {}) => {
 };
 function icon(key) {
   const s = el("svg", { viewBox: "0 0 24 24" });
-  s.append(el("path", { d: icons[key] || icons.person }));
+  s.append(el("path", { d: icons[key] || icons.workspace }));
   return s;
 }
 const detents = Array.from({ length: 4 }, () => {
@@ -368,7 +368,7 @@ function row(inner, outer, items, index, animate, rotation = 0, previousAngle = 
     const [x, y] = polar((inner + outer) / 2, mid),
       content = el("g", { class: "item-content", "data-pivot-x": x, "data-pivot-y": y, "pointer-events": "none" }),
       g = el("g", { class: "glyph", transform: `translate(${x - 12},${y - 24})` });
-    g.append(el("path", { d: icons[item.icon] || icons.person }));
+    g.append(el("path", { d: icons[item.icon] || icons.workspace }));
     content.append(g);
     if (item.icon === "phone")
       content.append(
@@ -533,7 +533,7 @@ function render(animate = false, rotation = 0, preservePrimary = false) {
     if (teamPage) {
       const items = team.slice(page * 4, page * 4 + 4).map((a, i) => ({
         label: a.name,
-        icon: "person",
+        icon: "workspace",
         sub: a.status,
         active: employee === page * 4 + i,
         click: () => action("employee", a.id),

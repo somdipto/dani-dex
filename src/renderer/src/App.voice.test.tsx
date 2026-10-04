@@ -219,6 +219,14 @@ describe("Dani-Dex connected desktop shell", () => {
             rejectTranscription = reject;
           }),
       );
+    vi.mocked(window.danidex.servers.list).mockResolvedValue([
+      testServer("local", true),
+      testServer("remote-1", false),
+    ]);
+    vi.mocked(window.danidex.servers.select).mockImplementation(async (id) => [
+      testServer("local", id === "local"),
+      testServer("remote-1", id === "remote-1"),
+    ]);
     installVoiceRecordingMocks();
     render(() => <App />);
 
@@ -226,12 +234,12 @@ describe("Dani-Dex connected desktop shell", () => {
     const recording = await screen.findByRole("group", { name: "Voice recording" });
     await fireEvent.click(within(recording).getByRole("button", { name: "Stop voice recording" }));
     await waitFor(() => expect(window.danidex.voice.transcribe).toHaveBeenCalledOnce());
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
+    await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
 
     resolveTranscription?.({ text: "Draft for Chief" });
     await screen.findByRole("button", { name: "Create prompt with voice" });
     expect(window.danidex.agent.sendMessage).not.toHaveBeenCalled();
-    await fireEvent.click(screen.getByRole("button", { name: /Chief/ }));
+    await fireEvent.click(screen.getByRole("button", { name: "Local server" }));
     await waitFor(() =>
       expect(screen.getByRole("textbox", { name: "Message Chief" })).toHaveTextContent("Draft for Chief"),
     );
@@ -240,12 +248,12 @@ describe("Dani-Dex connected desktop shell", () => {
     await screen.findByRole("group", { name: "Voice recording" });
     await fireEvent.click(screen.getByRole("button", { name: "Send voice message" }));
     await waitFor(() => expect(window.danidex.voice.transcribe).toHaveBeenCalledTimes(2));
-    await fireEvent.click(screen.getByRole("button", { name: /Sales Outbound/ }));
+    await fireEvent.click(screen.getByRole("button", { name: "Studio Mac server" }));
 
     rejectTranscription?.(new Error("Transcription failed"));
     await screen.findByRole("button", { name: "Create prompt with voice" });
     expect(screen.queryByText("Transcription failed")).not.toBeInTheDocument();
-    await fireEvent.click(screen.getByRole("button", { name: /Chief/ }));
+    await fireEvent.click(screen.getByRole("button", { name: "Local server" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Transcription failed");
     await fireEvent.click(screen.getByRole("button", { name: "Send message" }));
     await waitFor(() => expect(screen.queryByText("Transcription failed")).not.toBeInTheDocument());
@@ -350,17 +358,23 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("button", { name: "Create prompt with voice" })).not.toBeInTheDocument();
   });
 
-  it("starts a voice call from the composer and shows why it could not connect", async () => {
+  it("opens voice choices without connecting, spending or capturing audio", async () => {
     render(() => <App />);
     await screen.findByRole("heading", { name: "Chief" });
-
     await fireEvent.click(await screen.findByRole("button", { name: "Start voice call" }));
-
-    await waitFor(() => expect(window.danidex.voice.createRealtimeSession).toHaveBeenCalledOnce());
-    expect(await screen.findByText("Voice call unavailable")).toBeInTheDocument();
-    expect(await screen.findByText("Add your OpenAI API key to start a voice call.")).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Use your voice" })).toBeInTheDocument();
+    expect(window.danidex.voice.createRealtimeSession).not.toHaveBeenCalled();
+    expect(window.danidex.voice.getModelStatus).not.toHaveBeenCalled();
+    expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+    await fireEvent.click(screen.getByRole("button", { name: "Set up live conversation" }));
+    expect(
+      await screen.findByText(
+        "This call uses paid OpenAI API usage, not your ChatGPT subscription. You can end it at any time.",
+      ),
+    ).toBeInTheDocument();
+    expect(window.danidex.voice.createRealtimeSession).not.toHaveBeenCalled();
+    await fireEvent.click(screen.getByRole("button", { name: "Close voice setup" }));
     expect(screen.getByRole("textbox", { name: "Message Chief" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Start voice call" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "End voice call" })).not.toBeInTheDocument();
   });
 });

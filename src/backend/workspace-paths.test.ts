@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { rebaseLegacyWorkspacePath } from "./workspace-paths";
+import { localClickedPath, rebaseLegacyWorkspacePath } from "./workspace-paths";
 
 const AGENT_ID = "agent-6d3e8b17-9c04-4f21-8a55-1b2c3d4e5f60";
 const LEGACY_ID = "bot-6d3e8b17-9c04-4f21-8a55-1b2c3d4e5f60";
@@ -22,4 +22,11 @@ describe("rebaseLegacyWorkspacePath", () => {
     expect(rebaseLegacyWorkspacePath(current, AGENT_ID, `${legacy}/../../secret.env`)).toBeNull();
     expect(rebaseLegacyWorkspacePath(`/Users/dev/code/${AGENT_ID}`, AGENT_ID, `${legacy}/app/page.tsx`)).toBeNull();
   });
+});
+
+it("expands home and encoded paths for explicit local clicks", () => {
+  expect(localClickedPath("~/Desktop/my%20file.txt", "/Users/owner")).toBe("/Users/owner/Desktop/my file.txt");
+  expect(localClickedPath("/tmp/my%20file.txt", "/Users/owner")).toBe("/tmp/my file.txt");
+  expect(localClickedPath("~/Dani-Dex/Shared/file.txt", "/Users/owner")).toBe("~/Dani-Dex/Shared/file.txt");
+  expect(localClickedPath("relative.txt", "/Users/owner")).toBe("relative.txt");
 });

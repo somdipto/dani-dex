@@ -40,7 +40,12 @@ export interface DaniDexModelSource {
   readonly name: string;
   readonly baseUrl: string;
   /** The models the endpoint serves. OpenCode lists only the ones named here. */
-  readonly models: readonly { readonly id: string; readonly name: string }[];
+  readonly models: readonly {
+    readonly id: string;
+    readonly name: string;
+    readonly limit?: { readonly context: number; readonly output: number };
+    readonly reasoningEffortLevels?: readonly ("low" | "medium" | "high" | "max")[];
+  }[];
   /** Sent with every request, for a proxy that authenticates by header instead of a key. */
   readonly headers?: readonly { readonly name: string; readonly value: string }[];
   /**

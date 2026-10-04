@@ -220,7 +220,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  background: var(--dani-dex-bg-panel);
+  background: var(--dani-dex-bg-surface);
 }
 
 .voice-choice-card {

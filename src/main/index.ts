@@ -22,6 +22,7 @@ import { hostAllowsTenantLaunch } from "./host-update-coordinator";
 import { accountIpcHandlers } from "./ipc/account-handlers";
 import { agentIpcHandlers } from "./ipc/agent-handlers";
 import { appIpcHandlers } from "./ipc/app-handlers";
+import { arcIpcHandlers } from "./ipc/arc-handlers";
 import { attachmentIpcHandlers } from "./ipc/attachment-handlers";
 import { browserIpcHandlers } from "./ipc/browser-handlers";
 import { channelMemoryIpcHandlers } from "./ipc/channel-memory-handlers";
@@ -297,38 +298,41 @@ function attachWindowsSessionEndHandlers(window: BrowserWindow): void {
   });
 }
 
-function registerIpcHandlers({
-  service,
-  providerRuntimes,
-  providerCredentials,
-  chatGptPlan,
-  mailbox,
-  browser,
-  browserPictureInPicture,
-  browserView,
-  updater,
-  setupFile,
-  activeHarness,
-  analyticsPreferenceFile,
-  updatePreferenceFile,
-  approvalAutomation,
-  language,
-  agentInitialization,
-  sidebarLayout,
-  host,
-  remoteDesktop,
-  remoteServers,
-  centralAuth,
-  skills,
-  hostedSites,
-  customProviders,
-  marketplaceAgents,
-  voice,
-  dynamicIsland,
-  cuaDriver,
-  computerUsePermissionHelp,
-  analytics,
-}: ApplicationServices): void {
+function registerIpcHandlers(
+  {
+    service,
+    providerRuntimes,
+    providerCredentials,
+    chatGptPlan,
+    mailbox,
+    browser,
+    browserPictureInPicture,
+    browserView,
+    updater,
+    setupFile,
+    activeHarness,
+    analyticsPreferenceFile,
+    updatePreferenceFile,
+    approvalAutomation,
+    language,
+    agentInitialization,
+    sidebarLayout,
+    host,
+    remoteDesktop,
+    remoteServers,
+    centralAuth,
+    skills,
+    hostedSites,
+    customProviders,
+    marketplaceAgents,
+    voice,
+    dynamicIsland,
+    cuaDriver,
+    computerUsePermissionHelp,
+    analytics,
+  }: ApplicationServices,
+  arc: DaniArcWindow,
+): void {
   // Every renderer-to-main endpoint is bound by one of these, one file per domain under ./ipc.
   // Nothing is bound inline here: this is the trust boundary, and a reviewer should be able to read
   // a domain's whole surface in one file rather than find it interleaved with window and lifecycle
@@ -340,11 +344,14 @@ function registerIpcHandlers({
     join(app.getPath("userData"), "codex-voice"),
     () => providerRuntimes.executablePath("codex"),
     (url) => shell.openExternal(url),
+    undefined,
+    () => providerRuntimes.downloadAndWait("codex"),
   );
   app.once("before-quit", () => {
     void codexVoice.dispose();
   });
   registerIpcGroups({
+    ...arcIpcHandlers(arc),
     ...appIpcHandlers({
       service,
       mailbox,
@@ -706,7 +713,7 @@ if (!hasSingleInstanceLock) {
       });
       // Before the renderer loads: the trust boundary and every protocol it fetches through have to
       // be in place before the first request can arrive.
-      registerIpcHandlers(built);
+      registerIpcHandlers(built, arc);
       configureApplicationMenu(service, updater, language.translate, () => arc.show());
       // One place turns a language change into every visible consequence: the menu is built again
       // because a native label cannot be changed in place, and every window is told, including the

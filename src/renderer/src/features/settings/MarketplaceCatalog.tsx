@@ -165,7 +165,7 @@ export function MarketplaceCatalog<T extends CatalogItem>(props: {
     clearTimeout(timer);
   });
   /** True between a keystroke and the answer for it, when `items` still belongs to an older query. */
-  const searchPending = () => Boolean(state.query.trim()) && state.loadedQuery !== state.query.trim();
+  const searchPending = () => Boolean(state.query.trim()) && !state.error && state.loadedQuery !== state.query.trim();
   /**
    * What the rows show: the answer to the current query once it arrives, and the loaded rows narrowed by
    * the query until then. Narrowing only ever removes rows, so the list never keeps a wrong match on

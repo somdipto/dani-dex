@@ -138,7 +138,42 @@ describe("parseDaniFreeReadyLine", () => {
 });
 
 describe("DaniFreeSupervisor", () => {
-  it("starts the proxy, lists its models without forcing a refresh, and names the source Dani", async () => {
+  it("does not wait for refresh and aborts it on shutdown", async () => {
+    const fake = await fakeDaniFree();
+    const refresh: { signal: AbortSignal | null } = { signal: null };
+    const supervisor = new DaniFreeSupervisor({
+      executable: fake.executable,
+      home: join(fake.root, "home"),
+      fetch: async (url, init) => {
+        if (String(url).endsWith("/v1/models/refresh")) {
+          refresh.signal = init?.signal ?? null;
+          return new Promise<Response>((_resolve, reject) => {
+            refresh.signal?.addEventListener("abort", () => reject(new Error("cancelled")), { once: true });
+          });
+        }
+        return fetch(url, init);
+      },
+    });
+    supervisors.push(supervisor);
+    await expect(supervisor.start()).resolves.toMatchObject({ models: [{ id: "dani-free-auto" }] });
+    expect(refresh.signal).not.toBeNull();
+    expect(supervisor.isRunning()).toBe(true);
+    await supervisor.stop();
+    expect(refresh.signal?.aborted).toBe(true);
+  });
+  it("keeps the usable Auto source when background refresh fails", async () => {
+    const fake = await fakeDaniFree();
+    const supervisor = new DaniFreeSupervisor({
+      executable: fake.executable,
+      home: join(fake.root, "home"),
+      fetch: async (url, init) =>
+        String(url).endsWith("/v1/models/refresh") ? new Response("unavailable", { status: 503 }) : fetch(url, init),
+    });
+    supervisors.push(supervisor);
+    await expect(supervisor.start()).resolves.toMatchObject({ models: [{ id: "dani-free-auto" }] });
+    expect(supervisor.isRunning()).toBe(true);
+  });
+  it("starts the proxy, refreshes in the background, and keeps the Auto source", async () => {
     const fake = await fakeDaniFree();
     const supervisor = new DaniFreeSupervisor({ executable: fake.executable, home: join(fake.root, "home") });
     supervisors.push(supervisor);
@@ -156,7 +191,7 @@ describe("DaniFreeSupervisor", () => {
     const requests = await readFile(fake.log, "utf8");
     expect(requests).toContain("argv start private=0 host=127.0.0.1");
     expect(requests).toContain("GET /v1/models install-key");
-    expect(requests).not.toContain("/v1/models/refresh");
+    await expect.poll(() => readFile(fake.log, "utf8")).toContain("POST /v1/models/refresh install-key");
 
     await supervisor.stop();
     expect(await readFile(fake.log, "utf8")).toContain("SIGTERM");
