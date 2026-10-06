@@ -10,7 +10,7 @@ All notable changes to Dani-Dex will be documented here. The project follows
 ### Added
 
 - Package the character selection and robot avatars already present in the current source.
-- Package the Arc dial already present in the current source on macOS. The Arc dial is not available on Windows.
+- Arc dial packaged (macOS only; Windows/Linux Arc is parked in the V2 backlog).
 
 ### Changed
 
