@@ -123,6 +123,8 @@ export function parseExternalDestination(input: unknown): ExternalDestination {
     input !== "opencode-auth" &&
     input !== "feedback" &&
     input !== "message" &&
+    input !== "import-chatgpt" &&
+    input !== "import-claude" &&
     input !== "mac-screen-recording"
   ) {
     throw new Error("Unknown external destination.");

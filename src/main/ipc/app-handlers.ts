@@ -31,6 +31,10 @@ import {
 } from "./app-inputs";
 import { stringPayload } from "./validation";
 
+// Keep identical to PROMPT in ContextImportPanel.tsx.
+const CONTEXT_EXPORT_PROMPT =
+  "Export only what you can actually access from this chat's memory/context - do not infer or invent. Say when context is unavailable or incomplete. Exclude credentials, payment details, medical info, and private third-party details. Return discrete facts and preferences, each with its source and your uncertainty, as a simple list.";
+
 /**
  * Every destination `openExternal` may reach, as a closed table.
  *
@@ -48,6 +52,9 @@ export const EXTERNAL_DESTINATIONS: Record<ExternalDestination, string> = {
   "claude-install": "https://code.claude.com/docs",
   feedback: "https://x.com/intent/post?text=Feedback%20for%20DaniDex%20%40norbertbodziony%3A%20",
   message: "https://x.com/norbertbodziony",
+  // Fixed pages with the fixed context-export prompt prefilled; the renderer names one, never a URL.
+  "import-chatgpt": `https://chatgpt.com/?q=${encodeURIComponent(CONTEXT_EXPORT_PROMPT)}`,
+  "import-claude": `https://claude.ai/new?q=${encodeURIComponent(CONTEXT_EXPORT_PROMPT)}`,
   "mac-screen-recording": MAC_PERMISSION_URLS["screen-recording"],
 };
 

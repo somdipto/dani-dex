@@ -5,6 +5,7 @@ import { desktopAnalytics } from "../../analytics";
 import { createScrollFades } from "../../components/createScrollFades";
 import { Button, Dialog, IconButton, Plus, Textarea, Trash2, X } from "../../components/ui";
 import { errorMessage } from "../../error-message";
+import { ContextImportPanel } from "./ContextImportPanel";
 import type { MemoriesPort } from "./memories-port";
 
 interface AgentMemoriesModalProps {
@@ -225,6 +226,18 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
             </header>
 
             <div class="agent-memories-body">
+              <ContextImportPanel
+                room={props.port.limit - memories().length}
+                limit={props.port.limit}
+                doneLabel={(n) => `Saved ${n} memories as historical imports.`}
+                onSave={async (texts) => {
+                  try {
+                    for (const text of texts) await props.port.create(text);
+                  } finally {
+                    await loadMemories(false);
+                  }
+                }}
+              />
               <Show when={addOpen()}>
                 <section class="agent-memory-composer" aria-label="Add memory">
                   <Textarea

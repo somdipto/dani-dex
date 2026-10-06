@@ -8826,3 +8826,28 @@ body:has(.browser-panel-expanded) .app-frame {
   justify-content: flex-end;
   gap: var(--dani-dex-space-2);
 }
+
+.context-import-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.context-import-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  height: auto;
+  padding: 20px 12px;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: var(--dani-dex-radius-lg);
+}
+.context-import-card-note {
+  font-size: var(--dani-dex-text-sm);
+  opacity: 0.7;
+}
+.context-import-prompt {
+  white-space: pre-wrap;
+  font-size: var(--dani-dex-text-sm);
+  opacity: 0.85;
+}
