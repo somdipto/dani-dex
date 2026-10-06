@@ -3,12 +3,19 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, mkdtemp, readdir, readFile, readlink, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, join } from "node:path";
+import { basename, isAbsolute, join, resolve } from "node:path";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AgentStore } from "./agent-store";
 
 const temporaryRoots: string[] = [];
+const temporaryStores: AgentStore[] = [];
+
+function createStore(userData: string, home: string): AgentStore {
+  const store = new AgentStore(userData, home);
+  temporaryStores.push(store);
+  return store;
+}
 const AGENT_PROFILE_INPUT = {
   name: "Planning Agent",
   description: "Builds clear plans for everyday tasks.",
@@ -24,6 +31,7 @@ const EMPTY_LAYOUT = {
 };
 
 afterEach(async () => {
+  for (const store of temporaryStores.splice(0)) store.database.close();
   await Promise.all(temporaryRoots.splice(0).map((root) => rm(root, { recursive: true })));
 });
 
@@ -31,7 +39,7 @@ describe("AgentStore", () => {
   it("starts a new user with no agents", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
 
     await store.initialize();
 
@@ -43,7 +51,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
 
     await store.initialize();
     const chief = await store.getOrCreate("chief");
@@ -65,7 +73,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const agent = await store.createAgent(AGENT_PROFILE_INPUT);
     await writeFile(join(agent.workspacePath, "notes.md"), "kept");
@@ -100,7 +108,7 @@ describe("AgentStore", () => {
     await mkdir(legacyAvatar, { recursive: true });
     await writeFile(join(legacyAvatar, "avatar.png"), "uploaded");
 
-    const reconciled = new AgentStore(userData, home);
+    const reconciled = createStore(userData, home);
     await reconciled.initialize();
 
     expect(await readFile(join(agent.workspacePath, "notes.md"), "utf8")).toBe("kept");
@@ -119,7 +127,7 @@ describe("AgentStore", () => {
     // is what the database and every open conversation point at, so the leftover never lands on top of it.
     await mkdir(legacyWorkspace, { recursive: true });
     await writeFile(join(legacyWorkspace, "notes.md"), "stale");
-    await new AgentStore(userData, home).initialize();
+    await createStore(userData, home).initialize();
 
     expect(await readFile(join(agent.workspacePath, "notes.md"), "utf8")).toBe("kept");
 
@@ -134,7 +142,7 @@ describe("AgentStore", () => {
       )
       .run(legacyChiefWorkspace, chief.id);
 
-    const ambiguous = new AgentStore(userData, home);
+    const ambiguous = createStore(userData, home);
     await ambiguous.initialize();
 
     expect(ambiguous.list().find((entry) => entry.id === chief.id)?.workspacePath).toBe(legacyChiefWorkspace);
@@ -148,7 +156,7 @@ describe("AgentStore", () => {
     await mkdir(legacyAvatar, { recursive: true });
     await rename(uploadedPath, join(legacyAvatar, basename(uploadedPath)));
 
-    const adopted = new AgentStore(userData, home);
+    const adopted = createStore(userData, home);
     await adopted.initialize();
 
     await expect(readFile(adopted.resolveAvatar(agent.id)?.path ?? "")).resolves.toEqual(Buffer.from(image));
@@ -158,7 +166,7 @@ describe("AgentStore", () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
-    const store = new AgentStore(userData, join(root, "home"));
+    const store = createStore(userData, join(root, "home"));
     await store.initialize();
 
     await store.getOrCreate("chief");
@@ -168,7 +176,7 @@ describe("AgentStore", () => {
     // and a random id would file it against an empty thread while the user's own thread, with every
     // message in it, stays on disk addressable by nothing.
     expect(threadId).toBe("dani-dex-thread-chief");
-    const restored = new AgentStore(userData, join(root, "home"));
+    const restored = createStore(userData, join(root, "home"));
     await restored.initialize();
     expect(restored.list().find((agent) => agent.id === "chief")?.threadId).toBe(threadId);
     await expect(readFile(join(userData, "bots.json"), "utf8")).rejects.toMatchObject({
@@ -186,7 +194,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     await store.getOrCreate("chief");
     const threadId = await store.ensureThreadId("chief");
@@ -207,7 +215,7 @@ describe("AgentStore", () => {
     await store.updatePreview("chief", "stranded");
     expect(store.list().find((agent) => agent.id === "chief")?.threadId).toBeNull();
 
-    const restored = new AgentStore(userData, home);
+    const restored = createStore(userData, home);
     await restored.initialize();
 
     expect(restored.list().find((agent) => agent.id === "chief")?.threadId).toBe(threadId);
@@ -221,7 +229,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const agent = await store.getOrCreate("chief");
     const channelThreadId = "dani-dex-thread-channel-chief";
@@ -240,7 +248,7 @@ describe("AgentStore", () => {
       .prepare("INSERT INTO projection_channel_contexts(channel_id, agent_id, thread_id) VALUES (?, ?, ?)")
       .run("channel-1", agent.id, channelThreadId);
 
-    const restored = new AgentStore(userData, home);
+    const restored = createStore(userData, home);
     await restored.initialize();
 
     expect(restored.list().find((candidate) => candidate.id === agent.id)?.threadId).toBeNull();
@@ -252,7 +260,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     await store.getOrCreate("chief");
     await store.getOrCreate("sales-outbound");
@@ -279,7 +287,7 @@ describe("AgentStore", () => {
       .run("claude fable 5.1 (1m)", "sales-outbound");
     store.database.connection.prepare("DELETE FROM projection_agents WHERE agent_id = ?").run("chief");
 
-    const restored = new AgentStore(userData, home);
+    const restored = createStore(userData, home);
     await restored.initialize();
 
     expect(restored.list().map((agent) => agent.id)).toEqual(["sales-outbound", "chief"]);
@@ -292,7 +300,7 @@ describe("AgentStore", () => {
     // The whole roster gone is the same repair. Both agents come back, and the repair is persisted, so a
     // third launch reads them out of the projection with no replay at all.
     restored.database.connection.exec("DELETE FROM projection_agents");
-    const rebuilt = new AgentStore(userData, home);
+    const rebuilt = createStore(userData, home);
     await rebuilt.initialize();
 
     expect(
@@ -301,7 +309,7 @@ describe("AgentStore", () => {
         .map((agent) => agent.id)
         .sort(),
     ).toEqual(["chief", "sales-outbound"]);
-    const reopened = new AgentStore(userData, home);
+    const reopened = createStore(userData, home);
     await reopened.initialize();
     expect(
       reopened
@@ -316,7 +324,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const agent = await store.createAgent(AGENT_PROFILE_INPUT);
 
@@ -328,7 +336,7 @@ describe("AgentStore", () => {
       routineIds: ["routine-marketplace"],
     });
 
-    const restored = new AgentStore(userData, home);
+    const restored = createStore(userData, home);
     await restored.initialize();
     expect(restored.list().find((candidate) => candidate.id === agent.id)?.marketplaceSource).toEqual({
       listingId: "market-planner",
@@ -369,7 +377,7 @@ describe("AgentStore", () => {
     };
     await writeFile(statePath, `${JSON.stringify(legacy, null, 2)}\n`);
 
-    const restored = new AgentStore(userData, join(root, "home"));
+    const restored = createStore(userData, join(root, "home"));
     await restored.initialize();
 
     expect(restored.list().find((agent) => agent.id === "chief")).toMatchObject({
@@ -417,7 +425,7 @@ describe("AgentStore", () => {
     };
     const source = `${JSON.stringify(legacy, null, 2)}\n`;
     await writeFile(statePath, source);
-    const store = new AgentStore(userData, join(root, "home"));
+    const store = createStore(userData, join(root, "home"));
     await store.initialize();
 
     expect(store.list()).toMatchObject([{ id: "writer", model: "claude-sonnet-5", threadId: null, avatarHue: 215 }]);
@@ -442,7 +450,7 @@ describe("AgentStore", () => {
     )}\n`;
     await writeFile(statePath, source);
 
-    const store = new AgentStore(userData, join(root, "home"));
+    const store = createStore(userData, join(root, "home"));
     await expect(store.initialize()).rejects.toThrow("old role field");
     await expect(readFile(statePath, "utf8")).resolves.toBe(source);
   });
@@ -452,7 +460,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     await store.getOrCreate("chief");
     await store.updateAgent({
@@ -478,7 +486,7 @@ describe("AgentStore", () => {
       )
       .run("claude fable 5.1 (1m)", "ultra", "Chief Seed", 7, "chief");
 
-    const repaired = new AgentStore(userData, home);
+    const repaired = createStore(userData, home);
     await repaired.initialize();
 
     // The identity survives: same agent, same thread, same workspace, and the chat is still readable.
@@ -487,7 +495,7 @@ describe("AgentStore", () => {
       threadId,
       workspacePath,
       provider: "claude",
-      // The default of the provider the profile names, not the default of a new agent, which is Codex.
+      // The default of the provider the profile names, not the default of a new agent, which uses the free proxy.
       model: "claude-sonnet-5",
       // The effort has no per-provider default, so an unreadable one is repaired to the one value
       // there is. It is the floor of the range, which is the safe direction for a repair: it costs
@@ -512,7 +520,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     await store.getOrCreate("chief");
     const threadId = await store.ensureThreadId("chief");
@@ -522,7 +530,7 @@ describe("AgentStore", () => {
       )
       .run(42, "chief");
 
-    const blocked = new AgentStore(userData, home);
+    const blocked = createStore(userData, home);
     // The field is the diagnosis a support report can carry; the value is a path from the user's home
     // directory, and this message reaches a dialog, the log and any diagnostics export.
     await expect(blocked.initialize()).rejects.toThrow(
@@ -538,7 +546,7 @@ describe("AgentStore", () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-rejects-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
-    const store = new AgentStore(userData, join(root, "home"));
+    const store = createStore(userData, join(root, "home"));
     await store.initialize();
     const chief = await store.getOrCreate("chief");
 
@@ -571,7 +579,7 @@ describe("AgentStore", () => {
       const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
       temporaryRoots.push(root);
       const userData = join(root, "user-data");
-      const store = new AgentStore(userData, join(root, "home"));
+      const store = createStore(userData, join(root, "home"));
       await store.initialize();
 
       const first = await store.createAgent({
@@ -598,7 +606,7 @@ describe("AgentStore", () => {
           .map((agent) => agent.id),
       ).toEqual([second.id, first.id]);
 
-      const reloaded = new AgentStore(userData, join(root, "home"));
+      const reloaded = createStore(userData, join(root, "home"));
       await reloaded.initialize();
       expect(reloaded.list().find((agent) => agent.id === first.id)?.description).toBe(description.trim());
       expect(
@@ -615,7 +623,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const source = await store.getOrCreate("chief", "Research", "Research lead");
     await store.updateAgent({
@@ -673,7 +681,11 @@ describe("AgentStore", () => {
     await expect(readlink(join(duplicate.workspacePath, "internal-absolute"))).resolves.toBe(
       join(duplicate.workspacePath, "skills.lock"),
     );
-    await expect(readlink(join(duplicate.workspacePath, "links", "internal-relative"))).resolves.toBe("../skills.lock");
+    const relativeTarget = await readlink(join(duplicate.workspacePath, "links", "internal-relative"));
+    expect(isAbsolute(relativeTarget)).toBe(false);
+    expect(resolve(duplicate.workspacePath, "links", relativeTarget)).toBe(
+      join(duplicate.workspacePath, "skills.lock"),
+    );
     await expect(readlink(join(duplicate.workspacePath, "aliased-internal"))).resolves.toBe(
       join(duplicate.workspacePath, "skills.lock"),
     );
@@ -688,7 +700,7 @@ describe("AgentStore", () => {
     await expect(readFile(join(duplicate.workspacePath, "skills.lock"), "utf8")).resolves.toBe("research@3\n");
     await expect(readFile(join(source.workspacePath, "skills.lock"), "utf8")).resolves.toBe("research@1\n");
 
-    const reloaded = new AgentStore(userData, home);
+    const reloaded = createStore(userData, home);
     await reloaded.initialize();
     expect(reloaded.list().map((agent) => agent.id)).toEqual(
       expect.arrayContaining([source.id, duplicate.id, secondDuplicate.id]),
@@ -700,13 +712,13 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const source = await store.getOrCreate("chief");
     await writeFile(join(source.workspacePath, "note.txt"), "source\n");
     const duplicate = await store.duplicateAgent(source.id);
 
-    const recovered = new AgentStore(userData, home);
+    const recovered = createStore(userData, home);
     await recovered.initialize();
 
     expect(recovered.list().map((agent) => agent.id)).toEqual([source.id]);
@@ -721,7 +733,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const source = await store.getOrCreate("chief");
     const duplicate = await store.duplicateAgent(source.id);
@@ -742,7 +754,7 @@ describe("AgentStore", () => {
       `${JSON.stringify({ operationId: pending.operationId, sourceBotId: source.id })}\n`,
     );
 
-    const recovered = new AgentStore(userData, home);
+    const recovered = createStore(userData, home);
     await recovered.initialize();
 
     expect(recovered.list().map((agent) => agent.id)).toEqual([source.id]);
@@ -756,7 +768,7 @@ describe("AgentStore", () => {
     const userData = join(root, "user-data");
     const home = join(root, "home");
     const operationId = randomUUID();
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const source = await store.createAgent(AGENT_PROFILE_INPUT);
     const duplicate = await store.duplicateAgent(source.id, operationId);
@@ -773,7 +785,7 @@ describe("AgentStore", () => {
       `${JSON.stringify({ operationId, sourceBotId: legacyId(source.id) })}\n`,
     );
 
-    const recovered = new AgentStore(userData, home);
+    const recovered = createStore(userData, home);
     await recovered.initialize();
 
     expect(recovered.list().map((agent) => agent.id)).toEqual(expect.arrayContaining([source.id, duplicate.id]));
@@ -787,7 +799,7 @@ describe("AgentStore", () => {
     const userData = join(root, "user-data");
     const home = join(root, "home");
     const operationId = randomUUID();
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const source = await store.getOrCreate("chief");
     const duplicate = await store.duplicateAgent(source.id, operationId);
@@ -805,7 +817,7 @@ describe("AgentStore", () => {
         `agent-duplication:${operationId}`,
       );
 
-    const restored = new AgentStore(userData, home);
+    const restored = createStore(userData, home);
     await restored.initialize();
 
     expect(restored.committedAgentDuplication(operationId, source.id)).toEqual({ ...committed, agent: currentAgent });
@@ -820,7 +832,7 @@ describe("AgentStore", () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-rollback-"));
     temporaryRoots.push(root);
     const home = join(root, "home");
-    const store = new AgentStore(join(root, "user-data"), home);
+    const store = createStore(join(root, "user-data"), home);
     await store.initialize();
     const source = await store.getOrCreate("chief");
     await writeFile(join(source.workspacePath, "note.txt"), "keep\n");
@@ -838,7 +850,7 @@ describe("AgentStore", () => {
   it("duplicates an agent whose preview moves while its workspace is being copied", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-preview-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
     const source = await store.getOrCreate("chief", "Research", "Research lead");
     await writeFile(join(source.workspacePath, "note.txt"), "keep\n");
@@ -860,7 +872,7 @@ describe("AgentStore", () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-profile-"));
     temporaryRoots.push(root);
     const home = join(root, "home");
-    const store = new AgentStore(join(root, "user-data"), home);
+    const store = createStore(join(root, "user-data"), home);
     await store.initialize();
     const source = await store.getOrCreate("chief", "Research", "Research lead");
     const resolveAvatar = store.resolveAvatar.bind(store);
@@ -878,7 +890,7 @@ describe("AgentStore", () => {
   it("rejects duplication after the host reaches its agent limit", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-duplicate-limit-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
     const source = await store.getOrCreate("agent-0");
     for (let index = 1; index < INPUT_LIMITS.agents; index += 1) {
@@ -892,7 +904,7 @@ describe("AgentStore", () => {
   it("validates the complete Agent profile before it writes data", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
 
     await expect(store.createAgent({ ...AGENT_PROFILE_INPUT, name: " " })).rejects.toThrow("Agent name is required.");
@@ -906,7 +918,7 @@ describe("AgentStore", () => {
   it("rejects path traversal agent ids", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "data"), join(root, "home"));
+    const store = createStore(join(root, "data"), join(root, "home"));
     await store.initialize();
 
     await expect(store.getOrCreate("../outside")).rejects.toThrow("Invalid agent id");
@@ -921,7 +933,7 @@ describe("AgentStore", () => {
     await mkdir(userData, { recursive: true });
     await writeFile(statePath, unsupported);
 
-    const store = new AgentStore(userData, join(root, "home"));
+    const store = createStore(userData, join(root, "home"));
     await expect(store.initialize()).rejects.toThrow("refusing to overwrite");
     await expect(readFile(statePath, "utf8")).resolves.toBe(unsupported);
   });
@@ -930,7 +942,7 @@ describe("AgentStore", () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
-    const store = new AgentStore(userData, join(root, "home"));
+    const store = createStore(userData, join(root, "home"));
     await store.initialize();
 
     await store.getOrCreate("chief");
@@ -945,7 +957,7 @@ describe("AgentStore", () => {
       avatarSeed: "chief:avatar:2:4",
       avatarHue: 215,
     });
-    const restored = new AgentStore(userData, join(root, "home"));
+    const restored = createStore(userData, join(root, "home"));
     await restored.initialize();
     expect(restored.list().find((agent) => agent.id === "chief")).toMatchObject({
       name: "Coordinator",
@@ -963,7 +975,7 @@ describe("AgentStore", () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
-    const store = new AgentStore(userData, join(root, "home"));
+    const store = createStore(userData, join(root, "home"));
     await store.initialize();
     await store.getOrCreate("chief");
     const image = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -974,7 +986,7 @@ describe("AgentStore", () => {
     expect(storedAvatar?.mimeType).toBe("image/png");
     await expect(readFile(storedAvatar?.path ?? "")).resolves.toEqual(Buffer.from(image));
 
-    const restored = new AgentStore(userData, join(root, "home"));
+    const restored = createStore(userData, join(root, "home"));
     await restored.initialize();
     expect(restored.list().find((agent) => agent.id === "chief")?.avatarUrl).toBe(updated.avatarUrl);
     const restoredPath = restored.resolveAvatar("chief")?.path ?? "";
@@ -986,7 +998,7 @@ describe("AgentStore", () => {
   it("restores the previous avatar when SQLite persistence fails", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
     await store.getOrCreate("chief");
     const image = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -1013,7 +1025,7 @@ describe("AgentStore", () => {
   it("rejects agent fields above their limits without truncating stored values", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
     await store.getOrCreate("chief");
 
@@ -1035,7 +1047,7 @@ describe("AgentStore", () => {
   it("keeps the Dani-Dex thread when the model changes provider", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
     await store.getOrCreate("chief");
     const threadId = await store.ensureThreadId("chief");
@@ -1050,7 +1062,7 @@ describe("AgentStore", () => {
   it("keeps provider sessions private and creates a new session when returning", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
     await store.getOrCreate("chief");
     await store.updateAgent({ agentId: "chief", provider: "codex", model: "gpt-5.6-luna" });
@@ -1079,7 +1091,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
     const agent = await store.createAgent(AGENT_PROFILE_INPUT);
     const marker = join(userData, "agent-duplications", `${agent.id}.pending`);
@@ -1088,7 +1100,7 @@ describe("AgentStore", () => {
     await expect(store.deleteAgent(agent.id)).rejects.toThrow();
     expect(store.list().map((entry) => entry.id)).toEqual([agent.id]);
 
-    const restored = new AgentStore(userData, home);
+    const restored = createStore(userData, home);
     await restored.initialize();
     expect(restored.list().map((entry) => entry.id)).toEqual([agent.id]);
     await rm(marker, { recursive: true });
@@ -1104,7 +1116,7 @@ describe("AgentStore", () => {
   it("keeps the in-memory roster when the deletion transaction fails", async () => {
     const root = await mkdtemp(join(tmpdir(), "dani-dex-store-"));
     temporaryRoots.push(root);
-    const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+    const store = createStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
     const agent = await store.createAgent(AGENT_PROFILE_INPUT);
     vi.spyOn(store.database, "hardDeleteAgent").mockImplementationOnce(() => {
@@ -1121,7 +1133,7 @@ describe("AgentStore", () => {
     temporaryRoots.push(root);
     const userData = join(root, "user-data");
     const home = join(root, "home");
-    const store = new AgentStore(userData, home);
+    const store = createStore(userData, home);
     await store.initialize();
 
     const agent = await store.createAgent(AGENT_PROFILE_INPUT);
@@ -1150,7 +1162,7 @@ describe("AgentStore", () => {
     await store.deleteAgent(sibling);
     await expect(readFile(join(siblingLegacyWorkspace, "notes.md"))).rejects.toMatchObject({ code: "ENOENT" });
 
-    const restored = new AgentStore(userData, home);
+    const restored = createStore(userData, home);
     await restored.initialize();
     expect(restored.list()).toEqual([]);
   });
