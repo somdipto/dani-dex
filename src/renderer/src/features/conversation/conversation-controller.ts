@@ -5,6 +5,7 @@ import type {
   BrowserBounds,
   MarketplaceSkillDetail,
 } from "@dani-dex/contracts/ipc";
+import { defaultProviderModel } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import type { AgentActivityLabel } from "./AgentActivity";
 import type { ChatSearchMatch } from "./chat-search";
@@ -309,8 +310,8 @@ export function createServerConversationState() {
   const [markingRead, setMarkingRead] = createSignal(false);
   const [dropActive, setDropActive] = createSignal(false);
   const [rightPanels, setRightPanels] = createSignal<Record<string, RightPanelMode>>({});
-  const [settingsProvider, setSettingsProvider] = createSignal<AgentProviderId>("codex");
-  const [settingsModel, setSettingsModel] = createSignal<AgentModelId>("gpt-5.6-luna");
+  const [settingsProvider, setSettingsProvider] = createSignal<AgentProviderId>("opencode");
+  const [settingsModel, setSettingsModel] = createSignal<AgentModelId>(defaultProviderModel("opencode"));
   const [settingsReasoning, setSettingsReasoning] = createSignal<AgentReasoningEffort>("medium");
   const [browserAddress, setBrowserAddress] = createSignal("https://www.google.com");
   const [browserAddressEditing, setBrowserAddressEditing] = createSignal(false);

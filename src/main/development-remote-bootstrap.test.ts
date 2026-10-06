@@ -1,6 +1,11 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { CentralAuthState } from "@dani-dex/contracts/ipc";
 import { afterEach, expect, it, vi } from "vitest";
-import { ensureDevelopmentAccount } from "./development-remote-bootstrap";
+import { applyDevelopmentRemoteAccount, ensureDevelopmentAccount } from "./development-remote-bootstrap";
+import { readSetupState, writeSetupState } from "./setup-store";
+import { TeamStore } from "./team-store";
 
 const email = "dani-dex-dev-host@example.com";
 const user = { id: "seeded-owner", email, name: null, avatarUrl: null };
@@ -32,6 +37,36 @@ function authManager() {
 }
 
 afterEach(() => vi.useRealTimers());
+
+it.each([false, true])("uses free setup for a new dev client and preserves completed setup (%s)", async (completed) => {
+  const root = await mkdtemp(join(tmpdir(), "dani-dev-client-"));
+  try {
+    const setupFile = join(root, "setup.json");
+    if (completed) await writeSetupState(setupFile, { preferredProvider: "codex", preferredModel: "gpt-5.6-luna" });
+    const teamStore = new TeamStore(join(root, "team.json"));
+    await teamStore.initialize();
+    const manager = authManager();
+    manager.verifyEmailCode.mockResolvedValue({
+      status: "signed_in",
+      user: { ...user, email: "dani-dex-dev-client@example.com" },
+    });
+    await applyDevelopmentRemoteAccount({
+      role: "client",
+      testClientEnabled: true,
+      centralAuth: manager,
+      teamStore,
+      setupFile,
+      setupCompleted: completed,
+    });
+    await expect(readSetupState(setupFile)).resolves.toEqual({
+      completed: true,
+      preferredProvider: completed ? "codex" : "opencode",
+      preferredModel: completed ? "gpt-5.6-luna" : null,
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
 
 it("signs the seeded owner in after another dev instance triggered the resend cooldown", async () => {
   vi.useFakeTimers();
