@@ -1,54 +1,11 @@
 import { CONTEXT_EXPORT_PROMPT } from "@dani-dex/contracts/context-import-prompt";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
-import { createSignal, For, Show } from "solid-js";
+import { redactContextText } from "@dani-dex/logging";
+import { createStore, For, onSettled, Show } from "solid-js";
 import { Button, Textarea } from "../../components/ui";
 import { errorMessage } from "../../error-message";
+import { type ImportEntry, type ImportProvider, parseImport } from "./context-import";
 import { PROVIDER_LOGOS } from "./provider-logos";
-
-type Provider = "ChatGPT" | "Claude";
-
-const SECRET =
-  /(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,}|Bearer\s+[A-Za-z0-9._-]{16,}|(?:access_token|refresh_token|api[_-]?key|secret|password)\s*[:=]\s*\S+|\b(?:\d[ -]?){13,19}\b)/gi;
-/** The shape the prompt asks for: "- fact | Source: ... | Uncertainty: ...". */
-const EXPECTED_LINE = /\|\s*Source:.+\|\s*Uncertainty:/i;
-
-interface Entry {
-  id: number;
-  text: string;
-  keep: boolean;
-  redacted: boolean;
-}
-
-export function redact(raw: string): { text: string; redacted: boolean } {
-  const noKeys = raw.replace(
-    /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)/g,
-    "[private key removed]",
-  );
-  const text = noKeys.replace(SECRET, "[removed]");
-  return { text, redacted: text !== raw };
-}
-
-/** Lines in the requested shape become entries. Other non-empty lines are returned, never saved. */
-export function parseImport(raw: string, provider: Provider): { entries: Entry[]; rejected: string[] } {
-  const entries: Entry[] = [];
-  const rejected: string[] = [];
-  for (const line of raw.split(/\r?\n/)) {
-    const body = line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim();
-    if (body.length < 4 || body.startsWith("```") || /^[A-Za-z ]+:$/.test(body)) continue;
-    if (!EXPECTED_LINE.test(body)) {
-      rejected.push(body);
-      continue;
-    }
-    const clean = redact(body);
-    entries.push({
-      id: entries.length,
-      text: `Imported from ${provider} (historical): ${clean.text}`,
-      keep: true,
-      redacted: clean.redacted,
-    });
-  }
-  return { entries, rejected };
-}
 
 export function ContextImportPanel(props: {
   room: number;
@@ -57,42 +14,71 @@ export function ContextImportPanel(props: {
   onSave: (texts: string[]) => Promise<string[]>;
   doneLabel: (n: number) => string;
 }) {
-  const [open, setOpen] = createSignal(false);
-  const [provider, setProvider] = createSignal<Provider | null>(null);
-  const [pasted, setPasted] = createSignal("");
-  const [entries, setEntries] = createSignal<Entry[] | null>(null);
-  const [rejected, setRejected] = createSignal<string[]>([]);
-  const [copied, setCopied] = createSignal(false);
-  const [status, setStatus] = createSignal<string | null>(null);
-  const [saving, setSaving] = createSignal(false);
+  const [state, setState] = createStore<{
+    open: boolean;
+    provider: ImportProvider | null;
+    pasted: string;
+    entries: ImportEntry[] | null;
+    rejected: string[];
+    copied: boolean;
+    status: string | null;
+    saving: boolean;
+  }>({
+    open: false,
+    provider: null,
+    pasted: "",
+    entries: null,
+    rejected: [],
+    copied: false,
+    status: null,
+    saving: false,
+  });
+  let copiedTimer: ReturnType<typeof setTimeout> | undefined;
+  onSettled(() => () => clearTimeout(copiedTimer));
   const maxLen = INPUT_LIMITS.agentMemoryText;
 
   const room = () => Math.max(0, props.room);
-  const tooLong = (e: Entry) => e.text.length > maxLen;
-  const selected = () => (entries() ?? []).filter((e) => e.keep && !tooLong(e) && e.text.trim().length > 0);
+  const tooLong = (e: ImportEntry) => e.text.length > maxLen;
+  const selected = () => (state.entries ?? []).filter((e) => e.keep && !tooLong(e) && e.text.trim().length > 0);
   const willSave = () => selected().slice(0, room());
   const overCapacity = () => selected().slice(room());
 
   function reset() {
-    setProvider(null);
-    setPasted("");
-    setEntries(null);
-    setRejected([]);
-    setStatus(null);
+    if (state.saving) return;
+    clearTimeout(copiedTimer);
+    setState((draft) => {
+      draft.provider = null;
+      draft.pasted = "";
+      draft.entries = null;
+      draft.rejected = [];
+      draft.status = null;
+      draft.copied = false;
+    });
   }
   async function copy(): Promise<boolean> {
     try {
       await navigator.clipboard.writeText(CONTEXT_EXPORT_PROMPT);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setState((draft) => {
+        draft.copied = true;
+      });
+      clearTimeout(copiedTimer);
+      copiedTimer = setTimeout(
+        () =>
+          setState((draft) => {
+            draft.copied = false;
+          }),
+        2000,
+      );
       return true;
     } catch {
       return false;
     }
   }
   /** Opens the provider with the prompt in the link (the page may ignore it) and copies it as the fallback. */
-  async function start(name: Provider) {
-    setProvider(name);
+  async function start(name: ImportProvider) {
+    setState((draft) => {
+      draft.provider = name;
+    });
     const problems: string[] = [];
     if (!(await copy())) problems.push("Could not copy the prompt automatically. Select the prompt below and copy it.");
     try {
@@ -100,60 +86,96 @@ export function ContextImportPanel(props: {
     } catch {
       problems.push(`Could not open ${name}. Open it yourself and paste the prompt.`);
     }
-    setStatus(problems.length ? problems.join(" ") : null);
+    setState((draft) => {
+      draft.status = problems.length ? problems.join(" ") : null;
+    });
   }
   function preview() {
-    const p = provider();
-    if (!p || !pasted().trim()) return;
-    const result = parseImport(pasted(), p);
-    setEntries(result.entries);
-    setRejected(result.rejected);
-    setStatus(result.entries.length ? null : "No lines in the requested format were found. Nothing to import.");
+    const p = state.provider;
+    if (!p || !state.pasted.trim()) return;
+    const result = parseImport(state.pasted, p);
+    setState((draft) => {
+      draft.entries = result.entries;
+      draft.rejected = result.rejected;
+      draft.pasted = redactContextText(draft.pasted);
+      draft.status = result.entries.length ? null : "No lines in the requested format were found. Nothing to import.";
+    });
   }
   function setText(id: number, text: string) {
-    setEntries((list) => (list ?? []).map((e) => (e.id === id ? { ...e, text } : e)));
+    setState((draft) => {
+      draft.entries = (draft.entries ?? []).map((e) => (e.id === id ? { ...e, text } : e));
+    });
   }
   function setKeep(id: number, keep: boolean) {
-    setEntries((list) => (list ?? []).map((e) => (e.id === id ? { ...e, keep } : e)));
+    setState((draft) => {
+      draft.entries = (draft.entries ?? []).map((e) => (e.id === id ? { ...e, keep } : e));
+    });
   }
   async function save() {
     // Edits can add secret-like text after the preview, so everything is cleaned again here.
-    const items = willSave().map((item) => ({ id: item.id, text: redact(item.text.trim()).text }));
-    if (!items.length) return;
-    setSaving(true);
+    const items = willSave().map((item) => ({ id: item.id, text: redactContextText(item.text.trim()) }));
+    if (!items.length || state.saving) return;
+    setState((draft) => {
+      draft.saving = true;
+    });
     try {
       const failed = new Set(await props.onSave(items.map((item) => item.text)));
-      const stillFailed = items.filter((item) => failed.has(item.text)).map((item) => item.id);
-      const savedCount = items.length - stillFailed.length;
-      if (stillFailed.length === 0) {
-        setStatus(props.doneLabel(savedCount));
-        setEntries(null);
-        setPasted("");
-        setProvider(null);
+      const savedIds = new Set(items.filter((item) => !failed.has(item.text)).map((item) => item.id));
+      const remaining = (state.entries ?? []).filter((entry) => !savedIds.has(entry.id));
+      const savedCount = savedIds.size;
+      setState((draft) => {
+        draft.status =
+          failed.size > 0
+            ? `Saved ${savedCount}. ${failed.size} did not save and are kept here. Press save to retry.`
+            : props.doneLabel(savedCount);
+      });
+      if (remaining.length > 0) {
+        setState((draft) => {
+          draft.entries = remaining;
+        });
       } else {
-        setEntries((list) => (list ?? []).filter((e) => stillFailed.includes(e.id)));
-        setStatus(`Saved ${savedCount}. ${stillFailed.length} did not save and are kept here. Press save to retry.`);
+        setState((draft) => {
+          draft.entries = null;
+        });
+        setState((draft) => {
+          draft.pasted = "";
+        });
+        setState((draft) => {
+          draft.provider = null;
+        });
       }
     } catch (caught) {
-      setStatus(errorMessage(caught, "Could not save."));
+      setState((draft) => {
+        draft.status = errorMessage(caught, "Could not save.");
+      });
     } finally {
-      setSaving(false);
+      setState((draft) => {
+        draft.saving = false;
+      });
     }
   }
 
   return (
     <section class="agent-memory-composer" aria-label="Import context">
       <Show
-        when={open()}
+        when={state.open}
         fallback={
           <div class="agent-memory-composer-actions">
-            <Button size="sm" variant="default" onClick={() => setOpen(true)}>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() =>
+                setState((draft) => {
+                  draft.open = true;
+                })
+              }
+            >
               Import from ChatGPT or Claude
             </Button>
           </div>
         }
       >
-        <Show when={!provider()}>
+        <Show when={!state.provider}>
           <div class="context-import-cards">
             <For each={["ChatGPT", "Claude"] as const}>
               {(name) => (
@@ -179,39 +201,45 @@ export function ContextImportPanel(props: {
               variant="ghost"
               onClick={() => {
                 reset();
-                setOpen(false);
+                setState((draft) => {
+                  draft.open = false;
+                });
               }}
             >
               Close
             </Button>
           </div>
         </Show>
-        <Show when={provider() && !entries()}>
-          <p>1. Send this prompt to {provider()}. It was copied for you.</p>
+        <Show when={state.provider && !state.entries}>
+          <p>1. Send this prompt to {state.provider}. Use Copy prompt if it was not copied.</p>
           <p class="context-import-prompt">{CONTEXT_EXPORT_PROMPT}</p>
           <div class="agent-memory-composer-actions">
             <Button size="sm" variant="default" onClick={() => void copy()}>
-              {copied() ? "Copied" : "Copy prompt"}
+              {state.copied ? "Copied" : "Copy prompt"}
             </Button>
           </div>
-          <p>2. Paste {provider()}'s answer here.</p>
+          <p>2. Paste {state.provider}'s answer here.</p>
           <Textarea
             rows="6"
-            value={pasted()}
+            value={state.pasted}
             placeholder="Paste the list here"
             aria-label="Pasted answer"
-            onValueChange={setPasted}
+            onValueChange={(value) =>
+              setState((draft) => {
+                draft.pasted = value;
+              })
+            }
           />
           <div class="agent-memory-composer-actions">
             <Button size="sm" variant="ghost" onClick={reset}>
               Back
             </Button>
-            <Button size="sm" variant="default" disabled={!pasted().trim()} onClick={preview}>
+            <Button size="sm" variant="default" disabled={!state.pasted.trim()} onClick={preview}>
               Preview
             </Button>
           </div>
         </Show>
-        <Show when={entries()}>
+        <Show when={state.entries}>
           {(list) => (
             <>
               <p>
@@ -225,6 +253,7 @@ export function ContextImportPanel(props: {
                       size="sm"
                       variant="ghost"
                       aria-pressed={entry.keep ? "true" : "false"}
+                      disabled={state.saving}
                       onClick={() => setKeep(entry.id, !entry.keep)}
                     >
                       {entry.keep ? "Keep: yes" : "Keep: no"}
@@ -233,6 +262,7 @@ export function ContextImportPanel(props: {
                       rows="2"
                       value={entry.text}
                       aria-label="Imported entry"
+                      disabled={state.saving}
                       onValueChange={(v) => setText(entry.id, v)}
                     />
                     <Show when={tooLong(entry)}>
@@ -246,15 +276,15 @@ export function ContextImportPanel(props: {
                   </div>
                 )}
               </For>
-              <Show when={rejected().length > 0}>
+              <Show when={state.rejected.length > 0}>
                 <p role="alert">
-                  {rejected().length} lines were not in the requested "fact | Source | Uncertainty" format and will not
-                  be saved:{" "}
-                  {rejected()
+                  {state.rejected.length} lines were not in the requested "fact | Source | Uncertainty" format and will
+                  not be saved:{" "}
+                  {state.rejected
                     .slice(0, 3)
                     .map((line) => line.slice(0, 60))
                     .join(" / ")}
-                  {rejected().length > 3 ? " ..." : ""}
+                  {state.rejected.length > 3 ? " ..." : ""}
                 </p>
               </Show>
               <Show when={overCapacity().length > 0}>
@@ -264,14 +294,23 @@ export function ContextImportPanel(props: {
                 </p>
               </Show>
               <div class="agent-memory-composer-actions">
-                <Button size="sm" variant="ghost" onClick={() => setEntries(null)}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={state.saving}
+                  onClick={() =>
+                    setState((draft) => {
+                      draft.entries = null;
+                    })
+                  }
+                >
                   Back
                 </Button>
                 <Button
                   size="sm"
                   variant="default"
-                  disabled={!willSave().length}
-                  loading={saving()}
+                  disabled={state.saving || !willSave().length}
+                  loading={state.saving}
                   onClick={() => void save()}
                 >
                   Save {willSave().length} memories
@@ -280,7 +319,7 @@ export function ContextImportPanel(props: {
             </>
           )}
         </Show>
-        <Show when={status()}>{(m) => <p role="status">{m()}</p>}</Show>
+        <Show when={state.status}>{(m) => <p role="status">{m()}</p>}</Show>
       </Show>
     </section>
   );

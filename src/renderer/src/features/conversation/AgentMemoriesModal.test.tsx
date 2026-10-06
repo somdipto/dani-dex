@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type AnalyticsEventName, type DesktopAnalyticsEvents, desktopAnalytics } from "../../analytics";
 import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
 import { AgentMemoriesModal } from "./AgentMemoriesModal";
+import { pendingImportTexts, setPendingImportTexts } from "./context-import-save";
 import { agentMemoriesPort } from "./memories-port";
 
 const firstMemory: AgentMemory = {
@@ -43,9 +44,11 @@ function trackScopedMemoryAnalytics<Name extends AnalyticsEventName>(
 afterEach(() => {
   activeMock?.dispose();
   activeMock = undefined;
+  localStorage.clear();
 });
 
 beforeEach(() => {
+  localStorage.clear();
   vi.spyOn(desktopAnalytics, "scope").mockImplementation(() => ({ track: trackScopedMemoryAnalytics }));
   trackMemoryAnalytics.mockClear();
   memoryState = [];
@@ -91,6 +94,27 @@ beforeEach(() => {
 });
 
 describe("AgentMemoriesModal", () => {
+  it("retains failed staged imports and clears them only after a successful retry", async () => {
+    const text = "Imported from ChatGPT (historical): Uses Linux | Source: this chat | Uncertainty: none known";
+    setPendingImportTexts([text]);
+    createMemory.mockRejectedValueOnce(new Error("Host offline"));
+    render(() => (
+      <AgentMemoriesModal
+        port={agentMemoriesPort("chief", "Chief")}
+        open
+        onOpenChange={vi.fn()}
+        onCountChange={vi.fn()}
+      />
+    ));
+    await screen.findByRole("dialog", { name: "Memories" });
+    await fireEvent.click(await screen.findByRole("button", { name: "Retry imported memories" }));
+    await screen.findByText("1 imported memories could not save. Free some space and retry.");
+    expect(pendingImportTexts()).toEqual([text]);
+    await fireEvent.click(screen.getByRole("button", { name: "Retry imported memories" }));
+    await waitFor(() => expect(pendingImportTexts()).toEqual([]));
+    expect(memoryState.map((memory) => memory.text)).toEqual([text]);
+  });
+
   it("shows the empty state, adds a memory, and refreshes after a memory event", async () => {
     const onCountChange = vi.fn();
     render(() => (

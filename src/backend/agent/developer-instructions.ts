@@ -1,5 +1,6 @@
 import type { AgentMemory, AgentSummary } from "@dani-dex/contracts/ipc";
 import { COMPUTER_USE_MCP_SERVER_NAME } from "@dani-dex/contracts/ipc";
+import { redactContextText } from "@dani-dex/logging";
 import { DANI_DEX_BROWSER_NAMESPACE } from "../browser-tools";
 
 export function developerInstructions(
@@ -15,8 +16,8 @@ export function developerInstructions(
     description: agent.description.trim() || "No additional description configured.",
   });
   const memoryData = JSON.stringify(
-    memories.map((memory) => ({ id: memory.id, text: memory.text, origin: memory.origin })),
-  );
+    memories.map((memory) => ({ id: memory.id, text: redactContextText(memory.text), origin: memory.origin })),
+  ).replace(/</gu, "\\u003c");
   return [
     "You are a persistent local Dani-Dex teammate with this user-configured profile:",
     "<agent_profile>",

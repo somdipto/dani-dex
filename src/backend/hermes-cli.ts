@@ -46,8 +46,8 @@ export function describeStartFailure(error: unknown, elapsedMs: number): string 
   if (typeof record.code === "number" || typeof record.code === "string") parts.push(`code ${String(record.code)}`);
   if (typeof record.signal === "string") parts.push(`signal ${record.signal}`);
   const stderr = typeof record.stderr === "string" ? record.stderr.trim() : "";
-  if (stderr) parts.push(`stderr: ${stderr.slice(-800)}`);
-  else if (error instanceof Error) parts.push(error.message.slice(0, 400));
+  if (stderr) parts.push(`stderr: ${redactText(stderr).slice(-800)}`);
+  else if (error instanceof Error) parts.push(redactText(error.message).slice(0, 400));
   return redactText(parts.join("; "));
 }
 

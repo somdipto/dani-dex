@@ -419,3 +419,12 @@ automatically, and the tab's back/forward history is cleared after replacement t
 the sensitive document. The destination site receives the value and controls its own processing.
 This protection does not isolate credentials from the operating system or agents with unrestricted
 machine access. Values pasted into ordinary chat are not covered by secure handoff.
+
+## Imported historical context
+
+Context import opens ChatGPT or Claude with a fixed export prompt. You choose which account or
+conversation supplies the answer, paste it into Dani-Dex, and review each entry before saving.
+Dani-Dex removes credential-like text from the import. Reviewed entries stay on this computer,
+including entries staged before setup finishes. Failed saves remain available for retry. Saved
+entries are marked as historical and can be edited or deleted in Memories. Relevant memories
+can be sent to the agent's selected provider as context; they are treated as data, not instructions.

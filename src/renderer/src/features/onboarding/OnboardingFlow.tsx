@@ -1,3 +1,4 @@
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   AGENT_PROVIDER_DESCRIPTORS,
   type AgentModelId,
@@ -31,7 +32,7 @@ import { errorMessage } from "../../error-message";
 import { AgentAvatar } from "../agents/AgentAvatar";
 import { ComputerUseSetup } from "../computer-use/ComputerUseSetup";
 import { ContextImportPanel } from "../conversation/ContextImportPanel";
-import { commitStagedImport } from "../conversation/context-import-save";
+import { commitStagedImport, pendingImportTexts, setPendingImportTexts } from "../conversation/context-import-save";
 import { CustomProviderDialog } from "../custom-providers/CustomProviderDialog";
 import { CustomProviderListDialog } from "../custom-providers/CustomProviderListDialog";
 import { createCustomProviderHostState } from "../custom-providers/custom-provider-host-state";
@@ -102,7 +103,7 @@ type OnboardingAvatarVariants = {
 
 export function OnboardingFlow(props: OnboardingFlowProps) {
   const [step, setStep] = createSignal<OnboardingStep>("meet");
-  const [stagedImports, setStagedImports] = createSignal<string[]>([]);
+  const [stagedImports, setStagedImports] = createSignal(pendingImportTexts());
   const [direction, setDirection] = createSignal<StepDirection>("forward");
   /**
    * The first-run screen sits on the dialog layer, so a row menu portalled to `body` would paint
@@ -113,7 +114,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
   onSettled(() => {
     setScreenElement(screenRef);
   });
-  const [selectedProvider, setSelectedProvider] = createSignal<AgentProviderId | null>(null);
+  const [selectedProvider, setSelectedProvider] = createSignal<AgentProviderId | null>("opencode");
   // Dani serves every agent: the provider step is answered before it is shown.
   createEffect(
     () => props.daniOnly === true,
@@ -272,8 +273,8 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
     ({ options, selected, selectedByUser }) => {
       if (selectedByUser && selected && options.some((provider) => provider.id === selected)) return;
       if (selected && options.some((provider) => provider.id === selected && provider.state === "available")) return;
-      const available = options.find((provider) => provider.state === "available") ?? options.find(isStartingFreeDani);
-      setSelectedProvider(available?.id ?? null);
+      const free = options.find((provider) => provider.id === "opencode");
+      setSelectedProvider(free?.id ?? null);
     },
   );
 
@@ -685,11 +686,13 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                   to 64 entries of 500 characters each. Skip this if you like.
                 </p>
                 <ContextImportPanel
-                  room={64}
-                  limit={64}
-                  doneLabel={(n) => `${n} memories ready. They are saved when you open Dani-Dex.`}
+                  room={INPUT_LIMITS.agentMemories - stagedImports().length}
+                  limit={INPUT_LIMITS.agentMemories}
+                  doneLabel={(n) => `${n} memories kept on this computer. They will be added when setup finishes.`}
                   onSave={async (texts) => {
-                    setStagedImports(texts);
+                    const next = [...new Set([...stagedImports(), ...texts])];
+                    setPendingImportTexts(next);
+                    setStagedImports(next);
                     return [];
                   }}
                 />

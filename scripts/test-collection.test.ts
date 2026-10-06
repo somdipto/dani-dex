@@ -21,7 +21,12 @@ const repositoryRoot = resolve(import.meta.dirname, "..");
 // Workspaces the root run leaves alone because they have a runner of their own, which CI
 // invokes as `test:sites`, `test:remote` and `check:api`. Each entry is checked below to
 // still have that script, so a workspace cannot lose its runner and keep its exemption.
-const delegatedWorkspaces = ["apps/auth-api", "apps/site-router", "remote/api"];
+const delegatedWorkspaces = [
+  "apps/auth-api",
+  "apps/site-router",
+  "remote/api",
+  "resources/skill-packs/pstack/skills/poteto-mode/scripts",
+];
 
 // Input to scripts/ui-foundation-check.test.ts, which reads these as text to prove the
 // check skips test files. They assert nothing, so collecting them would be meaningless.

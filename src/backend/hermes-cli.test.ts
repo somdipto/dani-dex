@@ -1,17 +1,29 @@
-import { chmod, mkdtemp, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   bundledHermesExecutable,
+  describeStartFailure,
   HERMES_START_FAILED_MESSAGE,
   HermesStartError,
   parseHermesVersion,
   resolveHermesCli,
 } from "./hermes-cli";
 
-async function fakeHermes(version: string): Promise<string> {
+const roots: string[] = [];
+afterEach(async () => {
+  for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true });
+});
+
+async function temporaryRoot() {
   const root = await mkdtemp(join(tmpdir(), "hermes-cli-"));
+  roots.push(root);
+  return root;
+}
+
+async function fakeHermes(version: string): Promise<string> {
+  const root = await temporaryRoot();
   const path = join(root, "hermes");
   await writeFile(path, `#!/bin/sh\nprintf '%s\\n' '${version}'\n`);
   await chmod(path, 0o755);
@@ -34,7 +46,7 @@ describe("Hermes CLI", () => {
   });
 
   it("never tells the user to open a terminal, and keeps the real cause for the log", async () => {
-    const root = await mkdtemp(join(tmpdir(), "hermes-cli-"));
+    const root = await temporaryRoot();
     const broken = join(root, "hermes");
     await writeFile(broken, "#!/bin/sh\necho 'ImportError: no module named acp' >&2\nexit 3\n");
     await chmod(broken, 0o755);
@@ -48,7 +60,7 @@ describe("Hermes CLI", () => {
   });
 
   it("tries a slow first start again instead of giving up", async () => {
-    const root = await mkdtemp(join(tmpdir(), "hermes-cli-"));
+    const root = await temporaryRoot();
     const marker = join(root, "started");
     const slow = join(root, "hermes");
     await writeFile(
@@ -67,5 +79,12 @@ describe("Hermes CLI", () => {
     expect(bundledHermesExecutable("win32", "x64", "C:\\Resources")).toBe(
       "C:\\Resources\\hermes\\win\\x64\\bin\\hermes.cmd",
     );
+  });
+
+  it("redacts a complete credential before truncating startup diagnostics", () => {
+    const secret = "private-value".repeat(100);
+    const result = describeStartFailure({ stderr: `ERROR {"headers":{"X-Tenant":"${secret}"}}` }, 10);
+    expect(result).not.toContain("private-value");
+    expect(result).toContain("[redacted]");
   });
 });

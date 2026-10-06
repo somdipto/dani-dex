@@ -16,6 +16,18 @@ afterEach(async () => {
 });
 
 describe("AgentMemoryStore", () => {
+  it("redacts imported credentials before persistence, including edits and the event log", async () => {
+    const { database, memories } = await setup();
+    const prefix = "Imported from ChatGPT (historical): ";
+    const created = memories.createManual("chief", `${prefix}My password is demo-secret-one`);
+    memories.updateManual("chief", created.id, `${prefix}My api key is demo-secret-two`);
+    const events = database.connection.prepare("SELECT payload_json FROM orchestration_events").all();
+    const stored = JSON.stringify({ memories: memories.list("chief"), events });
+    expect(stored).not.toContain("demo-secret-one");
+    expect(stored).not.toContain("demo-secret-two");
+    expect(memories.list("chief")[0].text).toContain("[redacted]");
+    database.close();
+  });
   it("creates, updates, and merges exact duplicates", async () => {
     const { database, memories } = await setup();
     const created = memories.createManual("chief", "The user prefers concise status updates.");

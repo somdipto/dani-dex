@@ -197,7 +197,9 @@ describe("ProviderModelPicker", () => {
     await fireEvent.click(grant);
     expect(onAutoApproveChange).not.toHaveBeenCalled();
     let confirmation = await screen.findByRole("alertdialog");
-    expect(confirmation).toHaveTextContent("filesystem and network access");
+    expect(confirmation).toHaveTextContent("read, change or delete accessible files");
+    expect(confirmation).toHaveTextContent("outside its workspace");
+    expect(confirmation).toHaveTextContent("revoke future access");
     await fireEvent.click(within(confirmation).getByRole("button", { name: "Cancel" }));
     await vi.waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(onAutoApproveChange).not.toHaveBeenCalled();

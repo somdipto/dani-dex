@@ -1,5 +1,6 @@
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { AgentModelId, AgentProviderId, AvatarHue } from "@dani-dex/contracts/ipc";
+import { defaultProviderModel } from "@dani-dex/contracts/ipc";
 import { createSignal, For, onSettled, Show } from "solid-js";
 import { Button, Field, Input, Textarea } from "../../components/ui";
 import { RobotAvatar } from "./manzanilla/RobotAvatar";
@@ -51,8 +52,8 @@ export const DEFAULT_FIRST_AGENT_DRAFT: FirstAgentDraft = {
   avatarSeed: "manzanilla:default",
   avatarHue: null,
   suggestionId: null,
-  provider: "codex",
-  model: "gpt-5.6-luna",
+  provider: "opencode",
+  model: defaultProviderModel("opencode"),
 };
 
 export function createFirstAgentDraft(_random: () => number = Math.random): FirstAgentDraft {

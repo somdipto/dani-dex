@@ -40,12 +40,12 @@ export const STORY_NOW = "2026-08-19T10:00:00.000Z";
 export const STORY_AGENT_SUMMARIES: AgentSummary[] = [
   {
     id: "chief",
-    provider: "codex",
+    provider: "opencode",
     name: "Chief",
     title: "Chief of staff",
     description: "Coordinates projects, priorities, and next steps across the workspace.",
     notifications: true,
-    model: "gpt-5.6-luna",
+    model: "dani/dani-free-auto",
     reasoningEffort: "medium",
     threadId: "thread-chief",
     workspacePath: "/mock/Dani-Dex/Agents/chief",
@@ -57,12 +57,12 @@ export const STORY_AGENT_SUMMARIES: AgentSummary[] = [
   },
   {
     id: "research",
-    provider: "claude",
+    provider: "opencode",
     name: "Research",
     title: "Research partner",
     description: "Finds reliable sources and turns them into concise, useful briefs.",
     notifications: true,
-    model: "claude-sonnet-5",
+    model: "dani/dani-free-auto",
     reasoningEffort: "high",
     threadId: "thread-research",
     workspacePath: "/mock/Dani-Dex/Agents/research",
@@ -74,12 +74,12 @@ export const STORY_AGENT_SUMMARIES: AgentSummary[] = [
   },
   {
     id: "sales",
-    provider: "codex",
+    provider: "opencode",
     name: "Sales Outbound",
     title: "Outbound specialist",
     description: "Prepares thoughtful prospect research and personalized outreach.",
     notifications: true,
-    model: "gpt-5.6-terra",
+    model: "dani/dani-free-auto",
     reasoningEffort: "medium",
     threadId: "thread-sales",
     workspacePath: "/mock/Dani-Dex/Agents/sales",
@@ -119,6 +119,14 @@ export const STORY_SHARED_TABLES: SharedTable[] = [
 ];
 
 export const STORY_MODELS: AgentModelOption[] = [
+  {
+    provider: "opencode",
+    id: "dani/dani-free-auto",
+    name: "Dani Free Auto",
+    description: "Dani free model proxy, no account needed.",
+    defaultReasoningEffort: "low",
+    supportedReasoningEfforts: ["low", "medium", "high"],
+  },
   {
     provider: "codex",
     id: "gpt-5.6-luna",
@@ -182,6 +190,7 @@ export const STORY_AGENT_STATUS: AgentStatus = {
   cliVersion: "0.144.1",
   auth: { kind: "chatgpt", email: "person@example.com" },
   providers: [
+    { id: "opencode", state: "available", version: "1.18.27", message: null, email: null },
     {
       id: "codex",
       state: "available",

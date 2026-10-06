@@ -80,26 +80,23 @@ describe("mobile RocketSim integration", () => {
 });
 
 describe("mobile OTA compatibility", () => {
-  it.each(["ios", "android"] as const)(
-    "requires a fingerprinted %s binary instead of the old 1.0.0 runtime",
-    (platform) => {
-      // Resolve Expo from the app's dependency tree, as the native config tooling does.
-      const runtime = execFileSync(
-        "node",
-        [
-          "-e",
-          `
+  it.each(["ios", "android"] as const)("keeps OTA disabled for the %s binary", (platform) => {
+    // Resolve Expo from the app's dependency tree, as the native config tooling does.
+    const runtime = execFileSync(
+      "node",
+      [
+        "-e",
+        `
         const { getConfig } = require('expo/config');
         const { Updates } = require('expo/config-plugins');
         const { exp } = getConfig(process.cwd(), { skipSDKVersionRequirement: true });
         Updates.getRuntimeVersionAsync(process.cwd(), exp, process.argv[1])
-          .then(runtime => process.stdout.write(runtime ?? ''));
+          .then(runtime => process.stdout.write(JSON.stringify({ enabled: exp.updates?.enabled, runtime: runtime || null })));
       `,
-          platform,
-        ],
-        { cwd: projectRoot, encoding: "utf8" },
-      );
-      expect(runtime).toBe("file:fingerprint");
-    },
-  );
+        platform,
+      ],
+      { cwd: projectRoot, encoding: "utf8" },
+    );
+    expect(JSON.parse(runtime)).toEqual({ enabled: false, runtime: null });
+  });
 });

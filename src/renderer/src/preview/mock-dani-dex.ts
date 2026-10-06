@@ -83,6 +83,7 @@ import {
   createMcpServerId,
   DEFAULT_APPROVAL_AUTOMATION_PREFERENCE,
   DEFAULT_DYNAMIC_ISLAND_PREFERENCE,
+  defaultProviderModel,
   normalizeMcpConfig,
   SIDEBAR_PEOPLE_SECTION_ID,
   SIDEBAR_UNASSIGNED_SECTION_ID,
@@ -235,7 +236,11 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
   };
   let authState = clone<CentralAuthState>(options.authState ?? defaultAuthState);
   let setupState = clone<AppSetupState>(
-    options.setupState ?? { completed: true, preferredProvider: "codex", preferredModel: null },
+    options.setupState ?? {
+      completed: true,
+      preferredProvider: "opencode",
+      preferredModel: defaultProviderModel("opencode"),
+    },
   );
   const grantedComputerUsePermissions = new Set<MacPermissionId>();
   const computerUseState = (): ComputerUseState => {
@@ -547,12 +552,12 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
     const id = input.id ?? `mock-agent-${agentCounter}`;
     return {
       id,
-      provider: input.provider ?? "codex",
+      provider: input.provider ?? "opencode",
       name: input.name ?? "New agent",
       title: input.title ?? "Generalist agent",
       description: input.description ?? "A new agent ready to help with focused work.",
       notifications: input.notifications ?? true,
-      model: input.model ?? "gpt-5.6-luna",
+      model: input.model ?? defaultProviderModel(input.provider ?? "opencode"),
       reasoningEffort: input.reasoningEffort ?? "medium",
       threadId: input.threadId ?? `thread-${id}`,
       workspacePath: input.workspacePath ?? `/mock/Dani-Dex/Agents/${id}`,

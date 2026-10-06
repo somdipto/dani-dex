@@ -23,6 +23,7 @@ const fs = require("node:fs");
 const https = require("node:https");
 const os = require("node:os");
 const path = require("node:path");
+const { pipeline } = require("node:stream/promises");
 
 const REPO = "somdipto/dani-dex";
 const RELEASE_ROOT = process.env.DANI_DEX_ONBOARD_RELEASE_ROOT || `https://github.com/${REPO}/releases/latest/download`;
@@ -38,20 +39,11 @@ const step = (msg) => say(`${C.bold}==>${C.reset} ${msg}`);
 const ok = (msg) => say(`${C.green} ok ${C.reset} ${msg}`);
 const warn = (msg) => process.stderr.write(`${C.yellow}warn${C.reset} ${msg}\n`);
 const die = (msg) => {
-  process.stderr.write(`${C.red}error${C.reset} ${msg}\n`);
-  process.exit(1);
+  throw new Error(msg);
 };
 
 function banner() {
-  say();
-  say(`${C.bold}  ____              _   ____`);
-  say(" |  _ \\  __ _ _ __ (_) |  _ \\  _____  __");
-  say(" | | | |/ _` | '_ \\| | | | | |/ _ \\ \\/ /");
-  say(" | |_| | (_| | | | | | | |_| |  __/>  <");
-  say(" |____/ \\__,_|_| |_|_| |____/ \\___/_/\\_\\" + C.reset);
-  say();
-  say(" Your own AI team, on your own computer.");
-  say();
+  say("Dani-Dex setup");
 }
 
 function usage() {
@@ -75,7 +67,8 @@ Options:
 function resolveAsset(platform, arch) {
   const p = String(platform).toLowerCase();
   const a = String(arch).toLowerCase();
-  if (p === "darwin") return { platform: "macos", asset: "Dani-Dex-mac-universal.dmg" };
+  if (p === "darwin" && (a === "arm64" || a === "x64" || a === "x86_64"))
+    return { platform: "macos", asset: "Dani-Dex-mac-universal.dmg" };
   if (p === "linux" && (a === "x64" || a === "x86_64" || a === "amd64")) {
     return { platform: "linux", asset: "Dani-Dex-linux-x86_64.AppImage" };
   }
@@ -91,7 +84,7 @@ function get(url) {
   return new Promise((resolvePromise, rejectPromise) => {
     const follow = (current, hops) => {
       const request = current.startsWith("http:") ? require("node:http").get : https.get;
-      request
+      const req = request
         .call(null, current, (res) => {
           if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
             res.resume();
@@ -105,6 +98,7 @@ function get(url) {
           resolvePromise({ res, finalUrl: current });
         })
         .on("error", rejectPromise);
+      req.setTimeout(30_000, () => req.destroy(new Error("download timed out")));
     };
     follow(url, 0);
   });
@@ -116,31 +110,34 @@ async function download(url, dest) {
   const out = fs.createWriteStream(dest);
   let received = 0;
   let lastTick = 0;
-  await new Promise((resolvePromise, rejectPromise) => {
-    res.on("data", (chunk) => {
-      received += chunk.length;
-      if (TTY && total > 0) {
-        const now = Date.now();
-        if (now - lastTick > 200) {
-          lastTick = now;
-          const pct = Math.floor((received / total) * 100);
-          process.stdout.write(`\r${C.dim}  ${pct}% of ${(total / 1048576).toFixed(0)} MB${C.reset}   `);
-        }
+  res.on("data", (chunk) => {
+    received += chunk.length;
+    if (TTY && total > 0) {
+      const now = Date.now();
+      if (now - lastTick > 200) {
+        lastTick = now;
+        const pct = Math.floor((received / total) * 100);
+        process.stdout.write(`\r${C.dim}  ${pct}% of ${(total / 1048576).toFixed(0)} MB${C.reset}   `);
       }
-    });
-    res.on("error", rejectPromise);
-    out.on("error", rejectPromise);
-    out.on("finish", resolvePromise);
-    res.pipe(out);
+    }
   });
-  if (TTY && total > 0) process.stdout.write("\r" + " ".repeat(30) + "\r");
+  await pipeline(res, out);
+  if (TTY && total > 0) process.stdout.write(`\r${" ".repeat(30)}\r`);
   return { bytes: received, finalUrl };
 }
 
 async function fetchText(url) {
   const { res } = await get(url);
   const chunks = [];
-  for await (const chunk of res) chunks.push(chunk);
+  let bytes = 0;
+  for await (const chunk of res) {
+    bytes += chunk.length;
+    if (bytes > 262_144) {
+      res.destroy();
+      die("checksum file is too large");
+    }
+    chunks.push(chunk);
+  }
   return Buffer.concat(chunks).toString("utf8");
 }
 
@@ -155,21 +152,63 @@ const CHECKSUM_EXTENSIONS = { macos: ".dmg", linux: ".AppImage", windows: ".exe"
 function pickChecksumTarget(sumsText, platform) {
   const extension = CHECKSUM_EXTENSIONS[platform];
   if (!extension) return null;
+  let target = null;
   for (const entry of sumsText.split("\n")) {
     const line = entry.replace(/\r$/, "").trim();
     if (!line) continue;
-    const [hash, name] = line.split(/\s+/);
-    if (hash && name && name.endsWith(extension)) {
-      return { name, expected: hash.toLowerCase() };
-    }
+    if (!line.endsWith(extension)) continue;
+    const match = line.match(/^([a-f\d]{64})[ \t]+\*?(Dani-Dex-[A-Za-z\d._-]+)$/i);
+    if (!match || target) return null;
+    const name = match[2];
+    const suffix = { macos: "-universal.dmg", linux: "-x86_64.AppImage", windows: "-x64.exe" }[platform];
+    if (!name.endsWith(suffix)) return null;
+    target = { name, expected: match[1].toLowerCase() };
   }
-  return null;
+  return target;
 }
 
-function verifyChecksum(name, expected, file) {
-  const actual = crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+async function verifyChecksum(name, expected, file) {
+  const hash = crypto.createHash("sha256");
+  for await (const chunk of fs.createReadStream(file)) hash.update(chunk);
+  const actual = hash.digest("hex");
   if (actual !== expected) die("checksum mismatch - the download is corrupt or tampered with. Not installing it.");
   ok(`checksum verified (${name})`);
+}
+
+/** Copy before replacement; keep the installed app if copying or activation fails. */
+function replaceInstalledPath(source, dest, directory) {
+  const lock = `${dest}.install-lock`;
+  fs.mkdirSync(lock);
+  let staging;
+  let previous = false;
+  try {
+    staging = fs.mkdtempSync(path.join(path.dirname(dest), ".dani-dex-install-"));
+    const next = path.join(staging, "next");
+    const backup = path.join(staging, "previous");
+    if (directory) fs.cpSync(source, next, { recursive: true });
+    else {
+      fs.copyFileSync(source, next);
+      fs.chmodSync(next, 0o755);
+    }
+    if (fs.existsSync(dest)) {
+      fs.renameSync(dest, backup);
+      previous = true;
+    }
+    try {
+      fs.renameSync(next, dest);
+    } catch (error) {
+      if (previous) {
+        fs.renameSync(backup, dest);
+        previous = false;
+      }
+      throw error;
+    }
+    previous = false;
+  } finally {
+    // If restoring the old app fails, leave its recovery copy in place.
+    if (staging && !previous) fs.rmSync(staging, { recursive: true, force: true });
+    if (!previous) fs.rmdirSync(lock);
+  }
 }
 
 function exec(file, args, options = {}) {
@@ -197,17 +236,14 @@ async function installMac(downloaded, installDir, noLaunch) {
   step("Installing Dani-Dex");
   fs.mkdirSync(installDir, { recursive: true });
   const mount = fs.mkdtempSync(path.join(os.tmpdir(), "dani-dex-mount-"));
+  let mounted = false;
   try {
     await exec("hdiutil", ["attach", "-nobrowse", "-readonly", "-mountpoint", mount, downloaded]);
-  } catch (error) {
-    die(`could not open the downloaded disk image. Try downloading again. (${error.message})`);
-  }
-  try {
+    mounted = true;
     const app = fs.readdirSync(mount).find((entry) => entry.endsWith(".app"));
     if (!app) die("the disk image has no app inside - the download looks wrong.");
     const dest = path.join(installDir, "Dani-Dex.app");
-    fs.rmSync(dest, { recursive: true, force: true });
-    fs.cpSync(path.join(mount, app), dest, { recursive: true });
+    replaceInstalledPath(path.join(mount, app), dest, true);
     ok(`installed to ${dest}`);
     // Unsigned builds trip Gatekeeper on first launch; dropping quarantine matches the
     // README's manual Control-click step.
@@ -222,7 +258,8 @@ async function installMac(downloaded, installDir, noLaunch) {
       ok("launched");
     }
   } finally {
-    exec("hdiutil", ["detach", mount, "-quiet"]).catch(() => {});
+    if (mounted) await exec("hdiutil", ["detach", mount, "-quiet"]);
+    fs.rmdirSync(mount);
   }
 }
 
@@ -232,7 +269,10 @@ async function installWindows(downloaded, noLaunch) {
   const child = spawn(downloaded, [], { stdio: "ignore" });
   await new Promise((resolvePromise, rejectPromise) => {
     child.on("error", () => rejectPromise(new Error(`could not start the installer. Run it by hand: ${downloaded}`)));
-    child.on("exit", () => resolvePromise());
+    child.on("exit", (code, signal) => {
+      if (code !== 0) return rejectPromise(new Error(`installer failed (${signal || code})`));
+      resolvePromise();
+    });
   });
   const appExe = path.join(
     process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"),
@@ -242,7 +282,7 @@ async function installWindows(downloaded, noLaunch) {
   );
   if (!noLaunch && fs.existsSync(appExe)) {
     step("Opening Dani-Dex");
-    spawn(appExe, [], { detached: true, stdio: "ignore" }).unref();
+    await launch(appExe);
     ok("launched");
   } else if (!noLaunch) {
     say("Open Dani-Dex from the Start Menu when you are ready.");
@@ -253,18 +293,26 @@ async function installLinux(downloaded, installDir, noLaunch) {
   step("Installing Dani-Dex");
   fs.mkdirSync(installDir, { recursive: true });
   const dest = path.join(installDir, "Dani-Dex.AppImage");
-  fs.copyFileSync(downloaded, dest);
-  fs.chmodSync(dest, 0o755);
+  replaceInstalledPath(downloaded, dest, false);
   ok(`installed to ${dest}`);
   if (noLaunch) return;
   if (process.env.DISPLAY || process.env.WAYLAND_DISPLAY) {
     step("Opening Dani-Dex");
-    spawn(dest, [], { detached: true, stdio: "ignore" }).unref();
+    await launch(dest);
     ok("launched");
   } else {
     warn("no desktop session detected (headless or WSL without WSLg).");
     say(`  Run it when you have a desktop: ${dest}`);
   }
+}
+
+async function launch(executable) {
+  const child = spawn(executable, [], { detached: true, stdio: "ignore" });
+  await new Promise((resolvePromise, rejectPromise) => {
+    child.once("error", rejectPromise);
+    child.once("spawn", resolvePromise);
+  });
+  child.unref();
 }
 
 async function main() {
@@ -281,7 +329,8 @@ async function main() {
       usage();
       return;
     } else if (arg === "--install-dir") {
-      installDir = args[i + 1] || die("--install-dir needs a path");
+      if (!args[i + 1] || args[i + 1].startsWith("--")) die("--install-dir needs a path");
+      installDir = args[i + 1];
       i += 1;
     } else if (arg === "--resolve") {
       // Hidden test hook: print the resolved asset for a platform/arch and stop.
@@ -324,27 +373,16 @@ async function main() {
     return;
   }
 
-  // The checksum file is the source of truth for both the file name and its hash:
-  // releases publish versioned names, so look ours up by artifact type. No checksum
-  // file at all falls back to the stable alias name without verification.
-  let target = null;
+  // Both the artifact name and hash must come from the release manifest.
   let sums = "";
   try {
     sums = await fetchText(`${RELEASE_ROOT}/SHA256SUMS-${platform}.txt`);
   } catch {
-    /* genuinely absent - handled below */
+    die("could not fetch release checksums. Not installing an unverifiable download.");
   }
-  if (sums.trim() !== "") {
-    target = pickChecksumTarget(sums, platform);
-    if (!target) {
-      die(
-        `the release publishes checksums but has no entry for this platform - not installing an unverifiable download.`,
-      );
-    }
-  } else {
-    warn("this release has no checksum file - continuing without verification.");
-  }
-  const downloadName = target ? target.name : asset;
+  const target = pickChecksumTarget(sums, platform);
+  if (!target) die("release checksums must contain one valid artifact for this platform. Not installing.");
+  const downloadName = target.name;
   const url = `${RELEASE_ROOT}/${downloadName}`;
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "dani-dex-onboard-"));
@@ -360,10 +398,8 @@ async function main() {
     }
     ok(`downloaded ${(result.bytes / 1048576).toFixed(0)} MB`);
 
-    if (target) {
-      step("Verifying the download");
-      verifyChecksum(target.name, target.expected, downloaded);
-    }
+    step("Verifying the download");
+    await verifyChecksum(target.name, target.expected, downloaded);
 
     if (platform === "macos") await installMac(downloaded, destDir, noLaunch);
     else if (platform === "windows") await installWindows(downloaded, noLaunch);
@@ -373,15 +409,14 @@ async function main() {
   }
 
   say();
-  say(`${C.bold}${C.green}Done.${C.reset} Onboarding starts the first time Dani-Dex opens:`);
-  say("  1. Pick an AI - OpenCode's free models work right away, no account needed.");
-  say("  2. For ChatGPT, Claude or Grok, click Connect and sign in with that service.");
-  say("  3. Tell the Chief agent what you want done.");
-  say();
+  say("Installed. Open Dani-Dex to complete setup.");
 }
 
 if (require.main === module) {
-  main().catch((error) => die(error.message));
+  main().catch((error) => {
+    process.stderr.write(`${C.red}error${C.reset} ${error.message}\n`);
+    process.exitCode = 1;
+  });
 }
 
-module.exports = { resolveAsset, pickChecksumTarget };
+module.exports = { resolveAsset, pickChecksumTarget, replaceInstalledPath };

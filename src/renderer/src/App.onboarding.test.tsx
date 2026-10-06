@@ -38,9 +38,10 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
 
     const providers = screen.getByRole("radiogroup", { name: "Default AI" });
-    const codex = within(providers).getByRole("radio", { name: /ChatGPT.*Connected/ });
-    expect(codex).toBeChecked();
+    const free = within(providers).getByRole("radio", { name: /Dani Free/ });
+    expect(free).toBeChecked();
     await fireEvent.click(within(providers).getByRole("radio", { name: /Claude.*Connected/ }));
+    await fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await fireEvent.click(screen.getByRole("button", { name: "Open Dani-Dex" }));
@@ -151,8 +152,12 @@ describe("Dani-Dex connected desktop shell", () => {
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Sign in with ChatGPT" })).toBeEnabled());
     expect(
-      within(screen.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /Claude/ }),
+      within(screen.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /Dani Free/ }),
     ).toBeChecked();
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    await fireEvent.click(
+      within(screen.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /Claude/ }),
+    );
     expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
     const connectChatGPT = screen.getByRole("button", { name: "Sign in with ChatGPT" });
     await fireEvent.click(connectChatGPT);

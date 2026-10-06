@@ -1084,9 +1084,10 @@ describe("SettingsModal", () => {
 
   // The second way in, for the computer whose browser cannot finish the first one. What Settings
   // owns is the entry point and the dialog; the phase itself comes from main.
-  it("opens the code sign-in from the ChatGPT row and shows the code to type", async () => {
+  it("uses the supported ChatGPT sign-in from Settings", async () => {
     const [state, setState] = createSignal<ProviderCodeLoginState>({ phase: "starting" });
     const [provider, setProvider] = createSignal<AgentProviderId | null>(null);
+    const connectProvider = vi.fn();
     const codeLogin = {
       provider,
       state,
@@ -1116,21 +1117,14 @@ describe("SettingsModal", () => {
         onUpdateAccountAvatar={vi.fn(async () => undefined)}
         agentStatus={codexSignedOutStatus}
         codeLogin={codeLogin}
+        onConnectProvider={connectProvider}
       />
     ));
 
-    // The menu is a Kobalte trigger: it wants the pointer press as well as the click.
-    const moreActions = await screen.findByRole("button", { name: "More ways to log in to ChatGPT" });
-    fireEvent.pointerDown(moreActions, { button: 0 });
-    fireEvent.click(moreActions);
-    fireEvent.pointerUp(await screen.findByRole("menuitem", { name: "Log in with code" }), { button: 0 });
-
-    await waitFor(() => expect(codeLogin.start).toHaveBeenCalledWith("codex"));
-    expect(await screen.findByLabelText("Login code K T Q 4 - B 6 2 M X")).toHaveTextContent("KTQ4-B62MX");
-
-    fireEvent.click(screen.getByRole("button", { name: "Close log in to ChatGPT" }));
-
-    await waitFor(() => expect(codeLogin.cancel).toHaveBeenCalledTimes(1));
+    await fireEvent.click(await screen.findByRole("button", { name: "Sign in with ChatGPT" }));
+    await waitFor(() => expect(connectProvider).toHaveBeenCalledWith("codex"));
+    expect(screen.queryByRole("button", { name: "More ways to log in to ChatGPT" })).toBeNull();
+    expect(codeLogin.start).not.toHaveBeenCalled();
   });
 });
 

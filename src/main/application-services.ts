@@ -817,7 +817,7 @@ export async function createApplicationServices({
       modelId: "stepfun/step-3.7-flash:free",
       endpoint: "https://api.kilo.ai/api/gateway/chat/completions",
     }),
-    preferredProvider: setupState.preferredProvider ?? "codex",
+    preferredProvider: setupState.preferredProvider ?? "opencode",
     bundledExecutables: providerRuntimes.bundledExecutables(),
     providerDriver: (provider) =>
       provider === "codex"

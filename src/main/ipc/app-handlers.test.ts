@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import { CONTEXT_EXPORT_PROMPT } from "@dani-dex/contracts/context-import-prompt";
 import { describe, expect, it, vi } from "vitest";
 
 // electron cannot be imported outside an Electron process, and nothing in this module is called
@@ -10,6 +11,13 @@ const { EXTERNAL_DESTINATIONS } = await import("./app-handlers");
 const { parseExternalDestination } = await import("./app-inputs");
 
 describe("external destinations", () => {
+  it.each(["import-chatgpt", "import-claude"] as const)("opens a fixed public import prompt at %s", (destination) => {
+    const url = new URL(EXTERNAL_DESTINATIONS[destination]);
+    expect(url.protocol).toBe("https:");
+    expect(url.hostname).toBe(destination === "import-chatgpt" ? "chatgpt.com" : "claude.ai");
+    expect(url.searchParams.get("q")).toBe(CONTEXT_EXPORT_PROMPT);
+    expect(parseExternalDestination(destination)).toBe(destination);
+  });
   it("sends the OpenCode key request to the OpenCode sign-in page", () => {
     // The dialog says the key is optional and the free models need no account. A wrong address here
     // asks the user for a paid credential on a page Dani-Dex did not choose.

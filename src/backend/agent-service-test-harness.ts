@@ -5,7 +5,12 @@ import { EventEmitter } from "node:events";
 import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { AgentEvent, BrowserControlState, BrowserTab } from "@dani-dex/contracts/ipc";
+import {
+  type AgentEvent,
+  type BrowserControlState,
+  type BrowserTab,
+  defaultProviderModel,
+} from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
 import { expect, vi } from "vitest";
 import type { BrowserUploadHooks } from "./agent/browser-uploads";
@@ -352,6 +357,16 @@ export function inputRecords(value: unknown): DynamicRecord[] {
 
 export function stores(root: string): { store: AgentStore; mailbox: MailboxStore } {
   const store = new AgentStore(join(root, "user-data"), join(root, "home"));
+  // Provider-process tests model an existing Codex account. New product defaults have separate coverage.
+  const getOrCreate = store.getOrCreate.bind(store);
+  store.getOrCreate = async (...args) => {
+    const [id] = args;
+    const existing = store.list().some((agent) => agent.id === id);
+    const agent = await getOrCreate(...args);
+    return existing
+      ? agent
+      : store.updateAgent({ agentId: id, provider: "codex", model: defaultProviderModel("codex") });
+  };
   return { store, mailbox: new MailboxStore(join(root, "user-data"), store.sharedRoot, store.database) };
 }
 
@@ -390,7 +405,7 @@ export function fakeBrowser(tabs: BrowserTab[] = [], uploadTarget = { inputId: "
 export function createTestService(
   options: Partial<AgentServiceOptions> & Pick<AgentServiceOptions, "store" | "mailbox">,
 ): AgentService {
-  return new AgentService({ browser: fakeBrowser(), requestTimeoutMs: 30_000, ...options });
+  return new AgentService({ browser: fakeBrowser(), requestTimeoutMs: 30_000, preferredProvider: "codex", ...options });
 }
 
 /**

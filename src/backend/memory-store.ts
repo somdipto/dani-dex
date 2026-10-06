@@ -3,6 +3,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { AgentMemoryOrigin, MemoryEntry } from "@dani-dex/contracts/ipc";
 import { type DynamicRecord, isDynamicRecord, isString } from "@dani-dex/contracts/runtime-values";
+import { redactContextText } from "@dani-dex/logging";
 import type { DaniDexDatabase } from "./dani-dex-database";
 
 /**
@@ -263,7 +264,10 @@ function forgetEventsBefore(db: DatabaseSync, aggregateType: string, memoryId: s
 }
 
 function validateMemoryText(value: string): string {
-  const text = value.trim();
+  const trimmed = value.trim();
+  const text = /^Imported from (?:ChatGPT|Claude) \(historical\):/u.test(trimmed)
+    ? redactContextText(trimmed)
+    : trimmed;
   if (!text) throw new Error("Memory text is required.");
   if (text.length > INPUT_LIMITS.agentMemoryText) throw new Error("Memory text is too long.");
   return text;

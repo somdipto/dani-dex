@@ -14,5 +14,4 @@ fi
 echo "Running UI foundation check..."
 bun run check:ui
 
-echo "Running type checks..."
-bun run typecheck
+# Repository-wide type checks run in CI, as required by AGENTS.md.

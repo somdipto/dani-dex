@@ -52,7 +52,8 @@ describe("AgentStore", () => {
     expect(chief.workspacePath).toBe(join(home, "Dani-Dex", "Agents", "chief"));
     expect(chief.description).toBe("");
     expect(chief.preview).toBe("No messages yet");
-    expect(chief.model).toBe("gpt-5.6-luna");
+    expect(chief.provider).toBe("opencode");
+    expect(chief.model).toBe("dani/dani-free-auto");
     expect(chief.reasoningEffort).toBe("low");
     expect(sales.workspacePath).toBe(join(home, "Dani-Dex", "Agents", "sales-outbound"));
     expect(store.sharedRoot).toBe(join(home, "Dani-Dex", "Shared"));
@@ -282,7 +283,7 @@ describe("AgentStore", () => {
     await restored.initialize();
 
     expect(restored.list().map((agent) => agent.id)).toEqual(["sales-outbound", "chief"]);
-    expect(restored.list().find((agent) => agent.id === "sales-outbound")?.model).toBe("gpt-5.6-luna");
+    expect(restored.list().find((agent) => agent.id === "sales-outbound")?.model).toBe("dani/dani-free-auto");
     expect(restored.list().find((agent) => agent.id === "chief")?.threadId).toBe(threadId);
     expect(restored.database.readConversationPage("chief", threadId).messages).toEqual([
       expect.objectContaining({ id: "message-1", text: "Where did my chat go?" }),
@@ -548,7 +549,7 @@ describe("AgentStore", () => {
       store.updateAgent({ agentId: "chief", provider: "claude", model: "claude fable 5.1 (1m)" }),
     ).rejects.toThrow("Invalid agent model.");
     expect(store.list().find((agent) => agent.id === "chief")).toMatchObject({
-      provider: "codex",
+      provider: "opencode",
       model: chief.model,
     });
     await expect(store.updateAgent({ agentId: "chief", model: "claude fable 5.1 (1m)" })).rejects.toThrow(
@@ -1052,6 +1053,7 @@ describe("AgentStore", () => {
     const store = new AgentStore(join(root, "user-data"), join(root, "home"));
     await store.initialize();
     await store.getOrCreate("chief");
+    await store.updateAgent({ agentId: "chief", provider: "codex", model: "gpt-5.6-luna" });
     const publicThreadId = await store.ensureThreadId("chief");
     store.bindProviderSession("chief", "codex-native-1");
     store.database.deactivateProviderSessions(publicThreadId);

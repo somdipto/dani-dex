@@ -801,25 +801,13 @@ it("shows host memories, routine status, and usage on separate pages", async () 
 
 it("edits appearance separately from the main form", async () => {
   await renderSheet("appearance");
-  await click("Agent face 2", "radio");
-  await click("Automatic", "radio");
-  // Select a real palette option through its accessible radio role.
-  const color = screen
-    .getAllByRole("radio")
-    .find(
-      (element) =>
-        !element.getAttribute("aria-label")?.startsWith("Agent face") &&
-        element.getAttribute("aria-label") !== "Automatic",
-    );
-  if (!color) throw new Error("Color control missing");
-  await act(() => fireEvent.click(color));
+  await click("Pink", "radio");
 
   await click("Save changes");
   expect(workspace.updateAgent).toHaveBeenCalledWith(
     {
       agentId: original.id,
-      avatarSeed: expect.not.stringMatching(/^original$/),
-      avatarHue: expect.any(Number),
+      avatarHue: 320,
     },
     host.id,
   );
@@ -867,7 +855,7 @@ it("saves a supported model and reasoning level on the original host", async () 
 it("hides the header action after saving", async () => {
   await renderSheet("appearance");
   expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();
-  await click("Agent face 2", "radio");
+  await click("Pink", "radio");
   await click("Save changes");
   expect(screen.queryByRole("button", { name: "Save changes" })).toBeNull();
 });

@@ -1,66 +1,48 @@
-# Dani-Dex one-command onboarding for Windows.
-#
-#   irm https://raw.githubusercontent.com/somdipto/dani-dex/main/scripts/onboard.ps1 | iex
-#
-# Paste that single line into PowerShell. It downloads the newest Dani-Dex release
-# from GitHub, runs the installer and opens the app so onboarding starts.
-# macOS, Linux and WSL use the bash version instead (see README).
+# Dani-Dex Windows installer. Run with -NoLaunch to skip the launcher.
+param([switch]$NoLaunch, [switch]$DryRun)
 $ErrorActionPreference = 'Stop'
 
-$Repo  = 'somdipto/dani-dex'
-$Asset = 'Dani-Dex-windows-x64.exe'
-$Url   = "https://github.com/$Repo/releases/latest/download/$Asset"
-
-function Step($Message) { Write-Host "==> $Message" -ForegroundColor Cyan }
-function Ok($Message)   { Write-Host " ok  $Message" -ForegroundColor Green }
-function Warn($Message) { Write-Host "warn $Message" -ForegroundColor Yellow }
-
-Write-Host ''
-Write-Host '  Dani-Dex setup' -ForegroundColor Cyan
-Write-Host '  Your own AI team, on your own computer.'
-Write-Host ''
-
-Step "Downloading Dani-Dex ($Asset)"
-Write-Host "  $Url" -ForegroundColor DarkGray
-$Installer = Join-Path $env:TEMP $Asset
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-WebRequest -Uri $Url -OutFile $Installer -UseBasicParsing
-Ok 'downloaded'
-
-Step 'Verifying the download'
-$SumsUrl = "https://github.com/$Repo/releases/latest/download/SHA256SUMS-windows.txt"
-try {
-  $Sums = (Invoke-WebRequest -Uri $SumsUrl -UseBasicParsing).Content
-  $Line = ($Sums -split "`n" | Where-Object { $_ -match "\s$([regex]::Escape($Asset))$" }) | Select-Object -First 1
-  if ($Line) {
-    $Expected = ($Line -split '\s+')[0].ToLower()
-    $Actual = (Get-FileHash -Algorithm SHA256 $Installer).Hash.ToLower()
-    if ($Expected -ne $Actual) { throw "checksum mismatch - the download is corrupt or tampered with. Try again." }
-    Ok 'checksum verified'
-  } else {
-    Warn 'this release has no checksum entry yet - continuing without verification.'
-  }
-} catch {
-  if ($_.Exception.Message -match 'checksum mismatch') { throw }
-  Warn 'could not fetch the checksum file - continuing without verification.'
-}
-
-Step 'Running the installer'
-Write-Host '  If a blue SmartScreen window appears, click "More info", then "Run anyway".'
-Start-Process -FilePath $Installer -Wait
-$AppExe = Join-Path $env:LOCALAPPDATA 'Programs\Dani-Dex\Dani-Dex.exe'
-if (Test-Path $AppExe) {
-  Step 'Opening Dani-Dex'
-  Start-Process $AppExe
-  Ok 'launched'
+$Repo = 'somdipto/dani-dex'
+$ReleaseRoot = if ($env:DANI_DEX_ONBOARD_RELEASE_ROOT) {
+  $env:DANI_DEX_ONBOARD_RELEASE_ROOT
 } else {
-  Write-Host 'Open Dani-Dex from the Start Menu when you are ready.'
+  "https://github.com/$Repo/releases/latest/download"
+}
+$Arch = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }
+if ($Arch -ne 'AMD64') { throw 'Dani-Dex requires x64 Windows.' }
+if ($DryRun) {
+  Write-Host "Plan: verify $ReleaseRoot/SHA256SUMS-windows.txt, then run the per-user installer."
+  return
 }
 
-Write-Host ''
-Write-Host 'Done. ' -ForegroundColor Green -NoNewline
-Write-Host 'Onboarding starts the first time Dani-Dex opens:'
-Write-Host '  1. Pick an AI - OpenCode''s free models work right away, no account needed.'
-Write-Host '  2. For ChatGPT, Claude or Grok, click Connect and sign in with that service.'
-Write-Host '  3. Tell the Chief agent what you want done.'
-Write-Host ''
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$TempDir = Join-Path ([IO.Path]::GetTempPath()) ("dani-dex-onboard-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $TempDir | Out-Null
+try {
+  $Sums = (Invoke-WebRequest -Uri "$ReleaseRoot/SHA256SUMS-windows.txt" -UseBasicParsing -TimeoutSec 30).Content
+  $Entries = @($Sums -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_.EndsWith('.exe') })
+  if ($Entries.Count -ne 1) {
+    throw 'Release checksums must contain one valid Windows artifact. Not installing.'
+  }
+  if ($Entries[0] -cmatch '^([a-fA-F0-9]{64})[ \t]+\*?(Dani-Dex-[A-Za-z0-9._-]+-x64\.exe)$') {
+    $Expected = $Matches[1].ToLowerInvariant()
+    $Asset = $Matches[2]
+  } else { throw 'Invalid Windows checksum entry. Not installing.' }
+  $Installer = Join-Path $TempDir $Asset
+  Write-Host "Downloading Dani-Dex ($Asset)"
+  Invoke-WebRequest -Uri "$ReleaseRoot/$Asset" -OutFile $Installer -UseBasicParsing -TimeoutSec 300
+  $Actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $Installer).Hash.ToLowerInvariant()
+  if ($Expected -ne $Actual) { throw 'Checksum mismatch. Not installing.' }
+
+  Write-Host 'Running the verified installer.'
+  $Installed = Start-Process -FilePath $Installer -Wait -PassThru
+  if ($Installed.ExitCode -ne 0) { throw "Installer failed ($($Installed.ExitCode))." }
+  $AppExe = Join-Path $env:LOCALAPPDATA 'Programs\Dani-Dex\Dani-Dex.exe'
+  if (-not $NoLaunch) {
+    if (Test-Path -LiteralPath $AppExe) { Start-Process -FilePath $AppExe }
+    else { Write-Host 'Open Dani-Dex from the Start Menu.' }
+  }
+  Write-Host 'Installed. Open Dani-Dex to complete setup.'
+} finally {
+  Remove-Item -LiteralPath $TempDir -Recurse -Force
+}

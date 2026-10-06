@@ -38,10 +38,19 @@ describe("resolveCreationModel", () => {
     ).toEqual({ provider: "codex", model: "gpt-5.6-luna" });
   });
 
-  it("moves to the first listed provider when the saved one lists nothing", () => {
+  it("uses Dani Free when the saved provider lists nothing", () => {
     expect(
       resolveCreationModel({ completed: true, preferredProvider: "claude", preferredModel: null }, options),
-    ).toEqual({ provider: "codex", model: "gpt-5.6-luna" });
+    ).toEqual({ provider: "opencode", model: "opencode/example-free" });
+  });
+
+  it("does not choose a paid model when Dani Free is unavailable", () => {
+    expect(
+      resolveCreationModel(
+        null,
+        options.filter((option) => option.provider === "codex"),
+      ),
+    ).toBeNull();
   });
 
   it("returns null while the catalog is empty", () => {

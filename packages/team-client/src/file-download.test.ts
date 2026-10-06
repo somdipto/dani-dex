@@ -44,11 +44,13 @@ describe("mobile attachment downloads", () => {
     await expect(
       receiver.receive(encodeTeamProtocolV2Frame({ version: 2, type: "file-complete", transferId })),
     ).rejects.toThrow("incomplete");
+    await receiver.receive(encodeTeamProtocolV2Frame(open));
     await expect(
       receiver.receive(
         new Uint8Array(encodeTeamProtocolV2FileChunk({ transferId, offset: 1, bytes: new Uint8Array([1]) })).buffer,
       ),
     ).rejects.toThrow("invalid attachment chunk");
+    await receiver.receive(encodeTeamProtocolV2Frame(open));
     await receiver.receive(
       new Uint8Array(encodeTeamProtocolV2FileChunk({ transferId, offset: 0, bytes: new TextEncoder().encode("wrong") }))
         .buffer,
@@ -75,6 +77,83 @@ describe("mobile attachment downloads", () => {
     const result = receiver.take(transferId);
     receiver.clear();
     await expect(result).rejects.toThrow("connection closed");
+  });
+
+  it.each([false, true])("settles a cancelled download immediately (opened: %s)", async (opened) => {
+    vi.useFakeTimers();
+    const receiver = createRemoteFileReceiver(async () => {});
+    const settled = vi.fn();
+    const downloaded = receiver.take(transferId);
+    void downloaded.then(settled, settled);
+    try {
+      if (opened) await receiver.receive(encodeTeamProtocolV2Frame(open));
+      await receiver.receive(
+        encodeTeamProtocolV2Frame({ version: 2, type: "file-cancel", transferId, reason: "cancelled" }),
+      );
+      await Promise.resolve();
+      expect(settled).toHaveBeenCalledOnce();
+      await expect(downloaded).rejects.toThrow("cancelled");
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      receiver.clear();
+    }
+  });
+
+  it("rejects a waiting download as soon as its size is refused", async () => {
+    vi.useFakeTimers();
+    const receiver = createRemoteFileReceiver(async () => {});
+    const settled = vi.fn();
+    const downloaded = receiver.take(transferId);
+    void downloaded.then(settled, settled);
+    try {
+      await receiver.receive(encodeTeamProtocolV2Frame({ ...open, size: MOBILE_ATTACHMENT_BYTES + 1 }));
+      await Promise.resolve();
+      expect(settled).toHaveBeenCalledOnce();
+      await expect(downloaded).rejects.toThrow("10 MB");
+    } finally {
+      receiver.clear();
+    }
+  });
+
+  it("leaves cancellation for unknown transfers available to the upload sender", async () => {
+    const receiver = createRemoteFileReceiver(async () => {});
+    await expect(
+      receiver.receive(
+        encodeTeamProtocolV2Frame({
+          version: 2,
+          type: "file-cancel",
+          transferId,
+          reason: "upload refused",
+        }),
+      ),
+    ).resolves.toBe(false);
+  });
+
+  it("rejects a waiting caller and releases timers when a download is damaged", async () => {
+    vi.useFakeTimers();
+    const receiver = createRemoteFileReceiver(async () => {});
+    await receiver.receive(encodeTeamProtocolV2Frame(open));
+    const downloaded = expect(receiver.take(transferId)).rejects.toThrow("damaged");
+    await receiver.receive(
+      new Uint8Array(
+        encodeTeamProtocolV2FileChunk({
+          transferId,
+          offset: 0,
+          bytes: new TextEncoder().encode("wrong"),
+        }),
+      ).buffer,
+    );
+    await expect(
+      receiver.receive(
+        encodeTeamProtocolV2Frame({
+          version: 2,
+          type: "file-complete",
+          transferId,
+        }),
+      ),
+    ).rejects.toThrow("damaged");
+    await downloaded;
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
 

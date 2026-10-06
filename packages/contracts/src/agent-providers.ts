@@ -112,7 +112,7 @@ const AGENT_PROVIDER_DESCRIPTOR_TABLE = {
     // one works with no credential. So this asks for the optional key instead of a terminal login.
     signInMessage: "Dani listed no model. Add a model key in Settings to continue.",
     installGuideLink: null,
-    defaultModel: "",
+    defaultModel: "dani/dani-free-auto",
     legacyModelPrefix: null,
     authKind: "opencode",
     pickerOrder: 3,
@@ -205,7 +205,7 @@ export function isFreeOpencodeModelName(name: string): boolean {
  * badge, the catalog order, the stored-key drop -- goes through `isFreeOpencodeModel`, so the
  * three cannot disagree about what costs money.
  */
-const FREE_TIER_MODEL_IDS = new Set(["opencode/big-pickle"]);
+const FREE_TIER_MODEL_IDS = new Set(["dani/dani-free-auto", "opencode/big-pickle"]);
 
 export function isFreeOpencodeModel(id: string, name: string): boolean {
   return FREE_TIER_MODEL_IDS.has(id.trim().toLowerCase()) || isFreeOpencodeModelName(name);

@@ -54,16 +54,26 @@ function renderFlow(
   return view;
 }
 
-/** A custom endpoint is offered only while OpenCode can run it, and the fixture names no OpenCode. */
-const AGENT_STATUS_WITH_OPENCODE: AgentStatus = {
-  ...STORY_AGENT_STATUS,
-  providers: [
-    ...(STORY_AGENT_STATUS.providers ?? []),
-    { id: "opencode", state: "available", version: "1.18.27", message: null, email: null },
-  ],
-};
+const AGENT_STATUS_WITH_OPENCODE = STORY_AGENT_STATUS;
 
 describe("OnboardingFlow", () => {
+  it.each(["darwin", "win32", "linux"] as const)(
+    "uses Dani Free and the same four-step flow on %s",
+    async (platform) => {
+      const onSave = vi.fn(async (_provider: AgentProviderId) => undefined);
+      const view = renderFlow({ platform, onSave });
+      expect(
+        within(view.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /Dani Free/ }),
+      ).toBeChecked();
+      await fireEvent.click(view.getByRole("button", { name: "Next" }));
+      await fireEvent.click(view.getByRole("button", { name: "Next" }));
+      expect(view.getByRole("region", { name: "Import context" })).toBeInTheDocument();
+      await fireEvent.click(view.getByRole("button", { name: "Next" }));
+      await fireEvent.click(view.getByRole("button", { name: "Open Dani-Dex" }));
+      await waitFor(() => expect(onSave).toHaveBeenCalledWith("opencode", null));
+    },
+  );
+
   it("supports provider selection and forward/back navigation", async () => {
     const view = renderFlow();
     const providers = view.getByRole("radiogroup", { name: "Default AI" });
@@ -85,6 +95,7 @@ describe("OnboardingFlow", () => {
     await fireEvent.click(within(providers).getByRole("radio", { name: /Grok/ }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Open Dani-Dex" }));
 
     // A built-in provider records no model: it keeps its own default.
@@ -103,6 +114,7 @@ describe("OnboardingFlow", () => {
     await waitFor(() => expect(openPermission).toHaveBeenCalledWith("screen-recording"));
 
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
     expect(await view.findByRole("heading", { name: "Give each agent a job" })).toBeInTheDocument();
   });
 
@@ -113,11 +125,12 @@ describe("OnboardingFlow", () => {
     const view = renderFlow({ onSave });
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Open Dani-Dex" }));
 
     expect(await view.findByRole("alert")).toHaveTextContent("Setup failed.");
     expect(view.getByRole("heading", { name: "Give each agent a job" })).toBeInTheDocument();
-    expect(onSave).toHaveBeenCalledWith("codex", null);
+    expect(onSave).toHaveBeenCalledWith("opencode", null);
   });
 
   it("counts a saved endpoint in the custom row and selects that row after the save", async () => {
@@ -160,6 +173,7 @@ describe("OnboardingFlow", () => {
 
     // Setup records the provider that runs the endpoint, plus the endpoint's own first model, which
     // is what makes it the model a new agent starts on: the provider alone cannot name it.
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Open Dani-Dex" }));
@@ -225,6 +239,7 @@ describe("OnboardingFlow", () => {
     await waitFor(() => expect(screen.queryByRole("button", { name: "Done" })).not.toBeInTheDocument());
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Open Dani-Dex" }));
     // The removed endpoint's model is gone from setup; the endpoint still saved supplies the model
     // instead, because the custom row is still the choice and a choice with no model would start the
@@ -260,6 +275,7 @@ describe("OnboardingFlow", () => {
 
     const providers = view.getByRole("radiogroup", { name: "Default AI" });
     await fireEvent.click(within(providers).getByRole("radio", { name: /Custom provider/ }));
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Next" }));
     await fireEvent.click(view.getByRole("button", { name: "Open Dani-Dex" }));
@@ -425,8 +441,7 @@ describe("OnboardingFlow", () => {
       />
     ));
 
-    // Nothing is connected, so nothing is chosen for the user, and the reason says that first.
-    expect(view.getByText("Select a provider to continue.")).toBeInTheDocument();
+    expect(view.getByText("Download Dani Free to continue.")).toBeInTheDocument();
     await fireEvent.click(
       within(view.getByRole("radiogroup", { name: "Default AI" })).getByRole("radio", { name: /ChatGPT/ }),
     );
@@ -489,11 +504,10 @@ describe("OnboardingFlow", () => {
     // offer the download.
     expect(view.getByRole("button", { name: "Download ChatGPT" })).toBeInTheDocument();
     expect(view.queryByRole("button", { name: "Download OpenCode" })).toBeNull();
-    // The version the user's own CLI reports, which is the one the row must show.
-    expect(view.getByText("v1.18.27")).toBeInTheDocument();
+    expect(view.getByRole("radio", { name: /Dani Free/ })).toBeEnabled();
   });
 
-  it("offers the code sign-in on the first-run provider step and shows the code to type", async () => {
+  it("uses the supported ChatGPT sign-in on the first-run provider step", async () => {
     const agentStatus: AgentStatus = {
       ...STORY_AGENT_STATUS,
       providers: (STORY_AGENT_STATUS.providers ?? []).map((provider) =>
@@ -502,6 +516,7 @@ describe("OnboardingFlow", () => {
     };
     const [state, setState] = createSignal<ProviderCodeLoginState>({ phase: "starting" });
     const [provider, setProvider] = createSignal<AgentProviderId | null>(null);
+    const connectProvider = vi.fn();
     const codeLogin = {
       provider,
       state,
@@ -517,27 +532,20 @@ describe("OnboardingFlow", () => {
       cancel: vi.fn(() => setProvider(null)),
       openVerificationUrl: vi.fn(),
     };
-    const view = render(() => (
+    render(() => (
       <OnboardingFlow
         state={{ completed: false, preferredProvider: null, preferredModel: null }}
         agentStatus={agentStatus}
         platform="darwin"
         codeLogin={codeLogin}
+        onConnectProvider={connectProvider}
         onSave={async () => undefined}
       />
     ));
 
-    // The menu is a Kobalte trigger: it wants the pointer press as well as the click.
-    const moreActions = view.getByRole("button", { name: "More ways to log in to ChatGPT" });
-    await fireEvent.pointerDown(moreActions, { button: 0 });
-    await fireEvent.click(moreActions);
-    await fireEvent.pointerUp(await screen.findByRole("menuitem", { name: "Log in with code" }), { button: 0 });
-
-    await waitFor(() => expect(codeLogin.start).toHaveBeenCalledWith("codex"));
-    expect(await screen.findByLabelText("Login code K T Q 4 - B 6 2 M X")).toHaveTextContent("KTQ4-B62MX");
-
-    await fireEvent.click(screen.getByRole("button", { name: "Close log in to ChatGPT" }));
-    await waitFor(() => expect(codeLogin.cancel).toHaveBeenCalledTimes(1));
-    expect(screen.queryByLabelText("Login code K T Q 4 - B 6 2 M X")).toBeNull();
+    await fireEvent.click(await screen.findByRole("button", { name: "Sign in with ChatGPT" }));
+    await waitFor(() => expect(connectProvider).toHaveBeenCalledWith("codex"));
+    expect(screen.queryByRole("button", { name: "More ways to log in to ChatGPT" })).toBeNull();
+    expect(codeLogin.start).not.toHaveBeenCalled();
   });
 });

@@ -315,7 +315,11 @@ describe.sequential("HostedSiteCoordinator: approval, mutation and markers", () 
       { action: "publish", status: "succeeded" },
       { action: "delete", status: "cancelled" },
     ]);
-    expect((await service.readConversationPageFor(agent.id, "member-1")).readState?.unreadCount).toBe(0);
+    // The declined action is visible and unread; hosted-site markers are not unread replies.
+    expect((await service.readConversationPageFor(agent.id, "member-1")).readState).toMatchObject({
+      unreadCount: 1,
+      firstUnreadMessageId: "approval-denied:delete-site-approval",
+    });
     expect(service.searchConversationMessages(hostedSite.title, agent.id).total).toBe(0);
   });
 

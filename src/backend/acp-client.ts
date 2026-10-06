@@ -100,6 +100,7 @@ interface AcpTurn {
   thought: string;
   thoughtStarted: boolean;
   receivedOutput: boolean;
+  receivedAnswer: boolean;
   messages: ThreadItem[];
   toolNames: Map<string, string>;
   toolOperations: Map<string, { operation: string | null; toolKind: string | null; displayTitle: string | null }>;
@@ -850,6 +851,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       thought: "",
       thoughtStarted: false,
       receivedOutput: false,
+      receivedAnswer: false,
       messages: [],
       toolNames: new Map(),
       toolOperations: new Map(),
@@ -928,7 +930,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
         });
       // OpenCode can swallow provider errors and report a successful, empty ACP turn.
       // Do not invent the upstream cause or report that turn as a successful reply.
-      if (this.provider === "opencode" && response.stopReason === "end_turn" && !turn.receivedOutput) {
+      if (this.provider === "opencode" && response.stopReason === "end_turn" && !turn.receivedAnswer) {
         this.#completeTurn(
           thread,
           turn,
@@ -1044,7 +1046,10 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     if (!turn || turn.controller.signal.aborted) return;
     if (update.sessionUpdate === "agent_message_chunk" && update.content.type === "text") {
       if (update.content.text) this.#completeThought(thread, turn);
-      if (update.content.text.trim()) turn.receivedOutput = true;
+      if (update.content.text.trim()) {
+        turn.receivedOutput = true;
+        turn.receivedAnswer = true;
+      }
       turn.text += update.content.text;
       return;
     }
@@ -1074,6 +1079,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     }
     if (update.sessionUpdate === "tool_call" || update.sessionUpdate === "tool_call_update") {
       turn.receivedOutput = true;
+      turn.receivedAnswer = true;
       if (update.sessionUpdate === "tool_call") this.#completeMessage(thread, turn, "commentary");
       // ACP updates are partial; OpenCode omits the name when a tool finishes.
       const name = update.name ?? turn.toolNames.get(update.toolCallId) ?? update.title ?? "tool";
@@ -1376,6 +1382,7 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     if (!turn || turn.id !== params.turnId || this.#threads.get(params.threadId)?.retiredAttempt)
       throw new Error("No active attempt for tool dispatch.");
     turn.receivedOutput = true;
+    turn.receivedAnswer = true;
     if (turn.controller.signal.aborted) throw new Error("Turn cancelled before tool dispatch.");
     this.options.workerHistory?.append(params.threadId, {
       kind: "item",
@@ -1383,11 +1390,11 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
       item: {
         id: params.callId,
         type: "toolCall",
-        name: params.namespace + "." + params.tool,
+        name: `${params.namespace}.${params.tool}`,
         arguments: params.arguments,
         status: "in_progress",
       },
-      operation: params.namespace + "." + params.tool,
+      operation: `${params.namespace}.${params.tool}`,
       effectCommitted: false,
       effectUnknown: true,
     });
@@ -1396,11 +1403,11 @@ export class AcpAgentClient extends EventEmitter<ClientEvents> {
     this.options.workerHistory?.append(params.threadId, {
       kind: "item",
       turnId: turn.id,
-      operation: params.namespace + "." + params.tool,
+      operation: `${params.namespace}.${params.tool}`,
       item: {
         id: params.callId,
         type: "toolCall",
-        name: params.namespace + "." + params.tool,
+        name: `${params.namespace}.${params.tool}`,
         arguments: params.arguments,
         result,
         status: result.success ? "completed" : "failed",

@@ -258,6 +258,14 @@ describe("resolveLogLevel", () => {
 });
 
 describe("createDaniDexLogger", () => {
+  it("bounds large messages after redacting them", () => {
+    const lines: string[] = [];
+    const logger = createDaniDexLogger("automation", (line) => lines.push(line));
+    logger.error(`apiKey="${"secret-value".repeat(500)}" ${"x".repeat(10_000)}`);
+    expect(lines[0].length).toBeLessThan(5_000);
+    expect(lines[0]).not.toContain("secret-value");
+    expect(lines[0]).toContain("[redacted]");
+  });
   it("prefixes lines and redacts secrets before they reach the sink", () => {
     const lines: string[] = [];
     const logger = createDaniDexLogger("automation", (line) => lines.push(line));

@@ -549,6 +549,7 @@ export function installDanidexStub(): void {
           cliVersion: "0.144.1",
           auth: { kind: "chatgpt", email: "norbert@example.com" },
           providers: [
+            { id: "opencode", state: "available", version: "1.18.27", message: null, email: null },
             {
               id: "codex",
               state: "available",
