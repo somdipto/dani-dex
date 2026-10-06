@@ -5,6 +5,22 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+## [0.17.9] - 2026-10-06
+
+### Added
+
+- Package the character selection and robot avatars already present in the current source.
+- Package the Arc dial already present in the current source on macOS. The Arc dial is not available on Windows.
+
+### Changed
+
+- Advance the desktop release version so older installed copies can discover this source as a newer release once the matching installers and update metadata are published.
+
+### Known limits
+
+- Release preparation is not proof of native installation or live voice acceptance. The current source still requires macOS 13 or later.
+- Local V2 channel, Telegram reply, lightweight inbox and CLI work is not included in this release preparation.
+
 ## [0.17.8] - 2026-09-27
 
 ### Fixed
