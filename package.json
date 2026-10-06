@@ -228,7 +228,7 @@
     "lucide-solid": "1.33.0",
     "marked": "catalog:",
     "qrcode": "^1.5.4",
-    "solid-js": "2.0.0-rc.0",
+    "solid-js": "2.0.0-rc.9",
     "solid-recharts": "1.0.1",
     "solid-sonner": "0.3.2",
     "ws": "8.21.3",
