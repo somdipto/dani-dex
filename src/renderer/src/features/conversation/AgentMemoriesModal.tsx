@@ -6,6 +6,12 @@ import { createScrollFades } from "../../components/createScrollFades";
 import { Button, Dialog, IconButton, Plus, Textarea, Trash2, X } from "../../components/ui";
 import { errorMessage } from "../../error-message";
 import { ContextImportPanel } from "./ContextImportPanel";
+import {
+  IMPORT_TARGET_AGENT_ID,
+  pendingImportTexts,
+  saveEntriesOnce,
+  setPendingImportTexts,
+} from "./context-import-save";
 import type { MemoriesPort } from "./memories-port";
 
 interface AgentMemoriesModalProps {
@@ -56,7 +62,19 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
       setAddOpen(false);
       setNewText("");
       setClearConfirmation(false);
-      void loadMemories();
+      void loadMemories().then(async () => {
+        const pending = props.port.ownerId === IMPORT_TARGET_AGENT_ID ? pendingImportTexts() : [];
+        if (pending.length === 0) return;
+        const failed = await saveEntriesOnce(
+          async () => (await props.port.list()).map((memory) => memory.text),
+          (text) => props.port.create(text),
+          pending,
+        );
+        setPendingImportTexts(failed);
+        await loadMemories(false);
+        if (failed.length > 0)
+          setError(`${failed.length} imported memories could not be saved yet. Open this window again to retry.`);
+      });
     },
   );
 
@@ -231,11 +249,13 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
                 limit={props.port.limit}
                 doneLabel={(n) => `Saved ${n} memories as historical imports.`}
                 onSave={async (texts) => {
-                  try {
-                    for (const text of texts) await props.port.create(text);
-                  } finally {
-                    await loadMemories(false);
-                  }
+                  const failed = await saveEntriesOnce(
+                    async () => (await props.port.list()).map((memory) => memory.text),
+                    (text) => props.port.create(text),
+                    texts,
+                  );
+                  await loadMemories(false);
+                  return failed;
                 }}
               />
               <Show when={addOpen()}>

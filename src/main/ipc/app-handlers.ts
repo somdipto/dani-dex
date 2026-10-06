@@ -2,6 +2,7 @@
 // diagnostics exports.
 
 import { access } from "node:fs/promises";
+import { CONTEXT_EXPORT_PROMPT } from "@dani-dex/contracts/context-import-prompt";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentHarnessSetting,
@@ -30,10 +31,6 @@ import {
   parseSetup,
 } from "./app-inputs";
 import { stringPayload } from "./validation";
-
-// Keep identical to PROMPT in ContextImportPanel.tsx.
-const CONTEXT_EXPORT_PROMPT =
-  "Export only what you can actually access from this chat's memory/context - do not infer or invent. Say when context is unavailable or incomplete. Exclude credentials, payment details, medical info, and private third-party details. Return discrete facts and preferences, each with its source and your uncertainty, as a simple list.";
 
 /**
  * Every destination `openExternal` may reach, as a closed table.

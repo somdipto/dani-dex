@@ -31,6 +31,7 @@ import { errorMessage } from "../../error-message";
 import { AgentAvatar } from "../agents/AgentAvatar";
 import { ComputerUseSetup } from "../computer-use/ComputerUseSetup";
 import { ContextImportPanel } from "../conversation/ContextImportPanel";
+import { commitStagedImport } from "../conversation/context-import-save";
 import { CustomProviderDialog } from "../custom-providers/CustomProviderDialog";
 import { CustomProviderListDialog } from "../custom-providers/CustomProviderListDialog";
 import { createCustomProviderHostState } from "../custom-providers/custom-provider-host-state";
@@ -444,7 +445,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
     try {
       // A built-in provider keeps its own default model, so only the custom row sends one.
       await props.onSave(provider, customSelected() ? (customModel() ?? firstSavedCustomModel()) : null);
-      void saveStagedImports(stagedImports());
+      await commitStagedImport(stagedImports());
     } catch (cause) {
       setError(errorMessage(cause, "Dani-Dex could not finish setup."));
       setSaving(false);
@@ -689,6 +690,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                   doneLabel={(n) => `${n} memories ready. They are saved when you open Dani-Dex.`}
                   onSave={async (texts) => {
                     setStagedImports(texts);
+                    return [];
                   }}
                 />
                 <Show when={stagedImports().length > 0}>
@@ -819,23 +821,6 @@ function randomUnit(): number {
     // Fall back to the browser's pseudo-random source when secure random values are unavailable.
   }
   return Math.random();
-}
-
-async function saveStagedImports(texts: string[]): Promise<void> {
-  if (texts.length === 0) return;
-  for (let attempt = 0; attempt < 30; attempt += 1) {
-    try {
-      const agents = await window.danidex.agent.listAgents();
-      const first = agents[0];
-      if (first) {
-        for (const text of texts) await window.danidex.agent.createMemory({ agentId: first.id, text });
-        return;
-      }
-    } catch {
-      // The agent service may still be starting; try again.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
 }
 
 /** Dani Free needs no sign-in, so while its status check is still starting it counts as ready. */
