@@ -92,7 +92,7 @@ function PermissionsReview(props: AccountProps) {
       <Loading>
         <InitialSetup
           reviewing
-          state={setup.setupState() ?? { completed: true, preferredProvider: "codex", preferredModel: null }}
+          state={setup.setupState() ?? { completed: true, preferredProvider: "opencode", preferredModel: null }}
           agentStatus={agentStatus()}
           platform={platform.appInfo()?.platform ?? "darwin"}
           accountEmail={props.account().email}

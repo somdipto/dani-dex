@@ -1798,11 +1798,13 @@ textarea {
   translate: var(--agent-avatar-optical-offset-x, 0) var(--agent-avatar-optical-offset, 0);
 }
 
+.agent-avatar > img,
 .composer-mention-avatar > img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
 }
 
 /* A mood that flies rings. They sit outside the circle, so the parent stops
@@ -1897,135 +1899,7 @@ textarea {
   }
 }
 
-.avatar-editor-divider {
-  height: 1px;
-  background: var(--dani-dex-border);
-}
-
-.avatar-editor-heading {
-  display: flex;
-  min-height: 40px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 7px 10px 3px 13px;
-  color: var(--dani-dex-text-secondary);
-  font-size: var(--dani-dex-text-sm);
-  font-weight: 590;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.avatar-editor-actions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.avatar-editor-actions button {
-  min-height: 40px;
-  border: 0;
-  border-radius: var(--dani-dex-radius-md);
-  background: transparent;
-  padding: 0 9px;
-  color: var(--dani-dex-text-secondary);
-  font-size: var(--dani-dex-text-sm);
-  font-weight: 540;
-  transition-property: scale, background-color, color;
-  transition-duration: var(--dani-dex-duration-normal), var(--dani-dex-duration-hover), var(--dani-dex-duration-hover);
-  transition-timing-function: ease-out;
-}
-
-.avatar-editor-actions button:hover {
-  background: var(--dani-dex-hover);
-  color: var(--dani-dex-text-primary);
-}
-
-.avatar-editor-actions button:disabled,
-.avatar-image-upload:disabled {
-  cursor: wait;
-  opacity: 0.58;
-}
-
-.avatar-image-upload {
-  display: grid;
-  width: calc(100% - 20px);
-  min-height: 64px;
-  align-items: center;
-  margin: 4px 10px 12px;
-  border: 1px dashed var(--dani-dex-border-strong);
-  border-radius: var(--dani-dex-radius-lg);
-  background: var(--dani-dex-hover);
-  padding: 9px;
-  grid-template-columns: 42px minmax(0, 1fr);
-  gap: 11px;
-  color: var(--dani-dex-text-primary);
-  text-align: left;
-  transition:
-    border-color var(--dani-dex-duration-hover) ease,
-    background-color var(--dani-dex-duration-hover) ease,
-    transform var(--dani-dex-duration-normal) ease;
-}
-
-.avatar-image-upload:hover:not(:disabled) {
-  border-color: var(--dani-dex-success);
-  background: var(--dani-dex-success-soft);
-}
-
-.avatar-image-upload:active:not(:disabled) {
-  transform: scale(0.985);
-}
-
-.avatar-image-upload-active {
-  border-style: solid;
-  border-color: var(--dani-dex-border-strong);
-}
-
-.avatar-image-upload-preview {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  overflow: hidden;
-  border-radius: var(--dani-dex-radius-pill);
-  background: var(--dani-dex-hover);
-  color: var(--dani-dex-text-muted);
-}
-
-.avatar-image-upload-preview > svg {
-  width: 19px;
-  height: 19px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-width: var(--dani-dex-icon-stroke);
-}
-
-.avatar-image-upload-preview .agent-avatar {
-  width: 42px;
-  height: 42px;
-}
-
-.avatar-image-upload strong,
-.avatar-image-upload small {
-  display: block;
-}
-
-.avatar-image-upload strong {
-  margin-bottom: 3px;
-  font-size: var(--dani-dex-text-sm);
-  font-weight: 580;
-}
-
-.avatar-image-upload small {
-  color: var(--dani-dex-text-muted);
-  font-size: var(--dani-dex-text-sm);
-  line-height: 14px;
-}
-
-.avatar-editor-actions button:active,
-.avatar-face-choice:active,
-.avatar-color-choice:active {
+.avatar-face-choice:active {
   scale: 0.96;
 }
 
@@ -2039,8 +1913,7 @@ textarea {
   padding: 7px 10px 12px;
 }
 
-.avatar-face-choice,
-.avatar-color-choice {
+.avatar-face-choice {
   display: grid;
   place-items: center;
   border: 1px solid transparent;
@@ -2057,8 +1930,7 @@ textarea {
   height: 48px;
 }
 
-.avatar-face-choice:hover,
-.avatar-color-choice:hover {
+.avatar-face-choice:hover {
   background: var(--dani-dex-hover);
 }
 
@@ -2072,40 +1944,6 @@ textarea {
 .avatar-face-choice .agent-avatar {
   width: 34px;
   height: 34px;
-}
-
-.avatar-color-grid {
-  display: grid;
-  min-width: 0;
-  margin: 0;
-  border: 0;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 5px;
-  padding: 4px 10px 12px;
-}
-
-.avatar-color-choice {
-  width: 100%;
-  height: 40px;
-}
-
-.avatar-color-swatch {
-  display: block;
-  width: 18px;
-  height: 18px;
-  border-radius: var(--dani-dex-radius-pill);
-  box-shadow: inset 0 0 0 1px var(--dani-dex-border-strong);
-}
-
-.avatar-color-swatch-auto {
-  display: grid;
-  place-items: center;
-  border: 1px dashed var(--dani-dex-text-muted);
-  background: transparent;
-  box-shadow: none;
-  color: var(--dani-dex-text-secondary);
-  font-size: var(--dani-dex-text-sm);
-  font-weight: 650;
 }
 
 .conversation-title .agent-avatar {

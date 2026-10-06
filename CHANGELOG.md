@@ -5,6 +5,19 @@ All notable changes to Dani-Dex will be documented here. The project follows
 
 ## [Unreleased]
 
+### Added
+
+- Import reviewed historical context from ChatGPT or Claude during setup or from Memories.
+
+### Fixed
+
+- Reject thought-only provider answers and preserve retry and approval safeguards.
+- Fix installer verification, provider requests, file transfers, credential redaction and shutdown.
+- Use the robot avatar throughout the desktop, including agents with a saved photo.
+- Default new agents to Dani Free Auto without an implicit paid-model fallback.
+- Keep unsaved imported context for retry and redact credentials before storage and provider requests.
+- Repair CI setup and regression coverage.
+
 ## [0.17.8] - 2026-09-27
 
 ### Fixed

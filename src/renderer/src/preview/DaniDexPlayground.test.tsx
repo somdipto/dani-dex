@@ -19,6 +19,9 @@ describe("DaniDexPlayground", () => {
     await expect(mock.api.agent.getUsage()).resolves.toMatchObject({
       limits: [{ id: "codex" }, { id: "claude" }, { id: "grok" }],
     });
+    await expect(mock.api.agent.getUsage("chief")).resolves.toMatchObject({ limits: [] });
+    await mock.api.agent.updateAgent({ agentId: "chief", provider: "codex", model: "gpt-5.6-luna" });
+    await mock.api.agent.updateAgent({ agentId: "research", provider: "claude", model: "claude-sonnet-5" });
     await expect(mock.api.agent.getUsage("chief")).resolves.toMatchObject({
       limits: [{ id: "codex", secondary: { usedPercent: 41 } }],
     });

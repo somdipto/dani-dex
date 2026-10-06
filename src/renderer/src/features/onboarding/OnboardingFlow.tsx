@@ -1,3 +1,4 @@
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   AGENT_PROVIDER_DESCRIPTORS,
   type AgentModelId,
@@ -30,6 +31,8 @@ import { ArrowUp, Button, Plus } from "../../components/ui";
 import { errorMessage } from "../../error-message";
 import { AgentAvatar } from "../agents/AgentAvatar";
 import { ComputerUseSetup } from "../computer-use/ComputerUseSetup";
+import { ContextImportPanel } from "../conversation/ContextImportPanel";
+import { commitStagedImport, pendingImportTexts, setPendingImportTexts } from "../conversation/context-import-save";
 import { CustomProviderDialog } from "../custom-providers/CustomProviderDialog";
 import { CustomProviderListDialog } from "../custom-providers/CustomProviderListDialog";
 import { createCustomProviderHostState } from "../custom-providers/custom-provider-host-state";
@@ -74,7 +77,7 @@ export interface OnboardingFlowProps {
   daniOnly?: boolean;
 }
 
-type OnboardingStep = "meet" | "computer" | "jobs";
+type OnboardingStep = "meet" | "computer" | "import" | "jobs";
 type StepDirection = "forward" | "back";
 
 const PROVIDERS: Array<{ id: AgentProviderId; name: string; description: string }> = AGENT_PROVIDER_DESCRIPTORS.map(
@@ -100,6 +103,7 @@ type OnboardingAvatarVariants = {
 
 export function OnboardingFlow(props: OnboardingFlowProps) {
   const [step, setStep] = createSignal<OnboardingStep>("meet");
+  const [stagedImports, setStagedImports] = createSignal(pendingImportTexts());
   const [direction, setDirection] = createSignal<StepDirection>("forward");
   /**
    * The first-run screen sits on the dialog layer, so a row menu portalled to `body` would paint
@@ -110,7 +114,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
   onSettled(() => {
     setScreenElement(screenRef);
   });
-  const [selectedProvider, setSelectedProvider] = createSignal<AgentProviderId | null>(null);
+  const [selectedProvider, setSelectedProvider] = createSignal<AgentProviderId | null>("opencode");
   // Dani serves every agent: the provider step is answered before it is shown.
   createEffect(
     () => props.daniOnly === true,
@@ -226,7 +230,10 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
     if (props.daniOnly) return true;
     const selected = selectedProvider();
     return Boolean(
-      selected && providerOptions().some((provider) => provider.id === selected && provider.state === "available"),
+      selected &&
+        providerOptions().some(
+          (provider) => provider.id === selected && (provider.state === "available" || isStartingFreeDani(provider)),
+        ),
     );
   });
   const nextReasonId = createUniqueId();
@@ -266,8 +273,8 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
     ({ options, selected, selectedByUser }) => {
       if (selectedByUser && selected && options.some((provider) => provider.id === selected)) return;
       if (selected && options.some((provider) => provider.id === selected && provider.state === "available")) return;
-      const available = options.find((provider) => provider.state === "available");
-      setSelectedProvider(available?.id ?? null);
+      const free = options.find((provider) => provider.id === "opencode");
+      setSelectedProvider(free?.id ?? null);
     },
   );
 
@@ -415,6 +422,10 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
       return;
     }
     if (step() === "computer") {
+      moveTo("import", "forward");
+      return;
+    }
+    if (step() === "import") {
       moveTo("jobs", "forward");
       return;
     }
@@ -423,7 +434,8 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
 
   function previousStep(): void {
     if (step() === "computer") moveTo("meet", "back");
-    else if (step() === "jobs") moveTo("computer", "back");
+    else if (step() === "import") moveTo("computer", "back");
+    else if (step() === "jobs") moveTo("import", "back");
   }
 
   async function finish(): Promise<void> {
@@ -434,13 +446,14 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
     try {
       // A built-in provider keeps its own default model, so only the custom row sends one.
       await props.onSave(provider, customSelected() ? (customModel() ?? firstSavedCustomModel()) : null);
+      await commitStagedImport(stagedImports());
     } catch (cause) {
       setError(errorMessage(cause, "Dani-Dex could not finish setup."));
       setSaving(false);
     }
   }
 
-  const stepNumber = () => (step() === "meet" ? 1 : step() === "computer" ? 2 : 3);
+  const stepNumber = () => (step() === "meet" ? 1 : step() === "computer" ? 2 : step() === "import" ? 3 : 4);
 
   return (
     <main
@@ -452,8 +465,8 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
       }}
     >
       <div class="onboarding-shell">
-        <nav class="onboarding-progress" aria-label={`Onboarding step ${stepNumber()} of 3`}>
-          <For each={[1, 2, 3]}>
+        <nav class="onboarding-progress" aria-label={`Onboarding step ${stepNumber()} of 4`}>
+          <For each={[1, 2, 3, 4]}>
             {(item) => <span class={item === stepNumber() ? "is-active" : item < stepNumber() ? "is-complete" : ""} />}
           </For>
         </nav>
@@ -665,6 +678,30 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
               </section>
             </Match>
 
+            <Match when={step() === "import"}>
+              <section class="onboarding-panel" aria-labelledby="onboarding-title">
+                <h1 id="onboarding-title">Bring your context</h1>
+                <p class="onboarding-description">
+                  Optional. Import what ChatGPT or Claude already knows about you. It is saved as historical memory, up
+                  to 64 entries of 500 characters each. Skip this if you like.
+                </p>
+                <ContextImportPanel
+                  room={INPUT_LIMITS.agentMemories - stagedImports().length}
+                  limit={INPUT_LIMITS.agentMemories}
+                  doneLabel={(n) => `${n} memories kept on this computer. They will be added when setup finishes.`}
+                  onSave={async (texts) => {
+                    const next = [...new Set([...stagedImports(), ...texts])];
+                    setPendingImportTexts(next);
+                    setStagedImports(next);
+                    return [];
+                  }}
+                />
+                <Show when={stagedImports().length > 0}>
+                  <p role="status">{stagedImports().length} memories will be saved when you open Dani-Dex.</p>
+                </Show>
+              </section>
+            </Match>
+
             <Match when={step() === "jobs"}>
               <section class="onboarding-panel onboarding-panel-jobs" aria-labelledby="onboarding-title">
                 <h1 id="onboarding-title">Give each agent a job</h1>
@@ -787,4 +824,9 @@ function randomUnit(): number {
     // Fall back to the browser's pseudo-random source when secure random values are unavailable.
   }
   return Math.random();
+}
+
+/** Dani Free needs no sign-in, so while its status check is still starting it counts as ready. */
+function isStartingFreeDani(provider: { id: AgentProviderId; state?: string }): boolean {
+  return provider.id === "opencode" && (provider.state === "not-started" || provider.state === "checking");
 }

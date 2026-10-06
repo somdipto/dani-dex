@@ -1,0 +1,3 @@
+20ca78e53020772cd275cf5fde3ac95d52f470e65267ff3262a964488686eff5  onboard/bin/dani-dex-onboard.js
+ba4519a60e54079edbe3cc9531e0f42a6f60442f390ed12ca56e0fab98d54ea5  scripts/onboard.sh
+98e12260b9e0263e7d1aa027b1c738df07ddba19e286f384aa70834908a50af6  scripts/onboard.ps1

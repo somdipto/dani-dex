@@ -428,6 +428,8 @@ async function main(): Promise<void> {
     // child view and DOM report visible, so keep this window opaque on CI's
     // virtual display. No user desktop is exposed by xvfb.
     const window = new BrowserWindow({ show: false });
+    // Initialize the parent renderer before mounting child views, as the app does.
+    await window.loadURL("about:blank");
     window.show();
     app.focus({ steal: true });
     window.focus();

@@ -27,4 +27,15 @@ describe("JsonLineDecoder", () => {
     const decoder = new JsonLineDecoder();
     expect(() => decoder.push("not-json\n")).toThrow("Invalid JSONL");
   });
+
+  it("does not include private protocol data in parse errors", () => {
+    const decoder = new JsonLineDecoder();
+    try {
+      decoder.push("private-credential-value\n");
+      throw new Error("Malformed protocol data was accepted");
+    } catch (error) {
+      expect(String(error)).toContain("Invalid JSONL");
+      expect(String(error)).not.toContain("private");
+    }
+  });
 });

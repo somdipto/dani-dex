@@ -94,6 +94,28 @@ jobs:
       - name: Run desktop tests
         run: bun run test:desktop -- --shard=${{ matrix.shard }}/2
 
+  platform-defaults:
+    name: Platform defaults (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+        with:
+          install: ignore-scripts
+      - name: Verify saved agent defaults
+        run: bun run test:desktop -- src/backend/agent-store.test.ts --maxWorkers=1
+      - name: Verify model selection
+        run: bun run test:desktop -- src/renderer/src/features/agents/agent-resolution.test.ts --maxWorkers=1
+      - name: Verify onboarding and platform permissions
+        run: bun run test:desktop -- src/renderer/src/features/onboarding/OnboardingFlow.test.tsx --maxWorkers=1
+
   tests-sites:
     name: Tests (sites)
     runs-on: ubuntu-latest
@@ -109,6 +131,22 @@ jobs:
 
       - name: Run site router tests
         run: bun run test:sites
+
+  tests-skills:
+    name: Tests (bundled skills)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Bun
+        uses: ./.github/actions/setup-bun
+        with:
+          install: ignore-scripts
+      - name: Install bundled skill dependencies
+        run: bun install --cwd resources/skill-packs/pstack/skills/poteto-mode/scripts --frozen-lockfile --ignore-scripts
+      - name: Run bundled skill tests
+        run: bun run --cwd resources/skill-packs/pstack/skills/poteto-mode/scripts test
 
   tests-remote:
     name: Tests (remote)
@@ -276,7 +314,7 @@ jobs:
     # `apps/auth-api`, which `api` already covers: mobile, the site router, the
     # team client and the remote stack all consume the account API, so a red
     # Surfaces is the signal that this deploy is the thing about to break them.
-    needs: [check, browser, tests-desktop, tests-sites, tests-remote, api, storybook, surfaces]
+    needs: [check, browser, tests-desktop, tests-sites, tests-skills, tests-remote, api, storybook, surfaces]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: cloudflare-production

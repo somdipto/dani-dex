@@ -78,7 +78,12 @@ describe("TeamApiServer agents", () => {
     const store = new AgentStore(join(root, "agents"), join(root, "home"));
     await store.initialize();
     const { base } = await start({
-      agents: createAgents({ createAgent: (input) => store.createAgent(input) }),
+      agents: createAgents({
+        createAgent: async (input) => {
+          const agent = await store.createAgent(input);
+          return store.updateAgent({ agentId: agent.id, provider: "codex", model: "gpt-5.6-luna" });
+        },
+      }),
     });
     const token = await signIn();
     const input = {
@@ -148,6 +153,7 @@ describe("TeamApiServer agents", () => {
     const store = new AgentStore(join(root, "agents"), join(root, "home"));
     await store.initialize();
     await store.getOrCreate("chief");
+    await store.updateAgent({ agentId: "chief", provider: "codex", model: "gpt-5.6-luna" });
     const { base } = await start({
       agents: createAgents({
         listAgents: () => store.list(),

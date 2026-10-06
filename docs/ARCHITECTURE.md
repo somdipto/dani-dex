@@ -599,9 +599,11 @@ Protocol support has no fixed time or release limit. Removal is an exceptional a
 
 ## Required verification
 
-Run the narrowest relevant test, then `bun run lint` and `bun run typecheck`; both are cheap enough
-to run whole, and CI owns the minutes-long suites. See [AGENTS.md, Checks](../AGENTS.md#checks)
-for the division of labour and what each CI job covers.
+Run the narrowest relevant test with one worker, then lint and format only changed files.
+CI owns repository-wide lint, type checks, builds, and full suites. See
+[AGENTS.md, Checks](../AGENTS.md#checks) for the division of labour and what each CI job covers.
+The platform-defaults job checks stored defaults, model selection, and onboarding on Windows,
+macOS, and Linux.
 
 The Storybook CI job builds all stories with `DANI_DEX_STORYBOOK_CHECK=true`. This skips Solid's
 automatic prop documentation analysis. The job checks compilation and does not publish its output.

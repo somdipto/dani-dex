@@ -79,10 +79,9 @@ Dani-Dex is the first step: a team of agents on your computer that can already d
    ```bash
    npx dani-dex-onboard
    ```
-   It needs [Node.js](https://nodejs.org). After these scripts land on main, the native
-   one-liners below will download the current release. macOS and Windows installs still
-   need real-OS verification. The PowerShell candidate has not yet gained the same
-   fail-closed checksum path as the shell and npm candidates:
+   It needs [Node.js](https://nodejs.org). The native commands below download the current
+   release. All three installers require a valid release checksum file and verify the
+   download before installation. macOS and Windows installs still need real-OS verification:
    - **macOS, Linux or WSL** (Terminal):
      ```bash
      curl -fsSL https://raw.githubusercontent.com/somdipto/dani-dex/main/scripts/onboard.sh | bash

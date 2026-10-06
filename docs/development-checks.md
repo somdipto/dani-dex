@@ -32,6 +32,11 @@ CI does not build that image. `scripts/dependency-catalog.test.ts` checks that t
 cover the workspace dependency graph; keep that check when changing workspace dependencies.
 
 The source of truth for CI is [.github/workflows/ci.yml](../.github/workflows/ci.yml).
+The pinned `electron-vite@5.0.0` patch skips terminal cursor operations when stdout is a pipe.
+Its isolated preload plugin otherwise calls `moveCursor` unconditionally and fails CI builds.
+Preload entry isolation stays enabled because sandboxed preloads cannot load shared relative chunks.
+Remove the patch when an upstream version provides the same non-TTY guard.
+
 Its main jobs are:
 
 | Job | Runner | Commands |

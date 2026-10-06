@@ -227,6 +227,21 @@ describe("bundled Grok CLI resolution", () => {
 });
 
 describe("managed CLI selection", () => {
+  it.runIf(process.platform !== "win32").each([
+    { resolve: resolveCodexCli, old: "codex-cli 0.120.0" },
+    { resolve: resolveClaudeCli, old: "2.0.0 (Claude Code)" },
+    { resolve: resolveGrokCli, old: "grok 0.9.0" },
+  ])("keeps outdated errors ahead of invalid candidates ($old)", async ({ resolve, old }) => {
+    const invalid = await createExecutable("invalid-cli", "not a version");
+    const outdated = await createExecutable("outdated-cli", old);
+    await expect(resolve({ systemCandidates: [invalid, outdated], bundledExecutable: null })).rejects.toMatchObject({
+      code: "outdated",
+    });
+    await expect(resolve({ systemCandidates: [invalid], bundledExecutable: null })).rejects.toMatchObject({
+      code: "invalid",
+    });
+    await expect(resolve({ systemCandidates: [], bundledExecutable: null })).rejects.toMatchObject({ code: "missing" });
+  });
   it.runIf(process.platform !== "win32")("keeps explicit overrides ahead of a managed CLI", async () => {
     const system = await createExecutable("system-grok", "grok 1.0.5");
     const managed = await createExecutable("managed-grok", "grok 1.0.22");
@@ -364,6 +379,16 @@ describe("OpenCode CLI version parsing", () => {
 });
 
 describe("OpenCode CLI resolution", () => {
+  it.runIf(process.platform !== "win32")("redacts credentials from CLI startup failure details", async () => {
+    const executable = await createExecutable("opencode", "unused");
+    await writeFile(executable, "#!/bin/sh\nprintf 'Authorization: Bearer private-cli-secret\\n' >&2\nexit 1\n");
+    await expect(resolveOpencodeCli({ systemCandidates: [executable], bundledExecutable: null })).rejects.toMatchObject(
+      { code: "invalid", diagnosticDetail: expect.stringContaining("[redacted]") },
+    );
+    await expect(resolveOpencodeCli({ systemCandidates: [executable], bundledExecutable: null })).rejects.toMatchObject(
+      { diagnosticDetail: expect.not.stringContaining("private-cli-secret") },
+    );
+  });
   it("resolves the managed runtime path for supported targets", () => {
     expect(bundledOpencodeExecutable("darwin", "arm64", "/Applications/Dani-Dex.app/Contents/Resources")).toBe(
       "/Applications/Dani-Dex.app/Contents/Resources/opencode/mac/arm64/bin/opencode",

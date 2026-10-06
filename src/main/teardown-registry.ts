@@ -1,26 +1,7 @@
 /**
- * The named shutdown steps `createApplicationServices` accumulates while it builds, so a quit that
- * arrives mid-startup tears down exactly what exists rather than nothing at all.
- *
- * Two things it does that the hand-written shutdown sequence it replaces did not:
- *
- * - **Every step is caught.** A rejecting `remoteServers.stop()` used to skip the host, the WebRTC
- *   bridge and the agent service below it, leaving provider CLIs running after the app had quit.
- * - **A step registered after `runAll` still runs.** Construction keeps going after `before-quit`
- *   fires, so a service built during the teardown would otherwise leak a listening socket or a
- *   child process. Its step joins the run in progress instead of being dropped: while the drain is
- *   working it is spliced into the steps still to come, in ordinal position, so a service that
- *   finishes building mid-shutdown is still torn down in sequence. It can only be placed among the
- *   steps that remain - an ordinal whose slot has already passed goes next rather than in the past.
- *   A step registered after `runAll` has returned is genuinely best-effort: nothing awaits it, and
- *   `app.quit()` can end the process first. Closing that last gap needs construction itself to
- *   abort on `before-quit`, which it does not do today.
- *
- * Steps declare an **order** rather than running last-in-first-out. Shutdown here is largely
- * *construction* order and not its reverse: the browser host is destroyed before the
- * picture-in-picture window that holds a reference to it, and the provider runtimes stop before the
- * agent service that owns them. Reversing that would move the browser's cookie and state flush
- * behind a potentially slow agent stop, so the order is declared and sorted, never inferred.
+ * Runs every shutdown step in declared order, including services registered during startup.
+ * Late steps join the remaining queue; steps registered after completion are best-effort.
+ * Explicit order preserves browser state flushing and provider/service dependencies.
  */
 
 export interface TeardownRegistryOptions {
@@ -90,7 +71,11 @@ export class TeardownRegistry {
     try {
       await step.run();
     } catch (error) {
-      this.#reportError(step.name, error);
+      try {
+        this.#reportError(step.name, error);
+      } catch {
+        // A failed log sink must not prevent the remaining services from stopping.
+      }
     }
   }
 }

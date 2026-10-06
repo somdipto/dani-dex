@@ -88,7 +88,7 @@ export const IndependentMotion: AgentStory = {
   },
 };
 
-export const CustomImageFallback: AgentStory = {
+export const RobotWithSavedPhoto: AgentStory = {
   args: { agent: { ...STORY_AGENTS[2], avatarUrl: "mock-avatar://missing" } },
 };
 

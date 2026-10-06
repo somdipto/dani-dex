@@ -278,11 +278,18 @@ describe.sequential("AgentService: queue", () => {
       store,
       mailbox,
       developmentDefaults: true,
+      preferredProvider: undefined,
       clientFactory: (provider) => {
         const client = new FakeAgentClient(provider);
         if (provider === "opencode") {
           client.modelList = () => ({
-            data: [{ model: "opencode/muse-spark-1.3-contributor-free" }, { model: DEVELOPMENT_DEFAULT_MODEL }],
+            data: [
+              { model: "opencode/muse-spark-1.3-contributor-free" },
+              {
+                model: DEVELOPMENT_DEFAULT_MODEL,
+                supportedReasoningEfforts: [{ reasoningEffort: "low" }, { reasoningEffort: "medium" }],
+              },
+            ],
           });
         }
         return client;
@@ -292,8 +299,7 @@ describe.sequential("AgentService: queue", () => {
     await service.initialize();
     await service.ensureProvider("opencode");
 
-    // The developer asked for this model at this effort, and OpenCode lists it, so the built-in
-    // `codex` default steps aside -- provider included, because the model belongs to OpenCode.
+    // A fresh development profile uses the same free proxy default as a packaged profile.
     await expect(service.createAgent(CREATE_AGENT_INPUT)).resolves.toMatchObject({
       provider: "opencode",
       model: DEVELOPMENT_DEFAULT_MODEL,
@@ -412,11 +418,10 @@ describe.sequential("AgentService: queue", () => {
       auth: { kind: "chatgpt", email: "codex@example.com" },
       cliVersion: "0.144.1",
     });
-    // The store default, which is what a new agent on the default provider keeps: `low`, not the
-    // `medium` the Codex CLI reports for every GPT-5.6 model.
+    // An explicit provider choice uses the selected model's default effort.
     await expect(service.createAgent(CREATE_AGENT_INPUT)).resolves.toMatchObject({
       model: "gpt-5.6-luna",
-      reasoningEffort: "low",
+      reasoningEffort: "medium",
     });
     // Setup can record a model beside the provider, which is how a custom endpoint becomes the
     // default: it is a model of the CLI that runs it, so only the model names it.
@@ -618,6 +623,7 @@ describe.sequential("AgentService: queue", () => {
       await store.initialize();
       await mailbox.initialize();
       const existing = await store.createAgent({ ...CREATE_AGENT_INPUT, name: "Keep this agent" });
+      await store.updateAgent({ agentId: existing.id, provider: "codex", model: "gpt-5.6-luna" });
       const sidebar = new SidebarLayoutStore(join(root, "sidebar.json"));
       await sidebar.initialize();
       const input = {
@@ -633,6 +639,7 @@ describe.sequential("AgentService: queue", () => {
         },
       };
       const pending = await store.createAgent(input.draft, input.operationId);
+      await store.updateAgent({ agentId: pending.id, provider: "codex", model: "gpt-5.6-luna" });
       await mailbox.enqueue({
         sender: { kind: "user" },
         recipientAgentIds: [pending.id],

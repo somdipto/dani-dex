@@ -28,14 +28,17 @@ export function createRemoteFileReceiver(send: (data: string) => Promise<void>) 
     if (entry) clearTimeout(entry.timer);
     downloads.delete(id);
   }
-  function expire(id: string) {
+  function fail(id: string, error: Error) {
     remove(id);
     const waiter = waiters.get(id);
     if (waiter) {
       clearTimeout(waiter.timer);
       waiters.delete(id);
-      waiter.reject(new Error("The attachment download timed out. Try again."));
+      waiter.reject(error);
     }
+  }
+  function expire(id: string) {
+    fail(id, new Error("The attachment download timed out. Try again."));
   }
   function touch(id: string) {
     const entry = downloads.get(id);
@@ -91,8 +94,15 @@ export function createRemoteFileReceiver(send: (data: string) => Promise<void>) 
           );
           return true;
         }
-        if (entry.complete || chunk.offset !== entry.received || chunk.offset + chunk.bytes.length > entry.bytes.length)
-          throw new Error("The host sent an invalid attachment chunk.");
+        if (
+          entry.complete ||
+          chunk.offset !== entry.received ||
+          chunk.offset + chunk.bytes.length > entry.bytes.length
+        ) {
+          const error = new Error("The host sent an invalid attachment chunk.");
+          fail(chunk.transferId, error);
+          throw error;
+        }
         entry.bytes.set(chunk.bytes, chunk.offset);
         entry.received += chunk.bytes.length;
         if (chunk.bytes.length > 0) touch(chunk.transferId);
@@ -115,6 +125,7 @@ export function createRemoteFileReceiver(send: (data: string) => Promise<void>) 
           total + frame.size > MOBILE_ATTACHMENT_BYTES * 2 ||
           downloads.size >= 10
         ) {
+          fail(frame.transferId, new Error("Attachments must be 10 MB or smaller. Download fewer files at once."));
           await send(
             encodeTeamProtocolV2Frame({
               version: 2,
@@ -143,11 +154,16 @@ export function createRemoteFileReceiver(send: (data: string) => Promise<void>) 
       if (frame.type === "file-complete") {
         const entry = downloads.get(frame.transferId);
         if (!entry) return true;
-        if (entry.received !== entry.bytes.length) throw new Error("The attachment download is incomplete.");
+        if (entry.received !== entry.bytes.length) {
+          const error = new Error("The attachment download is incomplete.");
+          fail(frame.transferId, error);
+          throw error;
+        }
         const digest = Array.from(sha256(entry.bytes), (byte) => byte.toString(16).padStart(2, "0")).join("");
         if (digest !== entry.digest) {
-          remove(frame.transferId);
-          throw new Error("The attachment download is damaged. Try again.");
+          const error = new Error("The attachment download is damaged. Try again.");
+          fail(frame.transferId, error);
+          throw error;
         }
         entry.complete = true;
         touch(frame.transferId);
@@ -159,8 +175,8 @@ export function createRemoteFileReceiver(send: (data: string) => Promise<void>) 
         }
         return true;
       }
-      if (frame.type === "file-cancel" && downloads.has(frame.transferId)) {
-        remove(frame.transferId);
+      if (frame.type === "file-cancel" && (downloads.has(frame.transferId) || waiters.has(frame.transferId))) {
+        fail(frame.transferId, new Error("The attachment download was cancelled."));
         return true;
       }
       return false;

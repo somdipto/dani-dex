@@ -41,7 +41,7 @@ function developmentRemoteConnectionPath(): string {
 export interface DevelopmentRemoteAccountOptions {
   role: DevelopmentRemoteRole;
   testClientEnabled: boolean;
-  centralAuth: CentralAuthManager;
+  centralAuth: Parameters<typeof ensureDevelopmentAccount>[0];
   teamStore: TeamStore;
   setupFile: string;
   setupCompleted: boolean;
@@ -65,7 +65,7 @@ export async function applyDevelopmentRemoteAccount({
     await teamStore.configureWithAccount("Dani-Dex Local Dev Host", user);
   }
   if (role === "client" && !setupCompleted) {
-    await writeSetupState(setupFile, { preferredProvider: "codex", preferredModel: null });
+    await writeSetupState(setupFile, { preferredProvider: "opencode", preferredModel: null });
   }
   if (role === "host" && !testClientEnabled) {
     const technicalMember = teamStore

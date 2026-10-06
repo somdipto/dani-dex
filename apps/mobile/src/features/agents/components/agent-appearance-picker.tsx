@@ -24,6 +24,10 @@ export function AgentAppearancePicker({
   hue,
   name,
   nameField,
+  photoField,
+  agentId,
+  serverId,
+  imageUrl,
   disabled,
   onHueChange,
 }: AgentAppearancePickerProps) {
@@ -34,9 +38,17 @@ export function AgentAppearancePicker({
         accessible
         accessibilityLabel={`Robot preview for ${name.trim() || "New agent"}`}
       >
-        <BloubAvatarPreview seed={seed} hue={hue} size={144} />
+        <BloubAvatarPreview
+          agentId={agentId}
+          serverId={serverId}
+          imageUrl={imageUrl}
+          seed={seed}
+          hue={hue}
+          size={144}
+        />
       </View>
       {nameField}
+      {photoField}
       <View
         className="flex-row flex-wrap justify-center gap-2"
         accessibilityRole="radiogroup"

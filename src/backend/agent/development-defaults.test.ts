@@ -49,7 +49,7 @@ describe("development default model", () => {
   });
 
   it("falls back when the catalog does not list the model", () => {
-    // The free tier is what an OpenCode with no Go key lists, and it is not this model.
+    // The proxy has not entered the live catalog yet.
     expect(
       developmentStartingModel({
         enabled: true,
@@ -59,7 +59,7 @@ describe("development default model", () => {
     ).toBeNull();
   });
 
-  it("falls back when OpenCode is listed but has no credential", () => {
+  it("falls back when the provider is unavailable", () => {
     expect(
       developmentStartingModel({
         enabled: true,
@@ -72,7 +72,7 @@ describe("development default model", () => {
   it("keeps the model's own effort when it does not support the asked-for one", () => {
     const chosen = developmentStartingModel({
       enabled: true,
-      models: [model(DEVELOPMENT_DEFAULT_MODEL, DEVELOPMENT_DEFAULT_PROVIDER, ["low"])],
+      models: [model(DEVELOPMENT_DEFAULT_MODEL, DEVELOPMENT_DEFAULT_PROVIDER, ["medium"])],
       providerAvailable: available,
     });
 

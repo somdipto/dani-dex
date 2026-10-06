@@ -10,6 +10,7 @@
     "./attachment-files": "./src/attachment-files.ts",
     "./attachment-references": "./src/attachment-references.ts",
     "./avatar-images": "./src/avatar-images.ts",
+    "./context-import-prompt": "./src/context-import-prompt.ts",
     "./chat-tag-references": "./src/chat-tag-references.ts",
     "./full-duplex-voice": "./src/full-duplex-voice.ts",
     "./input-limits": "./src/input-limits.ts",

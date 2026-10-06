@@ -374,7 +374,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       mailbox,
       browser,
       requestTimeoutMs = 30_000,
-      preferredProvider = "codex",
+      preferredProvider = DEFAULT_AGENT_PROVIDER,
       preferredModel = null,
       clientFactory = null,
       providerDriver,
@@ -1300,8 +1300,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     return (
       chosen ??
       listed(defaultProviderModel(provider)) ??
-      free ??
-      models.find((model) => model.provider === provider) ??
+      (provider === "opencode" ? free : models.find((model) => model.provider === provider)) ??
       null
     );
   }
@@ -1328,7 +1327,11 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     if (provider === undefined) return null;
     const model =
       models.find((candidate) => candidate.provider === provider && candidate.id === defaultProviderModel(provider)) ??
-      models.find((candidate) => candidate.provider === provider) ??
+      models.find(
+        (candidate) =>
+          candidate.provider === provider &&
+          (provider !== "opencode" || isFreeOpencodeModel(candidate.id, candidate.name)),
+      ) ??
       null;
     if (!model) throw new Error(`${providerLabel(provider)} has no available model.`);
     return { provider, model };
@@ -1401,15 +1404,12 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
         });
       } else {
         const starting = this.#startingChoice(this.#availableModels());
-        // The provider a start lands on, even when it lists no model: the throw below names the
-        // provider the developer expected, and a preferred provider that equals the record's own is
-        // still the no-op it always was.
-        const startingProvider = starting?.provider ?? this.#providers.preferredProvider();
-        // A new record starts on the built-in default provider, so this is the one place a preferred
-        // provider lands on a new agent -- and with it the model setup chose, which is how a custom
-        // endpoint becomes the default: it is a model of the CLI that runs it, never a provider.
-        if (startingProvider !== agent.provider) {
-          if (!starting) throw new Error(`${providerLabel(startingProvider)} has no available model.`);
+        if (!starting) throw new Error(`${providerLabel(this.#providers.preferredProvider())} has no available model.`);
+        if (
+          starting.provider !== agent.provider ||
+          starting.model.id !== agent.model ||
+          starting.model.defaultReasoningEffort !== agent.reasoningEffort
+        ) {
           agent = await this.#store.updateAgent({
             agentId: agent.id,
             provider: starting.provider,
@@ -1875,17 +1875,7 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
     this.#emit({ type: "status", status: this.getStatus() });
   }
 
-  /**
-   * Moves every agent off a removed endpoint's models, onto a model that is still served.
-   *
-   * Runs *before* the file write and the restart, so no agent is left naming a model the fresh
-   * catalogue does not list, and inside `removeCustomProvider`, which has already excluded the
-   * endpoint and holds the chain that keeps an agent update out.
-   *
-   * Throws while an affected agent is busy, which stops the removal: the move is a provider switch,
-   * and that is refused during a turn or a queued delivery. The check runs over all of them first,
-   * so a refusal moves no agent at all.
-   */
+  /** Replace removed endpoint models with available free models before saving the configuration. */
   async #releaseCustomProviderModels(): Promise<void> {
     // Every endpoint already removed, not only this one. A removal during a turn leaves the running
     // CLI's catalogue as it was, so the models of an endpoint already taken out are still listed,
@@ -1894,24 +1884,10 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       .list()
       .filter((agent) => providerForAgent(agent) === "opencode" && !this.#servesModel(agent.model));
     if (affected.length === 0) return;
-    // OpenCode declares no default model of its own -- its catalogue is whatever the CLI lists -- so
-    // the fallback is chosen from the live list with the endpoint being removed taken out of it.
-    // The built-in default provider comes second, because an agent left on a model the CLI no longer
-    // serves cannot answer, and a provider switch keeps its workspace, thread and identity.
-    const remaining = this.#availableModels();
-    // The built-in default is offered only while it is usable: `#applyAgentUpdate` connects the
-    // provider it moves an agent to, and a Codex that is not installed or not signed in throws
-    // there. That would trap a user who runs custom endpoints only, because the last endpoint could
-    // never be removed while an agent still names one of its models.
-    const fallback =
-      this.#startingModel("opencode", remaining) ??
-      (this.#providerAvailable(DEFAULT_AGENT_PROVIDER) ? this.#startingModel(DEFAULT_AGENT_PROVIDER, remaining) : null);
-    // Nothing is listed, so there is no model to move to. The removal still goes ahead: refusing it
-    // would trap the user on an endpoint that may be the reason no model is listed.
+    // Keep the provider and identity. Without a free replacement, the removed-model guard blocks
+    // future deliveries until the user chooses a model, while removal itself remains possible.
+    const fallback = this.#startingModel("opencode", this.#availableModels());
     if (!fallback) return;
-    if (fallback.provider !== "opencode" && affected.some((agent) => this.#hasWorkInFlight(agent))) {
-      throw new Error("Wait for the active turn and queue to finish before you remove this endpoint.");
-    }
     for (const agent of affected) {
       // Not the public `updateAgent`: this already runs inside the chain that one takes.
       await this.#applyAgentUpdate({
@@ -1929,19 +1905,6 @@ export class AgentService extends EventEmitter<AgentServiceEvents> {
       this.getStatus().providers?.some((candidate) => candidate.id === provider && candidate.state === "available") ??
       false
     );
-  }
-
-  /**
-   * Whether a turn is running for this agent or a delivery is still queued for it. Read from the
-   * live snapshot first, then from the stored conversation, because an agent whose thread is not
-   * loaded keeps its active turn in the database.
-   */
-  #hasWorkInFlight(agent: AgentSummary): boolean {
-    if (this.#mailbox.hasUnfinishedDelivery(agent.id)) return true;
-    const active =
-      this.#conversation.workingSnapshot(agent.id)?.activeTurnId ??
-      (agent.threadId ? this.#store.database.readConversation(agent.id, agent.threadId).activeTurnId : null);
-    return Boolean(active);
   }
 
   async stop(): Promise<void> {

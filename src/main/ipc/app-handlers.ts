@@ -2,6 +2,7 @@
 // diagnostics exports.
 
 import { access } from "node:fs/promises";
+import { CONTEXT_EXPORT_PROMPT } from "@dani-dex/contracts/context-import-prompt";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentHarnessSetting,
@@ -48,6 +49,9 @@ export const EXTERNAL_DESTINATIONS: Record<ExternalDestination, string> = {
   "claude-install": "https://code.claude.com/docs",
   feedback: "https://x.com/intent/post?text=Feedback%20for%20DaniDex%20%40norbertbodziony%3A%20",
   message: "https://x.com/norbertbodziony",
+  // Fixed pages with the fixed context-export prompt prefilled; the renderer names one, never a URL.
+  "import-chatgpt": `https://chatgpt.com/?q=${encodeURIComponent(CONTEXT_EXPORT_PROMPT)}`,
+  "import-claude": `https://claude.ai/new?q=${encodeURIComponent(CONTEXT_EXPORT_PROMPT)}`,
   "mac-screen-recording": MAC_PERMISSION_URLS["screen-recording"],
 };
 

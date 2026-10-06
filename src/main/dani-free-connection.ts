@@ -1,3 +1,4 @@
+import { defaultProviderModel } from "@dani-dex/contracts/ipc";
 import type { DaniDexModelSource } from "@dani-dex/contracts/online-services";
 import { createDaniDexLogger } from "@dani-dex/logging";
 import { CodexCliError } from "../backend/cli";
@@ -7,7 +8,7 @@ import type { DaniFreeSupervisor } from "./dani-free";
 import { appendDaniFreeDiagnostic } from "./dani-free-diagnostic";
 
 const logger = createDaniDexLogger("dani-free-connection");
-const MODEL_ID = "dani/dani-free-auto";
+const MODEL_ID = defaultProviderModel("opencode");
 
 /** The small part of the agent service used to install and verify the live proxy. */
 export interface DaniFreeService {

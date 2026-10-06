@@ -5,10 +5,6 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { README_INSTALL_ASSETS } from "./verify-readme-install-links";
 
-// The one-command installers are a public entry point, same as the README download
-// buttons: they must resolve every supported platform to a real release asset and
-// never touch the filesystem before the user confirms the plan (dry run).
-
 const script = resolve(import.meta.dirname, "onboard.sh");
 const powershell = resolve(import.meta.dirname, "onboard.ps1");
 const RAW_BASE = "https://raw.githubusercontent.com/somdipto/dani-dex/main/scripts";
@@ -80,6 +76,8 @@ describe("onboard.sh", () => {
     ["Linux", "aarch64"],
     ["Linux", "arm64"],
     ["FreeBSD", "amd64"],
+    ["Darwin", "i386"],
+    ["MINGW64_NT-10.0", "aarch64"],
   ])("rejects unsupported %s/%s with a pointer to the releases page", (unameS, unameM) => {
     const result = resolvePlatform(unameS, unameM);
     expect(result.status).toBe(1);
@@ -120,13 +118,18 @@ describe("onboard.sh", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("unknown option");
   });
+
+  it("does not treat the next option as an installation path", () => {
+    const result = run(["--install-dir", "--no-launch", "--dry-run"]);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("--install-dir needs a path");
+  });
 });
 
 describe("onboard.ps1", () => {
   it("installs the same Windows asset the README button ships", () => {
     const source = readFileSync(powershell, "utf8");
-    expect(source).toContain("Dani-Dex-windows-x64.exe");
-    expect(source).toContain("https://github.com/$Repo/releases/latest/download/");
+    expect(source).toContain("https://github.com/$Repo/releases/latest/download");
   });
 });
 

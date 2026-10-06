@@ -87,11 +87,8 @@ const LEGACY_AVATAR_COLORS = [
 ] as const;
 
 export const NEW_AGENT_PREVIEW = "No messages yet";
-export const DEFAULT_AGENT_MODEL: AgentModelId = "gpt-5.6-luna";
-export const DEFAULT_AGENT_PROVIDER: AgentProviderId = "codex";
-// A provider CLI reports the effort its own configuration uses -- Codex says `medium` for every
-// GPT-5.6 model -- which is not the one this product leads with: a new agent starts on the fast
-// model, where the extra thinking buys little and costs a visible wait on every turn.
+export const DEFAULT_AGENT_PROVIDER: AgentProviderId = "opencode";
+export const DEFAULT_AGENT_MODEL: AgentModelId = defaultProviderModel(DEFAULT_AGENT_PROVIDER);
 export const DEFAULT_REASONING_EFFORT: AgentReasoningEffort = "low";
 
 // These three strings are history, not vocabulary. The first is the file a release before the move to
@@ -1365,9 +1362,7 @@ function readStoredAgent(value: unknown): ReadStoredAgent | UnreadableStoredAgen
     value.provider === undefined || isOneOf(AGENT_PROVIDERS, value.provider)
       ? value.provider
       : reset("provider", undefined);
-  const model = isAgentModel(value.model)
-    ? value.model
-    : reset("model", provider === undefined ? DEFAULT_AGENT_MODEL : defaultProviderModel(provider));
+  const model = isAgentModel(value.model) ? value.model : reset("model", defaultProviderModel(provider ?? "codex"));
   let marketplaceSource: StoredAgent["marketplaceSource"];
   if (value.marketplaceSource !== undefined) {
     if (isMarketplaceSource(value.marketplaceSource)) {

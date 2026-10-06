@@ -47,7 +47,8 @@ const CREDENTIAL_ASSIGNMENT = new RegExp(
 // The prefix has to start a token: without the boundary, `sk-` matched inside
 // ordinary words and `risk-register` came out as `ri[redacted]`, erasing the
 // part of a diagnostic that names what failed.
-const KNOWN_SECRET_PREFIXES = /(?<![A-Za-z0-9_-])(?:sk-ant|sk-|xai-|ghp_|gho_|github_pat_|AKIA)[A-Za-z0-9._-]{8,}/g;
+const KNOWN_SECRET_PREFIXES =
+  /(?<![A-Za-z0-9_-])(?:sk-ant|sk-|xai-|gh[pousr]_|github_pat_|AKIA|AIza)[A-Za-z0-9._-]{8,}/g;
 // Bounded for the same reason as the label above, and more sharply: with `+`
 // on the local part, every character of a long payload consumed the rest of
 // the run looking for an `@` and then backtracked over all of it.
@@ -78,6 +79,19 @@ export function redactText(value: string): string {
   const reparsed = redactSerializedJson(value);
   if (reparsed !== null) return reparsed;
   return applyTextRules(redactEmbeddedJson(value));
+}
+
+/** Imported prose can disclose credentials without the assignment syntax used by diagnostics. */
+export function redactContextText(value: string): string {
+  return redactText(
+    value
+      .replace(/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)/giu, "[redacted]")
+      .replace(
+        /\b(?:password|passwd|passphrase|api[ _-]?key|access[ _-]?token|refresh[ _-]?token|token|credential|authorization|secret|recovery[ _-]?codes?|private[ _-]?key|signing[ _-]?key|cookies?)\s+(?:is|was|are|were)\s+[^\r\n|]+/giu,
+        "[redacted]",
+      )
+      .replace(/\b(?:\d[ -]?){13,19}\b/gu, "[redacted]"),
+  );
 }
 
 function applyTextRules(value: string): string {
@@ -353,7 +367,7 @@ function formatParam(param: LogValue): string {
 }
 
 function formatLine(level: string, prefix: string, message: LogValue, params: LogValue[]): string {
-  const head = typeof message === "string" ? redactText(message) : formatParam(message);
+  const head = formatParam(message);
   const tail = params.map((param) => formatParam(param)).join(" ");
   return `${new Date().toISOString()} ${level} [${prefix}]${head ? ` ${head}` : ""}${tail ? ` ${tail}` : ""}`;
 }

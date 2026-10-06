@@ -335,4 +335,6 @@ export type ExternalDestination =
   | "message"
   // Not a page: the macOS pane that grants Dani-Dex screen recording. It is here rather than behind
   // its own endpoint because the destination is still a fixed address the renderer only names.
+  | "import-chatgpt"
+  | "import-claude"
   | "mac-screen-recording";

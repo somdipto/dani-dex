@@ -30,13 +30,15 @@ export class JsonLineDecoder {
 
   #drainCompleteLines(): RpcMessage[] {
     const messages: RpcMessage[] = [];
-    let newlineIndex = this.#buffer.indexOf("\n");
-
-    while (newlineIndex >= 0) {
-      const line = this.#buffer.slice(0, newlineIndex).trim();
-      this.#buffer = this.#buffer.slice(newlineIndex + 1);
-      if (line) messages.push(this.#parseLine(line));
-      newlineIndex = this.#buffer.indexOf("\n");
+    let start = 0;
+    try {
+      for (let end = this.#buffer.indexOf("\n"); end >= 0; end = this.#buffer.indexOf("\n", start)) {
+        const line = this.#buffer.slice(start, end).trim();
+        start = end + 1;
+        if (line) messages.push(this.#parseLine(line));
+      }
+    } finally {
+      this.#buffer = this.#buffer.slice(start);
     }
 
     return messages;
@@ -46,8 +48,8 @@ export class JsonLineDecoder {
     let parsed: unknown;
     try {
       parsed = JSON.parse(line);
-    } catch (error) {
-      throw new Error(`Invalid JSONL from Codex App Server: ${String(error)}`);
+    } catch {
+      throw new Error("Invalid JSONL from Codex App Server.");
     }
 
     if (!isRpcMessage(parsed)) {

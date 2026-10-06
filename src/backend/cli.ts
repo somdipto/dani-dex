@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { extname, posix, resolve, win32 } from "node:path";
 import { promisify } from "node:util";
 import type { AgentProviderId } from "@dani-dex/contracts/ipc";
+import { redactText } from "@dani-dex/logging";
 
 const execFileAsync = promisify(execFile);
 const MINIMUM_CODEX_VERSION = [0, 144, 1] as const;
@@ -55,43 +56,62 @@ export class CodexCliError extends Error {
  */
 export type BundledProviderExecutables = Partial<Record<AgentProviderId, string | null>>;
 
-export async function resolveCodexCli(
-  input: { systemCandidates?: string[]; bundledExecutable?: string | null } = {},
-): Promise<CodexCliInfo> {
-  const bundledExecutable = input.bundledExecutable === undefined ? bundledCodexExecutable() : input.bundledExecutable;
-  const candidates = await cliCandidates("codex", input.systemCandidates, bundledExecutable);
-  const failures: CodexCliError[] = [];
+interface CliResolutionInput {
+  systemCandidates?: string[];
+  bundledExecutable?: string | null;
+}
 
+const VERSIONED_PROVIDERS = {
+  codex: { label: "Codex CLI", product: "ChatGPT", minimum: MINIMUM_CODEX_VERSION, parse: parseCodexVersion },
+  claude: { label: "Claude Code", product: "Claude", minimum: MINIMUM_CLAUDE_VERSION, parse: parseClaudeVersion },
+  grok: { label: "Grok CLI", product: "Grok", minimum: MINIMUM_GROK_VERSION, parse: parseGrokVersion },
+};
+
+async function resolveVersionedCli(
+  provider: keyof typeof VERSIONED_PROVIDERS,
+  input: CliResolutionInput,
+): Promise<CodexCliInfo> {
+  const configuration = VERSIONED_PROVIDERS[provider];
+  const cliLabel = provider === "claude" ? "Claude CLI" : configuration.label;
+  const bundled =
+    input.bundledExecutable === undefined
+      ? bundledProviderExecutable(provider, process.platform, process.arch, process.resourcesPath)
+      : input.bundledExecutable;
+  const candidates = await cliCandidates(provider, input.systemCandidates, bundled);
+  let outdated: CodexCliError | undefined;
+  let found = false;
   for (const candidate of candidates) {
     if (!(await isExecutable(candidate.executable))) continue;
-
+    found = true;
     try {
-      const stdout = await readCliVersion(candidate.executable);
-      const version = parseCodexVersion(stdout);
-      if (!isMinimumVersion(version, MINIMUM_CODEX_VERSION)) {
-        throw new CodexCliError(`Codex CLI ${version} is too old. Dani-Dex requires 0.144.1 or newer.`, "outdated");
+      const version = configuration.parse(await readCliVersion(candidate.executable));
+      if (!isMinimumVersion(version, configuration.minimum)) {
+        outdated ??= new CodexCliError(
+          `${configuration.label} ${version} is too old. Dani-Dex requires ${configuration.minimum.join(".")} or newer.`,
+          "outdated",
+        );
+        continue;
       }
-
       return { executable: candidate.executable, version, source: candidate.source };
-    } catch (error) {
-      failures.push(
-        error instanceof CodexCliError
-          ? error
-          : new CodexCliError("Codex CLI was found but could not be started.", "invalid"),
-      );
+    } catch {
+      // An unusable candidate must not prevent another installed copy from starting.
     }
   }
-
-  const outdated = failures.find((failure) => failure.code === "outdated");
   if (outdated) throw outdated;
-  if (failures.length > 0) {
+  if (found) {
     throw new CodexCliError(
-      "Codex CLI was found but could not be started. Run `codex --version` in a new terminal.",
+      `${cliLabel} was found but could not be started. Run \`${provider} --version\` in a new terminal.`,
       "invalid",
     );
   }
+  throw new CodexCliError(
+    `${configuration.product} is not downloaded. Download it in Dani-Dex to continue.`,
+    "missing",
+  );
+}
 
-  throw new CodexCliError("ChatGPT is not downloaded. Download it in Dani-Dex to continue.", "missing");
+export async function resolveCodexCli(input: CliResolutionInput = {}): Promise<CodexCliInfo> {
+  return resolveVersionedCli("codex", input);
 }
 
 export function bundledCodexExecutable(
@@ -102,42 +122,8 @@ export function bundledCodexExecutable(
   return bundledProviderExecutable("codex", platform, architecture, resourcesPath);
 }
 
-export async function resolveClaudeCli(
-  input: { systemCandidates?: string[]; bundledExecutable?: string | null } = {},
-): Promise<ClaudeCliInfo> {
-  const bundledExecutable = input.bundledExecutable === undefined ? bundledClaudeExecutable() : input.bundledExecutable;
-  const candidates = await cliCandidates("claude", input.systemCandidates, bundledExecutable);
-  const failures: CodexCliError[] = [];
-
-  for (const candidate of candidates) {
-    if (!(await isExecutable(candidate.executable))) continue;
-
-    try {
-      const stdout = await readCliVersion(candidate.executable);
-      const version = parseClaudeVersion(stdout);
-      if (!isMinimumVersion(version, MINIMUM_CLAUDE_VERSION)) {
-        throw new CodexCliError(`Claude Code ${version} is too old. Dani-Dex requires 2.1.232 or newer.`, "outdated");
-      }
-      return { executable: candidate.executable, version, source: candidate.source };
-    } catch (error) {
-      failures.push(
-        error instanceof CodexCliError
-          ? error
-          : new CodexCliError("Claude CLI was found but could not be started.", "invalid"),
-      );
-    }
-  }
-
-  const outdated = failures.find((failure) => failure.code === "outdated");
-  if (outdated) throw outdated;
-  if (failures.length > 0) {
-    throw new CodexCliError(
-      "Claude CLI was found but could not be started. Run `claude --version` in a new terminal.",
-      "invalid",
-    );
-  }
-
-  throw new CodexCliError("Claude is not downloaded. Download it in Dani-Dex to continue.", "missing");
+export async function resolveClaudeCli(input: CliResolutionInput = {}): Promise<ClaudeCliInfo> {
+  return resolveVersionedCli("claude", input);
 }
 
 export function bundledClaudeExecutable(
@@ -148,42 +134,8 @@ export function bundledClaudeExecutable(
   return bundledProviderExecutable("claude", platform, architecture, resourcesPath);
 }
 
-export async function resolveGrokCli(
-  input: { systemCandidates?: string[]; bundledExecutable?: string | null } = {},
-): Promise<GrokCliInfo> {
-  const bundledExecutable = input.bundledExecutable === undefined ? bundledGrokExecutable() : input.bundledExecutable;
-  const candidates = await cliCandidates("grok", input.systemCandidates, bundledExecutable);
-  const failures: CodexCliError[] = [];
-
-  for (const candidate of candidates) {
-    if (!(await isExecutable(candidate.executable))) continue;
-
-    try {
-      const stdout = await readCliVersion(candidate.executable);
-      const version = parseGrokVersion(stdout);
-      if (!isMinimumVersion(version, MINIMUM_GROK_VERSION)) {
-        throw new CodexCliError(`Grok CLI ${version} is too old. Dani-Dex requires 1.0.5 or newer.`, "outdated");
-      }
-      return { executable: candidate.executable, version, source: candidate.source };
-    } catch (error) {
-      failures.push(
-        error instanceof CodexCliError
-          ? error
-          : new CodexCliError("Grok CLI was found but could not be started.", "invalid"),
-      );
-    }
-  }
-
-  const outdated = failures.find((failure) => failure.code === "outdated");
-  if (outdated) throw outdated;
-  if (failures.length > 0) {
-    throw new CodexCliError(
-      "Grok CLI was found but could not be started. Run `grok --version` in a new terminal.",
-      "invalid",
-    );
-  }
-
-  throw new CodexCliError("Grok is not downloaded. Download it in Dani-Dex to continue.", "missing");
+export async function resolveGrokCli(input: CliResolutionInput = {}): Promise<GrokCliInfo> {
+  return resolveVersionedCli("grok", input);
 }
 
 /**
@@ -220,7 +172,7 @@ export async function resolveOpencodeCli(
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
       const code = error instanceof Error && "code" in error ? String(error.code) : "unknown";
-      failures.push(`${candidate.source}: ${code}: ${detail}`);
+      failures.push(redactText(`${candidate.source}: ${code}: ${detail}`));
       /* Try the remaining installed candidates. */
     }
   }
@@ -462,22 +414,12 @@ export function cliSpawnTarget(
 }
 
 async function readCliVersion(candidate: string, timeout = 5_000): Promise<string> {
-  if (process.platform === "win32" && [".bat", ".cmd"].includes(extname(candidate).toLowerCase())) {
-    const commandProcessor = process.env.ComSpec?.trim() || "cmd.exe";
-    const escapedCandidate = candidate.replaceAll("%", "%%");
-    const { stdout } = await execFileAsync(commandProcessor, ["/d", "/s", "/c", `""${escapedCandidate}" --version"`], {
-      timeout,
-      maxBuffer: 64 * 1024,
-      windowsHide: true,
-      windowsVerbatimArguments: true,
-    });
-    return stdout;
-  }
-
-  const { stdout } = await execFileAsync(candidate, ["--version"], {
+  const target = cliSpawnTarget(candidate, ["--version"]);
+  const { stdout } = await execFileAsync(target.command, target.args, {
     timeout,
     maxBuffer: 64 * 1024,
     windowsHide: process.platform === "win32",
+    windowsVerbatimArguments: target.windowsVerbatimArguments,
   });
   return stdout;
 }

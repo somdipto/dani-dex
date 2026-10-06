@@ -934,7 +934,7 @@ describe("Dani-Dex connected desktop shell", () => {
     expect(await screen.findByRole("heading", { name: "Coordinator" })).toBeInTheDocument();
   });
 
-  it("removes a custom agent avatar and keeps its generated avatar settings", async () => {
+  it("changes the robot role without deleting a saved agent photo", async () => {
     vi.mocked(window.danidex.agent.listAgents).mockResolvedValueOnce([
       { ...AGENTS[0], avatarUrl: "dani-dex-avatar://agent/chief?v=image-1" },
     ]);
@@ -944,11 +944,14 @@ describe("Dani-Dex connected desktop shell", () => {
     const settings = await screen.findByRole("complementary", { name: "Agent settings" });
     await fireEvent.click(within(settings).getByRole("button", { name: "Edit agent avatar" }));
     const editor = within(settings).getByRole("dialog", { name: "Avatar editor" });
-    await fireEvent.click(within(editor).getByRole("button", { name: "Remove" }));
-    await waitFor(() => expect(window.danidex.agent.setAvatar).toHaveBeenCalledWith({ agentId: "chief", image: null }));
-    expect(window.danidex.agent.updateAgent).not.toHaveBeenCalledWith(
-      expect.objectContaining({ avatarSeed: expect.any(String) }),
+    await fireEvent.click(within(editor).getByRole("button", { name: "Research" }));
+    await waitFor(() =>
+      expect(window.danidex.agent.updateAgent).toHaveBeenCalledWith({
+        agentId: "chief",
+        avatarSeed: "manzanilla:research",
+      }),
     );
+    expect(window.danidex.agent.setAvatar).not.toHaveBeenCalled();
   });
 
   it("changes only the Chief provider while worker profiles stay hidden", async () => {

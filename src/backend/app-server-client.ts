@@ -1,7 +1,9 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { isNumber, isString } from "@dani-dex/contracts/runtime-values";
+import { redactText } from "@dani-dex/logging";
 import type { AgentProvider } from "./agent-client";
+import { cliSpawnTarget } from "./cli";
 import { JsonLineDecoder } from "./jsonl";
 import {
   type AppServerNotification,
@@ -65,7 +67,7 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
   }
 
   get running(): boolean {
-    return this.#process !== null && this.#process.exitCode === null;
+    return this.#process !== null && this.#process.exitCode === null && this.#process.signalCode === null;
   }
 
   start(): void {
@@ -73,24 +75,31 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
 
     this.#stopping = false;
     this.#decoder = new JsonLineDecoder();
-    const child = spawn(
-      this.#executable,
-      ["app-server", "--listen", "stdio://", ...(this.configuration.arguments ?? [])],
-      {
-        stdio: ["pipe", "pipe", "pipe"],
-        env: this.configuration.environment?.() ?? process.env,
-        shell: process.platform === "win32",
-        windowsHide: true,
-      },
-    );
+    const decoder = this.#decoder;
+    const target = cliSpawnTarget(this.#executable, [
+      "app-server",
+      "--listen",
+      "stdio://",
+      ...(this.configuration.arguments ?? []),
+    ]);
+    const child = spawn(target.command, target.args, {
+      stdio: ["pipe", "pipe", "pipe"],
+      env: this.configuration.environment?.() ?? process.env,
+      windowsVerbatimArguments: target.windowsVerbatimArguments,
+      windowsHide: true,
+    });
     this.#process = child;
 
     child.stdin.on("error", (error) => this.#fail(error, child));
     child.stdout.on("data", (chunk: Buffer) => {
+      if (this.#process !== child) return;
       try {
-        for (const message of this.#decoder.push(chunk)) this.#handleMessage(message);
+        for (const message of decoder.push(chunk)) {
+          if (this.#process !== child) break;
+          this.#handleMessage(message);
+        }
       } catch (error) {
-        this.#fail(new Error(`Codex protocol error: ${String(error)}`), child);
+        this.#fail(new Error(`Codex protocol error: ${redactDiagnostic(String(error))}`), child);
       }
     });
 
@@ -98,7 +107,9 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
     // readable nor reliably redactable.
     const diagnostics = createDiagnosticStream({
       redact: redactDiagnostic,
-      emit: (message) => this.emit("diagnostic", message),
+      emit: (message) => {
+        if (this.#decoder === decoder && !this.#stopping) this.emit("diagnostic", message);
+      },
     });
     child.stderr.on("data", (chunk: Buffer) => diagnostics.push(chunk.toString("utf8")));
     child.once("close", () => diagnostics.flush());
@@ -124,11 +135,11 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
     this.#pending.clear();
 
     child.stdin.end();
-    if (child.exitCode !== null) return;
+    if (child.exitCode !== null || child.signalCode !== null) return;
 
     await new Promise<void>((resolve) => {
       const forceKill = setTimeout(() => {
-        if (child.exitCode === null) child.kill("SIGKILL");
+        if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
       }, 2_000);
       child.once("exit", () => {
         clearTimeout(forceKill);
@@ -170,7 +181,13 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
       }, timeoutMs);
 
       this.#pending.set(id, {
-        resolve: (value) => resolve(decoder(value)),
+        resolve: (value) => {
+          try {
+            resolve(decoder(value));
+          } catch (error) {
+            reject(error);
+          }
+        },
         reject,
         timeout,
       });
@@ -244,7 +261,7 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
     }
     this.#pending.clear();
 
-    if (child.exitCode === null) child.kill("SIGTERM");
+    if (child.exitCode === null && child.signalCode === null) child.kill("SIGTERM");
     if (!this.#stopping) this.emit("exit", error);
   }
 }
@@ -255,7 +272,7 @@ export class CodexAppServerClient extends EventEmitter<ClientEvents> {
  * value that redactor no longer recognises. `shortenDiagnostic` is applied there instead.
  */
 export function redactDiagnostic(message: string): string {
-  return message
+  return redactText(message)
     .replace(/(?:sk|sess|Bearer|token)[-_a-zA-Z0-9.=]{8,}/gi, "[redacted]")
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]");
 }

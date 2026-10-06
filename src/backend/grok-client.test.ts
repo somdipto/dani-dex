@@ -250,7 +250,7 @@ describe.sequential("GrokAgentClient", () => {
         usage: { inputTokens: 300, outputTokens: 50, cachedReadTokens: 200 },
       });
       const history = await client.request("thread/read", { threadId: thread.id }, decodeThreadResponse);
-      const messages = history.thread.turns?.[0]?.items;
+      const messages = history.thread.turns?.[0]?.items?.filter((item) => item.type === "agentMessage");
       expect(messages).toEqual([
         expect.objectContaining({ phase: "commentary", text: "Planning inspection." }),
         expect.objectContaining({ phase: "commentary", text: "Inspecting files." }),
@@ -351,7 +351,7 @@ describe.sequential("GrokAgentClient", () => {
   });
 
   it.each(["grok", "opencode"] as const)(
-    "%s discovers models, streams, steers, asks, approves, cancels, and resumes",
+    "%s discovers models, streams, rejects unsafe steering, asks, approves, cancels, and resumes",
     async (provider) => {
       const createClient = () =>
         provider === "grok"
@@ -416,15 +416,17 @@ describe.sequential("GrokAgentClient", () => {
       expect(turn.turn.status).toBe("inProgress");
       await waitFor(() => requests.some((request) => request.method.includes("requestApproval")));
 
-      await client.request(
-        "turn/steer",
-        {
-          threadId,
-          expectedTurnId: "turn-1",
-          input: [{ type: "text", text: "Also add tests" }],
-        },
-        decodeRecordResponse,
-      );
+      await expect(
+        client.request(
+          "turn/steer",
+          {
+            threadId,
+            expectedTurnId: "turn-1",
+            input: [{ type: "text", text: "Also add tests" }],
+          },
+          decodeRecordResponse,
+        ),
+      ).rejects.toThrow("Steering is temporarily unavailable");
       const approval = requests.find((request) => request.method.includes("requestApproval"));
       if (!approval) throw new Error("The fake ACP permission request was not surfaced.");
       client.respond(approval.id, { decision: "accept" });

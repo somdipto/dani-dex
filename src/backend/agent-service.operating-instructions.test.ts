@@ -32,6 +32,7 @@ describe.sequential("AgentService: operating instructions", () => {
       store,
       mailbox,
       preferredProvider: "codex",
+      profileGenerationRoute: () => ({ provider: "codex", modelId: "gpt-5.4" }),
       clientFactory: (provider: AgentProvider) => {
         const client = new FakeAgentClient(provider, "- Write the spec before the code.");
         client.configRead = { config: {} };

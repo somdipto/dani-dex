@@ -43,8 +43,10 @@ export function createRemoteFileSender(send: (data: string | ArrayBuffer) => Pro
       const transferId = createId();
       let opened = () => {};
       let reject = (_error: Error) => {};
-      const acknowledged = new Promise<void>((resolve, fail) => {
+      const acknowledged = new Promise<void>((resolve) => {
         opened = resolve;
+      });
+      const failed = new Promise<never>((_resolve, fail) => {
         reject = fail;
       });
       const transfer: { opened: () => void; reject: (error: Error) => void; error: Error | null } = {
@@ -57,11 +59,19 @@ export function createRemoteFileSender(send: (data: string | ArrayBuffer) => Pro
         transfer.error = new Error("The attachment upload timed out.");
         reject(transfer.error);
       }, 60_000);
+      const sendFrame = (data: string | ArrayBuffer) =>
+        Promise.race([
+          failed,
+          Promise.resolve().then(() => {
+            if (transfer.error) throw transfer.error;
+            return send(data);
+          }),
+        ]);
       try {
         // Observe rejection before starting I/O, including a synchronous native disconnect.
         await Promise.all([
-          acknowledged,
-          send(
+          Promise.race([acknowledged, failed]),
+          sendFrame(
             encodeTeamProtocolV2Frame({
               version: 2,
               type: "file-open",
@@ -80,14 +90,14 @@ export function createRemoteFileSender(send: (data: string | ArrayBuffer) => Pro
             offset,
             bytes: bytes.slice(offset, offset + 60 * 1024),
           });
-          await send(new Uint8Array(chunk).buffer);
+          await sendFrame(new Uint8Array(chunk).buffer);
         }
         if (transfer.error) throw transfer.error;
-        await send(encodeTeamProtocolV2Frame({ version: 2, type: "file-complete", transferId }));
+        await sendFrame(encodeTeamProtocolV2Frame({ version: 2, type: "file-complete", transferId }));
         return transferId;
       } finally {
         clearTimeout(timer);
-        pending.delete(transferId);
+        if (pending.get(transferId) === transfer) pending.delete(transferId);
       }
     },
   };

@@ -3,11 +3,12 @@ import {
   decodeTeamProtocolV2FileControlFrame,
   encodeTeamProtocolV2Frame,
 } from "@dani-dex/contracts/team-protocol/v2";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createRemoteFileSender } from "./file-upload";
 
 const transferId = "b6396068-3405-4e51-9b42-d97bfd1e2f33";
 const input = { name: "note.txt", mimeType: "text/plain", base64: btoa("hello") };
+afterEach(() => vi.useRealTimers());
 
 describe("mobile file upload", () => {
   it("sends the existing file protocol with the exact bytes and digest before completing", async () => {
@@ -58,5 +59,53 @@ describe("mobile file upload", () => {
       () => transferId,
     );
     await expect(sender.upload(input)).rejects.toThrow("The attachment connection closed.");
+  });
+
+  it.each(["disconnect", "rejection", "timeout"])("interrupts a blocked chunk send after %s", async (failure) => {
+    if (failure === "timeout") vi.useFakeTimers();
+    let arrived = () => {};
+    let finish = () => {};
+    const sending = new Promise<void>((done) => {
+      arrived = done;
+    });
+    const blocked = new Promise<void>((done) => {
+      finish = done;
+    });
+    const sender = createRemoteFileSender(
+      async (data) => {
+        if (typeof data === "string") {
+          sender.receive(encodeTeamProtocolV2Frame({ version: 2, type: "file-ack", transferId, receivedThrough: 0 }));
+        } else {
+          arrived();
+          await blocked;
+        }
+      },
+      () => transferId,
+    );
+    const settled = vi.fn();
+    const uploaded = sender.upload(input);
+    void uploaded.then(settled, settled);
+    try {
+      await sending;
+      if (failure === "disconnect") sender.cancel();
+      else if (failure === "rejection")
+        sender.receive(
+          encodeTeamProtocolV2Frame({
+            version: 2,
+            type: "file-cancel",
+            transferId,
+            reason: "rejected",
+          }),
+        );
+      else await vi.advanceTimersByTimeAsync(60_000);
+      await vi.waitFor(() => expect(settled).toHaveBeenCalledOnce());
+      await expect(uploaded).rejects.toThrow(
+        failure === "disconnect" ? "connection closed" : failure === "rejection" ? "rejected" : "timed out",
+      );
+    } finally {
+      finish();
+      sender.cancel();
+      await uploaded.catch(() => undefined);
+    }
   });
 });

@@ -39,15 +39,7 @@ warn() { printf '%swarn%s %s\n' "$C_YELLOW" "$C_RESET" "$*" >&2; }
 die()  { printf '%serror%s %s\n' "$C_RED" "$C_RESET" "$*" >&2; exit 1; }
 
 banner() {
-  say ""
-  say "${C_BOLD}  ____              _   ____"
-  say " |  _ \\  __ _ _ __ (_) |  _ \\  _____  __"
-  say " | | | |/ _\` | '_ \\| | | | | |/ _ \\ \\/ /"
-  say " | |_| | (_| | | | | | | |_| |  __/>  <"
-  say " |____/ \\__,_|_| |_|_| |____/ \\___/_/\\_\\${C_RESET}"
-  say ""
-  say " Your own AI team, on your own computer."
-  say ""
+  say "Dani-Dex setup"
 }
 
 usage() {
@@ -78,7 +70,10 @@ resolve_asset() {
   arch=$(printf '%s' "$2" | tr 'A-Z' 'a-z')
   case "$os" in
     darwin)
-      printf 'macos|%s\n' "Dani-Dex-mac-universal.dmg"
+      case "$arch" in
+        arm64|x86_64) printf 'macos|%s\n' "Dani-Dex-mac-universal.dmg" ;;
+        *) return 1 ;;
+      esac
       ;;
     linux)
       case "$arch" in
@@ -87,7 +82,10 @@ resolve_asset() {
       esac
       ;;
     mingw*|msys*|cygwin*)
-      printf 'windows|%s\n' "Dani-Dex-windows-x64.exe"
+      case "$arch" in
+        x86_64|amd64) printf 'windows|%s\n' "Dani-Dex-windows-x64.exe" ;;
+        *) return 1 ;;
+      esac
       ;;
     *)
       return 1
@@ -101,6 +99,7 @@ while [ $# -gt 0 ]; do
     --dry-run) DRY_RUN=1 ;;
     --install-dir)
       [ $# -ge 2 ] || die "--install-dir needs a path"
+      [ -n "$2" ] && [[ "$2" != --* ]] || die "--install-dir needs a path"
       INSTALL_DIR=$2; shift
       ;;
     --resolve)
@@ -155,61 +154,79 @@ fi
 command -v curl >/dev/null 2>&1 || die "curl is required. Install it (e.g. sudo apt install curl) and run the command again."
 
 TMP=$(mktemp -d 2>/dev/null || mktemp -d -t dani-dex)
+INSTALL_STAGE=""
+INSTALL_LOCK=""
+DEST=""
 cleanup() {
   [ -n "${DMG_MOUNT:-}" ] && hdiutil detach "$DMG_MOUNT" -quiet >/dev/null 2>&1 || true
+  if [ -n "$INSTALL_STAGE" ]; then
+    if [ -e "$INSTALL_STAGE/previous" ] && [ ! -e "$DEST" ]; then
+      mv "$INSTALL_STAGE/previous" "$DEST" || warn "restore failed; previous app remains in $INSTALL_STAGE/previous"
+    fi
+    # Preserve a recovery copy if restoration failed.
+    [ -e "$INSTALL_STAGE/previous" ] || rm -rf "$INSTALL_STAGE"
+  fi
+  if [ -n "$INSTALL_LOCK" ] && [ ! -e "$INSTALL_STAGE/previous" ]; then rmdir "$INSTALL_LOCK"; fi
   rm -rf "$TMP"
 }
 trap cleanup EXIT
 
-# The checksum file is the source of truth for both the file name and its hash:
-# releases publish versioned names, so look ours up by artifact type and download
-# that exact name. No checksum file at all falls back to the stable alias name.
+# Require the exact artifact name and hash before downloading.
 SUMS_URL="${RELEASE_ROOT}/SHA256SUMS-${PLATFORM}.txt"
-SUMS_TEXT=$(curl -fsSL "$SUMS_URL" 2>/dev/null | tr -d '\r' || true)
+SUMS_TEXT=$(curl -fsSL --connect-timeout 15 --max-time 30 "$SUMS_URL" | tr -d '\r') \
+  || die "could not fetch release checksums. Not installing an unverifiable download."
 case "$PLATFORM" in
   macos) EXT=dmg ;;
   linux) EXT=AppImage ;;
   windows) EXT=exe ;;
 esac
-EXPECTED=""
-NAME=$ASSET
-if [ -n "$SUMS_TEXT" ]; then
-  SUM_LINE=$(printf '%s\n' "$SUMS_TEXT" | grep "\.${EXT}\$" | head -n 1 || true)
-  if [ -z "$SUM_LINE" ]; then
-    die "the release publishes checksums but has no ${EXT} entry for this platform - not installing an unverifiable download."
-  fi
-  EXPECTED=$(printf '%s\n' "$SUM_LINE" | awk '{print $1}')
-  NAME=$(printf '%s\n' "$SUM_LINE" | awk '{print $2}')
-  URL="${RELEASE_ROOT}/${NAME}"
-fi
+SUM_LINES=$(printf '%s\n' "$SUMS_TEXT" | grep "\.${EXT}\$" || true)
+[ "$(printf '%s\n' "$SUM_LINES" | grep -c . || true)" -eq 1 ] \
+  || die "release checksums must contain one valid artifact for this platform. Not installing."
+[[ "$SUM_LINES" =~ ^([[:xdigit:]]{64})[[:blank:]]+\*?(Dani-Dex-[A-Za-z0-9._-]+)$ ]] \
+  || die "invalid release checksum entry. Not installing."
+EXPECTED=$(printf '%s' "${BASH_REMATCH[1]}" | tr 'A-F' 'a-f')
+NAME=${BASH_REMATCH[2]}
+case "$PLATFORM:$NAME" in
+  macos:Dani-Dex-*-universal.dmg|linux:Dani-Dex-*-x86_64.AppImage|windows:Dani-Dex-*-x64.exe) ;;
+  *) die "wrong artifact for this platform. Not installing." ;;
+esac
+URL="${RELEASE_ROOT}/${NAME}"
+
+if command -v sha256sum >/dev/null 2>&1; then HASH_TOOL=sha256sum
+elif command -v shasum >/dev/null 2>&1; then HASH_TOOL=shasum
+else die "a SHA256 tool is required. Not installing an unverifiable download."; fi
 
 step "Downloading Dani-Dex (${NAME})"
 say "${C_DIM}  $URL${C_RESET}"
 DOWNLOAD="$TMP/$NAME"
 if [ -t 1 ]; then
-  curl -fL --retry 3 --progress-bar -o "$DOWNLOAD" "$URL" || die "download failed - check your connection and try again."
+  curl -fL --connect-timeout 15 --speed-time 30 --speed-limit 1 --retry 3 --progress-bar -o "$DOWNLOAD" "$URL" || die "download failed - check your connection and try again."
 else
-  curl -fsSL --retry 3 -o "$DOWNLOAD" "$URL" || die "download failed - check your connection and try again."
+  curl -fsSL --connect-timeout 15 --speed-time 30 --speed-limit 1 --retry 3 -o "$DOWNLOAD" "$URL" || die "download failed - check your connection and try again."
 fi
 ok "downloaded $(du -h "$DOWNLOAD" | cut -f1)"
 
 step "Verifying the download"
-if [ -z "$EXPECTED" ]; then
-  warn "this release has no checksum file - continuing without verification."
-else
-  if command -v sha256sum >/dev/null 2>&1; then
-    ACTUAL=$(sha256sum "$DOWNLOAD" | awk '{print $1}')
-  elif command -v shasum >/dev/null 2>&1; then
-    ACTUAL=$(shasum -a 256 "$DOWNLOAD" | awk '{print $1}')
-  else
-    ACTUAL=""
-    warn "no sha256 tool available - skipping checksum verification."
-  fi
-  if [ -n "$ACTUAL" ]; then
-    [ "$ACTUAL" = "$EXPECTED" ] || die "checksum mismatch - the download is corrupt or tampered with. Not installing it."
-    ok "checksum verified (${NAME})"
-  fi
-fi
+if [ "$HASH_TOOL" = sha256sum ]; then ACTUAL=$(sha256sum "$DOWNLOAD" | awk '{print $1}')
+else ACTUAL=$(shasum -a 256 "$DOWNLOAD" | awk '{print $1}'); fi
+[ "$ACTUAL" = "$EXPECTED" ] || die "checksum mismatch - the download is corrupt or tampered with. Not installing it."
+ok "checksum verified (${NAME})"
+
+install_path() {
+  DEST=$2
+  mkdir "${DEST}.install-lock" || die "another install or interrupted install owns ${DEST}.install-lock"
+  INSTALL_LOCK="${DEST}.install-lock"
+  INSTALL_STAGE=$(mktemp -d "$DEST_DIR/.dani-dex-install-XXXXXX")
+  cp -R "$1" "$INSTALL_STAGE/next"
+  [ "$PLATFORM" != linux ] || chmod +x "$INSTALL_STAGE/next"
+  [ ! -e "$DEST" ] || mv "$DEST" "$INSTALL_STAGE/previous"
+  mv "$INSTALL_STAGE/next" "$DEST"
+  rm -rf "$INSTALL_STAGE"
+  INSTALL_STAGE=""
+  rmdir "$INSTALL_LOCK"
+  INSTALL_LOCK=""
+}
 
 case "$PLATFORM" in
   macos)
@@ -221,8 +238,7 @@ case "$PLATFORM" in
       || die "could not open the downloaded disk image. Try downloading again."
     APP=$(find "$DMG_MOUNT" -maxdepth 1 -name '*.app' | head -n 1)
     [ -n "$APP" ] || die "the disk image has no app inside - the download looks wrong."
-    rm -rf "$DEST_DIR/Dani-Dex.app"
-    cp -R "$APP" "$DEST_DIR/Dani-Dex.app" || die "could not copy the app into $DEST_DIR."
+    install_path "$APP" "$DEST_DIR/Dani-Dex.app"
     hdiutil detach "$DMG_MOUNT" -quiet >/dev/null 2>&1 || true
     DMG_MOUNT=""
     # Unsigned builds trip Gatekeeper on first launch; dropping quarantine matches the
@@ -238,9 +254,7 @@ case "$PLATFORM" in
   linux)
     step "Installing Dani-Dex"
     mkdir -p "$DEST_DIR"
-    DEST="$DEST_DIR/Dani-Dex.AppImage"
-    cp "$DOWNLOAD" "$DEST"
-    chmod +x "$DEST"
+    install_path "$DOWNLOAD" "$DEST_DIR/Dani-Dex.AppImage"
     ok "installed to $DEST"
     if [ "$NO_LAUNCH" -eq 0 ]; then
       if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
@@ -268,8 +282,4 @@ case "$PLATFORM" in
 esac
 
 say ""
-say "${C_BOLD}${C_GREEN}Done.${C_RESET} Onboarding starts the first time Dani-Dex opens:"
-say "  1. Pick an AI - OpenCode's free models work right away, no account needed."
-say "  2. For ChatGPT, Claude or Grok, click Connect and sign in with that service."
-say "  3. Tell the Chief agent what you want done."
-say ""
+say "Installed. Open Dani-Dex to complete setup."

@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { isString } from "@dani-dex/contracts/runtime-values";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { CodexAppServerClient } from "./app-server-client";
+import { CodexAppServerClient, redactDiagnostic } from "./app-server-client";
 import { decodeRecordResponse, isRecord } from "./protocol";
 
 const temporaryRoots: string[] = [];
@@ -17,6 +17,14 @@ afterEach(async () => {
 });
 
 describe("CodexAppServerClient", () => {
+  it("redacts bearer tokens and custom header credentials in provider diagnostics", () => {
+    const diagnostic = redactDiagnostic(
+      'Authorization: Bearer private-access-value {"headers":{"X-Tenant":"tenant-secret-value"}}',
+    );
+    expect(diagnostic).not.toContain("private-access-value");
+    expect(diagnostic).not.toContain("tenant-secret-value");
+    expect(diagnostic).toContain("[redacted]");
+  });
   it("uses child-only configuration without changing the owner process environment", async () => {
     const executable = await createFakeCodex();
     const before = process.env.DANI_TEST_CHILD_TOKEN;
@@ -62,6 +70,24 @@ describe("CodexAppServerClient", () => {
     });
   });
 
+  it("rejects a malformed result and keeps the connection available for other requests", async () => {
+    const client = createClient(await createFakeCodex(), 5_000);
+    const exits = vi.fn();
+    client.on("exit", exits);
+    client.start();
+    const settled = vi.fn();
+    const request = client.request("test/invalid", {}, decodeEchoResponse);
+    const observed = request.then(settled, settled);
+    const exited = new Promise<void>((done) => client.once("exit", () => done()));
+    await Promise.race([observed, exited]);
+    expect(settled).toHaveBeenCalledOnce();
+    await expect(request).rejects.toThrow("Invalid echo response");
+    await expect(client.request("test/echo", { text: "still serving" }, decodeEchoResponse)).resolves.toEqual({
+      echoed: "still serving",
+    });
+    expect(exits).not.toHaveBeenCalled();
+  });
+
   it("releases one thread with an unsubscribe and keeps the app server for the others", async () => {
     const client = createClient(await createFakeCodex(), 5_000);
     const observed: unknown[] = [];
@@ -80,10 +106,10 @@ describe("CodexAppServerClient", () => {
     });
   });
 
-  it("resets fragmented JSON state when restarted after a process crash", async () => {
+  it.each(["test/partial-exit", "test/signal-exit"])("restarts after %s", async (method) => {
     const client = createClient(await createFakeCodex(), 5_000);
     client.start();
-    await expect(client.request("test/partial-exit", {}, decodeRecordResponse)).rejects.toThrow("exited");
+    await expect(client.request(method, {}, decodeRecordResponse)).rejects.toThrow("exited");
 
     client.start();
     await expect(client.request("test/echo", { text: "after restart" }, decodeEchoResponse)).resolves.toEqual({
@@ -128,6 +154,8 @@ process.stdin.on("data", (chunk) => {
         process.stdout.write(response.slice(0, middle));
         process.stdout.write(response.slice(middle));
         process.stdout.write(JSON.stringify({ method: "test/notification", params: {} }) + "\\n");
+      } else if (message.method === "test/invalid") {
+        process.stdout.write(JSON.stringify({ id: message.id, result: { echoed: 42 } }) + "\\n");
       } else if (message.method === "test/error") {
         process.stdout.write(JSON.stringify({ id: message.id, error: { code: 412, message: "Fake RPC failure" } }) + "\\n");
       } else if (message.method === "thread/unsubscribe") {
@@ -136,6 +164,8 @@ process.stdin.on("data", (chunk) => {
       } else if (message.method === "test/partial-exit") {
         process.stdout.write('{"id":');
         process.exit(9);
+      } else if (message.method === "test/signal-exit") {
+        process.kill(process.pid, "SIGTERM");
       }
     }
     newline = buffer.indexOf("\\n");

@@ -30,6 +30,21 @@ describe("TeardownRegistry", () => {
     expect(reportError).toHaveBeenCalledWith("host", failure);
   });
 
+  it("continues cleanup when the error reporter also throws", async () => {
+    const stop = vi.fn();
+    const registry = new TeardownRegistry({
+      reportError: () => {
+        throw new Error("log sink failed");
+      },
+    });
+    registry.push(10, "host", () => {
+      throw new Error("host failed");
+    });
+    registry.push(20, "agents", stop);
+    await expect(registry.runAll()).resolves.toBeUndefined();
+    expect(stop).toHaveBeenCalledOnce();
+  });
+
   it("runs each step once when shutdown is requested twice", async () => {
     const stop = vi.fn();
     const registry = new TeardownRegistry({ reportError: () => undefined });

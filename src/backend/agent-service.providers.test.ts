@@ -84,18 +84,19 @@ describe.sequential("AgentService: providers", () => {
     expect(service.listModels().some((model) => model.id === "opencode/new-free")).toBe(true);
   });
 
-  it("chooses a free OpenCode model over a listed paid model for a new bot", async () => {
+  it.each([true, false])("chooses Dani Free for a new agent (proxy listed: %s)", async (proxyListed) => {
     process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { store, mailbox } = stores(root);
     service = createTestService({
       store,
       mailbox,
-      preferredProvider: "opencode",
+      preferredProvider: undefined,
       clientFactory: (provider) => {
         const client = new FakeAgentClient(provider);
         if (provider === "opencode") {
           client.modelList = () => ({
             data: [
+              ...(proxyListed ? [{ model: "dani/dani-free-auto", displayName: "Dani Free Auto" }] : []),
               { model: "opencode-go/paid", displayName: "Paid model" },
               { model: "opencode/safe-free", displayName: "Safe Free" },
             ],
@@ -112,7 +113,10 @@ describe.sequential("AgentService: providers", () => {
       avatarSeed: "free-helper",
       avatarHue: null,
     });
-    expect(agent).toMatchObject({ provider: "opencode", model: "opencode/safe-free" });
+    expect(agent).toMatchObject({
+      provider: "opencode",
+      model: proxyListed ? "dani/dani-free-auto" : "opencode/safe-free",
+    });
   });
 
   it("runs a channel turn in a separate session and returns to the unchanged normal conversation", async () => {
@@ -1355,7 +1359,7 @@ describe.sequential("AgentService: providers", () => {
         const client = new FakeAgentClient(provider);
         // OpenCode reports a custom endpoint's model as `<endpoint id>/<model id>`, beside its own.
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "opencode/example-model" }, { model: "lmstudio/local-llm" }] });
+          client.modelList = () => ({ data: [{ model: "opencode/example-free" }, { model: "lmstudio/local-free" }] });
         }
         return client;
       },
@@ -1363,7 +1367,7 @@ describe.sequential("AgentService: providers", () => {
     });
     service = agentService;
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-free" });
 
     await service.removeCustomProvider("lmstudio", async () => undefined);
 
@@ -1372,7 +1376,7 @@ describe.sequential("AgentService: providers", () => {
     // failed removal with the endpoint still saved.
     expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({
       provider: "opencode",
-      model: "opencode/example-model",
+      model: "opencode/example-free",
     });
   });
 
@@ -1384,9 +1388,9 @@ describe.sequential("AgentService: providers", () => {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
         // Two endpoints and no OpenCode model of its own, so the fallback for one removal is the other
-        // endpoint, and the fallback for the second removal must leave OpenCode altogether.
+        // endpoint. With no free replacement after the second removal, keep the provider.
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         return client;
       },
@@ -1395,18 +1399,18 @@ describe.sequential("AgentService: providers", () => {
     service = agentService;
     await service.ensureProvider("codex");
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" });
 
     await service.removeCustomProvider("studio", async () => undefined);
     expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({
-      model: "house/router-llm",
+      model: "house/router-free",
     });
 
     await service.removeCustomProvider("house", async () => undefined);
 
     const chief = service.listAgents().find((agent) => agent.id === "chief");
-    expect(chief?.model).not.toBe("studio/local-llm");
-    expect(chief?.provider).toBe("codex");
+    expect(chief?.model).not.toBe("studio/local-free");
+    expect(chief?.provider).toBe("opencode");
   });
 
   // A user who runs custom endpoints only has no other provider to move to. The removal must still
@@ -1419,14 +1423,14 @@ describe.sequential("AgentService: providers", () => {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
         // Every OpenCode model belongs to the endpoint being removed, so there is nothing to move to.
-        if (provider === "opencode") client.modelList = () => ({ data: [{ model: "lmstudio/local-llm" }] });
+        if (provider === "opencode") client.modelList = () => ({ data: [{ model: "lmstudio/local-free" }] });
         return client;
       },
       preferredProvider: "opencode",
     });
     service = agentService;
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-free" });
 
     await service.removeCustomProvider("lmstudio", async () => undefined);
 
@@ -1434,7 +1438,7 @@ describe.sequential("AgentService: providers", () => {
     // can still serve. A refusal here would trap the user on an endpoint they asked to remove.
     expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({
       provider: "opencode",
-      model: "lmstudio/local-llm",
+      model: "lmstudio/local-free",
     });
 
     // The running OpenCode process still serves the removed endpoint, with the credentials it
@@ -1454,7 +1458,7 @@ describe.sequential("AgentService: providers", () => {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         return client;
       },
@@ -1463,20 +1467,20 @@ describe.sequential("AgentService: providers", () => {
     service = agentService;
     await service.ensureProvider("codex");
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" });
 
     // Removing `studio` moves the agent, and then the file write fails, so `studio` is still an
     // endpoint the user has, and still one the next removal may move agents onto.
     await expect(
       service.removeCustomProvider("studio", () => Promise.reject(new Error("The disk is full."))),
     ).rejects.toThrow("The disk is full.");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" });
 
     await service.removeCustomProvider("house", async () => undefined);
 
     expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({
       provider: "opencode",
-      model: "studio/local-llm",
+      model: "studio/local-free",
     });
   });
 
@@ -1489,7 +1493,7 @@ describe.sequential("AgentService: providers", () => {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         return client;
       },
@@ -1497,21 +1501,21 @@ describe.sequential("AgentService: providers", () => {
     });
     service = agentService;
     await store.getOrCreate("chief");
-    expect(service.listModels().map((model) => model.id)).toContain("studio/local-llm");
+    expect(service.listModels().map((model) => model.id)).toContain("studio/local-free");
 
     await service.removeCustomProvider("studio", async () => undefined);
 
-    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-llm");
-    expect(service.listModels().map((model) => model.id)).toContain("house/router-llm");
+    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-free");
+    expect(service.listModels().map((model) => model.id)).toContain("house/router-free");
     await expect(
-      service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" }),
+      service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" }),
     ).rejects.toThrow("The selected agent model is unavailable.");
 
     // Saved again under the same id, and a fresh process lists it, so both the list and the
     // selection accept it once more.
     await service.reloadOpenCodeConfig();
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" });
-    expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({ model: "studio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" });
+    expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({ model: "studio/local-free" });
   });
 
   // A removal runs a sweep and then a file write, and an agent update that landed between the two
@@ -1522,7 +1526,7 @@ describe.sequential("AgentService: providers", () => {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         return client;
       },
@@ -1530,7 +1534,7 @@ describe.sequential("AgentService: providers", () => {
     });
     service = agentService;
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "house/router-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "house/router-free" });
 
     // The write is held open, so the update below has every chance to run inside the removal.
     const writes: (() => void)[] = [];
@@ -1542,12 +1546,12 @@ describe.sequential("AgentService: providers", () => {
         }),
     );
     await waitFor(() => writes.length === 1);
-    const selection = service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" });
+    const selection = service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" });
     writes[0]?.();
     await removal;
 
     await expect(selection).rejects.toThrow("The selected agent model is unavailable.");
-    expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({ model: "house/router-llm" });
+    expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({ model: "house/router-free" });
   });
 
   // The same id may name a different server after a second save. While the process that answers on
@@ -1570,7 +1574,7 @@ describe.sequential("AgentService: providers", () => {
         const client = new FakeAgentClient(provider);
         const start = client.start.bind(client);
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
           client.start = () => {
             if (opencodeFailsToStart) throw new Error("OpenCode would not start.");
             start();
@@ -1591,9 +1595,9 @@ describe.sequential("AgentService: providers", () => {
     // The endpoint is removed and saved again under the same id, which may now name another server.
     await service.removeCustomProvider("studio", async () => undefined);
 
-    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-llm");
+    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-free");
     await expect(
-      service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" }),
+      service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" }),
     ).rejects.toThrow("The selected agent model is unavailable.");
 
     // A restart that fails is reported as a provider status, not as a throw of its own, so what it
@@ -1602,21 +1606,21 @@ describe.sequential("AgentService: providers", () => {
     await service.reloadOpenCodeConfig().catch(() => undefined);
     // The process from before still answers, which its other model shows, and the removed id is
     // still not among what may be given to an agent.
-    expect(service.listModels().map((model) => model.id)).toContain("house/router-llm");
-    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-llm");
+    expect(service.listModels().map((model) => model.id)).toContain("house/router-free");
+    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-free");
 
     // Connecting another provider starts no new OpenCode process, so it may not give the id back.
     claudeFailsToStart = false;
     await service.ensureProvider("claude");
-    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-llm");
+    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-free");
 
     // A process that started read the endpoint files as they are, and what it lists is the truth.
     opencodeFailsToStart = false;
     await service.reloadOpenCodeConfig();
 
-    expect(service.listModels().map((model) => model.id)).toContain("studio/local-llm");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" });
-    expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({ model: "studio/local-llm" });
+    expect(service.listModels().map((model) => model.id)).toContain("studio/local-free");
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" });
+    expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({ model: "studio/local-free" });
   });
 
   it("keeps an endpoint removed while a process starts out of that process", async () => {
@@ -1646,7 +1650,7 @@ describe.sequential("AgentService: providers", () => {
           signalStarted();
           await held;
         });
-        client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+        client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         return client;
       },
     });
@@ -1663,15 +1667,15 @@ describe.sequential("AgentService: providers", () => {
 
     // The process that arrived says nothing about a removal made after it read the files, so the id
     // stays out and no message can reach the server it named.
-    expect(service.listModels().map((model) => model.id)).toContain("house/router-llm");
-    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-llm");
+    expect(service.listModels().map((model) => model.id)).toContain("house/router-free");
+    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-free");
     await expect(
-      service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" }),
+      service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" }),
     ).rejects.toThrow("The selected agent model is unavailable.");
 
     // A process that spawned after the removal read the files as they are, so its catalogue counts.
     expect(await service.reloadOpenCodeConfig()).toBe("restarted");
-    expect(service.listModels().map((model) => model.id)).toContain("studio/local-llm");
+    expect(service.listModels().map((model) => model.id)).toContain("studio/local-free");
   });
 
   it("keeps an endpoint out while its removal is still being written", async () => {
@@ -1680,7 +1684,7 @@ describe.sequential("AgentService: providers", () => {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         return client;
       },
@@ -1695,19 +1699,19 @@ describe.sequential("AgentService: providers", () => {
     });
     const removal = service.removeCustomProvider("studio", () => written);
     // The removal runs on the endpoint chain, so the exclusion arrives on a later tick.
-    await waitFor(() => !service?.listModels().some((model) => model.id === "studio/local-llm"));
+    await waitFor(() => !service?.listModels().some((model) => model.id === "studio/local-free"));
 
     // This process reads the file as it still is, so its catalogue does not confirm the removal.
     expect(await service.reloadOpenCodeConfig()).toBe("restarted");
-    expect(service.listModels().map((model) => model.id)).toContain("house/router-llm");
-    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-llm");
+    expect(service.listModels().map((model) => model.id)).toContain("house/router-free");
+    expect(service.listModels().map((model) => model.id)).not.toContain("studio/local-free");
 
     releaseWrite();
     await removal;
 
     // The removal is on disk now, so the next process reads it and its catalogue counts.
     expect(await service.reloadOpenCodeConfig()).toBe("restarted");
-    expect(service.listModels().map((model) => model.id)).toContain("studio/local-llm");
+    expect(service.listModels().map((model) => model.id)).toContain("studio/local-free");
   });
 
   it("fails a delivery whose endpoint is removed while the thread is prepared", async () => {
@@ -1736,13 +1740,13 @@ describe.sequential("AgentService: providers", () => {
           signalPreparing();
           await prepared;
         });
-        if (provider === "opencode") client.modelList = () => ({ data: [{ model: "lmstudio/local-llm" }] });
+        if (provider === "opencode") client.modelList = () => ({ data: [{ model: "lmstudio/local-free" }] });
         return client;
       },
     });
     await service.initialize();
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-free" });
 
     await service.sendMessage({ agentId: "chief", text: "Keep working" });
     await preparing;
@@ -1770,7 +1774,7 @@ describe.sequential("AgentService: providers", () => {
       clientFactory: (provider) => {
         // The turn stays active, which is the state that holds back the restart of the CLI.
         const client = new FakeAgentClient(provider, "OPENCODE_DONE", false);
-        if (provider === "opencode") client.modelList = () => ({ data: [{ model: "lmstudio/local-llm" }] });
+        if (provider === "opencode") client.modelList = () => ({ data: [{ model: "lmstudio/local-free" }] });
         clients.set(provider, client);
         return client;
       },
@@ -1779,7 +1783,7 @@ describe.sequential("AgentService: providers", () => {
     service.on("event", (event) => events.push(event));
     await service.initialize();
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-free" });
 
     await service.sendMessage({ agentId: "chief", text: "Start this turn" });
     await waitFor(() => events.some((event) => event.type === "turn-started"));
@@ -1813,7 +1817,7 @@ describe.sequential("AgentService: providers", () => {
         // The turn stays active, which is what holds back the restart of the CLI.
         const client = new FakeAgentClient(provider, "OPENCODE_DONE", false);
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         clients.set(provider, client);
         return client;
@@ -1823,7 +1827,7 @@ describe.sequential("AgentService: providers", () => {
     service.on("event", (event) => events.push(event));
     await service.initialize();
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" });
 
     await service.sendMessage({ agentId: "chief", text: "Start this turn" });
     await waitFor(() => events.some((event) => event.type === "turn-started"));
@@ -1835,7 +1839,7 @@ describe.sequential("AgentService: providers", () => {
 
     // The other endpoint is a fallback, so the removal moves the agent record onto it at once.
     await service.removeCustomProvider("studio", async () => undefined);
-    expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({ model: "house/router-llm" });
+    expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({ model: "house/router-free" });
 
     // The turn the message would join still runs on the session the CLI opened for the removed
     // endpoint, so the model the agent names now says nothing about where the message arrives.
@@ -1864,7 +1868,7 @@ describe.sequential("AgentService: providers", () => {
       store,
       mailbox,
       preferredProvider: "opencode",
-      profileGenerationRoute: () => ({ provider: "opencode", modelId: "studio/local-llm" }),
+      profileGenerationRoute: () => ({ provider: "opencode", modelId: "studio/local-free" }),
       clientFactory: (provider) => {
         const profile = generating;
         const client = new FakeAgentClient(provider, undefined, true, true, {}, async () => {
@@ -1873,7 +1877,7 @@ describe.sequential("AgentService: providers", () => {
           await profileHeld;
         });
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         if (profile) profileClients.push(client);
         return client;
@@ -1881,7 +1885,7 @@ describe.sequential("AgentService: providers", () => {
     });
     await service.initialize();
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "studio/local-free" });
 
     generating = true;
     const generation = service.generateProfile({ prompt: "Describe a research assistant" }, []);
@@ -1918,7 +1922,7 @@ describe.sequential("AgentService: providers", () => {
           const failsDiscovery = opencodeClients === 2;
           client.modelList = () => {
             if (failsDiscovery) throw new Error("Model discovery failed.");
-            return { data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] };
+            return { data: [{ model: "studio/local-free" }, { model: "house/router-free" }] };
           };
         }
         return client;
@@ -1926,12 +1930,12 @@ describe.sequential("AgentService: providers", () => {
     });
     await service.initialize();
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "house/router-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "house/router-free" });
 
     await service.removeCustomProvider("studio", async () => undefined);
     await service.reloadOpenCodeConfig();
 
-    expect(service.listModels().some((model) => model.id === "studio/local-llm")).toBe(false);
+    expect(service.listModels().some((model) => model.id === "studio/local-free")).toBe(false);
   });
 
   // An id this app never saved can already exist in OpenCode's own configuration. Until a process
@@ -1942,7 +1946,7 @@ describe.sequential("AgentService: providers", () => {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         return client;
       },
@@ -1950,15 +1954,15 @@ describe.sequential("AgentService: providers", () => {
     });
     service = agentService;
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "house/router-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "house/router-free" });
 
     await service.saveCustomProvider("studio", async () => undefined);
 
-    expect(service.listModels().some((model) => model.id === "studio/local-llm")).toBe(false);
+    expect(service.listModels().some((model) => model.id === "studio/local-free")).toBe(false);
 
     await service.reloadOpenCodeConfig();
 
-    expect(service.listModels().some((model) => model.id === "studio/local-llm")).toBe(true);
+    expect(service.listModels().some((model) => model.id === "studio/local-free")).toBe(true);
   });
 
   // An id saved again is served again, whatever the CLI did with the removal before it.
@@ -1968,7 +1972,7 @@ describe.sequential("AgentService: providers", () => {
       client: (provider) => {
         const client = new FakeAgentClient(provider);
         if (provider === "opencode") {
-          client.modelList = () => ({ data: [{ model: "studio/local-llm" }, { model: "house/router-llm" }] });
+          client.modelList = () => ({ data: [{ model: "studio/local-free" }, { model: "house/router-free" }] });
         }
         return client;
       },
@@ -1977,7 +1981,7 @@ describe.sequential("AgentService: providers", () => {
     service = agentService;
     await service.ensureProvider("codex");
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "house/router-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "house/router-free" });
 
     await service.removeCustomProvider("studio", async () => undefined);
     await service.reloadOpenCodeConfig();
@@ -1986,11 +1990,11 @@ describe.sequential("AgentService: providers", () => {
 
     expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({
       provider: "opencode",
-      model: "studio/local-llm",
+      model: "studio/local-free",
     });
   });
 
-  it("refuses to release a busy agent when the only model left belongs to another provider", async () => {
+  it("keeps a busy agent on its provider when removal leaves only paid models", async () => {
     process.env.DANI_DEX_OPENCODE_PATH = await createFakeOpencode(root);
     const { store, mailbox } = stores(root);
     const clients = new Map<AgentProvider, FakeAgentClient>();
@@ -2003,7 +2007,7 @@ describe.sequential("AgentService: providers", () => {
         const client = new FakeAgentClient(provider, "", false);
         // Every OpenCode model comes from the endpoint being removed, so the fallback has to change
         // provider, and that is the switch which must not happen under a running turn.
-        if (provider === "opencode") client.modelList = () => ({ data: [{ model: "lmstudio/local-llm" }] });
+        if (provider === "opencode") client.modelList = () => ({ data: [{ model: "lmstudio/local-free" }] });
         clients.set(provider, client);
         return client;
       },
@@ -2011,21 +2015,19 @@ describe.sequential("AgentService: providers", () => {
     await service.initialize();
     await service.ensureProvider("codex");
     await store.getOrCreate("chief");
-    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-llm" });
+    await service.updateAgent({ agentId: "chief", provider: "opencode", model: "lmstudio/local-free" });
     const events: AgentEvent[] = [];
     service.on("event", (event) => events.push(event));
     await service.sendMessage({ agentId: "chief", text: "Keep working" });
     await waitFor(() => events.some((event) => event.type === "turn-started"));
 
-    await expect(service.removeCustomProvider("lmstudio", async () => undefined)).rejects.toThrow(
-      "Wait for the active turn and queue to finish before you remove this endpoint.",
-    );
+    await expect(service.removeCustomProvider("lmstudio", async () => undefined)).resolves.toBeUndefined();
+    expect(service.listModels().some((model) => model.id === "lmstudio/local-llm")).toBe(false);
 
-    // The endpoint stays saved because the caller stops on the refusal, so the agent must still name
-    // its model: a switch here would leave the running OpenCode process unowned and stoppable.
+    // The active session stays on its provider. Future deliveries need a new explicit model choice.
     expect(service.listAgents().find((agent) => agent.id === "chief")).toMatchObject({
       provider: "opencode",
-      model: "lmstudio/local-llm",
+      model: "lmstudio/local-free",
     });
   });
 

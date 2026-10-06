@@ -1,15 +1,10 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import fs, { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { basename, join, resolve } from "node:path";
+import { describe, expect, it, vi } from "vitest";
 import { README_INSTALL_ASSETS } from "./verify-readme-install-links";
-
-// `npx dani-dex-onboard` is the single command Som asked for: one literal string that
-// runs identically on Windows, macOS and Linux. These tests pin the platform mapping
-// to the same release assets the README download buttons ship, and prove the CLI never
-// touches the filesystem before the plan is shown.
 
 const cli = resolve(import.meta.dirname, "..", "onboard", "bin", "dani-dex-onboard.js");
 const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, "..", "onboard", "package.json"), "utf8"));
@@ -84,6 +79,7 @@ describe("dani-dex-onboard package", () => {
     ["linux", "arm64"],
     ["win32", "arm64"],
     ["freebsd", "x64"],
+    ["darwin", "ia32"],
   ])("rejects unsupported %s/%s with a pointer to the releases page", (platformArg, archArg) => {
     const result = run(["--resolve", platformArg, archArg]);
     expect(result.status).toBe(1);
@@ -122,6 +118,12 @@ describe("dani-dex-onboard package", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("unknown option");
   });
+
+  it("does not treat the next option as an installation path", () => {
+    const result = run(["--install-dir", "--no-launch", "--dry-run"]);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("--install-dir needs a path");
+  });
 });
 
 describe("pickChecksumTarget", () => {
@@ -146,6 +148,119 @@ describe("pickChecksumTarget", () => {
   it("returns null when the file has no entry for the platform, so the CLI fails closed", () => {
     expect(pickChecksumTarget(REAL_WINDOWS_SUMS, "linux")).toBeNull();
     expect(pickChecksumTarget("", "linux")).toBeNull();
+  });
+
+  it.each([
+    "not-a-hash  Dani-Dex-0.17.8-x86_64.AppImage",
+    `${"a".repeat(64)}  ../Dani-Dex-0.17.8-x86_64.AppImage`,
+    `${"a".repeat(64)}  /Dani-Dex-0.17.8-x86_64.AppImage`,
+    `${"a".repeat(64)}  Dani-Dex-0.17.8-arm64.AppImage`,
+    `${REAL_LINUX_SUMS}${REAL_LINUX_SUMS}`,
+  ])("rejects an invalid or ambiguous manifest: %s", (sums) => {
+    expect(pickChecksumTarget(sums, "linux")).toBeNull();
+  });
+
+  it("accepts the GNU binary marker and uppercase hex", () => {
+    expect(pickChecksumTarget(`${"A".repeat(64)} *Dani-Dex-0.17.8-x86_64.AppImage\r\n`, "linux")).toEqual({
+      name: "Dani-Dex-0.17.8-x86_64.AppImage",
+      expected: "a".repeat(64),
+    });
+  });
+});
+
+describe("installer replacement", () => {
+  function replace(source: string, dest: string) {
+    onboardModule.replaceInstalledPath(source, dest, false);
+  }
+
+  it("keeps the existing app when the copy fails", () => {
+    const dir = mkdtempSync(join(tmpdir(), "dani-dex-replace-test-"));
+    try {
+      const dest = join(dir, "Dani-Dex.AppImage");
+      writeFileSync(dest, "previous app");
+      expect(() => replace(join(dir, "missing"), dest)).toThrow();
+      expect(readFileSync(dest, "utf8")).toBe("previous app");
+      expect(readdirSync(dir)).toEqual(["Dani-Dex.AppImage"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("restores the previous app when activation fails", () => {
+    const dir = mkdtempSync(join(tmpdir(), "dani-dex-replace-test-"));
+    const rename = fs.renameSync;
+    const spy = vi.spyOn(fs, "renameSync").mockImplementation((source, dest) => {
+      if (basename(String(source)) === "next") {
+        throw new Error("activation failed");
+      }
+      rename(source, dest);
+    });
+    try {
+      const source = join(dir, "download");
+      const dest = join(dir, "Dani-Dex.AppImage");
+      writeFileSync(source, "new app");
+      writeFileSync(dest, "previous app");
+      expect(() => replace(source, dest)).toThrow("activation failed");
+      expect(readFileSync(dest, "utf8")).toBe("previous app");
+      expect(readdirSync(dir).sort()).toEqual(["Dani-Dex.AppImage", "download"]);
+    } finally {
+      spy.mockRestore();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not remove a lock held by another installer", () => {
+    const dir = mkdtempSync(join(tmpdir(), "dani-dex-replace-test-"));
+    try {
+      const dest = join(dir, "Dani-Dex.AppImage");
+      fs.mkdirSync(`${dest}.install-lock`);
+      writeFileSync(dest, "previous app");
+      expect(() => replace(join(dir, "missing"), dest)).toThrow();
+      expect(readFileSync(dest, "utf8")).toBe("previous app");
+      expect(fs.existsSync(`${dest}.install-lock`)).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps the recovery copy and lock if restoration also fails", () => {
+    const dir = mkdtempSync(join(tmpdir(), "dani-dex-replace-test-"));
+    const rename = fs.renameSync;
+    const spy = vi.spyOn(fs, "renameSync").mockImplementation((source, dest) => {
+      if (["next", "previous"].includes(basename(String(source)))) throw new Error("rename failed");
+      rename(source, dest);
+    });
+    try {
+      const source = join(dir, "download");
+      const dest = join(dir, "Dani-Dex.AppImage");
+      writeFileSync(source, "new app");
+      writeFileSync(dest, "previous app");
+      expect(() => onboardModule.replaceInstalledPath(source, dest, false)).toThrow("rename failed");
+      const staging = readdirSync(dir).find((name) => name.startsWith(".dani-dex-install-"));
+      if (!staging) throw new Error("Recovery directory was removed");
+      expect(readFileSync(join(dir, staging, "previous"), "utf8")).toBe("previous app");
+      expect(fs.existsSync(`${dest}.install-lock`)).toBe(true);
+    } finally {
+      spy.mockRestore();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("replaces an app directory only after the full copy is ready", () => {
+    const dir = mkdtempSync(join(tmpdir(), "dani-dex-replace-test-"));
+    try {
+      const source = join(dir, "download.app");
+      const dest = join(dir, "Dani-Dex.app");
+      fs.mkdirSync(source);
+      fs.mkdirSync(dest);
+      writeFileSync(join(source, "executable"), "new app");
+      writeFileSync(join(dest, "executable"), "previous app");
+      onboardModule.replaceInstalledPath(source, dest, true);
+      expect(readFileSync(join(dest, "executable"), "utf8")).toBe("new app");
+      expect(readdirSync(dir).sort()).toEqual(["Dani-Dex.app", "download.app"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 

@@ -5,6 +5,13 @@ import { desktopAnalytics } from "../../analytics";
 import { createScrollFades } from "../../components/createScrollFades";
 import { Button, Dialog, IconButton, Plus, Textarea, Trash2, X } from "../../components/ui";
 import { errorMessage } from "../../error-message";
+import { ContextImportPanel } from "./ContextImportPanel";
+import {
+  IMPORT_TARGET_AGENT_ID,
+  pendingImportTexts,
+  saveEntriesOnce,
+  setPendingImportTexts,
+} from "./context-import-save";
 import type { MemoriesPort } from "./memories-port";
 
 interface AgentMemoriesModalProps {
@@ -25,6 +32,7 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
   const [editingText, setEditingText] = createSignal("");
   const [savingId, setSavingId] = createSignal<string | null>(null);
   const [clearConfirmation, setClearConfirmation] = createSignal(false);
+  const [pendingImports, setPendingImports] = createSignal<string[]>([]);
   const scrollFades = createScrollFades();
   let modalContent: HTMLDivElement | undefined;
   let newMemoryInput: HTMLTextAreaElement | undefined;
@@ -55,9 +63,34 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
       setAddOpen(false);
       setNewText("");
       setClearConfirmation(false);
+      setPendingImports(
+        props.port.ownerNoun === "agent" && props.port.ownerId === IMPORT_TARGET_AGENT_ID ? pendingImportTexts() : [],
+      );
       void loadMemories();
     },
   );
+
+  async function retryImport(): Promise<void> {
+    if (savingId()) return;
+    const port = props.port;
+    setSavingId("import");
+    setError(null);
+    try {
+      const failed = await saveEntriesOnce(
+        async () => (await port.list()).map((memory) => memory.text),
+        (text) => port.create(text),
+        pendingImports(),
+      );
+      setPendingImportTexts(failed);
+      setPendingImports(failed);
+      await loadMemories(false);
+      if (failed.length > 0) setError(`${failed.length} imported memories could not save. Free some space and retry.`);
+    } catch (caught) {
+      setError(errorMessage(caught, "Could not save imported memories. They are kept on this computer."));
+    } finally {
+      setSavingId(null);
+    }
+  }
 
   createEffect(
     () => [props.open, props.port] as const,
@@ -225,6 +258,21 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
             </header>
 
             <div class="agent-memories-body">
+              <ContextImportPanel
+                room={props.port.limit - memories().length}
+                limit={props.port.limit}
+                doneLabel={(n) => `Saved ${n} memories as historical imports.`}
+                onSave={async (texts) => {
+                  const port = props.port;
+                  const failed = await saveEntriesOnce(
+                    async () => (await port.list()).map((memory) => memory.text),
+                    (text) => port.create(text),
+                    texts,
+                  );
+                  if (props.port === port) await loadMemories(false);
+                  return failed;
+                }}
+              />
               <Show when={addOpen()}>
                 <section class="agent-memory-composer" aria-label="Add memory">
                   <Textarea
@@ -279,6 +327,17 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
                 )}
               </Show>
 
+              <Show when={pendingImports().length > 0}>
+                <p role="status">Imported memories are kept on this computer and still need to be added.</p>
+                <Button
+                  size="sm"
+                  variant="default"
+                  loading={savingId() === "import"}
+                  onClick={() => void retryImport()}
+                >
+                  Retry imported memories
+                </Button>
+              </Show>
               <Show when={!loading()} fallback={<p class="agent-memory-state">Loading memories…</p>}>
                 <Show
                   when={memories().length > 0}
