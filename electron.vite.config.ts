@@ -26,8 +26,6 @@ export default defineConfig({
     },
   },
   preload: {
-    // Isolated-entry progress requires terminal methods that CI pipes do not provide.
-    logLevel: process.stdout.isTTY ? "info" : "warn",
     build: {
       // Electron sandbox preloads cannot require shared relative chunks.
       isolatedEntries: true,

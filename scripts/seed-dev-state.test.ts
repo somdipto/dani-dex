@@ -65,7 +65,7 @@ describe("development state seed", () => {
     });
     await expect(readSetupState(join(profilePath, "dani-dex-setup-v2.json"))).resolves.toEqual({
       completed: true,
-      preferredProvider: "codex",
+      preferredProvider: "opencode",
       preferredModel: null,
     });
 
