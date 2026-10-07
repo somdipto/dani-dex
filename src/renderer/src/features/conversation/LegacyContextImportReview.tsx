@@ -47,7 +47,7 @@ export function LegacyContextImportReview(props: { scope: LocalContextImportScop
         <Show when={scopeChanged()}>
           <p role="alert">The account or destination changed. Review the older import again.</p>
         </Show>
-        <Textarea aria-label="Older imported memories" value={state.texts.join("\n\n")} readOnly rows={6} />
+        <Textarea aria-label="Older imported memories" value={state.texts.join("\n\n")} readonly rows={6} />
         <Button
           size="sm"
           disabled={scopeChanged() || state.adopting}
