@@ -50,3 +50,14 @@ Initial PR CI found the old IPC group fixture missing the new cancellation endpo
 Promise helper in a Node test that targets ES2023. Both fixtures were repaired without changing the
 target or suppressing checks. The runtime builds passed on Linux and Apple Silicon at the initial
 source fingerprint; the remaining OS/CI results are recorded on PR 18.
+
+CI at 7fea40c passes the full static checks/build, both desktop test shards, API, remote, sites,
+Storybook, bundled skills and surfaces. Platform import/voice checks pass on Mac, Windows and Linux;
+pinned Whisper compile/start passes on Linux, Windows, Intel Mac and Apple Silicon. The browser smoke
+fails because its first click has no pointer events. The fixture now requires an actual displayed
+native frame before input and exposes --scenario=native-input; its CI result is pending.
+
+The native dev retry was blocked by automatic approval review: setup contacted Cloudflare and the
+review could not establish what data or credentials it might send. dev:stop reports no running stack.
+There is also no local display server; package installation is unavailable in this execution environment.
+No native UI, microphone or physical-device result is claimed from this retry.
