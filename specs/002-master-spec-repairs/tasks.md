@@ -7,6 +7,7 @@
 - [x] T05 add Linux packaging/verifier and compile/start the pinned runtime (R5).
 - [x] T06 focused adversarial tests and changed-file lint; add CI platform/runtime gates (R1-R7).
 - [x] T07 attempt actual dev UI and record the environment blockers (R6-R7).
-- [ ] T08 push the reviewed branch, raise a PR and update master issue 1.
+- [x] T08 push the reviewed branch and raise draft PR 18; remote source tree verified.
+- [ ] T09 reconcile CI and post final status on master issue 1.
 - [ ] Native before/after and packaged microphone acceptance; broad CI results.
 - [ ] External acceptance and unpublished V2 integration: ledger in acceptance.md.

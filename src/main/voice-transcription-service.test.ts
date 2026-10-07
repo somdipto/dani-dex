@@ -94,14 +94,18 @@ describe("local transcription request lifetime", () => {
 
   it("releases a cancelled preparation without letting a late completion start inference", async () => {
     const { service, prepare } = await fixture();
-    const preparation = Promise.withResolvers<VoiceModelStatus>();
-    prepare.mockReturnValueOnce(preparation.promise);
+    let resolvePreparation: ((status: VoiceModelStatus) => void) | undefined;
+    const preparation = new Promise<VoiceModelStatus>((resolve) => {
+      resolvePreparation = resolve;
+    });
+    prepare.mockReturnValueOnce(preparation);
     const result = service.transcribe(new Uint8Array([6]), "preparing");
     const rejected = expect(result).rejects.toThrow("was cancelled");
     service.cancelTranscription("preparing");
     await rejected;
-    preparation.resolve(ready);
-    await preparation.promise;
+    if (!resolvePreparation) throw new Error("No model preparation resolver.");
+    resolvePreparation(ready);
+    await preparation;
     expect(execFile).not.toHaveBeenCalled();
     prepare.mockResolvedValueOnce({ phase: "error", progress: null, message: "Try later" });
     await expect(service.transcribe(new Uint8Array([7]), "new-request")).rejects.toThrow("could not transcribe");

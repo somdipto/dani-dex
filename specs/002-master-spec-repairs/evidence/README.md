@@ -16,8 +16,9 @@ All test files below ran separately with the pinned Bun 1.4.0 and --maxWorkers=1
 | src/renderer/src/features/onboarding/OnboardingFlow.test.tsx | 16 |
 | scripts/dev-services.test.ts | 25 |
 | src/main/ipc/input-parsers.test.ts | 52 |
+| src/main/ipc/define-ipc-group.test.ts | 2 |
 
-Total: 138 focused tests. The import service uses a real SQLite database; native child lifecycle,
+Total: 140 focused tests. The import service uses a real SQLite database; native child lifecycle,
 microphones and browser locks have explicit test doubles. Those doubles do not certify physical devices.
 Changed-file Biome and git diff --check pass. No broad local typecheck, suite or app build was run.
 CI has contract tests on Linux, Mac and Windows plus actual Whisper compile/start on both Mac architectures,
@@ -44,3 +45,8 @@ auth login --agent reports environment_unsupported: browser login is unavailable
 No CodeRabbit review ran. It needs an Agentic API key or login from a user-controlled terminal/browser.
 
 The PR's commit/tree identifies the final source. Review image assets are not committed here.
+
+Initial PR CI found the old IPC group fixture missing the new cancellation endpoint and an ES2024
+Promise helper in a Node test that targets ES2023. Both fixtures were repaired without changing the
+target or suppressing checks. The runtime builds passed on Linux and Apple Silicon at the initial
+source fingerprint; the remaining OS/CI results are recorded on PR 18.
