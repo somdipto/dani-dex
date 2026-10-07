@@ -1,3 +1,4 @@
+import type { LocalContextImportScope } from "@dani-dex/contracts/context-import";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import {
   AGENT_PROVIDER_DESCRIPTORS,
@@ -27,18 +28,20 @@ import {
 import { ProviderCodeLoginDialog } from "../../components/ProviderCodeLoginDialog";
 import { ProviderPicker, type ProviderPickerOption } from "../../components/ProviderPicker";
 import type { ProviderCodeLoginApi } from "../../components/provider-code-login-api";
-import { ArrowUp, Button, Plus } from "../../components/ui";
+import { ArrowUp, Button, Plus, toast } from "../../components/ui";
 import { errorMessage } from "../../error-message";
 import { AgentAvatar } from "../agents/AgentAvatar";
 import { ComputerUseSetup } from "../computer-use/ComputerUseSetup";
 import { ContextImportPanel } from "../conversation/ContextImportPanel";
 import { commitStagedImport, pendingImportTexts, setPendingImportTexts } from "../conversation/context-import-save";
+import { LegacyContextImportReview } from "../conversation/LegacyContextImportReview";
 import { CustomProviderDialog } from "../custom-providers/CustomProviderDialog";
 import { CustomProviderListDialog } from "../custom-providers/CustomProviderListDialog";
 import { createCustomProviderHostState } from "../custom-providers/custom-provider-host-state";
 import { fallbackProviderState } from "./onboarding-provider-state";
 
 export interface OnboardingFlowProps {
+  importAccountId?: string | null;
   state: AppSetupState;
   agentStatus: AgentStatus;
   platform: DesktopPlatform;
@@ -103,7 +106,12 @@ type OnboardingAvatarVariants = {
 
 export function OnboardingFlow(props: OnboardingFlowProps) {
   const [step, setStep] = createSignal<OnboardingStep>("meet");
-  const [stagedImports, setStagedImports] = createSignal(pendingImportTexts());
+  const importScope: LocalContextImportScope = Object.freeze({
+    accountId: props.importAccountId ?? null,
+    serverId: "local",
+    agentId: "chief",
+  });
+  const [stagedImports, setStagedImports] = createSignal(pendingImportTexts(importScope));
   const [direction, setDirection] = createSignal<StepDirection>("forward");
   /**
    * The first-run screen sits on the dialog layer, so a row menu portalled to `body` would paint
@@ -446,7 +454,11 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
     try {
       // A built-in provider keeps its own default model, so only the custom row sends one.
       await props.onSave(provider, customSelected() ? (customModel() ?? firstSavedCustomModel()) : null);
-      await commitStagedImport(stagedImports());
+      const pending = await commitStagedImport(importScope, stagedImports());
+      if (pending.length > 0)
+        toast.error("Context import incomplete", {
+          description: `${pending.length} memories are kept on this computer. Open Chief’s Memories in the original account to retry.`,
+        });
     } catch (cause) {
       setError(errorMessage(cause, "Dani-Dex could not finish setup."));
       setSaving(false);
@@ -685,14 +697,18 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                   Optional. Import what ChatGPT or Claude already knows about you. It is saved as historical memory, up
                   to 64 entries of 500 characters each. Skip this if you like.
                 </p>
+                <LegacyContextImportReview
+                  scope={importScope}
+                  onAdopt={() => setStagedImports(pendingImportTexts(importScope))}
+                />
                 <ContextImportPanel
                   room={INPUT_LIMITS.agentMemories - stagedImports().length}
                   limit={INPUT_LIMITS.agentMemories}
                   doneLabel={(n) => `${n} memories kept on this computer. They will be added when setup finishes.`}
                   onSave={async (texts) => {
                     const next = [...new Set([...stagedImports(), ...texts])];
-                    setPendingImportTexts(next);
-                    setStagedImports(next);
+                    await setPendingImportTexts(importScope, next);
+                    setStagedImports(pendingImportTexts(importScope));
                     return [];
                   }}
                 />

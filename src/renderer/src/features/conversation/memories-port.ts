@@ -22,21 +22,21 @@ export interface MemoriesPort {
   subscribe: (reload: () => void) => () => void;
 }
 
-export function agentMemoriesPort(agentId: string, agentName: string): MemoriesPort {
+export function agentMemoriesPort(agentId: string, agentName: string, serverId = "local"): MemoriesPort {
   return {
     ownerId: agentId,
     ownerLabel: agentName,
     ownerNoun: "agent",
     limit: INPUT_LIMITS.agentMemories,
-    list: () => window.danidex.agent.listMemories(agentId),
+    list: () => window.danidex.agent.listMemories(agentId, serverId),
     create: async (text) => {
-      await window.danidex.agent.createMemory({ agentId, text });
+      await window.danidex.agent.createMemory({ agentId, text }, serverId);
     },
     update: async (memoryId, text) => {
-      await window.danidex.agent.updateMemory({ agentId, memoryId, text });
+      await window.danidex.agent.updateMemory({ agentId, memoryId, text }, serverId);
     },
-    remove: (memoryId) => window.danidex.agent.deleteMemory({ agentId, memoryId }),
-    clear: () => window.danidex.agent.clearMemories(agentId),
+    remove: (memoryId) => window.danidex.agent.deleteMemory({ agentId, memoryId }, serverId),
+    clear: () => window.danidex.agent.clearMemories(agentId, serverId),
     subscribe: (reload) =>
       window.danidex.agent.onEvent((event) => {
         if (event.type === "memories-changed" && event.agentId === agentId) reload();

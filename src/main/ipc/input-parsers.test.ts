@@ -325,6 +325,14 @@ describe("voice IPC input parsing", () => {
   it("accepts canonical 16 kHz mono PCM WAV audio", () => {
     const audio = voiceWav(8);
     expect(parseVoiceTranscription({ audio })).toEqual({ audio });
+    expect(parseVoiceTranscription({ audio, requestId: "owned-request" })).toEqual({
+      audio,
+      requestId: "owned-request",
+    });
+    expect(() => parseVoiceTranscription({ audio, requestId: "" })).toThrow("requestId is required");
+    expect(() => parseVoiceTranscription({ audio, requestId: "x".repeat(INPUT_LIMITS.identifier + 1) })).toThrow(
+      "requestId is too long",
+    );
   });
 
   it("rejects malformed and oversized voice audio", () => {

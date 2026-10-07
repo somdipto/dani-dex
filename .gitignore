@@ -36,6 +36,8 @@ Shared/
 index-*.css
 .openbot-browser-test/
 .openbot-build/
+.dani-dex-build/
+.dani-dex-browser-test/
 .worktrees/
 # Claude Code creates git worktrees here; they carry a nested biome.json.
 .claude/worktrees/

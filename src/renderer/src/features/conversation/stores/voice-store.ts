@@ -1,5 +1,5 @@
 import { VOICE_AUDIO_LIMITS } from "@dani-dex/contracts/ipc";
-import { onCleanup } from "solid-js";
+import { onSettled } from "solid-js";
 import { desktopAnalytics } from "../../../analytics";
 import { errorMessage } from "../../../error-message";
 import { appendVoiceTranscript, recordingToWav } from "../../../voice-recording";
@@ -35,6 +35,7 @@ export interface VoiceStoreDeps {
         };
     voiceDisposed: boolean;
     voiceRequestGeneration: number;
+    voiceTranscriptionId: string | undefined;
     voiceRecorder: Pick<MediaRecorder, "state" | "stop"> | undefined;
     voiceStream: { getTracks(): Array<Pick<MediaStreamTrack, "stop">> } | undefined;
     voiceRecordingTimer: ReturnType<typeof setTimeout> | undefined;
@@ -105,14 +106,25 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
       resources.voiceServerId = serverId;
       resources.voiceChunks = [];
       recorder.addEventListener("dataavailable", (event) => {
-        if (event.data.size > 0) resources.voiceChunks.push(event.data);
+        if (
+          resources.voiceRecorder === recorder &&
+          resources.voiceRequestGeneration === generation &&
+          event.data.size > 0
+        )
+          resources.voiceChunks.push(event.data);
       });
-      recorder.addEventListener("stop", () => void finishVoiceRecording(recorder.mimeType));
+      recorder.addEventListener("stop", () => {
+        if (resources.voiceRecorder === recorder && resources.voiceRequestGeneration === generation)
+          void finishVoiceRecording(recorder.mimeType);
+      });
       recorder.start();
       startVoiceElapsedTimer();
       deps.setVoicePhase("recording");
       resources.voiceRecordingTimer = setTimeout(stopVoiceRecording, VOICE_AUDIO_LIMITS.maximumSeconds * 1_000);
     } catch (error) {
+      if (resources.voiceDisposed || resources.voiceRequestGeneration !== generation) return;
+      stopVoiceElapsedTimer();
+      stopVoiceStream();
       if (resources.voiceRequestGeneration === generation) deps.setVoicePhase("idle");
       deps.setConversationError(target, voiceCaptureError(error));
     }
@@ -122,7 +134,9 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
     if (deps.voicePhase() !== "preparing") return;
     deps.setVoiceModelProgress(status.progress);
   });
-  onCleanup(removeVoiceModelListener);
+  onSettled(() => () => {
+    removeVoiceModelListener();
+  });
 
   function stopVoiceRecording(): void {
     if (deps.voicePhase() !== "recording" || !resources.voiceRecorder) return;
@@ -139,6 +153,7 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
     const targetServerId = resources.voiceServerId;
     const chunks = resources.voiceChunks;
     const submitRequest = resources.voiceSubmitRequest;
+    const generation = resources.voiceRequestGeneration;
     resources.voiceRecorder = undefined;
     resources.voiceAgentId = undefined;
     resources.voiceServerId = undefined;
@@ -151,7 +166,10 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
     try {
       if (chunks.length === 0) throw new Error("No speech was recorded.");
       const audio = await recordingToWav(new Blob(chunks, { type: mimeType }));
-      const result = await window.danidex.voice.transcribe({ audio });
+      if (resources.voiceDisposed || resources.voiceRequestGeneration !== generation) return;
+      const requestId = crypto.randomUUID();
+      resources.voiceTranscriptionId = requestId;
+      const result = await window.danidex.voice.transcribe({ audio, requestId });
       if (!result.text.trim()) throw new Error("No speech was detected.");
       analytics.track("voice_transcription", {
         result: "succeeded",
@@ -159,6 +177,7 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
         duration_ms: Math.max(0, Math.round(performance.now() - startedAt)),
       });
       if (resources.voiceDisposed) return;
+      if (resources.voiceRequestGeneration !== generation) return;
       const recordingTarget = { agentId: targetAgentId, serverId: targetServerId };
       deps.clearConversationError(recordingTarget);
       const draft = submitRequest?.draft ?? deps.drafts()[composerDraftKey(recordingTarget)] ?? EMPTY_DRAFT;
@@ -193,7 +212,7 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
         duration_ms: Math.max(0, Math.round(performance.now() - startedAt)),
         failure_code: "transcription_failed",
       });
-      if (!resources.voiceDisposed) {
+      if (!resources.voiceDisposed && resources.voiceRequestGeneration === generation) {
         const target = { agentId: targetAgentId, serverId: targetServerId };
         deps.setConversationErrors((current) => ({
           ...current,
@@ -201,8 +220,30 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
         }));
       }
     } finally {
-      if (!resources.voiceDisposed) deps.setVoicePhase("idle");
+      if (resources.voiceRequestGeneration === generation) {
+        resources.voiceTranscriptionId = undefined;
+        if (!resources.voiceDisposed) deps.setVoicePhase("idle");
+      }
     }
+  }
+
+  function cancelVoiceRecording(): void {
+    resources.voiceRequestGeneration += 1;
+    const recorder = resources.voiceRecorder;
+    resources.voiceChunks = [];
+    resources.voiceAgentId = undefined;
+    resources.voiceServerId = undefined;
+    resources.voiceSubmitRequest = undefined;
+    resources.voiceRecorder = undefined;
+    if (resources.voiceRecordingTimer) clearTimeout(resources.voiceRecordingTimer);
+    resources.voiceRecordingTimer = undefined;
+    stopVoiceElapsedTimer();
+    stopVoiceStream();
+    if (recorder?.state === "recording") recorder.stop();
+    if (resources.voiceTranscriptionId)
+      void window.danidex.voice.cancelTranscription(resources.voiceTranscriptionId).catch(() => undefined);
+    resources.voiceTranscriptionId = undefined;
+    if (!resources.voiceDisposed) deps.setVoicePhase("idle");
   }
 
   function stopVoiceStream(): void {
@@ -229,6 +270,7 @@ export function createVoiceStore(deps: VoiceStoreDeps) {
   return {
     startVoiceRecording,
     stopVoiceRecording,
+    cancelVoiceRecording,
     finishVoiceRecording,
     stopVoiceStream,
     startVoiceElapsedTimer,

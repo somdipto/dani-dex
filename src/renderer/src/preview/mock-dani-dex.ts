@@ -1,4 +1,6 @@
 import { isManagedRuntimeProvider, type ManagedProviderId } from "@dani-dex/contracts/agent-providers";
+import { parseImportLocalContext } from "@dani-dex/contracts/context-import";
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AccountSession,
   AccountUsage,
@@ -88,6 +90,7 @@ import {
   SIDEBAR_PEOPLE_SECTION_ID,
   SIDEBAR_UNASSIGNED_SECTION_ID,
 } from "@dani-dex/contracts/ipc";
+import { redactContextText } from "@dani-dex/logging";
 import browserTakeoverPreviewUrl from "../../stories/assets/browser-takeover-preview.svg";
 import { filePreviewForPath } from "../../stories/file-previews";
 import {
@@ -786,6 +789,7 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
       getModelStatus: async () => ({ phase: "ready", progress: 100, message: null }),
       prepareModel: async () => ({ phase: "ready", progress: 100, message: null }),
       transcribe: async () => ({ text: "Mock voice transcript" }),
+      cancelTranscription: async () => {},
       createRealtimeSession: async () => {
         throw new Error("Realtime voice is not available in the preview.");
       },
@@ -1445,6 +1449,31 @@ export function createMockDaniDex(options: MockDaniDexOptions = {}): MockDaniDex
         memories.delete(agentId);
         routines.delete(agentId);
         emitAgentEvent({ type: "agents-changed", agents });
+      },
+      importLocalContext: async (input) => {
+        const parsed = parseImportLocalContext(input);
+        const state = await api.auth.getState();
+        if (state.status !== "signed_in" && state.status !== "signed_out")
+          throw new Error("Wait for the account to load before importing memories.");
+        if ((state.status === "signed_in" ? state.user.id : null) !== parsed.accountId) {
+          throw new Error("The import belongs to another account or computer.");
+        }
+        const failedTexts: string[] = [];
+        let saved = 0;
+        for (const text of new Set(parsed.texts.map(redactContextText))) {
+          const current = memories.get(parsed.agentId) ?? [];
+          if (current.some((entry) => entry.text === text)) {
+            saved += 1;
+            continue;
+          }
+          if (current.length >= INPUT_LIMITS.agentMemories) {
+            failedTexts.push(text);
+            continue;
+          }
+          await api.agent.createMemory({ agentId: parsed.agentId, text });
+          saved += 1;
+        }
+        return { saved, failedTexts };
       },
       listMemories: async (agentId) => clone(memories.get(agentId) ?? []),
       createMemory: async (input) => {

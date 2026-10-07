@@ -1,7 +1,9 @@
 import { isDynamicRecord } from "@dani-dex/contracts/runtime-values";
 import type { CodexRealtimeService } from "../codex-realtime-service";
+
 // The local Whisper model, dictation, and Realtime call credentials.
 
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   ProviderApiKeyStatus,
   RealtimeVoiceSession,
@@ -13,6 +15,7 @@ import type { OpenAiRealtimeSessionService } from "../openai-realtime-session";
 import { type ProviderCredentialStore, REALTIME_CREDENTIAL_ID } from "../provider-credential-store";
 import type { VoiceTranscriptionService } from "../voice-transcription-service";
 import { handler, type IpcGroupHandlers, payloadHandler } from "./define-ipc-group";
+import { stringPayload } from "./validation";
 import { parseVoiceTranscription } from "./voice-inputs";
 
 /** Long enough for any OpenAI key, short enough that nothing large reaches the cipher. */
@@ -48,7 +51,11 @@ export function voiceIpcHandlers({
       prepareModel: handler((): Promise<VoiceModelStatus> => voice.prepareModel()),
       transcribe: payloadHandler(
         parseVoiceTranscription,
-        (transcription): Promise<VoiceTranscriptionResult> => voice.transcribe(transcription.audio),
+        (transcription): Promise<VoiceTranscriptionResult> =>
+          voice.transcribe(transcription.audio, transcription.requestId),
+      ),
+      cancelTranscription: payloadHandler(stringPayload("requestId", INPUT_LIMITS.identifier), (requestId) =>
+        voice.cancelTranscription(requestId),
       ),
       createRealtimeSession: handler((): Promise<RealtimeVoiceSession> => realtime.create()),
       // A status, never the key, as with provider keys.

@@ -31,6 +31,10 @@ function registerVoice(transcribe: (text: string) => unknown): void {
     getModelStatus: handler(() => "status"),
     prepareModel: handler(() => "prepared"),
     transcribe: payloadHandler((value) => String(value), transcribe),
+    cancelTranscription: payloadHandler(
+      (value) => String(value),
+      () => "cancelled",
+    ),
     createRealtimeSession: handler(() => "session"),
     setRealtimeApiKey: handler(() => "saved"),
     clearRealtimeApiKey: handler(() => "missing"),
@@ -48,6 +52,7 @@ describe("IPC group registration", () => {
 
     expect(registrations.get("voice:get-model-status")?.(TRUSTED_EVENT)).toBe("status");
     expect(registrations.get("voice:transcribe")?.(TRUSTED_EVENT, "a note")).toBe("heard a note");
+    expect(registrations.get("voice:cancel-transcription")?.(TRUSTED_EVENT, "owned-request")).toBe("cancelled");
     expect(registrations.has("voice:model-status")).toBe(false);
   });
 
@@ -61,5 +66,8 @@ describe("IPC group registration", () => {
       "Rejected IPC request from an untrusted renderer.",
     );
     expect(handled).toBe(0);
+    expect(() => registrations.get("voice:cancel-transcription")?.(UNTRUSTED_EVENT, "owned-request")).toThrow(
+      "Rejected IPC request from an untrusted renderer.",
+    );
   });
 });

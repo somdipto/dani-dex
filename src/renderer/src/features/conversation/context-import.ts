@@ -1,3 +1,4 @@
+import { CONTEXT_IMPORT_LIMITS } from "@dani-dex/contracts/context-import";
 import { redactContextText } from "@dani-dex/logging";
 
 export type ImportProvider = "ChatGPT" | "Claude";
@@ -9,6 +10,8 @@ export interface ImportEntry {
 }
 
 export function parseImport(raw: string, provider: ImportProvider): { entries: ImportEntry[]; rejected: string[] } {
+  if (raw.length > CONTEXT_IMPORT_LIMITS.pastedText)
+    throw new Error("The pasted context is too large. Import a smaller section.");
   const entries: ImportEntry[] = [];
   const rejected: string[] = [];
   for (const line of redactContextText(raw).split(/\r?\n/u)) {

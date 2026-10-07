@@ -374,6 +374,7 @@ async function main(): Promise<void> {
     scenario !== undefined &&
     ![
       "background",
+      "native-input",
       "controls",
       "tool-boundary",
       "evaluation",
@@ -384,7 +385,7 @@ async function main(): Promise<void> {
     ].includes(scenario)
   ) {
     throw new Error(
-      `Unknown browser smoke scenario: ${scenario}. Use background, controls, tool-boundary, evaluation, wait-deadlines, or live-view.`,
+      `Unknown browser smoke scenario: ${scenario}. Use background, native-input, controls, tool-boundary, evaluation, wait-deadlines, or live-view.`,
     );
   }
   const googleLive = process.argv.includes("--google-live");
@@ -428,12 +429,14 @@ async function main(): Promise<void> {
     // child view and DOM report visible, so keep this window opaque on CI's
     // virtual display. No user desktop is exposed by xvfb.
     const window = new BrowserWindow({ show: false });
+    const windowReady = new Promise<void>((resolve) => window.once("ready-to-show", () => resolve()));
     // Initialize the parent renderer before mounting child views, as the app does.
     await window.loadURL("about:blank");
+    await windowReady;
     window.show();
     app.focus({ steal: true });
     window.focus();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await waitFor(async () => window.isFocused());
     const downloadsRoot = join(temporaryRoot, "downloads");
     const statePath = join(temporaryRoot, "browser-tabs.json");
     const browser = new BrowserHost(window, downloadsRoot, statePath, {
@@ -441,9 +444,10 @@ async function main(): Promise<void> {
       recordingMaxConcurrent: 1,
       recordingMaxAggregateBytes: 100 * 1024 * 1024,
     });
-    if (!scenario || scenario === "background") await runBackgroundScenario(browser, origin);
+    if (!scenario || scenario === "background" || scenario === "native-input")
+      await runBackgroundScenario(browser, origin);
     await browser.setVisible({ visible: true, bounds: { x: 0, y: 0, width: 800, height: 600 } });
-    if (scenario) {
+    if (scenario && scenario !== "native-input") {
       try {
         if (scenario === "background") {
           // The scenario runs before the browser panel is first shown.
@@ -514,6 +518,14 @@ async function main(): Promise<void> {
     }
     await browser.setVisible({ visible: true, bounds: { x: 0, y: 0, width: 800, height: 600 } });
     process.stdout.write("BrowserHost: local tab opened.\n");
+    // DOM readiness and focus do not prove that the resized native child view has
+    // a compositor surface. Wait for an actual frame before testing pointer input.
+    const displayedContents = webContents
+      .getAllWebContents()
+      .find((contents) => !contents.isDestroyed() && contents.getURL() === `${origin}/`);
+    if (!displayedContents) throw new Error("Displayed browser contents were not available.");
+    const displayedFrame = await displayedContents.capturePage();
+    if (displayedFrame.isEmpty()) throw new Error("Displayed browser page has no native frame.");
     const first = await browser.snapshot(tab.id);
     const input = first.elements.find((element) => element.name === "Task");
     const save = first.elements.find((element) => element.name === "Save");
@@ -542,6 +554,11 @@ async function main(): Promise<void> {
       throw new Error(`Browser input was not native: ${result.text}; pointer events: ${pointerEvents}`);
     }
     process.stdout.write("BrowserHost: snapshot and actions passed.\n");
+    if (scenario === "native-input") {
+      await browser.destroy();
+      window.destroy();
+      return;
+    }
 
     await runDoubleClickScenario(browser, origin);
     const v2Tab = await browser.open(`${origin}/v2`, "smoke-thread", "smoke-bot");

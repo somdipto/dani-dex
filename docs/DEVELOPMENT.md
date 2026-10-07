@@ -201,6 +201,7 @@ Optional scripts, references, and assets follow the Codex skill folder structure
 | `bun run package:win:verify` | Build and verify the Windows x64 application on Windows. |
 | `bun run package:linux` | Build an unpacked local Linux x64 application on Linux. |
 | `bun run package:linux:verify` | Build and verify the Linux x64 application on Linux. Run it under `xvfb-run -a` without a display. |
+| `bun run voice:prepare-runtime` | Build the pinned local Whisper executable on macOS, Windows or Linux. Requires CMake and the platform C++ toolchain. Packaging includes the executable; the 539 MB verified model downloads on first use. |
 | `bun run release:preflight` | Verify version, Git state, and GitHub release secrets before tagging. |
 | `bun run dist:mac` | Build unsigned local ARM64 DMG and ZIP update artifacts. |
 | `bun run dist:win` | Build an unsigned Windows x64 NSIS installer on Windows. |

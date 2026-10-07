@@ -1,3 +1,4 @@
+import { isImportLocalContextResult } from "@dani-dex/contracts/context-import";
 import {
   type AccountUsage,
   type AgentIpcRequest,
@@ -979,6 +980,7 @@ const danidexApi: DaniDexDesktopApi = {
     getModelStatus: () => ipcRenderer.invoke(IPC_CHANNELS.voiceGetModelStatus),
     prepareModel: () => ipcRenderer.invoke(IPC_CHANNELS.voicePrepareModel),
     transcribe: (input) => ipcRenderer.invoke(IPC_CHANNELS.voiceTranscribe, input),
+    cancelTranscription: (requestId) => ipcRenderer.invoke(IPC_CHANNELS.voiceCancelTranscription, requestId),
     createRealtimeSession: () => ipcRenderer.invoke(IPC_CHANNELS.voiceCreateRealtimeSession),
     setRealtimeApiKey: (key) => ipcRenderer.invoke(IPC_CHANNELS.voiceSetRealtimeApiKey, key),
     clearRealtimeApiKey: () => ipcRenderer.invoke(IPC_CHANNELS.voiceClearRealtimeApiKey),
@@ -1086,11 +1088,21 @@ const danidexApi: DaniDexDesktopApi = {
     updateAgent: (input) => invokeAgent(IPC_CHANNELS.agentUpdate, input, decodeAgent),
     setAvatar: (input) => invokeAgent(IPC_CHANNELS.agentSetAvatar, input, decodeAgent),
     deleteAgent: (agentId) => invokeAgent(IPC_CHANNELS.agentDelete, agentId, decodeVoid),
-    listMemories: (agentId) => invokeAgent(IPC_CHANNELS.agentListMemories, agentId, decodeMemories),
-    createMemory: (input) => invokeAgent(IPC_CHANNELS.agentCreateMemory, input, decodeMemory),
-    updateMemory: (input) => invokeAgent(IPC_CHANNELS.agentUpdateMemory, input, decodeMemory),
-    deleteMemory: (input) => invokeAgent(IPC_CHANNELS.agentDeleteMemory, input, decodeVoid),
-    clearMemories: (agentId) => invokeAgent(IPC_CHANNELS.agentClearMemories, agentId, decodeVoid),
+    importLocalContext: (input) =>
+      ipcRenderer.invoke(IPC_CHANNELS.agentImportLocalContext, input).then((value) => {
+        if (!isImportLocalContextResult(value)) throw new Error("Invalid local context import result.");
+        return value;
+      }),
+    listMemories: (agentId, serverId = selectedServerId) =>
+      invokeAgentForServer(serverId, IPC_CHANNELS.agentListMemories, agentId, decodeMemories),
+    createMemory: (input, serverId = selectedServerId) =>
+      invokeAgentForServer(serverId, IPC_CHANNELS.agentCreateMemory, input, decodeMemory),
+    updateMemory: (input, serverId = selectedServerId) =>
+      invokeAgentForServer(serverId, IPC_CHANNELS.agentUpdateMemory, input, decodeMemory),
+    deleteMemory: (input, serverId = selectedServerId) =>
+      invokeAgentForServer(serverId, IPC_CHANNELS.agentDeleteMemory, input, decodeVoid),
+    clearMemories: (agentId, serverId = selectedServerId) =>
+      invokeAgentForServer(serverId, IPC_CHANNELS.agentClearMemories, agentId, decodeVoid),
     getOperatingInstructions: (agentId) =>
       invokeAgent(IPC_CHANNELS.agentGetOperatingInstructions, agentId, decodeOperatingInstructions),
     updateOperatingInstructions: (input) =>

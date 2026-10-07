@@ -1,4 +1,5 @@
 import type { AppLanguagePreference, SetAppLanguagePreferenceInput } from "./app-language";
+import type { ImportLocalContextInput, ImportLocalContextResult } from "./context-import";
 import type { AgentAnalytics, AgentAnalyticsInput } from "./ipc-agent-analytics";
 import type { AgentEvent, ScopedAgentEvent } from "./ipc-agent-events";
 import type { AgentModelOption } from "./ipc-agent-identity";
@@ -245,11 +246,12 @@ export interface AgentDesktopApi {
   updateAgent: (input: UpdateAgentInput) => Promise<AgentSummary>;
   setAvatar: (input: SetAgentAvatarInput) => Promise<AgentSummary>;
   deleteAgent: (agentId: string) => Promise<void>;
-  listMemories: (agentId: string) => Promise<AgentMemory[]>;
-  createMemory: (input: CreateAgentMemoryInput) => Promise<AgentMemory>;
-  updateMemory: (input: UpdateAgentMemoryInput) => Promise<AgentMemory>;
-  deleteMemory: (input: DeleteAgentMemoryInput) => Promise<void>;
-  clearMemories: (agentId: string) => Promise<void>;
+  listMemories: (agentId: string, serverId?: string) => Promise<AgentMemory[]>;
+  createMemory: (input: CreateAgentMemoryInput, serverId?: string) => Promise<AgentMemory>;
+  importLocalContext: (input: ImportLocalContextInput) => Promise<ImportLocalContextResult>;
+  updateMemory: (input: UpdateAgentMemoryInput, serverId?: string) => Promise<AgentMemory>;
+  deleteMemory: (input: DeleteAgentMemoryInput, serverId?: string) => Promise<void>;
+  clearMemories: (agentId: string, serverId?: string) => Promise<void>;
   /** A bot's evolving working method. Only bots on this computer have them. */
   getOperatingInstructions: (agentId: string) => Promise<AgentOperatingInstructions>;
   updateOperatingInstructions: (input: UpdateAgentOperatingInstructionsInput) => Promise<AgentOperatingInstructions>;
@@ -512,6 +514,7 @@ export interface VoiceDesktopApi {
   getModelStatus: () => Promise<VoiceModelStatus>;
   prepareModel: () => Promise<VoiceModelStatus>;
   transcribe: (input: VoiceTranscriptionInput) => Promise<VoiceTranscriptionResult>;
+  cancelTranscription: (requestId: string) => Promise<void>;
   createRealtimeSession: () => Promise<RealtimeVoiceSession>;
   /**
    * Voice calls run on the user's own OpenAI API key (bring your own key). As with provider keys,

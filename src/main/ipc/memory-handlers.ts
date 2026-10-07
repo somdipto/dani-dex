@@ -1,8 +1,11 @@
 // An agent's long-lived memories: the notes it carries between threads.
 
+import { parseImportLocalContext } from "@dani-dex/contracts/context-import";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { TEAM_API_ROUTES } from "@dani-dex/contracts/team-api-routes";
 import type { AgentService } from "../../backend/agent-service";
+import type { CentralAuthManager } from "../central-auth-manager";
+import { importLocalContext } from "../context-import-service";
 import { decodeAgentMemories, decodeAgentMemory } from "../remote-agent-decoding";
 import { decodeVoid } from "../remote-host-decoding";
 import type { RemoteServerManager } from "../remote-server-manager";
@@ -19,14 +22,19 @@ import { requireString } from "./validation";
 interface MemoryIpcDependencies {
   service: AgentService;
   remoteServers: RemoteServerManager;
+  centralAuth: Pick<CentralAuthManager, "getState">;
 }
 
 export function memoryIpcHandlers({
   service,
   remoteServers,
+  centralAuth,
 }: MemoryIpcDependencies): Pick<IpcGroupHandlers, "agentMemories"> {
   return {
     agentMemories: {
+      importLocalContext: payloadHandler(parseImportLocalContext, (input) =>
+        importLocalContext(input, service, centralAuth),
+      ),
       listMemories: payloadHandler(parseAgentRequest, (scoped) => {
         const agentId = requireString(scoped.payload, "agentId", INPUT_LIMITS.identifier);
         return routeToServer(scoped.serverId, {

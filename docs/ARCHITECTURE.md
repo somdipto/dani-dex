@@ -95,6 +95,10 @@ the `media-attachments` capability; released protocol adapters keep their existi
 - Renderer signals and stores are projections for the current screen only. They are not durable
   state, and one concern is one record - a row of parallel signals over its fields lets a screen
   hold states the product does not have.
+- Pending context imports retain a versioned local account and agent scope. The main process validates
+  that account, writes only to its local memory store and reads the records back before confirming them.
+  The selected remote server cannot route an import. Older imports without a scope stay held until the
+  owner reviews their content and destination. SQLite folds identical memories before the capacity check.
 - The desktop conversation context owns one record per agent inside the keyed server scope.
   Page, read, runtime-message, and removal commands keep its fields together. Other domains cannot
   write its store. Automatic-read retry markers stay above that scope; composer drafts and

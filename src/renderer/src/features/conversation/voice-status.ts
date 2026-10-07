@@ -12,12 +12,11 @@ export function voiceButtonLabel(phase: VoicePhase) {
 }
 
 /**
- * Whether this build can transcribe at all. The whisper binary is prepared for macOS and Windows
- * only, so the Linux package ships without one and the composer offers no microphone rather than a
- * control that always fails.
+ * All three desktop packages carry a matching local runtime. A missing executable/model is still
+ * checked by main before capture; an unknown platform never appears ready.
  */
 export function voiceSupported(platform: AppInfo["platform"] | undefined): boolean {
-  return platform !== "linux";
+  return platform === "darwin" || platform === "win32" || platform === "linux";
 }
 
 export function formatVoiceDuration(totalSeconds: number): string {

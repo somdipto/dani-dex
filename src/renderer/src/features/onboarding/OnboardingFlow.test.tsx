@@ -14,12 +14,17 @@ import type { ProviderCodeLoginState } from "../../components/ProviderCodeLoginD
 import { Toaster, toast } from "../../components/ui";
 import { STORY_AGENT_STATUS } from "../../preview/fixtures";
 import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
+import { installImportLocksStub } from "../conversation/context-import-locks.test-helper";
+import { pendingImportTexts } from "../conversation/context-import-save";
 import { OnboardingFlow } from "./OnboardingFlow";
 
 let activeMock: MockDaniDexControls | undefined;
+let restoreLocks: () => void;
 const previousApi = window.danidex;
 
 beforeEach(() => {
+  localStorage.clear();
+  restoreLocks = installImportLocksStub();
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
     value: vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
@@ -28,6 +33,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  restoreLocks();
+  localStorage.clear();
   activeMock?.dispose();
   activeMock = undefined;
   window.danidex = previousApi;
@@ -57,6 +64,31 @@ function renderFlow(
 const AGENT_STATUS_WITH_OPENCODE = STORY_AGENT_STATUS;
 
 describe("OnboardingFlow", () => {
+  it("reports a partial import after setup and retains its original local destination for retry", async () => {
+    const onSave = vi.fn(async () => undefined);
+    const view = renderFlow({ onSave });
+    if (!activeMock) throw new Error("No onboarding API");
+    const importContext = vi
+      .spyOn(activeMock.api.agent, "importLocalContext")
+      .mockImplementation(async (input) => ({ saved: 0, failedTexts: input.texts }));
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
+    await fireEvent.click(screen.getByRole("button", { name: "Import from ChatGPT or Claude" }));
+    await fireEvent.click(await screen.findByRole("button", { name: "Import from ChatGPT" }));
+    await fireEvent.input(await screen.findByRole("textbox", { name: "Pasted answer" }), {
+      target: { value: "- Uses Linux | Source: this chat | Uncertainty: none known; coverage: partial" },
+    });
+    await fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    await fireEvent.click(await screen.findByRole("button", { name: "Save 1 memories" }));
+    await screen.findByText("1 memories will be saved when you open Dani-Dex.");
+    await fireEvent.click(view.getByRole("button", { name: "Next" }));
+    await fireEvent.click(view.getByRole("button", { name: "Open Dani-Dex" }));
+    expect(await screen.findByText("Context import incomplete")).toBeInTheDocument();
+    expect(onSave).toHaveBeenCalledOnce();
+    const texts = pendingImportTexts({ accountId: null, serverId: "local", agentId: "chief" });
+    expect(texts).toHaveLength(1);
+    expect(importContext).toHaveBeenCalledWith({ accountId: null, serverId: "local", agentId: "chief", texts });
+  });
   it.each(["darwin", "win32", "linux"] as const)(
     "uses Dani Free and the same four-step flow on %s",
     async (platform) => {

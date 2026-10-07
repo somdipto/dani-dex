@@ -1,3 +1,4 @@
+import { CONTEXT_IMPORT_LIMITS } from "@dani-dex/contracts/context-import";
 import { CONTEXT_EXPORT_PROMPT } from "@dani-dex/contracts/context-import-prompt";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { redactContextText } from "@dani-dex/logging";
@@ -93,6 +94,12 @@ export function ContextImportPanel(props: {
   function preview() {
     const p = state.provider;
     if (!p || !state.pasted.trim()) return;
+    if (state.pasted.length > CONTEXT_IMPORT_LIMITS.pastedText) {
+      setState((draft) => {
+        draft.status = "The pasted context is too large. Import a smaller section.";
+      });
+      return;
+    }
     const result = parseImport(state.pasted, p);
     setState((draft) => {
       draft.entries = result.entries;

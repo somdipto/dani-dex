@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { access, mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -30,7 +30,7 @@ await Promise.all([
   access(resolve(resourcesPath, "managed-skills")),
   access(resolve(resourcesPath, "licenses/Electron-LICENSE")),
   access(resolve(resourcesPath, "licenses/LICENSES.chromium.html")),
-  // Computer Use is the one native runtime the Linux build does ship.
+  // Only this platform's Computer Use runtime is included.
   access(resolve(resourcesPath, "cua-driver/linux/x64/cua-driver")),
   access(resolve(resourcesPath, "cua-driver/linux/x64/wayland-helper/winrects@cua/extension.js")),
   access(resolve(resourcesPath, "cua-driver/linux/x64/LICENSE.md")),
@@ -41,10 +41,11 @@ await Promise.all(
   ),
 );
 
-// Voice and remote desktop are not built for Linux. These two assertions are the regression guard
-// for the platform split of `extraResources`: if either ever returns to the shared list, the Linux
-// build either fails outright on a missing source or ships a runtime it cannot use.
-await assertAbsent(resolve(resourcesPath, "whisper"), "Voice transcription is not available on Linux");
+// Local transcription is packaged on Linux too. The model is still acquired and hash-verified on demand.
+await access(resolve(resourcesPath, "whisper/bin/whisper-cli"));
+execFileSync(resolve(resourcesPath, "whisper/bin/whisper-cli"), ["--help"], { stdio: "ignore", timeout: 10_000 });
+await access(resolve(resourcesPath, "licenses/whisper.cpp-LICENSE"));
+await assertAbsent(resolve(resourcesPath, "whisper/model"), "The on-demand Whisper model must not be packaged");
 await assertAbsent(resolve(resourcesPath, "remote-desktop-runtime"), "Remote desktop is not available on Linux");
 
 // Providers and the tunnel are downloaded on demand, exactly as on macOS and Windows.
@@ -117,7 +118,7 @@ await verifyLaunch(executablePath);
 
 logger.info(`Verified ${appPath}`);
 logger.info(
-  `Dani-Dex ${packageJson.version} · Linux x64 · manifest · no voice or remote desktop · ASAR integrity · hardened fuses · launch`,
+  `Dani-Dex ${packageJson.version} · Linux x64 · manifest · Whisper runtime · ASAR integrity · hardened fuses · launch`,
 );
 
 function expectEqual(actual: unknown, expected: unknown, label: string): void {

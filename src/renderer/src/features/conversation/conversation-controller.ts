@@ -66,6 +66,7 @@ interface ConversationResources {
     | undefined;
   voiceDisposed: boolean;
   voiceRequestGeneration: number;
+  voiceTranscriptionId: string | undefined;
   filePreviewRequestGeneration: number;
   runtimeSettingsSaveTails: Map<string, Promise<boolean>>;
   runtimeSettingsAttempts: Map<
@@ -193,6 +194,7 @@ export function createStableConversationState(props: Pick<ConversationProps, "on
     voiceSubmitRequest: undefined,
     voiceDisposed: false,
     voiceRequestGeneration: 0,
+    voiceTranscriptionId: undefined,
     filePreviewRequestGeneration: 0,
     runtimeSettingsSaveTails: new Map(),
     runtimeSettingsAttempts: new Map(),
@@ -218,6 +220,10 @@ export function createStableConversationState(props: Pick<ConversationProps, "on
 
   onCleanup(() => {
     resources.voiceDisposed = true;
+    resources.voiceRequestGeneration += 1;
+    if (resources.voiceTranscriptionId)
+      void window.danidex.voice.cancelTranscription(resources.voiceTranscriptionId).catch(() => undefined);
+    resources.voiceTranscriptionId = undefined;
     if (resources.voiceRecordingTimer) clearTimeout(resources.voiceRecordingTimer);
     if (resources.voiceElapsedTimer) clearInterval(resources.voiceElapsedTimer);
     if (resources.voiceRecorder?.state === "recording") resources.voiceRecorder.stop();

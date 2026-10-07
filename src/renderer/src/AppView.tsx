@@ -88,6 +88,7 @@ export function AppAccessGate() {
                   fallback={
                     <Loading fallback={<LoadingScreen />}>
                       <OnboardingFlow
+                        importAccountId={auth.signedInAccount()?.id ?? null}
                         daniOnly={daniOnly()}
                         state={
                           setup.setupState() ?? { completed: false, preferredProvider: null, preferredModel: null }
