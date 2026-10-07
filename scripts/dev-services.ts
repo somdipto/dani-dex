@@ -399,7 +399,7 @@ async function allocateDevelopmentPorts(
         logger.info(`Signal health port ${DEFAULT_REMOTE_HEALTH_PORT} is busy. Using ${healthPort}.`);
       }
     }
-    configureMobileConnectDevelopmentNetwork(services, sharedEnvironment, networkInterfaces());
+    configureMobileConnectDevelopmentNetwork(services, sharedEnvironment, readDevelopmentNetworkInterfaces());
     if (sharedEnvironment.DANI_DEX_MOBILE_AUTH_API_URL) {
       logger.info(`Mobile Connect API: ${sharedEnvironment.DANI_DEX_MOBILE_AUTH_API_URL}`);
     }
@@ -524,6 +524,20 @@ export function configureSiteHostingDevelopmentEnvironment(environment: NodeJS.P
   environment.SITE_PUBLISH_ENABLED ??= "true";
   environment.SITE_COOKIE_ISOLATION_READY ??= "true";
   environment.SITE_LOCAL_ORIGIN ??= `http://danidex.localhost:${apiPort}`;
+}
+
+/** LAN discovery is optional. A restricted host can still run the local app and API. */
+export function readDevelopmentNetworkInterfaces(
+  read: typeof networkInterfaces = networkInterfaces,
+): DevelopmentNetworkInterfaces {
+  try {
+    return read();
+  } catch {
+    logger.warn(
+      "Network interface information is unavailable. Mobile Connect LAN links are unavailable for this development session.",
+    );
+    return {};
+  }
 }
 
 export function configureMobileConnectDevelopmentNetwork(

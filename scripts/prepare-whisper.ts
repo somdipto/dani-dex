@@ -25,8 +25,8 @@ const executableName = process.platform === "win32" ? "whisper-cli.exe" : "whisp
 const outputExecutable = join(binaryRoot, executableName);
 const runtimeOnly = process.argv.includes("--runtime-only");
 
-if (process.platform !== "darwin" && process.platform !== "win32") {
-  throw new Error("Voice assets can currently be prepared only on macOS or Windows.");
+if (process.platform !== "darwin" && process.platform !== "win32" && process.platform !== "linux") {
+  throw new Error("Voice assets can be prepared only on macOS, Windows or Linux.");
 }
 
 requireCommand("cmake", ["--version"]);
@@ -126,6 +126,8 @@ function buildSlice(buildDirectory: string, extraArguments: string[]): string {
       "-DCMAKE_BUILD_TYPE=Release",
       "-DBUILD_SHARED_LIBS=OFF",
       "-DGGML_NATIVE=OFF",
+      // ggml has its own thread pool. Avoid a separate OpenMP library in the portable runtime.
+      "-DGGML_OPENMP=OFF",
       "-DWHISPER_BUILD_TESTS=OFF",
       "-DWHISPER_BUILD_SERVER=OFF",
       ...(process.platform === "win32" ? ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"] : []),

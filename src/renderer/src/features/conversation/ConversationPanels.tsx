@@ -1,4 +1,6 @@
+import type { LocalContextImportScope } from "@dani-dex/contracts/context-import";
 import { usePlatform } from "../../platform";
+import { useAuth } from "../account/account-context";
 import { serverSupportsCapability } from "../servers/server-capabilities";
 import { useSettings } from "../settings/settings-context";
 import { useConversationController } from "./conversation-controller-context";
@@ -13,10 +15,11 @@ const CONVERSATION_PANEL_MIN = 96;
 const loadAgentSettingsPanel = () => import("./AgentSettingsPanel");
 
 import { Portal } from "@solidjs/web";
-import { createEffect, Loading, lazy, onSettled, Show } from "solid-js";
+import { createEffect, createMemo, Loading, lazy, onSettled, Show } from "solid-js";
 
 /** @internal Stable HMR boundary for conversation panels. */
 export function ConversationPanels(panelProps: { onOpenUsage: (trigger: HTMLButtonElement) => void }) {
+  const auth = useAuth();
   const controller = useConversationController();
   const platform = usePlatform();
   const { skillsMarketplaceOpen, setSkillsMarketplaceOpen } = useSettings();
@@ -65,6 +68,11 @@ export function ConversationPanels(panelProps: { onOpenUsage: (trigger: HTMLButt
     settingsReasoning,
     updateRuntimeSettings,
   } = useConversationViewScope();
+  const importScope = createMemo<LocalContextImportScope | undefined>(() =>
+    props.server?.kind === "local" && props.agent?.id === "chief"
+      ? { accountId: auth.signedInAccount()?.id ?? null, serverId: "local", agentId: "chief" }
+      : undefined,
+  );
   let browserPreviewTrigger: HTMLButtonElement | undefined;
   createEffect(
     () => ({ expanded: browserExpandedOpen(), suspended: props.globalOverlayOpen || props.remoteDesktopVisible }),
@@ -185,6 +193,8 @@ export function ConversationPanels(panelProps: { onOpenUsage: (trigger: HTMLButt
         {(agent) => (
           <Loading>
             <AgentSettingsPanel
+              pendingImportScope={importScope()}
+              serverId={props.server?.id ?? "local"}
               skillsMarketplaceOpen={skillsMarketplaceOpen()}
               onAddFromMarketplace={props.server?.kind === "local" ? () => setSkillsMarketplaceOpen(true) : undefined}
               skillsMode={props.server?.kind === "local" ? "mutable" : "readonly"}

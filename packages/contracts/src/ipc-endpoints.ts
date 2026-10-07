@@ -101,6 +101,7 @@ export const IPC_ENDPOINTS = {
     getModelStatus: request(IPC_CHANNELS.voiceGetModelStatus),
     prepareModel: request(IPC_CHANNELS.voicePrepareModel),
     transcribe: request(IPC_CHANNELS.voiceTranscribe),
+    cancelTranscription: request(IPC_CHANNELS.voiceCancelTranscription),
     createRealtimeSession: request(IPC_CHANNELS.voiceCreateRealtimeSession),
     setRealtimeApiKey: request(IPC_CHANNELS.voiceSetRealtimeApiKey),
     clearRealtimeApiKey: request(IPC_CHANNELS.voiceClearRealtimeApiKey),
@@ -240,6 +241,7 @@ export const IPC_ENDPOINTS = {
   agentMemories: {
     listMemories: request(IPC_CHANNELS.agentListMemories),
     createMemory: request(IPC_CHANNELS.agentCreateMemory),
+    importLocalContext: request(IPC_CHANNELS.agentImportLocalContext),
     updateMemory: request(IPC_CHANNELS.agentUpdateMemory),
     deleteMemory: request(IPC_CHANNELS.agentDeleteMemory),
     clearMemories: request(IPC_CHANNELS.agentClearMemories),

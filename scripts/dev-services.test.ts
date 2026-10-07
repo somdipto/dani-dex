@@ -9,6 +9,7 @@ import {
   findAvailablePort,
   parseDevelopmentTarget,
   projectRoot,
+  readDevelopmentNetworkInterfaces,
   selectMobileConnectLanAddress,
   servicesForTarget,
   signalOwnedProcess,
@@ -16,6 +17,16 @@ import {
 } from "./dev-services";
 
 describe("development service runner", () => {
+  it("keeps the API local when the host cannot enumerate network interfaces", () => {
+    const environment: NodeJS.ProcessEnv = { DANI_DEX_API_PORT: "8790" };
+    const interfaces = readDevelopmentNetworkInterfaces(() => {
+      throw new Error("getifaddrs failed");
+    });
+    configureMobileConnectDevelopmentNetwork(["api", "app"], environment, interfaces);
+    expect(environment.DANI_DEX_API_HOST).toBeUndefined();
+    expect(environment.DANI_DEX_MOBILE_AUTH_API_URL).toBeUndefined();
+    expect(environment.DANI_DEX_API_PORT).toBe("8790");
+  });
   it("runs the normal API and app in a stable order", () => {
     expect(servicesForTarget("all")).toEqual(["api", "remote", "app"]);
     expect(servicesForTarget("app")).toEqual(["api", "remote", "app"]);

@@ -1,3 +1,4 @@
+import type { LocalContextImportScope } from "@dani-dex/contracts/context-import";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type {
   AgentModelId,
@@ -56,6 +57,8 @@ export interface AgentRuntimeSettings {
 export type AgentRuntimeSettingsPatch = AgentRuntimeSettings | Pick<AgentRuntimeSettings, "reasoningEffort">;
 
 interface AgentSettingsPanelProps {
+  pendingImportScope?: LocalContextImportScope;
+  serverId?: string;
   onOpenUsage: (trigger: HTMLButtonElement) => void;
   agent: AgentProfile;
   runtimeSettings: AgentRuntimeSettings;
@@ -161,7 +164,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
     });
   }
 
-  const memoriesPort = createMemo(() => agentMemoriesPort(props.agent.id, props.agent.name));
+  const memoriesPort = createMemo(() => agentMemoriesPort(props.agent.id, props.agent.name, props.serverId ?? "local"));
   const routinesPort = createMemo(() => agentRoutinesPort(props.agent.id));
   const skillsMode = () => props.skillsMode ?? "mutable";
   let lastSkillsMarketplaceOpen = props.skillsMarketplaceOpen === true;
@@ -848,6 +851,7 @@ export default function AgentSettingsPanel(props: AgentSettingsPanelProps) {
         />
       </Show>
       <AgentMemoriesModal
+        pendingImportScope={props.pendingImportScope}
         port={memoriesPort()}
         open={draft.memories.open}
         onOpenChange={(open) =>

@@ -1,3 +1,4 @@
+import type { LocalContextImportScope } from "@dani-dex/contracts/context-import";
 import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import type { MemoryEntry } from "@dani-dex/contracts/ipc";
 import { createEffect, createSignal, For, onSettled, Show } from "solid-js";
@@ -6,15 +7,12 @@ import { createScrollFades } from "../../components/createScrollFades";
 import { Button, Dialog, IconButton, Plus, Textarea, Trash2, X } from "../../components/ui";
 import { errorMessage } from "../../error-message";
 import { ContextImportPanel } from "./ContextImportPanel";
-import {
-  IMPORT_TARGET_AGENT_ID,
-  pendingImportTexts,
-  saveEntriesOnce,
-  setPendingImportTexts,
-} from "./context-import-save";
+import { commitStagedImport, IMPORT_TARGET_AGENT_ID, pendingImportTexts, saveEntriesOnce } from "./context-import-save";
+import { LegacyContextImportReview } from "./LegacyContextImportReview";
 import type { MemoriesPort } from "./memories-port";
 
 interface AgentMemoriesModalProps {
+  pendingImportScope?: LocalContextImportScope;
   /** Names the owner and owns every call. A channel passes `channelMemoriesPort` here. */
   port: MemoriesPort;
   open: boolean;
@@ -56,7 +54,7 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
   }
 
   createEffect(
-    () => [props.open, props.port.ownerId] as const,
+    () => [props.open, props.port.ownerId, props.pendingImportScope] as const,
     ([open]) => {
       if (!open) return;
       setEditingId(null);
@@ -64,7 +62,9 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
       setNewText("");
       setClearConfirmation(false);
       setPendingImports(
-        props.port.ownerNoun === "agent" && props.port.ownerId === IMPORT_TARGET_AGENT_ID ? pendingImportTexts() : [],
+        props.pendingImportScope && props.port.ownerNoun === "agent" && props.port.ownerId === IMPORT_TARGET_AGENT_ID
+          ? pendingImportTexts(props.pendingImportScope)
+          : [],
       );
       void loadMemories();
     },
@@ -72,16 +72,13 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
 
   async function retryImport(): Promise<void> {
     if (savingId()) return;
-    const port = props.port;
+    const scope = props.pendingImportScope;
+    if (!scope || props.port.ownerId !== scope.agentId) return;
     setSavingId("import");
     setError(null);
     try {
-      const failed = await saveEntriesOnce(
-        async () => (await port.list()).map((memory) => memory.text),
-        (text) => port.create(text),
-        pendingImports(),
-      );
-      setPendingImportTexts(failed);
+      const failed = await commitStagedImport(scope, pendingImports());
+      if (props.pendingImportScope !== scope) return;
       setPendingImports(failed);
       await loadMemories(false);
       if (failed.length > 0) setError(`${failed.length} imported memories could not save. Free some space and retry.`);
@@ -258,17 +255,28 @@ export function AgentMemoriesModal(props: AgentMemoriesModalProps) {
             </header>
 
             <div class="agent-memories-body">
+              <Show when={props.pendingImportScope}>
+                {(scope) => (
+                  <LegacyContextImportReview
+                    scope={scope()}
+                    onAdopt={() => setPendingImports(pendingImportTexts(scope()))}
+                  />
+                )}
+              </Show>
               <ContextImportPanel
                 room={props.port.limit - memories().length}
                 limit={props.port.limit}
                 doneLabel={(n) => `Saved ${n} memories as historical imports.`}
                 onSave={async (texts) => {
                   const port = props.port;
-                  const failed = await saveEntriesOnce(
-                    async () => (await port.list()).map((memory) => memory.text),
-                    (text) => port.create(text),
-                    texts,
-                  );
+                  const scope = props.pendingImportScope;
+                  const failed = scope
+                    ? (await window.danidex.agent.importLocalContext({ ...scope, texts })).failedTexts
+                    : await saveEntriesOnce(
+                        async () => (await port.list()).map((memory) => memory.text),
+                        (text) => port.create(text),
+                        texts,
+                      );
                   if (props.port === port) await loadMemories(false);
                   return failed;
                 }}

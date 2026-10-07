@@ -8,6 +8,8 @@ export const VOICE_AUDIO_LIMITS = {
 
 export interface VoiceTranscriptionInput {
   audio: Uint8Array;
+  /** Opaque ID for cancelling this request without stopping another window’s transcription. */
+  requestId?: string;
 }
 
 export interface VoiceTranscriptionResult {

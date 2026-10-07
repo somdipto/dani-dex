@@ -148,6 +148,8 @@ linux:
   synopsis: A local-first desktop workspace with Dani Free included.
   description: Dani-Dex includes Dani Free.
   extraResources:
+    - from: .dani-dex-build/whisper/bin
+      to: whisper/bin
     - from: build/linux/dani-dex.apparmor
       to: linux/dani-dex.apparmor
     - from: build/cua-driver/linux/x64

@@ -401,7 +401,7 @@ function registerIpcHandlers(
     ...pluginIpcHandlers({
       takePendingPluginSlug: () => takePendingDeepLink("plugin"),
     }),
-    ...memoryIpcHandlers({ service, remoteServers }),
+    ...memoryIpcHandlers({ service, remoteServers, centralAuth }),
     ...operatingInstructionsIpcHandlers({ service }),
     ...sharedTableIpcHandlers({ service }),
     ...routineIpcHandlers({ service, remoteServers }),

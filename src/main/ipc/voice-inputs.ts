@@ -1,5 +1,6 @@
+import { INPUT_LIMITS } from "@dani-dex/contracts/input-limits";
 import { VOICE_AUDIO_LIMITS, type VoiceTranscriptionInput } from "@dani-dex/contracts/ipc";
-import { isObject } from "./validation";
+import { isObject, requireString } from "./validation";
 
 export function parseVoiceTranscription(input: unknown): VoiceTranscriptionInput {
   if (!isObject(input) || !(input.audio instanceof Uint8Array)) {
@@ -24,7 +25,12 @@ export function parseVoiceTranscription(input: unknown): VoiceTranscriptionInput
   ) {
     throw new Error("Voice audio must be a 16 kHz mono PCM WAV file.");
   }
-  return { audio };
+  return {
+    audio,
+    ...(input.requestId === undefined
+      ? {}
+      : { requestId: requireString(input.requestId, "requestId", INPUT_LIMITS.identifier) }),
+  };
 }
 
 function ascii(value: Uint8Array, start: number, end: number): string {

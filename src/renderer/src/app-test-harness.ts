@@ -501,6 +501,7 @@ export function installDanidexStub(): void {
       voice: {
         getModelStatus: vi.fn().mockResolvedValue({ phase: "ready", progress: 100, message: null }),
         prepareModel: vi.fn().mockResolvedValue({ phase: "ready", progress: 100, message: null }),
+        cancelTranscription: vi.fn().mockResolvedValue(undefined),
         transcribe: vi.fn().mockResolvedValue({ text: "Voice transcript" }),
         createRealtimeSession: vi.fn().mockRejectedValue(new Error("Add your OpenAI API key to start a voice call.")),
         setRealtimeApiKey: vi.fn().mockResolvedValue("saved"),
@@ -637,6 +638,9 @@ export function installDanidexStub(): void {
         listAgents: vi.fn().mockResolvedValue(AGENTS),
         listInstalledSkills: vi.fn().mockResolvedValue([]),
         listMcpServers: vi.fn().mockResolvedValue([]),
+        importLocalContext: vi
+          .fn()
+          .mockImplementation(async (input) => ({ saved: input.texts.length, failedTexts: [] })),
         listMemories: vi.fn().mockResolvedValue([]),
         listRoutines: vi.fn().mockResolvedValue([]),
         listRoutineRuns: vi.fn().mockResolvedValue([]),

@@ -11,8 +11,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type AnalyticsEventName, type DesktopAnalyticsEvents, desktopAnalytics } from "../../analytics";
 import { createMockDaniDex, type MockDaniDexControls } from "../../preview/mock-dani-dex";
 import { AgentMemoriesModal } from "./AgentMemoriesModal";
+import { installImportLocksStub } from "./context-import-locks.test-helper";
 import { pendingImportTexts, setPendingImportTexts } from "./context-import-save";
 import { agentMemoriesPort } from "./memories-port";
+
+let restoreLocks: () => void;
+const scope = { accountId: null, serverId: "local", agentId: "chief" } as const;
 
 const firstMemory: AgentMemory = {
   id: "memory-1",
@@ -42,12 +46,14 @@ function trackScopedMemoryAnalytics<Name extends AnalyticsEventName>(
 }
 
 afterEach(() => {
+  restoreLocks();
   activeMock?.dispose();
   activeMock = undefined;
   localStorage.clear();
 });
 
 beforeEach(() => {
+  restoreLocks = installImportLocksStub();
   localStorage.clear();
   vi.spyOn(desktopAnalytics, "scope").mockImplementation(() => ({ track: trackScopedMemoryAnalytics }));
   trackMemoryAnalytics.mockClear();
@@ -80,7 +86,7 @@ beforeEach(() => {
     memoryState = memoryState.filter((item) => item.agentId !== agentId);
   });
 
-  activeMock = createMockDaniDex();
+  activeMock = createMockDaniDex({ authState: { status: "signed_out" } });
   activeMock.api.agent.listMemories = listMemories;
   activeMock.api.agent.createMemory = createMemory;
   activeMock.api.agent.updateMemory = updateMemory;
@@ -96,10 +102,11 @@ beforeEach(() => {
 describe("AgentMemoriesModal", () => {
   it("retains failed staged imports and clears them only after a successful retry", async () => {
     const text = "Imported from ChatGPT (historical): Uses Linux | Source: this chat | Uncertainty: none known";
-    setPendingImportTexts([text]);
-    createMemory.mockRejectedValueOnce(new Error("Host offline"));
+    await setPendingImportTexts(scope, [text]);
+    vi.spyOn(window.danidex.agent, "importLocalContext").mockResolvedValueOnce({ saved: 0, failedTexts: [text] });
     render(() => (
       <AgentMemoriesModal
+        pendingImportScope={scope}
         port={agentMemoriesPort("chief", "Chief")}
         open
         onOpenChange={vi.fn()}
@@ -109,9 +116,9 @@ describe("AgentMemoriesModal", () => {
     await screen.findByRole("dialog", { name: "Memories" });
     await fireEvent.click(await screen.findByRole("button", { name: "Retry imported memories" }));
     await screen.findByText("1 imported memories could not save. Free some space and retry.");
-    expect(pendingImportTexts()).toEqual([text]);
+    expect(pendingImportTexts(scope)).toEqual([text]);
     await fireEvent.click(screen.getByRole("button", { name: "Retry imported memories" }));
-    await waitFor(() => expect(pendingImportTexts()).toEqual([]));
+    await waitFor(() => expect(pendingImportTexts(scope)).toEqual([]));
     expect(memoryState.map((memory) => memory.text)).toEqual([text]);
   });
 
@@ -144,10 +151,13 @@ describe("AgentMemoriesModal", () => {
     await fireEvent.click(saveMemoryButton);
 
     await waitFor(() =>
-      expect(createMemory).toHaveBeenCalledWith({
-        agentId: "chief",
-        text: "Prefers short status reports.",
-      }),
+      expect(createMemory).toHaveBeenCalledWith(
+        {
+          agentId: "chief",
+          text: "Prefers short status reports.",
+        },
+        "local",
+      ),
     );
     expect(await screen.findByText("Prefers short status reports.")).toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: "New memory" })).not.toBeInTheDocument();
@@ -184,12 +194,15 @@ describe("AgentMemoriesModal", () => {
     const saveButton = screen.getByRole("button", { name: "Save" });
     await fireEvent.click(saveButton);
     expect(await screen.findByText("Uses SI units.")).toBeInTheDocument();
-    expect(updateMemory).toHaveBeenCalledWith({ agentId: "chief", memoryId: "memory-1", text: "Uses SI units." });
+    expect(updateMemory).toHaveBeenCalledWith(
+      { agentId: "chief", memoryId: "memory-1", text: "Uses SI units." },
+      "local",
+    );
 
     const deleteButton = screen.getByRole("button", { name: "Delete memory" });
     await waitFor(() => expect(deleteButton).toBeEnabled());
     await fireEvent.click(deleteButton);
-    await waitFor(() => expect(deleteMemory).toHaveBeenCalledWith({ agentId: "chief", memoryId: "memory-1" }));
+    await waitFor(() => expect(deleteMemory).toHaveBeenCalledWith({ agentId: "chief", memoryId: "memory-1" }, "local"));
     expect(screen.queryByRole("dialog", { name: "Delete this memory?" })).not.toBeInTheDocument();
     expect(await screen.findByText("This agent has no saved memories yet.")).toBeInTheDocument();
   });
@@ -226,7 +239,7 @@ describe("AgentMemoriesModal", () => {
         name: "Clear all memories",
       }),
     );
-    await waitFor(() => expect(clearMemories).toHaveBeenCalledWith("chief"));
+    await waitFor(() => expect(clearMemories).toHaveBeenCalledWith("chief", "local"));
     expect(await screen.findByText("This agent has no saved memories yet.")).toBeInTheDocument();
   });
 

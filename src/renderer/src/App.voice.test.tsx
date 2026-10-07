@@ -340,9 +340,7 @@ describe("Dani-Dex connected desktop shell", () => {
     );
   });
 
-  // The Linux package carries no whisper binary, so the composer must not offer a control that
-  // always fails. Everything else about the window, the server rail included, stays the same.
-  it("offers no microphone on Linux and still draws the server rail", async () => {
+  it("offers local dictation on Linux and keeps the server rail", async () => {
     vi.mocked(window.danidex.getAppInfo).mockResolvedValue({
       name: "Dani-Dex",
       version: "0.1.0",
@@ -355,7 +353,25 @@ describe("Dani-Dex connected desktop shell", () => {
 
     expect(await screen.findByRole("complementary", { name: "Servers" })).toBeInTheDocument();
     expect(await screen.findByRole("textbox", { name: "Message Chief" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Create prompt with voice" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Create prompt with voice" })).toBeEnabled();
+  });
+
+  it("cancels active transcription when the app is closed and never dispatches its late result", async () => {
+    const transcription = Promise.withResolvers<{ text: string }>();
+    vi.mocked(window.danidex.voice.transcribe).mockReturnValueOnce(transcription.promise);
+    installVoiceRecordingMocks();
+    const view = render(() => <App />);
+    await fireEvent.click(await screen.findByRole("button", { name: "Create prompt with voice" }));
+    await screen.findByRole("group", { name: "Voice recording" });
+    await fireEvent.click(screen.getByRole("button", { name: "Send voice message" }));
+    await waitFor(() => expect(window.danidex.voice.transcribe).toHaveBeenCalledOnce());
+    const requestId = vi.mocked(window.danidex.voice.transcribe).mock.calls[0][0].requestId;
+    view.unmount();
+    expect(requestId).toBeTruthy();
+    expect(window.danidex.voice.cancelTranscription).toHaveBeenCalledWith(requestId);
+    transcription.resolve({ text: "Must never send" });
+    await transcription.promise;
+    expect(window.danidex.agent.sendMessage).not.toHaveBeenCalled();
   });
 
   it("opens voice choices without connecting, spending or capturing audio", async () => {
