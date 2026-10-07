@@ -2,6 +2,7 @@
 
 Checked against main d018175, the October 7 issue 1 comments, issue 15 and remote prod-2.
 This is a repair PR, not completion of the entire master specification. No gate below is lowered.
+The Open Instinct plan added during this work has a separate [29-item ledger](open-instinct.md).
 
 | Item | Current source / evidence | Remaining requirement |
 | --- | --- | --- |
@@ -32,6 +33,7 @@ This is a repair PR, not completion of the entire master specification. No gate 
 | PTT-T02/T04/T05 | New hold-to-talk feature remains unimplemented; R4/R5 repair its prerequisites | Two-option persistent talk-key onboarding, gesture/mode/scope controller, durable enqueue receipts and task outcomes |
 | PTT-A01-A13 | No native speech/gesture/latency acceptance claimed | All binary acceptance, owner pilot files/tasks and four-platform evidence from one build |
 | Bops wishlist / computer use pilot | A product wishlist, with no new live pilot or safety/cost acceptance | Prioritized reliability work, verified action readback, explicit pilot scopes and measured outcomes; no claims copied from another product |
+| Open Instinct OI-01-OI-29 / OI-T01-OI-T15 | Additional source-grounded proposal in the master issue; context-import repair covers part of its privacy prerequisite | Identity/audience/grants/effects, channels/apps/peers, optional hosting/payment decisions and native/live evidence; see open-instinct.md |
 
 Remote prod-2 ends at 0e374fa and contains release/changelog changes. It is not the unpublished
 gateway/Telegram/outbox/review/client candidate 395efae described in issue 15. That integration

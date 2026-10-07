@@ -429,12 +429,14 @@ async function main(): Promise<void> {
     // child view and DOM report visible, so keep this window opaque on CI's
     // virtual display. No user desktop is exposed by xvfb.
     const window = new BrowserWindow({ show: false });
+    const windowReady = new Promise<void>((resolve) => window.once("ready-to-show", () => resolve()));
     // Initialize the parent renderer before mounting child views, as the app does.
     await window.loadURL("about:blank");
+    await windowReady;
     window.show();
     app.focus({ steal: true });
     window.focus();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await waitFor(async () => window.isFocused());
     const downloadsRoot = join(temporaryRoot, "downloads");
     const statePath = join(temporaryRoot, "browser-tabs.json");
     const browser = new BrowserHost(window, downloadsRoot, statePath, {

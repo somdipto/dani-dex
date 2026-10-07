@@ -56,6 +56,9 @@ Storybook, bundled skills and surfaces. Platform import/voice checks pass on Mac
 pinned Whisper compile/start passes on Linux, Windows, Intel Mac and Apple Silicon. The browser smoke
 fails because its first click has no pointer events. The fixture now requires an actual displayed
 native frame before input and exposes --scenario=native-input; its CI result is pending.
+The frame probe at cf5d649 confirms the missing native surface with UnknownVizError. The fixture now
+waits for ready-to-show and actual window focus, replacing its fixed startup delay. Native input and
+capture assertions remain required; the next CI run must verify this startup correction.
 
 The native dev retry was blocked by automatic approval review: setup contacted Cloudflare and the
 review could not establish what data or credentials it might send. dev:stop reports no running stack.
