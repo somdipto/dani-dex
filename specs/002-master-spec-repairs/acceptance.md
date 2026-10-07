@@ -6,14 +6,14 @@ The Open Instinct plan added during this work has a separate [29-item ledger](op
 
 | Item | Current source / evidence | Remaining requirement |
 | --- | --- | --- |
-| R1-R3 context-import release blocker | Fixed local IPC, main account check, SQLite duplicate folding/readback, scoped retry, explicit legacy review; focused tests | CI OS matrix and native UI review |
+| R1-R3 context-import release blocker | Fixed local IPC, main account check, SQLite duplicate folding/readback, scoped retry, explicit legacy review; focused tests and three-OS CI pass | Native UI review |
 | R4 voice lifetime | Preparation covered by finally; request cancellation; child-close cleanup; app-close and original-server send regression tests | Native microphone and process recovery proof |
-| R5 Linux voice | Pinned CPU runtime compiled and --help executed; packaging and verifier now include Whisper; model stays on demand | Packaged clean-machine microphone/codec test |
+| R5 Linux voice | Pinned CPU runtime compiled and --help executed locally and on four CI targets; packaging and verifier now include Whisper; model stays on demand | Packaged clean-machine microphone/codec test |
 | V1 rebrand | Some legacy domains and compatibility names remain | Domain/deployment decision, compatibility manifest and tested sweep |
 | V1 full duplex / Realtime | Renderer transport and coordinator already exist | Real spoken delegation, audible reply, barge-in and recovery on the same build |
 | V1 harness picker | Picker and runtime state already exist | Persist/restart/run a real supported turn |
 | V1 Hermes | Pinned install recipes and package smoke steps already exist | Clean-machine real turn on each supported architecture |
-| V1 CI/CD | Main package matrix already exists; this PR adds import/voice tests to three OS jobs | Green matrix, universal binary, signing/notarization proof |
+| V1 CI/CD | PR CI run 111 is green; imports/defaults pass on three OSes and runtime compile/start on both Mac architectures, Windows and Linux | Main package/release matrix, universal binary and signing/notarization proof |
 | V1 updater | Feed and updater service already exist | Installed N to N+1 download/restart on the fleet |
 | V1 self-hosted auth / live keys | Account service and Realtime minting code exist | Owner domain, deployment, email delivery, actual sign-in and Realtime credentials |
 | V1 artwork gate | Current contentArtProblems() returns [] | Stale ledger item; this result does not certify the whole auth production build |

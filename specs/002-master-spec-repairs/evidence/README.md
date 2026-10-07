@@ -51,16 +51,23 @@ Promise helper in a Node test that targets ES2023. Both fixtures were repaired w
 target or suppressing checks. The runtime builds passed on Linux and Apple Silicon at the initial
 source fingerprint; the remaining OS/CI results are recorded on PR 18.
 
-CI at 7fea40c passes the full static checks/build, both desktop test shards, API, remote, sites,
-Storybook, bundled skills and surfaces. Platform import/voice checks pass on Mac, Windows and Linux;
-pinned Whisper compile/start passes on Linux, Windows, Intel Mac and Apple Silicon. The browser smoke
-fails because its first click has no pointer events. The fixture now requires an actual displayed
-native frame before input and exposes --scenario=native-input; its CI result is pending.
-The frame probe at cf5d649 confirms the missing native surface with UnknownVizError. The fixture now
-waits for ready-to-show and actual window focus, replacing its fixed startup delay. Native input and
-capture assertions remain required; the next CI run must verify this startup correction.
+CI run 111 is green at source 995c7784550a9e88d654078687572bec9a05b15c:
+https://github.com/somdipto/dani-dex/actions/runs/37670666826.
+The full static checks/build, both desktop shards, API, remote, sites, Storybook, bundled skills,
+surfaces and native browser smoke pass. Platform import/voice checks pass on Mac, Windows and Linux;
+pinned Whisper compile/start passes on Linux, Windows, Intel Mac and Apple Silicon.
+The browser fixture waits for ready-to-show, actual focus and a displayed native frame, replacing
+its fixed startup delay. Trusted pointer/input, capture, protected entry and restart persistence
+assertions pass. --scenario=native-input enables a focused diagnosis of this boundary.
+The separate Android APK build was still running when the repair status was posted.
+This final documentation update changes no production or test code from that verified source.
 
 The native dev retry was blocked by automatic approval review: setup contacted Cloudflare and the
 review could not establish what data or credentials it might send. dev:stop reports no running stack.
 There is also no local display server; package installation is unavailable in this execution environment.
 No native UI, microphone or physical-device result is claimed from this retry.
+
+Repair status posted; master issue stays open:
+https://github.com/somdipto/dani-dex/issues/1#issuecomment-6044916424.
+The added Open Instinct plan is mapped separately in open-instinct.md. Its feature/live gates,
+unpublished V2 integration and PTT implementation remain open.
