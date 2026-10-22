@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Public HTTPS URL for the gateway with no account: a Cloudflare quick tunnel.
+# The URL changes each start and is for testing/demos; use a named tunnel or a
+# real domain for anything permanent. MCP stays behind the bearer token.
+# Usage: dani-tunnel start | stop | url
+set -euo pipefail
+PREFIX="${DANI_PREFIX:-$HOME/.dani}"; BIN="$PREFIX/bin/cloudflared"; LOG="$PREFIX/logs/tunnel.log"; PID="$PREFIX/run/tunnel.pid"
+PORT="${MCP_PORT:-8788}"
+case "${1:-url}" in
+  start)
+    if [ ! -x "$BIN" ]; then curl -fsSL -o "$BIN" https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64; chmod +x "$BIN"; fi
+    [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null && { "$0" url; exit 0; }
+    mkdir -p "$PREFIX/run" "$PREFIX/logs"; : > "$LOG"
+    setsid nohup "$BIN" tunnel --no-autoupdate --url "http://127.0.0.1:$PORT" >>"$LOG" 2>&1 &
+    echo $! > "$PID"
+    for _ in $(seq 1 30); do sleep 1; "$0" url 2>/dev/null && exit 0; done
+    echo "tunnel did not come up; see $LOG"; exit 1 ;;
+  stop) [ -f "$PID" ] && kill "$(cat "$PID")" 2>/dev/null; rm -f "$PID"; echo stopped ;;
+  url) U=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' "$LOG" 2>/dev/null | head -1); [ -n "$U" ] && echo "$U/mcp" || { echo "no tunnel running"; exit 1; } ;;
+esac

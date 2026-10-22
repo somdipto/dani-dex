@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Idempotent Cartesia provisioning: creates/updates the Dani Line agent and
+# assigns the awarded phone number. Key comes from the secrets dir only.
+set -euo pipefail
+PREFIX="${DANI_PREFIX:-$HOME/.dani}"
+KEY_FILE="$PREFIX/secrets/cartesia-api-key"
+[ -f "$KEY_FILE" ] || { echo "missing $KEY_FILE - put the Cartesia API key there (0600)"; exit 1; }
+export CARTESIA_KEY_FILE="$KEY_FILE"
+exec node "$(dirname "$0")/../src/cartesia-provision.js" "$@"
