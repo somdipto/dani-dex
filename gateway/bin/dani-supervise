@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# Runs the full Dani gateway stack in the foreground.
+# Used by systemd (Type=simple) and by dani-up (nohup mode).
+set -euo pipefail
+PREFIX="${DANI_PREFIX:-$HOME/.dani}"
+set -a; source "$PREFIX/env"; set +a
+mkdir -p "$PREFIX/state"
+export OPENCODE_CONFIG="$PREFIX/config/opencode.json"
+
+trap 'kill 0 2>/dev/null || true' EXIT INT TERM
+
+# Every service starts with a curated environment: the base set a CLI needs to
+# boot, plus only the variables that service reads. Anything else in this
+# shell's environment - cloud credentials, session tokens, other tools' keys -
+# must never reach a service process or a child it spawns. The bot token and
+# the dani-free API key are not here at all: services read them from files.
+BASE_ENV=(
+  "HOME=$HOME"
+  "PATH=$PATH"
+  "USER=${USER:-$(id -un)}"
+  "LOGNAME=${LOGNAME:-${USER:-$(id -un)}}"
+  "SHELL=${SHELL:-/bin/sh}"
+  "TZ=${TZ:-UTC}"
+)
+
+/usr/bin/env -i "${BASE_ENV[@]}" \
+  "$PREFIX/bin/dani-free" start --port "$DANI_FREE_PORT" &
+
+/usr/bin/env -i "${BASE_ENV[@]}" \
+  OPENCODE_CONFIG="$OPENCODE_CONFIG" \
+  "$PREFIX/bin/opencode" serve --port "$OPENCODE_PORT" --hostname 127.0.0.1 &
+
+cd "$PREFIX/app"
+/usr/bin/env -i "${BASE_ENV[@]}" \
+  TELEGRAM_BOT_TOKEN_FILE="$TELEGRAM_BOT_TOKEN_FILE" \
+  DANI_OPENCODE_BASE_URL="$DANI_OPENCODE_BASE_URL" \
+  DANI_JOURNAL="$DANI_JOURNAL" \
+  DANI_MEMORY="$DANI_MEMORY" \
+  DANI_PAIRING="$DANI_PAIRING" \
+  DANI_TELEGRAM_STATE="$DANI_TELEGRAM_STATE" \
+  DANI_TASTE="${DANI_TASTE:-$PREFIX/state/taste.json}" \
+  DANI_INBOX="${DANI_INBOX:-$PREFIX/state/inbox.json}" \
+  DANI_PENDING="${DANI_PENDING:-$PREFIX/state/pending-question.json}" \
+  DANI_WATCHES="${DANI_WATCHES:-$PREFIX/state/watches.json}" \
+  "$DANI_NODE" src/telegram-main.js &
+
+CARTESIA_KEY_ARG=""
+[ -f "$PREFIX/secrets/cartesia-api-key" ] && CARTESIA_KEY_ARG="$PREFIX/secrets/cartesia-api-key"
+CUA_URL_ARG=()
+if [ -n "${DANI_DISPLAY:-}" ] && [ -x "$PREFIX/bin/cua-driver" ]; then
+  CUA_URL_ARG=("DANI_CUA_BASE_URL=${DANI_CUA_BASE_URL:-http://127.0.0.1:${DANI_CUA_PORT:-4201}}")
+fi
+
+/usr/bin/env -i "${BASE_ENV[@]}" \
+  PORT="$MCP_PORT" \
+  ${DANI_MCP_HOST:+DANI_MCP_HOST="$DANI_MCP_HOST"} \
+  MCP_AUTH_TOKEN="$MCP_AUTH_TOKEN" \
+  DANI_OPENCODE_BASE_URL="$DANI_OPENCODE_BASE_URL" \
+  DANI_JOURNAL="$DANI_JOURNAL" \
+  DANI_MEMORY="$DANI_MEMORY" \
+  DANI_PAIRING="$DANI_PAIRING" \
+  DANI_PLAN="${DANI_PLAN:-$PREFIX/state/plan.json}" \
+  DANI_CARTESIA_STATE="${DANI_CARTESIA_STATE:-$PREFIX/state/cartesia.json}" \
+  ${CARTESIA_KEY_ARG:+CARTESIA_KEY_FILE="$CARTESIA_KEY_ARG"} \
+  "${CUA_URL_ARG[@]}" \
+  "$DANI_NODE" src/http.js &
+
+# Heartbeat: scheduled durable jobs pushed to the chief. The trigger half of
+# the proactive agent; tasks themselves stay journaled and restart-proof
+# because it delegates through the MCP authority, not around it.
+/usr/bin/env -i "${BASE_ENV[@]}" \
+  TELEGRAM_BOT_TOKEN_FILE="$TELEGRAM_BOT_TOKEN_FILE" \
+  DANI_PAIRING="$DANI_PAIRING" \
+  DANI_JOBS="${DANI_JOBS:-$PREFIX/state/jobs.json}" \
+  DANI_MCP_URL="${DANI_MCP_URL:-http://127.0.0.1:$MCP_PORT}" \
+  DANI_MCP_TOKEN_FILE="$PREFIX/secrets/mcp-token" \
+  DANI_TASTE="${DANI_TASTE:-$PREFIX/state/taste.json}" \
+  "$DANI_NODE" src/heartbeat.js --serve &
+
+# Computer-use worker: only when a display is configured (a desktop install, or
+# a VM running a virtual display). Without one there is nothing to drive.
+if [ -n "${DANI_DISPLAY:-}" ] && [ -x "$PREFIX/bin/cua-driver" ]; then
+  mkdir -p "$PREFIX/cua"
+  # This stack owns the prefix: a socket left by a crashed daemon is stale, and
+  # the driver refuses to spawn over one it cannot prove dead.
+  rm -f "$PREFIX/cua/driver.sock"
+  /usr/bin/env -i "${BASE_ENV[@]}" \
+    DISPLAY="$DANI_DISPLAY" \
+    XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}" \
+    CUA_DRIVER_EMBEDDED=1 \
+    CUA_DRIVER_RS_TELEMETRY_ENABLED=0 \
+    CUA_DRIVER_RS_UPDATE_CHECK=0 \
+    "$PREFIX/bin/cua-driver" serve --socket "$PREFIX/cua/driver.sock" --no-overlay &
+  # The worker brain gets its own state dir: two opencode processes on one
+  # shared state database race at boot and the second loses ("database is
+  # locked"). A short beat also lets the daemon's socket come up first.
+  sleep 2
+  mkdir -p "$PREFIX/opencode-cua/data"
+  (cd "$PREFIX/opencode-cua" && /usr/bin/env -i "${BASE_ENV[@]}" \
+    OPENCODE_CONFIG="$PREFIX/opencode-cua/opencode.json" \
+    XDG_DATA_HOME="$PREFIX/opencode-cua/data" \
+    "$PREFIX/bin/opencode" serve --port "${DANI_CUA_PORT:-4201}" --hostname 127.0.0.1) &
+fi
+
+wait

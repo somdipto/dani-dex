@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Shows whether the Dani gateway is up and what it sees.
+set -euo pipefail
+PREFIX="${DANI_PREFIX:-$HOME/.dani}"
+source "$PREFIX/env"
+if [ -f "$PREFIX/run/supervisor.pid" ] && kill -0 "$(cat "$PREFIX/run/supervisor.pid")" 2>/dev/null; then
+  echo "gateway: running (pid $(cat "$PREFIX/run/supervisor.pid"))"
+elif systemctl --user is-active dani-gateway >/dev/null 2>&1; then
+  echo "gateway: running (systemd)"
+else
+  echo "gateway: stopped"
+fi
+printf 'mcp: '
+curl -fsS --max-time 5 "http://127.0.0.1:$MCP_PORT/healthz" 2>/dev/null && echo || echo "not answering"
+printf 'models: '
+curl -fsS --max-time 5 -H "Authorization: Bearer $DANI_FREE_API_KEY" "http://127.0.0.1:$DANI_FREE_PORT/v1/models" 2>/dev/null | head -c 80 && echo " ..." || echo "not answering"

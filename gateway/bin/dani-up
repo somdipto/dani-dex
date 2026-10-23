@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Starts the Dani gateway in the background (nohup mode).
+set -euo pipefail
+PREFIX="${DANI_PREFIX:-$HOME/.dani}"
+mkdir -p "$PREFIX/run" "$PREFIX/logs"
+if [ -f "$PREFIX/run/supervisor.pid" ] && kill -0 "$(cat "$PREFIX/run/supervisor.pid")" 2>/dev/null; then
+  echo "dani gateway already running (pid $(cat "$PREFIX/run/supervisor.pid"))"
+  exit 0
+fi
+DANI_PREFIX="$PREFIX" setsid nohup "$PREFIX/bin/dani-supervise" >>"$PREFIX/logs/gateway.log" 2>&1 &
+echo $! > "$PREFIX/run/supervisor.pid"
+echo "dani gateway started (pid $!), logs: $PREFIX/logs/gateway.log"
