@@ -1,0 +1,3 @@
+{
+  "example.com": ["Example hint: add one entry per host after a failure; hints are injected into page reads for that host."]
+}

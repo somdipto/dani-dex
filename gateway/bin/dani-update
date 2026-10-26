@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Update the gateway in place. Source: DANI_UPDATE_SRC (local checkout) or
+# DANI_UPDATE_REPO (+ DANI_UPDATE_REF, default main). Keeps the previous app
+# copy; if the new one fails tests or the live self-test, rolls back.
+set -euo pipefail
+PREFIX="${DANI_PREFIX:-$HOME/.dani}"
+NODE="$PREFIX/node/bin/node"; [ -x "$NODE" ] || NODE="$(command -v node)"
+NEW="$PREFIX/app.new"; OLD="$PREFIX/app.prev"; APP="$PREFIX/app"
+rm -rf "$NEW"; mkdir -p "$NEW"
+if [ -n "${DANI_UPDATE_SRC:-}" ]; then
+  cp -r "$DANI_UPDATE_SRC/src" "$DANI_UPDATE_SRC/bin" "$DANI_UPDATE_SRC/test" "$DANI_UPDATE_SRC/package.json" "$NEW/"
+elif [ -n "${DANI_UPDATE_REPO:-}" ]; then
+  rm -rf "$NEW"; git clone -q --depth 1 --branch "${DANI_UPDATE_REF:-main}" "$DANI_UPDATE_REPO" "$NEW"
+else
+  echo "set DANI_UPDATE_SRC or DANI_UPDATE_REPO"; exit 2
+fi
+if [ -f "$APP/package.json" ] && diff -rq "$APP/src" "$NEW/src" >/dev/null 2>&1; then echo "already up to date"; rm -rf "$NEW"; exit 0; fi
+( cd "$NEW" && "$NODE" --test test/*.test.js >/tmp/dani-update-test.log 2>&1 ) || { echo "new version failed its tests; keeping current"; tail -5 /tmp/dani-update-test.log; rm -rf "$NEW"; exit 1; }
+"$PREFIX/bin/dani-down" >/dev/null 2>&1 || true
+rm -rf "$OLD"; mv "$APP" "$OLD"; mv "$NEW" "$APP"
+cp "$APP/bin/dani-supervise" "$APP/bin/dani-up" "$APP/bin/dani-down" "$APP/bin/dani-status" "$APP/bin/dani-update" "$PREFIX/bin/"
+[ -d "$PREFIX/app.prev/node_modules" ] && cp -r "$PREFIX/app.prev/node_modules" "$APP/" || true
+DANI_PREFIX="$PREFIX" setsid nohup "$PREFIX/bin/dani-up" >/dev/null 2>&1 < /dev/null &
+sleep 12
+if "$NODE" "$APP/test/selftest.mjs" >/tmp/dani-update-self.log 2>&1; then echo "updated; self-test ok"; exit 0; fi
+echo "self-test failed after update; rolling back"; tail -3 /tmp/dani-update-self.log
+"$PREFIX/bin/dani-down" >/dev/null 2>&1 || true
+rm -rf "$APP"; mv "$OLD" "$APP"
+cp "$APP/bin/"dani-* "$PREFIX/bin/" 2>/dev/null || true
+DANI_PREFIX="$PREFIX" setsid nohup "$PREFIX/bin/dani-up" >/dev/null 2>&1 < /dev/null &
+exit 1

@@ -1,0 +1,7 @@
+node_modules/
+tasks.jsonl
+memory.jsonl
+telegram-state.json
+pairing.json
+state/
+*.bundle

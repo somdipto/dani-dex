@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Stops the Dani gateway.
+set -euo pipefail
+PREFIX="${DANI_PREFIX:-$HOME/.dani}"
+if systemctl --user is-active dani-gateway >/dev/null 2>&1; then
+  systemctl --user stop dani-gateway
+  echo "stopped (systemd)"
+  exit 0
+fi
+if [ -f "$PREFIX/run/supervisor.pid" ]; then
+  PID="$(cat "$PREFIX/run/supervisor.pid")"
+  kill "$PID" 2>/dev/null || true
+  for _ in 1 2 3 4 5; do kill -0 "$PID" 2>/dev/null || break; sleep 1; done
+  kill -9 "$PID" 2>/dev/null || true
+  rm -f "$PREFIX/run/supervisor.pid"
+  echo "stopped"
+else
+  echo "not running"
+fi

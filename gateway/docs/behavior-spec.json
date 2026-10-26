@@ -1,0 +1,12 @@
+[
+  {"id":"B1","behavior":"Check live state before acting, never rely on remembered state","check":null},
+  {"id":"B2","behavior":"After every step confirm the screen changed as intended, otherwise stop and re-read","check":null},
+  {"id":"B3","behavior":"Count a task done only on visible proof","check":"node --test test/receipts-approvals.test.js"},
+  {"id":"B4","behavior":"Switch strategy after two failed tries, never repeat the same failing call","check":"node --test test/desktop-control.regression.mjs","needs":"scripts/desktop-up.sh"},
+  {"id":"B5","behavior":"Stop at obstacles that need a human and report them plainly","check":null},
+  {"id":"B6","behavior":"Show exact words and recipient before anything is sent as the owner","check":"node --test test/receipts-approvals.test.js"},
+  {"id":"B7","behavior":"Ask the owner only for gaps that change the outcome","check":null},
+  {"id":"B8","behavior":"Keep secrets out of text, only through a vault","check":null},
+  {"id":"B9","behavior":"Keep follow-ups, report short and only what changed","check":null},
+  {"id":"B10","behavior":"Recover from stuck states without the owner","check":"node --test test/desktop-control.regression.mjs test/site-memory.test.js","needs":"scripts/desktop-up.sh"}
+]

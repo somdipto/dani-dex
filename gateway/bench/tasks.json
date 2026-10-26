@@ -1,0 +1,12 @@
+[
+ {"id":"read-heading","task":"Open Google Chrome on the page http://127.0.0.1:8899/p1.html and tell me the big heading text.","expect":{"answerHas":"Quartz Lantern"}},
+ {"id":"read-price","task":"In Chrome open http://127.0.0.1:8899/p2.html and tell me the price shown for the Pro plan.","expect":{"answerHas":"$37"}},
+ {"id":"fill-form","task":"In Chrome open http://127.0.0.1:8899/form.html, type the name Ada Test and the email ada@example.test into the form and press Submit.","expect":{"fileHas":["/tmp/bench/submissions.log","Ada Test"]}},
+ {"id":"click-link","task":"In Chrome open http://127.0.0.1:8899/p3.html, click the link labelled 'Next step' and tell me the heading of the page you land on.","expect":{"answerHas":"Harbor Seven"}},
+ {"id":"terminal-file","task":"Open a terminal and create the file /tmp/bench/made.txt containing exactly the word lantern.","expect":{"fileHas":["/tmp/bench/made.txt","lantern"]}},
+ {"id":"terminal-count","task":"Open a terminal, run: ls /tmp/bench/count | wc -l  and tell me the number it prints.","expect":{"answerHas":"7"}},
+ {"id":"scroll-find","task":"In Chrome open http://127.0.0.1:8899/long.html, scroll to the bottom and tell me the code word written in the last line.","expect":{"answerHas":"cobalt-ninety"}},
+ {"id":"two-pages","task":"In Chrome open http://127.0.0.1:8899/p1.html and http://127.0.0.1:8899/p2.html in two tabs and tell me both page titles.","expect":{"answerHasAll":["Quartz Lantern","Pricing"]}},
+ {"id":"checkbox","task":"In Chrome open http://127.0.0.1:8899/check.html, tick the box labelled 'I agree' and press Confirm.","expect":{"fileHas":["/tmp/bench/submissions.log","agree=on"]}},
+ {"id":"honest-fail","task":"In Chrome open http://127.0.0.1:8899/missing-page.html and tell me the heading on it.","expect":{"answerHasAny":["not found","404","doesn't exist","does not exist","cannot","can't","unable","error"]}}
+]
